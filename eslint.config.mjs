@@ -49,6 +49,8 @@ const eslintConfig = [
     rules: {
       ...restrict(anthropic, prismaClient, resend),
       "@typescript-eslint/no-explicit-any": "error",
+      // Écarter une clé par déstructuration est une façon lisible de la retirer.
+      "@typescript-eslint/no-unused-vars": ["error", { ignoreRestSiblings: true }],
       "@typescript-eslint/consistent-type-assertions": ["error", { assertionStyle: "never" }],
       "no-console": ["error", { allow: ["warn", "error", "info"] }],
     },

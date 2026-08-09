@@ -1,0 +1,20 @@
+{
+  "cases": [
+    {
+      "name": "capture-nette",
+      "minInputChars": 0,
+      "output": {
+        "text": "Cache-Control: public, max-age=3600, stale-while-revalidate=86400\n\nLa réponse est fraîche pendant une heure. Passé ce délai et pendant les vingt-quatre heures suivantes, le cache peut encore la servir telle quelle en lançant une revalidation en arrière-plan.",
+        "confidence": "HIGH"
+      }
+    },
+    {
+      "name": "capture-degradee",
+      "minInputChars": 200,
+      "output": {
+        "text": "SELECT atom_id, count(*)\nFROM review\nWHERE reviewed_at > now() - interval '30 days'\nGROUP BY atom_id\nHAVING count(*) > 3;\n\n[fin de ligne illisible]",
+        "confidence": "LOW"
+      }
+    }
+  ]
+}

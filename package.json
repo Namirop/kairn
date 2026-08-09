@@ -16,7 +16,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "verify:ai": "tsx scripts/verifier-garde-fous.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",

@@ -1,0 +1,68 @@
+{
+  "cases": [
+    {
+      "name": "phrase-isolee",
+      "minInputChars": 0,
+      "output": {
+        "atoms": [
+          {
+            "concept": "`Array.prototype.at()` accepte un index négatif, compté depuis la fin du tableau : `at(-1)` rend le dernier élément.",
+            "tags": ["javascript", "tableaux"]
+          }
+        ]
+      }
+    },
+    {
+      "name": "note-courte",
+      "minInputChars": 300,
+      "output": {
+        "atoms": [
+          {
+            "concept": "Chaque instruction d'un Dockerfile produit une couche. Une couche n'est réutilisée que si toutes celles qui la précèdent sont inchangées, d'où l'intérêt de copier le manifeste de dépendances avant le code source.",
+            "tags": ["docker", "cache"]
+          },
+          {
+            "concept": "`COPY` se contente de copier des fichiers du contexte de build. `ADD` y ajoute la décompression d'archives et le téléchargement d'URL, deux comportements implicites qui rendent le build moins prévisible.",
+            "tags": ["docker", "dockerfile"]
+          },
+          {
+            "concept": "Un build multi-étapes compile dans une image outillée puis ne copie que le résultat dans une image finale minimale. Les outils de compilation ne se retrouvent pas dans l'image livrée.",
+            "tags": ["docker", "multistage"]
+          }
+        ]
+      }
+    },
+    {
+      "name": "pave",
+      "minInputChars": 900,
+      "output": {
+        "atoms": [
+          {
+            "concept": "La résolution d'une promesse place sa suite dans la file des microtâches, vidée entièrement entre deux macrotâches. Un `setTimeout(…, 0)` s'exécute donc après toutes les promesses déjà résolues.",
+            "tags": ["javascript", "eventloop"]
+          },
+          {
+            "concept": "Une promesse ne se règle qu'une fois. Les appels à `resolve` ou `reject` qui suivent le premier sont ignorés sans erreur.",
+            "tags": ["javascript", "promesses"]
+          },
+          {
+            "concept": "`Promise.all` rejette dès le premier échec et perd les résultats des autres. `Promise.allSettled` attend tout le monde et rend un statut par entrée.",
+            "tags": ["javascript", "promesses"]
+          },
+          {
+            "concept": "`Promise.race` se règle avec la première promesse réglée, succès ou échec. Les autres continuent de tourner : elle n'annule rien.",
+            "tags": ["javascript", "promesses"]
+          },
+          {
+            "concept": "`await` ne capture une erreur que si l'appel est dans le bloc `try`. Une promesse créée avant le `try` et attendue dedans échappe au `catch` si elle rejette avant l'entrée du bloc.",
+            "tags": ["javascript", "async"]
+          },
+          {
+            "concept": "Une promesse rejetée sans gestionnaire déclenche `unhandledrejection` dans le navigateur et fait tomber le processus Node par défaut depuis la version 15.",
+            "tags": ["javascript", "erreurs"]
+          }
+        ]
+      }
+    }
+  ]
+}

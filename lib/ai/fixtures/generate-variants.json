@@ -1,0 +1,63 @@
+{
+  "cases": [
+    {
+      "name": "concept-court",
+      "minInputChars": 0,
+      "output": {
+        "variants": [
+          {
+            "format": "SHORT_ANSWER",
+            "question": "Que rend `[10, 20, 30].at(-1)` ?",
+            "answerKey": "30. Un index négatif est compté depuis la fin du tableau."
+          },
+          {
+            "format": "TRUE_FALSE",
+            "question": "`tableau[-1]` et `tableau.at(-1)` rendent la même valeur.",
+            "answerKey": "Faux. `tableau[-1]` lit une propriété nommée « -1 », qui n'existe pas, et rend `undefined`."
+          },
+          {
+            "format": "MCQ",
+            "question": "Que rend `[].at(-1)` ?",
+            "answerKey": "`undefined`",
+            "options": ["`undefined`", "`null`", "`-1`", "Une erreur d'index"]
+          }
+        ]
+      }
+    },
+    {
+      "name": "concept-dense",
+      "minInputChars": 200,
+      "output": {
+        "variants": [
+          {
+            "format": "SHORT_ANSWER",
+            "question": "Dans quel ordre se vident les files de microtâches et de macrotâches ?",
+            "answerKey": "La file des microtâches est vidée entièrement après chaque macrotâche, avant que la suivante ne démarre."
+          },
+          {
+            "format": "MCQ",
+            "question": "Quel ordre d'affichage produit ce code ?",
+            "answerKey": "sync, micro, macro",
+            "options": [
+              "sync, micro, macro",
+              "sync, macro, micro",
+              "micro, sync, macro",
+              "macro, micro, sync"
+            ]
+          },
+          {
+            "format": "CODE",
+            "question": "Écris le code qui affiche `sync`, puis `micro`, puis `macro`.",
+            "answerKey": "setTimeout(() => console.log(\"macro\"), 0);\nPromise.resolve().then(() => console.log(\"micro\"));\nconsole.log(\"sync\");",
+            "language": "javascript"
+          },
+          {
+            "format": "EXPLAIN",
+            "question": "Pourquoi une boucle de promesses qui se réenchaînent peut-elle empêcher le rendu du navigateur ?",
+            "answerKey": "Chaque promesse réenchaînée ajoute une microtâche, et la file des microtâches est vidée jusqu'au bout avant de rendre la main. La boucle ne laisse donc jamais passer la macrotâche de rendu."
+          }
+        ]
+      }
+    }
+  ]
+}
