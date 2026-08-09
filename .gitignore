@@ -44,11 +44,11 @@ next-env.d.ts
 # client Prisma généré
 /lib/db/generated
 
-# skills installés par des outils tiers (Prisma les réinstalle à chaque `prisma init`)
-/.claude/skills/prisma-*
-/skills-lock.json
+# Config d'assistant et méthodo de travail : présentes sur la machine,
+# absentes du dépôt. Voir README pour ce qui fait contrat côté code.
+/.claude/
 /.windsurf
 /.agents
-
-# réglages locaux de l'assistant, propres à la machine
-/.claude/settings.local.json
+/skills-lock.json
+/CLAUDE.md
+/phase-0-prompt.md
