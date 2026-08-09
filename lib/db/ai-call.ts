@@ -24,9 +24,11 @@ function startOfUtcDay(instant: Date): Date {
 }
 
 /**
- * Nombre d'appels réels émis depuis minuit UTC. Le plafond est global au
- * produit, pas par utilisateur : la journée se compte donc en UTC, pas dans le
- * fuseau de qui déclenche l'appel.
+ * Nombre d'appels réels émis depuis minuit UTC.
+ *
+ * Sert à l'observation, pas à l'autorisation : c'est `reserverAppelModele()`
+ * de `lib/db/ai-quota.ts` qui décide, parce qu'un compteur lu ici puis comparé
+ * dans le code laisse passer deux appels simultanés.
  */
 export async function countAiCallsToday(now: Date = new Date()): Promise<number> {
   return prisma.aiCall.count({ where: { createdAt: { gte: startOfUtcDay(now) } } });

@@ -22,8 +22,27 @@ model GenerationJob {
   @@index([inputId])
 }
 
+/// Réservation des appels modèle de la journée, en UTC. Une ligne par jour,
+/// globale au produit.
+///
+/// Ce modèle existe parce que compter les lignes d'`AiCall` avant d'émettre est
+/// une course : deux appels simultanés lisent la même valeur et passent tous les
+/// deux. Ici, prendre sa place est une seule instruction SQL qui incrémente et
+/// refuse dans le même mouvement. La place est prise avant l'émission et n'est
+/// jamais rendue — un appel qui échoue a pu consommer des tokens.
+model AiCallQuota {
+  /// Minuit UTC du jour concerné.
+  day DateTime @id @db.Date
+
+  reserved Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 /// Une ligne par appel réel au modèle, succès comme échec. C'est le registre
-/// qui protège le budget : le plafond journalier se lit ici avant d'émettre.
+/// qui sert la comptabilité et l'observation ; l'autorisation, elle, passe par
+/// `AiCallQuota`.
 model AiCall {
   id String @id @default(cuid())
 

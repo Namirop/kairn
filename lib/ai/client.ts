@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ZodType } from "zod";
-import { countAiCallsToday, recordAiCall } from "@/lib/db/ai-call";
+import { recordAiCall } from "@/lib/db/ai-call";
+import { reserverAppelModele } from "@/lib/db/ai-quota";
 import { readAiConfig, type AiConfig } from "./config";
 import {
   AICallFailedError,
@@ -181,10 +182,12 @@ export async function callAI<T>(params: CallAIParams<T>): Promise<T> {
     return loadFixture(params.purpose, params.schema, textLength(params.messages));
   }
 
-  const used = await countAiCallsToday();
+  // La place est réservée avant d'émettre, en une seule instruction : deux
+  // appels simultanés ne peuvent pas obtenir la même.
+  const reservation = await reserverAppelModele(config.dailyCallCap);
 
-  if (used >= config.dailyCallCap) {
-    throw new AIQuotaError(used, config.dailyCallCap);
+  if (!reservation.obtenue) {
+    throw new AIQuotaError(reservation.utilisees, config.dailyCallCap);
   }
 
   return emit(params, config);

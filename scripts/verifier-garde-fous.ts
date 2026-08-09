@@ -121,25 +121,27 @@ async function main(): Promise<void> {
     }),
   );
 
-  // Le plafond se lit dans `AiCall`. On écrit une ligne datée d'aujourd'hui,
-  // on abaisse le plafond à un, puis on nettoie.
+  // Le plafond du jour est amené à saturation, puis remis exactement dans
+  // l'état où il était : la vérification ne doit consommer aucune vraie place.
+  // La tenue sous concurrence est prouvée séparément, sur un jour sentinelle,
+  // par scripts/verifier-plafond-concurrent.ts.
   const { prisma } = await import("@/lib/db/client");
-  const { recordAiCall } = await import("@/lib/db/ai-call");
-  const marker = "verification_garde_fous";
+  const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
+  const { dayToUtcDate, localDay } = await import("@/lib/domain/local-day");
 
-  await recordAiCall({
-    purpose: marker,
-    model: "verification",
-    inputTokens: 0,
-    outputTokens: 0,
-    costUsd: "0",
-    latencyMs: 0,
-    success: true,
+  const jour = dayToUtcDate(localDay(new Date(), "UTC"));
+  const avant = await prisma.aiCallQuota.findUnique({ where: { day: jour } });
+  const sature = 3;
+
+  await prisma.aiCallQuota.upsert({
+    where: { day: jour },
+    create: { day: jour, reserved: sature },
+    update: { reserved: sature },
   });
 
   process.env.AI_ENABLED = "true";
   process.env.MOCK_AI = "false";
-  process.env.AI_DAILY_CALL_CAP = "1";
+  process.env.AI_DAILY_CALL_CAP = String(sature);
   await expectFailure("Le plafond journalier refuse avant d'émettre", "AI_QUOTA", () =>
     callAI({
       purpose: "extract_atoms",
@@ -149,7 +151,17 @@ async function main(): Promise<void> {
     }),
   );
 
-  await prisma.aiCall.deleteMany({ where: { purpose: marker } });
+  record(
+    "Un refus n'entame pas le compteur",
+    (await lireReservationsDuJour()) === sature,
+    `compteur à ${await lireReservationsDuJour()}`,
+  );
+
+  if (avant) {
+    await prisma.aiCallQuota.update({ where: { day: jour }, data: { reserved: avant.reserved } });
+  } else {
+    await prisma.aiCallQuota.delete({ where: { day: jour } });
+  }
 
   record(
     "Aucune requête n'est sortie vers l'API",
