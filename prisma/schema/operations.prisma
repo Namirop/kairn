@@ -1,0 +1,82 @@
+// Ce qui fait tourner le produit sans être le produit : travail asynchrone,
+// traçabilité des appels modèle, quotas, envois d'emails.
+
+model GenerationJob {
+  id      String @id @default(cuid())
+  inputId String
+  input   Input  @relation(fields: [inputId], references: [id], onDelete: Cascade)
+
+  kind      GenerationKind
+  status    JobStatus      @default(QUEUED)
+  attempts  Int            @default(0)
+  lastError String?        @db.Text
+
+  createdAt  DateTime  @default(now())
+  startedAt  DateTime?
+  finishedAt DateTime?
+
+  aiCalls AiCall[]
+
+  /// Requête du cron de reprise : les jobs à relancer, les plus vieux d'abord.
+  @@index([status, createdAt])
+  @@index([inputId])
+}
+
+/// Une ligne par appel réel au modèle, succès comme échec. C'est le registre
+/// qui protège le budget : le plafond journalier se lit ici avant d'émettre.
+model AiCall {
+  id String @id @default(cuid())
+
+  /// Nuls tous les deux si l'appel ne vient pas d'un utilisateur ou d'un job.
+  /// Détachés plutôt que supprimés : la comptabilité survit à la suppression.
+  userId String?
+  user   User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  jobId  String?
+  job    GenerationJob? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  purpose      String
+  model        String
+  inputTokens  Int
+  outputTokens Int
+  costUsd      Decimal @db.Decimal(12, 8)
+  latencyMs    Int
+  success      Boolean
+  errorCode    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+}
+
+/// Compteurs par utilisateur et par jour, pour les quotas d'usage.
+model DailyUsage {
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Date locale de l'utilisateur.
+  day    DateTime @db.Date
+
+  generations Int @default(0)
+  reviews     Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, day])
+}
+
+/// Rend le cron de notification idempotent : la clé primaire interdit deux
+/// envois du même type au même utilisateur le même jour.
+model EmailDelivery {
+  userId String
+  user   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type   NotificationType
+  /// Date locale de l'utilisateur au moment de l'envoi.
+  day    DateTime         @db.Date
+
+  sentAt     DateTime @default(now())
+  /// Identifiant renvoyé par Resend, pour retrouver un envoi côté fournisseur.
+  providerId String?
+
+  @@id([userId, type, day])
+}

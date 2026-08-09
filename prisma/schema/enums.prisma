@@ -1,0 +1,67 @@
+/// Forme sous laquelle l'utilisateur a déposé son Input.
+enum InputSourceType {
+  TEXT
+  IMAGE
+}
+
+/// Avancement du découpage d'un Input en Atoms.
+enum InputStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
+
+/// État de maîtrise d'un Atom, du point de vue du produit.
+enum AtomState {
+  LEARNING
+  REVIEWING
+  CONSOLIDATED
+  ARCHIVED
+}
+
+/// État interne de la carte pour ts-fsrs. Distinct d'AtomState :
+/// l'un décrit le produit, l'autre l'algorithme. Voir lib/domain/fsrs-state.ts.
+enum FsrsState {
+  NEW
+  LEARNING
+  REVIEW
+  RELEARNING
+}
+
+/// Format de question porté par un Variant.
+enum VariantFormat {
+  MCQ
+  TRUE_FALSE
+  SHORT_ANSWER
+  CODE
+  EXPLAIN
+}
+
+/// Notation donnée par l'utilisateur sur une Review, alignée sur ts-fsrs.
+enum ReviewRating {
+  AGAIN
+  HARD
+  GOOD
+  EASY
+}
+
+/// Nature du travail confié à un GenerationJob.
+enum GenerationKind {
+  ATOMS
+  VARIANTS
+  OCR
+}
+
+/// Cycle de vie d'un GenerationJob.
+enum JobStatus {
+  QUEUED
+  RUNNING
+  DONE
+  FAILED
+}
+
+/// Canal unique pour l'instant : l'email.
+enum NotificationType {
+  DAILY_REMINDER
+}

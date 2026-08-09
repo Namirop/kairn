@@ -1,0 +1,15 @@
+// Schéma découpé par rôle : voir les autres fichiers de ce dossier.
+//   enums.prisma       les états et formats du domaine
+//   auth.prisma        modèles possédés par better-auth
+//   profile.prisma     réglages et statistiques d'un compte
+//   learning.prisma    Input → Atom → Variant → Review
+//   operations.prisma  jobs, traçabilité des appels modèle, quotas, emails
+
+generator client {
+  provider = "prisma-client"
+  output   = "../../lib/db/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}

@@ -1,0 +1,41 @@
+// Champs applicatifs d'un compte, tenus à l'écart de User : better-auth possède
+// User et sa forme suit les versions de la librairie. Deux modèles plutôt qu'un :
+// UserSettings est lu par les crons (sélection horaire), UserStats est réécrit à
+// chaque Session de révision. Les faire cohabiter ferait réécrire des réglages
+// stables à chaque révision.
+
+model UserSettings {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Identifiant IANA, ex. « Europe/Brussels ». Sert à l'affichage et au
+  /// déclenchement des notifications, jamais au calcul d'une échéance.
+  timezone             String    @default("UTC")
+  dailyReminderEnabled Boolean   @default(true)
+  /// Heure locale de l'utilisateur, 0 à 23.
+  dailyReminderHour    Int       @default(19)
+  streakAlertEnabled   Boolean   @default(true)
+  /// Renseigné par le lien de désinscription. Non nul coupe tous les emails.
+  emailOptOutAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserStats {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  xp                Int       @default(0)
+  level             Int       @default(1)
+  currentStreak     Int       @default(0)
+  longestStreak     Int       @default(0)
+  /// Date locale de l'utilisateur, pas un instant : c'est ce qui rend le streak
+  /// stable quand il révise à 23 h 50 puis à 00 h 10.
+  lastReviewedOn    DateTime? @db.Date
+  /// Nombre d'Atoms en CONSOLIDATED. C'est la hauteur du cairn affiché.
+  atomsConsolidated Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,111 @@
+// La chaîne du produit : Input → Atom → Variant → Review.
+// La planification porte sur l'Atom. Aucun champ d'échéance, d'intervalle ou de
+// difficulté ne doit apparaître sur Variant : ce serait un bug d'architecture.
+
+model Input {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Ce que l'utilisateur a déposé, mot pour mot. Jamais réécrit après création.
+  rawContent    String          @db.Text
+  sourceType    InputSourceType
+  imageUrl      String?
+  /// Texte tiré d'une image par l'OCR. Nul pour un Input textuel.
+  extractedText String?         @db.Text
+  status        InputStatus     @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  atoms Atom[]
+  jobs  GenerationJob[]
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+model Atom {
+  id      String @id @default(cuid())
+  inputId String
+  input   Input  @relation(fields: [inputId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  concept        String    @db.Text
+  tags           String[]
+  state          AtomState @default(LEARNING)
+  archivedAt     DateTime?
+  /// Distingue l'archivage décidé par l'utilisateur de celui décidé par le produit.
+  archivedByUser Boolean   @default(false)
+
+  // Carte ts-fsrs. Ces champs sont écrits par l'algorithme, jamais à la main.
+  due           DateTime  @default(now())
+  stability     Float     @default(0)
+  difficulty    Float     @default(0)
+  elapsedDays   Int       @default(0)
+  scheduledDays Int       @default(0)
+  /// Exigé par ts-fsrs 5 en plus des champs historiques.
+  learningSteps Int       @default(0)
+  reps          Int       @default(0)
+  lapses        Int       @default(0)
+  fsrsState     FsrsState @default(NEW)
+  lastReview    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  variants Variant[]
+  reviews  Review[]
+
+  /// La requête chaude de toute l'application : les Atoms dus d'un utilisateur.
+  @@index([userId, due])
+  @@index([userId, state])
+  @@index([inputId])
+}
+
+model Variant {
+  id     String @id @default(cuid())
+  atomId String
+  atom   Atom   @relation(fields: [atomId], references: [id], onDelete: Cascade)
+
+  format    VariantFormat
+  question  String        @db.Text
+  answerKey String        @db.Text
+  /// Données propres au format : options d'un QCM, langage d'un extrait de code.
+  payload   Json?
+
+  seenCount  Int       @default(0)
+  lastSeenAt DateTime?
+  /// Un Variant retiré n'est plus proposé mais reste lié à ses Reviews passées.
+  retiredAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  reviews Review[]
+
+  @@index([atomId, retiredAt])
+}
+
+model Review {
+  id        String  @id @default(cuid())
+  atomId    String
+  atom      Atom    @relation(fields: [atomId], references: [id], onDelete: Cascade)
+  variantId String
+  variant   Variant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rating          ReviewRating
+  responseTimeMs  Int
+  /// L'utilisateur a déclaré maîtriser le concept et l'a sorti du cycle.
+  selfMastered    Boolean      @default(false)
+  /// Stabilité de l'Atom avant et après le passage, pour rejouer une courbe.
+  stabilityBefore Float
+  stabilityAfter  Float
+
+  reviewedAt DateTime @default(now())
+
+  @@index([userId, reviewedAt])
+  @@index([atomId, reviewedAt])
+}
