@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Cairn } from "@/components/cairn/cairn";
+import { CairnRenversable } from "@/components/cairn/cairn-renversable";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
@@ -34,7 +34,7 @@ export function Hero() {
       </div>
 
       <div className="mx-auto h-64 w-56 md:h-80 md:w-full">
-        <Cairn nombre={7} />
+        <CairnRenversable nombre={7} />
       </div>
     </section>
   );

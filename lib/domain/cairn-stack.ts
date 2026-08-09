@@ -25,6 +25,9 @@ export type Pierre = {
   x: number;
   y: number;
   rotation: number;
+  /** Encombrement de la pierre, pour la détection de contact et la chute. */
+  largeur: number;
+  hauteur: number;
   /** 0 la plus sombre, 2 la plus claire. */
   nuance: 0 | 1 | 2;
 };
@@ -128,6 +131,8 @@ export function empiler(nombre: number, graines?: string[]): Empilement {
       x: arrondi(LARGEUR_VUE / 2 + (tirage() * 2 - 1) * largeur * 0.1 * instabilite),
       y: arrondi(-(hauteurCumulee - hauteur / 2) - JEU_VERTICAL * index),
       rotation: arrondi((tirage() * 2 - 1) * 3.5 * instabilite),
+      largeur: arrondi(largeur),
+      hauteur: arrondi(hauteur),
       nuance,
     });
   }
