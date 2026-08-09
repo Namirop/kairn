@@ -1,0 +1,6 @@
+.next
+node_modules
+lib/db/generated
+prisma/migrations
+public
+package-lock.json
