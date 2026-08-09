@@ -1,0 +1,55 @@
+/*
+  Pont entre les noms sémantiques de shadcn et la palette de pierre.
+
+  Nos composants n'utilisent pas ces noms : ils écrivent directement
+  `bg-stone-900`, `text-lichen-deep`. Ce fichier existe pour la primitive
+  suivante — celle qu'on ajoutera par la CLI et qui arrivera câblée sur
+  `bg-primary` et `text-muted-foreground`. Sans ce remappage, elle sortirait
+  sans couleurs du tout.
+
+  Une seule règle : rien ici ne définit de valeur, tout pointe vers un token de
+  globals.css.
+*/
+
+:root {
+  --background: var(--paper);
+  --foreground: var(--stone-900);
+  --card: var(--stone-50);
+  --card-foreground: var(--stone-900);
+  --popover: var(--stone-50);
+  --popover-foreground: var(--stone-900);
+  --primary: var(--stone-900);
+  --primary-foreground: var(--stone-50);
+  --secondary: var(--stone-100);
+  --secondary-foreground: var(--stone-900);
+  --muted: var(--stone-100);
+  --muted-foreground: var(--stone-500);
+  --accent: var(--stone-100);
+  --accent-foreground: var(--stone-900);
+  --destructive: var(--alerte);
+  --border: var(--stone-100);
+  --input: var(--stone-300);
+  --ring: var(--lichen-deep);
+  --radius: var(--r-sm);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}

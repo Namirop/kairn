@@ -4,3 +4,8 @@ lib/db/generated
 prisma/migrations
 public
 package-lock.json
+
+# Documents de Romain : leur mise en forme lui appartient.
+CLAUDE.md
+phase-0-prompt.md
+.claude/

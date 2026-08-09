@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { PAPIER } from "@/lib/design/couleurs-hors-css";
 
 /**
  * Manifeste PWA. L'application s'installe depuis le navigateur et s'ouvre en
@@ -15,8 +16,8 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#e9e9e5",
-    theme_color: "#e9e9e5",
+    background_color: PAPIER,
+    theme_color: PAPIER,
     categories: ["education", "productivity"],
     icons: [
       { src: "/icones/icone-192.png", sizes: "192x192", type: "image/png", purpose: "any" },

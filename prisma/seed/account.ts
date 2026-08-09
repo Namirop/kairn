@@ -16,6 +16,10 @@ export const SEED_TIMEZONE = process.env.SEED_USER_TIMEZONE ?? "Europe/Brussels"
  * sans jamais toucher aux autres comptes ni au schéma.
  */
 export async function resetSeedAccount(): Promise<void> {
+  // AiCall se détache du compte au lieu de disparaître avec lui : la
+  // comptabilité doit survivre à une suppression. Pour le seed, c'est l'inverse
+  // qu'on veut — sinon chaque rejeu empile un registre de plus.
+  await prisma.aiCall.deleteMany({ where: { userId: SEED_USER_ID } });
   await prisma.user.deleteMany({ where: { id: SEED_USER_ID } });
 }
 

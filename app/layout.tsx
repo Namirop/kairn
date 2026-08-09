@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { PAPIER } from "@/lib/design/couleurs-hors-css";
 import { classesPolices } from "./fonts";
 import "./globals.css";
 
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#e9e9e5",
+  themeColor: PAPIER,
   colorScheme: "light",
   viewportFit: "cover",
 };
