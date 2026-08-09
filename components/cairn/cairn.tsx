@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
+import { useEffect, useState } from "react";
 import { empiler, LARGEUR_VUE, type Pierre } from "@/lib/domain/cairn-stack";
 import { cn } from "@/lib/utils";
 
@@ -13,25 +14,31 @@ import { cn } from "@/lib/utils";
  *
  * La pierre du sommet se pose en arrivant : c'est celle qu'on vient de gagner,
  * et son arête porte le lichen.
+ *
+ * L'animation est un supplément, jamais un préalable : l'empilement est rendu
+ * posé, et ne s'anime que si la page est effectivement regardée. Un onglet
+ * ouvert en arrière-plan suspend les rAF ; s'il fallait une animation pour
+ * révéler les pierres, elles y resteraient invisibles.
  */
 
 const NUANCES = ["fill-stone-900", "fill-stone-800", "fill-stone-700"] as const;
+
+const POSE = { y: "0%", rotate: 0, opacity: 1 } as const;
 
 function Pose({
   pierre,
   rang,
   derniere,
-  immobile,
+  anime,
 }: {
   pierre: Pierre;
   rang: number;
   derniere: boolean;
-  immobile: boolean;
+  anime: boolean;
 }) {
   // La position finale passe par l'attribut `transform` du SVG : elle est donc
   // en unités de viewBox. L'animation, elle, est une transformation CSS — en
   // pixels — d'où les pourcentages, relatifs à la boîte de la pierre.
-  const arrivee = { y: "0%", rotate: 0, opacity: 1 };
   const depart = derniere
     ? { y: "-140%", rotate: -7, opacity: 0 }
     : { y: "-40%", rotate: 0, opacity: 0 };
@@ -39,12 +46,15 @@ function Pose({
   return (
     <g transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}>
       <motion.g
+        // Remonter le groupe quand l'animation devient possible est ce qui
+        // permet de partir de l'état posé : `initial` n'est lu qu'au montage.
+        key={anime ? "chute" : "posee"}
         style={{ transformBox: "fill-box", transformOrigin: "center" }}
-        initial={immobile ? arrivee : depart}
-        animate={arrivee}
+        initial={anime ? depart : false}
+        animate={POSE}
         transition={{
           duration: derniere ? 0.42 : 0.3,
-          delay: immobile ? 0 : rang * 0.06,
+          delay: rang * 0.06,
           ease: [0.2, 0.8, 0.2, 1],
         }}
       >
@@ -66,6 +76,18 @@ function Pose({
   );
 }
 
+/** Vrai quand la page est regardée et que l'utilisateur accepte le mouvement. */
+function useAnimationPossible(immobile: boolean): boolean {
+  const [possible, setPossible] = useState(false);
+
+  useEffect(() => {
+    if (immobile || document.hidden) return;
+    setPossible(true);
+  }, [immobile]);
+
+  return possible;
+}
+
 export function Cairn({
   nombre,
   graines,
@@ -76,6 +98,7 @@ export function Cairn({
   className?: string;
 }) {
   const immobile = useReducedMotion() ?? false;
+  const anime = useAnimationPossible(immobile);
   const { pierres, hauteur, ySol } = empiler(nombre, graines);
 
   return (
@@ -103,7 +126,7 @@ export function Cairn({
           pierre={pierre}
           rang={rang}
           derniere={rang === pierres.length - 1}
-          immobile={immobile}
+          anime={anime}
         />
       ))}
     </svg>
