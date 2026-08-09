@@ -36,8 +36,8 @@ export default async function PageAujourdhui() {
 
       <hr className="border-stone-100" />
 
-      <ListeEnCours atomes={tableau.enCours} maintenant={maintenant} />
-      <ListeDepots depots={tableau.depots} maintenant={maintenant} />
+      <ListeEnCours atomes={tableau.enCours} maintenant={maintenant} fuseau={tableau.fuseau} />
+      <ListeDepots depots={tableau.depots} maintenant={maintenant} fuseau={tableau.fuseau} />
     </div>
   );
 }

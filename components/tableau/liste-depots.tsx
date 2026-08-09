@@ -23,11 +23,13 @@ function Etat({ depot }: { depot: DepotRecent }) {
 export function ListeDepots({
   depots,
   maintenant,
+  fuseau,
   titre = "Ce que tu as déposé",
   avecLien = true,
 }: {
   depots: DepotRecent[];
   maintenant: Date;
+  fuseau: string;
   /** Nul sur la page dédiée, où le titre de page dit déjà de quoi il s'agit. */
   titre?: string | null;
   avecLien?: boolean;
@@ -70,7 +72,7 @@ export function ListeDepots({
               <p className="mt-pas-2 gap-pas-3 text-mono flex items-center text-stone-500">
                 <Etat depot={depot} />
                 <span aria-hidden>·</span>
-                <span>{anciennete(depot.createdAt, maintenant)}</span>
+                <span>{anciennete(depot.createdAt, maintenant, fuseau)}</span>
               </p>
             </li>
           ))}

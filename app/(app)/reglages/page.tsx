@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { BoutonDeconnexion } from "@/components/compte/bouton-deconnexion";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
-import { findUserSettings } from "@/lib/db/user-settings";
+import { lireReglages } from "@/lib/db/user-settings";
 
 export const metadata: Metadata = { title: "Réglages" };
 
@@ -22,8 +22,8 @@ export default async function PageReglages() {
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
-  const reglages = await findUserSettings(utilisateur.id);
-  const heure = `${String(reglages?.dailyReminderHour ?? 19).padStart(2, "0")} h 00`;
+  const reglages = await lireReglages(utilisateur.id);
+  const heure = `${String(reglages.dailyReminderHour).padStart(2, "0")} h 00`;
 
   return (
     <div className="gap-pas-8 flex max-w-xl flex-col">
@@ -36,16 +36,16 @@ export default async function PageReglages() {
 
       <dl>
         <Ligne intitule="Adresse" valeur={utilisateur.email} />
-        <Ligne intitule="Fuseau horaire" valeur={reglages?.timezone ?? "UTC"} />
+        <Ligne intitule="Fuseau horaire" valeur={reglages.timezone} />
         <Ligne
           intitule="Rappel quotidien"
-          valeur={reglages?.dailyReminderEnabled ? heure : "coupé"}
+          valeur={reglages.dailyReminderEnabled ? heure : "coupé"}
         />
         <Ligne
           intitule="Alerte de streak"
-          valeur={reglages?.streakAlertEnabled ? "active" : "coupée"}
+          valeur={reglages.streakAlertEnabled ? "active" : "coupée"}
         />
-        <Ligne intitule="Emails" valeur={reglages?.emailOptOutAt ? "désinscrit" : "activés"} />
+        <Ligne intitule="Emails" valeur={reglages.emailOptOutAt ? "désinscrit" : "activés"} />
       </dl>
 
       <BoutonDeconnexion />

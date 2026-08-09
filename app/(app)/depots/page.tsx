@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { listerDepots } from "@/lib/db/depots";
+import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 
 export const metadata: Metadata = { title: "Dépôts" };
 
@@ -14,7 +15,10 @@ export default async function PageDepots() {
   if (!utilisateur) redirect(ROUTES.connexion);
 
   const maintenant = new Date();
-  const depots = await listerDepots(utilisateur.id);
+  const [depots, fuseau] = await Promise.all([
+    listerDepots(utilisateur.id),
+    lireFuseauUtilisateur(utilisateur.id),
+  ]);
 
   return (
     <div className="gap-pas-8 flex flex-col">
@@ -28,7 +32,13 @@ export default async function PageDepots() {
         <Button disabled>Déposer</Button>
       </div>
 
-      <ListeDepots depots={depots} maintenant={maintenant} titre={null} avecLien={false} />
+      <ListeDepots
+        depots={depots}
+        maintenant={maintenant}
+        fuseau={fuseau}
+        titre={null}
+        avecLien={false}
+      />
     </div>
   );
 }

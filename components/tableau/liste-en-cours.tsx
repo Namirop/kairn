@@ -8,7 +8,16 @@ import { cn } from "@/lib/utils";
  * droite en mono. Pas de cartes — une ligne de texte n'a pas besoin d'un
  * container pour exister.
  */
-export function ListeEnCours({ atomes, maintenant }: { atomes: AtomEnCours[]; maintenant: Date }) {
+export function ListeEnCours({
+  atomes,
+  maintenant,
+  fuseau,
+}: {
+  atomes: AtomEnCours[];
+  maintenant: Date;
+  /** Fuseau de l'utilisateur : « auj. » n'a de sens que dans son calendrier. */
+  fuseau: string;
+}) {
   return (
     <section>
       <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">En cours</h2>
@@ -23,7 +32,7 @@ export function ListeEnCours({ atomes, maintenant }: { atomes: AtomEnCours[]; ma
       ) : (
         <ul className="mt-pas-4 max-w-3xl">
           {atomes.map((atome) => {
-            const enRetard = joursAvant(atome.due, maintenant) < 0;
+            const enRetard = joursAvant(atome.due, maintenant, fuseau) < 0;
 
             return (
               <li
@@ -37,7 +46,7 @@ export function ListeEnCours({ atomes, maintenant }: { atomes: AtomEnCours[]; ma
                     enRetard ? "text-lichen-deep" : "text-stone-500",
                   )}
                 >
-                  {echeanceCourte(atome.due, maintenant)}
+                  {echeanceCourte(atome.due, maintenant, fuseau)}
                 </span>
               </li>
             );

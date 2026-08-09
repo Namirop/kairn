@@ -1,23 +1,37 @@
+import { dayToUtcDate, localDay } from "./local-day";
+
 const MS_PAR_JOUR = 24 * 60 * 60 * 1000;
 
 /**
- * Lecture d'une échéance. Les calculs se font en UTC — le fuseau de
- * l'utilisateur ne sert qu'à savoir quel jour il est chez lui, pas à décaler
- * une échéance.
+ * Lecture d'une échéance.
+ *
+ * « auj. » et « −2 j » sont des affirmations sur le calendrier de
+ * l'utilisateur, pas sur l'horloge UTC : à 00 h 30 à Paris on est déjà demain
+ * chez soi et encore hier en UTC. Ces fonctions ramènent donc chaque instant à
+ * son jour civil dans le fuseau de l'utilisateur avant de compter.
+ *
+ * Le stockage et la planification, eux, restent en UTC — c'est la lecture qui
+ * est locale, pas le modèle de données.
  */
 
-function jourUtc(instant: Date): number {
-  return Math.floor(instant.getTime() / MS_PAR_JOUR);
+/** Nombre de jours civils entre deux instants, vus depuis un fuseau donné. */
+function ecartEnJoursCivils(depuis: Date, jusqua: Date, fuseau: string): number {
+  const a = dayToUtcDate(localDay(depuis, fuseau)).getTime();
+  const b = dayToUtcDate(localDay(jusqua, fuseau)).getTime();
+
+  // Les deux bornes sont des minuits UTC : la division est exacte, l'arrondi ne
+  // sert qu'à absorber le bruit des flottants.
+  return Math.round((b - a) / MS_PAR_JOUR);
 }
 
-/** Écart en jours pleins. Négatif quand l'échéance est dépassée. */
-export function joursAvant(echeance: Date, maintenant: Date): number {
-  return jourUtc(echeance) - jourUtc(maintenant);
+/** Écart en jours civils. Négatif quand l'échéance est dépassée. */
+export function joursAvant(echeance: Date, maintenant: Date, fuseau: string): number {
+  return ecartEnJoursCivils(maintenant, echeance, fuseau);
 }
 
 /** Forme courte, pour une colonne de données : « auj. », « 5 j », « −3 j ». */
-export function echeanceCourte(echeance: Date, maintenant: Date): string {
-  const jours = joursAvant(echeance, maintenant);
+export function echeanceCourte(echeance: Date, maintenant: Date, fuseau: string): string {
+  const jours = joursAvant(echeance, maintenant, fuseau);
 
   if (jours === 0) return "auj.";
   if (jours < 0) return `−${Math.abs(jours)} j`;
@@ -27,8 +41,8 @@ export function echeanceCourte(echeance: Date, maintenant: Date): string {
 }
 
 /** Forme en prose, pour une ligne de texte : « il y a 6 jours ». */
-export function anciennete(instant: Date, maintenant: Date): string {
-  const jours = Math.max(0, -joursAvant(instant, maintenant));
+export function anciennete(instant: Date, maintenant: Date, fuseau: string): string {
+  const jours = Math.max(0, ecartEnJoursCivils(instant, maintenant, fuseau));
 
   if (jours === 0) return "aujourd'hui";
   if (jours === 1) return "hier";

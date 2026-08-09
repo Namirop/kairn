@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import type { AtomState, InputSourceType, InputStatus, UserStats } from "@/lib/db/types";
 
 /**
@@ -25,6 +26,8 @@ export type DepotRecent = {
 
 export type TableauDeBord = {
   dusAujourdhui: number;
+  /** Fuseau de l'utilisateur : toute échéance se lit dans son calendrier. */
+  fuseau: string;
   stats: UserStats | null;
   /** Identifiants des Atoms consolidés : une pierre chacun. */
   grainesDuCairn: string[];
@@ -39,40 +42,44 @@ export async function lireTableauDeBord(
   userId: string,
   maintenant: Date = new Date(),
 ): Promise<TableauDeBord> {
-  const [dusAujourdhui, stats, consolides, enCours, depots, totalAtoms] = await Promise.all([
-    prisma.atom.count({
-      where: { userId, due: { lte: maintenant }, state: { notIn: ["ARCHIVED", "CONSOLIDATED"] } },
-    }),
-    prisma.userStats.findUnique({ where: { userId } }),
-    prisma.atom.findMany({
-      where: { userId, state: "CONSOLIDATED" },
-      orderBy: { updatedAt: "asc" },
-      select: { id: true },
-    }),
-    prisma.atom.findMany({
-      where: { userId, state: { in: ["LEARNING", "REVIEWING"] } },
-      orderBy: { due: "asc" },
-      take: 4,
-      select: { id: true, concept: true, due: true, state: true },
-    }),
-    prisma.input.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      take: 3,
-      select: {
-        id: true,
-        rawContent: true,
-        sourceType: true,
-        status: true,
-        createdAt: true,
-        _count: { select: { atoms: true } },
-      },
-    }),
-    prisma.atom.count({ where: { userId } }),
-  ]);
+  const [dusAujourdhui, fuseau, stats, consolides, enCours, depots, totalAtoms] = await Promise.all(
+    [
+      prisma.atom.count({
+        where: { userId, due: { lte: maintenant }, state: { notIn: ["ARCHIVED", "CONSOLIDATED"] } },
+      }),
+      lireFuseauUtilisateur(userId),
+      prisma.userStats.findUnique({ where: { userId } }),
+      prisma.atom.findMany({
+        where: { userId, state: "CONSOLIDATED" },
+        orderBy: { updatedAt: "asc" },
+        select: { id: true },
+      }),
+      prisma.atom.findMany({
+        where: { userId, state: { in: ["LEARNING", "REVIEWING"] } },
+        orderBy: { due: "asc" },
+        take: 4,
+        select: { id: true, concept: true, due: true, state: true },
+      }),
+      prisma.input.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+        select: {
+          id: true,
+          rawContent: true,
+          sourceType: true,
+          status: true,
+          createdAt: true,
+          _count: { select: { atoms: true } },
+        },
+      }),
+      prisma.atom.count({ where: { userId } }),
+    ],
+  );
 
   return {
     dusAujourdhui,
+    fuseau,
     stats,
     grainesDuCairn: consolides.map((atom) => atom.id),
     enCours,

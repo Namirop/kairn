@@ -7,7 +7,7 @@ import { InviteInstallation } from "@/components/pwa/invite-installation";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
-import { findUserSettings } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 
 /**
  * La coquille de l'application authentifiée.
@@ -21,7 +21,7 @@ export default async function CoquilleApplication({ children }: { children: Reac
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
-  const reglages = await findUserSettings(utilisateur.id);
+  const fuseau = await lireFuseauUtilisateur(utilisateur.id);
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -35,7 +35,7 @@ export default async function CoquilleApplication({ children }: { children: Reac
         </div>
         <BarreBasse />
         <InviteInstallation />
-        <AccordFuseau enregistre={reglages?.timezone ?? "UTC"} />
+        <AccordFuseau enregistre={fuseau} />
       </div>
     </TooltipProvider>
   );
