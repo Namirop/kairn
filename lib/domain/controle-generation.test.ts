@@ -10,9 +10,12 @@ import {
 const CONCEPT_PROPRE =
   "`Array.prototype.at()` accepte un index négatif, compté depuis la fin du tableau.";
 
+/** Un format par facette, distincts : c'est ce que le prompt demande. */
+const FORMATS_PAR_DEFAUT = ["SHORT_ANSWER", "EXPLAIN", "TRUE_FALSE", "CODE"];
+
 function variante(reglages: Partial<VariantAControler> = {}, rang = 0): VariantAControler {
   return {
-    format: "SHORT_ANSWER",
+    format: FORMATS_PAR_DEFAUT[rang] ?? "SHORT_ANSWER",
     facet: FACETTES_ATTENDUES[rang] ?? "RECOGNITION",
     question: "Depuis quel bout du tableau un index négatif est-il compté ?",
     answerKey: "Depuis la fin. Un index de moins un désigne le dernier élément.",
@@ -109,6 +112,29 @@ describe("controlerVariants", () => {
     });
 
     expect(controlerVariants(variantes)).toEqual([]);
+  });
+
+  it("signale un lot où deux formats seulement se partagent quatre questions", () => {
+    const variantes = FACETTES_ATTENDUES.map((facet, rang) =>
+      variante({ facet, format: rang < 2 ? "SHORT_ANSWER" : "MCQ" }, rang),
+    );
+
+    expect(controlerVariants(variantes).map((m) => m.regle)).toContain("formats");
+  });
+
+  it("situe le manquement sur la variante qu'il vise", () => {
+    const variantes = quatreVariantes();
+    variantes[2] = variante(
+      {
+        facet: "BOUNDARY",
+        question: "L'index négatif est compté depuis la fin du tableau : vrai ou faux ?",
+        answerKey: "L'index négatif est compté depuis la fin du tableau",
+      },
+      2,
+    );
+    const cite = controlerVariants(variantes).find((m) => m.regle === "réponse citée");
+
+    expect(cite?.rang).toBe(2);
   });
 });
 

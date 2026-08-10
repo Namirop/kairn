@@ -16,6 +16,12 @@ export type Manquement = {
   /** Le nom de la règle enfreinte, court, réutilisé d'un rapport à l'autre. */
   regle: string;
   detail: string;
+  /**
+   * L'index de la variante en cause, quand le manquement en vise une. Un
+   * compteur sans emplacement est inutilisable : il annonce un problème et
+   * laisse le chercher dans huit cents lignes.
+   */
+  rang?: number;
 };
 
 export type VariantAControler = {
@@ -43,6 +49,15 @@ export const ECART_MINIMUM_SIGNIFICATIF = 30;
 
 /** Nombre de mots en deçà duquel une réponse citée ne prouve rien. */
 const MOTS_MINIMUM_POUR_CITER = 3;
+
+/**
+ * Formats distincts attendus sur un lot de quatre questions.
+ *
+ * Le prompt tolère qu'un format revienne une fois : deux questions au plus le
+ * partagent, ce qui laisse au moins trois formats sur quatre questions. En
+ * dessous, la facette a repris le pas sur le contenu.
+ */
+export const FORMATS_MINIMUM = 3;
 
 const RENVOIS =
   /ci-dessus|ci-dessous|ci-avant|plus haut dans|comme vu|comme expliqué|précédemment|le précédent|la précédente|susmentionné|évoqué plus haut/i;
@@ -81,8 +96,9 @@ export function controlerConcept(concept: string): Manquement[] {
   return manquements;
 }
 
-function controlerFacettes(variants: VariantAControler[]): Manquement[] {
+function controlerLot(variants: VariantAControler[]): Manquement[] {
   const facettes = variants.map((variant) => variant.facet);
+  const formats = new Set(variants.map((variant) => variant.format));
   const manquements: Manquement[] = [];
 
   if (variants.length !== FACETTES_ATTENDUES.length) {
@@ -93,6 +109,13 @@ function controlerFacettes(variants: VariantAControler[]): Manquement[] {
     manquements.push({ regle: "facettes", detail: `facettes répétées : ${facettes.join(", ")}` });
   } else if (facettes.join() !== FACETTES_ATTENDUES.join()) {
     manquements.push({ regle: "ordre", detail: `ordre servi : ${facettes.join(", ")}` });
+  }
+
+  if (formats.size < FORMATS_MINIMUM) {
+    manquements.push({
+      regle: "formats",
+      detail: `${formats.size} formats distincts sur quatre questions : ${[...formats].join(", ")}`,
+    });
   }
 
   return manquements;
@@ -144,14 +167,19 @@ function controlerReponseCachee(variant: VariantAControler): Manquement[] {
   ];
 }
 
-/** Les manquements des quatre variantes d'un même Atom, dans l'ordre servi. */
+/**
+ * Les manquements des quatre variantes d'un même Atom, dans l'ordre servi.
+ *
+ * Ceux qui visent une variante portent son rang : le rapport les affiche sous
+ * elle, pas dans une liste à la fin qu'il faudrait recouper à la main.
+ */
 export function controlerVariants(variants: VariantAControler[]): Manquement[] {
   return [
-    ...controlerFacettes(variants),
+    ...controlerLot(variants),
     ...variants.flatMap((variant, rang) =>
       [...controlerMcq(variant), ...controlerReponseCachee(variant)].map((manquement) => ({
         ...manquement,
-        detail: `variante ${rang + 1} — ${manquement.detail}`,
+        rang,
       })),
     ),
   ];
