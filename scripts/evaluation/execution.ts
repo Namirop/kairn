@@ -15,6 +15,7 @@ import {
   type Manquement,
 } from "@/lib/domain/controle-generation";
 import type { Depot } from "./corpus";
+import type { DepotFige } from "./fige";
 
 /**
  * Un passage du banc sur un dépôt : lecture d'image si c'en est une, découpage
@@ -94,6 +95,17 @@ async function evaluerConcept(
   }
 }
 
+async function evaluerConcepts(concepts: ExtractAtomsOutput["atoms"]): Promise<ConceptEvalue[]> {
+  const evalues: ConceptEvalue[] = [];
+
+  for (const concept of concepts) {
+    evalues.push(await evaluerConcept(concept));
+  }
+
+  return evalues;
+}
+
+/** Un dépôt du corpus : lecture éventuelle, extraction, puis questions. */
 export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
   const vide = { nom: depot.nom, texte: depot.texte, rejet: null, concepts: [] };
 
@@ -105,13 +117,25 @@ export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
       messages: messageTexte(texte),
     });
 
-    const concepts: ConceptEvalue[] = [];
-    for (const concept of extraction.atoms) {
-      concepts.push(await evaluerConcept(concept));
-    }
-
-    return { ...vide, texte, lecture, rejet: extraction.rejected, concepts };
+    return {
+      ...vide,
+      texte,
+      lecture,
+      rejet: extraction.rejected,
+      concepts: await evaluerConcepts(extraction.atoms),
+    };
   } catch (erreur) {
     return { ...vide, echec: decrire(erreur) };
   }
+}
+
+/** Un dépôt figé : on ne rappelle pas l'extraction, seules les questions bougent. */
+export async function rejouerDepot(fige: DepotFige): Promise<DepotEvalue> {
+  return {
+    nom: fige.nom,
+    texte: fige.texte,
+    lecture: fige.lecture,
+    rejet: fige.rejet,
+    concepts: await evaluerConcepts(fige.concepts),
+  };
 }

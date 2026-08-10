@@ -112,7 +112,7 @@ function longueursDesPrompts(): string {
 
 export function rendreRapport(
   passages: Passage[],
-  entete: { modele: string; emisA: Date; total: ConsommationFenetre },
+  entete: { modele: string; emisA: Date; total: ConsommationFenetre; source: string },
 ): string {
   const horodatage = entete.emisA.toISOString().slice(0, 16).replace("T", " ");
   const { concepts, aboutis, echecs, manquements } = compter(passages);
@@ -120,7 +120,7 @@ export function rendreRapport(
   return [
     `# Banc de génération — ${horodatage} UTC`,
     "",
-    `\`${entete.modele}\` · ${accorder(passages.length, "dépôt")} · ${rendreConsommation(entete.total)}`,
+    `\`${entete.modele}\` · ${entete.source} · ${accorder(passages.length, "dépôt")} · ${rendreConsommation(entete.total)}`,
     "",
     `${accorder(concepts, "concept extrait", "concepts extraits")} · ${accorder(aboutis, "lot abouti", "lots aboutis")} · ${accorder(echecs, "génération en échec", "générations en échec")} · ${accorder(manquements, "manquement")}`,
     "",

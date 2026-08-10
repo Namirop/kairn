@@ -59,3 +59,5 @@ next-env.d.ts
 # Rapports du banc d’évaluation : produits localement, jamais commités.
 /scripts/evaluation/rapports/
 /phase-1.1-prompt.md
+/scripts/evaluation/concepts/
+/phase-1.2-prompt.md

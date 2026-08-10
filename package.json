@@ -19,6 +19,7 @@
     "postinstall": "prisma generate",
     "verify:ai": "tsx scripts/verifier-garde-fous.ts && tsx scripts/verifier-plafond-concurrent.ts",
     "eval:generation": "tsx scripts/evaluer-generation.ts",
+    "eval:rejeu": "tsx scripts/evaluer-generation.ts --rejeu",
     "test": "vitest run",
     "test:watch": "vitest"
   },
