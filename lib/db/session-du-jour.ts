@@ -2,6 +2,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db/client";
 import type { VariantFacet, VariantFormat } from "@/lib/db/types";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { jourSuivant, localDay } from "@/lib/domain/local-day";
 import { choisirVariante } from "@/lib/domain/rotation-variantes";
 import { composerSession } from "@/lib/domain/selection-session";
 
@@ -153,4 +154,32 @@ export async function lireSessionDuJour(
     conceptsEnAttenteDeQuestions: enAttente,
     prochaineEcheance: prochain?.due ?? null,
   };
+}
+
+/**
+ * Ce qui revient demain, dans le calendrier de l'utilisateur.
+ *
+ * Lu après la session et non avant : les notes qu'on vient de donner ont
+ * déplacé les échéances, et annoncer le chiffre d'avant serait annoncer faux.
+ */
+export async function compterDusDemain(
+  userId: string,
+  maintenant: Date = new Date(),
+): Promise<number> {
+  const fuseau = await lireFuseauUtilisateur(userId);
+  const demain = jourSuivant(localDay(maintenant, fuseau));
+
+  const candidats = await prisma.atom.findMany({
+    where: {
+      userId,
+      uncertain: false,
+      variants: { some: { retiredAt: null } },
+      // Deux fois la marge : le lendemain de l'utilisateur se termine au plus
+      // tard un peu avant 48 h d'ici, quel que soit son décalage.
+      due: { gte: maintenant, lte: new Date(maintenant.getTime() + 2 * MARGE_MS) },
+    },
+    select: { due: true },
+  });
+
+  return candidats.filter((atome) => localDay(atome.due, fuseau) === demain).length;
 }

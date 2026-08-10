@@ -44,3 +44,16 @@ export function isSupportedTimeZone(timeZone: string): boolean {
 export function dayToUtcDate(day: string): Date {
   return new Date(`${day}T00:00:00.000Z`);
 }
+
+/**
+ * Le lendemain d'un jour civil.
+ *
+ * Le calcul passe par minuit UTC et non par l'heure locale : une journée locale
+ * ne dure pas toujours 24 h — elle en fait 23 ou 25 aux changements d'heure —
+ * alors que l'étiquette du jour, elle, avance toujours d'un cran.
+ */
+export function jourSuivant(day: string): string {
+  const lendemain = new Date(dayToUtcDate(day).getTime() + 24 * 60 * 60 * 1000);
+
+  return lendemain.toISOString().slice(0, 10);
+}

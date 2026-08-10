@@ -40,6 +40,24 @@ export function echeanceCourte(echeance: Date, maintenant: Date, fuseau: string)
   return `${Math.round(jours / 30)} mois`;
 }
 
+/**
+ * Forme en prose pour une échéance à venir : « demain », « dans 3 jours ».
+ *
+ * Une échéance déjà passée se dit « aujourd'hui » : elle est due maintenant, et
+ * annoncer un retard à quelqu'un qui vient de finir sa session serait lui
+ * reprocher ce qu'il vient de faire.
+ */
+export function delaiAvant(echeance: Date, maintenant: Date, fuseau: string): string {
+  const jours = joursAvant(echeance, maintenant, fuseau);
+
+  if (jours <= 0) return "aujourd'hui";
+  if (jours === 1) return "demain";
+  if (jours < 30) return `dans ${jours} jours`;
+  if (jours < 60) return "dans un mois";
+
+  return `dans ${Math.round(jours / 30)} mois`;
+}
+
 /** Forme en prose, pour une ligne de texte : « il y a 6 jours ». */
 export function anciennete(instant: Date, maintenant: Date, fuseau: string): string {
   const jours = Math.max(0, ecartEnJoursCivils(instant, maintenant, fuseau));

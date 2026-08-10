@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/lib/auth/routes";
 
 /**
  * Ce qui arrive à échéance aujourd'hui. Le chiffre est nu, souligné d'un filet
@@ -27,9 +29,17 @@ export function CompteurDu({ nombre, aDesAtoms }: { nombre: number; aDesAtoms: b
           : `${nombre === 1 ? "concept arrive" : "concepts arrivent"} à échéance.`}
       </p>
 
-      <Button size="lg" className="mt-pas-6 w-full sm:w-auto" disabled={nombre === 0}>
-        Commencer
-      </Button>
+      {nombre === 0 ? (
+        // Rien à faire : le bouton reste, mort, plutôt que de disparaître et de
+        // faire sauter la colonne d'un jour à l'autre.
+        <Button size="lg" className="mt-pas-6 w-full sm:w-auto" disabled>
+          Commencer
+        </Button>
+      ) : (
+        <Button asChild size="lg" className="mt-pas-6 w-full sm:w-auto">
+          <Link href={ROUTES.reviser}>Commencer</Link>
+        </Button>
+      )}
     </section>
   );
 }

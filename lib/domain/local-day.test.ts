@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { dayToUtcDate, isSupportedTimeZone, localDay, localHour } from "./local-day";
+import { dayToUtcDate, isSupportedTimeZone, jourSuivant, localDay, localHour } from "./local-day";
 
 /** Repères horaires, écrits en UTC pour que l'intention soit lisible. */
 const utc = (iso: string) => new Date(`${iso}Z`);
@@ -125,6 +125,45 @@ describe("propriété : localDay conserve l'ordre du temps", () => {
 
         expect(jour).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         expect(Number.isNaN(dayToUtcDate(jour).getTime())).toBe(false);
+      }),
+      { numRuns: 500 },
+    );
+  });
+});
+
+describe("jourSuivant", () => {
+  it("avance d'un cran", () => {
+    expect(jourSuivant("2026-01-15")).toBe("2026-01-16");
+  });
+
+  it("passe un mois", () => {
+    expect(jourSuivant("2026-01-31")).toBe("2026-02-01");
+  });
+
+  it("passe une année", () => {
+    expect(jourSuivant("2026-12-31")).toBe("2027-01-01");
+  });
+
+  it("tient une année bissextile", () => {
+    expect(jourSuivant("2028-02-28")).toBe("2028-02-29");
+    expect(jourSuivant("2028-02-29")).toBe("2028-03-01");
+  });
+
+  it("avance même sur un jour local de 23 ou 25 heures", () => {
+    // Passages à l'heure d'été et d'hiver en Europe en 2026 : l'étiquette du
+    // jour avance d'un cran, quelle que soit la durée réelle de la journée.
+    expect(jourSuivant("2026-03-29")).toBe("2026-03-30");
+    expect(jourSuivant("2026-10-25")).toBe("2026-10-26");
+  });
+
+  it("rend toujours un jour relisible, et strictement postérieur", () => {
+    fc.assert(
+      fc.property(unInstant, unFuseau, (instant, fuseau) => {
+        const jour = localDay(instant, fuseau);
+        const suivant = jourSuivant(jour);
+
+        expect(suivant).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(suivant > jour).toBe(true);
       }),
       { numRuns: 500 },
     );

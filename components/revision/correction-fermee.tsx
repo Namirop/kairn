@@ -1,0 +1,65 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import type { ReviewRating } from "@/lib/db/types";
+
+/**
+ * Ce qui suit une réponse à choix.
+ *
+ * Une bonne réponse n'est pas félicitée : l'écran dit ce qui est, et la
+ * récompense est l'espacement qui s'allonge. Une mauvaise réponse donne
+ * l'étalon — sans lui, l'échec n'apprend rien.
+ *
+ * « C'était facile » est le geste en plus dont parle le produit : le cas
+ * courant se règle d'un seul bouton.
+ */
+export function CorrectionFermee({
+  juste,
+  answerKey,
+  enCours,
+  dernier,
+  onSuite,
+}: {
+  juste: boolean;
+  answerKey: string;
+  enCours: boolean;
+  dernier: boolean;
+  onSuite: (note: ReviewRating) => void;
+}) {
+  return (
+    <div className="mt-pas-8 pt-pas-6 border-t border-stone-100">
+      <p className="text-mono font-mono tracking-[0.12em] uppercase">
+        {juste ? (
+          <span className="text-lichen-deep">Réponse juste</span>
+        ) : (
+          <span className="text-alerte">Réponse fausse</span>
+        )}
+      </p>
+
+      {/* L'étalon n'est montré que s'il apporte autre chose que l'option cochée :
+          sur une bonne réponse, le répéter serait du bruit. */}
+      {!juste ? (
+        <p className="mt-pas-3 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed text-stone-900">
+          {answerKey}
+        </p>
+      ) : null}
+
+      <div className="gap-pas-2 mt-pas-6 flex flex-wrap">
+        <Button type="button" disabled={enCours} onClick={() => onSuite(juste ? "GOOD" : "AGAIN")}>
+          {dernier ? "Terminer" : "Continuer"}
+        </Button>
+
+        {juste ? (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={enCours}
+            onClick={() => onSuite("EASY")}
+          >
+            C&apos;était facile
+          </Button>
+        ) : null}
+      </div>
+    </div>
+  );
+}

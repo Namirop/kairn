@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { anciennete, echeanceCourte, joursAvant } from "./echeance";
+import { anciennete, delaiAvant, echeanceCourte, joursAvant } from "./echeance";
 import { localDay } from "./local-day";
 import { unFuseau, unInstant } from "./local-day.test";
 
@@ -163,6 +163,42 @@ describe("propriété : joursAvant est antisymétrique", () => {
     fc.assert(
       fc.property(unInstant, unFuseau, (instant, fuseau) => {
         expect(joursAvant(instant, instant, fuseau)).toBe(0);
+      }),
+      { numRuns: 300 },
+    );
+  });
+});
+
+describe("delaiAvant", () => {
+  const maintenant = new Date("2026-01-15T09:00:00Z");
+
+  it("dit demain pour le jour suivant", () => {
+    expect(delaiAvant(new Date("2026-01-16T08:00:00Z"), maintenant, PARIS)).toBe("demain");
+  });
+
+  it("compte en jours civils, pas en heures", () => {
+    // Douze heures plus tard mais déjà le lendemain à Paris : c'est « demain »,
+    // pas « aujourd'hui ».
+    expect(delaiAvant(new Date("2026-01-15T23:30:00Z"), maintenant, PARIS)).toBe("demain");
+  });
+
+  it("dit aujourd'hui pour une échéance déjà passée", () => {
+    expect(delaiAvant(new Date("2026-01-10T08:00:00Z"), maintenant, PARIS)).toBe("aujourd'hui");
+    expect(delaiAvant(new Date("2026-01-15T02:00:00Z"), maintenant, PARIS)).toBe("aujourd'hui");
+  });
+
+  it("passe aux mois quand l'échéance est lointaine", () => {
+    expect(delaiAvant(new Date("2026-02-10T08:00:00Z"), maintenant, PARIS)).toBe("dans 26 jours");
+    expect(delaiAvant(new Date("2026-03-01T08:00:00Z"), maintenant, PARIS)).toBe("dans un mois");
+    expect(delaiAvant(new Date("2026-07-15T08:00:00Z"), maintenant, PARIS)).toBe("dans 6 mois");
+  });
+
+  it("ne dit jamais un retard, quel que soit l'écart", () => {
+    fc.assert(
+      fc.property(fc.integer({ min: -400, max: 400 }), (jours) => {
+        const echeance = new Date(maintenant.getTime() + jours * 24 * 60 * 60 * 1000);
+
+        return !delaiAvant(echeance, maintenant, PARIS).includes("−");
       }),
       { numRuns: 300 },
     );
