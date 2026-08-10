@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { toToolInputSchema } from "../tool-schema";
+import { z } from "zod";
 import { GENERATE_VARIANTS, generateVariantsForme } from "./generate-variants";
 
 /**
  * Le premier passage du banc a rendu quatre lots sur vingt-quatre, dont seize
- * où le tableau arrivait en chaîne. On a soupçonné le schéma d'outil d'être
- * dégénéré — il ne l'était pas, mais rien ne le prouvait.
+ * où le tableau arrivait en chaîne. On a soupçonné la forme envoyée d'être
+ * dégénérée — elle ne l'était pas, mais rien ne le prouvait.
  *
- * Ce test prouve ce que le modèle voit, et tombe si un `.refine()` revient
+ * Ce test prouve ce que le modèle voit — la forme d'où la grammaire des
+ * structured outputs est compilée — et tombe si un `.refine()` revient
  * s'intercaler sur le chemin de dérivation ou si le tableau réapparaît.
  */
 
@@ -19,10 +20,14 @@ function chemin(valeur: unknown, ...cles: string[]): unknown {
   );
 }
 
+function enJsonSchema(forme: z.ZodType): unknown {
+  return z.toJSONSchema(forme, { target: "draft-2020-12", io: "input" });
+}
+
 const CLES = ["recognition", "mechanism", "boundary", "application"];
 
-describe("schéma d'outil de generate_variants", () => {
-  const outil = toToolInputSchema(generateVariantsForme);
+describe("forme de sortie de generate_variants", () => {
+  const outil = enJsonSchema(generateVariantsForme);
 
   it("porte quatre clés nommées, et aucun tableau de questions", () => {
     expect(Object.keys(chemin(outil, "properties") ?? {})).toEqual(CLES);
@@ -65,7 +70,7 @@ describe("schéma d'outil de generate_variants", () => {
   it("dérive la forme, jamais la validation", () => {
     // La validation porte une contrainte croisée et une mise à plat en
     // tableau : rien de tout cela ne s'exprime en JSON Schema.
-    expect(toToolInputSchema(GENERATE_VARIANTS.forme)).toEqual(outil);
+    expect(enJsonSchema(GENERATE_VARIANTS.forme)).toEqual(outil);
     expect(GENERATE_VARIANTS.validation).not.toBe(GENERATE_VARIANTS.forme);
   });
 

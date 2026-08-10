@@ -21,10 +21,3 @@ export type AiContract<T> = {
 export const AI_PURPOSES = ["extract_atoms", "generate_variants", "ocr_extract"] as const;
 
 export type AiPurpose = (typeof AI_PURPOSES)[number];
-
-/** Nom de l'outil exposé au modèle, par intention. */
-export const TOOL_NAMES: Record<AiPurpose, string> = {
-  extract_atoms: "enregistrer_concepts",
-  generate_variants: "enregistrer_questions",
-  ocr_extract: "enregistrer_texte_lu",
-};

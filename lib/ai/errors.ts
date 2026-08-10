@@ -66,12 +66,12 @@ export class AITruncatedOutputError extends AiError {
   }
 }
 
-/** Le modèle n'a pas appelé l'outil demandé. */
-export class AIMissingToolUseError extends AiError {
-  readonly code = "AI_NO_TOOL_USE";
+/** Le modèle n'a rien rendu là où la sortie structurée devait arriver. */
+export class AIMissingOutputError extends AiError {
+  readonly code = "AI_NO_OUTPUT";
 
   constructor(readonly purpose: string) {
-    super(`Le modèle n'a pas produit de bloc d'outil pour « ${purpose} ».`);
+    super(`Le modèle n'a produit aucun texte pour « ${purpose} ».`);
   }
 }
 

@@ -4,7 +4,7 @@
  * raison de cette séparation.
  */
 
-export { AI_PURPOSES, TOOL_NAMES, type AiContract, type AiPurpose } from "./contract";
+export { AI_PURPOSES, type AiContract, type AiPurpose } from "./contract";
 export { EXTRACT_ATOMS, extractAtomsForme, type ExtractAtomsOutput } from "./extract-atoms";
 export {
   GENERATE_VARIANTS,

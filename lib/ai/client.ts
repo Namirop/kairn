@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { recordAiCall } from "@/lib/db/ai-call";
 import { reserverAppelModele } from "@/lib/db/ai-quota";
 import { readAiConfig, type AiConfig } from "./config";
@@ -7,7 +8,7 @@ import {
   AICallFailedError,
   AIDisabledError,
   AIInvalidOutputError,
-  AIMissingToolUseError,
+  AIMissingOutputError,
   AIQuotaError,
   AITruncatedOutputError,
   AiError,
@@ -15,8 +16,7 @@ import {
 import { loadFixture } from "./fixtures";
 import { flattenText, toSdkMessage, type AiMessage } from "./message";
 import { computeCostUsd } from "./pricing";
-import { TOOL_NAMES, type AiContract } from "./schemas";
-import { toToolInputSchema } from "./tool-schema";
+import type { AiContract } from "./schemas";
 
 /**
  * Le seul point d'entrée vers le modèle, et le seul fichier qui importe le SDK
@@ -46,22 +46,41 @@ function sdkFor(config: AiConfig): Anthropic {
   return cachedClient.sdk;
 }
 
-function readToolUse<T>(contract: AiContract<T>, response: Anthropic.Message): T {
+/**
+ * La sortie structurée arrive dans un bloc de texte, contrainte pendant
+ * l'inférence par la grammaire compilée depuis la forme. La validation Zod
+ * reste : une garantie de forme n'est pas une garantie de contenu, et le SDK
+ * rétrograde en simple description ce que la grammaire ne sait pas contraindre
+ * — les énumérations comme les bornes de longueur.
+ */
+function readStructuredOutput<T>(contract: AiContract<T>, response: Anthropic.Message): T {
   const block = response.content.find(
-    (candidate): candidate is Anthropic.ToolUseBlock => candidate.type === "tool_use",
+    (candidate): candidate is Anthropic.TextBlock => candidate.type === "text",
   );
 
   if (!block) {
-    throw new AIMissingToolUseError(contract.purpose);
+    throw new AIMissingOutputError(contract.purpose);
   }
 
-  const parsed = contract.validation.safeParse(block.input);
+  let rendu: unknown;
+
+  try {
+    rendu = JSON.parse(block.text);
+  } catch {
+    throw new AIInvalidOutputError(
+      contract.purpose,
+      ["(racine) : la réponse n'est pas du JSON"],
+      apercuBrut(block.text),
+    );
+  }
+
+  const parsed = contract.validation.safeParse(rendu);
 
   if (!parsed.success) {
     throw new AIInvalidOutputError(
       contract.purpose,
-      decrireIssues(parsed.error, block.input),
-      apercuBrut(block.input),
+      decrireIssues(parsed.error, rendu),
+      apercuBrut(rendu),
     );
   }
 
@@ -84,22 +103,20 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
     response = await sdkFor(config).messages.create({
       model: config.model,
       max_tokens: maxTokens,
-      // Le prompt système et l'outil sont identiques d'un appel à l'autre : le
-      // point de cache posé ici couvre les deux, l'outil étant rendu avant.
+      // Le prompt système est identique d'un appel à l'autre. Depuis que
+      // l'outil a disparu du préfixe, il est seul devant le point de cache :
+      // sous le minimum de mise en cache du modèle, rien ne sera mis en cache
+      // — le registre le dira.
       system: [{ type: "text", text: params.system, cache_control: { type: "ephemeral" } }],
-      // Coupé : la sortie structurée repose sur un `tool_choice` qui force un
-      // outil, et le raisonnement étendu ne s'y ajoute pas. Le rouvrir voudrait
-      // dire repasser en `tool_choice: auto` et gérer l'absence de bloc d'outil.
+      // Coupé, et ce n'est plus le forçage d'outil qui l'impose : ces trois
+      // intentions n'ont rien montré qui demande du raisonnement. Le rouvrir
+      // est une décision à prendre sur une mesure, pas un réglage à laisser
+      // glisser.
       thinking: { type: "disabled" },
       messages: params.messages.map(toSdkMessage),
-      tools: [
-        {
-          name: TOOL_NAMES[contract.purpose],
-          description: "Enregistre le résultat sous la forme attendue.",
-          input_schema: toToolInputSchema(contract.forme),
-        },
-      ],
-      tool_choice: { type: "tool", name: TOOL_NAMES[contract.purpose] },
+      // La forme est compilée en grammaire et contraint la génération. Un
+      // tableau rendu en chaîne n'est plus improbable, il est impossible.
+      output_config: { format: zodOutputFormat(contract.forme) },
     });
   } catch (error) {
     await recordAiCall({
@@ -124,13 +141,13 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
   const costUsd = computeCostUsd(config.model, consommation);
 
   try {
-    // Une réponse coupée porte un bloc d'outil incomplet mais parfois valide :
+    // Une réponse coupée porte une sortie incomplète mais parfois valide :
     // huit concepts demandés, cinq rendus, aucune erreur. C'est un échec.
     if (response.stop_reason === "max_tokens") {
       throw new AITruncatedOutputError(contract.purpose, maxTokens);
     }
 
-    const value = readToolUse(contract, response);
+    const value = readStructuredOutput(contract, response);
     await recordAiCall({ ...ledger, ...consommation, costUsd, latencyMs, success: true });
     return value;
   } catch (error) {
@@ -149,7 +166,7 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
 /**
  * Appelle le modèle et rend une valeur déjà validée. Dans l'ordre :
  * interrupteur, mode mock, plafond journalier, émission avec `max_tokens`
- * explicite et sortie structurée par outil, refus d'une réponse tronquée,
+ * explicite et sortie contrainte par grammaire, refus d'une réponse tronquée,
  * validation stricte, puis écriture au registre — succès comme échec. Aucun
  * retry.
  */
