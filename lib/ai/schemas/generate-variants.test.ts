@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { z } from "zod";
+import { toOutputSchema } from "../output-schema";
 import { GENERATE_VARIANTS, generateVariantsForme } from "./generate-variants";
 
 /**
@@ -20,14 +20,10 @@ function chemin(valeur: unknown, ...cles: string[]): unknown {
   );
 }
 
-function enJsonSchema(forme: z.ZodType): unknown {
-  return z.toJSONSchema(forme, { target: "draft-2020-12", io: "input" });
-}
-
 const CLES = ["recognition", "mechanism", "boundary", "application"];
 
 describe("forme de sortie de generate_variants", () => {
-  const outil = enJsonSchema(generateVariantsForme);
+  const outil = toOutputSchema(generateVariantsForme).schema;
 
   it("porte quatre clés nommées, et aucun tableau de questions", () => {
     expect(Object.keys(chemin(outil, "properties") ?? {})).toEqual(CLES);
@@ -35,7 +31,7 @@ describe("forme de sortie de generate_variants", () => {
     expect(JSON.stringify(outil)).not.toContain('"type":"array","items":{"type":"object"');
   });
 
-  it("montre les cinq formats sur chacune des quatre clés", () => {
+  it("contraint les cinq formats sur chacune des quatre clés", () => {
     for (const cle of CLES) {
       expect(chemin(outil, "properties", cle, "properties", "format", "enum")).toEqual([
         "MCQ",
@@ -45,6 +41,10 @@ describe("forme de sortie de generate_variants", () => {
         "EXPLAIN",
       ]);
     }
+
+    // L'énumération doit rester une contrainte. Le helper du SDK la verse dans
+    // la description, où elle n'est plus qu'un conseil — c'est ce qu'on évite.
+    expect(JSON.stringify(outil)).not.toContain("{enum:");
   });
 
   it("n'exige d'une question que ce que tout format porte", () => {
@@ -70,7 +70,7 @@ describe("forme de sortie de generate_variants", () => {
   it("dérive la forme, jamais la validation", () => {
     // La validation porte une contrainte croisée et une mise à plat en
     // tableau : rien de tout cela ne s'exprime en JSON Schema.
-    expect(enJsonSchema(GENERATE_VARIANTS.forme)).toEqual(outil);
+    expect(toOutputSchema(GENERATE_VARIANTS.forme).schema).toEqual(outil);
     expect(GENERATE_VARIANTS.validation).not.toBe(GENERATE_VARIANTS.forme);
   });
 

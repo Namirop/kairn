@@ -1,5 +1,4 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { recordAiCall } from "@/lib/db/ai-call";
 import { reserverAppelModele } from "@/lib/db/ai-quota";
 import { readAiConfig, type AiConfig } from "./config";
@@ -15,6 +14,7 @@ import {
 } from "./errors";
 import { loadFixture } from "./fixtures";
 import { flattenText, toSdkMessage, type AiMessage } from "./message";
+import { toOutputSchema } from "./output-schema";
 import { computeCostUsd } from "./pricing";
 import type { AiContract } from "./schemas";
 
@@ -116,7 +116,7 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
       messages: params.messages.map(toSdkMessage),
       // La forme est compilée en grammaire et contraint la génération. Un
       // tableau rendu en chaîne n'est plus improbable, il est impossible.
-      output_config: { format: zodOutputFormat(contract.forme) },
+      output_config: { format: toOutputSchema(contract.forme) },
     });
   } catch (error) {
     await recordAiCall({
