@@ -46,8 +46,13 @@ model Atom {
   userId  String
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  concept        String    @db.Text
-  tags           String[]
+  concept String   @db.Text
+  tags    String[]
+  /// Extrait tel qu'il a été déposé alors qu'il paraît factuellement douteux.
+  /// Aucune question n'est écrite dessus : river une erreur serait pire que
+  /// l'ignorer. Il attend que l'utilisateur confirme, corrige ou supprime.
+  uncertain Boolean @default(false)
+
   state          AtomState @default(LEARNING)
   archivedAt     DateTime?
   /// Distingue l'archivage décidé par l'utilisateur de celui décidé par le produit.
