@@ -53,9 +53,11 @@ APPLICATION : SHORT_ANSWER, CODE, EXPLAIN, MCQ
 
 Deux questions au plus partagent le même format.
 
-Si le concept porte sur du code — une méthode, une syntaxe, un comportement à
-l'exécution — au moins une des quatre questions emploie CODE : un extrait court, et on
-demande ce qu'il produit, ce qui lui manque, ou ce qui le casse.
+Si le concept cite du code — un identifiant entre accents graves, un appel de méthode,
+une instruction, une commande, un en-tête —, une des quatre questions emploie CODE. La
+citation suffit à déclencher la règle : ce n'est pas une appréciation à porter sur le
+sujet du concept. Cette question montre un extrait court et demande ce qu'il produit,
+ce qui lui manque, ou ce qui le casse.
 
 MCQ : exactement quatre options. Chaque mauvaise option est fausse pour une raison
 précise, une confusion que quelqu'un pourrait réellement avoir. Une option
