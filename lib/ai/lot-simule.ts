@@ -7,11 +7,20 @@ import { flattenText, type AiMessage } from "./message";
  * soumission et la relève, le lot est perdu et le cron le signalera comme un lot
  * resté sans réponse. C'est exactement ce qu'on veut voir arriver en
  * développement, puisque c'est ce qui peut arriver en vrai.
+ *
+ * La référence est globale, comme celle du client Prisma : en développement,
+ * une action serveur et une route n'exécutent pas la même instance de ce
+ * module. Sans elle, un lot déposé depuis l'interface serait introuvable au
+ * relevé, et les questions n'arriveraient jamais sans appel réel.
  */
 
 export type EntreeSimulee = { reference: string; texte: string };
 
-const LOTS = new Map<string, EntreeSimulee[]>();
+declare global {
+  var cairnLotsSimules: Map<string, EntreeSimulee[]> | undefined;
+}
+
+const LOTS: Map<string, EntreeSimulee[]> = (globalThis.cairnLotsSimules ??= new Map());
 
 /** Range le lot et rend son identifiant, comme le ferait le fournisseur. */
 export function deposerLotSimule(requetes: { reference: string; messages: AiMessage[] }[]): string {
