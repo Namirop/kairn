@@ -45,6 +45,22 @@ export class AIInvalidOutputError extends AiError {
   }
 }
 
+/**
+ * La réponse a été coupée par `max_tokens`. Le bloc d'outil est peut-être
+ * présent et syntaxiquement valide, mais incomplet : c'est un échec, pas un
+ * succès partiel. Relever `AI_MAX_TOKENS` plutôt que rejouer à l'identique.
+ */
+export class AITruncatedOutputError extends AiError {
+  readonly code = "AI_TRUNCATED";
+
+  constructor(
+    readonly purpose: string,
+    readonly maxTokens: number,
+  ) {
+    super(`Sortie tronquée pour « ${purpose} » : la limite de ${maxTokens} tokens a été atteinte.`);
+  }
+}
+
 /** Le modèle n'a pas appelé l'outil demandé. */
 export class AIMissingToolUseError extends AiError {
   readonly code = "AI_NO_TOOL_USE";

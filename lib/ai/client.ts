@@ -9,18 +9,18 @@ import {
   AIInvalidOutputError,
   AIMissingToolUseError,
   AIQuotaError,
+  AITruncatedOutputError,
   AiError,
 } from "./errors";
 import { loadFixture } from "./fixtures";
-import { textLength, type AiMessage } from "./message";
+import { flattenText, type AiMessage } from "./message";
 import { computeCostUsd } from "./pricing";
 import { TOOL_NAMES, type AiPurpose } from "./schemas";
 import { toToolInputSchema } from "./tool-schema";
 
 /**
- * Le seul point d'entrée vers le modèle, et le seul fichier du projet qui
- * importe le SDK Anthropic. Voir la section « Règles sur les appels au modèle »
- * du CLAUDE.md : ce fichier est ce qui protège le budget.
+ * Le seul point d'entrée vers le modèle, et le seul fichier qui importe le SDK
+ * Anthropic. C'est lui qui protège le budget.
  */
 
 const MOCK_LATENCY_MS = 300;
@@ -86,10 +86,6 @@ function readToolUse<T>(purpose: AiPurpose, schema: ZodType<T>, response: Anthro
   return parsed.data;
 }
 
-function errorCodeOf(error: unknown): string {
-  return error instanceof AiError ? error.code : "AI_UNKNOWN";
-}
-
 async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
   const maxTokens = params.maxTokens ?? config.maxTokens;
   const ledger = {
@@ -106,9 +102,9 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
       model: config.model,
       max_tokens: maxTokens,
       system: params.system,
-      // Coupé volontairement : le raisonnement consommerait le budget de sortie
-      // que ces extractions structurées réservent au résultat. À rouvrir en
-      // phase 1 si les prompts le demandent, en relevant max_tokens d'autant.
+      // Coupé : la sortie structurée repose sur un `tool_choice` qui force un
+      // outil, et le raisonnement étendu ne s'y ajoute pas. Le rouvrir voudrait
+      // dire repasser en `tool_choice: auto` et gérer l'absence de bloc d'outil.
       thinking: { type: "disabled" },
       messages: params.messages.map(toSdkMessage),
       tools: [
@@ -139,6 +135,12 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
   const costUsd = computeCostUsd(config.model, inputTokens, outputTokens);
 
   try {
+    // Une réponse coupée porte un bloc d'outil incomplet mais parfois valide :
+    // huit concepts demandés, cinq rendus, aucune erreur. C'est un échec.
+    if (response.stop_reason === "max_tokens") {
+      throw new AITruncatedOutputError(params.purpose, maxTokens);
+    }
+
     const value = readToolUse(params.purpose, params.schema, response);
     await recordAiCall({
       ...ledger,
@@ -157,18 +159,18 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
       costUsd,
       latencyMs,
       success: false,
-      errorCode: errorCodeOf(error),
+      errorCode: error instanceof AiError ? error.code : "AI_UNKNOWN",
     });
     throw error;
   }
 }
 
 /**
- * Appelle le modèle et rend une valeur déjà validée.
- *
- * Dans l'ordre : interrupteur, mode mock, plafond journalier, émission avec
- * `max_tokens` explicite et sortie structurée par outil, validation stricte,
- * puis écriture au registre — succès comme échec. Aucun retry.
+ * Appelle le modèle et rend une valeur déjà validée. Dans l'ordre :
+ * interrupteur, mode mock, plafond journalier, émission avec `max_tokens`
+ * explicite et sortie structurée par outil, refus d'une réponse tronquée,
+ * validation stricte, puis écriture au registre — succès comme échec. Aucun
+ * retry.
  */
 export async function callAI<T>(params: CallAIParams<T>): Promise<T> {
   const config = readAiConfig();
@@ -179,7 +181,7 @@ export async function callAI<T>(params: CallAIParams<T>): Promise<T> {
 
   if (config.mock) {
     await new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS));
-    return loadFixture(params.purpose, params.schema, textLength(params.messages));
+    return loadFixture(params.purpose, params.schema, flattenText(params.messages));
   }
 
   // La place est réservée avant d'émettre, en une seule instruction : deux
