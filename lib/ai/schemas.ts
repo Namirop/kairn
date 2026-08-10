@@ -111,6 +111,10 @@ export const generateVariantsSchema = z
 
 export type GenerateVariantsOutput = z.infer<typeof generateVariantsSchema>;
 
+function porteDuTexte(texte: string): boolean {
+  return texte.trim().length > 0;
+}
+
 /** Le texte tiré d'une capture d'écran. */
 export const ocrExtractSchema = z
   .object({
@@ -123,14 +127,21 @@ export const ocrExtractSchema = z
     language: z
       .string()
       .regex(/^[a-z]{2}$/)
-      .describe("Code ISO 639-1 de la langue lue, en minuscules."),
+      .nullable()
+      .describe("Code ISO 639-1 de la langue lue, en minuscules. Nul si rien n'a été lu."),
     usable: z
       .boolean()
       .describe("Faux si l'image ne porte rien à retenir : ni texte, ni texte lisible."),
   })
-  .refine((output) => output.usable === output.extractedText.trim().length > 0, {
+  // Une image sans texte n'a pas de langue : exiger un code ISO ferait
+  // inventer une réponse, et une réponse inventée casse un cas normal.
+  .refine((output) => output.usable === porteDuTexte(output.extractedText), {
     error: "extractedText est vide si et seulement si usable est faux",
     path: ["extractedText"],
+  })
+  .refine((output) => output.usable === (output.language !== null), {
+    error: "language est renseigné si et seulement si usable est vrai",
+    path: ["language"],
   });
 
 export type OcrExtractOutput = z.infer<typeof ocrExtractSchema>;

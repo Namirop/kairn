@@ -34,7 +34,7 @@ export type ConceptEvalue = {
 export type DepotEvalue = {
   nom: string;
   texte: string;
-  lecture?: { langue: string; exploitable: boolean };
+  lecture?: { langue: string | null; exploitable: boolean };
   rejet: string | null;
   concepts: ConceptEvalue[];
   erreur?: string;

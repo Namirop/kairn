@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { conclure, expectFailure, record } from "./verification/journal";
 
 /**
  * Preuve, à l'exécution, que les garde-fous d'appel modèle tiennent.
@@ -22,29 +23,6 @@ function trippedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Res
 }
 
 globalThis.fetch = trippedFetch;
-
-const checks: { label: string; ok: boolean; detail: string }[] = [];
-
-function record(label: string, ok: boolean, detail: string): void {
-  checks.push({ label, ok, detail });
-}
-
-async function expectFailure(
-  label: string,
-  expectedCode: string,
-  run: () => Promise<unknown>,
-): Promise<void> {
-  try {
-    await run();
-    record(label, false, "aucune erreur levée");
-  } catch (error) {
-    const code =
-      error !== null && typeof error === "object" && "code" in error
-        ? String(error.code)
-        : "inconnu";
-    record(label, code === expectedCode, `code levé : ${code}`);
-  }
-}
 
 async function main(): Promise<void> {
   const { callAI } = await import("@/lib/ai/client");
@@ -112,7 +90,19 @@ async function main(): Promise<void> {
   record(
     "Mock — l'OCR rend du texte exploitable et sa langue",
     ocr.usable && ocr.extractedText.length > 0,
-    ocr.language,
+    ocr.language ?? "sans langue",
+  );
+
+  const floue = await callAI({
+    purpose: "ocr_extract",
+    schema: ocrExtractSchema,
+    system: "",
+    messages: [{ role: "user", content: "capture floue, prise de loin" }],
+  });
+  record(
+    "Mock — une capture illisible ne rend ni texte ni langue",
+    !floue.usable && floue.extractedText === "" && floue.language === null,
+    `usable=${floue.usable}, language=${floue.language}`,
   );
 
   await expectFailure("Une fixture hors schéma est refusée", "AI_INVALID_OUTPUT", async () => {
@@ -180,14 +170,7 @@ async function main(): Promise<void> {
 }
 
 main()
-  .then(async () => {
-    for (const check of checks) {
-      console.info(`${check.ok ? "ok  " : "ÉCHEC"}  ${check.label} — ${check.detail}`);
-    }
-    const failed = checks.filter((check) => !check.ok).length;
-    console.info(failed === 0 ? "\nGarde-fous vérifiés." : `\n${failed} vérification(s) en échec.`);
-    process.exitCode = failed === 0 ? 0 : 1;
-  })
+  .then(() => conclure("Garde-fous vérifiés."))
   .catch((error: unknown) => {
     console.error("La vérification a échoué.", error);
     process.exitCode = 1;

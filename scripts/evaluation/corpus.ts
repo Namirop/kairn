@@ -9,6 +9,13 @@ import type { AiImagePart } from "@/lib/ai/message";
  * avant l'extraction.
  *
  * Ajouter un cas au banc, c'est déposer un fichier ici. Rien à déclarer.
+ *
+ * `07-capture-assistant.png` est une interface reconstituée, pas une vraie
+ * capture : elle porte de l'habillage — barre de titre, liste de
+ * conversations, horodatage, compteur de mentions, suggestions, zone de
+ * saisie — autour d'une réponse à retenir. C'est ce qui met à l'épreuve la
+ * consigne « jette l'habillage ». Une capture réelle la remplace en la
+ * déposant à sa place.
  */
 
 export type Depot = {

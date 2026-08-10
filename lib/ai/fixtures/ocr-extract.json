@@ -5,7 +5,7 @@
       "keywords": ["capture floue", "capture illisible"],
       "output": {
         "extractedText": "",
-        "language": "fr",
+        "language": null,
         "usable": false
       }
     },

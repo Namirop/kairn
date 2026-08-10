@@ -40,7 +40,7 @@ async function main(): Promise<void> {
 
   const { lireCorpus } = await import("./evaluation/corpus");
   const { evaluerDepot } = await import("./evaluation/execution");
-  const { rendreRapport, resumeConsole } = await import("./evaluation/rapport");
+  const { accorder, rendreRapport, resumeConsole } = await import("./evaluation/rapport");
   const { sumAiCallsSince } = await import("@/lib/db/ai-call");
   const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
 
@@ -53,7 +53,9 @@ async function main(): Promise<void> {
   const plafond = plancher + corpus.length * MAX_CONCEPTS_PAR_DEPOT;
   const reservees = await lireReservationsDuJour();
 
-  console.info(`Corpus : ${corpus.length} dépôts, dont ${images} captures.`);
+  console.info(
+    `Corpus : ${accorder(corpus.length, "dépôt")}, dont ${accorder(images, "capture")}.`,
+  );
   console.info(`Modèle : ${process.env.AI_MODEL}, ${process.env.AI_MAX_TOKENS} tokens de sortie.`);
   console.info(
     `Appels : ${plancher} d'abord — une lecture par capture, une extraction par dépôt —,` +

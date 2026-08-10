@@ -77,8 +77,11 @@ function rendreDepot(depot: DepotEvalue): string[] {
   const lignes = [`## ${depot.nom}`, "", `> ${extrait(depot.texte) || "(aucun texte lu)"}`, ""];
 
   if (depot.lecture) {
-    const etat = depot.lecture.exploitable ? "exploitable" : "inexploitable";
-    lignes.push(`Capture lue en \`${depot.lecture.langue}\`, jugée ${etat}.`, "");
+    const { langue, exploitable } = depot.lecture;
+    lignes.push(
+      exploitable ? `Capture lue en \`${langue}\`.` : "Capture jugée inexploitable, rien de lu.",
+      "",
+    );
   }
 
   if (depot.erreur) return [...lignes, `Extraction en échec : ${depot.erreur}`, ""];
@@ -127,7 +130,7 @@ export function rendreRapport(evaluations: DepotEvalue[], entete: Entete): strin
   ].join("\n");
 }
 
-function accorder(nombre: number, singulier: string, pluriel = `${singulier}s`): string {
+export function accorder(nombre: number, singulier: string, pluriel = `${singulier}s`): string {
   return `${nombre} ${nombre > 1 ? pluriel : singulier}`;
 }
 
