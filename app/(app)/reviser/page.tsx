@@ -30,7 +30,7 @@ export default async function PageReviser() {
       <RienAReviser
         totalConcepts={session.totalConcepts}
         conceptsEnAttenteDeQuestions={session.conceptsEnAttenteDeQuestions}
-        prochaineEcheance={session.prochaineEcheance}
+        prochainJourServi={session.prochainJourServi}
         fuseau={session.fuseau}
         maintenant={maintenant}
       />

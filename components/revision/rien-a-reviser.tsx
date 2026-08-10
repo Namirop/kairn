@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
-import { delaiAvant } from "@/lib/domain/echeance";
+import { delaiAvantLeJour } from "@/lib/domain/echeance";
 
 /**
  * Les trois raisons de n'avoir rien à réviser.
@@ -13,7 +13,7 @@ import { delaiAvant } from "@/lib/domain/echeance";
 type Props = {
   totalConcepts: number;
   conceptsEnAttenteDeQuestions: number;
-  prochaineEcheance: Date | null;
+  prochainJourServi: string | null;
   fuseau: string;
   maintenant: Date;
 };
@@ -46,7 +46,7 @@ function Ecran({
 export function RienAReviser({
   totalConcepts,
   conceptsEnAttenteDeQuestions,
-  prochaineEcheance,
+  prochainJourServi,
   fuseau,
   maintenant,
 }: Props) {
@@ -62,7 +62,7 @@ export function RienAReviser({
 
   // Des concepts existent, mais aucun ne porte encore de question : leurs
   // formulations sont en cours d'écriture. On dit l'attente, pas la file de jobs.
-  if (!prochaineEcheance && conceptsEnAttenteDeQuestions > 0) {
+  if (!prochainJourServi && conceptsEnAttenteDeQuestions > 0) {
     return (
       <Ecran
         titre="Les questions arrivent"
@@ -76,8 +76,8 @@ export function RienAReviser({
     <Ecran
       titre="Tu es à jour"
       explication={
-        prochaineEcheance
-          ? `Rien n'arrive à échéance aujourd'hui. Le prochain concept revient ${delaiAvant(prochaineEcheance, maintenant, fuseau)}.`
+        prochainJourServi
+          ? `Rien n'arrive à échéance aujourd'hui. Le prochain concept revient ${delaiAvantLeJour(prochainJourServi, maintenant, fuseau)}.`
           : "Rien n'arrive à échéance aujourd'hui."
       }
       action={{ libelle: "Déposer autre chose", href: `${ROUTES.depots}/nouveau` }}

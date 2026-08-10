@@ -5,7 +5,7 @@ import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
 import { jourSuivant, localDay } from "@/lib/domain/local-day";
 import { choisirVariante } from "@/lib/domain/rotation-variantes";
-import { composerSession } from "@/lib/domain/selection-session";
+import { composerSession, dejaRevuAujourdhui } from "@/lib/domain/selection-session";
 
 /**
  * Ce qu'il y a à réviser maintenant.
@@ -55,7 +55,8 @@ export type SessionDuJour = {
   /** De quoi distinguer les trois écrans vides sans deviner. */
   totalConcepts: number;
   conceptsEnAttenteDeQuestions: number;
-  prochaineEcheance: Date | null;
+  /** Jour civil du prochain passage, au format AAAA-MM-JJ. */
+  prochainJourServi: string | null;
 };
 
 /**
@@ -133,10 +134,13 @@ export async function lireSessionDuJour(
     }),
     prisma.atom.count({ where: { userId } }),
     prisma.atom.count({ where: { userId, uncertain: false, variants: { none: {} } } }),
-    prisma.atom.findFirst({
+    prisma.atom.findMany({
       where: { userId, uncertain: false, variants: { some: { retiredAt: null } } },
       orderBy: { due: "asc" },
-      select: { due: true },
+      select: { due: true, lastReview: true },
+      // Le prochain jour servi est parmi les plus proches échéances : inutile de
+      // ramener un historique entier pour trouver un minimum.
+      take: 50,
     }),
   ]);
 
@@ -175,8 +179,44 @@ export async function lireSessionDuJour(
     questions,
     totalConcepts,
     conceptsEnAttenteDeQuestions: enAttente,
-    prochaineEcheance: prochain?.due ?? null,
+    prochainJourServi: prochainJourServi(prochain, maintenant, fuseau),
   };
+}
+
+/**
+ * Le prochain jour où quelque chose sera effectivement posé.
+ *
+ * Ce n'est pas la plus petite échéance en base : un concept revu ce matin porte
+ * une échéance encore aujourd'hui — ts-fsrs replanifie court en apprentissage —
+ * et ne reviendra pourtant que demain. Annoncer son échéance produisait la
+ * phrase « rien n'arrive aujourd'hui, le prochain revient aujourd'hui ».
+ */
+function prochainJourServi(
+  concepts: { due: Date; lastReview: Date | null }[],
+  maintenant: Date,
+  fuseau: string,
+): string | null {
+  return concepts.map((concept) => jourServi(concept, maintenant, fuseau)).sort()[0] ?? null;
+}
+
+/**
+ * Le jour où ce concept sera posé.
+ *
+ * Son échéance, sauf s'il a déjà été vu aujourd'hui : dans ce cas il attend
+ * demain, quelle que soit l'heure que ts-fsrs a écrite.
+ */
+function jourServi(
+  concept: { due: Date; lastReview: Date | null },
+  maintenant: Date,
+  fuseau: string,
+): string {
+  const aujourdhui = localDay(maintenant, fuseau);
+  const echeance = localDay(concept.due, fuseau);
+
+  if (echeance > aujourdhui) return echeance;
+  if (dejaRevuAujourdhui(concept.lastReview, maintenant, fuseau)) return jourSuivant(aujourdhui);
+
+  return echeance;
 }
 
 /**
@@ -198,11 +238,16 @@ export async function compterDusDemain(
       uncertain: false,
       variants: { some: { retiredAt: null } },
       // Deux fois la marge : le lendemain de l'utilisateur se termine au plus
-      // tard un peu avant 48 h d'ici, quel que soit son décalage.
-      due: { gte: maintenant, lte: new Date(maintenant.getTime() + 2 * MARGE_MS) },
+      // tard un peu avant 48 h d'ici, quel que soit son décalage. La borne basse
+      // remonte avant maintenant, sinon un concept revu ce matin — échéance
+      // posée court par ts-fsrs — sortirait du compte alors qu'il revient demain.
+      due: {
+        gte: new Date(maintenant.getTime() - 2 * MARGE_MS),
+        lte: new Date(maintenant.getTime() + 2 * MARGE_MS),
+      },
     },
-    select: { due: true },
+    select: { due: true, lastReview: true },
   });
 
-  return candidats.filter((atome) => localDay(atome.due, fuseau) === demain).length;
+  return candidats.filter((atome) => jourServi(atome, maintenant, fuseau) === demain).length;
 }

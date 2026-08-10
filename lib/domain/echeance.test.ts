@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { anciennete, delaiAvant, echeanceCourte, joursAvant } from "./echeance";
+import { anciennete, delaiAvant, delaiAvantLeJour, echeanceCourte, joursAvant } from "./echeance";
 import { localDay } from "./local-day";
 import { unFuseau, unInstant } from "./local-day.test";
 
@@ -202,5 +202,29 @@ describe("delaiAvant", () => {
       }),
       { numRuns: 300 },
     );
+  });
+});
+
+describe("delaiAvantLeJour", () => {
+  const maintenant = new Date("2026-01-15T09:00:00Z");
+
+  it("dit demain pour le jour suivant", () => {
+    expect(delaiAvantLeJour("2026-01-16", maintenant, PARIS)).toBe("demain");
+  });
+
+  it("dit aujourd'hui pour le jour courant", () => {
+    expect(delaiAvantLeJour("2026-01-15", maintenant, PARIS)).toBe("aujourd'hui");
+  });
+
+  it("se cale sur le calendrier de l'utilisateur, pas sur UTC", () => {
+    // 23 h 30 UTC le 15 : il est déjà le 16 à Paris, donc le 17 est « demain ».
+    const tard = new Date("2026-01-15T23:30:00Z");
+
+    expect(delaiAvantLeJour("2026-01-17", tard, PARIS)).toBe("demain");
+    expect(delaiAvantLeJour("2026-01-17", tard, "UTC")).toBe("dans 2 jours");
+  });
+
+  it("passe aux mois de la même façon que delaiAvant", () => {
+    expect(delaiAvantLeJour("2026-07-15", maintenant, PARIS)).toBe("dans 6 mois");
   });
 });

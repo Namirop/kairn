@@ -48,8 +48,25 @@ export function echeanceCourte(echeance: Date, maintenant: Date, fuseau: string)
  * reprocher ce qu'il vient de faire.
  */
 export function delaiAvant(echeance: Date, maintenant: Date, fuseau: string): string {
-  const jours = joursAvant(echeance, maintenant, fuseau);
+  return delaiEnProse(joursAvant(echeance, maintenant, fuseau));
+}
 
+/**
+ * Le même délai, quand on tient déjà le jour civil visé.
+ *
+ * Le prochain passage d'un concept n'est pas toujours son échéance : celui qui
+ * vient d'être revu porte une échéance encore aujourd'hui et ne reviendra que
+ * demain. C'est ce jour-là qu'on annonce, et il se calcule ailleurs — ici on ne
+ * fait que le dire.
+ */
+export function delaiAvantLeJour(jour: string, maintenant: Date, fuseau: string): string {
+  const vise = dayToUtcDate(jour).getTime();
+  const aujourdhui = dayToUtcDate(localDay(maintenant, fuseau)).getTime();
+
+  return delaiEnProse(Math.round((vise - aujourdhui) / MS_PAR_JOUR));
+}
+
+function delaiEnProse(jours: number): string {
   if (jours <= 0) return "aujourd'hui";
   if (jours === 1) return "demain";
   if (jours < 30) return `dans ${jours} jours`;
