@@ -70,7 +70,11 @@ export async function lireDepotDetaille(
           state: true,
           variants: {
             where: { retiredAt: null },
-            orderBy: { createdAt: "asc" },
+            // Par facette, dans l'ordre où elle est déclarée : reconnaître,
+            // expliquer, délimiter, appliquer. Les quatre questions d'un lot
+            // sont écrites dans la même instruction, donc leur date ne départage
+            // rien — sans cet ordre, l'écran se réarrange à chaque chargement.
+            orderBy: { facet: "asc" },
             select: { id: true, format: true, facet: true, question: true, answerKey: true },
           },
         },
