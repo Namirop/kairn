@@ -55,3 +55,6 @@ next-env.d.ts
 /phase-0.5-prompt.md
 /claude-md-section-tests.md
 /phase-1-prompt.md
+
+# Rapports du banc d’évaluation : produits localement, jamais commités.
+/scripts/evaluation/rapports/

@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY pose un verrou exclusif sur la table pendant toute la construction de l'index, donc on évite de s'en servir en production aux heures de pointe. En revanche, si la construction est interrompue, elle laisse en base un index invalide qu'il faut supprimer avant de relancer.

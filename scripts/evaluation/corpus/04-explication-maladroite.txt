@@ -1,0 +1,3 @@
+bon donc le truc que j'ai compris sur useEffect c'est que quand tu return une fonction dedans ben elle est appelée avant que l'effet se relance et aussi quand le composant disparait, en gros pour defaire ce que t'as mis en place. genre si tu poses un abonnement et que tu l'enleves pas ben ils s'empilent et les vieux continuent de repondre alors qu'ils servent plus a rien.
+
+et le truc chiant que j'ai mis 2h a comprendre : si tu mets une fonction dans le tableau des deps ça repart en boucle a chaque rendu, parce que la fonction elle est recréée a chaque fois donc c'est jamais la meme, meme si elle fait exactement pareil.

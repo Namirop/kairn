@@ -1,0 +1,1 @@
+`Array.prototype.at()` accepte un index négatif : `at(-1)` rend le dernier élément du tableau.

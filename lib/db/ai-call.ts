@@ -34,6 +34,21 @@ export async function countAiCallsToday(now: Date = new Date()): Promise<number>
   return prisma.aiCall.count({ where: { createdAt: { gte: startOfUtcDay(now) } } });
 }
 
+/**
+ * Ce qu'a coûté une fenêtre de temps, appels et dollars. Le banc d'évaluation
+ * s'en sert pour chiffrer son propre passage : la dépense se lit au registre,
+ * elle ne s'estime pas.
+ */
+export async function sumAiCallsSince(instant: Date): Promise<{ calls: number; costUsd: string }> {
+  const { _count, _sum } = await prisma.aiCall.aggregate({
+    where: { createdAt: { gte: instant } },
+    _count: { _all: true },
+    _sum: { costUsd: true },
+  });
+
+  return { calls: _count._all, costUsd: (_sum.costUsd ?? 0).toString() };
+}
+
 export async function recordAiCall(record: AiCallRecord): Promise<void> {
   await prisma.aiCall.create({
     data: {
