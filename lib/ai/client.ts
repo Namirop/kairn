@@ -2,17 +2,16 @@ import Anthropic from "@anthropic-ai/sdk";
 import { recordAiCall } from "@/lib/db/ai-call";
 import { reserverAppelModele } from "@/lib/db/ai-quota";
 import { readAiConfig, type AiConfig } from "./config";
-import { apercuBrut, decrireIssues } from "./diagnostic";
 import {
   AICallFailedError,
   AIDisabledError,
-  AIInvalidOutputError,
   AIMissingOutputError,
   AIQuotaError,
   AITruncatedOutputError,
   AiError,
 } from "./errors";
 import { loadFixture } from "./fixtures";
+import { lireSortieStructuree } from "./lecture";
 import { flattenText, toSdkMessage, type AiMessage } from "./message";
 import { toOutputSchema } from "./output-schema";
 import { computeCostUsd } from "./pricing";
@@ -36,7 +35,11 @@ export type CallAIParams<T> = {
 
 let cachedClient: { key: string; sdk: Anthropic } | null = null;
 
-function sdkFor(config: AiConfig): Anthropic {
+/**
+ * Le SDK, prêt à servir. Exporté pour `batch.ts`, qui a besoin du même client
+ * sans importer le paquet : ce fichier reste le seul à le connaître.
+ */
+export function sdkFor(config: AiConfig): Anthropic {
   const key = config.apiKey ?? "";
   if (cachedClient?.key !== key) {
     // Clé absente : on laisse le SDK résoudre lui-même ses identifiants et
@@ -46,13 +49,7 @@ function sdkFor(config: AiConfig): Anthropic {
   return cachedClient.sdk;
 }
 
-/**
- * La sortie structurée arrive dans un bloc de texte, contrainte pendant
- * l'inférence par la grammaire compilée depuis la forme. La validation Zod
- * reste : une garantie de forme n'est pas une garantie de contenu, et le SDK
- * rétrograde en simple description ce que la grammaire ne sait pas contraindre
- * — les énumérations comme les bornes de longueur.
- */
+/** La sortie structurée arrive dans un bloc de texte, plus dans un bloc d'outil. */
 function readStructuredOutput<T>(contract: AiContract<T>, response: Anthropic.Message): T {
   const block = response.content.find(
     (candidate): candidate is Anthropic.TextBlock => candidate.type === "text",
@@ -62,29 +59,7 @@ function readStructuredOutput<T>(contract: AiContract<T>, response: Anthropic.Me
     throw new AIMissingOutputError(contract.purpose);
   }
 
-  let rendu: unknown;
-
-  try {
-    rendu = JSON.parse(block.text);
-  } catch {
-    throw new AIInvalidOutputError(
-      contract.purpose,
-      ["(racine) : la réponse n'est pas du JSON"],
-      apercuBrut(block.text),
-    );
-  }
-
-  const parsed = contract.validation.safeParse(rendu);
-
-  if (!parsed.success) {
-    throw new AIInvalidOutputError(
-      contract.purpose,
-      decrireIssues(parsed.error, rendu),
-      apercuBrut(rendu),
-    );
-  }
-
-  return parsed.data;
+  return lireSortieStructuree(contract, block.text);
 }
 
 async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {

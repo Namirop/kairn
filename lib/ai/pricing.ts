@@ -26,12 +26,17 @@ const FALLBACK: ModelPricing = { inputPerMillion: 5, outputPerMillion: 25 };
 const ECRITURE_CACHE = 1.25;
 const LECTURE_CACHE = 0.1;
 
+/** Un envoi groupé est facturé moitié prix, entrée comme sortie. */
+const REMISE_GROUPEE = 0.5;
+
 /** Ce qu'un appel a consommé. Les tokens de cache sont comptés à part. */
 export type Consommation = {
   inputTokens: number;
   outputTokens: number;
   cacheCreationTokens?: number;
   cacheReadTokens?: number;
+  /** Vrai si la requête est partie dans un envoi groupé. */
+  groupe?: boolean;
 };
 
 export function pricingFor(model: string): ModelPricing {
@@ -51,7 +56,9 @@ export function computeCostUsd(model: string, consommation: Consommation): strin
     consommation.inputTokens +
     (consommation.cacheCreationTokens ?? 0) * ECRITURE_CACHE +
     (consommation.cacheReadTokens ?? 0) * LECTURE_CACHE;
-  const dollars = (entree * inputPerMillion + consommation.outputTokens * outputPerMillion) / 1e6;
+  const remise = consommation.groupe ? REMISE_GROUPEE : 1;
+  const dollars =
+    ((entree * inputPerMillion + consommation.outputTokens * outputPerMillion) * remise) / 1e6;
 
   return dollars.toFixed(8);
 }
