@@ -70,6 +70,40 @@ export async function casDecoupageImpossible(userId: string): Promise<void> {
 }
 
 /**
+ * La lecture d'une capture n'aboutit pas — l'appel lève au lieu de rendre un
+ * verdict. Le chemin d'erreur doit effacer les octets comme le fait le chemin
+ * qui réussit : c'est précisément là qu'une capture pourrait rester en base.
+ */
+export async function casLectureImpossible(userId: string, image: File): Promise<void> {
+  await libererLaJournee(userId);
+
+  const resultat = await deposer(
+    userId,
+    formulaire({ texte: "", cleEnvoi: "verif-lecture-impossible" }, image),
+  );
+
+  if (!resultat.ok) throw new Error(`Dépôt refusé : ${resultat.motif}`);
+
+  const avant = await prisma.input.findUniqueOrThrow({ where: { id: resultat.inputId } });
+
+  process.env.AI_ENABLED = "false";
+  await executerJobsEnAttente(resultat.inputId);
+  process.env.AI_ENABLED = "true";
+
+  const depot = await prisma.input.findUniqueOrThrow({ where: { id: resultat.inputId } });
+
+  record(
+    "Lecture impossible — les octets de l'image ne survivent pas à l'échec",
+    (avant.imageData?.length ?? 0) > 0 && depot.imageData === null && depot.status === "FAILED",
+    depot.imageData === null
+      ? `${avant.imageData?.length ?? 0} octets déposés, effacés au refus`
+      : `${depot.imageData.length} octets restants`,
+  );
+
+  await prisma.input.delete({ where: { id: resultat.inputId } });
+}
+
+/**
  * Le lot part, puis disparaît avant sa relève — processus recyclé, mémoire
  * perdue. Passé le délai d'attente, ses jobs reviennent à la file.
  */

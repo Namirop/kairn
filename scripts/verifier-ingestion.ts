@@ -62,6 +62,7 @@ async function main(): Promise<void> {
     await pipeline.casCorrectionDeConcept(userId);
 
     await reprise.casDecoupageImpossible(userId);
+    await reprise.casLectureImpossible(userId, capture);
     await reprise.casLotPerdu(userId);
     await reprise.casEchecPartiel(userId);
 

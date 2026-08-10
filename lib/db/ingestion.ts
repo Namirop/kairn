@@ -133,12 +133,21 @@ export async function marquerPretSiPlusRienEnAttente(
 
   // Des questions manquantes ne condamnent pas un dépôt qui a ses concepts :
   // ce qui a coûté un appel reste, et l'écran dira ce qui manque.
+  //
+  // Les octets de l'image, eux, partent quoi qu'il arrive. `enregistrerTexteLu`
+  // et `oublierImage` ne couvrent que les chemins où la lecture est allée au
+  // bout ; si l'appel lève, ou si le job est abandonné après trois reprises,
+  // c'est ici — et nulle part ailleurs — que le dépôt cesse d'attendre. La
+  // capture d'un utilisateur ne doit pas survivre précisément à l'échec.
   await prisma.input.update({
     where: { id: inputId },
-    data:
-      enEchec > 0 && concepts === 0
-        ? { status: "FAILED", failureReason: motifSiVide }
-        : { status: "READY" },
+    data: {
+      imageData: null,
+      imageMediaType: null,
+      ...(enEchec > 0 && concepts === 0
+        ? { status: "FAILED" as const, failureReason: motifSiVide }
+        : { status: "READY" as const }),
+    },
   });
 
   return true;
