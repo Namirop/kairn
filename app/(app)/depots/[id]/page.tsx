@@ -26,7 +26,7 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
   const fuseau = await lireFuseauUtilisateur(utilisateur.id);
   const etat = etatDuDepot({
     status: depot.status,
-    travaux: depot.travauxEnCours > 0 ? [{ kind: "VARIANTS" }] : [],
+    travaux: depot.travauxEnCours,
     concepts: depot.concepts.length,
   });
   const texte = depot.rawContent.trim() || depot.extractedText || "";

@@ -1,4 +1,4 @@
-import { localDay, localHour } from "./local-day";
+import { localHour } from "./local-day";
 
 /**
  * Quand le compteur du jour repart.
@@ -31,9 +31,4 @@ export function quandRepartLeCompteur(maintenant: Date, fuseau: string): string 
   if (heures <= 6) return `dans ${heures} heures`;
 
   return "à minuit";
-}
-
-/** Le jour civil de l'utilisateur, pour les compteurs qui s'y rattachent. */
-export function jourDeLUtilisateur(maintenant: Date, fuseau: string): string {
-  return localDay(maintenant, fuseau);
 }

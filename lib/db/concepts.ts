@@ -1,7 +1,13 @@
 import { prisma } from "@/lib/db/client";
 import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { effacerQuestions } from "@/lib/db/variants";
-import type { AtomState, InputStatus, VariantFacet, VariantFormat } from "@/lib/db/types";
+import type {
+  AtomState,
+  GenerationKind,
+  InputStatus,
+  VariantFacet,
+  VariantFormat,
+} from "@/lib/db/types";
 
 /**
  * Lecture et correction d'un concept.
@@ -36,8 +42,9 @@ export type DepotDetaille = {
   failureReason: string | null;
   createdAt: Date;
   concepts: ConceptLu[];
-  /** Travaux encore en cours ou en attente sur ce dépôt. */
-  travauxEnCours: number;
+  /** Travaux encore en cours ou en attente, avec leur nature : c'est elle qui
+   * dit à l'utilisateur ce qu'il attend. */
+  travauxEnCours: { kind: GenerationKind }[];
 };
 
 export async function lireDepotDetaille(
@@ -68,16 +75,18 @@ export async function lireDepotDetaille(
           },
         },
       },
-      _count: { select: { jobs: { where: { status: { in: ["QUEUED", "RUNNING"] } } } } },
+      jobs: { where: { status: { in: ["QUEUED", "RUNNING"] } }, select: { kind: true } },
     },
   });
 
   if (!depot) return null;
 
+  const { atoms, jobs, ...reste } = depot;
+
   return {
-    ...depot,
-    concepts: depot.atoms.map(({ variants, ...atome }) => ({ ...atome, questions: variants })),
-    travauxEnCours: depot._count.jobs,
+    ...reste,
+    concepts: atoms.map(({ variants, ...atome }) => ({ ...atome, questions: variants })),
+    travauxEnCours: jobs,
   };
 }
 
@@ -140,12 +149,6 @@ export async function confirmerConcept(atomId: string, userId: string): Promise<
 
 export async function supprimerConcept(atomId: string, userId: string): Promise<boolean> {
   const { count } = await prisma.atom.deleteMany({ where: { id: atomId, userId } });
-
-  return count === 1;
-}
-
-export async function supprimerDepot(inputId: string, userId: string): Promise<boolean> {
-  const { count } = await prisma.input.deleteMany({ where: { id: inputId, userId } });
 
   return count === 1;
 }
