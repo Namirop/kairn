@@ -26,15 +26,13 @@ globalThis.fetch = trippedFetch;
 
 async function main(): Promise<void> {
   const { callAI } = await import("@/lib/ai/client");
-  const { extractAtomsSchema, generateVariantsSchema, ocrExtractSchema } =
-    await import("@/lib/ai/schemas");
+  const { EXTRACT_ATOMS, GENERATE_VARIANTS, OCR_EXTRACT } = await import("@/lib/ai/schemas");
 
   process.env.AI_ENABLED = "true";
   process.env.MOCK_AI = "true";
 
   const short = await callAI({
-    purpose: "extract_atoms",
-    schema: extractAtomsSchema,
+    contract: EXTRACT_ATOMS,
     system: "",
     messages: [{ role: "user", content: "Une seule phrase, courte." }],
   });
@@ -45,8 +43,7 @@ async function main(): Promise<void> {
   );
 
   const long = await callAI({
-    purpose: "extract_atoms",
-    schema: extractAtomsSchema,
+    contract: EXTRACT_ATOMS,
     system: "",
     messages: [{ role: "user", content: "x".repeat(2_000) }],
   });
@@ -57,8 +54,7 @@ async function main(): Promise<void> {
   );
 
   const courses = await callAI({
-    purpose: "extract_atoms",
-    schema: extractAtomsSchema,
+    contract: EXTRACT_ATOMS,
     system: "",
     messages: [{ role: "user", content: "Ma liste de courses : lentilles corail, pain, café." }],
   });
@@ -69,8 +65,7 @@ async function main(): Promise<void> {
   );
 
   const variants = await callAI({
-    purpose: "generate_variants",
-    schema: generateVariantsSchema,
+    contract: GENERATE_VARIANTS,
     system: "",
     messages: [{ role: "user", content: "y".repeat(400) }],
   });
@@ -82,8 +77,7 @@ async function main(): Promise<void> {
   );
 
   const ocr = await callAI({
-    purpose: "ocr_extract",
-    schema: ocrExtractSchema,
+    contract: OCR_EXTRACT,
     system: "",
     messages: [{ role: "user", content: "Lis cette capture." }],
   });
@@ -94,8 +88,7 @@ async function main(): Promise<void> {
   );
 
   const floue = await callAI({
-    purpose: "ocr_extract",
-    schema: ocrExtractSchema,
+    contract: OCR_EXTRACT,
     system: "",
     messages: [{ role: "user", content: "capture floue, prise de loin" }],
   });
@@ -107,14 +100,13 @@ async function main(): Promise<void> {
 
   await expectFailure("Une fixture hors schéma est refusée", "AI_INVALID_OUTPUT", async () => {
     const { loadFixture } = await import("@/lib/ai/fixtures");
-    return loadFixture("extract_atoms", ocrExtractSchema, "");
+    return loadFixture({ ...OCR_EXTRACT, purpose: "extract_atoms" }, "");
   });
 
   process.env.AI_ENABLED = "false";
   await expectFailure("AI_ENABLED=false coupe tout appel", "AI_DISABLED", () =>
     callAI({
-      purpose: "extract_atoms",
-      schema: extractAtomsSchema,
+      contract: EXTRACT_ATOMS,
       system: "",
       messages: [{ role: "user", content: "test" }],
     }),
@@ -143,8 +135,7 @@ async function main(): Promise<void> {
   process.env.AI_DAILY_CALL_CAP = String(sature);
   await expectFailure("Le plafond journalier refuse avant d'émettre", "AI_QUOTA", () =>
     callAI({
-      purpose: "extract_atoms",
-      schema: extractAtomsSchema,
+      contract: EXTRACT_ATOMS,
       system: "",
       messages: [{ role: "user", content: "test" }],
     }),

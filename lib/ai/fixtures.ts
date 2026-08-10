@@ -1,6 +1,6 @@
-import type { ZodType } from "zod";
+import { apercuBrut, decrireIssues } from "./diagnostic";
 import { AIFixtureMissingError, AIInvalidOutputError } from "./errors";
-import type { AiPurpose } from "./schemas";
+import type { AiContract, AiPurpose } from "./schemas";
 import extractAtoms from "./fixtures/extract-atoms.json";
 import generateVariants from "./fixtures/generate-variants.json";
 import ocrExtract from "./fixtures/ocr-extract.json";
@@ -50,19 +50,20 @@ function selectCase(file: FixtureFile, input: string): FixtureCase | undefined {
     .at(-1);
 }
 
-export function loadFixture<T>(purpose: AiPurpose, schema: ZodType<T>, input: string): T {
-  const selected = selectCase(FIXTURES[purpose], input);
+export function loadFixture<T>(contract: AiContract<T>, input: string): T {
+  const selected = selectCase(FIXTURES[contract.purpose], input);
 
   if (!selected) {
-    throw new AIFixtureMissingError(purpose);
+    throw new AIFixtureMissingError(contract.purpose);
   }
 
-  const parsed = schema.safeParse(selected.output);
+  const parsed = contract.validation.safeParse(selected.output);
 
   if (!parsed.success) {
     throw new AIInvalidOutputError(
-      purpose,
-      parsed.error.issues.map((issue) => `${issue.path.join(".")} : ${issue.message}`),
+      contract.purpose,
+      decrireIssues(parsed.error, selected.output),
+      apercuBrut(selected.output),
     );
   }
 

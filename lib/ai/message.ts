@@ -26,6 +26,42 @@ export type AiMessage = {
   content: string | AiContentPart[];
 };
 
+/**
+ * Forme attendue par le SDK, décrite ici sans l'importer : `client.ts` reste le
+ * seul fichier qui le connaît, et la compilation vérifie que les deux formes
+ * coïncident au moment de l'envoi.
+ */
+export type SdkMessage = {
+  role: "user" | "assistant";
+  content:
+    | string
+    | (
+        | { type: "text"; text: string }
+        | {
+            type: "image";
+            source: { type: "base64"; media_type: AiImagePart["mediaType"]; data: string };
+          }
+      )[];
+};
+
+export function toSdkMessage(message: AiMessage): SdkMessage {
+  if (typeof message.content === "string") {
+    return { role: message.role, content: message.content };
+  }
+
+  return {
+    role: message.role,
+    content: message.content.map((part) =>
+      part.type === "text"
+        ? { type: "text", text: part.text }
+        : {
+            type: "image",
+            source: { type: "base64", media_type: part.mediaType, data: part.base64 },
+          },
+    ),
+  };
+}
+
 /** Le texte soumis, mis bout à bout. Le mode mock y choisit sa fixture. */
 export function flattenText(messages: AiMessage[]): string {
   return messages
