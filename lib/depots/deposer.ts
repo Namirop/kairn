@@ -18,11 +18,17 @@ import { enqueueJob } from "@/lib/jobs/queue";
 
 export const SIGNES_MAXIMUM = 8000;
 
+const CLE_ILLISIBLE = "Ce dépôt n'a pas pu être identifié. Recharge la page et recommence.";
+
 const depotSchema = z.object({
   texte: z.string().max(SIGNES_MAXIMUM, {
     error: `Ce dépôt dépasse ${SIGNES_MAXIMUM} signes. Coupe-le en deux : deux dépôts valent mieux qu'un tronqué.`,
   }),
-  cleEnvoi: z.string().min(8).max(64),
+  // L'utilisateur ne remplit jamais ce champ : s'il ne tient pas, c'est le
+  // formulaire qui est en défaut, pas ce qu'on a écrit dedans. Le message reste
+  // écrit ici pour les deux bornes — sans lui, c'est la phrase brute de Zod, en
+  // anglais, qui s'affiche sous le bouton.
+  cleEnvoi: z.string().min(8, { error: CLE_ILLISIBLE }).max(64, { error: CLE_ILLISIBLE }),
 });
 
 export type ResultatDepot =

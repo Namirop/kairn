@@ -34,7 +34,9 @@ export default async function PageNouveauDepot() {
       {restants === 0 ? (
         <PlafondAtteint remiseAZero={quandRepartLeCompteur(new Date(), fuseau)} inscrit={inscrit} />
       ) : (
-        <FormulaireDepot restants={restants} />
+        // La clé d'un geste de dépôt, tirée à chaque affichage : elle rend le
+        // double envoi inoffensif sans jamais confondre deux dépôts distincts.
+        <FormulaireDepot restants={restants} cleEnvoi={crypto.randomUUID()} />
       )}
     </div>
   );

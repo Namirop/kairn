@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useId, useRef, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { Paperclip, X } from "lucide-react";
 import { deposerAction, type EtatDepot } from "@/app/(app)/depots/actions";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,10 @@ import { Button } from "@/components/ui/button";
  * qu'on a et ça part. Tout le reste du produit repose sur la vitesse de ce
  * geste-là.
  *
- * La clé d'envoi est tirée au montage : deux clics sur le même formulaire
- * portent la même, et n'écrivent qu'un dépôt.
+ * La clé d'envoi vient du serveur, tirée à l'affichage de la page : deux clics
+ * sur le même formulaire portent la même, et n'écrivent qu'un dépôt. Elle ne
+ * peut pas être tirée ici — `useId()` rend la même valeur à chaque chargement,
+ * puisqu'elle décrit une position dans l'arbre, pas un geste.
  */
 
 const SIGNES_MAXIMUM = 8000;
@@ -21,12 +23,11 @@ const SIGNES_MAXIMUM = 8000;
 /** Au-delà, on montre le compteur : avant, il n'apprend rien à personne. */
 const SEUIL_COMPTEUR = 6000;
 
-export function FormulaireDepot({ restants }: { restants: number }) {
+export function FormulaireDepot({ restants, cleEnvoi }: { restants: number; cleEnvoi: string }) {
   const [etat, action, enCours] = useActionState<EtatDepot, FormData>(deposerAction, {});
   const [texte, setTexte] = useState("");
   const [capture, setCapture] = useState<string | null>(null);
   const fichier = useRef<HTMLInputElement>(null);
-  const cleEnvoi = useId();
   const trop = texte.length > SIGNES_MAXIMUM;
 
   return (
