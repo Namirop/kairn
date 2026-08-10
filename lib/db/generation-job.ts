@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { marquerPretSiPlusRienEnAttente } from "@/lib/db/ingestion";
 import type { GenerationJob, GenerationKind, JobStatus } from "@/lib/db/types";
 
 /**
@@ -54,7 +55,12 @@ export async function finishJob(
   });
 }
 
-/** Jobs que le cron peut relancer, les plus anciens d'abord. */
+/**
+ * Jobs que le cron peut relancer, les plus anciens d'abord.
+ *
+ * Les jobs de questions en sont exclus : ils vivent dans un lot chez le
+ * fournisseur, et les reprendre ici les marquerait terminés sans réponse.
+ */
 export async function findResumableJobs(
   limit: number,
   now: Date = new Date(),
@@ -63,6 +69,7 @@ export async function findResumableJobs(
 
   return prisma.generationJob.findMany({
     where: {
+      kind: { in: ["OCR", "ATOMS"] },
       attempts: { lt: MAX_ATTEMPTS },
       OR: [{ status: "QUEUED" }, { status: "RUNNING", startedAt: { lt: stallCutoff } }],
     },
@@ -78,12 +85,20 @@ export async function findResumableJobs(
 export async function failExhaustedJobs(now: Date = new Date()): Promise<number> {
   const stallCutoff = new Date(now.getTime() - STALL_AFTER_MS);
 
-  const { count } = await prisma.generationJob.updateMany({
+  const bloques = await prisma.generationJob.findMany({
     where: {
+      kind: { in: ["OCR", "ATOMS"] },
       status: "RUNNING",
       startedAt: { lt: stallCutoff },
       attempts: { gte: MAX_ATTEMPTS },
     },
+    select: { id: true, inputId: true },
+  });
+
+  if (bloques.length === 0) return 0;
+
+  await prisma.generationJob.updateMany({
+    where: { id: { in: bloques.map((job) => job.id) } },
     data: {
       status: "FAILED",
       finishedAt: now,
@@ -91,5 +106,11 @@ export async function failExhaustedJobs(now: Date = new Date()): Promise<number>
     },
   });
 
-  return count;
+  // Ces dépôts n'attendent plus rien : sans cette clôture, ils annonceraient un
+  // travail en cours indéfiniment.
+  for (const inputId of new Set(bloques.map((job) => job.inputId))) {
+    await marquerPretSiPlusRienEnAttente(inputId, "Ce dépôt a été interrompu trop de fois.");
+  }
+
+  return bloques.length;
 }
