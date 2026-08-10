@@ -23,7 +23,9 @@ export default async function PageDepots() {
 
   return (
     <div className="gap-pas-8 flex flex-col">
-      <div className="gap-pas-4 flex flex-wrap items-end justify-between">
+      {/* Même largeur que la liste : sans ça, le bouton part se poser tout seul
+          au bord de l'écran, loin de ce sur quoi il agit. */}
+      <div className="gap-pas-4 flex max-w-3xl flex-wrap items-end justify-between">
         <div>
           <h1 className="text-h1-app leading-tight font-bold">Ce que tu as déposé</h1>
           <p className="mt-pas-2 text-petit text-stone-500">
