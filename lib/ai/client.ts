@@ -96,6 +96,9 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
     userId: params.userId ?? null,
     jobId: params.jobId ?? null,
   };
+  // Dérivé avant d'ouvrir le registre : une forme intraduisible est une erreur
+  // de développement, pas un appel raté.
+  const format = toOutputSchema(contract.forme);
   const startedAt = Date.now();
   let response: Anthropic.Message;
 
@@ -116,7 +119,7 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
       messages: params.messages.map(toSdkMessage),
       // La forme est compilée en grammaire et contraint la génération. Un
       // tableau rendu en chaîne n'est plus improbable, il est impossible.
-      output_config: { format: toOutputSchema(contract.forme) },
+      output_config: { format },
     });
   } catch (error) {
     await recordAiCall({

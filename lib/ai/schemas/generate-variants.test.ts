@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { toOutputSchema } from "../output-schema";
 import { CONCEPTS_PAR_APPEL, GENERATE_VARIANTS, generateVariantsForme } from "./generate-variants";
 
@@ -86,6 +87,18 @@ describe("forme de sortie de generate_variants", () => {
     expect(JSON.stringify(outil)).not.toContain("$defs");
     expect(JSON.stringify(chemin(entree, "properties", "boundary", "properties", "mcq"))).toContain(
       "correctIndex",
+    );
+  });
+
+  it("refuse de dériver une forme qui renvoie à une définition partagée", () => {
+    // Zod extrait vers `$defs` dès qu'une forme est réutilisée. Le jour où ça
+    // arrive ici, on veut une erreur, pas une contrainte muée en description.
+    const partagee = z.object({ format: z.enum(["MCQ", "TRUE_FALSE"]) });
+    const reutilisee = z.object({ premier: partagee, second: partagee });
+
+    expect(() => toOutputSchema(reutilisee)).not.toThrow();
+    expect(() => toOutputSchema(z.object({ un: z.intersection(partagee, partagee) }))).toThrow(
+      /allOf|\$ref/,
     );
   });
 

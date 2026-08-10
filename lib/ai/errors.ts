@@ -100,3 +100,24 @@ export class AICallFailedError extends AiError {
 export class AIConfigError extends AiError {
   readonly code = "AI_CONFIG";
 }
+
+/**
+ * Une forme ne se traduit pas en schéma de sortie.
+ *
+ * Levée avant d'émettre, jamais après : perdre en silence un mot-clé qui décide
+ * de ce que le modèle a le droit d'écrire, c'est se retrouver un jour avec une
+ * énumération qui n'en est plus une, sans rien pour l'expliquer.
+ */
+export class AISchemaError extends AiError {
+  readonly code = "AI_SCHEMA";
+
+  constructor(
+    readonly motCle: string,
+    readonly chemin: string,
+  ) {
+    super(
+      `Le schéma de sortie ne sait pas traduire « ${motCle} » (chemin : ${chemin}).` +
+        " Rétrograder une contrainte de structure en description la ferait disparaître.",
+    );
+  }
+}
