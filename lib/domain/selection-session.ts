@@ -25,6 +25,8 @@ export type ConceptDu = {
   tags: string[];
   /** Le dépôt d'origine, qui sert de sujet quand le concept n'a pas de tag. */
   inputId: string;
+  /** Dernier passage sur ce concept, quel qu'en ait été le résultat. */
+  lastReview: Date | null;
 };
 
 /** Vrai si l'échéance tombe au plus tard dans la journée en cours chez l'utilisateur. */
@@ -32,6 +34,27 @@ export function estDu(due: Date, maintenant: Date, fuseau: string): boolean {
   // Deux dates au format AAAA-MM-JJ : l'ordre lexicographique est l'ordre
   // chronologique, sans repasser par un fuseau ni un décalage.
   return localDay(due, fuseau) <= localDay(maintenant, fuseau);
+}
+
+/**
+ * Déjà passé aujourd'hui : il ne revient pas aujourd'hui.
+ *
+ * ts-fsrs replanifie un concept encore en apprentissage à quelques minutes, si
+ * bien que sa prochaine échéance tombe le même jour civil. Sans cette règle la
+ * session le reposerait dans la foulée, et « tu es à jour » ne serait jamais
+ * atteignable — alors que c'est l'état normal du produit, pas un vide.
+ *
+ * La Session est l'unité d'usage quotidien : ce qui a été vu aujourd'hui compte
+ * comme vu, le reste est reporté au lendemain.
+ */
+export function dejaRevuAujourdhui(
+  lastReview: Date | null,
+  maintenant: Date,
+  fuseau: string,
+): boolean {
+  if (!lastReview) return false;
+
+  return localDay(lastReview, fuseau) === localDay(maintenant, fuseau);
 }
 
 /** Ce qui définit un sujet pour l'alternance : le premier tag, sinon le dépôt. */
@@ -97,7 +120,11 @@ export function composerSession<T extends ConceptDu>(
   plafond: number = PLAFOND_SESSION,
 ): T[] {
   const dus = concepts
-    .filter((concept) => estDu(concept.due, maintenant, fuseau))
+    .filter(
+      (concept) =>
+        estDu(concept.due, maintenant, fuseau) &&
+        !dejaRevuAujourdhui(concept.lastReview, maintenant, fuseau),
+    )
     // L'identifiant départage : sans lui, deux échéances égales pourraient
     // sortir dans un ordre différent d'un appel à l'autre.
     .sort((a, b) => a.due.getTime() - b.due.getTime() || a.id.localeCompare(b.id));

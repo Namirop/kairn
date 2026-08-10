@@ -13,19 +13,34 @@ import type { ReviewRating } from "@/lib/db/types";
  * « C'était facile » est le geste en plus dont parle le produit : le cas
  * courant se règle d'un seul bouton.
  */
+/**
+ * L'étalon répète-t-il seulement l'option déjà surlignée ?
+ *
+ * Un vrai ou faux du contenu de démonstration a « Faux » pour toute réponse :
+ * l'afficher sous une option « Faux » en vert n'apprend rien. Une réponse
+ * générée, elle, explique après le verdict, et là elle vaut d'être lue.
+ */
+function repeteLOption(answerKey: string, bonneOption: string): boolean {
+  return answerKey.trim().toLowerCase() === bonneOption.trim().toLowerCase();
+}
+
 export function CorrectionFermee({
   juste,
   answerKey,
+  bonneOption,
   enCours,
   dernier,
   onSuite,
 }: {
   juste: boolean;
   answerKey: string;
+  bonneOption: string;
   enCours: boolean;
   dernier: boolean;
   onSuite: (note: ReviewRating) => void;
 }) {
+  const etalonUtile = !repeteLOption(answerKey, bonneOption);
+
   return (
     <div className="mt-pas-8 pt-pas-6 border-t border-stone-100">
       <p className="text-mono font-mono tracking-[0.12em] uppercase">
@@ -38,7 +53,7 @@ export function CorrectionFermee({
 
       {/* L'étalon n'est montré que s'il apporte autre chose que l'option cochée :
           sur une bonne réponse, le répéter serait du bruit. */}
-      {!juste ? (
+      {!juste && etalonUtile ? (
         <p className="mt-pas-3 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed text-stone-900">
           {answerKey}
         </p>

@@ -22,7 +22,8 @@
     "eval:rejeu": "tsx scripts/evaluer-generation.ts --rejeu",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify:ingestion": "tsx scripts/verifier-ingestion.ts"
+    "verify:ingestion": "tsx scripts/verifier-ingestion.ts",
+    "verify:session": "tsx scripts/verifier-session.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",

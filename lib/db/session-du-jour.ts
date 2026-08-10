@@ -2,6 +2,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db/client";
 import type { VariantFacet, VariantFormat } from "@/lib/db/types";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
 import { jourSuivant, localDay } from "@/lib/domain/local-day";
 import { choisirVariante } from "@/lib/domain/rotation-variantes";
 import { composerSession } from "@/lib/domain/selection-session";
@@ -31,6 +32,9 @@ const PAYLOAD_CHOIX = z.object({
   correctIndex: z.number().int().min(0),
 });
 
+/** Ce qu'un vrai ou faux pose à côté de sa question, quand il pose quelque chose. */
+const PAYLOAD_VRAI_FAUX = z.object({ expected: z.boolean() });
+
 export type QuestionDeSession = {
   atomId: string;
   concept: string;
@@ -54,7 +58,25 @@ export type SessionDuJour = {
   prochaineEcheance: Date | null;
 };
 
-function lireChoix(payload: unknown): { options: string[]; correctIndex: number } | null {
+/**
+ * Les choix à proposer, ou `null` si la question doit repartir en format ouvert.
+ *
+ * Un vrai ou faux ne porte pas d'options en base : ce sont toujours les deux
+ * mêmes, et c'est le domaine qui les reconstruit. Sans ce passage, un vrai ou
+ * faux tombait côté ouvert et demandait à l'utilisateur de se juger sur une
+ * question dont la justesse est pourtant connue.
+ */
+function lireChoix(
+  format: VariantFormat,
+  payload: unknown,
+  answerKey: string,
+): { options: string[]; correctIndex: number } | null {
+  if (format === "TRUE_FALSE") {
+    const attendu = PAYLOAD_VRAI_FAUX.safeParse(payload);
+
+    return choixDUnVraiOuFaux(attendu.success ? attendu.data.expected : null, answerKey);
+  }
+
   const lu = PAYLOAD_CHOIX.safeParse(payload);
 
   if (!lu.success) return null;
@@ -87,6 +109,7 @@ export async function lireSessionDuJour(
         tags: true,
         due: true,
         inputId: true,
+        lastReview: true,
         variants: {
           where: { retiredAt: null },
           select: {
@@ -131,7 +154,7 @@ export async function lireSessionDuJour(
 
     if (!variante) continue;
 
-    const choix = lireChoix(variante.payload);
+    const choix = lireChoix(variante.format, variante.payload, variante.answerKey);
 
     questions.push({
       atomId: atome.id,

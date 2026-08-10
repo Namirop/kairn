@@ -1,13 +1,31 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
-import { alternerLesSujets, composerSession, estDu, type ConceptDu } from "./selection-session";
+import {
+  alternerLesSujets,
+  composerSession,
+  dejaRevuAujourdhui,
+  estDu,
+  type ConceptDu,
+} from "./selection-session";
 
 const PARIS = "Europe/Paris";
 const LOS_ANGELES = "America/Los_Angeles";
 const KATMANDOU = "Asia/Kathmandu";
 
-function concept(id: string, due: string, tags: string[] = [], inputId = "depot"): ConceptDu {
-  return { id, due: new Date(due), tags, inputId };
+function concept(
+  id: string,
+  due: string,
+  tags: string[] = [],
+  inputId = "depot",
+  lastReview: string | null = null,
+): ConceptDu {
+  return {
+    id,
+    due: new Date(due),
+    tags,
+    inputId,
+    lastReview: lastReview ? new Date(lastReview) : null,
+  };
 }
 
 describe("estDu", () => {
@@ -211,5 +229,52 @@ describe("composerSession", () => {
       ),
       { numRuns: 300 },
     );
+  });
+});
+
+describe("dejaRevuAujourdhui", () => {
+  it("est faux pour un concept jamais passé", () => {
+    expect(dejaRevuAujourdhui(null, new Date("2026-01-15T09:00:00Z"), PARIS)).toBe(false);
+  });
+
+  it("est vrai dans la journée civile de l'utilisateur", () => {
+    const passage = new Date("2026-01-15T07:00:00Z");
+
+    expect(dejaRevuAujourdhui(passage, new Date("2026-01-15T21:00:00Z"), PARIS)).toBe(true);
+  });
+
+  it("redevient faux au minuit de l'utilisateur, pas à celui d'UTC", () => {
+    const passage = new Date("2026-01-14T22:00:00Z");
+    // 23 h 30 UTC le 14 : il est déjà 00 h 30 le 15 à Paris, donc un jour civil
+    // plus tard — le concept est de nouveau proposable.
+    const apresMinuitLocal = new Date("2026-01-14T23:30:00Z");
+
+    expect(dejaRevuAujourdhui(passage, apresMinuitLocal, PARIS)).toBe(false);
+    expect(dejaRevuAujourdhui(passage, apresMinuitLocal, "UTC")).toBe(true);
+  });
+});
+
+describe("composerSession et le passage du jour", () => {
+  it("ne repropose pas un concept déjà revu aujourd'hui", () => {
+    // ts-fsrs replanifie un concept en apprentissage à quelques minutes : son
+    // échéance est donc encore aujourd'hui, et il ne doit pas revenir pour autant.
+    const concepts = [
+      concept("revu", "2026-01-15T09:10:00Z", ["a"], "depot", "2026-01-15T09:00:00Z"),
+      concept("pas-revu", "2026-01-15T08:00:00Z", ["b"]),
+    ];
+
+    const session = composerSession(concepts, new Date("2026-01-15T09:30:00Z"), PARIS);
+
+    expect(session.map((c) => c.id)).toEqual(["pas-revu"]);
+  });
+
+  it("le repropose le lendemain", () => {
+    const concepts = [
+      concept("revu-hier", "2026-01-15T09:10:00Z", ["a"], "depot", "2026-01-15T09:00:00Z"),
+    ];
+
+    const session = composerSession(concepts, new Date("2026-01-16T09:30:00Z"), PARIS);
+
+    expect(session.map((c) => c.id)).toEqual(["revu-hier"]);
   });
 });

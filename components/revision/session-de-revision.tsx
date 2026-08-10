@@ -132,6 +132,7 @@ export function SessionDeRevision({ questions }: { questions: QuestionDeSession[
             <CorrectionFermee
               juste={choisi === question.correctIndex}
               answerKey={question.answerKey}
+              bonneOption={question.options[question.correctIndex] ?? ""}
               enCours={enCours}
               dernier={rang + 1 >= questions.length}
               onSuite={(note) => void envoyer(note)}
