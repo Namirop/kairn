@@ -25,19 +25,27 @@ function jourUtc(instant: Date): string {
   return localDay(instant, "UTC");
 }
 
-export async function reserverAppelModele(
+/**
+ * Réserve `places` d'un coup, ou aucune.
+ *
+ * Un envoi groupé consomme autant de places qu'il porte de requêtes : c'est le
+ * même budget, la même journée, seul le tarif change. Le tout ou rien évite un
+ * lot amputé de la moitié de ses requêtes.
+ */
+export async function reserverAppelsModele(
   plafond: number,
+  places: number,
   maintenant: Date = new Date(),
 ): Promise<Reservation> {
   const jour = jourUtc(maintenant);
 
   const lignes = await prisma.$queryRaw<{ reserved: number }[]>`
     INSERT INTO "AiCallQuota" ("day", "reserved", "createdAt", "updatedAt")
-    VALUES (${jour}::date, 1, now(), now())
+    VALUES (${jour}::date, ${places}, now(), now())
     ON CONFLICT ("day") DO UPDATE
-      SET "reserved" = "AiCallQuota"."reserved" + 1,
+      SET "reserved" = "AiCallQuota"."reserved" + ${places},
           "updatedAt" = now()
-      WHERE "AiCallQuota"."reserved" < ${plafond}
+      WHERE "AiCallQuota"."reserved" + ${places} <= ${plafond}
     RETURNING "reserved"
   `;
 
@@ -48,6 +56,13 @@ export async function reserverAppelModele(
   }
 
   return { obtenue: false, utilisees: await lireReservationsDuJour(maintenant) };
+}
+
+export async function reserverAppelModele(
+  plafond: number,
+  maintenant: Date = new Date(),
+): Promise<Reservation> {
+  return reserverAppelsModele(plafond, 1, maintenant);
 }
 
 /** Places déjà prises aujourd'hui. Pour l'observation et les messages d'erreur. */

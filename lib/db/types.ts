@@ -7,6 +7,7 @@
  */
 export {
   AtomState,
+  BatchStatus,
   FsrsState,
   GenerationKind,
   InputSourceType,
@@ -21,6 +22,7 @@ export {
 // Prisma 7 suffixe les types de ligne par `Model`. On les réexporte sous le nom
 // du modèle : c'est le vocabulaire du domaine qui doit apparaître dans le code.
 export type {
+  AiBatchModel as AiBatch,
   AiCallModel as AiCall,
   AtomModel as Atom,
   DailyUsageModel as DailyUsage,
@@ -32,4 +34,5 @@ export type {
   UserSettingsModel as UserSettings,
   UserStatsModel as UserStats,
   VariantModel as Variant,
+  WaitlistEntryModel as WaitlistEntry,
 } from "@/lib/db/generated/models";

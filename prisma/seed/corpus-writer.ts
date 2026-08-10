@@ -93,7 +93,6 @@ async function writeInput(userId: string, input: SeedInput, now: Date): Promise<
       userId,
       rawContent: input.rawContent,
       sourceType: input.sourceType,
-      imageUrl: input.imageUrl ?? null,
       extractedText: input.extractedText ?? null,
       status: "READY",
       createdAt,

@@ -35,7 +35,6 @@ export type SeedAtom = {
 export type SeedInput = {
   rawContent: string;
   sourceType: InputSourceType;
-  imageUrl?: string;
   extractedText?: string;
   createdDaysAgo: number;
   atoms: SeedAtom[];

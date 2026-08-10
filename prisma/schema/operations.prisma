@@ -11,6 +11,13 @@ model GenerationJob {
   attempts  Int            @default(0)
   lastError String?        @db.Text
 
+  /// Les Atoms qu'un job de variantes couvre, trois au plus. Vide ailleurs.
+  atomIds String[]
+
+  /// Le lot qui porte ce job, quand il est parti en soumission groupée.
+  batchId String?
+  batch   AiBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+
   createdAt  DateTime  @default(now())
   startedAt  DateTime?
   finishedAt DateTime?
@@ -20,6 +27,41 @@ model GenerationJob {
   /// Requête du cron de reprise : les jobs à relancer, les plus vieux d'abord.
   @@index([status, createdAt])
   @@index([inputId])
+  @@index([batchId])
+}
+
+/// Une soumission groupée au modèle : plusieurs requêtes, un seul envoi, moitié
+/// tarif contre une latence de quelques minutes à quelques heures.
+///
+/// Les questions ne servent qu'à la première révision, au plus tôt le lendemain.
+/// Elles peuvent attendre ; les concepts, eux, sont le retour visible du dépôt
+/// et restent en appel normal.
+model AiBatch {
+  id String @id @default(cuid())
+
+  /// Identifiant rendu par la plateforme, celui qu'on interroge.
+  providerId String      @unique
+  status     BatchStatus @default(SUBMITTED)
+  /// Nombre de requêtes du lot. Chacune a pris une place au plafond du jour.
+  requests   Int
+
+  createdAt DateTime  @default(now())
+  polledAt  DateTime?
+  endedAt   DateTime?
+
+  jobs GenerationJob[]
+
+  /// Requête du cron de relève : les lots encore ouverts, les plus vieux d'abord.
+  @@index([status, createdAt])
+}
+
+/// Les gens qui veulent plus que le plafond du jour. Une table et un bouton :
+/// un signal de demande gratuit, bien avant d'avoir quoi que ce soit à vendre.
+model WaitlistEntry {
+  userId String   @id
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  motif  String?
+  askedAt DateTime @default(now())
 }
 
 /// Réservation des appels modèle de la journée, en UTC. Une ligne par jour,

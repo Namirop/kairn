@@ -5,7 +5,6 @@ export const CORPUS_REACT: SeedInput[] = [
   {
     sourceType: "IMAGE",
     createdDaysAgo: 47,
-    imageUrl: "/seed/diapo-server-components.png",
     rawContent: "Capture d'une diapositive : « Server Components — ce qui part et ce qui reste ».",
     extractedText: `Server Components — ce qui part et ce qui reste
 · Le code d'un Server Component ne quitte jamais le serveur. Le client reçoit le résultat du rendu, pas le composant.

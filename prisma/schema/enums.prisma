@@ -79,3 +79,10 @@ enum JobStatus {
 enum NotificationType {
   DAILY_REMINDER
 }
+
+/// Cycle de vie d'une soumission groupée.
+enum BatchStatus {
+  SUBMITTED
+  ENDED
+  FAILED
+}

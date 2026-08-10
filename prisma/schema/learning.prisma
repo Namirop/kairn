@@ -8,12 +8,25 @@ model Input {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   /// Ce que l'utilisateur a déposé, mot pour mot. Jamais réécrit après création.
-  rawContent    String          @db.Text
-  sourceType    InputSourceType
-  imageUrl      String?
+  rawContent String          @db.Text
+  sourceType InputSourceType
+
+  /// L'image, le temps de la lire, et rien de plus. Une capture montre souvent
+  /// plus que ce que son auteur croit y montrer — barre latérale, notifications,
+  /// onglets. Ces octets sont effacés dès que `extractedText` est obtenu, et il
+  /// n'existe aucune route pour les servir. Ce que l'utilisateur relira, c'est
+  /// le texte extrait.
+  imageData      Bytes?
+  imageMediaType String?
   /// Texte tiré d'une image par l'OCR. Nul pour un Input textuel.
-  extractedText String?         @db.Text
-  status        InputStatus     @default(PENDING)
+  extractedText  String?  @db.Text
+  /// Ce qu'on dit à l'utilisateur quand le dépôt n'a pas abouti.
+  failureReason  String?
+  status         InputStatus @default(PENDING)
+
+  /// Clé d'un envoi, émise par le formulaire. Deux envois du même geste — double
+  /// clic, reprise réseau — portent la même et ne créent qu'un dépôt.
+  submissionKey String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -21,6 +34,7 @@ model Input {
   atoms Atom[]
   jobs  GenerationJob[]
 
+  @@unique([userId, submissionKey])
   @@index([userId, createdAt])
   @@index([status, createdAt])
 }
