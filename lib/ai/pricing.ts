@@ -19,6 +19,21 @@ const PRICING: Record<string, ModelPricing> = {
 /** Tarif retenu pour un modèle inconnu : le plus cher de la table. */
 const FALLBACK: ModelPricing = { inputPerMillion: 5, outputPerMillion: 25 };
 
+/**
+ * Écrire dans le cache coûte un quart de plus qu'une entrée normale, y lire
+ * coûte un dixième. Ces deux multiplicateurs ne dépendent pas du modèle.
+ */
+const ECRITURE_CACHE = 1.25;
+const LECTURE_CACHE = 0.1;
+
+/** Ce qu'un appel a consommé. Les tokens de cache sont comptés à part. */
+export type Consommation = {
+  inputTokens: number;
+  outputTokens: number;
+  cacheCreationTokens?: number;
+  cacheReadTokens?: number;
+};
+
 export function pricingFor(model: string): ModelPricing {
   return PRICING[model] ?? FALLBACK;
 }
@@ -26,10 +41,17 @@ export function pricingFor(model: string): ModelPricing {
 /**
  * Coût d'un appel, rendu en chaîne décimale à huit décimales : la colonne
  * `AiCall.costUsd` est un Decimal, on n'y fait pas passer un flottant.
+ *
+ * `inputTokens` ne compte que l'entrée non mise en cache — l'API sépare les
+ * trois. Les additionner au même tarif ferait mentir le chiffre.
  */
-export function computeCostUsd(model: string, inputTokens: number, outputTokens: number): string {
+export function computeCostUsd(model: string, consommation: Consommation): string {
   const { inputPerMillion, outputPerMillion } = pricingFor(model);
-  const dollars = (inputTokens * inputPerMillion + outputTokens * outputPerMillion) / 1_000_000;
+  const entree =
+    consommation.inputTokens +
+    (consommation.cacheCreationTokens ?? 0) * ECRITURE_CACHE +
+    (consommation.cacheReadTokens ?? 0) * LECTURE_CACHE;
+  const dollars = (entree * inputPerMillion + consommation.outputTokens * outputPerMillion) / 1e6;
 
   return dollars.toFixed(8);
 }

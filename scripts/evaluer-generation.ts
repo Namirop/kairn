@@ -41,7 +41,7 @@ async function main(): Promise<void> {
   const { lireCorpus } = await import("./evaluation/corpus");
   const { evaluerDepot } = await import("./evaluation/execution");
   const { accorder, rendreRapport, resumeConsole } = await import("./evaluation/rapport");
-  const { sumAiCallsSince } = await import("@/lib/db/ai-call");
+  const { sumAiCalls } = await import("@/lib/db/ai-call");
   const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
 
   const corpus = lireCorpus();
@@ -69,27 +69,31 @@ async function main(): Promise<void> {
   }
 
   const debut = new Date();
-  const evaluations = [];
+  const passages = [];
 
+  // Le coût se relève dépôt par dépôt : un total ne dit pas lequel a coûté dix
+  // appels à lui seul.
   for (const depot of corpus) {
     console.info(`… ${depot.nom}`);
-    evaluations.push(await evaluerDepot(depot));
+    const ouverture = new Date();
+    const evaluation = await evaluerDepot(depot);
+    passages.push({ evaluation, consommation: await sumAiCalls(ouverture) });
   }
 
-  const { calls, costUsd } = await sumAiCallsSince(debut);
-  const rapport = rendreRapport(evaluations, {
+  const total = await sumAiCalls(debut);
+  const rapport = rendreRapport(passages, {
     modele: process.env.AI_MODEL ?? "inconnu",
-    appels: calls,
-    coutUsd: costUsd,
     emisA: debut,
+    total,
   });
 
   mkdirSync(RAPPORTS, { recursive: true });
   const chemin = join(RAPPORTS, nomDuRapport(debut));
   writeFileSync(chemin, rapport, "utf8");
 
-  console.info(`\n${resumeConsole(evaluations).join("\n")}`);
-  console.info(`\n${calls} appels, ${costUsd} $. Rapport écrit dans ${chemin}`);
+  console.info(`\n${resumeConsole(passages).join("\n")}`);
+  console.info(`\n${total.calls} appels, ${Number(total.costUsd).toFixed(4)} $.`);
+  console.info(`Rapport écrit dans ${chemin}`);
 }
 
 main()

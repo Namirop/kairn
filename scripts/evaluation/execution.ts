@@ -1,10 +1,11 @@
 import { callAI } from "@/lib/ai/client";
+import { AIInvalidOutputError } from "@/lib/ai/errors";
 import type { AiMessage } from "@/lib/ai/message";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import {
-  extractAtomsSchema,
-  generateVariantsSchema,
-  ocrExtractSchema,
+  EXTRACT_ATOMS,
+  GENERATE_VARIANTS,
+  OCR_EXTRACT,
   type ExtractAtomsOutput,
   type GenerateVariantsOutput,
 } from "@/lib/ai/schemas";
@@ -20,15 +21,19 @@ import type { Depot } from "./corpus";
  * en concepts, puis quatre questions par concept.
  *
  * Un échec n'interrompt pas le passage — il est rangé avec le dépôt qui l'a
- * produit. Un banc qui s'arrête au premier raté ne dit rien du reste du corpus.
+ * produit, accompagné de la sortie brute du modèle. Un banc qui s'arrête au
+ * premier raté ne dit rien du reste du corpus ; un banc qui jette la sortie
+ * fautive oblige à redépenser pour comprendre.
  */
+
+export type Echec = { motif: string; brut?: string };
 
 export type ConceptEvalue = {
   concept: ExtractAtomsOutput["atoms"][number];
   manquements: Manquement[];
   variants: GenerateVariantsOutput["variants"];
   manquementsVariants: Manquement[];
-  erreur?: string;
+  echec?: Echec;
 };
 
 export type DepotEvalue = {
@@ -37,15 +42,19 @@ export type DepotEvalue = {
   lecture?: { langue: string | null; exploitable: boolean };
   rejet: string | null;
   concepts: ConceptEvalue[];
-  erreur?: string;
+  echec?: Echec;
 };
 
 function messageTexte(texte: string): AiMessage[] {
   return [{ role: "user", content: texte }];
 }
 
-function motif(erreur: unknown): string {
-  return erreur instanceof Error ? erreur.message : String(erreur);
+function decrire(erreur: unknown): Echec {
+  if (erreur instanceof AIInvalidOutputError) {
+    return { motif: erreur.message, brut: erreur.raw };
+  }
+
+  return { motif: erreur instanceof Error ? erreur.message : String(erreur) };
 }
 
 async function lireImage(
@@ -54,8 +63,7 @@ async function lireImage(
   if (!depot.image) return { texte: depot.texte, lecture: undefined };
 
   const lu = await callAI({
-    purpose: "ocr_extract",
-    schema: ocrExtractSchema,
+    contract: OCR_EXTRACT,
     system: SYSTEM_PROMPTS.ocr_extract,
     messages: [
       {
@@ -75,15 +83,14 @@ async function evaluerConcept(
 
   try {
     const { variants } = await callAI({
-      purpose: "generate_variants",
-      schema: generateVariantsSchema,
+      contract: GENERATE_VARIANTS,
       system: SYSTEM_PROMPTS.generate_variants,
       messages: messageTexte(concept.concept),
     });
 
     return { ...base, variants, manquementsVariants: controlerVariants(variants) };
   } catch (erreur) {
-    return { ...base, variants: [], manquementsVariants: [], erreur: motif(erreur) };
+    return { ...base, variants: [], manquementsVariants: [], echec: decrire(erreur) };
   }
 }
 
@@ -93,8 +100,7 @@ export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
   try {
     const { texte, lecture } = await lireImage(depot);
     const extraction = await callAI({
-      purpose: "extract_atoms",
-      schema: extractAtomsSchema,
+      contract: EXTRACT_ATOMS,
       system: SYSTEM_PROMPTS.extract_atoms,
       messages: messageTexte(texte),
     });
@@ -106,6 +112,6 @@ export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
 
     return { ...vide, texte, lecture, rejet: extraction.rejected, concepts };
   } catch (erreur) {
-    return { ...vide, erreur: motif(erreur) };
+    return { ...vide, echec: decrire(erreur) };
   }
 }

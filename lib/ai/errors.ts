@@ -33,13 +33,18 @@ export class AIQuotaError extends AiError {
   }
 }
 
-/** La sortie du modèle ne respecte pas le schéma. Elle n'est pas réparée. */
+/**
+ * La sortie du modèle ne respecte pas le schéma. Elle n'est pas réparée — mais
+ * elle est conservée telle quelle dans `raw` : sans elle, on diagnostique une
+ * anomalie de génération à l'aveugle.
+ */
 export class AIInvalidOutputError extends AiError {
   readonly code = "AI_INVALID_OUTPUT";
 
   constructor(
     readonly purpose: string,
     readonly issues: string[],
+    readonly raw: string = "",
   ) {
     super(`Sortie invalide pour « ${purpose} » : ${issues.join(" ; ")}`);
   }

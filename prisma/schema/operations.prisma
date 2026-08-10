@@ -53,11 +53,16 @@ model AiCall {
   jobId  String?
   job    GenerationJob? @relation(fields: [jobId], references: [id], onDelete: SetNull)
 
-  purpose      String
-  model        String
-  inputTokens  Int
-  outputTokens Int
-  costUsd      Decimal @db.Decimal(12, 8)
+  purpose String
+  model   String
+  /// Entrée facturée plein tarif : ce que le cache n'a pas couvert.
+  inputTokens         Int
+  /// Entrée écrite dans le cache, facturée un quart plus cher.
+  cacheCreationTokens Int     @default(0)
+  /// Entrée lue depuis le cache, facturée un dixième.
+  cacheReadTokens     Int     @default(0)
+  outputTokens        Int
+  costUsd             Decimal @db.Decimal(12, 8)
   latencyMs    Int
   success      Boolean
   errorCode    String?

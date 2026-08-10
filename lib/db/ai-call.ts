@@ -10,6 +10,8 @@ export type AiCallRecord = {
   model: string;
   inputTokens: number;
   outputTokens: number;
+  cacheCreationTokens?: number;
+  cacheReadTokens?: number;
   /** Chaîne décimale, voir lib/ai/pricing.ts. */
   costUsd: string;
   latencyMs: number;
@@ -17,6 +19,16 @@ export type AiCallRecord = {
   errorCode?: string | null;
   userId?: string | null;
   jobId?: string | null;
+};
+
+/** Ce qu'une fenêtre de temps a consommé. */
+export type ConsommationFenetre = {
+  calls: number;
+  inputTokens: number;
+  cacheCreationTokens: number;
+  cacheReadTokens: number;
+  outputTokens: number;
+  costUsd: string;
 };
 
 function startOfUtcDay(instant: Date): Date {
@@ -35,18 +47,30 @@ export async function countAiCallsToday(now: Date = new Date()): Promise<number>
 }
 
 /**
- * Ce qu'a coûté une fenêtre de temps, appels et dollars. Le banc d'évaluation
- * s'en sert pour chiffrer son propre passage : la dépense se lit au registre,
- * elle ne s'estime pas.
+ * Appels, tokens et dollars d'une fenêtre. Le banc d'évaluation s'en sert pour
+ * chiffrer un dépôt : la dépense se lit au registre, elle ne s'estime pas.
  */
-export async function sumAiCallsSince(instant: Date): Promise<{ calls: number; costUsd: string }> {
+export async function sumAiCalls(from: Date, to?: Date): Promise<ConsommationFenetre> {
   const { _count, _sum } = await prisma.aiCall.aggregate({
-    where: { createdAt: { gte: instant } },
+    where: { createdAt: { gte: from, ...(to ? { lte: to } : {}) } },
     _count: { _all: true },
-    _sum: { costUsd: true },
+    _sum: {
+      inputTokens: true,
+      cacheCreationTokens: true,
+      cacheReadTokens: true,
+      outputTokens: true,
+      costUsd: true,
+    },
   });
 
-  return { calls: _count._all, costUsd: (_sum.costUsd ?? 0).toString() };
+  return {
+    calls: _count._all,
+    inputTokens: _sum.inputTokens ?? 0,
+    cacheCreationTokens: _sum.cacheCreationTokens ?? 0,
+    cacheReadTokens: _sum.cacheReadTokens ?? 0,
+    outputTokens: _sum.outputTokens ?? 0,
+    costUsd: (_sum.costUsd ?? 0).toString(),
+  };
 }
 
 export async function recordAiCall(record: AiCallRecord): Promise<void> {
@@ -55,6 +79,8 @@ export async function recordAiCall(record: AiCallRecord): Promise<void> {
       purpose: record.purpose,
       model: record.model,
       inputTokens: record.inputTokens,
+      cacheCreationTokens: record.cacheCreationTokens ?? 0,
+      cacheReadTokens: record.cacheReadTokens ?? 0,
       outputTokens: record.outputTokens,
       costUsd: record.costUsd,
       latencyMs: record.latencyMs,
