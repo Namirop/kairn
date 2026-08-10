@@ -3,18 +3,20 @@ import { VariantFormat } from "@/lib/db/types";
 import type { AiContract } from "./contract";
 
 /**
- * Quatre clés nommées, pas un tableau.
+ * Quatre clés nommées par concept, et plusieurs concepts par appel.
  *
- * Le premier passage du banc a rendu seize sorties où `variants` arrivait en
- * chaîne : le modèle sérialisait le tableau au lieu de l'émettre. Un tableau
- * qui n'existe pas ne se sérialise pas. La facette devient le nom de la clé,
- * ce qui retire du même coup l'énumération des facettes, le contrôle de leur
- * unicité et celui de la cardinalité — la structure les impose.
+ * La facette est le nom de la clé : elle ne peut être ni répétée, ni omise, ni
+ * inventée, et l'énumération des facettes disparaît du schéma. Le tableau, lui,
+ * ne porte plus que le groupement — un concept par entrée, désigné par son
+ * rang, celui de l'envoi.
  *
- * Les prompts ne changent pas : ils décrivent déjà quatre facettes, dans cet
- * ordre. La validation rend un tableau ordonné, forme sous laquelle le reste
- * du projet lit une génération.
+ * La validation rend un lot par concept, questions à plat dans l'ordre des
+ * facettes : c'est la forme sous laquelle le reste du projet lit une
+ * génération.
  */
+
+/** Concepts traités en un appel. Au-delà, la sortie frôlerait `max_tokens`. */
+export const CONCEPTS_PAR_APPEL = 3;
 
 /** Ce qu'un MCQ ajoute. Une clé facultative plutôt que deux champs à annuler. */
 function mcq() {
@@ -42,11 +44,25 @@ function question(facette: string) {
     .describe(facette);
 }
 
-export const generateVariantsForme = z.object({
+const lot = z.object({
+  rang: z
+    .number()
+    .int()
+    .min(1)
+    .max(CONCEPTS_PAR_APPEL)
+    .describe("Le numéro du concept traité, tel qu'il est donné dans l'envoi."),
   recognition: question("De quoi s'agit-il, comment le nommerait-on, à quoi le reconnaît-on."),
   mechanism: question("Pourquoi ça marche, ce qui se passe réellement, dans quel ordre."),
   boundary: question("Ce que ce n'est pas, quand ça ne s'applique pas, la confusion classique."),
   application: question("S'en servir dans une situation concrète qui n'est pas celle du concept."),
+});
+
+export const generateVariantsForme = z.object({
+  lots: z
+    .array(lot)
+    .min(1)
+    .max(CONCEPTS_PAR_APPEL)
+    .describe("Un lot de quatre questions par concept reçu, un rang par concept."),
 });
 
 /** L'ordre servi, et la facette que porte chaque clé. */
@@ -59,27 +75,41 @@ const FACETTES = [
 
 const generateVariantsValidation = generateVariantsForme
   .superRefine((sortie, ctx) => {
-    for (const [cle] of FACETTES) {
-      const posee = sortie[cle];
-      const porteUnMcq = (posee.mcq ?? null) !== null;
+    const rangs = sortie.lots.map((entree) => entree.rang);
 
-      if ((posee.format === "MCQ") !== porteUnMcq) {
-        ctx.addIssue({
-          code: "custom",
-          message: "mcq est renseigné si et seulement si le format est MCQ",
-          path: [cle, "mcq"],
-        });
+    if (new Set(rangs).size !== rangs.length) {
+      ctx.addIssue({
+        code: "custom",
+        message: `deux lots portent le même rang : ${rangs.join(", ")}`,
+        path: ["lots"],
+      });
+    }
+
+    for (const [index, entree] of sortie.lots.entries()) {
+      for (const [cle] of FACETTES) {
+        const posee = entree[cle];
+
+        if ((posee.format === "MCQ") !== ((posee.mcq ?? null) !== null)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "mcq est renseigné si et seulement si le format est MCQ",
+            path: ["lots", index, cle, "mcq"],
+          });
+        }
       }
     }
   })
   .transform((sortie) => ({
-    variants: FACETTES.map(([cle, facet]) => ({
-      format: sortie[cle].format,
-      facet,
-      question: sortie[cle].question,
-      answerKey: sortie[cle].answerKey,
-      options: sortie[cle].mcq?.options ?? null,
-      correctIndex: sortie[cle].mcq?.correctIndex ?? null,
+    lots: sortie.lots.map((entree) => ({
+      rang: entree.rang,
+      variants: FACETTES.map(([cle, facet]) => ({
+        format: entree[cle].format,
+        facet,
+        question: entree[cle].question,
+        answerKey: entree[cle].answerKey,
+        options: entree[cle].mcq?.options ?? null,
+        correctIndex: entree[cle].mcq?.correctIndex ?? null,
+      })),
     })),
   }));
 

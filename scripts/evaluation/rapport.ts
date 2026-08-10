@@ -1,19 +1,15 @@
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import type { ConsommationFenetre } from "@/lib/db/ai-call";
-import type { DepotEvalue } from "./execution";
+import { compter, rendreRepartition, type Passage } from "./rapport-chiffres";
 import { rendreConcept, rendreEchec } from "./rapport-concept";
 
 /**
  * Le rapport. Les contrôles automatiques disent où regarder ; le reste — est-ce
  * que la question est bonne — se juge à l'œil, donc le rapport est fait pour
  * être lu en entier.
- *
- * La ligne de tête compte séparément ce qui a abouti et ce qui a échoué : un
- * banc qui annonce « un manquement » quand les quatre cinquièmes de la sortie
- * manquent rassure à tort.
  */
 
-export type Passage = { evaluation: DepotEvalue; consommation: ConsommationFenetre };
+export type { Passage } from "./rapport-chiffres";
 
 const EXTRAIT_MAX = 220;
 
@@ -36,6 +32,8 @@ function extrait(texte: string): string {
 }
 
 function rendreConsommation(consommation: ConsommationFenetre): string {
+  const entree =
+    consommation.inputTokens + consommation.cacheReadTokens + consommation.cacheCreationTokens;
   const cache =
     consommation.cacheReadTokens > 0
       ? ` (dont ${nombre(consommation.cacheReadTokens)} lus en cache)`
@@ -43,7 +41,7 @@ function rendreConsommation(consommation: ConsommationFenetre): string {
 
   return [
     accorder(consommation.calls, "appel"),
-    `${nombre(consommation.inputTokens + consommation.cacheReadTokens + consommation.cacheCreationTokens)} tokens d'entrée${cache}`,
+    `${nombre(entree)} tokens d'entrée${cache}`,
     `${nombre(consommation.outputTokens)} en sortie`,
     dollars(consommation.costUsd),
   ].join(" · ");
@@ -67,8 +65,10 @@ function rendreDepot({ evaluation, consommation }: Passage): string[] {
     );
   }
 
-  if (evaluation.echec)
+  if (evaluation.echec) {
     return [...lignes, ...rendreEchec("Extraction en échec :", evaluation.echec)];
+  }
+
   if (evaluation.rejet) {
     return [...lignes, `Aucun concept. Motif rendu : « ${evaluation.rejet} »`, ""];
   }
@@ -81,29 +81,25 @@ function rendreDepot({ evaluation, consommation }: Passage): string[] {
   ];
 }
 
-/** Les quatre nombres de la ligne de tête, comptés séparément. */
-export function compter(passages: Passage[]) {
-  const concepts = passages.flatMap((passage) => passage.evaluation.concepts);
-  const aboutis = concepts.filter((concept) => !concept.echec);
-
-  return {
-    concepts: concepts.length,
-    aboutis: aboutis.length,
-    echecs: concepts.length - aboutis.length + passages.filter((p) => p.evaluation.echec).length,
-    manquements: aboutis.reduce(
-      (total, concept) => total + concept.manquements.length + concept.manquementsVariants.length,
-      0,
-    ),
-  };
-}
-
-function coutParDepot(passages: Passage[]): string {
+function coutParConcept(passages: Passage[], total: ConsommationFenetre): string {
+  const { aboutis } = compter(passages);
+  const parConcept = aboutis === 0 ? 0 : Number(total.costUsd) / aboutis;
   const couts = passages.map((passage) => Number(passage.consommation.costUsd));
-  const moyenne = couts.reduce((total, cout) => total + cout, 0) / (couts.length || 1);
+  const moyenne = couts.reduce((cumul, cout) => cumul + cout, 0) / (couts.length || 1);
   const pire = Math.max(...couts, 0);
   const coupable = passages.find((passage) => Number(passage.consommation.costUsd) === pire);
 
-  return `Par dépôt : ${moyenne.toFixed(4)} $ en moyenne, ${pire.toFixed(4)} $ au pire (${coupable?.evaluation.nom ?? "—"})`;
+  return [
+    `Par concept abouti : ${parConcept.toFixed(4)} $`,
+    `par dépôt : ${moyenne.toFixed(4)} $ en moyenne, ${pire.toFixed(4)} $ au pire (${coupable?.evaluation.nom ?? "—"})`,
+  ].join(" · ");
+}
+
+function appelsParDepot(passages: Passage[]): string {
+  const appels = passages.map((passage) => passage.consommation.calls);
+  const total = appels.reduce((cumul, valeur) => cumul + valeur, 0);
+
+  return `Appels par dépôt : ${appels.join(", ")} — ${accorder(total, "appel")} en tout`;
 }
 
 function longueursDesPrompts(): string {
@@ -115,19 +111,29 @@ export function rendreRapport(
   entete: { modele: string; emisA: Date; total: ConsommationFenetre; source: string },
 ): string {
   const horodatage = entete.emisA.toISOString().slice(0, 16).replace("T", " ");
-  const { concepts, aboutis, echecs, manquements } = compter(passages);
+  const { concepts, aboutis, misDeCote, generations, extractions, manquements } = compter(passages);
 
   return [
     `# Banc de génération — ${horodatage} UTC`,
     "",
     `\`${entete.modele}\` · ${entete.source} · ${accorder(passages.length, "dépôt")} · ${rendreConsommation(entete.total)}`,
     "",
-    `${accorder(concepts, "concept extrait", "concepts extraits")} · ${accorder(aboutis, "lot abouti", "lots aboutis")} · ${accorder(echecs, "génération en échec", "générations en échec")} · ${accorder(manquements, "manquement")}`,
+    [
+      accorder(concepts, "concept extrait", "concepts extraits"),
+      accorder(aboutis, "lot abouti", "lots aboutis"),
+      `${misDeCote} mis de côté`,
+      accorder(generations, "génération en échec", "générations en échec"),
+      accorder(extractions, "extraction en échec", "extractions en échec"),
+      accorder(manquements, "manquement"),
+    ].join(" · "),
     "",
-    coutParDepot(passages),
+    coutParConcept(passages, entete.total),
+    "",
+    appelsParDepot(passages),
     "",
     longueursDesPrompts(),
     "",
+    ...rendreRepartition(passages),
     ...passages.flatMap((passage) => [...rendreDepot(passage), "---", ""]),
   ].join("\n");
 }
@@ -140,15 +146,12 @@ export function resumeConsole(passages: Passage[]): string[] {
     if (evaluation.echec) return `échec   ${evaluation.nom} — ${evaluation.echec.motif}`;
     if (evaluation.rejet) return `rejet   ${evaluation.nom} — aucun concept, motif rendu · ${cout}`;
 
-    const manquements = evaluation.concepts.reduce(
-      (total, concept) =>
-        total +
-        (concept.echec ? 0 : concept.manquements.length + concept.manquementsVariants.length),
-      0,
-    );
-    const echecs = evaluation.concepts.filter((concept) => concept.echec).length;
-    const etat = manquements === 0 && echecs === 0 ? "ok     " : "à voir ";
+    const { aboutis, misDeCote, generations, manquements } = compter([
+      { evaluation, consommation },
+    ]);
+    const etat = manquements === 0 && generations === 0 ? "ok     " : "à voir ";
+    const cotes = misDeCote > 0 ? `, ${misDeCote} mis de côté` : "";
 
-    return `${etat} ${evaluation.nom} — ${accorder(evaluation.concepts.length, "concept")}, ${echecs} en échec, ${accorder(manquements, "manquement")} · ${cout}`;
+    return `${etat} ${evaluation.nom} — ${accorder(aboutis, "lot")}${cotes}, ${generations} en échec, ${accorder(manquements, "manquement")} · ${cout}`;
   });
 }

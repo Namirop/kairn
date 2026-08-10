@@ -7,6 +7,7 @@
 export { AI_PURPOSES, type AiContract, type AiPurpose } from "./contract";
 export { EXTRACT_ATOMS, extractAtomsForme, type ExtractAtomsOutput } from "./extract-atoms";
 export {
+  CONCEPTS_PAR_APPEL,
   GENERATE_VARIANTS,
   generateVariantsForme,
   type GenerateVariantsOutput,

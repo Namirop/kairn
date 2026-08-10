@@ -64,16 +64,17 @@ async function main(): Promise<void> {
     courses.rejected ?? "aucun motif",
   );
 
-  const variants = await callAI({
+  const { lots } = await callAI({
     contract: GENERATE_VARIANTS,
     system: "",
     messages: [{ role: "user", content: "y".repeat(400) }],
   });
-  const facets = new Set(variants.variants.map((variant) => variant.facet));
+  const premier = lots[0]?.variants ?? [];
+  const facets = new Set(premier.map((variant) => variant.facet));
   record(
-    "Mock — quatre Variants sur quatre facettes distinctes",
-    variants.variants.length === 4 && facets.size === 4,
-    `${variants.variants.length} Variants, ${facets.size} facettes`,
+    "Mock — un lot par concept, quatre facettes distinctes chacun",
+    lots.length === 3 && premier.length === 4 && facets.size === 4,
+    `${lots.length} lots, ${premier.length} Variants, ${facets.size} facettes`,
   );
 
   const ocr = await callAI({

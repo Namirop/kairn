@@ -3,6 +3,7 @@ import { AIInvalidOutputError } from "@/lib/ai/errors";
 import type { AiMessage } from "@/lib/ai/message";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import {
+  CONCEPTS_PAR_APPEL,
   EXTRACT_ATOMS,
   GENERATE_VARIANTS,
   OCR_EXTRACT,
@@ -19,22 +20,28 @@ import type { DepotFige } from "./fige";
 
 /**
  * Un passage du banc sur un dépôt : lecture d'image si c'en est une, découpage
- * en concepts, puis quatre questions par concept.
+ * en concepts, puis quatre questions par concept — trois concepts par appel.
  *
- * Un échec n'interrompt pas le passage — il est rangé avec le dépôt qui l'a
- * produit, accompagné de la sortie brute du modèle. Un banc qui s'arrête au
- * premier raté ne dit rien du reste du corpus ; un banc qui jette la sortie
- * fautive oblige à redépenser pour comprendre.
+ * Un échec n'interrompt pas le passage : il est rangé avec le dépôt qui l'a
+ * produit, accompagné de la sortie brute du modèle, et le groupe qui l'entoure
+ * n'est pas perdu pour autant.
+ *
+ * Un concept marqué douteux ne part pas en génération. Il attend une décision
+ * de l'utilisateur : lui écrire quatre questions, ce serait river une erreur.
  */
+
+type Concept = ExtractAtomsOutput["atoms"][number];
 
 export type Echec = { motif: string; brut?: string };
 
 export type ConceptEvalue = {
-  concept: ExtractAtomsOutput["atoms"][number];
+  concept: Concept;
   manquements: Manquement[];
-  variants: GenerateVariantsOutput["variants"];
+  variants: GenerateVariantsOutput["lots"][number]["variants"];
   manquementsVariants: Manquement[];
   echec?: Echec;
+  /** Douteux : aucune question n'a été demandée pour ce concept. */
+  misDeCote?: boolean;
 };
 
 export type DepotEvalue = {
@@ -45,10 +52,6 @@ export type DepotEvalue = {
   concepts: ConceptEvalue[];
   echec?: Echec;
 };
-
-function messageTexte(texte: string): AiMessage[] {
-  return [{ role: "user", content: texte }];
-}
 
 function decrire(erreur: unknown): Echec {
   if (erreur instanceof AIInvalidOutputError) {
@@ -77,32 +80,81 @@ async function lireImage(
   return { texte: lu.extractedText, lecture: { langue: lu.language, exploitable: lu.usable } };
 }
 
-async function evaluerConcept(
-  concept: ExtractAtomsOutput["atoms"][number],
-): Promise<ConceptEvalue> {
-  const base = { concept, manquements: controlerConcept(concept.concept) };
+/** Les concepts d'un envoi, numérotés : c'est ce rang que la sortie référence. */
+function messageDuGroupe(groupe: Concept[]): AiMessage[] {
+  const contenu = groupe
+    .map((concept, index) => `Concept ${index + 1}.\n${concept.concept}`)
+    .join("\n\n");
+
+  return [{ role: "user", content: contenu }];
+}
+
+function grouper(concepts: Concept[]): Concept[][] {
+  const groupes: Concept[][] = [];
+
+  for (let debut = 0; debut < concepts.length; debut += CONCEPTS_PAR_APPEL) {
+    groupes.push(concepts.slice(debut, debut + CONCEPTS_PAR_APPEL));
+  }
+
+  return groupes;
+}
+
+async function genererPourGroupe(groupe: Concept[]): Promise<ConceptEvalue[]> {
+  const base = groupe.map((concept) => ({
+    concept,
+    manquements: controlerConcept(concept.concept),
+  }));
 
   try {
-    const { variants } = await callAI({
+    const { lots } = await callAI({
       contract: GENERATE_VARIANTS,
       system: SYSTEM_PROMPTS.generate_variants,
-      messages: messageTexte(concept.concept),
+      messages: messageDuGroupe(groupe),
     });
 
-    return { ...base, variants, manquementsVariants: controlerVariants(variants) };
+    return base.map((entree, index) => {
+      const lot = lots.find((candidat) => candidat.rang === index + 1);
+
+      if (!lot) {
+        return {
+          ...entree,
+          variants: [],
+          manquementsVariants: [],
+          echec: { motif: `aucun lot rendu pour le concept ${index + 1} de l'envoi` },
+        };
+      }
+
+      return {
+        ...entree,
+        variants: lot.variants,
+        manquementsVariants: controlerVariants(lot.variants),
+      };
+    });
   } catch (erreur) {
-    return { ...base, variants: [], manquementsVariants: [], echec: decrire(erreur) };
+    const echec = decrire(erreur);
+
+    return base.map((entree) => ({ ...entree, variants: [], manquementsVariants: [], echec }));
   }
 }
 
-async function evaluerConcepts(concepts: ExtractAtomsOutput["atoms"]): Promise<ConceptEvalue[]> {
+async function evaluerConcepts(concepts: Concept[]): Promise<ConceptEvalue[]> {
+  const douteux = concepts
+    .filter((concept) => concept.uncertain)
+    .map((concept) => ({
+      concept,
+      manquements: controlerConcept(concept.concept),
+      variants: [],
+      manquementsVariants: [],
+      misDeCote: true,
+    }));
+
   const evalues: ConceptEvalue[] = [];
 
-  for (const concept of concepts) {
-    evalues.push(await evaluerConcept(concept));
+  for (const groupe of grouper(concepts.filter((concept) => !concept.uncertain))) {
+    evalues.push(...(await genererPourGroupe(groupe)));
   }
 
-  return evalues;
+  return [...evalues, ...douteux];
 }
 
 /** Un dépôt du corpus : lecture éventuelle, extraction, puis questions. */
@@ -114,7 +166,7 @@ export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
     const extraction = await callAI({
       contract: EXTRACT_ATOMS,
       system: SYSTEM_PROMPTS.extract_atoms,
-      messages: messageTexte(texte),
+      messages: [{ role: "user", content: texte }],
     });
 
     return {

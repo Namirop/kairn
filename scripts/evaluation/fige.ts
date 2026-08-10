@@ -65,7 +65,15 @@ export function ecrireFige(evaluations: DepotEvalue[], modele: string, emisA: Da
 }
 
 export function lireFige(chemin: string): CorpusFige {
-  return figeSchema.parse(JSON.parse(readFileSync(chemin, "utf8")));
+  const fige = figeSchema.parse(JSON.parse(readFileSync(chemin, "utf8")));
+
+  // Un figé écrit en mock ne mesure rien : le rejeu comparerait des questions
+  // réelles à des concepts de fixture.
+  if (fige.modele === "mock") {
+    throw new Error(`${chemin} a été écrit en mode mock : il ne sert pas de référence.`);
+  }
+
+  return fige;
 }
 
 /** Le figé le plus récent, quand on ne dit pas lequel rejouer. */

@@ -72,26 +72,41 @@ async function main(): Promise<void> {
     entrees.filter((entree) => !fragment || entree.nom.includes(fragment));
 
   const corpus = garder(lireCorpus());
-  const figes = figeDemande === undefined ? [] : garder(lireFige(figeDemande).depots);
+  const fige = figeDemande === undefined ? undefined : lireFige(figeDemande);
+  const figes = garder(fige?.depots ?? []);
   const aTraiter = rejeu ? figes.length : corpus.length;
 
   if (aTraiter === 0) {
     refuser(fragment ? `aucun dépôt ne contient « ${fragment} ».` : "il n'y a rien à traiter.");
   }
 
-  const concepts = figes.reduce((total, depot) => total + depot.concepts.length, 0);
+  const { CONCEPTS_PAR_APPEL } = await import("@/lib/ai/schemas");
+  const appelsPour = (concepts: number) => Math.ceil(concepts / CONCEPTS_PAR_APPEL);
+
+  // Un concept douteux ne part pas en génération : il ne compte pas au plan.
+  const aGenerer = figes.map(
+    (depot) => depot.concepts.filter((concept) => !concept.uncertain).length,
+  );
+  const generations = aGenerer.reduce((total, concepts) => total + appelsPour(concepts), 0);
   const images = corpus.filter((depot) => depot.image).length;
-  const plancher = rejeu ? concepts : corpus.length + images;
-  const plafond = rejeu ? concepts : plancher + corpus.length * MAX_CONCEPTS_PAR_DEPOT;
-  const source = rejeu ? `rejeu du figé ${basename(figeDemande ?? "")}` : "extraction du corpus";
+  const plancher = rejeu ? generations : corpus.length + images;
+  const plafond = rejeu
+    ? generations
+    : plancher + corpus.length * appelsPour(MAX_CONCEPTS_PAR_DEPOT);
+  const source = rejeu
+    ? `rejeu du figé ${basename(figeDemande ?? "")} (${fige?.modele}, ${fige?.emisA.slice(0, 16)} UTC)`
+    : "extraction du corpus";
 
   console.info(`Passage : ${source}${fragment ? `, restreint à « ${fragment} »` : ""}.`);
   console.info(`Modèle : ${process.env.AI_MODEL}, ${process.env.AI_MAX_TOKENS} tokens de sortie.`);
+  const aRegenerer = aGenerer.reduce((total, concepts) => total + concepts, 0);
+
   console.info(
     rejeu
-      ? `Appels : ${accorder(concepts, "concept figé")} à regénérer, soit autant d'appels.`
-      : `Appels : ${plancher} d'abord — une lecture par capture, une extraction par dépôt —,` +
-          ` puis un par concept extrait, soit ${plafond} au pire.`,
+      ? `Appels : ${accorder(aRegenerer, "concept figé", "concepts figés")} à regénérer,` +
+          ` ${CONCEPTS_PAR_APPEL} par appel, soit ${accorder(generations, "appel")}.`
+      : `Appels : ${plancher} d'abord — une lecture par capture, une extraction par dépôt —, puis` +
+          ` un par groupe de ${CONCEPTS_PAR_APPEL} concepts, soit ${plafond} au pire.`,
   );
   console.info(
     `Plafond du jour : ${await lireReservationsDuJour()}/${process.env.AI_DAILY_CALL_CAP} déjà réservés.\n`,
