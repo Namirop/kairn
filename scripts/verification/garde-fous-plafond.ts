@@ -78,11 +78,28 @@ export async function verifierPlafond(): Promise<void> {
       !troisSurDeux.obtenue && deuxSurDeux.obtenue && deuxSurDeux.utilisees === SATURE + 2,
       `trois refusées, puis deux accordées jusqu'à ${deuxSurDeux.utilisees}`,
     );
+
+    // Le premier lot d'une journée UTC n'a aucune ligne à mettre à jour :
+    // l'insertion ne rencontre alors aucune condition de plafond. Un lot plus
+    // gros que le plafond entier s'y installerait, juste après minuit.
+    await prisma.aiCallQuota.deleteMany({ where: { day: jour } });
+
+    const plusGrosQueLePlafond = await reserverAppelsModele(SATURE, SATURE + 1);
+    record(
+      "Un lot plus gros que le plafond est refusé, même sur une journée vierge",
+      !plusGrosQueLePlafond.obtenue && (await lireReservationsDuJour()) === 0,
+      `compteur à ${await lireReservationsDuJour()} après un lot de ${SATURE + 1} sur ${SATURE}`,
+    );
   } finally {
+    // Le compteur peut avoir été effacé au-dessus : on le repose tel qu'il était.
     if (avant) {
-      await prisma.aiCallQuota.update({ where: { day: jour }, data: { reserved: avant.reserved } });
+      await prisma.aiCallQuota.upsert({
+        where: { day: jour },
+        create: { day: jour, reserved: avant.reserved },
+        update: { reserved: avant.reserved },
+      });
     } else {
-      await prisma.aiCallQuota.delete({ where: { day: jour } });
+      await prisma.aiCallQuota.deleteMany({ where: { day: jour } });
     }
   }
 }

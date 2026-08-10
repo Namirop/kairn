@@ -39,6 +39,15 @@ export async function reserverAppelsModele(
 ): Promise<Reservation> {
   const jour = jourUtc(maintenant);
 
+  // La clause `WHERE` ci-dessous ne garde que le `DO UPDATE` : sur la première
+  // réservation d'une journée, l'insertion passe sans être confrontée au
+  // plafond. Un lot plus gros que le plafond, soumis juste après minuit UTC,
+  // s'installerait donc entier. La demande d'une seule place ne pouvait pas se
+  // tromper, un nombre variable si.
+  if (places > plafond) {
+    return { obtenue: false, utilisees: await lireReservationsDuJour(maintenant) };
+  }
+
   const lignes = await prisma.$queryRaw<{ reserved: number }[]>`
     INSERT INTO "AiCallQuota" ("day", "reserved", "createdAt", "updatedAt")
     VALUES (${jour}::date, ${places}, now(), now())
