@@ -113,46 +113,8 @@ async function main(): Promise<void> {
     }),
   );
 
-  // Le plafond du jour est amené à saturation, puis remis exactement dans
-  // l'état où il était : la vérification ne doit consommer aucune vraie place.
-  // La tenue sous concurrence est prouvée séparément, sur un jour sentinelle,
-  // par scripts/verifier-plafond-concurrent.ts.
-  const { prisma } = await import("@/lib/db/client");
-  const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
-  const { dayToUtcDate, localDay } = await import("@/lib/domain/local-day");
-
-  const jour = dayToUtcDate(localDay(new Date(), "UTC"));
-  const avant = await prisma.aiCallQuota.findUnique({ where: { day: jour } });
-  const sature = 3;
-
-  await prisma.aiCallQuota.upsert({
-    where: { day: jour },
-    create: { day: jour, reserved: sature },
-    update: { reserved: sature },
-  });
-
-  process.env.AI_ENABLED = "true";
-  process.env.MOCK_AI = "false";
-  process.env.AI_DAILY_CALL_CAP = String(sature);
-  await expectFailure("Le plafond journalier refuse avant d'émettre", "AI_QUOTA", () =>
-    callAI({
-      contract: EXTRACT_ATOMS,
-      system: "",
-      messages: [{ role: "user", content: "test" }],
-    }),
-  );
-
-  record(
-    "Un refus n'entame pas le compteur",
-    (await lireReservationsDuJour()) === sature,
-    `compteur à ${await lireReservationsDuJour()}`,
-  );
-
-  if (avant) {
-    await prisma.aiCallQuota.update({ where: { day: jour }, data: { reserved: avant.reserved } });
-  } else {
-    await prisma.aiCallQuota.delete({ where: { day: jour } });
-  }
+  const { verifierPlafond } = await import("./verification/garde-fous-plafond");
+  await verifierPlafond();
 
   record(
     "Aucune requête n'est sortie vers l'API",

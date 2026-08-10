@@ -1,0 +1,82 @@
+import { prisma } from "@/lib/db/client";
+import { runJob } from "@/lib/jobs/runner";
+
+/**
+ * De quoi rejouer un dépôt hors requête HTTP.
+ *
+ * `after()` ne part pas en dehors d'une requête : les jobs restent en attente,
+ * exactement comme quand un processus est recyclé. On les exécute donc à la
+ * main, ce qui vérifie au passage que le cron de reprise a de quoi travailler.
+ */
+
+export const UTILISATEUR_DE_TEST = "verification-ingestion@cairn.test";
+
+export function formulaire(champs: Record<string, string>, image?: File): FormData {
+  const donnees = new FormData();
+
+  for (const [nom, valeur] of Object.entries(champs)) donnees.set(nom, valeur);
+  if (image) donnees.set("image", image);
+
+  return donnees;
+}
+
+export async function utilisateurDeTest(): Promise<string> {
+  const existant = await prisma.user.findFirst({ where: { email: UTILISATEUR_DE_TEST } });
+
+  if (existant) return existant.id;
+
+  const cree = await prisma.user.create({
+    data: {
+      // C'est better-auth qui pose l'identifiant en temps normal ; ici, une
+      // valeur fixe suffit et rend le nettoyage évident.
+      id: "verification-ingestion",
+      email: UTILISATEUR_DE_TEST,
+      name: "Vérification",
+      emailVerified: true,
+      settings: { create: { timezone: "UTC" } },
+    },
+  });
+
+  return cree.id;
+}
+
+/** Exécute les jobs en attente de ce dépôt, sauf ceux qui partent en lot. */
+export async function executerJobsEnAttente(inputId: string): Promise<number> {
+  const jobs = await prisma.generationJob.findMany({
+    where: { inputId, status: "QUEUED", kind: { in: ["OCR", "ATOMS"] } },
+    orderBy: { createdAt: "asc" },
+  });
+
+  for (const job of jobs) await runJob(job.id);
+
+  return jobs.length;
+}
+
+/** Recule les dépôts déjà écrits hors de la fenêtre de débit. */
+export async function vieillirLesDepots(userId: string): Promise<void> {
+  await prisma.input.updateMany({
+    where: { userId },
+    data: { createdAt: new Date(Date.now() - 10 * 60 * 1000) },
+  });
+}
+
+/**
+ * Rend une place libre sans rien effacer : les limites sont éprouvées à part,
+ * elles n'ont pas à gêner la vérification du pipeline.
+ */
+export async function libererLaJournee(userId: string): Promise<void> {
+  await vieillirLesDepots(userId);
+  await prisma.dailyUsage.deleteMany({ where: { userId } });
+}
+
+/** Remet le compte du jour et les dépôts à zéro entre deux vérifications. */
+export async function repartirDeZero(userId: string): Promise<void> {
+  await prisma.input.deleteMany({ where: { userId } });
+  await prisma.dailyUsage.deleteMany({ where: { userId } });
+  await prisma.waitlistEntry.deleteMany({ where: { userId } });
+  await prisma.aiBatch.deleteMany({ where: { jobs: { none: {} } } });
+}
+
+export async function compterQuestions(inputId: string): Promise<number> {
+  return prisma.variant.count({ where: { atom: { inputId } } });
+}
