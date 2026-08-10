@@ -1,28 +1,9 @@
-/**
- * Ce qu'on peut reprocher à une génération sans jugement humain.
- *
- * Le banc d'évaluation lit ces manquements pour dire « regarde ici » ; il ne
- * dit pas si la question est bonne, ça se juge à l'œil. Ce sont des détecteurs
- * de fumée : ils ratent des mauvaises questions, ils ne doivent pas crier sur
- * des bonnes.
- *
- * Certaines règles sont déjà refusées par les schémas Zod de `lib/ai/`. Elles
- * restent ici parce que le banc doit pouvoir juger une sortie qui ne vient pas
- * de `callAI()` — un dump, une génération d'hier, un contre-exemple écrit à la
- * main.
- */
+import type { Manquement } from "./manquement";
 
-export type Manquement = {
-  /** Le nom de la règle enfreinte, court, réutilisé d'un rapport à l'autre. */
-  regle: string;
-  detail: string;
-  /**
-   * L'index de la variante en cause, quand le manquement en vise une. Un
-   * compteur sans emplacement est inutilisable : il annonce un problème et
-   * laisse le chercher dans huit cents lignes.
-   */
-  rang?: number;
-};
+/**
+ * Ce qui se vérifie sur les quatre questions d'un même Atom : leur composition
+ * en tant que lot, puis chacune prise à part.
+ */
 
 export type VariantAControler = {
   format: string;
@@ -47,9 +28,6 @@ export const FACETTES_ATTENDUES = ["RECOGNITION", "MECHANISM", "BOUNDARY", "APPL
 export const ECART_MAX_OPTIONS = 2;
 export const ECART_MINIMUM_SIGNIFICATIF = 30;
 
-/** Nombre de mots en deçà duquel une réponse citée ne prouve rien. */
-const MOTS_MINIMUM_POUR_CITER = 3;
-
 /**
  * Formats distincts attendus sur un lot de quatre questions.
  *
@@ -59,37 +37,8 @@ const MOTS_MINIMUM_POUR_CITER = 3;
  */
 export const FORMATS_MINIMUM = 3;
 
-const RENVOIS =
-  /ci-dessus|ci-dessous|ci-avant|plus haut dans|comme vu|comme expliqué|précédemment|le précédent|la précédente|susmentionné|évoqué plus haut/i;
-
-/** Une ouverture qui reprend un antécédent absent du concept. */
-const OUVERTURE_REPRISE = /^(il|elle|ils|elles|cela|ça|celui|celle|ceux|celles|cette|ces|cet)\b/i;
-
-/** « Il faut », « il existe » : le pronom ne reprend rien, il est impersonnel. */
-const OUVERTURE_IMPERSONNELLE =
-  /^il (faut|existe|est|y a|n'y a|s'agit|suffit|vaut|arrive|reste)\b/i;
-
-/**
- * Ce qui déclenche la règle CODE du prompt : une citation, pas un jugement sur
- * le sujet. Un fragment entre accents graves, ou un appel écrit tel qu'on
- * l'écrirait dans un fichier — `at(-1)`, `Promise.all(`.
- *
- * Sert à mesurer, pas à sanctionner : on veut savoir combien de concepts
- * déclenchent la règle et combien de lots la respectent. Une question CODE
- * posée pour respecter une règle plutôt que pour éprouver quelque chose ne se
- * verra qu'à l'œil.
- */
-const CITATIONS_DE_CODE = [
-  /`[^`]+`/, // un fragment entre accents graves
-  /\b[A-Za-z_$][\w$]*\(/, // un appel : at(, Promise.all(
-  /\b[a-z][\w$]*[A-Z][\w$]*/, // un identifiant en casse mixte : setTimeout, useEffect
-  /\b[A-Z][A-Z_]{2,}\b/, // une instruction ou une variable : COPY, DATABASE_URL
-  /\b[A-Za-z_$][\w$]*\.[A-Za-z_$][\w$]*/, // un chemin pointé : Promise.all
-];
-
-export function citeDuCode(concept: string): boolean {
-  return CITATIONS_DE_CODE.some((marqueur) => marqueur.test(concept));
-}
+/** Nombre de mots en deçà duquel une réponse citée ne prouve rien. */
+const MOTS_MINIMUM_POUR_CITER = 3;
 
 function motsNormalises(texte: string): string {
   return ` ${texte
@@ -98,24 +47,6 @@ function motsNormalises(texte: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim()} `;
-}
-
-/** Le concept se comprend-il seul, sans le texte d'origine ni ses voisins ? */
-export function controlerConcept(concept: string): Manquement[] {
-  const manquements: Manquement[] = [];
-  const texte = concept.trim();
-  const renvoi = RENVOIS.exec(texte);
-
-  if (renvoi) {
-    manquements.push({ regle: "renvoi", detail: `« ${renvoi[0]} » renvoie hors du concept` });
-  }
-
-  if (OUVERTURE_REPRISE.test(texte) && !OUVERTURE_IMPERSONNELLE.test(texte)) {
-    const premiersMots = texte.split(/\s+/).slice(0, 3).join(" ");
-    manquements.push({ regle: "antécédent", detail: `« ${premiersMots}… » reprend un absent` });
-  }
-
-  return manquements;
 }
 
 function controlerLot(variants: VariantAControler[]): Manquement[] {
@@ -165,8 +96,9 @@ function controlerMcq(variant: VariantAControler): Manquement[] {
   const plusLongue = Math.max(...longueurs);
   const rapport = plusLongue / plusCourte;
 
-  if (rapport <= ECART_MAX_OPTIONS || plusLongue - plusCourte <= ECART_MINIMUM_SIGNIFICATIF)
+  if (rapport <= ECART_MAX_OPTIONS || plusLongue - plusCourte <= ECART_MINIMUM_SIGNIFICATIF) {
     return [];
+  }
 
   return [
     {

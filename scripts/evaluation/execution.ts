@@ -10,11 +10,9 @@ import {
   type ExtractAtomsOutput,
   type GenerateVariantsOutput,
 } from "@/lib/ai/schemas";
-import {
-  controlerConcept,
-  controlerVariants,
-  type Manquement,
-} from "@/lib/domain/controle-generation";
+import { controlerConcept } from "@/lib/domain/controle-concept";
+import { controlerVariants } from "@/lib/domain/controle-variants";
+import type { Manquement } from "@/lib/domain/manquement";
 import type { Depot } from "./corpus";
 import type { DepotFige } from "./fige";
 

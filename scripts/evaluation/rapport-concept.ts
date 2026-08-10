@@ -1,4 +1,4 @@
-import type { Manquement } from "@/lib/domain/controle-generation";
+import type { Manquement } from "@/lib/domain/manquement";
 import type { ConceptEvalue, Echec } from "./execution";
 
 /** Le rendu d'un concept et de ses quatre questions, manquements compris. */

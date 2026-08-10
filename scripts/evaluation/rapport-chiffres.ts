@@ -1,4 +1,5 @@
-import { citeDuCode, FACETTES_ATTENDUES } from "@/lib/domain/controle-generation";
+import { citeDuCode } from "@/lib/domain/controle-concept";
+import { FACETTES_ATTENDUES } from "@/lib/domain/controle-variants";
 import type { ConsommationFenetre } from "@/lib/db/ai-call";
 import type { DepotEvalue } from "./execution";
 
