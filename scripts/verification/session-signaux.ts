@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { desarchiverConcept } from "@/lib/db/concepts";
 import { enregistrerRevision, reclamerSignalDeMaitrise } from "@/lib/db/revision";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
 import { JOURS_AVANT_ARCHIVAGE } from "@/lib/domain/etat-maitrise";
@@ -158,5 +159,36 @@ export async function casArchivageDeclare(userId: string, maintenant: Date): Pro
     "Archivage — il revient bien six mois plus tard",
     retour.questions.some((question) => question.atomId === cible.atomId),
     `${retour.questions.length} question(s) six mois plus tard`,
+  );
+
+  // « L'archivage se défait » : sans ce chemin, un clic sortait un concept pour
+  // six mois sans aucun retour possible.
+  const demain = new Date(maintenant.getTime() + JOUR_MS);
+  const defait = await desarchiverConcept(cible.atomId, userId, demain);
+  const remis = await prisma.atom.findUniqueOrThrow({
+    where: { id: cible.atomId },
+    select: { state: true, archivedByUser: true, archivedAt: true },
+  });
+
+  record(
+    "Archivage — il se défait, et le concept cesse d'être archivé",
+    defait && remis.state !== "ARCHIVED" && !remis.archivedByUser && remis.archivedAt === null,
+    `${remis.state}, déclaré : ${remis.archivedByUser}`,
+  );
+
+  const aussitot = await lireSessionDuJour(userId, demain);
+
+  record(
+    "Archivage — défait, le concept redevient dû tout de suite",
+    aussitot.questions.some((question) => question.atomId === cible.atomId),
+    aussitot.questions.some((question) => question.atomId === cible.atomId)
+      ? "de retour dans la session"
+      : "absent de la session",
+  );
+
+  record(
+    "Archivage — défaire deux fois ne fait rien la seconde",
+    !(await desarchiverConcept(cible.atomId, userId, demain)),
+    "second appel refusé",
   );
 }

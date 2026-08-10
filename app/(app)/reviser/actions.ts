@@ -1,8 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { enregistrerRevision, reclamerSignalDeMaitrise } from "@/lib/db/revision";
 import { compterDusDemain } from "@/lib/db/session-du-jour";
@@ -80,12 +78,10 @@ export async function reclamerMaitriseAction(
 
   if (!valide.success) return null;
 
-  const reclame = await reclamerSignalDeMaitrise(utilisateur.id, valide.data);
-
-  // Le tableau de bord compte les concepts dus : il vient de changer.
-  revalidatePath(ROUTES.aujourdhui);
-
-  return reclame;
+  // Pas de revalidation : elle rafraîchirait la route courante, le serveur
+  // rendrait une session désormais vide, et l'écran de fin disparaîtrait à
+  // l'instant où il s'affiche. Le tableau de bord est rendu à la demande.
+  return reclamerSignalDeMaitrise(utilisateur.id, valide.data);
 }
 
 /** Ce qui revient demain, une fois la session finie. */

@@ -1,18 +1,18 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { ReviewRating } from "@/lib/db/types";
 
 /**
  * Ce qui suit une réponse à choix.
  *
+ * Le passage est déjà écrit — il l'a été au clic sur l'option, en une seule
+ * action. Ce bouton ne note plus rien, il enchaîne.
+ *
  * Une bonne réponse n'est pas félicitée : l'écran dit ce qui est, et la
  * récompense est l'espacement qui s'allonge. Une mauvaise réponse donne
  * l'étalon — sans lui, l'échec n'apprend rien.
- *
- * « C'était facile » est le geste en plus dont parle le produit : le cas
- * courant se règle d'un seul bouton.
  */
+
 /**
  * L'étalon répète-t-il seulement l'option déjà surlignée ?
  *
@@ -37,7 +37,7 @@ export function CorrectionFermee({
   bonneOption: string;
   enCours: boolean;
   dernier: boolean;
-  onSuite: (note: ReviewRating) => void;
+  onSuite: () => void;
 }) {
   const etalonUtile = !repeteLOption(answerKey, bonneOption);
 
@@ -51,8 +51,6 @@ export function CorrectionFermee({
         )}
       </p>
 
-      {/* L'étalon n'est montré que s'il apporte autre chose que l'option cochée :
-          sur une bonne réponse, le répéter serait du bruit. */}
       {!juste && etalonUtile ? (
         <p className="mt-pas-3 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed text-stone-900">
           {answerKey}
@@ -60,20 +58,9 @@ export function CorrectionFermee({
       ) : null}
 
       <div className="gap-pas-2 mt-pas-6 flex flex-wrap">
-        <Button type="button" disabled={enCours} onClick={() => onSuite(juste ? "GOOD" : "AGAIN")}>
+        <Button type="button" disabled={enCours} onClick={onSuite}>
           {dernier ? "Terminer" : "Continuer"}
         </Button>
-
-        {juste ? (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={enCours}
-            onClick={() => onSuite("EASY")}
-          >
-            C&apos;était facile
-          </Button>
-        ) : null}
       </div>
     </div>
   );

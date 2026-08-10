@@ -8,6 +8,7 @@ import type {
   VariantFacet,
   VariantFormat,
 } from "@/lib/db/types";
+import { compterReussitesConsecutives, etatApresRevision } from "@/lib/domain/etat-maitrise";
 
 /**
  * Lecture et correction d'un concept.
@@ -31,6 +32,8 @@ export type ConceptLu = {
   tags: string[];
   uncertain: boolean;
   state: AtomState;
+  /** Sorti du cycle par l'utilisateur — et donc remettable par lui. */
+  archivedByUser: boolean;
   questions: QuestionLue[];
 };
 
@@ -68,6 +71,7 @@ export async function lireDepotDetaille(
           tags: true,
           uncertain: true,
           state: true,
+          archivedByUser: true,
           variants: {
             where: { retiredAt: null },
             // Par facette, dans l'ordre où elle est déclarée : reconnaître,
@@ -147,6 +151,52 @@ export async function confirmerConcept(atomId: string, userId: string): Promise<
 
   await prisma.atom.update({ where: { id: atomId }, data: { uncertain: false } });
   await relancerLesQuestions(atomId, atome.inputId);
+
+  return true;
+}
+
+/**
+ * Remet dans le cycle un concept que l'utilisateur en avait sorti.
+ *
+ * « Je maîtrise ça » est une déclaration, pas une suppression, et une
+ * déclaration se retire. Sans ce chemin, un clic sortait un concept pour six
+ * mois sans aucun retour possible — une perte de données déguisée en geste
+ * réversible.
+ *
+ * Seul l'archivage déclaré se défait. Celui que le produit pose au-delà de six
+ * mois d'intervalle n'est pas une décision de l'utilisateur : le défaire le
+ * ferait rearchiver dans la seconde.
+ *
+ * La planification ne repart pas de zéro — le concept a une histoire et elle
+ * reste vraie. Seule l'échéance revient à maintenant : qui remet un concept en
+ * révision veut le revoir, pas attendre.
+ */
+export async function desarchiverConcept(
+  atomId: string,
+  userId: string,
+  maintenant: Date = new Date(),
+): Promise<boolean> {
+  const atome = await prisma.atom.findFirst({
+    where: { id: atomId, userId, archivedByUser: true },
+    select: {
+      scheduledDays: true,
+      reviews: { orderBy: { reviewedAt: "desc" }, take: 10, select: { rating: true } },
+    },
+  });
+
+  if (!atome) return false;
+
+  const notes = [...atome.reviews].reverse().map((passage) => passage.rating);
+
+  await prisma.atom.update({
+    where: { id: atomId },
+    data: {
+      archivedAt: null,
+      archivedByUser: false,
+      state: etatApresRevision(atome.scheduledDays, compterReussitesConsecutives(notes), false),
+      due: maintenant,
+    },
+  });
 
   return true;
 }

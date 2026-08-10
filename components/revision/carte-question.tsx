@@ -65,8 +65,10 @@ export function CarteQuestion({
         <Button type="button" variant="ghost" size="sm" disabled={enCours} onClick={onMaitrise}>
           Je maîtrise ça
         </Button>
+        {/* Ce que le geste fait vraiment : il repousse, il ne supprime pas, et
+            il se défait. Annoncer « une seule fois » laissait croire l'inverse. */}
         <p className="mt-pas-1 text-petit text-stone-500">
-          Le concept sort du cycle et revient dans six mois, une seule fois.
+          Le concept sort du cycle et revient dans six mois pour vérifier. Ça se défait.
         </p>
       </div>
     </section>

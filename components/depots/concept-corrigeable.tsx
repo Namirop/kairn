@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   confirmerConceptAction,
+  desarchiverConceptAction,
   modifierConceptAction,
   supprimerConceptAction,
 } from "@/app/(app)/depots/actions";
@@ -76,6 +77,7 @@ export function ConceptCorrigeable({ concept, inputId }: { concept: ConceptLu; i
               <Badge key={tag}>{tag}</Badge>
             ))}
             {concept.uncertain ? <Badge variant="alerte">À vérifier</Badge> : null}
+            {concept.archivedByUser ? <Badge>Sorti du cycle</Badge> : null}
           </div>
 
           <p className="mt-pas-2 text-corps text-stone-900">{concept.concept}</p>
@@ -89,6 +91,23 @@ export function ConceptCorrigeable({ concept, inputId }: { concept: ConceptLu; i
           ) : (
             <Questions questions={concept.questions} />
           )}
+
+          {/* L'archivage se défait, et l'écran le dit là où le concept se
+              trouve — sans quoi « je maîtrise ça » serait un aller sans retour. */}
+          {concept.archivedByUser ? (
+            <div className="mt-pas-4 gap-pas-3 flex flex-wrap items-center">
+              <p className="text-petit text-stone-500">
+                Tu l&apos;as déclaré su. Il revient dans six mois pour vérifier.
+              </p>
+              <form action={desarchiverConceptAction}>
+                <input type="hidden" name="atomId" value={concept.id} />
+                <input type="hidden" name="inputId" value={inputId} />
+                <Button type="submit" size="sm" variant="outline">
+                  Remettre en révision
+                </Button>
+              </form>
+            </div>
+          ) : null}
 
           <div className="mt-pas-4 gap-pas-2 flex flex-wrap">
             {concept.uncertain ? (

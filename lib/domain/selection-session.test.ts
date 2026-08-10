@@ -5,6 +5,8 @@ import {
   composerSession,
   dejaRevuAujourdhui,
   estDu,
+  estServableAujourdhui,
+  jourOuIlRevient,
   type ConceptDu,
 } from "./selection-session";
 
@@ -276,5 +278,80 @@ describe("composerSession et le passage du jour", () => {
     const session = composerSession(concepts, new Date("2026-01-16T09:30:00Z"), PARIS);
 
     expect(session.map((c) => c.id)).toEqual(["revu-hier"]);
+  });
+});
+
+describe("jourOuIlRevient", () => {
+  const maintenant = new Date("2026-01-15T09:00:00Z");
+  const jour = (due: string, lastReview: string | null = null) =>
+    jourOuIlRevient(
+      { due: new Date(due), lastReview: lastReview ? new Date(lastReview) : null },
+      maintenant,
+      PARIS,
+    );
+
+  it("dit aujourd'hui pour un concept dû et pas encore vu", () => {
+    expect(jour("2026-01-15T08:00:00Z")).toBe("2026-01-15");
+  });
+
+  it("dit aujourd'hui pour un concept en retard et pas encore vu", () => {
+    expect(jour("2026-01-11T08:00:00Z")).toBe("2026-01-15");
+  });
+
+  it("dit demain pour un concept déjà revu aujourd'hui", () => {
+    expect(jour("2026-01-15T09:10:00Z", "2026-01-15T09:00:00Z")).toBe("2026-01-16");
+  });
+
+  it("dit demain pour un concept en retard de quatre jours mais déjà revu", () => {
+    // Le compteur de ce qui revient demain le perdait : son échéance était trop
+    // ancienne pour la fenêtre SQL, alors qu'il revient bien demain.
+    expect(jour("2026-01-11T08:00:00Z", "2026-01-15T09:00:00Z")).toBe("2026-01-16");
+  });
+
+  it("dit son échéance pour un concept encore à venir", () => {
+    expect(jour("2026-01-20T08:00:00Z")).toBe("2026-01-20");
+    expect(jour("2026-01-20T08:00:00Z", "2026-01-15T09:00:00Z")).toBe("2026-01-20");
+  });
+
+  it("ne rend jamais un jour passé", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: -400, max: 400 }),
+        fc.oneof(fc.constant<number | null>(null), fc.integer({ min: -400, max: 0 })),
+        (dueJours, vuJours) => {
+          const decale = (n: number) =>
+            new Date(maintenant.getTime() + n * 24 * 60 * 60 * 1000).toISOString();
+
+          const rendu = jour(decale(dueJours), vuJours === null ? null : decale(vuJours));
+
+          return rendu >= "2026-01-15";
+        },
+      ),
+      { numRuns: 400 },
+    );
+  });
+
+  it("dit aujourd'hui exactement quand le concept entre dans la session", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: -30, max: 30 }),
+        fc.oneof(fc.constant<number | null>(null), fc.integer({ min: -30, max: 0 })),
+        (dueJours, vuJours) => {
+          const decale = (n: number) => new Date(maintenant.getTime() + n * 24 * 60 * 60 * 1000);
+          const concept = {
+            due: decale(dueJours),
+            lastReview: vuJours === null ? null : decale(vuJours),
+          };
+
+          const servable = estServableAujourdhui(concept, maintenant, PARIS);
+          const revient = jourOuIlRevient(concept, maintenant, PARIS);
+
+          // Le compteur et la session ne peuvent pas se contredire : elles
+          // dérivent du même prédicat.
+          return servable === (revient === "2026-01-15");
+        },
+      ),
+      { numRuns: 400 },
+    );
   });
 });

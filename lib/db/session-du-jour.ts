@@ -5,7 +5,7 @@ import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
 import { jourSuivant, localDay } from "@/lib/domain/local-day";
 import { choisirVariante } from "@/lib/domain/rotation-variantes";
-import { composerSession, dejaRevuAujourdhui } from "@/lib/domain/selection-session";
+import { composerSession, jourOuIlRevient } from "@/lib/domain/selection-session";
 
 /**
  * Ce qu'il y a à réviser maintenant.
@@ -196,27 +196,7 @@ function prochainJourServi(
   maintenant: Date,
   fuseau: string,
 ): string | null {
-  return concepts.map((concept) => jourServi(concept, maintenant, fuseau)).sort()[0] ?? null;
-}
-
-/**
- * Le jour où ce concept sera posé.
- *
- * Son échéance, sauf s'il a déjà été vu aujourd'hui : dans ce cas il attend
- * demain, quelle que soit l'heure que ts-fsrs a écrite.
- */
-function jourServi(
-  concept: { due: Date; lastReview: Date | null },
-  maintenant: Date,
-  fuseau: string,
-): string {
-  const aujourdhui = localDay(maintenant, fuseau);
-  const echeance = localDay(concept.due, fuseau);
-
-  if (echeance > aujourdhui) return echeance;
-  if (dejaRevuAujourdhui(concept.lastReview, maintenant, fuseau)) return jourSuivant(aujourdhui);
-
-  return echeance;
+  return concepts.map((concept) => jourOuIlRevient(concept, maintenant, fuseau)).sort()[0] ?? null;
 }
 
 /**
@@ -237,17 +217,14 @@ export async function compterDusDemain(
       userId,
       uncertain: false,
       variants: { some: { retiredAt: null } },
-      // Deux fois la marge : le lendemain de l'utilisateur se termine au plus
-      // tard un peu avant 48 h d'ici, quel que soit son décalage. La borne basse
-      // remonte avant maintenant, sinon un concept revu ce matin — échéance
-      // posée court par ts-fsrs — sortirait du compte alors qu'il revient demain.
-      due: {
-        gte: new Date(maintenant.getTime() - 2 * MARGE_MS),
-        lte: new Date(maintenant.getTime() + 2 * MARGE_MS),
-      },
+      // Borne haute seulement. Une borne basse écarterait les concepts en
+      // retard — quatre jours de retard, et le concept sortait de la fenêtre
+      // alors qu'il revient bien demain. Le retard accumulé est justement le
+      // cas où ce chiffre compte le plus.
+      due: { lte: new Date(maintenant.getTime() + 2 * MARGE_MS) },
     },
     select: { due: true, lastReview: true },
   });
 
-  return candidats.filter((atome) => jourServi(atome, maintenant, fuseau) === demain).length;
+  return candidats.filter((atome) => jourOuIlRevient(atome, maintenant, fuseau) === demain).length;
 }

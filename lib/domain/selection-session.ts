@@ -1,4 +1,4 @@
-import { localDay } from "./local-day";
+import { jourSuivant, localDay } from "./local-day";
 
 /**
  * Ce qui compose une session : ce qui est dû, dans quel ordre, et jusqu'où.
@@ -55,6 +55,48 @@ export function dejaRevuAujourdhui(
   if (!lastReview) return false;
 
   return localDay(lastReview, fuseau) === localDay(maintenant, fuseau);
+}
+
+/**
+ * Le prédicat unique : ce concept est-il posable aujourd'hui ?
+ *
+ * Tout ce qui compte des concepts — la session, ce qui revient demain, la
+ * prochaine échéance annoncée — passe par ici. Deux définitions de « est dû »
+ * finissent toujours par diverger, et elles divergent en silence.
+ */
+export function estServableAujourdhui(
+  concept: Pick<ConceptDu, "due" | "lastReview">,
+  maintenant: Date,
+  fuseau: string,
+): boolean {
+  return (
+    estDu(concept.due, maintenant, fuseau) &&
+    !dejaRevuAujourdhui(concept.lastReview, maintenant, fuseau)
+  );
+}
+
+/**
+ * Le jour civil où ce concept sera posé.
+ *
+ * Ce n'est pas son échéance : celui qui vient d'être revu en porte une encore
+ * dans la journée — ts-fsrs replanifie court en apprentissage — et ne reviendra
+ * pourtant que demain. C'est ce jour-là qui intéresse l'utilisateur, et c'est
+ * lui qu'annoncent les écrans.
+ */
+export function jourOuIlRevient(
+  concept: Pick<ConceptDu, "due" | "lastReview">,
+  maintenant: Date,
+  fuseau: string,
+): string {
+  const aujourdhui = localDay(maintenant, fuseau);
+
+  if (estServableAujourdhui(concept, maintenant, fuseau)) return aujourdhui;
+
+  const echeance = localDay(concept.due, fuseau);
+
+  // Son échéance si elle est devant. Sinon elle est derrière ou aujourd'hui, et
+  // s'il n'est pas servable c'est qu'il a déjà servi : il revient demain.
+  return echeance > aujourdhui ? echeance : jourSuivant(aujourdhui);
 }
 
 /** Ce qui définit un sujet pour l'alternance : le premier tag, sinon le dépôt. */
@@ -120,11 +162,7 @@ export function composerSession<T extends ConceptDu>(
   plafond: number = PLAFOND_SESSION,
 ): T[] {
   const dus = concepts
-    .filter(
-      (concept) =>
-        estDu(concept.due, maintenant, fuseau) &&
-        !dejaRevuAujourdhui(concept.lastReview, maintenant, fuseau),
-    )
+    .filter((concept) => estServableAujourdhui(concept, maintenant, fuseau))
     // L'identifiant départage : sans lui, deux échéances égales pourraient
     // sortir dans un ordre différent d'un appel à l'autre.
     .sort((a, b) => a.due.getTime() - b.due.getTime() || a.id.localeCompare(b.id));
