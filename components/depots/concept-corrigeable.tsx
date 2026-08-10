@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ConceptLu } from "@/lib/db/concepts";
+import { LIBELLE_FACETTE } from "./libelle-facette";
 
 /**
  * Un concept, ses questions, et ce qu'on peut en faire.
@@ -25,7 +26,7 @@ function Questions({ questions }: { questions: ConceptLu["questions"] }) {
       {questions.map((question) => (
         <li key={question.id} className="gap-pas-1 flex flex-col">
           <span className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
-            {question.facet}
+            {LIBELLE_FACETTE[question.facet]}
           </span>
           <p className="text-petit text-stone-900">{question.question}</p>
         </li>
