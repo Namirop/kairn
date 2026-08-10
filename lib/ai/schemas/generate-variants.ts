@@ -1,69 +1,85 @@
 import { z } from "zod";
-import { VariantFacet, VariantFormat } from "@/lib/db/types";
+import { VariantFormat } from "@/lib/db/types";
 import type { AiContract } from "./contract";
 
-const variante = z.object({
-  format: z.enum(VariantFormat),
-  facet: z
-    .enum(VariantFacet)
-    .describe("L'angle interrogé. Une facette par question, dans l'ordre de l'enum."),
-  question: z.string().min(10).max(800),
-  answerKey: z
-    .string()
-    .min(1)
-    .max(2000)
-    .describe("La réponse attendue en clair. Pour SHORT_ANSWER et EXPLAIN, de quoi se juger seul."),
-  options: z
-    .array(z.string().min(1).max(300))
-    .length(4)
-    .nullish()
-    .describe("Les quatre options d'un MCQ. À omettre pour tout autre format."),
-  correctIndex: z
-    .number()
-    .int()
-    .min(0)
-    .max(3)
-    .nullish()
-    .describe("L'index de la bonne option dans options. À omettre pour tout autre format."),
-});
+/**
+ * Quatre clés nommées, pas un tableau.
+ *
+ * Le premier passage du banc a rendu seize sorties où `variants` arrivait en
+ * chaîne : le modèle sérialisait le tableau au lieu de l'émettre. Un tableau
+ * qui n'existe pas ne se sérialise pas. La facette devient le nom de la clé,
+ * ce qui retire du même coup l'énumération des facettes, le contrôle de leur
+ * unicité et celui de la cardinalité — la structure les impose.
+ *
+ * Les prompts ne changent pas : ils décrivent déjà quatre facettes, dans cet
+ * ordre. La validation rend un tableau ordonné, forme sous laquelle le reste
+ * du projet lit une génération.
+ */
 
-/** Les quatre formulations de question portant sur un même Atom. */
+/** Ce qu'un MCQ ajoute. Une clé facultative plutôt que deux champs à annuler. */
+function mcq() {
+  return z.object({
+    options: z
+      .array(z.string().min(1).max(300))
+      .length(4)
+      .describe("Les quatre options, de longueur comparable."),
+    correctIndex: z.number().int().min(0).max(3).describe("L'index de la bonne option."),
+  });
+}
+
+function question(facette: string) {
+  return z
+    .object({
+      format: z.enum(VariantFormat),
+      question: z.string().min(10).max(800),
+      answerKey: z
+        .string()
+        .min(1)
+        .max(2000)
+        .describe("La réponse attendue en clair. Pour SHORT_ANSWER et EXPLAIN, de quoi se juger."),
+      mcq: mcq().nullish().describe("À renseigner si et seulement si format vaut MCQ."),
+    })
+    .describe(facette);
+}
+
 export const generateVariantsForme = z.object({
-  variants: z.array(variante).length(4).describe("Quatre questions, quatre facettes différentes."),
+  recognition: question("De quoi s'agit-il, comment le nommerait-on, à quoi le reconnaît-on."),
+  mechanism: question("Pourquoi ça marche, ce qui se passe réellement, dans quel ordre."),
+  boundary: question("Ce que ce n'est pas, quand ça ne s'applique pas, la confusion classique."),
+  application: question("S'en servir dans une situation concrète qui n'est pas celle du concept."),
 });
 
-function estMcq(variant: z.infer<typeof variante>): boolean {
-  return variant.format === "MCQ";
-}
-
-function renseigne(valeur: unknown): boolean {
-  return (valeur ?? null) !== null;
-}
+/** L'ordre servi, et la facette que porte chaque clé. */
+const FACETTES = [
+  ["recognition", "RECOGNITION"],
+  ["mechanism", "MECHANISM"],
+  ["boundary", "BOUNDARY"],
+  ["application", "APPLICATION"],
+] as const;
 
 const generateVariantsValidation = generateVariantsForme
-  .refine((sortie) => new Set(sortie.variants.map((variant) => variant.facet)).size === 4, {
-    error: "les quatre variants doivent porter quatre facettes différentes",
-    path: ["variants"],
+  .superRefine((sortie, ctx) => {
+    for (const [cle] of FACETTES) {
+      const posee = sortie[cle];
+      const porteUnMcq = (posee.mcq ?? null) !== null;
+
+      if ((posee.format === "MCQ") !== porteUnMcq) {
+        ctx.addIssue({
+          code: "custom",
+          message: "mcq est renseigné si et seulement si le format est MCQ",
+          path: [cle, "mcq"],
+        });
+      }
+    }
   })
-  // Un MCQ sans options, ou des options sur un format libre, sont deux
-  // manières de rendre la question inaffichable.
-  .refine(
-    (sortie) =>
-      sortie.variants.every(
-        (variant) =>
-          estMcq(variant) === renseigne(variant.options) &&
-          estMcq(variant) === renseigne(variant.correctIndex),
-      ),
-    {
-      error: "options et correctIndex sont renseignés si et seulement si le format est MCQ",
-      path: ["variants"],
-    },
-  )
   .transform((sortie) => ({
-    variants: sortie.variants.map((variant) => ({
-      ...variant,
-      options: variant.options ?? null,
-      correctIndex: variant.correctIndex ?? null,
+    variants: FACETTES.map(([cle, facet]) => ({
+      format: sortie[cle].format,
+      facet,
+      question: sortie[cle].question,
+      answerKey: sortie[cle].answerKey,
+      options: sortie[cle].mcq?.options ?? null,
+      correctIndex: sortie[cle].mcq?.correctIndex ?? null,
     })),
   }));
 

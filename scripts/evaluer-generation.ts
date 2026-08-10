@@ -15,6 +15,10 @@ import { join } from "node:path";
  *
  *   MOCK_AI=false npx tsx scripts/evaluer-generation.ts             # le plan
  *   MOCK_AI=false npx tsx scripts/evaluer-generation.ts --emettre   # le passage
+ *
+ * `--depot <fragment>` restreint le passage aux dépôts dont le nom contient ce
+ * fragment. C'est ce qu'on lance quand on vérifie une forme de sortie : deux
+ * appels et trois centimes, au lieu de quarante.
  */
 
 const RAPPORTS = join(import.meta.dirname, "evaluation", "rapports");
@@ -23,6 +27,13 @@ const MAX_CONCEPTS_PAR_DEPOT = 12;
 function refuser(motif: string): never {
   console.error(`Le banc ne démarre pas : ${motif}`);
   process.exit(1);
+}
+
+/** La valeur qui suit un drapeau, s'il est là. */
+function argument(drapeau: string): string | undefined {
+  const rang = process.argv.indexOf(drapeau);
+
+  return rang === -1 ? undefined : process.argv[rang + 1];
 }
 
 function nomDuRapport(instant: Date): string {
@@ -44,9 +55,12 @@ async function main(): Promise<void> {
   const { sumAiCalls } = await import("@/lib/db/ai-call");
   const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
 
-  const corpus = lireCorpus();
+  const fragment = argument("--depot");
+  const corpus = lireCorpus().filter((depot) => !fragment || depot.nom.includes(fragment));
 
-  if (corpus.length === 0) refuser("le corpus est vide.");
+  if (corpus.length === 0) {
+    refuser(fragment ? `aucun dépôt ne contient « ${fragment} ».` : "le corpus est vide.");
+  }
 
   const images = corpus.filter((depot) => depot.image).length;
   const plancher = corpus.length + images;
@@ -54,7 +68,8 @@ async function main(): Promise<void> {
   const reservees = await lireReservationsDuJour();
 
   console.info(
-    `Corpus : ${accorder(corpus.length, "dépôt")}, dont ${accorder(images, "capture")}.`,
+    `Corpus : ${accorder(corpus.length, "dépôt")}, dont ${accorder(images, "capture")}` +
+      `${fragment ? ` — restreint à « ${fragment} »` : ""}.`,
   );
   console.info(`Modèle : ${process.env.AI_MODEL}, ${process.env.AI_MAX_TOKENS} tokens de sortie.`);
   console.info(

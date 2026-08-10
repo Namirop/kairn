@@ -4,36 +4,26 @@
       "name": "concept-court",
       "minInputChars": 0,
       "output": {
-        "variants": [
-          {
-            "format": "SHORT_ANSWER",
-            "facet": "RECOGNITION",
-            "question": "Que rend `[10, 20, 30].at(-1)` ?",
-            "answerKey": "30. Attendu : dire que l'index négatif est compté depuis la fin du tableau. Répondre « le dernier élément » sans nommer la valeur reste juste ; répondre `-1` ou `undefined` ne l'est pas.",
-            "options": null,
-            "correctIndex": null
-          },
-          {
-            "format": "SHORT_ANSWER",
-            "facet": "MECHANISM",
-            "question": "Sur un tableau de cinq éléments, à quelle position `at(-2)` va-t-il chercher, et pourquoi ?",
-            "answerKey": "À l'avant-dernière position, l'indice 3. Attendu : l'index négatif est ajouté à la longueur du tableau, donc -2 devient 5 - 2. Une réponse qui donne la bonne position sans dire d'où elle vient est incomplète.",
-            "options": null,
-            "correctIndex": null
-          },
-          {
-            "format": "TRUE_FALSE",
-            "facet": "BOUNDARY",
-            "question": "`tableau[-1]` et `tableau.at(-1)` rendent la même valeur.",
-            "answerKey": "Faux. Les crochets lisent une propriété dont le nom est la chaîne « -1 », qui n'existe pas, et rendent `undefined`. Seul `at()` interprète l'index comme un décalage depuis la fin.",
-            "options": null,
-            "correctIndex": null
-          },
-          {
-            "format": "MCQ",
-            "facet": "APPLICATION",
-            "question": "Une fonction reçoit un tableau de longueur inconnue et doit rendre son dernier élément. Quelle expression convient ?",
-            "answerKey": "`valeurs.at(-1)`",
+        "recognition": {
+          "format": "SHORT_ANSWER",
+          "question": "Que rend `[10, 20, 30].at(-1)` ?",
+          "answerKey": "30. Attendu : dire que l'index négatif est compté depuis la fin du tableau. Répondre « le dernier élément » sans nommer la valeur reste juste ; répondre `-1` ou `undefined` ne l'est pas."
+        },
+        "mechanism": {
+          "format": "SHORT_ANSWER",
+          "question": "Sur un tableau de cinq éléments, à quelle position `at(-2)` va-t-il chercher, et pourquoi ?",
+          "answerKey": "À l'avant-dernière position, l'indice 3. Attendu : l'index négatif est ajouté à la longueur du tableau, donc -2 devient 5 - 2. Une réponse qui donne la bonne position sans dire d'où elle vient est incomplète."
+        },
+        "boundary": {
+          "format": "TRUE_FALSE",
+          "question": "`tableau[-1]` et `tableau.at(-1)` rendent la même valeur.",
+          "answerKey": "Faux. Les crochets lisent une propriété dont le nom est la chaîne « -1 », qui n'existe pas, et rendent `undefined`. Seul `at()` interprète l'index comme un décalage depuis la fin."
+        },
+        "application": {
+          "format": "MCQ",
+          "question": "Une fonction reçoit un tableau de longueur inconnue et doit rendre son dernier élément. Quelle expression convient ?",
+          "answerKey": "`valeurs.at(-1)`",
+          "mcq": {
             "options": [
               "`valeurs.at(-1)`",
               "`valeurs[valeurs.length]`",
@@ -42,43 +32,33 @@
             ],
             "correctIndex": 0
           }
-        ]
+        }
       }
     },
     {
       "name": "concept-dense",
       "minInputChars": 200,
       "output": {
-        "variants": [
-          {
-            "format": "SHORT_ANSWER",
-            "facet": "RECOGNITION",
-            "question": "Quelles sont les deux files que sert la boucle d'événements, et qu'est-ce qui alimente chacune ?",
-            "answerKey": "Les tâches, alimentées par les minuteries et les événements, et les microtâches, alimentées par les promesses et `queueMicrotask`. Nommer une seule des deux files ne suffit pas.",
-            "options": null,
-            "correctIndex": null
-          },
-          {
-            "format": "EXPLAIN",
-            "facet": "MECHANISM",
-            "question": "Décris l'ordre dans lequel les deux files sont servies au cours d'un tour de boucle.",
-            "answerKey": "Une tâche est prise et exécutée jusqu'au bout, puis la file des microtâches est vidée entièrement — y compris celles ajoutées pendant qu'on la vide — avant que la tâche suivante ne démarre. Une réponse qui alterne une tâche puis une microtâche décrit autre chose.",
-            "options": null,
-            "correctIndex": null
-          },
-          {
-            "format": "TRUE_FALSE",
-            "facet": "BOUNDARY",
-            "question": "Un `setTimeout(…, 0)` écrit avant une promesse déjà résolue s'exécute avant la suite de cette promesse.",
-            "answerKey": "Faux. L'ordre d'écriture ne compte pas : la file des microtâches est vidée avant que la tâche de la minuterie ne soit prise, quel que soit le délai demandé.",
-            "options": null,
-            "correctIndex": null
-          },
-          {
-            "format": "MCQ",
-            "facet": "APPLICATION",
-            "question": "Une fonction planifie un rendu avec `setTimeout(peindre, 0)`, puis enchaîne mille promesses résolues. Quand `peindre` s'exécute-t-il ?",
-            "answerKey": "Après les mille promesses, la file des microtâches étant vidée en entier d'abord.",
+        "recognition": {
+          "format": "SHORT_ANSWER",
+          "question": "Quelles sont les deux files que sert la boucle d'événements, et qu'est-ce qui alimente chacune ?",
+          "answerKey": "Les tâches, alimentées par les minuteries et les événements, et les microtâches, alimentées par les promesses et `queueMicrotask`. Nommer une seule des deux files ne suffit pas."
+        },
+        "mechanism": {
+          "format": "EXPLAIN",
+          "question": "Décris l'ordre dans lequel les deux files sont servies au cours d'un tour de boucle.",
+          "answerKey": "Une tâche est prise et exécutée jusqu'au bout, puis la file des microtâches est vidée entièrement — y compris celles ajoutées pendant qu'on la vide — avant que la tâche suivante ne démarre. Une réponse qui alterne une tâche puis une microtâche décrit autre chose."
+        },
+        "boundary": {
+          "format": "TRUE_FALSE",
+          "question": "Un `setTimeout(…, 0)` écrit avant une promesse déjà résolue s'exécute avant la suite de cette promesse.",
+          "answerKey": "Faux. L'ordre d'écriture ne compte pas : la file des microtâches est vidée avant que la tâche de la minuterie ne soit prise, quel que soit le délai demandé."
+        },
+        "application": {
+          "format": "MCQ",
+          "question": "Une fonction planifie un rendu avec `setTimeout(peindre, 0)`, puis enchaîne mille promesses résolues. Quand `peindre` s'exécute-t-il ?",
+          "answerKey": "Après les mille promesses, la file des microtâches étant vidée en entier d'abord.",
+          "mcq": {
             "options": [
               "Après les mille promesses, la file des microtâches étant vidée en entier d'abord.",
               "Avant les promesses, puisque la minuterie a été planifiée en premier.",
@@ -87,7 +67,7 @@
             ],
             "correctIndex": 0
           }
-        ]
+        }
       }
     }
   ]
