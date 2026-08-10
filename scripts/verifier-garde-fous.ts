@@ -15,13 +15,10 @@ const realFetch = globalThis.fetch;
 
 function trippedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const url = typeof input === "string" ? input : input.toString();
+  if (!url.includes("anthropic.com")) return realFetch(input, init);
 
-  if (url.includes("anthropic.com")) {
-    networkAttempts.push(url);
-    return Promise.reject(new Error(`Requête sortante interdite pendant la vérification : ${url}`));
-  }
-
-  return realFetch(input, init);
+  networkAttempts.push(url);
+  return Promise.reject(new Error(`Requête sortante interdite pendant la vérification : ${url}`));
 }
 
 globalThis.fetch = trippedFetch;
@@ -73,12 +70,24 @@ async function main(): Promise<void> {
     purpose: "extract_atoms",
     schema: extractAtomsSchema,
     system: "",
-    messages: [{ role: "user", content: "x".repeat(1_200) }],
+    messages: [{ role: "user", content: "x".repeat(2_000) }],
   });
   record(
-    "Mock — un pavé produit six Atoms",
-    long.atoms.length === 6,
+    "Mock — un article produit huit Atoms",
+    long.atoms.length === 8,
     `${long.atoms.length} Atom(s)`,
+  );
+
+  const courses = await callAI({
+    purpose: "extract_atoms",
+    schema: extractAtomsSchema,
+    system: "",
+    messages: [{ role: "user", content: "Ma liste de courses : lentilles corail, pain, café." }],
+  });
+  record(
+    "Mock — une liste de courses ne donne aucun Atom mais un motif",
+    courses.atoms.length === 0 && courses.rejected !== null,
+    courses.rejected ?? "aucun motif",
   );
 
   const variants = await callAI({
@@ -87,11 +96,11 @@ async function main(): Promise<void> {
     system: "",
     messages: [{ role: "user", content: "y".repeat(400) }],
   });
-  const formats = new Set(variants.variants.map((variant) => variant.format));
+  const facets = new Set(variants.variants.map((variant) => variant.facet));
   record(
-    "Mock — les Variants ont des formats différents",
-    variants.variants.length >= 3 && formats.size === variants.variants.length,
-    `${variants.variants.length} Variants, ${formats.size} formats`,
+    "Mock — quatre Variants sur quatre facettes distinctes",
+    variants.variants.length === 4 && facets.size === 4,
+    `${variants.variants.length} Variants, ${facets.size} facettes`,
   );
 
   const ocr = await callAI({
@@ -101,14 +110,14 @@ async function main(): Promise<void> {
     messages: [{ role: "user", content: "Lis cette capture." }],
   });
   record(
-    "Mock — l'OCR rend du texte et un niveau de confiance",
-    ocr.text.length > 0,
-    ocr.confidence,
+    "Mock — l'OCR rend du texte exploitable et sa langue",
+    ocr.usable && ocr.extractedText.length > 0,
+    ocr.language,
   );
 
   await expectFailure("Une fixture hors schéma est refusée", "AI_INVALID_OUTPUT", async () => {
     const { loadFixture } = await import("@/lib/ai/fixtures");
-    return loadFixture("extract_atoms", ocrExtractSchema, 0);
+    return loadFixture("extract_atoms", ocrExtractSchema, "");
   });
 
   process.env.AI_ENABLED = "false";

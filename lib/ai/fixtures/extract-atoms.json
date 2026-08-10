@@ -1,67 +1,141 @@
 {
   "cases": [
     {
-      "name": "phrase-isolee",
+      "name": "liste-de-courses",
+      "keywords": ["liste de courses", "lentilles corail"],
+      "output": {
+        "atoms": [],
+        "rejected": "C'est une liste de courses : il n'y a pas de connaissance à te reposer plus tard. Dépose plutôt une règle, un mécanisme ou une explication que tu veux garder."
+      }
+    },
+    {
+      "name": "affirmation-fausse",
+      "keywords": ["concurrently"],
+      "output": {
+        "atoms": [
+          {
+            "concept": "`CREATE INDEX CONCURRENTLY` pose un verrou exclusif sur la table pendant toute la construction de l'index, ce qui bloque les écritures.",
+            "tags": ["postgres", "index"],
+            "uncertain": true
+          },
+          {
+            "concept": "Un `CREATE INDEX CONCURRENTLY` interrompu laisse un index invalide en base. Il faut le supprimer avant de relancer la construction.",
+            "tags": ["postgres", "index"],
+            "uncertain": false
+          }
+        ],
+        "rejected": null
+      }
+    },
+    {
+      "name": "explication-maladroite",
+      "keywords": ["ça repart en boucle"],
+      "output": {
+        "atoms": [
+          {
+            "concept": "La fonction rendue par un `useEffect` est appelée avant chaque réexécution de l'effet et au démontage du composant. C'est là qu'on défait ce que l'effet a mis en place.",
+            "tags": ["react", "useeffect"],
+            "uncertain": false
+          },
+          {
+            "concept": "Un effet qui pose un abonnement sans le retirer dans sa fonction de nettoyage en accumule un par exécution. Les abonnements des rendus précédents continuent de répondre.",
+            "tags": ["react", "useeffect"],
+            "uncertain": false
+          },
+          {
+            "concept": "Une fonction ou un objet recréé à chaque rendu et placé dans le tableau de dépendances d'un effet change d'identité à chaque fois, donc l'effet se rejoue à chaque rendu.",
+            "tags": ["react", "useeffect"],
+            "uncertain": false
+          }
+        ],
+        "rejected": null
+      }
+    },
+    {
+      "name": "phrase-courte",
       "minInputChars": 0,
       "output": {
         "atoms": [
           {
             "concept": "`Array.prototype.at()` accepte un index négatif, compté depuis la fin du tableau : `at(-1)` rend le dernier élément.",
-            "tags": ["javascript", "tableaux"]
+            "tags": ["javascript", "tableaux"],
+            "uncertain": false
           }
-        ]
+        ],
+        "rejected": null
       }
     },
     {
-      "name": "note-courte",
+      "name": "paragraphe-technique",
       "minInputChars": 300,
       "output": {
         "atoms": [
           {
             "concept": "Chaque instruction d'un Dockerfile produit une couche. Une couche n'est réutilisée que si toutes celles qui la précèdent sont inchangées, d'où l'intérêt de copier le manifeste de dépendances avant le code source.",
-            "tags": ["docker", "cache"]
+            "tags": ["docker", "cache"],
+            "uncertain": false
           },
           {
             "concept": "`COPY` se contente de copier des fichiers du contexte de build. `ADD` y ajoute la décompression d'archives et le téléchargement d'URL, deux comportements implicites qui rendent le build moins prévisible.",
-            "tags": ["docker", "dockerfile"]
+            "tags": ["docker", "dockerfile"],
+            "uncertain": false
           },
           {
             "concept": "Un build multi-étapes compile dans une image outillée puis ne copie que le résultat dans une image finale minimale. Les outils de compilation ne se retrouvent pas dans l'image livrée.",
-            "tags": ["docker", "multistage"]
+            "tags": ["docker", "multistage"],
+            "uncertain": false
           }
-        ]
+        ],
+        "rejected": null
       }
     },
     {
-      "name": "pave",
-      "minInputChars": 900,
+      "name": "article-colle",
+      "minInputChars": 1500,
       "output": {
         "atoms": [
           {
-            "concept": "La résolution d'une promesse place sa suite dans la file des microtâches, vidée entièrement entre deux macrotâches. Un `setTimeout(…, 0)` s'exécute donc après toutes les promesses déjà résolues.",
-            "tags": ["javascript", "eventloop"]
+            "concept": "JavaScript exécute une seule pile d'appels à la fois. Tant qu'une fonction n'a pas rendu la main, rien d'autre ne s'exécute : ni minuterie échue, ni promesse résolue, ni gestionnaire d'événement.",
+            "tags": ["javascript", "eventloop"],
+            "uncertain": false
           },
           {
-            "concept": "Une promesse ne se règle qu'une fois. Les appels à `resolve` ou `reject` qui suivent le premier sont ignorés sans erreur.",
-            "tags": ["javascript", "promesses"]
+            "concept": "La boucle d'événements sépare deux files : les tâches, alimentées par les minuteries et les événements, et les microtâches, alimentées par les promesses et `queueMicrotask`.",
+            "tags": ["javascript", "eventloop"],
+            "uncertain": false
           },
           {
-            "concept": "`Promise.all` rejette dès le premier échec et perd les résultats des autres. `Promise.allSettled` attend tout le monde et rend un statut par entrée.",
-            "tags": ["javascript", "promesses"]
+            "concept": "La file des microtâches est vidée entièrement entre deux tâches, y compris les microtâches ajoutées pendant qu'on la vide. Un `setTimeout(…, 0)` s'exécute donc après toutes les promesses déjà résolues.",
+            "tags": ["javascript", "eventloop"],
+            "uncertain": false
           },
           {
-            "concept": "`Promise.race` se règle avec la première promesse réglée, succès ou échec. Les autres continuent de tourner : elle n'annule rien.",
-            "tags": ["javascript", "promesses"]
+            "concept": "Une boucle de promesses qui se réenchaînent sans fin remplit la file des microtâches en continu. La page ne rend plus rien et ne répond plus, alors qu'aucune boucle bloquante n'est visible dans le code.",
+            "tags": ["javascript", "eventloop"],
+            "uncertain": false
           },
           {
-            "concept": "`await` ne capture une erreur que si l'appel est dans le bloc `try`. Une promesse créée avant le `try` et attendue dedans échappe au `catch` si elle rejette avant l'entrée du bloc.",
-            "tags": ["javascript", "async"]
+            "concept": "Le délai passé à `setTimeout` est un minimum, pas une garantie : le rappel part quand la pile est vide et que les microtâches sont épuisées, ce qui peut être bien après le délai demandé.",
+            "tags": ["javascript", "timers"],
+            "uncertain": false
           },
           {
-            "concept": "Une promesse rejetée sans gestionnaire déclenche `unhandledrejection` dans le navigateur et fait tomber le processus Node par défaut depuis la version 15.",
-            "tags": ["javascript", "erreurs"]
+            "concept": "`await` découpe la fonction en deux : ce qui suit l'attente devient une microtâche planifiée à la résolution de la promesse. Le code appelant reprend la main entre les deux moitiés.",
+            "tags": ["javascript", "async"],
+            "uncertain": false
+          },
+          {
+            "concept": "`Promise.all` rejette dès le premier échec et perd les résultats des autres promesses, qui continuent pourtant de tourner. `Promise.allSettled` attend tout le monde et rend un statut par entrée.",
+            "tags": ["javascript", "promesses"],
+            "uncertain": false
+          },
+          {
+            "concept": "Une promesse rejetée sans gestionnaire déclenche `unhandledrejection` dans le navigateur et fait tomber le processus Node par défaut. Attacher le `catch` plus tard dans le même tour de boucle suffit à l'éviter.",
+            "tags": ["javascript", "erreurs"],
+            "uncertain": false
           }
-        ]
+        ],
+        "rejected": null
       }
     }
   ]

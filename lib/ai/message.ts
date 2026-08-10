@@ -26,17 +26,16 @@ export type AiMessage = {
   content: string | AiContentPart[];
 };
 
-/** Longueur du texte soumis, utilisée par le mode mock pour choisir sa fixture. */
-export function textLength(messages: AiMessage[]): number {
-  return messages.reduce((total, message) => {
-    if (typeof message.content === "string") return total + message.content.length;
-
-    return (
-      total +
-      message.content.reduce(
-        (subtotal, part) => subtotal + (part.type === "text" ? part.text.length : 0),
-        0,
-      )
-    );
-  }, 0);
+/** Le texte soumis, mis bout à bout. Le mode mock y choisit sa fixture. */
+export function flattenText(messages: AiMessage[]): string {
+  return messages
+    .map((message) =>
+      typeof message.content === "string"
+        ? message.content
+        : message.content
+            .filter((part): part is AiTextPart => part.type === "text")
+            .map((part) => part.text)
+            .join("\n"),
+    )
+    .join("\n");
 }
