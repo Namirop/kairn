@@ -69,6 +69,28 @@ const OUVERTURE_REPRISE = /^(il|elle|ils|elles|cela|ça|celui|celle|ceux|celles|
 const OUVERTURE_IMPERSONNELLE =
   /^il (faut|existe|est|y a|n'y a|s'agit|suffit|vaut|arrive|reste)\b/i;
 
+/**
+ * Ce qui déclenche la règle CODE du prompt : une citation, pas un jugement sur
+ * le sujet. Un fragment entre accents graves, ou un appel écrit tel qu'on
+ * l'écrirait dans un fichier — `at(-1)`, `Promise.all(`.
+ *
+ * Sert à mesurer, pas à sanctionner : on veut savoir combien de concepts
+ * déclenchent la règle et combien de lots la respectent. Une question CODE
+ * posée pour respecter une règle plutôt que pour éprouver quelque chose ne se
+ * verra qu'à l'œil.
+ */
+const CITATIONS_DE_CODE = [
+  /`[^`]+`/, // un fragment entre accents graves
+  /\b[A-Za-z_$][\w$]*\(/, // un appel : at(, Promise.all(
+  /\b[a-z][\w$]*[A-Z][\w$]*/, // un identifiant en casse mixte : setTimeout, useEffect
+  /\b[A-Z][A-Z_]{2,}\b/, // une instruction ou une variable : COPY, DATABASE_URL
+  /\b[A-Za-z_$][\w$]*\.[A-Za-z_$][\w$]*/, // un chemin pointé : Promise.all
+];
+
+export function citeDuCode(concept: string): boolean {
+  return CITATIONS_DE_CODE.some((marqueur) => marqueur.test(concept));
+}
+
 function motsNormalises(texte: string): string {
   return ` ${texte
     .normalize("NFD")

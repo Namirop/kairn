@@ -1,4 +1,4 @@
-import { FACETTES_ATTENDUES } from "@/lib/domain/controle-generation";
+import { citeDuCode, FACETTES_ATTENDUES } from "@/lib/domain/controle-generation";
 import type { ConsommationFenetre } from "@/lib/db/ai-call";
 import type { DepotEvalue } from "./execution";
 
@@ -63,5 +63,27 @@ export function rendreRepartition(passages: Passage[]): string[] {
     `| --- | ${FORMATS.map(() => "---").join(" | ")} |`,
     ...lignes,
     "",
+    mesureDuCode(passages),
+    "",
   ];
+}
+
+/**
+ * Deux nombres, pas un contrôle.
+ *
+ * La règle CODE se déclenche désormais sur une citation dans le concept, ce qui
+ * est observable — mais un déclencheur trop large remplacerait un verrou par un
+ * autre. Ces deux nombres disent si c'est arrivé ; savoir si la question CODE
+ * éprouve quelque chose ou respecte une règle, ça se juge à l'œil.
+ */
+function mesureDuCode(passages: Passage[]): string {
+  const lots = passages
+    .flatMap((passage) => passage.evaluation.concepts)
+    .filter((concept) => !concept.echec && !concept.misDeCote);
+  const declenchent = lots.filter((concept) => citeDuCode(concept.concept.concept));
+  const porteurs = declenchent.filter((concept) =>
+    concept.variants.some((variant) => variant.format === "CODE"),
+  );
+
+  return `CODE : ${declenchent.length} des ${lots.length} lots partent d'un concept qui cite du code, ${porteurs.length} en portent une question.`;
 }
