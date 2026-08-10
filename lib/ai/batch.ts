@@ -6,7 +6,8 @@ import { apercuBrut } from "./diagnostic";
 import { AIDisabledError, AIQuotaError } from "./errors";
 import { loadFixture } from "./fixtures";
 import { lireSortieStructuree } from "./lecture";
-import { flattenText, toSdkMessage, type AiMessage } from "./message";
+import { deposerLotSimule, lotSimulePresent, releverLotSimule } from "./lot-simule";
+import { toSdkMessage, type AiMessage } from "./message";
 import { toOutputSchema } from "./output-schema";
 import { computeCostUsd } from "./pricing";
 import type { AiContract } from "./schemas";
@@ -39,23 +40,6 @@ export type ResultatGroupe<T> =
 export type LotSoumis = { providerId: string; requetes: number };
 
 /**
- * Les lots servis en mode mock, le temps que le relevé vienne les chercher.
- *
- * Ils vivent en mémoire du processus : si celui-ci est recyclé entre la
- * soumission et la relève, le lot est perdu et le cron le signalera comme un
- * lot resté sans réponse. C'est exactement ce qu'on veut voir arriver en
- * développement, puisque c'est ce qui peut arriver en vrai.
- */
-const LOTS_SIMULES = new Map<string, { reference: string; texte: string }[]>();
-
-function resoudreEnMock<T>(requetes: RequeteGroupee<T>[]): { reference: string; texte: string }[] {
-  return requetes.map((requete) => ({
-    reference: requete.reference,
-    texte: flattenText(requete.messages),
-  }));
-}
-
-/**
  * Soumet le lot et rend son identifiant. Les places au plafond sont prises ici,
  * toutes ensemble : un lot à moitié réservé n'aurait aucun sens.
  */
@@ -64,17 +48,17 @@ export async function submitAIBatch<T>(requetes: RequeteGroupee<T>[]): Promise<L
 
   if (!config.enabled) throw new AIDisabledError();
 
+  // Le mode mock passe avant la réservation, comme dans `callAI` : un lot simulé
+  // ne dépense rien, il ne doit donc pas entamer le budget du jour. Sinon une
+  // journée de développement viderait le plafond sans qu'un appel soit parti.
+  if (config.mock) {
+    return { providerId: deposerLotSimule(requetes), requetes: requetes.length };
+  }
+
   const reservation = await reserverAppelsModele(config.dailyCallCap, requetes.length);
 
   if (!reservation.obtenue) {
     throw new AIQuotaError(reservation.utilisees, config.dailyCallCap);
-  }
-
-  if (config.mock) {
-    const providerId = `mock_batch_${Date.now()}_${LOTS_SIMULES.size}`;
-    LOTS_SIMULES.set(providerId, resoudreEnMock(requetes));
-
-    return { providerId, requetes: requetes.length };
   }
 
   const lot = await sdkFor(config).messages.batches.create({
@@ -98,7 +82,7 @@ export async function submitAIBatch<T>(requetes: RequeteGroupee<T>[]): Promise<L
 export async function batchTermine(providerId: string): Promise<boolean> {
   const config = readAiConfig();
 
-  if (config.mock) return LOTS_SIMULES.has(providerId);
+  if (config.mock) return lotSimulePresent(providerId);
 
   const lot = await sdkFor(config).messages.batches.retrieve(providerId);
 
@@ -128,10 +112,7 @@ export async function readAIBatch<T>(
   const config = readAiConfig();
 
   if (config.mock) {
-    const simule = LOTS_SIMULES.get(providerId) ?? [];
-    LOTS_SIMULES.delete(providerId);
-
-    return simule.map(({ reference, texte }) => {
+    return releverLotSimule(providerId).map(({ reference, texte }) => {
       try {
         return { reference, valeur: loadFixture(contract, texte) };
       } catch (erreur) {
