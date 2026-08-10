@@ -20,12 +20,14 @@ export const CORPUS_WEB: SeedInput[] = [
         variants: [
           {
             format: "SHORT_ANSWER",
+            facet: "RECOGNITION",
             question: "Qu'est-ce que `content-visibility: auto` fait sauter au navigateur ?",
             answerKey:
               "Le layout et la peinture de l'élément, tant qu'il n'approche pas de la fenêtre. Le nœud reste dans le DOM et reste trouvable.",
           },
           {
             format: "TRUE_FALSE",
+            facet: "BOUNDARY",
             question:
               "Avec `content-visibility: auto`, l'élément est retiré du DOM tant qu'il est hors écran.",
             answerKey: "Faux",
@@ -33,6 +35,7 @@ export const CORPUS_WEB: SeedInput[] = [
           },
           {
             format: "MCQ",
+            facet: "APPLICATION",
             question: "Quel effet de bord faut-il compenser, et avec quoi ?",
             answerKey:
               "La hauteur devient nulle avant rendu : on la déclare avec `contain-intrinsic-size`.",
@@ -71,12 +74,14 @@ ETag: "<empreinte>" — le client renvoie la valeur en If-None-Match ; le serveu
         variants: [
           {
             format: "SHORT_ANSWER",
+            facet: "MECHANISM",
             question: "À partir de quel instant `max-age` est-il compté ?",
             answerKey:
               "Depuis la génération de la réponse par le serveur, pas depuis sa réception. L'en-tête `Age` dit le temps déjà consommé dans les caches intermédiaires.",
           },
           {
             format: "MCQ",
+            facet: "APPLICATION",
             question:
               "Une réponse porte `max-age=600` et `Age: 550`. Combien lui reste-t-il de fraîcheur ?",
             answerKey: "50 secondes",
@@ -84,6 +89,7 @@ ETag: "<empreinte>" — le client renvoie la valeur en If-None-Match ; le serveu
           },
           {
             format: "TRUE_FALSE",
+            facet: "BOUNDARY",
             question: "`max-age` se compte à partir du moment où le client reçoit la réponse.",
             answerKey: "Faux",
             payload: { statement: "à partir de la réception", expected: false },
@@ -103,12 +109,14 @@ ETag: "<empreinte>" — le client renvoie la valeur en If-None-Match ; le serveu
         variants: [
           {
             format: "SHORT_ANSWER",
+            facet: "RECOGNITION",
             question: "Qui profite de `stale-while-revalidate`, et comment ?",
             answerKey:
               "Le premier visiteur après expiration : il reçoit la version périmée immédiatement, la revalidation se fait derrière lui.",
           },
           {
             format: "EXPLAIN",
+            facet: "MECHANISM",
             question:
               "Explique pourquoi `stale-while-revalidate` change la forme du pic de charge sur l'origine.",
             answerKey:
@@ -116,6 +124,7 @@ ETag: "<empreinte>" — le client renvoie la valeur en If-None-Match ; le serveu
           },
           {
             format: "TRUE_FALSE",
+            facet: "BOUNDARY",
             question:
               "Pendant la fenêtre `stale-while-revalidate`, le client attend la réponse revalidée.",
             answerKey: "Faux",
@@ -138,12 +147,14 @@ ETag: "<empreinte>" — le client renvoie la valeur en If-None-Match ; le serveu
         variants: [
           {
             format: "SHORT_ANSWER",
+            facet: "MECHANISM",
             question: "Quel en-tête le client envoie-t-il pour faire valider son `ETag` ?",
             answerKey:
               "`If-None-Match`. Le serveur répond `304` sans corps si l'empreinte correspond.",
           },
           {
             format: "MCQ",
+            facet: "RECOGNITION",
             question: "Que contient le corps d'une réponse `304 Not Modified` ?",
             answerKey: "Rien : le corps est vide, le client réutilise sa copie.",
             payload: {
@@ -157,6 +168,7 @@ ETag: "<empreinte>" — le client renvoie la valeur en If-None-Match ; le serveu
           },
           {
             format: "EXPLAIN",
+            facet: "BOUNDARY",
             question: "Quand un `ETag` faible (`W/`) suffit-il, et quand faut-il un fort ?",
             answerKey:
               "Un ETag faible affirme une équivalence sémantique et suffit au cache. Un ETag fort affirme une identité octet par octet : il est exigé pour les requêtes par intervalle.",

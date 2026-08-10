@@ -27,6 +27,7 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
         variants: [
           {
             format: "MCQ",
+            facet: "APPLICATION",
             question: "Laquelle de ces requêtes un B-tree sur `créé_le` ne sert-il pas ?",
             answerKey: "`WHERE tags @> ARRAY['css']`",
             payload: {
@@ -40,11 +41,13 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
           },
           {
             format: "SHORT_ANSWER",
+            facet: "RECOGNITION",
             question: "Quels trois usages un B-tree couvre-t-il ?",
             answerKey: "L'égalité, l'intervalle et le tri sur la colonne indexée.",
           },
           {
             format: "TRUE_FALSE",
+            facet: "BOUNDARY",
             question:
               "Un B-tree sur une colonne JSONB permet de chercher une clé à l'intérieur du document.",
             answerKey: "Faux",
@@ -66,12 +69,14 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
         variants: [
           {
             format: "SHORT_ANSWER",
+            facet: "RECOGNITION",
             question: "Qu'indexe un GIN qu'un B-tree n'indexe pas ?",
             answerKey:
               "Les éléments contenus dans la valeur : chaque entrée d'un tableau, chaque clé d'un JSONB, chaque lexème d'un tsvector.",
           },
           {
             format: "CODE",
+            facet: "APPLICATION",
             question:
               "Écris l'index qui sert `SELECT * FROM \"Atom\" WHERE tags @> ARRAY['postgres']`.",
             answerKey: 'CREATE INDEX ON "Atom" USING GIN (tags);',
@@ -79,6 +84,7 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
           },
           {
             format: "EXPLAIN",
+            facet: "MECHANISM",
             question: "Pourquoi un GIN est-il plus lent à écrire qu'un B-tree ?",
             answerKey:
               "Une seule ligne produit autant d'entrées d'index qu'elle contient d'éléments. Chaque insertion touche donc plusieurs endroits de l'index.",
@@ -94,6 +100,7 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
         variants: [
           {
             format: "MCQ",
+            facet: "BOUNDARY",
             question: "Avec un index sur `(userId, due)`, quelle requête ne l'utilise pas ?",
             answerKey: "`WHERE due < now()`",
             payload: {
@@ -107,12 +114,14 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
           },
           {
             format: "SHORT_ANSWER",
+            facet: "MECHANISM",
             question: "Quelle règle décide de l'ordre des colonnes d'un index composite ?",
             answerKey:
               "Les colonnes filtrées par égalité d'abord, la colonne d'intervalle ou de tri ensuite. Seul un préfixe de gauche est servi.",
           },
           {
             format: "EXPLAIN",
+            facet: "APPLICATION",
             question: "Faut-il un second index sur `due` seul si `(userId, due)` existe déjà ?",
             answerKey:
               "Seulement si une requête filtre sur `due` sans `userId`. Dans Cairn la requête chaude porte toujours les deux : le composite suffit.",
@@ -131,6 +140,7 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
         variants: [
           {
             format: "CODE",
+            facet: "APPLICATION",
             question:
               "Écris l'index qui sert la reprise des jobs restés en attente, sachant qu'ils sont rares.",
             answerKey: 'CREATE INDEX ON "GenerationJob" ("createdAt") WHERE status = \'QUEUED\';',
@@ -138,12 +148,14 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
           },
           {
             format: "SHORT_ANSWER",
+            facet: "MECHANISM",
             question: "Quand un index partiel est-il rentable ?",
             answerKey:
               "Quand la condition ne retient qu'une petite part de la table et que toutes les requêtes visées la portent aussi.",
           },
           {
             format: "TRUE_FALSE",
+            facet: "BOUNDARY",
             question:
               "Une requête sans la clause `WHERE` de l'index partiel peut quand même s'en servir.",
             answerKey: "Faux",

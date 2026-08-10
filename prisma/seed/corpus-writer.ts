@@ -24,6 +24,7 @@ async function writeVariants(atomId: string, atom: SeedAtom, reviews: ReplayedRe
         data: {
           atomId,
           format: variant.format,
+          facet: variant.facet,
           question: variant.question,
           answerKey: variant.answerKey,
           payload: variant.payload,

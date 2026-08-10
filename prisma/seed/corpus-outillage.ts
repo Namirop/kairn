@@ -22,6 +22,7 @@ unknown force à restreindre avant usage. any supprime la vérification.`,
         variants: [
           {
             format: "CODE",
+            facet: "APPLICATION",
             question:
               '`const routes = { accueil: "/", session: "/session" }`. Comment contraindre les valeurs à `string` sans perdre les clés littérales ?',
             answerKey:
@@ -30,12 +31,14 @@ unknown force à restreindre avant usage. any supprime la vérification.`,
           },
           {
             format: "SHORT_ANSWER",
+            facet: "BOUNDARY",
             question: "Que perd-on en écrivant `const x: Record<string, string> = { … }` ?",
             answerKey:
               "Les clés et les valeurs littérales : le type devient `Record<string, string>` et `keyof typeof x` devient `string`.",
           },
           {
             format: "TRUE_FALSE",
+            facet: "RECOGNITION",
             question: "`satisfies` modifie le type inféré de la valeur.",
             answerKey: "Faux",
             payload: { statement: "satisfies modifie l'inférence", expected: false },
@@ -56,18 +59,21 @@ unknown force à restreindre avant usage. any supprime la vérification.`,
         variants: [
           {
             format: "SHORT_ANSWER",
+            facet: "RECOGNITION",
             question: "Que peut-on faire d'une valeur `unknown` sans la restreindre ?",
             answerKey:
               "La comparer, la réaffecter, la passer à quelque chose qui accepte `unknown`. Aucun accès de propriété ni appel.",
           },
           {
             format: "EXPLAIN",
+            facet: "MECHANISM",
             question: "Pourquoi préférer `unknown` à `any` pour la réponse d'une API ?",
             answerKey:
               "`unknown` force à passer par une validation avant usage. `any` laisse le code compiler sur une forme qui n'existe peut-être pas, et l'erreur ne sort qu'à l'exécution.",
           },
           {
             format: "MCQ",
+            facet: "APPLICATION",
             question: "Laquelle de ces lignes compile ?",
             answerKey: '`const v: unknown = fetchJson(); if (typeof v === "string") v.trim();`',
             payload: {
@@ -102,18 +108,21 @@ unknown force à restreindre avant usage. any supprime la vérification.`,
         variants: [
           {
             format: "SHORT_ANSWER",
+            facet: "MECHANISM",
             question: "Que deviennent les identifiants des commits après un rebase ?",
             answerKey:
               "Ils changent : les commits sont recréés sur la nouvelle base. Les anciens restent atteignables par le reflog jusqu'au nettoyage.",
           },
           {
             format: "TRUE_FALSE",
+            facet: "RECOGNITION",
             question: "Un rebase conserve les identifiants des commits rejoués.",
             answerKey: "Faux",
             payload: { statement: "identifiants conservés", expected: false },
           },
           {
             format: "EXPLAIN",
+            facet: "BOUNDARY",
             question: "Pourquoi éviter de rebaser une branche déjà partagée ?",
             answerKey:
               "Les commits rejoués remplacent des commits que d'autres ont déjà en local. Leur prochain `pull` verra deux historiques divergents pour le même travail.",
@@ -133,6 +142,7 @@ unknown force à restreindre avant usage. any supprime la vérification.`,
         variants: [
           {
             format: "CODE",
+            facet: "APPLICATION",
             question: "Tu viens de perdre un commit avec `git reset --hard HEAD~3`. Récupère-le.",
             answerKey:
               "git reflog                  # repérer la ligne d'avant le reset, ex. HEAD@{1}\ngit reset --hard HEAD@{1}   # ou : git branch sauvetage <sha>",
@@ -140,11 +150,13 @@ unknown force à restreindre avant usage. any supprime la vérification.`,
           },
           {
             format: "SHORT_ANSWER",
+            facet: "BOUNDARY",
             question: "Le reflog est-il partagé avec le dépôt distant ?",
             answerKey: "Non. Il est local au clone et il expire, par défaut au bout de 90 jours.",
           },
           {
             format: "MCQ",
+            facet: "RECOGNITION",
             question: "Que note le reflog ?",
             answerKey: "Les positions successives de `HEAD` et des branches locales.",
             payload: {

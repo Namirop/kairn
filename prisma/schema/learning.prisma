@@ -70,6 +70,9 @@ model Variant {
   atom   Atom   @relation(fields: [atomId], references: [id], onDelete: Cascade)
 
   format    VariantFormat
+  /// L'angle interrogé. La rotation sert une facette différente à chaque
+  /// passage : c'est elle qui empêche de réciter, pas le changement de format.
+  facet     VariantFacet
   question  String        @db.Text
   answerKey String        @db.Text
   /// Données propres au format : options d'un QCM, langage d'un extrait de code.

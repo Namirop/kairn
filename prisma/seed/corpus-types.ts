@@ -1,4 +1,10 @@
-import type { AtomState, InputSourceType, ReviewRating, VariantFormat } from "@/lib/db/types";
+import type {
+  AtomState,
+  InputSourceType,
+  ReviewRating,
+  VariantFacet,
+  VariantFormat,
+} from "@/lib/db/types";
 
 /** Un passage passé : il y a combien de jours, et avec quelle notation. */
 export type SeedReview = readonly [daysAgo: number, rating: ReviewRating];
@@ -7,6 +13,8 @@ type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string
 
 export type SeedVariant = {
   format: VariantFormat;
+  /** L'angle interrogé. Les Variants d'un même Atom en portent des différents. */
+  facet: VariantFacet;
   question: string;
   answerKey: string;
   /** Options d'un QCM, langage d'un extrait de code. */

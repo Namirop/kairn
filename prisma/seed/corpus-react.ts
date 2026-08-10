@@ -26,12 +26,14 @@ export const CORPUS_REACT: SeedInput[] = [
         variants: [
           {
             format: "SHORT_ANSWER",
+            facet: "RECOGNITION",
             question: "Que reçoit le navigateur d'un Server Component ?",
             answerKey:
               "Le résultat de son rendu, sérialisé. Ni son code, ni les librairies qu'il importe ne rejoignent le bundle.",
           },
           {
             format: "EXPLAIN",
+            facet: "APPLICATION",
             question:
               "Une dépendance lourde n'est utilisée que dans un Server Component. Quel est son coût pour le client ?",
             answerKey:
@@ -39,6 +41,7 @@ export const CORPUS_REACT: SeedInput[] = [
           },
           {
             format: "TRUE_FALSE",
+            facet: "BOUNDARY",
             question: "Un Server Component peut appeler `useState`.",
             answerKey: "Faux",
             payload: { statement: "useState dans un Server Component", expected: false },
@@ -59,12 +62,14 @@ export const CORPUS_REACT: SeedInput[] = [
         variants: [
           {
             format: "SHORT_ANSWER",
+            facet: "RECOGNITION",
             question: "Jusqu'où porte un `\"use client\"` placé en haut d'un fichier ?",
             answerKey:
               "Sur le fichier et sur tout ce qu'il importe. Ce n'est pas une marque locale au composant : c'est l'entrée d'un sous-arbre client.",
           },
           {
             format: "CODE",
+            facet: "APPLICATION",
             question:
               "Un Client Component doit afficher un Server Component au milieu de sa mise en page. Écris la forme qui marche.",
             answerKey:
@@ -73,6 +78,7 @@ export const CORPUS_REACT: SeedInput[] = [
           },
           {
             format: "MCQ",
+            facet: "BOUNDARY",
             question: "Quelle forme ne compile pas ?",
             answerKey: 'Importer et rendre un Server Component depuis un fichier `"use client"`.',
             payload: {

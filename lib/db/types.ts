@@ -14,6 +14,7 @@ export {
   JobStatus,
   NotificationType,
   ReviewRating,
+  VariantFacet,
   VariantFormat,
 } from "@/lib/db/generated/enums";
 

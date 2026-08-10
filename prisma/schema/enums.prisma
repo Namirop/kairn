@@ -38,6 +38,20 @@ enum VariantFormat {
   EXPLAIN
 }
 
+/// Angle sous lequel un Variant interroge son Atom. C'est la facette, et non le
+/// format, qui fait tourner la rotation : servir deux fois le même angle sous
+/// deux habillages ne prouve rien de plus que la première fois.
+enum VariantFacet {
+  /// De quoi s'agit-il, à quoi le reconnaît-on.
+  RECOGNITION
+  /// Pourquoi ça marche, ce qui se passe réellement.
+  MECHANISM
+  /// Ce que ce n'est pas, quand ça ne s'applique pas.
+  BOUNDARY
+  /// S'en servir dans une situation qui n'est pas celle du concept.
+  APPLICATION
+}
+
 /// Notation donnée par l'utilisateur sur une Review, alignée sur ts-fsrs.
 enum ReviewRating {
   AGAIN
