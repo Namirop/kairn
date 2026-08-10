@@ -22,21 +22,35 @@ export async function ecrireQuestions(
   atomId: string,
   questions: QuestionAEcrire[],
 ): Promise<number> {
-  const { count } = await prisma.variant.createMany({
-    data: questions.map((question) => ({
-      atomId,
-      format: question.format,
-      facet: question.facet,
-      question: question.question,
-      answerKey: question.answerKey,
-      payload:
-        question.options && question.correctIndex !== null
-          ? { options: question.options, correctIndex: question.correctIndex }
-          : undefined,
-    })),
-  });
+  // Rien à écrire : on ne retire surtout pas ce qui existe, sans quoi une
+  // régénération qui ne rend rien laisserait le concept sans aucune question.
+  if (questions.length === 0) return 0;
 
-  return count;
+  const [, ecrites] = await prisma.$transaction([
+    // Les anciennes formulations sortent du tirage à l'instant où les nouvelles
+    // arrivent, jamais avant : entre la mise en file et la relève il peut se
+    // passer des heures, et le concept doit rester révisable pendant ce temps.
+    // Elles sont retirées et non supprimées — leurs Reviews passées les citent.
+    prisma.variant.updateMany({
+      where: { atomId, retiredAt: null },
+      data: { retiredAt: new Date() },
+    }),
+    prisma.variant.createMany({
+      data: questions.map((question) => ({
+        atomId,
+        format: question.format,
+        facet: question.facet,
+        question: question.question,
+        answerKey: question.answerKey,
+        payload:
+          question.options && question.correctIndex !== null
+            ? { options: question.options, correctIndex: question.correctIndex }
+            : undefined,
+      })),
+    }),
+  ]);
+
+  return ecrites.count;
 }
 
 /** Les anciennes questions d'un concept réécrit : elles ne le décrivent plus. */

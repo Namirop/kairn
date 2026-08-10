@@ -58,6 +58,12 @@ model Atom {
   /// Distingue l'archivage décidé par l'utilisateur de celui décidé par le produit.
   archivedByUser Boolean   @default(false)
 
+  /// Quand la carte « tu maîtrises ça » a été montrée pour ce concept.
+  /// Ce qui est rare fait plaisir : sans cette trace, le même concept
+  /// rappellerait sa victoire à chaque série qui accélère, et la carte
+  /// deviendrait le bruit qu'on apprend à ignorer.
+  masterySignaledAt DateTime?
+
   // Carte ts-fsrs. Ces champs sont écrits par l'algorithme, jamais à la main.
   due           DateTime  @default(now())
   stability     Float     @default(0)
