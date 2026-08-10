@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ListeDepots } from "@/components/tableau/liste-depots";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,9 @@ export default async function PageDepots() {
             Le texte d&apos;origine n&apos;est jamais réécrit. Il reste tel que tu l&apos;as posé.
           </p>
         </div>
-        <Button disabled>Déposer</Button>
+        <Button asChild>
+          <Link href={`${ROUTES.depots}/nouveau`}>Déposer</Link>
+        </Button>
       </div>
 
       <ListeDepots

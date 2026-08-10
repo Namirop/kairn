@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db/client";
+import { listerDepots } from "@/lib/db/depots";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
-import type { AtomState, InputSourceType, InputStatus, UserStats } from "@/lib/db/types";
+import type { AtomState, UserStats } from "@/lib/db/types";
+import type { DepotListe } from "@/lib/db/depots";
 
 /**
  * Une seule lecture pour tout le tableau de bord. Les requêtes partent
@@ -15,15 +17,6 @@ export type AtomEnCours = {
   state: AtomState;
 };
 
-export type DepotRecent = {
-  id: string;
-  apercu: string;
-  sourceType: InputSourceType;
-  status: InputStatus;
-  createdAt: Date;
-  nombreAtoms: number;
-};
-
 export type TableauDeBord = {
   dusAujourdhui: number;
   /** Fuseau de l'utilisateur : toute échéance se lit dans son calendrier. */
@@ -32,11 +25,9 @@ export type TableauDeBord = {
   /** Identifiants des Atoms consolidés : une pierre chacun. */
   grainesDuCairn: string[];
   enCours: AtomEnCours[];
-  depots: DepotRecent[];
+  depots: DepotListe[];
   totalAtoms: number;
 };
-
-const APERCU = 110;
 
 export async function lireTableauDeBord(
   userId: string,
@@ -60,19 +51,7 @@ export async function lireTableauDeBord(
         take: 4,
         select: { id: true, concept: true, due: true, state: true },
       }),
-      prisma.input.findMany({
-        where: { userId },
-        orderBy: { createdAt: "desc" },
-        take: 3,
-        select: {
-          id: true,
-          rawContent: true,
-          sourceType: true,
-          status: true,
-          createdAt: true,
-          _count: { select: { atoms: true } },
-        },
-      }),
+      listerDepots(userId, 3),
       prisma.atom.count({ where: { userId } }),
     ],
   );
@@ -84,13 +63,6 @@ export async function lireTableauDeBord(
     grainesDuCairn: consolides.map((atom) => atom.id),
     enCours,
     totalAtoms,
-    depots: depots.map((depot) => ({
-      id: depot.id,
-      apercu: depot.rawContent.slice(0, APERCU).trim(),
-      sourceType: depot.sourceType,
-      status: depot.status,
-      createdAt: depot.createdAt,
-      nombreAtoms: depot._count.atoms,
-    })),
+    depots,
   };
 }

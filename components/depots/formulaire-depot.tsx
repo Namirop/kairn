@@ -1,0 +1,116 @@
+"use client";
+
+import { useActionState, useId, useRef, useState } from "react";
+import { Paperclip, X } from "lucide-react";
+import { deposerAction, type EtatDepot } from "@/app/(app)/depots/actions";
+import { Button } from "@/components/ui/button";
+
+/**
+ * Le geste de dépôt : un champ, une pièce jointe facultative, un bouton.
+ *
+ * Pas de choix de type, pas d'onglet, pas de bouton « générer » : on colle ce
+ * qu'on a et ça part. Tout le reste du produit repose sur la vitesse de ce
+ * geste-là.
+ *
+ * La clé d'envoi est tirée au montage : deux clics sur le même formulaire
+ * portent la même, et n'écrivent qu'un dépôt.
+ */
+
+const SIGNES_MAXIMUM = 8000;
+
+/** Au-delà, on montre le compteur : avant, il n'apprend rien à personne. */
+const SEUIL_COMPTEUR = 6000;
+
+export function FormulaireDepot({ restants }: { restants: number }) {
+  const [etat, action, enCours] = useActionState<EtatDepot, FormData>(deposerAction, {});
+  const [texte, setTexte] = useState("");
+  const [capture, setCapture] = useState<string | null>(null);
+  const fichier = useRef<HTMLInputElement>(null);
+  const cleEnvoi = useId();
+  const trop = texte.length > SIGNES_MAXIMUM;
+
+  return (
+    <form action={action} noValidate className="gap-pas-4 flex max-w-3xl flex-col">
+      <input type="hidden" name="cleEnvoi" value={cleEnvoi} />
+
+      <div>
+        <label htmlFor="texte" className="sr-only">
+          Ce que tu veux retenir
+        </label>
+        <textarea
+          id="texte"
+          name="texte"
+          rows={12}
+          autoFocus
+          value={texte}
+          onChange={(evenement) => setTexte(evenement.target.value)}
+          placeholder="Colle ici ce que tu veux retenir. Une phrase, un pavé, une réponse d'assistant."
+          className="p-pas-4 text-corps field-sizing-content min-h-56 w-full resize-y rounded-xs border border-stone-300 bg-stone-50 leading-relaxed text-stone-900 placeholder:text-stone-500"
+        />
+      </div>
+
+      <div className="gap-pas-4 flex flex-wrap items-center justify-between">
+        <div className="gap-pas-3 flex items-center">
+          <input
+            ref={fichier}
+            id="image"
+            name="image"
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            onChange={(evenement) => setCapture(evenement.target.files?.[0]?.name ?? null)}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => fichier.current?.click()}
+          >
+            <Paperclip aria-hidden />
+            {capture ? "Changer la capture" : "Joindre une capture"}
+          </Button>
+
+          {capture ? (
+            <span className="gap-pas-2 text-petit flex items-center text-stone-500">
+              <span className="max-w-48 truncate">{capture}</span>
+              <button
+                type="button"
+                aria-label="Retirer la capture"
+                className="rounded-xs text-stone-500 transition-colors hover:text-stone-900"
+                onClick={() => {
+                  setCapture(null);
+                  if (fichier.current) fichier.current.value = "";
+                }}
+              >
+                <X aria-hidden className="size-4" />
+              </button>
+            </span>
+          ) : null}
+        </div>
+
+        <div className="gap-pas-4 flex items-center">
+          {texte.length > SEUIL_COMPTEUR ? (
+            <span
+              className={`text-mono font-mono tabular-nums ${trop ? "text-alerte" : "text-stone-500"}`}
+            >
+              {texte.length.toLocaleString("fr-FR")} / {SIGNES_MAXIMUM.toLocaleString("fr-FR")}
+            </span>
+          ) : null}
+          <Button type="submit" disabled={enCours || trop}>
+            {enCours ? "Dépôt en cours…" : "Déposer"}
+          </Button>
+        </div>
+      </div>
+
+      {/* L'espace du message est réservé : l'apparition d'une erreur ne doit pas
+          décaler ce qui est au-dessus. */}
+      <p className="text-petit min-h-5 text-stone-500" role="status" aria-live="polite">
+        {etat.erreur ? (
+          <span className="text-alerte">{etat.erreur}</span>
+        ) : (
+          `Il te reste ${restants} ${restants === 1 ? "dépôt" : "dépôts"} aujourd'hui.`
+        )}
+      </p>
+    </form>
+  );
+}

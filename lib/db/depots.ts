@@ -1,10 +1,22 @@
 import { prisma } from "@/lib/db/client";
-import type { DepotRecent } from "@/lib/db/tableau-de-bord";
+import type { InputSourceType } from "@/lib/db/types";
+import { etatDuDepot, type EtatDepot } from "@/lib/domain/etat-depot";
+
+/** Ce que l'utilisateur a déposé, du plus récent au plus ancien. */
 
 const APERCU = 220;
 
-/** Tout ce que l'utilisateur a déposé, du plus récent au plus ancien. */
-export async function listerDepots(userId: string, limite = 50): Promise<DepotRecent[]> {
+export type DepotListe = {
+  id: string;
+  apercu: string;
+  sourceType: InputSourceType;
+  etat: EtatDepot;
+  motifEchec: string | null;
+  createdAt: Date;
+  nombreAtoms: number;
+};
+
+export async function listerDepots(userId: string, limite = 50): Promise<DepotListe[]> {
   const lignes = await prisma.input.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -12,18 +24,31 @@ export async function listerDepots(userId: string, limite = 50): Promise<DepotRe
     select: {
       id: true,
       rawContent: true,
+      extractedText: true,
       sourceType: true,
       status: true,
+      failureReason: true,
       createdAt: true,
+      jobs: {
+        where: { status: { in: ["QUEUED", "RUNNING"] } },
+        select: { kind: true },
+      },
       _count: { select: { atoms: true } },
     },
   });
 
   return lignes.map((ligne) => ({
     id: ligne.id,
-    apercu: ligne.rawContent.slice(0, APERCU).trim(),
+    // Une capture n'a souvent pas de texte déposé : c'est ce qu'on y a lu qui
+    // la décrit, et rien tant qu'elle n'est pas lue.
+    apercu: (ligne.rawContent.trim() || ligne.extractedText || "").slice(0, APERCU).trim(),
     sourceType: ligne.sourceType,
-    status: ligne.status,
+    etat: etatDuDepot({
+      status: ligne.status,
+      travaux: ligne.jobs,
+      concepts: ligne._count.atoms,
+    }),
+    motifEchec: ligne.failureReason,
     createdAt: ligne.createdAt,
     nombreAtoms: ligne._count.atoms,
   }));
