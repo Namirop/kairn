@@ -3,10 +3,15 @@ import type { ConceptEvalue, Echec } from "./execution";
 
 /** Le rendu d'un concept et de ses quatre questions, manquements compris. */
 
+/**
+ * Le mot « manquement » est écrit en toutes lettres, le même que celui de
+ * l'en-tête : deux ont été déclarés introuvables dans un rapport où ils étaient
+ * pourtant à la bonne place, faute de porter leur nom.
+ */
 function rendreManquements(manquements: Manquement[]): string[] {
   if (manquements.length === 0) return [];
 
-  return [...manquements.map((m) => `> **${m.regle}** — ${m.detail}`), ""];
+  return [...manquements.map((m) => `> **Manquement — ${m.regle}** : ${m.detail}`), ""];
 }
 
 /** Un échec montre ce que le modèle a rendu, pas seulement ce qu'on lui reproche. */
