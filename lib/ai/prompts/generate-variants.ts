@@ -5,8 +5,12 @@
  * sont ceux des enums `VariantFormat` et `VariantFacet` du schéma Prisma : le
  * prompt et la base nomment les mêmes valeurs.
  */
-export const GENERATE_VARIANTS_PROMPT = `Tu écris quatre questions sur un même concept, pour qu'une personne vérifie plus tard
-qu'elle le sait encore.
+export const GENERATE_VARIANTS_PROMPT = `On te donne un ou plusieurs concepts issus d'un même dépôt. Tu écris quatre questions
+pour chacun, indépendamment.
+
+Chaque question ne se répond qu'avec son propre concept. Ne t'appuie jamais sur un
+concept voisin du même envoi, même s'il éclaire le sujet : au moment de la révision,
+ils seront servis à des semaines d'intervalle.
 
 LA RÈGLE QUI COMPTE
 
@@ -39,18 +43,24 @@ CE QUI TUE UNE QUESTION
 
 LES FORMATS
 
-Choisis le format qui sert la facette, parmi MCQ, TRUE_FALSE, SHORT_ANSWER, CODE,
-EXPLAIN. Les quatre questions n'utilisent pas quatre formats différents par obligation :
-un format peut revenir si c'est le bon, mais les quatre facettes, elles, sont
-obligatoires.
+Le format n'est pas déterminé par la facette. Chaque facette s'écrit dans plusieurs
+formats, et c'est le contenu du concept qui tranche.
 
-CODE ne s'emploie que si le concept porte réellement sur du code. La question montre
-alors un extrait court et demande ce qu'il produit, ce qui manque, ou ce qui casse.
+RECOGNITION : MCQ, TRUE_FALSE, SHORT_ANSWER
+MECHANISM   : EXPLAIN, SHORT_ANSWER, CODE, MCQ
+BOUNDARY    : TRUE_FALSE, MCQ, SHORT_ANSWER
+APPLICATION : SHORT_ANSWER, CODE, EXPLAIN, MCQ
 
-MCQ : exactement quatre options. Chaque mauvaise option doit être fausse pour une
-raison précise — une confusion réelle que quelqu'un pourrait avoir. Une option
+Deux questions au plus partagent le même format.
+
+Si le concept porte sur du code — une méthode, une syntaxe, un comportement à
+l'exécution — au moins une des quatre questions emploie CODE : un extrait court, et on
+demande ce qu'il produit, ce qui lui manque, ou ce qui le casse.
+
+MCQ : exactement quatre options. Chaque mauvaise option est fausse pour une raison
+précise, une confusion que quelqu'un pourrait réellement avoir. Une option
 manifestement absurde rend la question inutile. Les quatre options ont une longueur et
-une forme comparables : la bonne réponse ne doit pas être repérable à sa taille.
+une forme comparables : la bonne réponse ne doit pas se repérer à sa taille.
 
 TRUE_FALSE : l'affirmation est fausse à peu près une fois sur deux. Quand elle est
 fausse, elle l'est d'un cheveu — une condition inversée, un cas particulier étendu à
