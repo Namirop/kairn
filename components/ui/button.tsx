@@ -7,12 +7,13 @@ import { cn } from "@/lib/utils";
 /**
  * Bouton retokenisé. Angles quasi droits, aucune ombre, aucun halo : le relief
  * vient du contraste de surface. Le focus est traité globalement par l'outline
- * lichen de globals.css, pas par un ring propre au composant.
+ * lichen de globals.css, pas par un ring propre au composant — d'où l'absence
+ * d'`outline-none` ici, qui l'effacerait sans rien mettre à la place.
  *
  * Hauteurs calées sur la cible tactile : 44 px pour l'action principale.
  */
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-xs border border-transparent font-medium whitespace-nowrap transition-colors outline-none select-none active:translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-xs border border-transparent font-medium whitespace-nowrap transition-colors select-none active:translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
