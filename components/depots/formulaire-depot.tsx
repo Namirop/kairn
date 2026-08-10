@@ -51,12 +51,16 @@ export function FormulaireDepot({ restants }: { restants: number }) {
 
       <div className="gap-pas-4 flex flex-wrap items-center justify-between">
         <div className="gap-pas-3 flex items-center">
+          {/* C'est le bouton qui porte l'action, au clavier comme à la souris :
+              le champ lui-même sort du parcours pour ne pas faire doublon. */}
           <input
             ref={fichier}
             id="image"
             name="image"
             type="file"
             accept="image/*"
+            tabIndex={-1}
+            aria-hidden
             className="sr-only"
             onChange={(evenement) => setCapture(evenement.target.files?.[0]?.name ?? null)}
           />

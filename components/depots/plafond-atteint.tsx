@@ -24,8 +24,9 @@ export function PlafondAtteint({
 
   return (
     <div className="border-lichen pl-pas-4 gap-pas-3 flex max-w-xl flex-col border-l-2">
+      {/* Les mêmes mots que le refus côté serveur : c'est la même limite. */}
       <p className="text-corps text-stone-900">
-        Tu as déposé les cinq dépôts de la journée. Le compteur repart {remiseAZero}.
+        Tu as déposé tout ce que la journée permet. Le compteur repart {remiseAZero}.
       </p>
       <p className="text-petit text-stone-500">
         Cette limite tient le coût des appels au modèle pendant que Cairn se construit. Si elle te
