@@ -6,29 +6,83 @@ function daysBefore(reference: Date, days: number): Date {
 }
 
 /**
- * Un dépôt dont le découpage a échoué. Il existe pour qu'on puisse regarder
- * l'écran d'erreur sans provoquer un vrai échec.
+ * Les trois fins sans concept, pour qu'on puisse les regarder côte à côte sans
+ * provoquer de vrai incident.
+ *
+ * Un rejet — la chaîne a lu et n'a rien trouvé, avec le motif qu'elle a écrit.
+ * Une panne — quelque chose s'est cassé, on peut relancer. Un dépôt vidé — il a
+ * donné des concepts, l'utilisateur les a tous supprimés, le texte reste.
  */
 export async function writeFailedInput(userId: string, now: Date): Promise<void> {
-  const createdAt = daysBefore(now, 2);
+  const rejet = daysBefore(now, 2);
+  const panne = daysBefore(now, 4);
+  const vide = daysBefore(now, 6);
 
   await prisma.input.create({
     data: {
       userId,
       rawContent: "https://example.com/article-tres-long — collé sans le contenu de la page.",
       sourceType: "TEXT",
+      status: "REJECTED",
+      failureReason:
+        "Tu as collé une adresse, pas le texte qu'elle désigne. Ouvre la page et copie le passage qui t'intéresse : je ne vais pas la chercher à ta place.",
+      createdAt: rejet,
+      updatedAt: rejet,
+      jobs: {
+        create: {
+          kind: "ATOMS",
+          status: "DONE",
+          attempts: 1,
+          createdAt: rejet,
+          startedAt: rejet,
+          finishedAt: rejet,
+        },
+      },
+    },
+  });
+
+  await prisma.input.create({
+    data: {
+      userId,
+      rawContent:
+        "Le protocole QUIC multiplexe plusieurs flux sur une seule connexion UDP, ce qui supprime le blocage en tête de file du TCP.",
+      sourceType: "TEXT",
       status: "FAILED",
-      createdAt,
-      updatedAt: createdAt,
+      failureReason:
+        "Le découpage n'a pas abouti après trois tentatives. Rien n'a été écrit, et rien n'a été perdu.",
+      createdAt: panne,
+      updatedAt: panne,
       jobs: {
         create: {
           kind: "ATOMS",
           status: "FAILED",
           attempts: 3,
           lastError: "Sortie du modèle invalide : le champ `atoms` était vide.",
-          createdAt,
-          startedAt: createdAt,
-          finishedAt: createdAt,
+          createdAt: panne,
+          startedAt: panne,
+          finishedAt: panne,
+        },
+      },
+    },
+  });
+
+  await prisma.input.create({
+    data: {
+      userId,
+      rawContent:
+        "Un `Map` garde l'ordre d'insertion de ses clés, contrairement à un objet dont les clés numériques remontent en tête. Les clés peuvent être de n'importe quel type, y compris des objets.",
+      sourceType: "TEXT",
+      status: "READY",
+      createdAt: vide,
+      updatedAt: vide,
+      jobs: {
+        create: {
+          kind: "ATOMS",
+          status: "DONE",
+          attempts: 1,
+          createdAt: vide,
+          startedAt: vide,
+          finishedAt: vide,
         },
       },
     },

@@ -11,7 +11,9 @@ import {
   supprimerConcept,
 } from "@/lib/db/concepts";
 import { inscrireEnListeDattente } from "@/lib/db/quota-depots";
+import { supprimerDepot } from "@/lib/db/reprise-depot";
 import { deposer, SIGNES_MAXIMUM } from "@/lib/depots/deposer";
+import { redecouper, type ResultatRedecoupage } from "@/lib/depots/redecouper";
 import { soumettreLotsEnAttente } from "@/lib/jobs/questions";
 
 /**
@@ -106,6 +108,35 @@ export async function supprimerConceptAction(donnees: FormData): Promise<void> {
   if (await supprimerConcept((donnees.get("atomId") ?? "").toString(), userId)) {
     revalidatePath(`${ROUTES.depots}/${(donnees.get("inputId") ?? "").toString()}`);
   }
+}
+
+/**
+ * Efface le dépôt et tout ce qui en découle, puis renvoie à la liste.
+ *
+ * Distinct de « supprimer ce concept » : l'un corrige un découpage, l'autre dit
+ * qu'on ne veut plus de ce texte du tout. Confondre les deux gestes obligerait à
+ * vider un dépôt concept par concept pour s'en débarrasser.
+ */
+export async function supprimerDepotAction(donnees: FormData): Promise<void> {
+  const userId = await utilisateurOuRefus();
+  const inputId = (donnees.get("inputId") ?? "").toString();
+
+  if (await supprimerDepot(inputId, userId)) {
+    revalidatePath(ROUTES.depots);
+    revalidatePath(ROUTES.aujourdhui);
+  }
+
+  redirect(ROUTES.depots);
+}
+
+/** Relance une extraction sur le texte d'un dépôt vidé ou en échec. */
+export async function redecouperAction(inputId: string): Promise<ResultatRedecoupage> {
+  const userId = await utilisateurOuRefus();
+  const resultat = await redecouper(userId, inputId);
+
+  if (resultat.ok) revalidatePath(`${ROUTES.depots}/${inputId}`);
+
+  return resultat;
 }
 
 export async function rejoindreListeDattenteAction(): Promise<void> {

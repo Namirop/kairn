@@ -104,10 +104,33 @@ export async function enregistrerConcepts(
   );
 }
 
+/**
+ * Le dépôt s'arrête sur une panne. Retenter a du sens.
+ *
+ * À réserver aux vraies casses : une image introuvable, une sortie de modèle
+ * illisible, un job abandonné après ses reprises. Ce que le contenu ne porte
+ * pas relève de `marquerRejet` — appeler ça un échec revient à annoncer une
+ * panne du produit à quelqu'un qui a simplement collé une URL nue.
+ */
 export async function marquerEchec(inputId: string, motif: string): Promise<void> {
   await prisma.input.update({
     where: { id: inputId },
     data: { status: "FAILED", failureReason: motif, imageData: null, imageMediaType: null },
+  });
+}
+
+/**
+ * La chaîne a lu le dépôt et n'y a rien trouvé à retenir.
+ *
+ * Le motif vient du modèle, à la deuxième personne, et dit ce qui manquait. Il
+ * est la seule chose de valeur que produise un rejet : c'est lui qui apprend à
+ * mieux déposer la fois suivante, et l'écraser par une phrase générique
+ * revenait à jeter ce qu'on venait de payer.
+ */
+export async function marquerRejet(inputId: string, motif: string): Promise<void> {
+  await prisma.input.update({
+    where: { id: inputId },
+    data: { status: "REJECTED", failureReason: motif, imageData: null, imageMediaType: null },
   });
 }
 
@@ -129,12 +152,12 @@ export async function marquerPretSiPlusRienEnAttente(
   if (restants > 0) return false;
 
   // Un dépôt déjà arrêté avec son motif ne se rouvre pas. Le découpage marque
-  // lui-même l'échec quand il n'y a rien à retenir — puis son job se termine
+  // lui-même le rejet quand il n'y a rien à retenir — puis son job se termine
   // normalement, puisqu'il a fait son travail. Sans cette garde, la clôture qui
   // suit effacerait le motif et rendrait le dépôt « prêt » sans un concept.
   const depot = await prisma.input.findUnique({ where: { id: inputId }, select: { status: true } });
 
-  if (depot?.status === "FAILED") return false;
+  if (depot?.status === "FAILED" || depot?.status === "REJECTED") return false;
 
   const enEchec = await prisma.generationJob.count({ where: { inputId, status: "FAILED" } });
   const concepts = await prisma.atom.count({ where: { inputId } });

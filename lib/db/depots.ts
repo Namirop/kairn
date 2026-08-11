@@ -11,7 +11,8 @@ export type DepotListe = {
   apercu: string;
   sourceType: InputSourceType;
   etat: EtatDepot;
-  motifEchec: string | null;
+  /** Le motif d'un rejet ou d'une panne, tel qu'il a été écrit. */
+  motif: string | null;
   createdAt: Date;
   nombreAtoms: number;
 };
@@ -48,7 +49,7 @@ export async function listerDepots(userId: string, limite = 50): Promise<DepotLi
       travaux: ligne.jobs,
       concepts: ligne._count.atoms,
     }),
-    motifEchec: ligne.failureReason,
+    motif: ligne.failureReason,
     createdAt: ligne.createdAt,
     nombreAtoms: ligne._count.atoms,
   }));

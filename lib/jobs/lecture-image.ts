@@ -2,7 +2,13 @@ import { z } from "zod";
 import { callAI } from "@/lib/ai/client";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import { OCR_EXTRACT } from "@/lib/ai/schemas";
-import { enregistrerTexteLu, lireDepot, marquerEchec, oublierImage } from "@/lib/db/ingestion";
+import {
+  enregistrerTexteLu,
+  lireDepot,
+  marquerEchec,
+  marquerRejet,
+  oublierImage,
+} from "@/lib/db/ingestion";
 import type { GenerationJob } from "@/lib/db/types";
 import { enqueueJob } from "./queue";
 
@@ -54,8 +60,10 @@ export async function lireImage(job: GenerationJob): Promise<void> {
   });
 
   if (!lu.usable) {
+    // La lecture a marché : elle a vu la capture et n'y a rien trouvé à
+    // lire. C'est un rejet, pas une panne d'OCR.
     await oublierImage(depot.id);
-    await marquerEchec(depot.id, RIEN_A_LIRE);
+    await marquerRejet(depot.id, RIEN_A_LIRE);
     return;
   }
 

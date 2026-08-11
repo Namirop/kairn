@@ -4,8 +4,8 @@ import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
 import {
   enregistrerConcepts,
   lireDepot,
-  marquerEchec,
   marquerPretSiPlusRienEnAttente,
+  marquerRejet,
 } from "@/lib/db/ingestion";
 import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { compterConceptsRetenus } from "@/lib/db/quota-depots";
@@ -32,7 +32,8 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
   const texte = (depot.extractedText ?? depot.rawContent).trim();
 
   if (texte.length === 0) {
-    await marquerEchec(depot.id, "Ce dépôt ne contient aucun texte à découper.");
+    // Un rejet, pas une panne : rien ne s'est cassé, il n'y avait rien.
+    await marquerRejet(depot.id, "Ce dépôt ne contient aucun texte à découper.");
     return;
   }
 
@@ -45,7 +46,9 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
   });
 
   if (extraction.atoms.length === 0) {
-    await marquerEchec(
+    // La phrase du modèle, telle quelle. C'est elle qui dit ce qui manquait à
+    // ce dépôt-là, et c'est la seule chose qu'un rejet ait à offrir.
+    await marquerRejet(
       depot.id,
       extraction.rejected ?? "Il n'y a pas de concept à retenir dans ce dépôt.",
     );

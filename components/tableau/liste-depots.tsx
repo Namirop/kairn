@@ -3,6 +3,7 @@ import { EtatVide } from "@/components/etats/etat-vide";
 import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/lib/auth/routes";
 import type { DepotListe } from "@/lib/db/depots";
+import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";
 import { cn } from "@/lib/utils";
 import { conceptsLisibles, libelleEtat } from "@/lib/domain/etat-depot";
@@ -13,11 +14,16 @@ import { conceptsLisibles, libelleEtat } from "@/lib/domain/etat-depot";
  *
  * Le compte de concepts s'affiche dès qu'il existe, sans attendre les
  * questions — c'est le retour qui dit que le geste a servi à quelque chose.
+ *
+ * La couleur d'alerte est réservée à la panne. Un dépôt dont le contenu ne
+ * portait rien à retenir le dit avec ses mots, en gris : rien ne s'est cassé,
+ * et l'annoncer en rouge faisait passer une limite du texte pour une avarie du
+ * produit.
  */
 function Avancement({ depot }: { depot: DepotListe }) {
-  const concepts = `${depot.nombreAtoms} ${depot.nombreAtoms === 1 ? "concept" : "concepts"}`;
+  const concepts = compte(depot.nombreAtoms, "concept", "concepts");
 
-  if (depot.etat === "echec") return <Badge variant="alerte">Échec</Badge>;
+  if (depot.etat === "echec") return <Badge variant="alerte">{libelleEtat(depot.etat)}</Badge>;
 
   if (depot.etat === "pret") {
     return <span className="font-mono tabular-nums">{concepts}</span>;

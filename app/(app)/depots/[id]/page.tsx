@@ -5,17 +5,26 @@ import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
 import { ConceptCorrigeable } from "@/components/depots/concept-corrigeable";
-import { EtatVide } from "@/components/etats/etat-vide";
+import { GestesDuDepot } from "@/components/depots/gestes-du-depot";
+import { VideDuDepot } from "@/components/depots/vide-du-depot";
 import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireDepotDetaille } from "@/lib/db/concepts";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";
-import { etatDuDepot, libelleEtat } from "@/lib/domain/etat-depot";
+import { etatDuDepot, libelleEtat, redecoupable } from "@/lib/domain/etat-depot";
 
 export const metadata: Metadata = { title: "Dépôt" };
 
+/**
+ * Un dépôt et ce qu'il a donné.
+ *
+ * L'écran distingue trois fins sans concept, là où il n'en montrait qu'une :
+ * rejeté faute de matière, arrêté par une panne, ou vidé par son auteur. Elles
+ * n'appellent pas la même conduite — c'est tout l'intérêt de les séparer.
+ */
 export default async function PageDepot({ params }: { params: Promise<{ id: string }> }) {
   const utilisateur = await getCurrentUser();
 
@@ -45,19 +54,18 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
         </Link>
 
         <h1 className="mt-pas-3 text-h1-app leading-tight font-bold">
-          {depot.concepts.length} {depot.concepts.length === 1 ? "concept" : "concepts"}
+          {compte(depot.concepts.length, "concept", "concepts")}
         </h1>
 
         <p className="mt-pas-2 gap-pas-3 text-mono flex flex-wrap items-center text-stone-500">
-          {etat === "pret" ? null : <Badge variant="pose">{libelleEtat(etat)}</Badge>}
+          {etat === "pret" ? null : (
+            // Une panne est la seule chose qui mérite la couleur d'alerte. Un
+            // dépôt sans matière n'a rien cassé, et le peindre en rouge
+            // annonçait une avarie du produit à qui avait collé une URL nue.
+            <Badge variant={etat === "echec" ? "alerte" : "pose"}>{libelleEtat(etat)}</Badge>
+          )}
           <span>Déposé {anciennete(depot.createdAt, new Date(), fuseau)}</span>
         </p>
-
-        {depot.failureReason ? (
-          <p className="mt-pas-6 border-alerte pl-pas-4 text-corps max-w-2xl border-l-2 text-stone-900">
-            {depot.failureReason}
-          </p>
-        ) : null}
 
         {texte ? (
           <section className="mt-pas-8">
@@ -80,15 +88,7 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
 
         {depot.concepts.length === 0 ? (
           <div className="mt-pas-2">
-            <EtatVide
-              graine={depot.id}
-              constat="Aucun concept pour l'instant."
-              contexte={
-                etat === "echec"
-                  ? "Ce dépôt n'a rien donné. Tu peux en déposer un autre, reformulé."
-                  : "Le découpage est en cours. Les concepts apparaissent dès qu'il a fini."
-              }
-            />
+            <VideDuDepot etat={etat} motif={depot.failureReason} graine={depot.id} />
           </div>
         ) : (
           <ul className="mt-pas-4 gap-pas-2 flex flex-col">
@@ -97,6 +97,12 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
             ))}
           </ul>
         )}
+
+        <GestesDuDepot
+          inputId={depot.id}
+          redecoupable={redecoupable(etat)}
+          concepts={depot.concepts.length}
+        />
       </Panneau>
     </PileDePanneaux>
   );

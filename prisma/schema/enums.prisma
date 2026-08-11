@@ -5,10 +5,17 @@ enum InputSourceType {
 }
 
 /// Avancement du découpage d'un Input en Atoms.
+///
+/// `REJECTED` et `FAILED` sont deux fins distinctes, et les confondre était un
+/// mensonge à l'utilisateur. Rejeté : la chaîne a fonctionné et a conclu qu'il
+/// n'y avait rien à retenir — le motif dit quoi, et redéposer le même texte
+/// donnera le même résultat. En échec : quelque chose s'est cassé, et retenter
+/// a du sens.
 enum InputStatus {
   PENDING
   PROCESSING
   READY
+  REJECTED
   FAILED
 }
 
