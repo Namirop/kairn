@@ -71,10 +71,30 @@ export function FinDeSession({
         </div>
       ) : null}
 
-      <div className="mt-pas-12">
-        <Button asChild className="w-full sm:w-auto">
-          <Link href={ROUTES.aujourdhui}>Retour à aujourd&apos;hui</Link>
+      {/* Déposer d'abord, s'entraîner ensuite. La boucle de croissance du
+          produit, ce sont les dépôts : quelqu'un avec deux concepts n'a pas un
+          problème de session, il a un problème de contenu. */}
+      <div className="gap-pas-3 mt-pas-12 flex flex-col sm:flex-row">
+        <Button asChild>
+          <Link href={`${ROUTES.depots}/nouveau`}>Déposer autre chose</Link>
         </Button>
+        <Button asChild variant="outline">
+          <Link href={ROUTES.entrainement}>S&apos;entraîner</Link>
+        </Button>
+      </div>
+
+      <p className="mt-pas-4 text-petit text-stone-500">
+        L&apos;entraînement repose d&apos;autres questions sur les mêmes concepts. Il ne change pas
+        ton planning.
+      </p>
+
+      <div className="mt-pas-8">
+        <Link
+          href={ROUTES.aujourdhui}
+          className="text-petit text-stone-500 underline-offset-4 hover:underline focus-visible:underline"
+        >
+          Retour à aujourd&apos;hui
+        </Link>
       </div>
     </section>
   );

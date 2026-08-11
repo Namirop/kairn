@@ -1,8 +1,6 @@
-import { z } from "zod";
 import { prisma } from "@/lib/db/client";
-import type { VariantFacet, VariantFormat } from "@/lib/db/types";
+import { questionServie, type QuestionServie } from "@/lib/db/question-servie";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
-import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
 import { jourSuivant, localDay } from "@/lib/domain/local-day";
 import { choisirVariante } from "@/lib/domain/rotation-variantes";
 import { composerSession, jourOuIlRevient } from "@/lib/domain/selection-session";
@@ -26,67 +24,15 @@ import { composerSession, jourOuIlRevient } from "@/lib/domain/selection-session
  */
 const MARGE_MS = 36 * 60 * 60 * 1000;
 
-/** Les options d'un QCM, telles que la génération les a écrites. */
-const PAYLOAD_CHOIX = z.object({
-  options: z.array(z.string()).min(2),
-  correctIndex: z.number().int().min(0),
-});
-
-/** Ce qu'un vrai ou faux pose à côté de sa question, quand il pose quelque chose. */
-const PAYLOAD_VRAI_FAUX = z.object({ expected: z.boolean() });
-
-export type QuestionDeSession = {
-  atomId: string;
-  concept: string;
-  tags: string[];
-  variantId: string;
-  format: VariantFormat;
-  facet: VariantFacet;
-  question: string;
-  /** L'étalon montré après coup sur un format ouvert. */
-  answerKey: string;
-  options: string[] | null;
-  correctIndex: number | null;
-};
-
 export type SessionDuJour = {
   fuseau: string;
-  questions: QuestionDeSession[];
+  questions: QuestionServie[];
   /** De quoi distinguer les trois écrans vides sans deviner. */
   totalConcepts: number;
   conceptsEnAttenteDeQuestions: number;
   /** Jour civil du prochain passage, au format AAAA-MM-JJ. */
   prochainJourServi: string | null;
 };
-
-/**
- * Les choix à proposer, ou `null` si la question doit repartir en format ouvert.
- *
- * Un vrai ou faux ne porte pas d'options en base : ce sont toujours les deux
- * mêmes, et c'est le domaine qui les reconstruit. Sans ce passage, un vrai ou
- * faux tombait côté ouvert et demandait à l'utilisateur de se juger sur une
- * question dont la justesse est pourtant connue.
- */
-function lireChoix(
-  format: VariantFormat,
-  payload: unknown,
-  answerKey: string,
-): { options: string[]; correctIndex: number } | null {
-  if (format === "TRUE_FALSE") {
-    const attendu = PAYLOAD_VRAI_FAUX.safeParse(payload);
-
-    return choixDUnVraiOuFaux(attendu.success ? attendu.data.expected : null, answerKey);
-  }
-
-  const lu = PAYLOAD_CHOIX.safeParse(payload);
-
-  if (!lu.success) return null;
-  // Un index hors des options viendrait d'une génération abîmée : mieux vaut
-  // servir la question sans ses choix que proposer une bonne réponse fausse.
-  if (lu.data.correctIndex >= lu.data.options.length) return null;
-
-  return lu.data;
-}
 
 export async function lireSessionDuJour(
   userId: string,
@@ -146,7 +92,7 @@ export async function lireSessionDuJour(
   ]);
 
   const retenus = composerSession(candidats, maintenant, fuseau);
-  const questions: QuestionDeSession[] = [];
+  const questions: QuestionServie[] = [];
 
   for (const atome of retenus) {
     const derniereFacette = atome.reviews[0]?.variant.facet ?? null;
@@ -159,20 +105,7 @@ export async function lireSessionDuJour(
 
     if (!variante) continue;
 
-    const choix = lireChoix(variante.format, variante.payload, variante.answerKey);
-
-    questions.push({
-      atomId: atome.id,
-      concept: atome.concept,
-      tags: atome.tags,
-      variantId: variante.id,
-      format: variante.format,
-      facet: variante.facet,
-      question: variante.question,
-      answerKey: variante.answerKey,
-      options: choix?.options ?? null,
-      correctIndex: choix?.correctIndex ?? null,
-    });
+    questions.push(questionServie(atome, variante));
   }
 
   return {

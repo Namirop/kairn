@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
 import { LIBELLE_FACETTE } from "@/components/depots/libelle-facette";
 import type { VariantFacet } from "@/lib/db/types";
 
@@ -13,6 +12,10 @@ import type { VariantFacet } from "@/lib/db/types";
  *
  * L'avancement est là parce qu'une session se finit mieux quand on en voit le
  * bout. Ce n'est ni un score ni une série : il disparaît avec la session.
+ *
+ * Ce qui vit sous le trait dépend du mode. La session du jour y met « Je
+ * maîtrise ça », qui sort le concept du cycle ; l'entraînement libre n'y met
+ * rien, puisqu'il ne décide de rien.
  */
 export function CarteQuestion({
   rang,
@@ -20,8 +23,7 @@ export function CarteQuestion({
   facet,
   tags,
   question,
-  enCours,
-  onMaitrise,
+  actions,
   children,
 }: {
   rang: number;
@@ -29,8 +31,7 @@ export function CarteQuestion({
   facet: VariantFacet;
   tags: string[];
   question: string;
-  enCours: boolean;
-  onMaitrise: () => void;
+  actions?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -61,16 +62,9 @@ export function CarteQuestion({
 
       {children}
 
-      <div className="mt-pas-12 pt-pas-4 border-t border-stone-100">
-        <Button type="button" variant="ghost" size="sm" disabled={enCours} onClick={onMaitrise}>
-          Je maîtrise ça
-        </Button>
-        {/* Ce que le geste fait vraiment : il repousse, il ne supprime pas, et
-            il se défait. Annoncer « une seule fois » laissait croire l'inverse. */}
-        <p className="mt-pas-1 text-petit text-stone-500">
-          Le concept sort du cycle et revient dans trois mois pour vérifier. Ça se défait.
-        </p>
-      </div>
+      {actions ? (
+        <div className="mt-pas-12 pt-pas-4 border-t border-stone-100">{actions}</div>
+      ) : null}
     </section>
   );
 }

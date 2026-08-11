@@ -17,6 +17,10 @@ model UserSettings {
   streakAlertEnabled   Boolean   @default(true)
   /// Renseigné par le lien de désinscription. Non nul coupe tous les emails.
   emailOptOutAt        DateTime?
+  /// Quand le principe de l'entraînement libre a été expliqué. Non nul, on ne
+  /// le réexplique plus : une fenêtre qui barre la route à chaque fois devient
+  /// un péage qu'on apprend à cliquer sans le lire.
+  trainingIntroSeenAt  DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

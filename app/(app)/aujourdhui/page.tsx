@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { ColonneCairn } from "@/components/tableau/colonne-cairn";
 import { CompteurDu } from "@/components/tableau/compteur-du";
 import { ListeDepots } from "@/components/tableau/liste-depots";
-import { ListeEnCours } from "@/components/tableau/liste-en-cours";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireTableauDeBord } from "@/lib/db/tableau-de-bord";
@@ -36,7 +35,6 @@ export default async function PageAujourdhui() {
 
       <hr className="border-stone-100" />
 
-      <ListeEnCours atomes={tableau.enCours} maintenant={maintenant} fuseau={tableau.fuseau} />
       <ListeDepots depots={tableau.depots} maintenant={maintenant} fuseau={tableau.fuseau} />
     </div>
   );

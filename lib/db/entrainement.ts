@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/client";
+import { questionServie, type QuestionServie } from "@/lib/db/question-servie";
 import { regenererSiUsees } from "@/lib/db/regeneration";
-import type { ReviewRating, VariantFacet, VariantFormat } from "@/lib/db/types";
+import type { ReviewRating } from "@/lib/db/types";
 import { apresLePassage } from "@/lib/domain/rotation-variantes";
 import { composerEntrainement, QUESTIONS_PAR_TOUR } from "@/lib/domain/selection-entrainement";
 
@@ -19,18 +20,6 @@ import { composerEntrainement, QUESTIONS_PAR_TOUR } from "@/lib/domain/selection
  * a rien à oublier : le code qui replanifie n'existe pas dans ce fichier.
  */
 
-export type QuestionDentrainement = {
-  atomId: string;
-  concept: string;
-  tags: string[];
-  variantId: string;
-  format: VariantFormat;
-  facet: VariantFacet;
-  question: string;
-  answerKey: string;
-  payload: unknown;
-};
-
 /**
  * Un tour de questions tirées des concepts de cette personne.
  *
@@ -41,7 +30,7 @@ export type QuestionDentrainement = {
 export async function lireTourDentrainement(
   userId: string,
   taille: number = QUESTIONS_PAR_TOUR,
-): Promise<QuestionDentrainement[]> {
+): Promise<QuestionServie[]> {
   const concepts = await prisma.atom.findMany({
     where: {
       userId,
@@ -91,19 +80,7 @@ export async function lireTourDentrainement(
 
     const { concept, variante } = trouve;
 
-    return [
-      {
-        atomId: concept.id,
-        concept: concept.concept,
-        tags: concept.tags,
-        variantId: variante.id,
-        format: variante.format,
-        facet: variante.facet,
-        question: variante.question,
-        answerKey: variante.answerKey,
-        payload: variante.payload,
-      },
-    ];
+    return [questionServie(concept, variante)];
   });
 }
 

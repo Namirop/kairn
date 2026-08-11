@@ -10,29 +10,25 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ConceptLu } from "@/lib/db/concepts";
-import { LIBELLE_FACETTE } from "./libelle-facette";
 
 /**
- * Un concept, ses questions, et ce qu'on peut en faire.
+ * Un concept, son état, et ce qu'on peut en faire.
+ *
+ * Ses questions ne sont pas affichées : les lire hors session revient à se
+ * gâcher la surprise, et une question qu'on a lue la veille ne mesure plus
+ * rien. Seul leur nombre apparaît — c'est ce qui dit que le travail est fait.
  *
  * Un concept douteux dit pourquoi il est signalé sans donner la version
  * « juste » : on ne l'a pas vérifiée, et affirmer serait pire que douter.
  */
 
-function Questions({ questions }: { questions: ConceptLu["questions"] }) {
-  if (questions.length === 0) return null;
+function Questions({ nombre }: { nombre: number }) {
+  if (nombre === 0) return null;
 
   return (
-    <ul className="mt-pas-4 gap-pas-3 flex flex-col">
-      {questions.map((question) => (
-        <li key={question.id} className="gap-pas-1 flex flex-col">
-          <span className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
-            {LIBELLE_FACETTE[question.facet]}
-          </span>
-          <p className="text-petit text-stone-900">{question.question}</p>
-        </li>
-      ))}
-    </ul>
+    <p className="mt-pas-3 text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
+      {nombre} {nombre === 1 ? "question écrite" : "questions écrites"}
+    </p>
   );
 }
 
@@ -89,7 +85,7 @@ export function ConceptCorrigeable({ concept, inputId }: { concept: ConceptLu; i
               pour ne pas river une erreur.
             </p>
           ) : (
-            <Questions questions={concept.questions} />
+            <Questions nombre={concept.questions} />
           )}
 
           {/* L'archivage se défait, et l'écran le dit là où le concept se

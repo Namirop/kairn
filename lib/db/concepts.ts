@@ -1,13 +1,7 @@
 import { prisma } from "@/lib/db/client";
 import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { effacerQuestions } from "@/lib/db/variants";
-import type {
-  AtomState,
-  GenerationKind,
-  InputStatus,
-  VariantFacet,
-  VariantFormat,
-} from "@/lib/db/types";
+import type { AtomState, GenerationKind, InputStatus } from "@/lib/db/types";
 import { compterReussitesConsecutives, etatApresRevision } from "@/lib/domain/etat-maitrise";
 
 /**
@@ -18,14 +12,6 @@ import { compterReussitesConsecutives, etatApresRevision } from "@/lib/domain/et
  * jamais du client.
  */
 
-export type QuestionLue = {
-  id: string;
-  format: VariantFormat;
-  facet: VariantFacet;
-  question: string;
-  answerKey: string;
-};
-
 export type ConceptLu = {
   id: string;
   concept: string;
@@ -34,7 +20,14 @@ export type ConceptLu = {
   state: AtomState;
   /** Sorti du cycle par l'utilisateur — et donc remettable par lui. */
   archivedByUser: boolean;
-  questions: QuestionLue[];
+  /**
+   * Combien de questions portent ce concept, sans leur texte.
+   *
+   * Les lire hors session reviendrait à se gâcher la surprise : on retient une
+   * formulation qu'on n'a pas eu à retrouver, et la question suivante ne mesure
+   * plus rien. Le nombre suffit à dire que le travail est fait.
+   */
+  questions: number;
 };
 
 export type DepotDetaille = {
@@ -72,15 +65,7 @@ export async function lireDepotDetaille(
           uncertain: true,
           state: true,
           archivedByUser: true,
-          variants: {
-            where: { retiredAt: null },
-            // Par facette, dans l'ordre où elle est déclarée : reconnaître,
-            // expliquer, délimiter, appliquer. Les quatre questions d'un lot
-            // sont écrites dans la même instruction, donc leur date ne départage
-            // rien — sans cet ordre, l'écran se réarrange à chaque chargement.
-            orderBy: { facet: "asc" },
-            select: { id: true, format: true, facet: true, question: true, answerKey: true },
-          },
+          _count: { select: { variants: { where: { retiredAt: null } } } },
         },
       },
       jobs: { where: { status: { in: ["QUEUED", "RUNNING"] } }, select: { kind: true } },
@@ -93,7 +78,7 @@ export async function lireDepotDetaille(
 
   return {
     ...reste,
-    concepts: atoms.map(({ variants, ...atome }) => ({ ...atome, questions: variants })),
+    concepts: atoms.map(({ _count, ...atome }) => ({ ...atome, questions: _count.variants })),
     travauxEnCours: jobs,
   };
 }

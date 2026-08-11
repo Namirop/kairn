@@ -9,6 +9,7 @@ export const ROUTES = {
   inscription: "/inscription",
   aujourdhui: "/aujourdhui",
   reviser: "/reviser",
+  entrainement: "/entrainement",
   depots: "/depots",
   reglages: "/reglages",
 } as const;
@@ -17,6 +18,7 @@ export const ROUTES = {
 export const PROTECTED_PATHS = [
   ROUTES.aujourdhui,
   ROUTES.reviser,
+  ROUTES.entrainement,
   ROUTES.depots,
   ROUTES.reglages,
 ] as const;

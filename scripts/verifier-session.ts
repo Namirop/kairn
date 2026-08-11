@@ -27,8 +27,15 @@ globalThis.fetch = function fetchPiege(input: RequestInfo | URL, init?: RequestI
   return Promise.reject(new Error(`Requête sortante interdite pendant la vérification : ${url}`));
 };
 
-const UTILISATEUR = "verification-session@cairn.test";
 const IDENTIFIANT = "verification-session";
+
+/**
+ * L'entraînement tire dans tous les concepts du compte, sans regarder aucune
+ * échéance. Il lui faut donc son propre compte : sur celui des autres cas, il
+ * piocherait dans les concepts qu'ils viennent d'écrire et on ne saurait plus
+ * ce qu'on mesure.
+ */
+const ENTRAINEMENT = "verification-entrainement";
 
 /**
  * La règle centrale du produit, vérifiée sur le schéma lui-même.
@@ -71,20 +78,27 @@ async function main(): Promise<void> {
   const session = await import("./verification/session-revision");
   const signaux = await import("./verification/session-signaux");
   const fuseaux = await import("./verification/session-fuseaux");
+  const entrainement = await import("./verification/entrainement-etanche");
 
-  await prisma.aiCall.deleteMany({ where: { userId: IDENTIFIANT } });
-  await prisma.user.deleteMany({ where: { id: IDENTIFIANT } });
+  const comptes = [IDENTIFIANT, ENTRAINEMENT];
 
-  const utilisateur = await prisma.user.create({
-    data: {
-      id: IDENTIFIANT,
-      email: UTILISATEUR,
-      name: "Vérification session",
-      emailVerified: true,
-      settings: { create: { timezone: "Europe/Paris" } },
-    },
-    select: { id: true },
-  });
+  await prisma.aiCall.deleteMany({ where: { userId: { in: comptes } } });
+  await prisma.user.deleteMany({ where: { id: { in: comptes } } });
+
+  const creerCompte = (id: string, nom: string) =>
+    prisma.user.create({
+      data: {
+        id,
+        email: `${id}@cairn.test`,
+        name: nom,
+        emailVerified: true,
+        settings: { create: { timezone: "Europe/Paris" } },
+      },
+      select: { id: true },
+    });
+
+  const utilisateur = await creerCompte(IDENTIFIANT, "Vérification session");
+  const entraine = await creerCompte(ENTRAINEMENT, "Vérification entraînement");
 
   // Un instant fixe : la vérification ne doit pas dépendre de l'heure qu'il est
   // quand on la lance.
@@ -99,8 +113,9 @@ async function main(): Promise<void> {
     await session.casRotationDesFacettes(utilisateur.id, maintenant);
     await signaux.casSignalDeMaitrise(utilisateur.id, maintenant);
     await signaux.casArchivageDeclare(utilisateur.id, maintenant);
+    await entrainement.casEntrainementEtanche(entraine.id, maintenant);
 
-    const appels = await prisma.aiCall.count({ where: { userId: utilisateur.id } });
+    const appels = await prisma.aiCall.count({ where: { userId: { in: comptes } } });
     record(
       "Le moteur de révision n'appelle jamais le modèle",
       appels === 0,
@@ -113,8 +128,8 @@ async function main(): Promise<void> {
       tentativesReseau.length === 0 ? "zéro tentative" : tentativesReseau.join(", "),
     );
   } finally {
-    await prisma.aiCall.deleteMany({ where: { userId: IDENTIFIANT } });
-    await prisma.user.deleteMany({ where: { id: IDENTIFIANT } });
+    await prisma.aiCall.deleteMany({ where: { userId: { in: comptes } } });
+    await prisma.user.deleteMany({ where: { id: { in: comptes } } });
   }
 }
 

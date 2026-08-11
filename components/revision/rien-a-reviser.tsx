@@ -18,14 +18,20 @@ type Props = {
   maintenant: Date;
 };
 
+type Lien = { libelle: string; href: string };
+
 function Ecran({
   titre,
   explication,
   action,
+  secondaire,
+  note,
 }: {
   titre: string;
   explication: string;
-  action?: { libelle: string; href: string };
+  action?: Lien;
+  secondaire?: Lien;
+  note?: string;
 }) {
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col">
@@ -33,12 +39,19 @@ function Ecran({
       <p className="mt-pas-3 text-corps max-w-lg leading-relaxed text-stone-500">{explication}</p>
 
       {action ? (
-        <div className="mt-pas-8">
-          <Button asChild className="w-full sm:w-auto">
+        <div className="gap-pas-3 mt-pas-8 flex flex-col sm:flex-row">
+          <Button asChild>
             <Link href={action.href}>{action.libelle}</Link>
           </Button>
+          {secondaire ? (
+            <Button asChild variant="outline">
+              <Link href={secondaire.href}>{secondaire.libelle}</Link>
+            </Button>
+          ) : null}
         </div>
       ) : null}
+
+      {note ? <p className="mt-pas-4 text-petit max-w-lg text-stone-500">{note}</p> : null}
     </section>
   );
 }
@@ -72,15 +85,20 @@ export function RienAReviser({
     );
   }
 
+  // Le moment exact où l'entraînement existe : un compte neuf a fait le tour de
+  // sa session en quatre questions et tombe sur « reviens demain ». Déposer
+  // d'abord — c'est ce qui fait avancer —, s'entraîner ensuite.
   return (
     <Ecran
       titre="Tu es à jour"
       explication={
         prochainJourServi
-          ? `Rien n'arrive à échéance aujourd'hui. Le prochain concept revient ${delaiAvantLeJour(prochainJourServi, maintenant, fuseau)}.`
-          : "Rien n'arrive à échéance aujourd'hui."
+          ? `Rien à revoir aujourd'hui. Le prochain concept revient ${delaiAvantLeJour(prochainJourServi, maintenant, fuseau)}.`
+          : "Rien à revoir aujourd'hui."
       }
       action={{ libelle: "Déposer autre chose", href: `${ROUTES.depots}/nouveau` }}
+      secondaire={{ libelle: "S'entraîner", href: ROUTES.entrainement }}
+      note="L'entraînement repose d'autres questions sur les mêmes concepts. Il ne change pas ton planning."
     />
   );
 }

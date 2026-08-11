@@ -61,6 +61,20 @@ export async function setTimezone(userId: string, timezone: string): Promise<voi
 }
 
 /**
+ * Note que le principe de l'entraînement libre a été expliqué.
+ *
+ * Écrit une fois pour toutes, sans jamais réécrire : la date du premier
+ * passage est celle qui compte, et une seconde ouverture ne doit pas la
+ * repousser.
+ */
+export async function marquerPrincipeVu(userId: string, at: Date = new Date()): Promise<void> {
+  await prisma.userSettings.updateMany({
+    where: { userId, trainingIntroSeenAt: null },
+    data: { trainingIntroSeenAt: at },
+  });
+}
+
+/**
  * Coupe les emails. Appelé par le lien de désinscription, qui ne demande pas de
  * session : le jeton signé du lien fait foi.
  */
