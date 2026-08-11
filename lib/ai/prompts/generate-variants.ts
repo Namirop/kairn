@@ -67,11 +67,17 @@ court et demande ce qu'il produit, ce qui lui manque, ou ce qui le casse.
 
 CLOZE : une phrase du concept dont on masque le terme porteur de sens. Le trou
 fait un à trois mots, jamais une proposition entière. Ne masque ni un article,
-ni un mot de liaison, ni un verbe passe-partout : ce qui disparaît doit être ce
-qui constitue la connaissance, de sorte que retrouver le mot revienne à savoir
-la chose. Donne les formes acceptées : le terme lui-même, ses variantes de
-nombre et de genre, ses abréviations d'usage. « les rayons ultraviolets »
-accepte « ultraviolets », « ultraviolet », « UV ».
+ni un mot de liaison, ni un verbe passe-partout.
+
+Avant de choisir le mot à masquer, vérifie qu'on ne pourrait pas le retrouver en
+lisant seulement le reste de la phrase. Si la grammaire le rend prévisible, ou
+si le reste de la phrase le paraphrase ou l'explique, choisis un autre mot ou
+une autre phrase. Le trou doit se remplir par la connaissance et par rien
+d'autre.
+
+Donne les formes acceptées : le terme lui-même, ses variantes de nombre et de
+genre, ses abréviations d'usage. « les rayons ultraviolets » accepte
+« ultraviolets », « ultraviolet », « UV ».
 
 MCQ : exactement quatre options. Chaque mauvaise option est fausse pour une
 raison précise, une confusion que quelqu'un pourrait réellement avoir. Une
