@@ -2,11 +2,14 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import {
   avancer,
+  CADRE_LARGE,
   cairnRenverse,
+  demiEmprise,
   initialiser,
   remonter,
   renverser,
   toutEstPose,
+  type Cadre,
   type Corps,
 } from "./cairn-physique";
 import { empiler, LARGEUR_VUE, type Pierre } from "./cairn-stack";
@@ -15,10 +18,15 @@ const EMPILEMENT = empiler(6);
 const PIERRES = EMPILEMENT.pierres;
 
 /** Fait tourner la simulation jusqu'au repos, ou jusqu'à la borne. */
-function simuler(corps: Corps[], pierres: Pierre[] = PIERRES, pasMax = 600): Corps[] {
+function simuler(
+  corps: Corps[],
+  pierres: Pierre[] = PIERRES,
+  pasMax = 600,
+  cadre?: Cadre,
+): Corps[] {
   let etat = corps;
   for (let i = 0; i < pasMax && !toutEstPose(etat); i += 1) {
-    etat = avancer(etat, pierres, 1 / 60);
+    etat = avancer(etat, pierres, 1 / 60, cadre);
   }
   return etat;
 }
@@ -77,11 +85,11 @@ describe("avancer", () => {
     expect(final.every((c) => c.repos)).toBe(true);
   });
 
-  it("pose chaque pierre exactement sur le sol, jamais dedans", () => {
+  it("pose chaque pierre sur son encombrement incliné, jamais dans le sol", () => {
     const final = simuler(renverser(initialiser(PIERRES), 0, { vx: 30, vy: 0 }));
 
     final.forEach((solide, index) => {
-      expect(solide.y).toBeCloseTo(-PIERRES[index]!.hauteur / 2, 5);
+      expect(solide.y).toBeCloseTo(-demiEmprise(PIERRES[index]!, solide.rotation).y, 5);
     });
   });
 
@@ -91,6 +99,21 @@ describe("avancer", () => {
     for (const solide of final) {
       expect(solide.x).toBeGreaterThan(0);
       expect(solide.x).toBeLessThan(LARGEUR_VUE);
+    }
+  });
+
+  it("laisse les pierres sortir du dessin quand le cadre est large", () => {
+    const final = simuler(
+      renverser(initialiser(PIERRES), 0, { vx: 600, vy: -120 }),
+      PIERRES,
+      600,
+      CADRE_LARGE,
+    );
+
+    expect(final.some((solide) => solide.x > LARGEUR_VUE)).toBe(true);
+    for (const solide of final) {
+      expect(solide.x).toBeGreaterThan(CADRE_LARGE.gauche);
+      expect(solide.x).toBeLessThan(CADRE_LARGE.droite);
     }
   });
 
@@ -157,6 +180,62 @@ describe("propriété : la chute est déterministe et bornée", () => {
         },
       ),
       { numRuns: 120 },
+    );
+  });
+
+  /**
+   * La propriété qui manquait, et qui se voyait à l'écran : des pierres à
+   * moitié enfoncées dans le sol. Aucun point d'une pierre au repos ne passe
+   * sous le sol, quelle que soit l'inclinaison où elle a fini.
+   */
+  it("aucune pierre ne s'enfonce dans le sol, quelle que soit son inclinaison", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: PIERRES.length - 1 }),
+        fc.integer({ min: -600, max: 600 }),
+        fc.integer({ min: -400, max: 400 }),
+        (index, vx, vy) => {
+          const final = simuler(renverser(initialiser(PIERRES), index, { vx, vy }));
+
+          final.forEach((solide, rang) => {
+            if (!solide.libre) return;
+
+            expect(solide.y + demiEmprise(PIERRES[rang]!, solide.rotation).y).toBeLessThanOrEqual(
+              1e-9,
+            );
+          });
+        },
+      ),
+      { numRuns: 120 },
+    );
+  });
+});
+
+describe("demiEmprise", () => {
+  it("rend la demi-hauteur et la demi-largeur d'une pierre à plat", () => {
+    const pierre = PIERRES[0]!;
+
+    expect(demiEmprise(pierre, 0).y).toBeCloseTo(pierre.hauteur / 2, 10);
+    expect(demiEmprise(pierre, 0).x).toBeCloseTo(pierre.largeur / 2, 10);
+  });
+
+  it("échange les deux axes sur une pierre couchée", () => {
+    const pierre = PIERRES[0]!;
+
+    expect(demiEmprise(pierre, 90).y).toBeCloseTo(pierre.largeur / 2, 10);
+    expect(demiEmprise(pierre, 90).x).toBeCloseTo(pierre.hauteur / 2, 10);
+  });
+
+  it("ne descend jamais sous l'encombrement à plat", () => {
+    fc.assert(
+      fc.property(fc.integer({ min: -720, max: 720 }), (rotation) => {
+        const pierre = PIERRES[0]!;
+        const demi = demiEmprise(pierre, rotation);
+
+        expect(demi.y).toBeGreaterThanOrEqual(Math.min(pierre.hauteur, pierre.largeur) / 2 - 1e-9);
+        expect(demi.x).toBeGreaterThanOrEqual(Math.min(pierre.hauteur, pierre.largeur) / 2 - 1e-9);
+      }),
+      { numRuns: 100 },
     );
   });
 });

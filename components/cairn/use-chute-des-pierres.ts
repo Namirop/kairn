@@ -4,10 +4,12 @@ import { useCallback, useEffect, useRef } from "react";
 import {
   avancer,
   cairnRenverse,
+  CADRE_SERRE,
   initialiser,
   remonter,
   renverser,
   toutEstPose,
+  type Cadre,
   type Corps,
 } from "@/lib/domain/cairn-physique";
 import { pierreTraversee } from "@/lib/domain/cairn-contact";
@@ -26,11 +28,19 @@ import type { Pierre } from "@/lib/domain/cairn-stack";
 const AVANT_REMONTEE = 1600;
 /** Au-delà, un geste est considéré comme un coup porté. */
 const VITESSE_MINIMALE = 40;
-const VITESSE_MAXIMALE = 340;
+/**
+ * Plafond de la force transmise.
+ *
+ * Il était calé sur la largeur du dessin : au-delà, les pierres n'avaient nulle
+ * part où aller. Maintenant qu'elles peuvent sortir du cadre, un geste franc
+ * doit pouvoir les envoyer loin — c'est toute la différence entre effleurer un
+ * empilement et le faucher.
+ */
+const VITESSE_MAXIMALE = 640;
 
 type Phase = "pose" | "chute" | "attente" | "remontee";
 
-export function useChuteDesPierres(pierres: Pierre[], actif: boolean) {
+export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cadre = CADRE_SERRE) {
   const refSvg = useRef<SVGSVGElement>(null);
   const refsGroupes = useRef<(SVGGElement | null)[]>([]);
   const corps = useRef<Corps[]>(initialiser(pierres));
@@ -53,7 +63,7 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean) {
       const dt = (instant - precedent) / 1000;
 
       if (phase.current === "chute") {
-        corps.current = avancer(corps.current, pierres, dt);
+        corps.current = avancer(corps.current, pierres, dt, cadre);
         if (toutEstPose(corps.current)) {
           phase.current = "attente";
           posee.current = instant;
@@ -74,7 +84,7 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean) {
 
       boucle.current = requestAnimationFrame(tourner(instant));
     },
-    [peindre, pierres],
+    [cadre, peindre, pierres],
   );
 
   const relancer = useCallback(() => {

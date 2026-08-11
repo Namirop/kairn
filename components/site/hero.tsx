@@ -9,9 +9,11 @@ import { ROUTES } from "@/lib/auth/routes";
  * de halo, pas d'illustration pour compenser. L'empilement de pierres à côté
  * est l'élément signature, et il est le même que celui du tableau de bord.
  *
- * Il est posé dans un cartouche d'ombre plutôt que de flotter sur le fond : sur
- * un écran large, le cairn seul au milieu du vide était exactement le défaut
- * qu'on corrige — une colonne à gauche, un désert à droite.
+ * Il n'a plus de cartouche. Le cadre d'ombre tenait la colonne de droite, mais
+ * il enfermait aussi ce qui doit pouvoir en sortir : les pierres traversent
+ * maintenant la composition quand on coupe l'empilement. C'est la taille du
+ * cairn qui occupe la colonne désormais — il monte à toute la hauteur du
+ * panneau plutôt que de flotter au milieu d'un rectangle.
  */
 export function Hero() {
   return (
@@ -43,8 +45,8 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="bg-surface-ombre rounded-carte p-pas-8 flex justify-center">
-        <div className="h-64 w-40 md:h-80 md:w-full">
+      <div className="flex justify-center">
+        <div className="h-72 w-44 md:h-[30rem] md:w-full">
           <CairnRenversable nombre={7} />
         </div>
       </div>

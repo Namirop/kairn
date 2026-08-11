@@ -24,6 +24,18 @@ const MARGE = 4;
 /** Pas de temps maximal : un onglet qui reprend la main ne téléporte rien. */
 const PAS_MAX = 1 / 30;
 
+/**
+ * Les bords entre lesquels les pierres tombent, en unités de viewBox.
+ *
+ * Le cairn du tableau de bord n'a pas à quitter son dessin. Celui de la page
+ * publique, si : l'enfermer dans la largeur de son propre SVG le faisait
+ * rebondir sur des murs qu'on ne voyait pas, ni contenu ni libre.
+ */
+export type Cadre = { gauche: number; droite: number };
+
+export const CADRE_SERRE: Cadre = { gauche: 0, droite: LARGEUR_VUE };
+export const CADRE_LARGE: Cadre = { gauche: -2 * LARGEUR_VUE, droite: 3 * LARGEUR_VUE };
+
 export type Corps = {
   x: number;
   y: number;
@@ -78,16 +90,44 @@ export function renverser(corps: Corps[], index: number, impulsion: Impulsion): 
   });
 }
 
+/**
+ * Demi-encombrement d'une pierre inclinée, sur chaque axe.
+ *
+ * Une pierre couchée à quarante degrés déborde vers le bas de bien plus que sa
+ * demi-hauteur : c'est sa diagonale qui touche le sol. La demi-hauteur seule
+ * faisait donc enfoncer dans le sol toute pierre qui ne finissait pas à plat —
+ * et une chute produit surtout des pierres qui ne finissent pas à plat.
+ */
+export function demiEmprise(pierre: Pierre, rotation: number): { x: number; y: number } {
+  const angle = (rotation * Math.PI) / 180;
+  const cos = Math.abs(Math.cos(angle));
+  const sin = Math.abs(Math.sin(angle));
+
+  return {
+    x: (cos * pierre.largeur + sin * pierre.hauteur) / 2,
+    y: (cos * pierre.hauteur + sin * pierre.largeur) / 2,
+  };
+}
+
 /** Avance la simulation d'un pas. `dt` est en secondes. */
-export function avancer(corps: Corps[], pierres: Pierre[], dt: number): Corps[] {
+export function avancer(
+  corps: Corps[],
+  pierres: Pierre[],
+  dt: number,
+  cadre: Cadre = CADRE_SERRE,
+): Corps[] {
   const pas = Math.min(Math.max(dt, 0), PAS_MAX);
+
+  // Sans temps écoulé, rien ne change — pas même la résolution du contact au
+  // sol. Une pierre de base est posée à sa demi-hauteur sans tenir compte de son
+  // inclinaison : la corriger sur un pas nul ferait sursauter l'empilement à
+  // l'instant précis où on le touche, avant toute chute.
+  if (pas === 0) return corps;
 
   return corps.map((solide, index) => {
     const pierre = pierres[index];
     if (!solide.libre || solide.repos || !pierre) return solide;
 
-    const demiH = pierre.hauteur / 2;
-    const demiL = pierre.largeur / 2;
     let { x, y, rotation, vx, vy, vr } = solide;
 
     vy += GRAVITE * pas;
@@ -95,9 +135,12 @@ export function avancer(corps: Corps[], pierres: Pierre[], dt: number): Corps[] 
     y += vy * pas;
     rotation += vr * pas;
 
+    const demi = demiEmprise(pierre, rotation);
+    const demiH = demi.y;
+
     // Bords du cadre.
-    const minX = MARGE + demiL;
-    const maxX = LARGEUR_VUE - MARGE - demiL;
+    const minX = cadre.gauche + MARGE + demi.x;
+    const maxX = cadre.droite - MARGE - demi.x;
     if (x < minX || x > maxX) {
       x = Math.min(Math.max(x, minX), maxX);
       vx = -vx * REBOND;
