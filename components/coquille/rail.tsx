@@ -7,8 +7,15 @@ import { cn } from "@/lib/utils";
 
 /**
  * Navigation de bureau : un rail vertical étroit, icône et libellé visibles.
- * L'indicateur d'état actif est un trait de lichen à gauche — c'est le seul
- * endroit de la coquille où l'accent apparaît.
+ *
+ * Le rail est une surface d'ombre, la page une surface de papier : la
+ * séparation vient du fond, pas d'un trait. La destination active porte la
+ * surface de la page — elle appartient à ce qu'on est en train de regarder,
+ * et c'est ce que dit sa pastille claire.
+ *
+ * L'accent a quitté la navigation. Il signale ce qui est dû et le sommet du
+ * cairn ; un état de navigation se lit très bien sans lui, et chaque
+ * occurrence de lichen en moins rend les autres plus fortes.
  */
 export function Rail() {
   const chemin = usePathname();
@@ -16,7 +23,7 @@ export function Rail() {
   return (
     <nav
       aria-label="Navigation principale"
-      className="pt-pas-16 fixed inset-y-0 left-0 z-30 hidden w-22 flex-col items-center border-r border-stone-100 bg-stone-50 md:flex"
+      className="pt-pas-16 px-pas-2 gap-pas-1 bg-surface-ombre fixed inset-y-0 left-0 z-30 hidden w-22 flex-col items-center md:flex"
     >
       {DESTINATIONS.map(({ href, libelle, icone: Icone }) => {
         const actif = chemin === href || chemin.startsWith(`${href}/`);
@@ -27,17 +34,12 @@ export function Rail() {
             href={href}
             aria-current={actif ? "page" : undefined}
             className={cn(
-              "gap-pas-1 py-pas-3 relative flex w-full flex-col items-center transition-colors",
-              actif ? "text-stone-900" : "text-stone-500 hover:text-stone-900",
+              "gap-pas-1 py-pas-3 rounded-carte flex w-full flex-col items-center transition-colors",
+              actif
+                ? "bg-surface-papier text-stone-900"
+                : "hover:bg-surface-papier/60 text-stone-500 hover:text-stone-900",
             )}
           >
-            <span
-              aria-hidden
-              className={cn(
-                "top-pas-2 bottom-pas-2 absolute left-0 w-0.5 transition-colors",
-                actif ? "bg-lichen" : "bg-transparent",
-              )}
-            />
             <Icone className="size-5" strokeWidth={1.75} aria-hidden />
             <span className="text-mono font-mono tracking-[0.06em]">{libelle}</span>
           </Link>

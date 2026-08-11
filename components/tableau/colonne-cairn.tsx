@@ -2,8 +2,14 @@ import { Cairn } from "@/components/cairn/cairn";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 /**
- * L'élément signature et ce qu'il compte. Le streak est la seule occurrence
- * d'ember du produit ; il vit sous l'empilement, en petites capitales.
+ * L'élément signature et ce qu'il compte.
+ *
+ * Il vit sur le panneau de roche — l'un des deux de toute l'application. Les
+ * pierres s'y inversent en gris clairs, et le sommet garde son lichen : c'est
+ * la constante de l'identité, et la seule occurrence d'accent sur ce panneau.
+ *
+ * Le streak est la seule occurrence d'ember du produit ; il vit sous
+ * l'empilement, en petites capitales.
  */
 export function ColonneCairn({
   consolides,
@@ -15,12 +21,12 @@ export function ColonneCairn({
   streak: number;
 }) {
   return (
-    <aside className="md:pl-pas-8 flex flex-col items-center border-stone-100 md:border-l">
+    <aside className="flex flex-col items-center">
       <div className="h-56 w-full max-w-56 md:h-72">
-        <Cairn nombre={consolides} graines={graines} />
+        <Cairn nombre={consolides} graines={graines} clair />
       </div>
 
-      <p className="mt-pas-4 text-petit text-center text-stone-500">
+      <p className="mt-pas-4 text-petit text-center text-stone-300">
         {consolides === 0
           ? "Le premier concept consolidé posera la première pierre."
           : `${consolides} ${consolides === 1 ? "concept consolidé" : "concepts consolidés"}`}
@@ -28,7 +34,7 @@ export function ColonneCairn({
 
       {streak > 0 ? (
         <Tooltip>
-          <TooltipTrigger className="mt-pas-6 text-mono text-ember-deep rounded-xs font-mono tracking-[0.14em] uppercase">
+          <TooltipTrigger className="mt-pas-6 text-mono text-ember rounded-galet font-mono tracking-[0.14em] uppercase">
             {streak} {streak === 1 ? "jour" : "jours"} d&apos;affilée
           </TooltipTrigger>
           <TooltipContent>

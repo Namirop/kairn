@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
 import type { Pierre } from "@/lib/domain/cairn-stack";
 
 /**
@@ -11,8 +12,6 @@ import type { Pierre } from "@/lib/domain/cairn-stack";
  * d'où les pourcentages, relatifs à la boîte de la pierre.
  */
 
-const NUANCES = ["fill-stone-900", "fill-stone-800", "fill-stone-700"] as const;
-
 const POSE = { y: "0%", rotate: 0, opacity: 1 } as const;
 
 export function PierrePosee({
@@ -20,11 +19,13 @@ export function PierrePosee({
   rang,
   derniere,
   anime,
+  clair = false,
 }: {
   pierre: Pierre;
   rang: number;
   derniere: boolean;
   anime: boolean;
+  clair?: boolean;
 }) {
   const depart = derniere
     ? { y: "-140%", rotate: -7, opacity: 0 }
@@ -45,29 +46,8 @@ export function PierrePosee({
           ease: [0.2, 0.8, 0.2, 1],
         }}
       >
-        <ArêtesDePierre pierre={pierre} derniere={derniere} />
+        <ArêtesDePierre pierre={pierre} derniere={derniere} clair={clair} />
       </motion.g>
     </g>
-  );
-}
-
-/** Le tracé de la pierre, et l'arête de lichen sur la dernière posée. */
-export function ArêtesDePierre({ pierre, derniere }: { pierre: Pierre; derniere: boolean }) {
-  return (
-    <>
-      <path d={pierre.chemin} className={NUANCES[pierre.nuance]} />
-      {derniere ? (
-        <path
-          d={pierre.chemin}
-          className="stroke-lichen"
-          strokeWidth={1.4}
-          strokeLinecap="round"
-          fill="none"
-          pathLength={1}
-          strokeDasharray="0.34 0.66"
-          strokeDashoffset={-0.04}
-        />
-      ) : null}
-    </>
   );
 }

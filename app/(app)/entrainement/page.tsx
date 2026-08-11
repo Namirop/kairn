@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { Panneau } from "@/components/coquille/panneau";
 import { TourDentrainement } from "@/components/entrainement/tour-dentrainement";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -28,6 +29,8 @@ export default async function PageEntrainement() {
   ]);
 
   return (
-    <TourDentrainement premierTour={tour} principeVu={reglages.trainingIntroSeenAt !== null} />
+    <Panneau surface="papier" className="md:py-pas-16">
+      <TourDentrainement premierTour={tour} principeVu={reglages.trainingIntroSeenAt !== null} />
+    </Panneau>
   );
 }

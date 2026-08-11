@@ -39,10 +39,13 @@ export function Cairn({
   nombre,
   graines,
   className,
+  clair = false,
 }: {
   nombre: number;
   graines?: string[];
   className?: string;
+  /** Sur un panneau de roche, les pierres s'inversent en gris clairs. */
+  clair?: boolean;
 }) {
   const immobile = useReducedMotion() ?? false;
   const anime = useAnimationPossible(immobile);
@@ -59,7 +62,7 @@ export function Cairn({
           : `Empilement de ${nombre} pierre${nombre > 1 ? "s" : ""}`
       }
     >
-      <SolDuCairn />
+      <SolDuCairn clair={clair} />
       {pierres.map((pierre, rang) => (
         <PierrePosee
           key={pierre.cle}
@@ -67,6 +70,7 @@ export function Cairn({
           rang={rang}
           derniere={rang === pierres.length - 1}
           anime={anime}
+          clair={clair}
         />
       ))}
     </svg>

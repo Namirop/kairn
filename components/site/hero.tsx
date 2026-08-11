@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CairnRenversable } from "@/components/cairn/cairn-renversable";
+import { Panneau } from "@/components/coquille/panneau";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
@@ -7,10 +8,18 @@ import { ROUTES } from "@/lib/auth/routes";
  * L'ouverture. Le titre porte la composition à lui seul : pas de dégradé, pas
  * de halo, pas d'illustration pour compenser. L'empilement de pierres à côté
  * est l'élément signature, et il est le même que celui du tableau de bord.
+ *
+ * Il est posé dans un cartouche d'ombre plutôt que de flotter sur le fond : sur
+ * un écran large, le cairn seul au milieu du vide était exactement le défaut
+ * qu'on corrige — une colonne à gauche, un désert à droite.
  */
 export function Hero() {
   return (
-    <section className="gap-pas-12 pt-pas-12 pb-pas-16 md:pt-pas-24 md:pb-pas-24 grid items-center md:grid-cols-[1.4fr_1fr]">
+    <Panneau
+      surface="papier"
+      aere
+      className="gap-pas-12 grid items-center md:grid-cols-[1.4fr_1fr]"
+    >
       <div>
         <h1 className="font-display text-h1-site leading-[0.95] font-bold tracking-[-0.03em] text-balance">
           Tu lis beaucoup.
@@ -34,9 +43,11 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="mx-auto h-64 w-56 md:h-80 md:w-full">
-        <CairnRenversable nombre={7} />
+      <div className="bg-surface-ombre rounded-carte p-pas-8 flex justify-center">
+        <div className="h-64 w-40 md:h-80 md:w-full">
+          <CairnRenversable nombre={7} />
+        </div>
       </div>
-    </section>
+    </Panneau>
   );
 }

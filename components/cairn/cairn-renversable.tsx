@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useReducedMotion } from "motion/react";
 import { Cairn } from "@/components/cairn/cairn";
-import { ArêtesDePierre } from "@/components/cairn/pierre-posee";
+import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
 import { SolDuCairn } from "@/components/cairn/sol-du-cairn";
 import { useChuteDesPierres } from "@/components/cairn/use-chute-des-pierres";
 import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";

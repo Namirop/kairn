@@ -25,13 +25,14 @@ export default async function CoquilleApplication({ children }: { children: Reac
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="min-h-dvh">
+      <div className="bg-surface-papier min-h-dvh">
         <Rail />
         <div className="md:pl-22">
           <EnTete utilisateur={utilisateur} />
-          <main className="px-pas-4 pt-pas-6 md:px-pas-8 md:pt-pas-12 md:pb-pas-16 mx-auto w-full max-w-5xl pb-32">
-            {children}
-          </main>
+          {/* Aucune mesure ici : chaque écran est une pile de panneaux, et
+              chaque panneau porte la sienne. Un conteneur à cet endroit
+              empêcherait tout fond d'aller d'un bord à l'autre. */}
+          <main className="pb-32 md:pb-0">{children}</main>
         </div>
         <BarreBasse />
         <InviteInstallation />

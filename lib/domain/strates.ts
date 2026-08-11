@@ -93,9 +93,13 @@ export function strates(graine: string): Strates {
 
   // Les trois lignes descendent, et chacune ondule un peu moins que la
   // précédente : la couche du dessus est celle qui a été le plus attaquée.
-  const premiere = ligne(3.4, 1.5, tirage);
-  const seconde = ligne(6.2, 1.2, tirage);
-  const troisieme = ligne(8.4, 0.9, tirage);
+  //
+  // L'amplitude compte plus qu'on ne croit. Étirée sur un écran large, une
+  // ondulation timide redevient exactement le filet qu'on a enlevé partout — il
+  // faut que le pli se voie à deux mètres de l'écran.
+  const premiere = ligne(2.6, 2.2, tirage);
+  const seconde = ligne(5.4, 1.8, tirage);
+  const troisieme = ligne(7.8, 1.4, tirage);
 
   return {
     veines: [jusquenBas(premiere), jusquenBas(seconde)],

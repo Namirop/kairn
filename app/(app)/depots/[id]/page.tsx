@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { Panneau } from "@/components/coquille/panneau";
+import { Strates } from "@/components/coquille/strates";
 import { ConceptCorrigeable } from "@/components/depots/concept-corrigeable";
 import { EtatVide } from "@/components/etats/etat-vide";
 import { Badge } from "@/components/ui/badge";
@@ -32,11 +34,11 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
   const texte = depot.rawContent.trim() || depot.extractedText || "";
 
   return (
-    <div className="gap-pas-8 flex flex-col">
-      <div>
+    <>
+      <Panneau surface="papier">
         <Link
           href={ROUTES.depots}
-          className="text-petit rounded-xs text-stone-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900"
+          className="text-petit rounded-galet text-stone-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900"
         >
           Retour aux dépôts
         </Link>
@@ -49,33 +51,36 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
           {etat === "pret" ? null : <Badge variant="pose">{libelleEtat(etat)}</Badge>}
           <span>Déposé {anciennete(depot.createdAt, new Date(), fuseau)}</span>
         </p>
-      </div>
 
-      {depot.failureReason ? (
-        <p className="border-alerte pl-pas-4 text-corps max-w-2xl border-l-2 text-stone-900">
-          {depot.failureReason}
-        </p>
-      ) : null}
-
-      {texte ? (
-        <section className="max-w-3xl">
-          <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-            Ce que tu as déposé
-          </h2>
-          <p className="mt-pas-3 p-pas-4 text-petit rounded-xs border border-stone-100 bg-stone-50 whitespace-pre-wrap text-stone-700">
-            {texte}
+        {depot.failureReason ? (
+          <p className="mt-pas-6 border-alerte pl-pas-4 text-corps max-w-2xl border-l-2 text-stone-900">
+            {depot.failureReason}
           </p>
-        </section>
-      ) : null}
+        ) : null}
 
-      <section className="max-w-3xl">
+        {texte ? (
+          <section className="mt-pas-8 max-w-3xl">
+            <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
+              Ce que tu as déposé
+            </h2>
+            <p className="mt-pas-3 p-pas-4 text-petit rounded-carte bg-surface-ombre whitespace-pre-wrap text-stone-700">
+              {texte}
+            </p>
+          </section>
+        ) : null}
+      </Panneau>
+
+      <Strates de="papier" vers="ombre" graine="depot-concepts" />
+
+      <Panneau surface="ombre" className="md:pb-pas-16">
         <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
           Ce qu&apos;on en a tiré
         </h2>
 
         {depot.concepts.length === 0 ? (
-          <div className="mt-pas-4">
+          <div className="mt-pas-2 max-w-3xl">
             <EtatVide
+              graine={depot.id}
               constat="Aucun concept pour l'instant."
               contexte={
                 etat === "echec"
@@ -85,13 +90,13 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
             />
           </div>
         ) : (
-          <ul className="mt-pas-2">
+          <ul className="mt-pas-4 gap-pas-2 flex max-w-3xl flex-col">
             {depot.concepts.map((concept) => (
               <ConceptCorrigeable key={concept.id} concept={concept} inputId={depot.id} />
             ))}
           </ul>
         )}
-      </section>
-    </div>
+      </Panneau>
+    </>
   );
 }

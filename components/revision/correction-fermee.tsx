@@ -42,7 +42,7 @@ export function CorrectionFermee({
   const etalonUtile = !repeteLOption(answerKey, bonneOption);
 
   return (
-    <div className="mt-pas-8 pt-pas-6 border-t border-stone-100">
+    <div className="mt-pas-8 pt-pas-6">
       <p className="text-mono font-mono tracking-[0.12em] uppercase">
         {juste ? (
           <span className="text-lichen-deep">Réponse juste</span>

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Panneau } from "@/components/coquille/panneau";
+import { Strates } from "@/components/coquille/strates";
 import { ListeDepots } from "@/components/tableau/liste-depots";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
@@ -22,28 +24,35 @@ export default async function PageDepots() {
   ]);
 
   return (
-    <div className="gap-pas-8 flex flex-col">
-      {/* Même largeur que la liste : sans ça, le bouton part se poser tout seul
-          au bord de l'écran, loin de ce sur quoi il agit. */}
-      <div className="gap-pas-4 flex max-w-3xl flex-wrap items-end justify-between">
-        <div>
-          <h1 className="text-h1-app leading-tight font-bold">Ce que tu as déposé</h1>
-          <p className="mt-pas-2 text-petit text-stone-500">
-            Le texte d&apos;origine n&apos;est jamais réécrit. Il reste tel que tu l&apos;as posé.
-          </p>
+    <>
+      <Panneau surface="papier">
+        {/* Même largeur que la liste : sans ça, le bouton part se poser tout
+            seul au bord de l'écran, loin de ce sur quoi il agit. */}
+        <div className="gap-pas-4 flex max-w-3xl flex-wrap items-end justify-between">
+          <div>
+            <h1 className="text-h1-app leading-tight font-bold">Ce que tu as déposé</h1>
+            <p className="mt-pas-2 text-petit max-w-md text-stone-500">
+              Le texte d&apos;origine n&apos;est jamais réécrit. Il reste tel que tu l&apos;as posé.
+            </p>
+          </div>
+          <Button asChild>
+            <Link href={`${ROUTES.depots}/nouveau`}>Déposer</Link>
+          </Button>
         </div>
-        <Button asChild>
-          <Link href={`${ROUTES.depots}/nouveau`}>Déposer</Link>
-        </Button>
-      </div>
+      </Panneau>
 
-      <ListeDepots
-        depots={depots}
-        maintenant={maintenant}
-        fuseau={fuseau}
-        titre={null}
-        avecLien={false}
-      />
-    </div>
+      <Strates de="papier" vers="ombre" graine="depots-liste" />
+
+      <Panneau surface="ombre" className="md:pb-pas-16">
+        <ListeDepots
+          depots={depots}
+          maintenant={maintenant}
+          fuseau={fuseau}
+          titre={null}
+          avecLien={false}
+          surface="ombre"
+        />
+      </Panneau>
+    </>
   );
 }

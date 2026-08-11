@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/lib/auth/routes";
 import type { DepotListe } from "@/lib/db/depots";
 import { anciennete } from "@/lib/domain/echeance";
+import { cn } from "@/lib/utils";
 import { conceptsLisibles, libelleEtat } from "@/lib/domain/etat-depot";
 
 /**
@@ -38,6 +39,7 @@ export function ListeDepots({
   fuseau,
   titre = "Ce que tu as déposé",
   avecLien = true,
+  surface = "papier",
 }: {
   depots: DepotListe[];
   maintenant: Date;
@@ -45,6 +47,8 @@ export function ListeDepots({
   /** Nul sur la page dédiée, où le titre de page dit déjà de quoi il s'agit. */
   titre?: string | null;
   avecLien?: boolean;
+  /** La surface du panneau qui porte la liste : les cartes prennent l'autre. */
+  surface?: "papier" | "ombre";
 }) {
   return (
     <section>
@@ -59,7 +63,7 @@ export function ListeDepots({
         {avecLien && depots.length > 0 ? (
           <Link
             href={ROUTES.depots}
-            className="text-petit rounded-xs text-stone-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900"
+            className="text-petit rounded-galet text-stone-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900"
           >
             Tout voir
           </Link>
@@ -74,12 +78,20 @@ export function ListeDepots({
           />
         </div>
       ) : (
-        <ul className="mt-pas-4 max-w-3xl">
+        <ul className="mt-pas-4 gap-pas-2 flex max-w-3xl flex-col">
           {depots.map((depot) => (
-            <li key={depot.id} className="border-b border-stone-100 last:border-b-0">
+            <li key={depot.id}>
               <Link
                 href={`${ROUTES.depots}/${depot.id}`}
-                className="py-pas-3 -mx-pas-2 px-pas-2 block rounded-xs transition-colors hover:bg-stone-50"
+                // Une carte cliquable se soulève : le survol change de surface
+                // et décolle d'un cheveu, il ne baisse pas l'opacité.
+                className={cn(
+                  "p-pas-4 rounded-carte block transition-[transform,background-color] duration-150",
+                  "hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",
+                  surface === "ombre"
+                    ? "bg-surface-papier hover:bg-surface-papier"
+                    : "bg-surface-ombre hover:bg-surface-ombre/70",
+                )}
               >
                 <p className="text-petit line-clamp-2">
                   {depot.sourceType === "IMAGE" ? "Capture — " : null}

@@ -37,7 +37,7 @@ export function ConceptCorrigeable({ concept, inputId }: { concept: ConceptLu; i
   const [texte, setTexte] = useState(concept.concept);
 
   return (
-    <li className="py-pas-6 border-b border-stone-100 last:border-b-0">
+    <li className="p-pas-6 rounded-carte bg-surface-papier">
       {edition ? (
         <form action={modifierConceptAction} className="gap-pas-3 flex flex-col">
           <input type="hidden" name="atomId" value={concept.id} />
@@ -51,7 +51,7 @@ export function ConceptCorrigeable({ concept, inputId }: { concept: ConceptLu; i
             rows={4}
             value={texte}
             onChange={(evenement) => setTexte(evenement.target.value)}
-            className="p-pas-3 text-petit w-full resize-y rounded-xs border border-stone-300 bg-stone-50 leading-relaxed"
+            className="p-pas-3 text-petit rounded-champ bg-surface-ombre w-full resize-y border border-stone-300 leading-relaxed"
           />
           <p className="text-petit text-stone-500">
             Les questions écrites sur l&apos;ancienne formulation seront remplacées, et la

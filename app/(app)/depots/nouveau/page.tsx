@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { Panneau } from "@/components/coquille/panneau";
+import { Strates } from "@/components/coquille/strates";
 import { FormulaireDepot } from "@/components/depots/formulaire-depot";
 import { PlafondAtteint } from "@/components/depots/plafond-atteint";
 import { ROUTES } from "@/lib/auth/routes";
@@ -31,25 +33,29 @@ export default async function PageNouveauDepot() {
   const plein = restants === 0 || usage.depots >= DEPOTS_PAR_JOUR;
 
   return (
-    <div className="gap-pas-8 flex flex-col">
-      <div>
+    <>
+      <Panneau surface="papier">
         <h1 className="text-h1-app leading-tight font-bold">Dépose ce que tu veux retenir</h1>
         <p className="mt-pas-2 text-petit max-w-xl text-stone-500">
           Le découpage part tout seul. Tu retrouves tes concepts dans la liste, sans rien lancer.
         </p>
-      </div>
+      </Panneau>
 
-      {plein ? (
-        <PlafondAtteint
-          remiseAZero={quandRepartLeCompteur(new Date(), fuseau)}
-          inscrit={inscrit}
-          plafond={CONCEPTS_PAR_JOUR}
-        />
-      ) : (
-        // La clé d'un geste de dépôt, tirée à chaque affichage : elle rend le
-        // double envoi inoffensif sans jamais confondre deux dépôts distincts.
-        <FormulaireDepot restants={restants} cleEnvoi={crypto.randomUUID()} />
-      )}
-    </div>
+      <Strates de="papier" vers="ombre" graine="depot-formulaire" />
+
+      <Panneau surface="ombre" className="md:pb-pas-16">
+        {plein ? (
+          <PlafondAtteint
+            remiseAZero={quandRepartLeCompteur(new Date(), fuseau)}
+            inscrit={inscrit}
+            plafond={CONCEPTS_PAR_JOUR}
+          />
+        ) : (
+          // La clé d'un geste de dépôt, tirée à chaque affichage : elle rend le
+          // double envoi inoffensif sans jamais confondre deux dépôts distincts.
+          <FormulaireDepot restants={restants} cleEnvoi={crypto.randomUUID()} />
+        )}
+      </Panneau>
+    </>
   );
 }
