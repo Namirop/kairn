@@ -45,7 +45,8 @@ export default async function PageAujourdhui() {
 
       <Panneau
         surface="roche"
-        className="md:py-pas-16 gap-pas-8 md:gap-pas-12 grid flex-1 items-center md:grid-cols-[1fr_auto]"
+        remplit
+        className="md:py-pas-16 gap-pas-8 md:gap-pas-12 grid items-center md:grid-cols-[1fr_auto]"
       >
         <div className="max-w-md">
           <h2 className="text-mono font-mono tracking-[0.14em] text-stone-300 uppercase">

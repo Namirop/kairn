@@ -31,7 +31,7 @@ export default async function PageEntrainement() {
 
   return (
     <PileDePanneaux>
-      <Panneau surface="papier" mesure="texte" className="md:py-pas-16 flex-1">
+      <Panneau surface="papier" mesure="texte" remplit className="md:py-pas-16">
         <TourDentrainement premierTour={tour} principeVu={reglages.trainingIntroSeenAt !== null} />
       </Panneau>
     </PileDePanneaux>

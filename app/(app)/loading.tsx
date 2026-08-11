@@ -9,15 +9,17 @@ import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
  * squelette gris qui mime la page suivante promettrait une mise en page qu'on
  * ne connaît pas encore — celle de la révision n'a rien à voir avec celle des
  * dépôts.
+ *
+ * Elle occupe l'écran entier et se tient au milieu. Posée en haut à gauche,
+ * elle ressemblait à un morceau de page arrivé avant les autres, ce qui est
+ * exactement le contraire de ce qu'une attente doit dire.
  */
 export default function Chargement() {
   return (
     <PileDePanneaux>
-      <Panneau surface="papier" mesure="texte" className="md:py-pas-16 flex-1">
-        <div className="gap-pas-4 flex items-center">
-          <PileEnConstruction />
-          <p className="text-petit text-stone-500">Un instant.</p>
-        </div>
+      <Panneau surface="papier" mesure="texte" centre remplit>
+        <PileEnConstruction className="w-20 md:w-24" />
+        <p className="mt-pas-6 text-petit text-stone-500">Un instant.</p>
       </Panneau>
     </PileDePanneaux>
   );

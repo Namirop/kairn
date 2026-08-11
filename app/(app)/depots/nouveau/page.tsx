@@ -44,7 +44,7 @@ export default async function PageNouveauDepot() {
 
       <Strates de="papier" vers="ombre" graine="depot-formulaire" />
 
-      <Panneau surface="ombre" mesure="colonne" className="md:pb-pas-16 flex-1">
+      <Panneau surface="ombre" mesure="colonne" remplit className="md:pb-pas-16">
         {plein ? (
           <PlafondAtteint
             remiseAZero={quandRepartLeCompteur(new Date(), fuseau)}

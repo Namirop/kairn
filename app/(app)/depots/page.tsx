@@ -44,7 +44,7 @@ export default async function PageDepots() {
 
       <Strates de="papier" vers="ombre" graine="depots-liste" />
 
-      <Panneau surface="ombre" mesure="colonne" className="md:pb-pas-16 flex-1">
+      <Panneau surface="ombre" mesure="colonne" remplit className="md:pb-pas-16">
         <ListeDepots
           depots={depots}
           maintenant={maintenant}

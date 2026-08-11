@@ -73,7 +73,7 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
 
       <Strates de="papier" vers="ombre" graine="depot-concepts" />
 
-      <Panneau surface="ombre" mesure="colonne" className="md:pb-pas-16 flex-1">
+      <Panneau surface="ombre" mesure="colonne" remplit className="md:pb-pas-16">
         <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
           Ce qu&apos;on en a tiré
         </h2>

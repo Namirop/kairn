@@ -35,6 +35,8 @@ export function Panneau({
   surface = "papier",
   mesure = "page",
   aere = false,
+  centre = false,
+  remplit = false,
   fond: matiere,
   className,
   children,
@@ -43,6 +45,24 @@ export function Panneau({
   mesure?: Mesure;
   /** Le rythme d'un panneau de marketing, plus ample que celui d'un écran. */
   aere?: boolean;
+  /**
+   * Contenu centré dans toute la hauteur du panneau.
+   *
+   * Réservé à ce qui n'est pas une page : une attente, un message qui tient en
+   * deux lignes. Posés en haut à gauche d'un panneau vide, ils ont l'air d'un
+   * bout de page qui n'a pas fini de charger — ce qui, pour une attente, est
+   * une ironie coûteuse.
+   */
+  centre?: boolean;
+  /**
+   * Le panneau prend toute la hauteur qui reste dans la pile.
+   *
+   * À poser sur le dernier panneau d'une page. Sans lui, le grain s'arrêtait
+   * avec le panneau et laissait une couture visible en travers de l'écran, là
+   * même où on croyait avoir réglé le problème en peignant le sol de la bonne
+   * couleur : c'est la texture qui trahissait la jointure, pas la teinte.
+   */
+  remplit?: boolean;
   /** Ce qui vit derrière le contenu, sous le grain. Une texture, jamais un texte. */
   fond?: ReactNode;
   className?: string;
@@ -51,7 +71,16 @@ export function Panneau({
   const { fond, encre, grain } = SURFACES[surface];
 
   return (
-    <section className={cn("relative w-full shrink-0 overflow-hidden", fond, encre, grain)}>
+    <section
+      className={cn(
+        "relative w-full overflow-hidden",
+        remplit ? "flex-1" : "shrink-0",
+        centre && "flex flex-col justify-center",
+        fond,
+        encre,
+        grain,
+      )}
+    >
       {matiere ? <div aria-hidden>{matiere}</div> : null}
 
       <div
@@ -59,6 +88,7 @@ export function Panneau({
           "px-pas-4 md:px-pas-8 relative z-10 mx-auto w-full",
           MESURES[mesure],
           aere ? "py-pas-16 md:py-pas-24" : "py-pas-8 md:py-pas-12",
+          centre && "flex flex-col items-center text-center",
           className,
         )}
       >

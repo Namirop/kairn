@@ -28,12 +28,16 @@ function PhraseTrouee({ phrase, comble }: { phrase: string; comble: string | nul
     <p className="text-corps leading-loose text-stone-900">
       {avant}
       {comble === null ? (
+        // Un emplacement, pas un soulignement : c'est le geste central de ce
+        // format, et un trait fin sous une ligne de texte se remarquait à peine.
         <span
           aria-hidden
-          className="mx-1 inline-block w-24 border-b-2 border-stone-300 align-baseline"
+          className="rounded-champ bg-surface-ombre mx-1 inline-block h-6 w-28 align-middle"
         />
       ) : (
-        <span className="border-lichen border-b-2 px-1 font-medium">{comble}</span>
+        <span className="rounded-champ bg-surface-ombre border-lichen mx-1 border-b-2 px-2 font-medium">
+          {comble}
+        </span>
       )}
       {suite.join(TROU)}
     </p>

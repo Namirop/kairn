@@ -45,7 +45,7 @@ export default async function PageReglages() {
 
       <Strates de="papier" vers="ombre" graine="reglages-liste" />
 
-      <Panneau surface="ombre" mesure="colonne" className="md:pb-pas-16 flex-1">
+      <Panneau surface="ombre" mesure="colonne" remplit className="md:pb-pas-16">
         <dl className="gap-pas-2 flex flex-col">
           <Ligne intitule="Adresse" valeur={utilisateur.email} />
           <Ligne intitule="Fuseau horaire" valeur={reglages.timezone} />
