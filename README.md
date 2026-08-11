@@ -1,11 +1,11 @@
-# Cairn
+# Kairn
 
 > Application de répétition espacée : on y dépose une information brute, elle est découpée en
 > concepts, transformée en questions, et reposée au moment où elle est sur le point d'être oubliée.
 
 ## Aperçu
 
-Cairn prend un dépôt libre — une phrase, un pavé collé, une capture d'écran — et en tire des
+Kairn prend un dépôt libre — une phrase, un pavé collé, une capture d'écran — et en tire des
 concepts unitaires (`Atom`). Chaque concept porte quatre formulations de question (`Variant`), une
 par facette : reconnaître, expliquer le mécanisme, délimiter, appliquer. La planification par
 répétition espacée porte sur le concept, pas sur la formulation : les formulations tournent pour

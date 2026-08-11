@@ -5,12 +5,15 @@
  * clients mail ne savent pas lire une variable CSS, et beaucoup suppriment les
  * feuilles de style externes. Ce fichier est le seul endroit où elles sont
  * dupliquées ; il suit `app/globals.css`.
+ *
+ * L'email reprend la composition du produit : un fond d'ombre, une surface de
+ * papier posée dessus. Le blanc pur n'existe nulle part dans Kairn.
  */
 const PALETTE = {
-  paper: "#F2F2EF",
-  surface: "#FFFFFF",
-  border: "#E4E4DF",
-  muted: "#6E7370",
+  paper: "#E4E4DF",
+  surface: "#F2F2EF",
+  border: "#BFC0BA",
+  muted: "#5E635F",
   ink: "#16191A",
   lichen: "#7A8B4F",
   ember: "#B4552F",
@@ -38,7 +41,7 @@ export function renderShell({ preheader, body, unsubscribeUrl }: ShellContent): 
 <tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:${PALETTE.surface};border:1px solid ${PALETTE.border};">
 <tr><td style="padding:32px 28px;">
-<div style="font-family:${MONO};font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:${PALETTE.muted};padding-bottom:24px;">Cairn</div>
+<div style="font-family:${SANS};font-size:17px;font-weight:600;letter-spacing:-0.01em;color:${PALETTE.ink};padding-bottom:24px;">Kairn</div>
 ${body}
 </td></tr>
 </table>

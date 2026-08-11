@@ -11,7 +11,7 @@ export function FormulaireDesinscription({ jeton }: { jeton: string }) {
   if (etat === "fait") {
     return (
       <p className="border-lichen pl-pas-4 border-l-2 text-stone-900">
-        C&apos;est fait. Tu ne recevras plus d&apos;email de Cairn.
+        C&apos;est fait. Tu ne recevras plus d&apos;email de Kairn.
       </p>
     );
   }

@@ -21,7 +21,7 @@ export default function CoquilleSite({ children }: { children: React.ReactNode }
 
       <footer className="px-pas-4 py-pas-8 md:px-pas-8 mx-auto w-full max-w-5xl border-t border-stone-100">
         <p className="text-mono text-stone-500">
-          Cairn — un cairn balise un sentier, une pierre à la fois.
+          Kairn — un cairn balise un sentier, une pierre à la fois.
         </p>
       </footer>
     </div>

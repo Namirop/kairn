@@ -124,7 +124,7 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
             facet: "APPLICATION",
             question: "Faut-il un second index sur `due` seul si `(userId, due)` existe déjà ?",
             answerKey:
-              "Seulement si une requête filtre sur `due` sans `userId`. Dans Cairn la requête chaude porte toujours les deux : le composite suffit.",
+              "Seulement si une requête filtre sur `due` sans `userId`. Dans Kairn la requête chaude porte toujours les deux : le composite suffit.",
           },
         ],
       },

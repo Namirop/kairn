@@ -44,7 +44,7 @@ export function InviteInstallation() {
   return (
     <div className="inset-x-pas-4 gap-pas-3 p-pas-4 md:right-pas-8 md:bottom-pas-8 fixed bottom-20 z-40 flex items-start border border-stone-300 bg-stone-50 md:left-auto md:w-80">
       <div className="flex-1">
-        <p className="font-medium">Installer Cairn</p>
+        <p className="font-medium">Installer Kairn</p>
         <p className="mt-pas-1 text-petit text-stone-500">
           L&apos;application s&apos;ouvre depuis ton écran d&apos;accueil et fonctionne hors ligne
           pour la lecture. Une application mobile native suivra.

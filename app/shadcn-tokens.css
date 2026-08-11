@@ -12,25 +12,25 @@
 */
 
 :root {
-  --background: var(--paper);
+  --background: var(--surface-papier);
   --foreground: var(--stone-900);
-  --card: var(--stone-50);
+  --card: var(--surface-papier);
   --card-foreground: var(--stone-900);
-  --popover: var(--stone-50);
+  --popover: var(--surface-papier);
   --popover-foreground: var(--stone-900);
   --primary: var(--stone-900);
   --primary-foreground: var(--stone-50);
-  --secondary: var(--stone-100);
+  --secondary: var(--surface-ombre);
   --secondary-foreground: var(--stone-900);
-  --muted: var(--stone-100);
+  --muted: var(--surface-ombre);
   --muted-foreground: var(--stone-500);
-  --accent: var(--stone-100);
+  --accent: var(--surface-ombre);
   --accent-foreground: var(--stone-900);
   --destructive: var(--alerte);
   --border: var(--stone-100);
   --input: var(--stone-300);
   --ring: var(--lichen-deep);
-  --radius: var(--r-sm);
+  --radius: var(--r-champ);
 }
 
 @theme inline {

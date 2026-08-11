@@ -13,7 +13,7 @@ export default function PageInscription() {
       <div>
         <h1 className="text-h1-app leading-tight font-bold">Poser la première pierre</h1>
         <p className="mt-pas-2 text-petit text-stone-500">
-          Dépose ce que tu apprends. Cairn le découpe et te le repose au bon moment.
+          Dépose ce que tu apprends. Kairn le découpe et te le repose au bon moment.
         </p>
       </div>
 

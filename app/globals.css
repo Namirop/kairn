@@ -11,8 +11,25 @@
 */
 
 :root {
+  /*
+    Les quatre surfaces. Une page est une pile de panneaux, et chaque panneau
+    porte l'une d'elles — c'est le changement de fond qui sépare deux sujets,
+    plus jamais un filet d'un pixel.
+
+    papier  la surface de lecture, par défaut
+    ombre   le panneau alterné, jamais deux d'affilée
+    lichen  un seul panneau dans toute l'application : celui où le produit tient
+            sa promesse. Il interdit tout autre usage du lichen sur cet écran,
+            sauf le sommet du cairn
+    roche   deux panneaux, pas trois. Le texte et les pierres s'y inversent en
+            gris clairs ; le sommet lichen reste lichen
+  */
+  --surface-papier: #f2f2ef;
+  --surface-ombre: #e4e4df;
+  --surface-lichen: #e8eadf;
+  --surface-roche: #2a2e2c;
+
   /* Pierre — neutres à température légèrement froide, côté lichen. */
-  --paper: #e9e9e5;
   --stone-50: #f2f2ef;
   --stone-100: #e4e4df;
   --stone-300: #bfc0ba;
@@ -33,9 +50,16 @@
   --alerte: #9a3b2c;
   --alerte-surface: #f3e6e2;
 
-  /* Rayons : la pierre est taillée, pas galbée. */
-  --r-xs: 2px;
-  --r-sm: 3px;
+  /*
+    Trois formes, trois sens. Le panneau est le sol, la carte est un objet posé
+    dessus, la pilule est un geste. L'angle vif ne survit que sur les pleines
+    largeurs : ailleurs, une interface faite d'angles droits et de traits fins
+    se lit comme un document, pas comme une application.
+  */
+  --r-plein: 0;
+  --r-champ: 10px;
+  --r-carte: 20px;
+  --r-galet: 999px;
 
   /* Rythme vertical. Le contraste entre paliers fait la structure. */
   --pas-1: 0.25rem;
@@ -71,7 +95,6 @@
 }
 
 @theme inline {
-  --color-paper: var(--paper);
   --color-stone-50: var(--stone-50);
   --color-stone-100: var(--stone-100);
   --color-stone-300: var(--stone-300);
@@ -109,11 +132,20 @@
   --spacing-pas-16: var(--pas-16);
   --spacing-pas-24: var(--pas-24);
 
-  --radius-xs: var(--r-xs);
-  --radius-sm: var(--r-sm);
-  --radius-md: var(--r-sm);
-  --radius-lg: var(--r-sm);
-  --radius-xl: var(--r-sm);
+  --color-surface-papier: var(--surface-papier);
+  --color-surface-ombre: var(--surface-ombre);
+  --color-surface-lichen: var(--surface-lichen);
+  --color-surface-roche: var(--surface-roche);
+
+  --radius-plein: var(--r-plein);
+  --radius-champ: var(--r-champ);
+  --radius-carte: var(--r-carte);
+  --radius-galet: var(--r-galet);
+  --radius-xs: var(--r-champ);
+  --radius-sm: var(--r-champ);
+  --radius-md: var(--r-champ);
+  --radius-lg: var(--r-carte);
+  --radius-xl: var(--r-carte);
 }
 
 @layer base {
@@ -126,7 +158,7 @@
   }
 
   body {
-    background-color: var(--paper);
+    background-color: var(--surface-papier);
     color: var(--foreground);
     font-family: var(--police-texte), ui-sans-serif, system-ui, sans-serif;
     font-size: var(--t-corps);
@@ -134,16 +166,30 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Le grain. Il doit se sentir sans se voir. */
-  body::before {
+  /*
+    Le grain. Il doit se sentir sur les grandes surfaces sans se voir sur le
+    texte.
+
+    Il vivait en `fixed` par-dessus toute la page, lettres comprises, à une
+    opacité si basse qu'il fallait le chercher. Il descend d'un cran : chaque
+    panneau le porte derrière son contenu, ce qui permet de le monter jusqu'à
+    ce qu'il se sente vraiment.
+  */
+  .grain::after {
     content: "";
-    position: fixed;
+    position: absolute;
     inset: 0;
-    z-index: 50;
+    z-index: 0;
     pointer-events: none;
-    opacity: 0.05;
+    opacity: 0.09;
     mix-blend-mode: multiply;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+
+  /* Sur la roche, le multiply n'a rien à assombrir : on éclaire à la place. */
+  .grain-clair::after {
+    mix-blend-mode: overlay;
+    opacity: 0.14;
   }
 
   :focus-visible {

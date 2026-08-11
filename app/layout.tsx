@@ -4,12 +4,12 @@ import { classesPolices } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Cairn", template: "%s · Cairn" },
+  title: { default: "Kairn", template: "%s · Kairn" },
   description:
-    "Dépose ce que tu apprends. Cairn le découpe en concepts et te les repose au bon moment.",
-  applicationName: "Cairn",
+    "Dépose ce que tu apprends. Kairn le découpe en concepts et te les repose au bon moment.",
+  applicationName: "Kairn",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "Cairn", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Kairn", statusBarStyle: "default" },
   formatDetection: { telephone: false },
 };
 

@@ -67,7 +67,7 @@ export function RienAReviser({
     return (
       <Ecran
         titre="Rien à revoir pour l'instant"
-        explication="Cairn repose ce que tu lui donnes. Dépose une première chose que tu veux garder, et elle reviendra d'elle-même."
+        explication="Kairn repose ce que tu lui donnes. Dépose une première chose que tu veux garder, et elle reviendra d'elle-même."
         action={{ libelle: "Déposer", href: `${ROUTES.depots}/nouveau` }}
       />
     );

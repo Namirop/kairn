@@ -20,7 +20,7 @@ export function Hero() {
 
         <p className="mt-pas-6 max-w-md text-stone-500">
           Un article, une réponse qu&apos;on t&apos;a donnée, une page de manuel, ce qu&apos;un
-          collègue vient de t&apos;expliquer. Cairn le découpe en concepts et te les repose juste
+          collègue vient de t&apos;expliquer. Kairn le découpe en concepts et te les repose juste
           avant que tu les oublies.
         </p>
 

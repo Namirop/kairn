@@ -7,10 +7,10 @@ import { PAPIER } from "@/lib/design/couleurs-hors-css";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Cairn",
-    short_name: "Cairn",
+    name: "Kairn",
+    short_name: "Kairn",
     description:
-      "Dépose ce que tu apprends. Cairn le découpe en concepts et te les repose au bon moment.",
+      "Dépose ce que tu apprends. Kairn le découpe en concepts et te les repose au bon moment.",
     lang: "fr",
     start_url: "/aujourdhui",
     scope: "/",

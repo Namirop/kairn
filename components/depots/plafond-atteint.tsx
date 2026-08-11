@@ -33,7 +33,7 @@ export function PlafondAtteint({
         {remiseAZero}.
       </p>
       <p className="text-petit text-stone-500">
-        Cette limite tient le coût des appels au modèle pendant que Cairn se construit. Si elle te
+        Cette limite tient le coût des appels au modèle pendant que Kairn se construit. Si elle te
         gêne, dis-le : c&apos;est le signal qui décidera de la suite.
       </p>
 
