@@ -22,9 +22,13 @@
               "answerKey": "À l'avant-dernière position, l'indice 3. Attendu : l'index négatif est ajouté à la longueur du tableau, donc -2 devient 5 - 2. Une réponse qui donne la bonne position sans dire d'où elle vient est incomplète."
             },
             "boundary": {
-              "format": "TRUE_FALSE",
-              "question": "`tableau[-1]` et `tableau.at(-1)` rendent la même valeur.",
-              "answerKey": "Faux. Les crochets lisent une propriété dont le nom est la chaîne « -1 », qui n'existe pas, et rendent `undefined`. Seul `at()` interprète l'index comme un décalage depuis la fin."
+              "format": "CLOZE",
+              "question": "Complète la phrase.",
+              "answerKey": "undefined",
+              "cloze": {
+                "sentence": "Lu avec des crochets, un index négatif désigne une propriété qui n'existe pas, et l'expression rend ___.",
+                "accepted": ["undefined", "`undefined`"]
+              }
             },
             "application": {
               "format": "CODE",

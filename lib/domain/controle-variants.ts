@@ -41,6 +41,18 @@ export const FORMATS_MINIMUM = 3;
 export const FORMATS_LIBRES = ["SHORT_ANSWER", "EXPLAIN"];
 export const LIBRES_MAXIMUM = 1;
 
+/**
+ * Le texte à trou qu'un lot doit porter, au moins.
+ *
+ * Fermer le texte libre par la grammaire a poussé le modèle vers le QCM et le
+ * vrai ou faux : un lot typique montrait la réponse à l'écran trois fois sur
+ * quatre. Or désigner la bonne option, c'est de la reconnaissance ; c'est
+ * produire la réponse qui fait tenir un souvenir, et c'est ce que le produit
+ * promet. `CODE` jouait ce rôle sur du contenu technique et n'existe pas
+ * ailleurs — le texte à trou, lui, marche sur n'importe quel concept.
+ */
+export const CLOZE_MINIMUM = 1;
+
 function controlerLot(variants: VariantAControler[]): Manquement[] {
   const facettes = variants.map((variant) => variant.facet);
   const formats = new Set(variants.map((variant) => variant.format));
@@ -68,6 +80,15 @@ function controlerLot(variants: VariantAControler[]): Manquement[] {
     manquements.push({
       regle: "texte libre",
       detail: `${libres.length} questions à s'auto-noter : ${libres.map((variant) => variant.format).join(", ")}`,
+    });
+  }
+
+  const trous = variants.filter((variant) => variant.format === "CLOZE");
+
+  if (trous.length < CLOZE_MINIMUM) {
+    manquements.push({
+      regle: "rappel",
+      detail: `aucun texte à trou : ${variants.map((variant) => variant.format).join(", ")}`,
     });
   }
 

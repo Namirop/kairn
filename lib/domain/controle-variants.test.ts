@@ -1,27 +1,52 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
 import { controlerVariants, FACETTES_ATTENDUES, type VariantAControler } from "./controle-variants";
+import { TROU } from "./reponse-cloze";
 
 /**
- * Un lot bien composé : quatre facettes dans l'ordre, trois formats distincts,
- * et une seule question que la personne aura à se noter elle-même.
+ * Un lot bien composé : quatre facettes dans l'ordre, quatre formats distincts,
+ * une seule question que la personne aura à se noter elle-même, et un texte à
+ * trou pour qu'elle ait à produire une réponse au moins une fois.
  */
-const FORMATS_PAR_DEFAUT = ["TRUE_FALSE", "EXPLAIN", "CODE", "TRUE_FALSE"];
+const FORMATS_PAR_DEFAUT = ["CLOZE", "EXPLAIN", "TRUE_FALSE", "CODE"];
 
 function variante(reglages: Partial<VariantAControler> = {}, rang = 0): VariantAControler {
+  const format = reglages.format ?? FORMATS_PAR_DEFAUT[rang] ?? "TRUE_FALSE";
+
   return {
-    format: FORMATS_PAR_DEFAUT[rang] ?? "TRUE_FALSE",
+    format,
     facet: FACETTES_ATTENDUES[rang] ?? "RECOGNITION",
     question: "Depuis quel bout du tableau un index négatif est-il compté ?",
     answerKey: "Depuis la fin. Un index de moins un désigne le dernier élément.",
     options: null,
     correctIndex: null,
+    cloze:
+      format === "CLOZE"
+        ? {
+            sentence: `Un index négatif se compte depuis ${TROU} du tableau.`,
+            accepted: ["la fin"],
+          }
+        : null,
     ...reglages,
   };
 }
 
 function quatreVariantes(): VariantAControler[] {
   return FACETTES_ATTENDUES.map((facet, rang) => variante({ facet }, rang));
+}
+
+/** Un QCM complet : privé de ses options, c'est un autre manquement qui parle. */
+function qcm(facet: string, rang: number): VariantAControler {
+  const options = ["un", "deux", "trois", "quatre"];
+
+  return variante({ facet, format: "MCQ", options, correctIndex: 1 }, rang);
+}
+
+/** Un lot composé format par format, les QCM servis avec leurs options. */
+function lotDeFormats(formats: string[]): VariantAControler[] {
+  return FACETTES_ATTENDUES.map((facet, rang) =>
+    formats[rang] === "MCQ" ? qcm(facet, rang) : variante({ facet, format: formats[rang] }, rang),
+  );
 }
 
 describe("controlerVariants", () => {
@@ -45,39 +70,40 @@ describe("controlerVariants", () => {
   });
 
   it("signale un lot où deux formats seulement se partagent quatre questions", () => {
-    const variantes = FACETTES_ATTENDUES.map((facet, rang) =>
-      variante({ facet, format: rang < 2 ? "SHORT_ANSWER" : "TRUE_FALSE" }, rang),
-    );
+    const variantes = lotDeFormats(["SHORT_ANSWER", "SHORT_ANSWER", "TRUE_FALSE", "TRUE_FALSE"]);
 
     expect(controlerVariants(variantes).map((m) => m.regle)).toContain("formats");
   });
 
   it("signale un lot qui demande de se noter soi-même plus d'une fois", () => {
-    const variantes = FACETTES_ATTENDUES.map((facet, rang) =>
-      variante({ facet, format: ["SHORT_ANSWER", "EXPLAIN", "TRUE_FALSE", "CODE"][rang] }, rang),
-    );
-    const libre = controlerVariants(variantes).find((m) => m.regle === "texte libre");
+    const variantes = lotDeFormats(["SHORT_ANSWER", "EXPLAIN", "TRUE_FALSE", "CODE"]);
+    const manquements = controlerVariants(variantes);
 
     // Quatre formats distincts : l'ancien contrôle ne voyait rien de ce lot.
-    expect(controlerVariants(variantes).map((m) => m.regle)).not.toContain("formats");
-    expect(libre?.detail).toContain("2 questions");
+    expect(manquements.map((m) => m.regle)).not.toContain("formats");
+    expect(manquements.find((m) => m.regle === "texte libre")?.detail).toContain("2 questions");
   });
 
   it("laisse passer une seule question à s'auto-noter", () => {
-    const variantes = FACETTES_ATTENDUES.map((facet, rang) =>
-      variante({ facet, format: ["MCQ", "EXPLAIN", "TRUE_FALSE", "CODE"][rang] }, rang),
-    );
-    variantes[0] = variante(
-      {
-        facet: "RECOGNITION",
-        format: "MCQ",
-        options: ["un", "deux", "trois", "quatre"],
-        correctIndex: 1,
-      },
-      0,
-    );
+    const variantes = lotDeFormats(["MCQ", "EXPLAIN", "CLOZE", "CODE"]);
 
     expect(controlerVariants(variantes).map((m) => m.regle)).not.toContain("texte libre");
+  });
+
+  it("signale un lot où rien ne demande de produire la réponse", () => {
+    const variantes = lotDeFormats(["MCQ", "EXPLAIN", "TRUE_FALSE", "MCQ"]);
+    const manquements = controlerVariants(variantes);
+
+    // Le lot est régulier partout ailleurs : trois formats distincts, une seule
+    // question à s'auto-noter. Aucun autre contrôle ne l'attrape.
+    expect(manquements.map((m) => m.regle)).toEqual(["rappel"]);
+    expect(manquements[0]?.detail).toContain("MCQ, EXPLAIN, TRUE_FALSE, MCQ");
+  });
+
+  it("se contente d'un seul texte à trou", () => {
+    const variantes = lotDeFormats(["CLOZE", "EXPLAIN", "TRUE_FALSE", "MCQ"]);
+
+    expect(controlerVariants(variantes).map((m) => m.regle)).not.toContain("rappel");
   });
 
   it("signale un lot qui ne rend pas quatre questions", () => {

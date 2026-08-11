@@ -59,6 +59,12 @@ MECHANISM aussi, prends un format vérifiable dès que le concept s'y prête.
 
 Deux questions au plus partagent le même format.
 
+Une des quatre questions au moins est un CLOZE. Un QCM et un vrai ou faux
+montrent la réponse et demandent de la désigner ; le texte à trou demande de la
+produire. Sans lui, un lot ne teste plus que la reconnaissance, alors que c'est
+le rappel qui fait tenir un souvenir. Le masquage d'un terme marche sur presque
+n'importe quel concept : ce n'est pas réservé à ceux qui s'y prêtent.
+
 Si le concept cite du code — un identifiant entre accents graves, un appel de
 méthode, une instruction, une commande, un en-tête —, une des quatre questions
 emploie CODE. La citation suffit à déclencher la règle : ce n'est pas une
