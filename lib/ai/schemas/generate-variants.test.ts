@@ -54,10 +54,11 @@ describe("forme de sortie de generate_variants", () => {
     expect(chemin(entree, "required")).toEqual(CLES);
   });
 
-  it("contraint les cinq formats sur chacune des quatre facettes", () => {
+  it("contraint les six formats sur chacune des quatre facettes", () => {
     for (const cle of FACETTES) {
       expect(chemin(entree, "properties", cle, "properties", "format", "enum")).toEqual([
         "MCQ",
+        "CLOZE",
         "TRUE_FALSE",
         "SHORT_ANSWER",
         "CODE",
@@ -71,8 +72,8 @@ describe("forme de sortie de generate_variants", () => {
   });
 
   it("n'exige d'une question que ce que tout format porte", () => {
-    // `mcq` est absent de `required` : trois questions sur quatre n'en ont pas,
-    // et le modèle omet une clé plutôt que de l'annuler.
+    // `mcq` et `cloze` sont absents de `required` : une question n'en porte au
+    // plus qu'un, et le modèle omet une clé plutôt que de l'annuler.
     for (const cle of FACETTES) {
       expect(chemin(entree, "properties", cle, "required")).toEqual([
         "format",
@@ -141,5 +142,26 @@ describe("forme de sortie de generate_variants", () => {
 
     expect(GENERATE_VARIANTS.validation.safeParse({ lots: [sansOptions] }).success).toBe(false);
     expect(GENERATE_VARIANTS.validation.safeParse({ lots: [optionsEnTrop] }).success).toBe(false);
+  });
+
+  it("refuse un CLOZE sans phrase trouée, et une phrase trouée sur un autre format", () => {
+    const cloze = { sentence: "Le lichen est une ___ entre deux espèces.", accepted: ["symbiose"] };
+    const sansTrou = { ...lot(1), boundary: question("CLOZE") };
+    const trouEnTrop = { ...lot(1), mechanism: { ...question("EXPLAIN"), cloze } };
+    const juste = { ...lot(1), boundary: { ...question("CLOZE"), cloze } };
+
+    expect(GENERATE_VARIANTS.validation.safeParse({ lots: [sansTrou] }).success).toBe(false);
+    expect(GENERATE_VARIANTS.validation.safeParse({ lots: [trouEnTrop] }).success).toBe(false);
+    expect(GENERATE_VARIANTS.validation.safeParse({ lots: [juste] }).success).toBe(true);
+  });
+
+  it("rend la phrase trouée et ses formes acceptées à plat, avec la question", () => {
+    const cloze = { sentence: "Le lichen est une ___ entre deux espèces.", accepted: ["symbiose"] };
+    const sortie = GENERATE_VARIANTS.validation.parse({
+      lots: [{ ...lot(1), boundary: { ...question("CLOZE"), cloze } }],
+    });
+
+    expect(sortie.lots[0]?.variants[2]?.cloze).toEqual(cloze);
+    expect(sortie.lots[0]?.variants[0]?.cloze).toBeNull();
   });
 });

@@ -5,8 +5,9 @@ import type { VariantFacet, VariantFormat } from "@/lib/db/types";
  * Écriture des questions d'un concept.
  *
  * Les données propres au format vivent dans `payload` : les options d'un QCM et
- * l'index de la bonne. Aucun champ d'échéance ni de difficulté n'apparaît ici —
- * la planification porte sur l'Atom, jamais sur la formulation.
+ * l'index de la bonne, la phrase trouée et les formes acceptées d'un texte à
+ * trou. Aucun champ d'échéance ni de difficulté n'apparaît ici — la
+ * planification porte sur l'Atom, jamais sur la formulation.
  */
 
 export type QuestionAEcrire = {
@@ -16,7 +17,19 @@ export type QuestionAEcrire = {
   answerKey: string;
   options: string[] | null;
   correctIndex: number | null;
+  cloze: { sentence: string; accepted: string[] } | null;
 };
+
+/** Ce que le format ajoute à la question, ou rien s'il n'ajoute rien. */
+function payloadDe(question: QuestionAEcrire) {
+  if (question.cloze) return question.cloze;
+
+  if (question.options && question.correctIndex !== null) {
+    return { options: question.options, correctIndex: question.correctIndex };
+  }
+
+  return undefined;
+}
 
 export async function ecrireQuestions(
   atomId: string,
@@ -42,10 +55,7 @@ export async function ecrireQuestions(
         facet: question.facet,
         question: question.question,
         answerKey: question.answerKey,
-        payload:
-          question.options && question.correctIndex !== null
-            ? { options: question.options, correctIndex: question.correctIndex }
-            : undefined,
+        payload: payloadDe(question),
       })),
     }),
   ]);

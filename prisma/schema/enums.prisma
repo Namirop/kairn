@@ -30,8 +30,13 @@ enum FsrsState {
 }
 
 /// Format de question porté par un Variant.
+///
+/// Quatre formats se vérifient sans jugement — MCQ, CLOZE, TRUE_FALSE, CODE —
+/// et deux se répondent en texte libre, où la personne se note elle-même. Un lot
+/// n'en porte qu'un seul du second groupe : voir lib/domain/controle-variants.ts.
 enum VariantFormat {
   MCQ
+  CLOZE
   TRUE_FALSE
   SHORT_ANSWER
   CODE

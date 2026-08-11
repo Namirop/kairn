@@ -1,6 +1,8 @@
+import { z } from "zod";
 import { prisma } from "@/lib/db/client";
 import { confirmerConcept, modifierConcept } from "@/lib/db/concepts";
 import { deposer } from "@/lib/depots/deposer";
+import { TROU } from "@/lib/domain/reponse-cloze";
 import { releverLots, soumettreLotsEnAttente } from "@/lib/jobs/questions";
 import {
   compterQuestions,
@@ -22,6 +24,12 @@ négatif et va chercher depuis la fin. \`useMemo\` ne garantit rien : React se r
 jeter le cache d'un rendu à l'autre, ce n'est pas une promesse de mémoïsation mais une indication.
 Enfin, une transaction Postgres en \`READ COMMITTED\` voit les écritures validées par les autres
 sessions entre deux instructions, ce qui suffit à casser un compteur lu puis écrit.`;
+
+/** Ce qu'un texte à trou dépose dans `payload`, tel que la révision le relira. */
+const PAYLOAD_CLOZE = z.object({
+  sentence: z.string().min(1),
+  accepted: z.array(z.string().min(1)).min(1),
+});
 
 const DOUTEUX = `En JavaScript, les promesses lancées concurrently s'exécutent sur plusieurs cœurs,
 ce qui rend Promise.all réellement parallèle. Un tableau de promesses passé à Promise.all se règle
@@ -71,6 +79,25 @@ export async function casDepotTexte(userId: string): Promise<void> {
     "Texte — les questions sont réparties sur les trois concepts",
     new Set(depot.atoms.map((atome) => atome.id)).size === 3 && planifie === 12,
     `${planifie} questions actives`,
+  );
+
+  // Ce que le format ajoute doit traverser le pipeline entier. Un texte à trou
+  // dont les formes acceptées se perdent en route ne se vérifie plus : il
+  // redevient une question à s'auto-noter, exactement ce qu'on cherche à éviter.
+  const trous = await prisma.variant.findMany({
+    where: { atom: { inputId }, format: "CLOZE" },
+    select: { payload: true },
+  });
+  const complets = trous.filter((trou) => {
+    const lu = PAYLOAD_CLOZE.safeParse(trou.payload);
+
+    return lu.success && lu.data.sentence.includes(TROU);
+  });
+
+  record(
+    "Texte — un texte à trou garde sa phrase trouée et ses formes acceptées",
+    trous.length > 0 && complets.length === trous.length,
+    `${complets.length} sur ${trous.length} texte(s) à trou`,
   );
 }
 

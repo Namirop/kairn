@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { VariantFormat } from "@/lib/db/types";
+import { TROU } from "@/lib/domain/reponse-cloze";
 import type { AiContract } from "./contract";
 
 /**
@@ -29,6 +30,30 @@ function mcq() {
   });
 }
 
+/**
+ * Ce qu'un CLOZE ajoute : la phrase trouée, et de quoi vérifier la saisie sans
+ * rappeler le modèle.
+ *
+ * La tolérance se paie ici, une fois, à la génération. La comparaison, elle,
+ * vit dans `lib/domain/reponse-cloze.ts` : instantanée et gratuite à chaque
+ * passage. Le terme masqué vient en premier — c'est celui qu'on montre quand la
+ * réponse ne correspond pas, et celui dont on mesure la longueur.
+ */
+function cloze() {
+  return z.object({
+    sentence: z
+      .string()
+      .min(10)
+      .max(600)
+      .describe(`La phrase du concept, le terme masqué remplacé par ${TROU}.`),
+    accepted: z
+      .array(z.string().min(1).max(120))
+      .min(1)
+      .max(8)
+      .describe("Les formes acceptées, le terme masqué d'abord, puis ses variantes."),
+  });
+}
+
 function question(facette: string) {
   return z
     .object({
@@ -40,6 +65,7 @@ function question(facette: string) {
         .max(2000)
         .describe("La réponse attendue en clair. Pour SHORT_ANSWER et EXPLAIN, de quoi se juger."),
       mcq: mcq().nullish().describe("À renseigner si et seulement si format vaut MCQ."),
+      cloze: cloze().nullish().describe("À renseigner si et seulement si format vaut CLOZE."),
     })
     .describe(facette);
 }
@@ -85,6 +111,10 @@ const generateVariantsValidation = generateVariantsForme
       });
     }
 
+    // Les deux contraintes croisées : la clé du format et le format lui-même
+    // vont ensemble. Elles vivent ici et non dans la forme — un « si et
+    // seulement si » ne s'exprime pas en JSON Schema sans union, et une union
+    // dégraderait la grammaire envoyée au modèle.
     for (const [index, entree] of sortie.lots.entries()) {
       for (const [cle] of FACETTES) {
         const posee = entree[cle];
@@ -94,6 +124,14 @@ const generateVariantsValidation = generateVariantsForme
             code: "custom",
             message: "mcq est renseigné si et seulement si le format est MCQ",
             path: ["lots", index, cle, "mcq"],
+          });
+        }
+
+        if ((posee.format === "CLOZE") !== ((posee.cloze ?? null) !== null)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "cloze est renseigné si et seulement si le format est CLOZE",
+            path: ["lots", index, cle, "cloze"],
           });
         }
       }
@@ -109,6 +147,7 @@ const generateVariantsValidation = generateVariantsForme
         answerKey: entree[cle].answerKey,
         options: entree[cle].mcq?.options ?? null,
         correctIndex: entree[cle].mcq?.correctIndex ?? null,
+        cloze: entree[cle].cloze ?? null,
       })),
     })),
   }));

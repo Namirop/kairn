@@ -35,9 +35,13 @@
           {
             "rang": 2,
             "recognition": {
-              "format": "SHORT_ANSWER",
-              "question": "Quelles sont les deux files que sert la boucle d'événements, et qu'est-ce qui alimente chacune ?",
-              "answerKey": "Les tâches, alimentées par les minuteries et les événements, et les microtâches, alimentées par les promesses et `queueMicrotask`. Nommer une seule des deux files ne suffit pas."
+              "format": "CLOZE",
+              "question": "Complète la phrase.",
+              "answerKey": "microtâches",
+              "cloze": {
+                "sentence": "La boucle d'événements sert deux files : celle des tâches, alimentée par les minuteries, et celle des ___, alimentée par les promesses.",
+                "accepted": ["microtâches", "microtâche", "micro-tâches"]
+              }
             },
             "mechanism": {
               "format": "EXPLAIN",
@@ -67,9 +71,13 @@
           {
             "rang": 3,
             "recognition": {
-              "format": "SHORT_ANSWER",
-              "question": "Qu'est-ce qui déclenche la reconstruction d'une couche de Dockerfile ?",
-              "answerKey": "Le changement de l'instruction elle-même, ou de n'importe laquelle des couches qui la précèdent. Attendu : la notion de cascade, pas seulement « quand le fichier change »."
+              "format": "CLOZE",
+              "question": "Complète la phrase.",
+              "answerKey": "couche",
+              "cloze": {
+                "sentence": "Dans un Dockerfile, chaque instruction produit une ___ réutilisée telle quelle tant que rien avant elle n'a changé.",
+                "accepted": ["couche", "couches", "layer"]
+              }
             },
             "mechanism": {
               "format": "EXPLAIN",
