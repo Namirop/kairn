@@ -73,6 +73,8 @@ export function rendreRepartition(passages: Passage[]): string[] {
     "",
     mesureDuTexteLibre(passages),
     "",
+    mesureDuRappel(passages),
+    "",
     mesureDuCode(passages),
     "",
   ];
@@ -95,6 +97,28 @@ function mesureDuTexteLibre(passages: Passage[]): string {
   const aucune = libres.filter((compte) => compte === 0).length;
 
   return `Texte libre : ${debordent} des ${lots.length} lots posent plus d'une question à s'auto-noter, ${aucune} n'en posent aucune.`;
+}
+
+/**
+ * L'équilibre entre reconnaître et produire.
+ *
+ * Un QCM et un vrai ou faux montrent la réponse ; le texte à trou, le code et
+ * le texte libre demandent de la produire. C'est le second geste qui consolide,
+ * et c'est celui qui disparaît en premier quand le modèle se réfugie dans le
+ * QCM. Ces deux nombres disent si un lot est devenu un questionnaire à cocher.
+ */
+function mesureDuRappel(passages: Passage[]): string {
+  const lots = lotsAboutis(passages);
+  const sansTrou = lots.filter(
+    (concept) => !concept.variants.some((variant) => variant.format === "CLOZE"),
+  );
+  const aCocher = lots.filter(
+    (concept) =>
+      concept.variants.filter((variant) => ["MCQ", "TRUE_FALSE"].includes(variant.format)).length >
+      2,
+  );
+
+  return `Rappel : ${sansTrou.length} des ${lots.length} lots ne portent aucun texte à trou, ${aCocher.length} posent plus de deux questions où la réponse est affichée.`;
 }
 
 /**
