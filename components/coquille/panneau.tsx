@@ -27,6 +27,7 @@ export function Panneau({
   surface = "papier",
   mesure = "page",
   aere = false,
+  fond: matiere,
   className,
   children,
 }: {
@@ -34,13 +35,17 @@ export function Panneau({
   mesure?: Mesure;
   /** Le rythme d'un panneau de marketing, plus ample que celui d'un écran. */
   aere?: boolean;
+  /** Ce qui vit derrière le contenu, sous le grain. Une texture, jamais un texte. */
+  fond?: ReactNode;
   className?: string;
   children: ReactNode;
 }) {
   const { fond, encre, grain } = SURFACES[surface];
 
   return (
-    <section className={cn("relative w-full", fond, encre, grain)}>
+    <section className={cn("relative w-full overflow-hidden", fond, encre, grain)}>
+      {matiere ? <div aria-hidden>{matiere}</div> : null}
+
       <div
         className={cn(
           "px-pas-4 md:px-pas-8 relative z-10 mx-auto w-full",

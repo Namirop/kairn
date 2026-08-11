@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SilhouetteDeCairn } from "@/components/cairn/silhouette-de-cairn";
 import { Panneau } from "@/components/coquille/panneau";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
@@ -11,10 +12,21 @@ import { ROUTES } from "@/lib/auth/routes";
  * C'est le panneau de roche de la page publique — l'un des deux de toute
  * l'application. Le noir sert l'affirmation : on ne dit pas « ce n'est pas ça »
  * sur la même surface que tout le reste.
+ *
+ * C'est aussi le seul endroit qui porte la silhouette du cairn en fond. Elle
+ * déborde du panneau et sort du cadre : une forme entière, posée bien au
+ * milieu, redeviendrait une illustration.
  */
 export function PasCeci() {
   return (
-    <Panneau surface="roche" aere className="gap-pas-8 md:gap-pas-16 grid md:grid-cols-[1fr_1.2fr]">
+    <Panneau
+      surface="roche"
+      aere
+      className="gap-pas-8 md:gap-pas-16 grid md:grid-cols-[1fr_1.2fr]"
+      fond={
+        <SilhouetteDeCairn className="absolute -right-8 bottom-0 h-[130%] md:right-8 md:h-[150%]" />
+      }
+    >
       <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
         Ce que ce n&apos;est pas.
       </h2>
