@@ -12,8 +12,15 @@
 /** Bornes en jours, telles qu'annoncées à l'utilisateur. */
 export const JOURS_AVANT_REVIEWING = 7;
 export const JOURS_AVANT_CONSOLIDATION = 21;
-/** Six mois. Au-delà, le concept sort du cycle de lui-même. */
-export const JOURS_AVANT_ARCHIVAGE = 180;
+/**
+ * Trois mois. Au-delà, le concept sort du cycle de lui-même.
+ *
+ * Six mois laissaient l'oubli faire son travail deux fois plutôt qu'une, et
+ * surtout c'était une promesse qu'on n'ose pas afficher : « on te le repose
+ * dans six mois » s'entend comme « on te le rend jamais ». Trois mois suffisent
+ * à ce qu'oublier ait le temps de se produire, et ça se dit devant quelqu'un.
+ */
+export const JOURS_AVANT_ARCHIVAGE = 90;
 
 /** Ce qu'il faut de réussites d'affilée pour consolider un concept espacé. */
 export const REUSSITES_POUR_CONSOLIDER = 3;
@@ -53,7 +60,7 @@ export function compterReussitesConsecutives(notes: readonly Note[]): number {
  * L'état après un passage.
  *
  * L'archivage passe en premier : une déclaration de l'utilisateur ou un
- * intervalle au-delà de six mois sortent le concept du cycle, quel que soit le
+ * intervalle au-delà de trois mois sortent le concept du cycle, quel que soit le
  * reste. Un concept espacé mais pas encore régulier reste en `REVIEWING` — la
  * consolidation demande les deux, la durée **et** la régularité.
  */

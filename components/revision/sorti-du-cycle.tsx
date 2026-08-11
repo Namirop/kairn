@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
  *
  * Le mauvais clic le plus probable est celui qu'on vient de faire. Sans cette
  * bande, il faudrait deviner qu'on peut le défaire, et deviner où — personne ne
- * devinerait, et le geste vaudrait perte du concept pour six mois.
+ * devinerait, et le geste vaudrait perte du concept pour trois mois.
  *
  * Elle disparaît dès que la question suivante est engagée : ce qui traîne
  * indéfiniment sur un écran cesse d'être lu.
@@ -53,7 +53,7 @@ export function SortiDuCycle({
       {/* Le concept sur sa propre ligne, borné : la carte a déjà avancé, il faut
           dire lequel — mais un pavé de trois lignes chasserait la question. */}
       <p className="text-petit line-clamp-2 text-stone-900">{concept.concept}</p>
-      <p className="mt-pas-1 text-petit text-stone-500">Il reviendra dans six mois.</p>
+      <p className="mt-pas-1 text-petit text-stone-500">Il reviendra dans trois mois.</p>
     </div>
   );
 }

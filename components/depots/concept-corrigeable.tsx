@@ -97,7 +97,7 @@ export function ConceptCorrigeable({ concept, inputId }: { concept: ConceptLu; i
           {concept.archivedByUser ? (
             <div className="mt-pas-4 gap-pas-3 flex flex-wrap items-center">
               <p className="text-petit text-stone-500">
-                Tu l&apos;as déclaré su. Il revient dans six mois pour vérifier.
+                Tu l&apos;as déclaré su. Il revient dans trois mois pour vérifier.
               </p>
               <form action={desarchiverConceptAction}>
                 <input type="hidden" name="atomId" value={concept.id} />

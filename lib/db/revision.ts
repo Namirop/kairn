@@ -50,7 +50,7 @@ export type ResultatRevision = {
   signal: SignalDeMaitrise | null;
 };
 
-function dansSixMois(maintenant: Date): Date {
+function dansTroisMois(maintenant: Date): Date {
   return new Date(maintenant.getTime() + JOURS_AVANT_ARCHIVAGE * 24 * 60 * 60 * 1000);
 }
 
@@ -101,10 +101,10 @@ export async function enregistrerRevision(
 
   const plan = planifier(atome, revision.note, maintenant);
 
-  // L'archivage déclaré ne supprime rien : il repousse l'échéance à six mois.
+  // L'archivage déclaré ne supprime rien : il repousse l'échéance à trois mois.
   // La thèse du produit est qu'on croit savoir et qu'on oublie — prendre la
   // déclaration au pied de la lettre reviendrait à contredire le produit.
-  const echeance = revision.maitrise ? dansSixMois(maintenant) : plan.carte.due;
+  const echeance = revision.maitrise ? dansTroisMois(maintenant) : plan.carte.due;
   const intervalleJours = revision.maitrise ? JOURS_AVANT_ARCHIVAGE : plan.intervalleJours;
 
   // Les passages arrivent du plus récent au plus ancien : on les remet dans le

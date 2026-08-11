@@ -139,7 +139,7 @@ export async function casArchivageDeclare(userId: string, maintenant: Date): Pro
   );
 
   record(
-    "Archivage — l'échéance repart à six mois au lieu de disparaître",
+    "Archivage — l'échéance repart à trois mois au lieu de disparaître",
     joursAvantRetour === JOURS_AVANT_ARCHIVAGE,
     `revient dans ${joursAvantRetour} jours`,
   );
@@ -156,13 +156,13 @@ export async function casArchivageDeclare(userId: string, maintenant: Date): Pro
   const retour = await lireSessionDuJour(userId, plusTard);
 
   record(
-    "Archivage — il revient bien six mois plus tard",
+    "Archivage — il revient bien trois mois plus tard",
     retour.questions.some((question) => question.atomId === cible.atomId),
-    `${retour.questions.length} question(s) six mois plus tard`,
+    `${retour.questions.length} question(s) trois mois plus tard`,
   );
 
   // « L'archivage se défait » : sans ce chemin, un clic sortait un concept pour
-  // six mois sans aucun retour possible.
+  // trois mois sans aucun retour possible.
   const demain = new Date(maintenant.getTime() + JOUR_MS);
   const defait = await desarchiverConcept(cible.atomId, userId, demain);
   const remis = await prisma.atom.findUniqueOrThrow({

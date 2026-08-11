@@ -61,11 +61,11 @@ describe("etatApresRevision aux bornes", () => {
     expect(etatApresRevision(JOURS_AVANT_CONSOLIDATION + 1, REGULIER - 1, false)).toBe("REVIEWING");
   });
 
-  it("consolide encore à six mois pile", () => {
+  it("consolide encore à trois mois pile", () => {
     expect(etatApresRevision(JOURS_AVANT_ARCHIVAGE, REGULIER, false)).toBe("CONSOLIDATED");
   });
 
-  it("archive au-delà de six mois", () => {
+  it("archive au-delà de trois mois", () => {
     expect(etatApresRevision(JOURS_AVANT_ARCHIVAGE + 1, REGULIER, false)).toBe("ARCHIVED");
   });
 

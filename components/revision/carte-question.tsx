@@ -68,7 +68,7 @@ export function CarteQuestion({
         {/* Ce que le geste fait vraiment : il repousse, il ne supprime pas, et
             il se défait. Annoncer « une seule fois » laissait croire l'inverse. */}
         <p className="mt-pas-1 text-petit text-stone-500">
-          Le concept sort du cycle et revient dans six mois pour vérifier. Ça se défait.
+          Le concept sort du cycle et revient dans trois mois pour vérifier. Ça se défait.
         </p>
       </div>
     </section>
