@@ -10,6 +10,11 @@ import type { AiImagePart } from "@/lib/ai/message";
  *
  * Ajouter un cas au banc, c'est déposer un fichier ici. Rien à déclarer.
  *
+ * Le corpus n'est pas un corpus de développeur. Les dépôts `08` à `10` sont là
+ * pour ça : une observation scientifique, un fait pratique, et des notes prises
+ * à la volée. Ils exercent le texte à trou sur des connaissances qui ne citent
+ * aucun code, là où la règle `CODE` ne doit jamais se déclencher.
+ *
  * `07-capture-assistant.png` est une interface reconstituée, pas une vraie
  * capture : elle porte de l'habillage — barre de titre, liste de
  * conversations, horodatage, compteur de mentions, suggestions, zone de

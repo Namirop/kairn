@@ -1,0 +1,5 @@
+Sur une carte de randonnée, les courbes de niveau relient les points de même altitude. L'écart d'altitude entre deux courbes voisines ne change jamais sur une même carte : c'est l'équidistance, elle est écrite dans la légende, et elle vaut souvent dix mètres.
+
+Ce qu'on lit, ce n'est pas une courbe isolée mais l'espacement entre les courbes. Des courbes serrées annoncent une pente raide, des courbes écartées un terrain presque plat. Quatre courbes collées sur un centimètre de carte, c'est une paroi : on n'y passe pas avec un sac sur le dos.
+
+Une courbe fermée en anneau est soit un sommet, soit une cuvette, et le dessin seul ne permet pas de trancher. Ce sont les altitudes portées le long des courbes qui le disent : si les chiffres augmentent vers le centre de l'anneau, c'est un sommet ; s'ils diminuent, c'est une dépression.
