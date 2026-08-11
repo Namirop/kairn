@@ -1,9 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { LIBELLE_FACETTE } from "@/components/depots/libelle-facette";
 import { PileDeSession } from "@/components/revision/pile-de-session";
-import type { VariantFacet } from "@/lib/db/types";
 
 /**
  * La carte de révision.
@@ -11,10 +9,14 @@ import type { VariantFacet } from "@/lib/db/types";
  * Elle ne montre jamais le concept — seulement la question. Afficher l'énoncé
  * dont la question est tirée reviendrait à donner la réponse avec l'exercice.
  *
+ * Elle ne montre pas non plus la facette. « Reconnaître », « Appliquer » : c'est
+ * du vocabulaire de génération, utile pour équilibrer les Variants d'un Atom,
+ * inutile à qui répond. Savoir qu'on est interrogé sur du rappel ne change rien
+ * à l'effort de rappel — et l'annoncer met une étiquette de système en tête d'un
+ * écran qui doit porter une question.
+ *
  * L'avancement est là parce qu'une session se finit mieux quand on en voit le
- * bout. Ce n'est ni un score ni une série : il disparaît avec la session. Il
- * est devenu un empilement — un filet de progression d'un pixel était de la
- * même famille que les traits qu'on vient d'enlever partout.
+ * bout. Ce n'est ni un score ni une série : il disparaît avec la session.
  *
  * Ce qui vit sous le trait dépend du mode. La session du jour y met « Je
  * maîtrise ça », qui sort le concept du cycle ; l'entraînement libre n'y met
@@ -23,7 +25,7 @@ import type { VariantFacet } from "@/lib/db/types";
 export function CarteQuestion({
   rang,
   total,
-  facet,
+  chiffree,
   tags,
   question,
   actions,
@@ -31,7 +33,8 @@ export function CarteQuestion({
 }: {
   rang: number;
   total: number;
-  facet: VariantFacet;
+  /** Le compte exact à côté de la pile. L'entraînement ne le porte pas. */
+  chiffree?: boolean;
   tags: string[];
   question: string;
   actions?: ReactNode;
@@ -40,21 +43,16 @@ export function CarteQuestion({
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col">
       <div className="gap-pas-4 flex items-end justify-between">
-        <div>
-          <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
-            {LIBELLE_FACETTE[facet]}
-          </p>
-          {tags.length > 0 ? (
-            <p className="mt-pas-1 text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
-              {tags.join(" · ")}
-            </p>
-          ) : null}
-        </div>
+        <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
+          {tags.join(" · ")}
+        </p>
 
-        <PileDeSession rang={rang} total={total} />
+        <PileDeSession rang={rang} total={total} chiffree={chiffree} />
       </div>
 
-      <h1 className="mt-pas-8 text-h1-app leading-snug font-bold text-stone-900">{question}</h1>
+      <h1 className="mt-pas-8 text-h1-app leading-snug font-bold text-pretty text-stone-900">
+        {question}
+      </h1>
 
       {children}
 

@@ -95,9 +95,13 @@ export function TourDentrainement({
 
   return (
     <div className="flex flex-col">
+      {/* Sans compte : un tour d'entraînement n'a pas de longueur à tenir. « 3 /
+          12 » y transformait en devoir ce qu'on fait justement parce qu'on peut
+          s'arrêter quand on veut. La pile suffit à dire qu'on avance. */}
       <DerouleQuestions
         key={questions.map((question) => question.variantId).join()}
         questions={questions}
+        chiffree={false}
         onRepondre={repondre}
         onFini={() => setTourFini(true)}
       />

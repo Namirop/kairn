@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { CarteQuestion } from "@/components/revision/carte-question";
-import { CorrectionFermee } from "@/components/revision/correction-fermee";
-import { ReponseCloze } from "@/components/revision/reponse-cloze";
-import { ReponseFermee } from "@/components/revision/reponse-fermee";
-import { ReponseOuverte } from "@/components/revision/reponse-ouverte";
+import { etalonUtile } from "@/components/revision/etalon-utile";
+import { JeterLaPierre } from "@/components/revision/jeter-la-pierre";
+import { PierreJetee } from "@/components/revision/pierre-jetee";
+import { useChronometre } from "@/components/revision/use-chronometre";
+import { ZoneDeReponse } from "@/components/revision/zone-de-reponse";
 import type { QuestionServie } from "@/lib/db/question-servie";
 import type { ReviewRating } from "@/lib/db/types";
 
@@ -14,12 +15,9 @@ import type { ReviewRating } from "@/lib/db/types";
  *
  * Il ne sait rien de ce qu'on écrit derrière : il pose une question, mesure le
  * temps, et rend la note. La session du jour replanifie, l'entraînement libre
- * ne touche à rien — ça se décide dans `onRepondre`, pas ici.
- *
- * Le chronomètre part à l'affichage et se fige à la validation : le choix d'une
- * option, la vérification d'un trou, la demande de l'étalon. Lire la correction
- * n'entre pas dans la mesure, sans quoi le signal le plus précieux du produit
- * serait pollué par le temps de lecture.
+ * ne touche à rien — ça se décide dans `onRepondre`, pas ici. Il ne sait rien
+ * non plus des formats : c'est `ZoneDeReponse` qui décide qu'un QCM se clique
+ * et qu'un texte à trou se saisit.
  */
 
 export type PassageDonne = {
@@ -35,11 +33,14 @@ export type Valider = (note: ReviewRating, maitrise?: boolean) => Promise<void>;
 
 export function DerouleQuestions({
   questions,
+  chiffree,
   onRepondre,
   onFini,
   actions,
 }: {
   questions: QuestionServie[];
+  /** Le compte exact à côté de la pile. L'entraînement ne le porte pas. */
+  chiffree?: boolean;
   /** Rend `true` si le passage a bien été écrit ; l'écran avance alors. */
   onRepondre: (passage: PassageDonne) => Promise<boolean>;
   onFini: (revus: number) => void;
@@ -53,24 +54,21 @@ export function DerouleQuestions({
   const [rang, setRang] = useState(0);
   const [choisi, setChoisi] = useState<number | null>(null);
   const [revelee, setRevelee] = useState(false);
+  // Une réponse a été produite : le geste de renoncement n'a plus de sens.
+  const [engage, setEngage] = useState(false);
+  const [jetee, setJetee] = useState(false);
   const [enCours, setEnCours] = useState(false);
   const [ecrit, setEcrit] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [revus, setRevus] = useState(0);
 
-  const debut = useRef(Date.now());
-  const fige = useRef<number | null>(null);
-
   const question = questions[rang];
-
-  useEffect(() => {
-    debut.current = Date.now();
-    fige.current = null;
-  }, [rang]);
+  const chronometre = useChronometre(rang);
 
   const arreter = useCallback(() => {
-    fige.current ??= Date.now() - debut.current;
-  }, []);
+    chronometre.arreter();
+    setEngage(true);
+  }, [chronometre]);
 
   const enregistrer = useCallback(
     async (note: ReviewRating, maitrise = false): Promise<boolean> => {
@@ -80,7 +78,7 @@ export function DerouleQuestions({
       setEnCours(true);
       setErreur(null);
 
-      const ok = await onRepondre({ question, note, tempsMs: fige.current ?? 0, maitrise });
+      const ok = await onRepondre({ question, note, tempsMs: chronometre.mesure(), maitrise });
 
       setEnCours(false);
 
@@ -94,7 +92,7 @@ export function DerouleQuestions({
 
       return true;
     },
-    [arreter, enCours, onRepondre, question],
+    [arreter, chronometre, enCours, onRepondre, question],
   );
 
   const avancer = useCallback(
@@ -106,6 +104,8 @@ export function DerouleQuestions({
 
       setChoisi(null);
       setRevelee(false);
+      setEngage(false);
+      setJetee(false);
       setEcrit(false);
       setRang(rang + 1);
     },
@@ -114,7 +114,11 @@ export function DerouleQuestions({
 
   if (!question) return null;
 
-  const ferme = question.options !== null && question.correctIndex !== null;
+  const dernier = rang + 1 >= questions.length;
+  const bonneOption =
+    question.options && question.correctIndex !== null
+      ? (question.options[question.correctIndex] ?? null)
+      : null;
 
   const suivre: Valider = async (note, maitrise = false) => {
     // Sur un format fermé, le passage est parti au clic sur l'option ; s'il a
@@ -132,17 +136,31 @@ export function DerouleQuestions({
     <CarteQuestion
       rang={rang}
       total={questions.length}
-      facet={question.facet}
+      chiffree={chiffree}
       tags={question.tags}
       question={question.question}
       actions={actions?.({ question, enCours, valider: suivre })}
     >
-      {ferme && question.options && question.correctIndex !== null ? (
+      {jetee ? (
+        <PierreJetee
+          reponse={bonneOption ?? question.answerKey}
+          precision={
+            bonneOption && etalonUtile(question.answerKey, bonneOption)
+              ? question.answerKey
+              : undefined
+          }
+          enCours={enCours}
+          dernier={dernier}
+          onSuite={() => void suivre("AGAIN")}
+        />
+      ) : (
         <>
-          <ReponseFermee
-            options={question.options}
-            correctIndex={question.correctIndex}
+          <ZoneDeReponse
+            question={question}
             choisi={choisi}
+            revelee={revelee}
+            enCours={enCours}
+            dernier={dernier}
             onChoisir={(index) => {
               if (choisi !== null) return;
 
@@ -150,38 +168,24 @@ export function DerouleQuestions({
               setChoisi(index);
               void enregistrer(index === question.correctIndex ? "GOOD" : "AGAIN");
             }}
+            onEngager={arreter}
+            onReveler={() => {
+              arreter();
+              setRevelee(true);
+            }}
+            onNoter={(note) => void suivre(note)}
           />
-          {choisi !== null ? (
-            <CorrectionFermee
-              juste={choisi === question.correctIndex}
-              answerKey={question.answerKey}
-              bonneOption={question.options[question.correctIndex] ?? ""}
+
+          {engage ? null : (
+            <JeterLaPierre
               enCours={enCours}
-              dernier={rang + 1 >= questions.length}
-              onSuite={() => void suivre(choisi === question.correctIndex ? "GOOD" : "AGAIN")}
+              onJeter={() => {
+                setJetee(true);
+                void enregistrer("AGAIN");
+              }}
             />
-          ) : null}
+          )}
         </>
-      ) : question.cloze ? (
-        <ReponseCloze
-          key={question.variantId}
-          sentence={question.cloze.sentence}
-          accepted={question.cloze.accepted}
-          enCours={enCours}
-          onValider={arreter}
-          onJuger={(note) => void suivre(note)}
-        />
-      ) : (
-        <ReponseOuverte
-          answerKey={question.answerKey}
-          revelee={revelee}
-          enCours={enCours}
-          onReveler={() => {
-            arreter();
-            setRevelee(true);
-          }}
-          onSeJuger={(note) => void suivre(note)}
-        />
       )}
 
       {/* L'espace du message est réservé : une erreur ne décale pas la carte. */}

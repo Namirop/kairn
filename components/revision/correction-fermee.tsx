@@ -1,5 +1,6 @@
 "use client";
 
+import { etalonUtile } from "@/components/revision/etalon-utile";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -12,18 +13,6 @@ import { Button } from "@/components/ui/button";
  * récompense est l'espacement qui s'allonge. Une mauvaise réponse donne
  * l'étalon — sans lui, l'échec n'apprend rien.
  */
-
-/**
- * L'étalon répète-t-il seulement l'option déjà surlignée ?
- *
- * Un vrai ou faux du contenu de démonstration a « Faux » pour toute réponse :
- * l'afficher sous une option « Faux » en vert n'apprend rien. Une réponse
- * générée, elle, explique après le verdict, et là elle vaut d'être lue.
- */
-function repeteLOption(answerKey: string, bonneOption: string): boolean {
-  return answerKey.trim().toLowerCase() === bonneOption.trim().toLowerCase();
-}
-
 export function CorrectionFermee({
   juste,
   answerKey,
@@ -39,7 +28,7 @@ export function CorrectionFermee({
   dernier: boolean;
   onSuite: () => void;
 }) {
-  const etalonUtile = !repeteLOption(answerKey, bonneOption);
+  const complete = etalonUtile(answerKey, bonneOption);
 
   return (
     <div className="mt-pas-8 pt-pas-6">
@@ -51,7 +40,7 @@ export function CorrectionFermee({
         )}
       </p>
 
-      {!juste && etalonUtile ? (
+      {!juste && complete ? (
         <p className="mt-pas-3 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed text-stone-900">
           {answerKey}
         </p>
