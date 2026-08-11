@@ -79,6 +79,7 @@ async function main(): Promise<void> {
   const signaux = await import("./verification/session-signaux");
   const fuseaux = await import("./verification/session-fuseaux");
   const entrainement = await import("./verification/entrainement-etanche");
+  const usure = await import("./verification/regeneration-usee");
 
   const comptes = [IDENTIFIANT, ENTRAINEMENT];
 
@@ -114,6 +115,7 @@ async function main(): Promise<void> {
     await signaux.casSignalDeMaitrise(utilisateur.id, maintenant);
     await signaux.casArchivageDeclare(utilisateur.id, maintenant);
     await entrainement.casEntrainementEtanche(entraine.id, maintenant);
+    await usure.casRegenerationParUsure(entraine.id, maintenant);
 
     const appels = await prisma.aiCall.count({ where: { userId: { in: comptes } } });
     record(
