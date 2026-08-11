@@ -43,33 +43,48 @@ CE QUI TUE UNE QUESTION
 
 LES FORMATS
 
-Le format n'est pas déterminé par la facette. Chaque facette s'écrit dans plusieurs
-formats, et c'est le contenu du concept qui tranche.
+Le format n'est pas déterminé par la facette. Chaque facette s'écrit dans
+plusieurs formats, et c'est le contenu du concept qui tranche.
 
-RECOGNITION : MCQ, TRUE_FALSE, SHORT_ANSWER
-MECHANISM   : EXPLAIN, SHORT_ANSWER, CODE, MCQ
-BOUNDARY    : TRUE_FALSE, MCQ, SHORT_ANSWER
-APPLICATION : SHORT_ANSWER, CODE, EXPLAIN, MCQ
+RECOGNITION : MCQ, CLOZE, TRUE_FALSE, SHORT_ANSWER
+MECHANISM   : EXPLAIN, CLOZE, MCQ, CODE, SHORT_ANSWER
+BOUNDARY    : TRUE_FALSE, MCQ, CLOZE, SHORT_ANSWER
+APPLICATION : MCQ, CODE, CLOZE, SHORT_ANSWER, EXPLAIN
+
+Au plus une des quatre questions se répond en texte libre — c'est-à-dire au
+format SHORT_ANSWER ou EXPLAIN, où la personne écrit puis se juge elle-même.
+Les trois autres ont une réponse vérifiable sans jugement : MCQ, TRUE_FALSE,
+CLOZE ou CODE. Une suite de questions à s'auto-noter épuise, et finit par être
+expédiée sans être lue.
 
 Deux questions au plus partagent le même format.
 
-Si le concept cite du code — un identifiant entre accents graves, un appel de méthode,
-une instruction, une commande, un en-tête —, une des quatre questions emploie CODE. La
-citation suffit à déclencher la règle : ce n'est pas une appréciation à porter sur le
-sujet du concept. Cette question montre un extrait court et demande ce qu'il produit,
-ce qui lui manque, ou ce qui le casse.
+Si le concept cite du code — un identifiant entre accents graves, un appel de
+méthode, une instruction, une commande, un en-tête —, une des quatre questions
+emploie CODE. La citation suffit à déclencher la règle : ce n'est pas une
+appréciation à porter sur le sujet du concept. Cette question montre un extrait
+court et demande ce qu'il produit, ce qui lui manque, ou ce qui le casse.
 
-MCQ : exactement quatre options. Chaque mauvaise option est fausse pour une raison
-précise, une confusion que quelqu'un pourrait réellement avoir. Une option
-manifestement absurde rend la question inutile. Les quatre options ont une longueur et
-une forme comparables : la bonne réponse ne doit pas se repérer à sa taille.
+CLOZE : une phrase du concept dont on masque le terme porteur de sens. Le trou
+fait un à trois mots, jamais une proposition entière. Ne masque ni un article,
+ni un mot de liaison, ni un verbe passe-partout : ce qui disparaît doit être ce
+qui constitue la connaissance, de sorte que retrouver le mot revienne à savoir
+la chose. Donne les formes acceptées : le terme lui-même, ses variantes de
+nombre et de genre, ses abréviations d'usage. « les rayons ultraviolets »
+accepte « ultraviolets », « ultraviolet », « UV ».
 
-TRUE_FALSE : l'affirmation est fausse à peu près une fois sur deux. Quand elle est
-fausse, elle l'est d'un cheveu — une condition inversée, un cas particulier étendu à
-tous — pas grossièrement.
+MCQ : exactement quatre options. Chaque mauvaise option est fausse pour une
+raison précise, une confusion que quelqu'un pourrait réellement avoir. Une
+option manifestement absurde rend la question inutile. Les quatre options ont
+une longueur et une forme comparables : la bonne réponse ne doit pas se repérer
+à sa taille.
 
-SHORT_ANSWER et EXPLAIN : la personne répond en texte libre et jugera elle-même. Écris
-\`answerKey\` pour qu'elle puisse se juger honnêtement : les points attendus, formulés
-simplement, et ce qui compte comme une réponse insuffisante.
+TRUE_FALSE : l'affirmation est fausse à peu près une fois sur deux. Quand elle
+est fausse, elle l'est d'un cheveu — une condition inversée, un cas particulier
+étendu à tous — pas grossièrement.
+
+SHORT_ANSWER et EXPLAIN : la personne répond en texte libre et jugera elle-même.
+Écris \`answerKey\` pour qu'elle puisse se juger honnêtement : les points attendus,
+formulés simplement, et ce qui compte comme une réponse insuffisante.
 
 Écris dans la langue du concept.`;
