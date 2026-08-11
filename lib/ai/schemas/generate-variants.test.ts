@@ -28,7 +28,7 @@ function question(format: string) {
   return { format, question: "Une question assez longue pour passer.", answerKey: "Une réponse." };
 }
 
-function lot(rang: number, formats = ["SHORT_ANSWER", "EXPLAIN", "TRUE_FALSE", "MCQ"]) {
+function lot(rang: number, formats = ["TRUE_FALSE", "EXPLAIN", "TRUE_FALSE", "MCQ"]) {
   const [reconnaissance, mecanisme, limite, application] = formats;
 
   return {
@@ -54,21 +54,41 @@ describe("forme de sortie de generate_variants", () => {
     expect(chemin(entree, "required")).toEqual(CLES);
   });
 
-  it("contraint les six formats sur chacune des quatre facettes", () => {
-    for (const cle of FACETTES) {
+  it("n'ouvre le texte libre que sur le mécanisme", () => {
+    // C'est ici que se joue « au plus une question à s'auto-noter » : trois
+    // facettes n'offrent aucun format en texte libre, donc le décodage
+    // contraint ne peut pas produire un lot qui déborde. Le modèle n'a rien à
+    // compter, et une consigne en prose ne peut pas se relâcher.
+    for (const cle of ["recognition", "boundary", "application"]) {
       expect(chemin(entree, "properties", cle, "properties", "format", "enum")).toEqual([
         "MCQ",
-        "CLOZE",
         "TRUE_FALSE",
-        "SHORT_ANSWER",
+        "CLOZE",
         "CODE",
-        "EXPLAIN",
       ]);
     }
+
+    expect(chemin(entree, "properties", "mechanism", "properties", "format", "enum")).toEqual([
+      "EXPLAIN",
+      "CLOZE",
+      "MCQ",
+      "CODE",
+      "SHORT_ANSWER",
+    ]);
 
     // L'énumération doit rester une contrainte. Le helper du SDK la verse dans
     // la description, où elle n'est plus qu'un conseil — c'est ce qu'on évite.
     expect(JSON.stringify(outil)).not.toContain("{enum:");
+  });
+
+  it("refuse le texte libre partout ailleurs que sur le mécanisme", () => {
+    for (const cle of ["recognition", "boundary", "application"]) {
+      for (const format of ["SHORT_ANSWER", "EXPLAIN"]) {
+        const pose = { ...lot(1), [cle]: question(format) };
+
+        expect(GENERATE_VARIANTS.validation.safeParse({ lots: [pose] }).success).toBe(false);
+      }
+    }
   });
 
   it("n'exige d'une question que ce que tout format porte", () => {
@@ -134,8 +154,8 @@ describe("forme de sortie de generate_variants", () => {
     const sansOptions = { ...lot(1), application: question("MCQ") };
     const optionsEnTrop = {
       ...lot(1),
-      recognition: {
-        ...question("SHORT_ANSWER"),
+      mechanism: {
+        ...question("EXPLAIN"),
         mcq: { options: ["a", "b", "c", "d"], correctIndex: 0 },
       },
     };

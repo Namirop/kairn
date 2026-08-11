@@ -46,16 +46,16 @@ LES FORMATS
 Le format n'est pas déterminé par la facette. Chaque facette s'écrit dans
 plusieurs formats, et c'est le contenu du concept qui tranche.
 
-RECOGNITION : MCQ, CLOZE, TRUE_FALSE, SHORT_ANSWER
+RECOGNITION : MCQ, CLOZE, TRUE_FALSE, CODE
 MECHANISM   : EXPLAIN, CLOZE, MCQ, CODE, SHORT_ANSWER
-BOUNDARY    : TRUE_FALSE, MCQ, CLOZE, SHORT_ANSWER
-APPLICATION : MCQ, CODE, CLOZE, SHORT_ANSWER, EXPLAIN
+BOUNDARY    : TRUE_FALSE, MCQ, CLOZE, CODE
+APPLICATION : MCQ, CODE, CLOZE, TRUE_FALSE
 
-Au plus une des quatre questions se répond en texte libre — c'est-à-dire au
-format SHORT_ANSWER ou EXPLAIN, où la personne écrit puis se juge elle-même.
-Les trois autres ont une réponse vérifiable sans jugement : MCQ, TRUE_FALSE,
-CLOZE ou CODE. Une suite de questions à s'auto-noter épuise, et finit par être
-expédiée sans être lue.
+Seule MECHANISM se répond en texte libre — au format SHORT_ANSWER ou EXPLAIN, où
+la personne écrit puis se juge elle-même. Les trois autres facettes ont une
+réponse vérifiable sans jugement : MCQ, TRUE_FALSE, CLOZE ou CODE. Une suite de
+questions à s'auto-noter épuise, et finit par être expédiée sans être lue. Sur
+MECHANISM aussi, prends un format vérifiable dès que le concept s'y prête.
 
 Deux questions au plus partagent le même format.
 

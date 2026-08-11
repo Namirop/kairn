@@ -54,10 +54,48 @@ function cloze() {
   });
 }
 
-function question(facette: string) {
+/**
+ * Les formats ouverts à chaque facette.
+ *
+ * Le quota « au plus une question à s'auto-noter » est une propriété de la
+ * grammaire, pas une consigne que le modèle aurait à compter : trois facettes
+ * sur quatre n'offrent aucun format en texte libre, donc le décodage contraint
+ * ne peut pas produire un lot qui déborde.
+ *
+ * Le banc a montré pourquoi la consigne seule ne suffisait pas. Sur le corpus
+ * technique, `CODE` occupait un tiers des emplacements `APPLICATION` et le quota
+ * tenait ; hors informatique, `CODE` disparaît, `APPLICATION` retombe sur
+ * `SHORT_ANSWER`, `MECHANISM` reste sur `EXPLAIN`, et plus d'un lot sur deux
+ * repassait à deux questions jugées par l'utilisateur. La règle ne tenait que
+ * grâce à une béquille qui n'existe pas là où va le produit.
+ *
+ * `MECHANISM` garde le texte libre : « explique pourquoi » vaut souvent mieux
+ * qu'un choix à cocher, et une seule question de ce genre ne fatigue personne.
+ */
+const FORMATS_VERIFIABLES = [
+  "MCQ",
+  "TRUE_FALSE",
+  "CLOZE",
+  "CODE",
+] as const satisfies readonly VariantFormat[];
+
+const FORMATS_DU_MECANISME = [
+  "EXPLAIN",
+  "CLOZE",
+  "MCQ",
+  "CODE",
+  "SHORT_ANSWER",
+] as const satisfies readonly VariantFormat[];
+
+/**
+ * `z.enum()` est appelé ici, une fois par facette, et jamais partagé : Zod
+ * extrait vers `$defs` dès qu'une même instance de schéma est réutilisée, et la
+ * contrainte y devient une description que le décodage n'applique plus.
+ */
+function question(formats: readonly [VariantFormat, ...VariantFormat[]], facette: string) {
   return z
     .object({
-      format: z.enum(VariantFormat),
+      format: z.enum(formats),
       question: z.string().min(10).max(800),
       answerKey: z
         .string()
@@ -77,10 +115,22 @@ const lot = z.object({
     .min(1)
     .max(CONCEPTS_PAR_APPEL)
     .describe("Le numéro du concept traité, tel qu'il est donné dans l'envoi."),
-  recognition: question("De quoi s'agit-il, comment le nommerait-on, à quoi le reconnaît-on."),
-  mechanism: question("Pourquoi ça marche, ce qui se passe réellement, dans quel ordre."),
-  boundary: question("Ce que ce n'est pas, quand ça ne s'applique pas, la confusion classique."),
-  application: question("S'en servir dans une situation concrète qui n'est pas celle du concept."),
+  recognition: question(
+    FORMATS_VERIFIABLES,
+    "De quoi s'agit-il, comment le nommerait-on, à quoi le reconnaît-on.",
+  ),
+  mechanism: question(
+    FORMATS_DU_MECANISME,
+    "Pourquoi ça marche, ce qui se passe réellement, dans quel ordre.",
+  ),
+  boundary: question(
+    FORMATS_VERIFIABLES,
+    "Ce que ce n'est pas, quand ça ne s'applique pas, la confusion classique.",
+  ),
+  application: question(
+    FORMATS_VERIFIABLES,
+    "S'en servir dans une situation concrète qui n'est pas celle du concept.",
+  ),
 });
 
 export const generateVariantsForme = z.object({

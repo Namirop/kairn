@@ -32,6 +32,11 @@ export const FORMATS_MINIMUM = 3;
  * savais » pour avancer, et la planification enregistre du bruit. Le compte de
  * formats distincts ne voyait rien de ce défaut — un quatuor de quatre formats
  * dont trois sont auto-notés le satisfaisait.
+ *
+ * Depuis, le schéma de génération n'ouvre le texte libre que sur `MECHANISM` :
+ * une sortie passée par `callAI()` ne peut plus déborder. Le contrôle reste,
+ * parce que le banc doit pouvoir juger une génération d'hier ou un lot écrit à
+ * la main — et parce qu'il mesure ce que la grammaire garantit.
  */
 export const FORMATS_LIBRES = ["SHORT_ANSWER", "EXPLAIN"];
 export const LIBRES_MAXIMUM = 1;
