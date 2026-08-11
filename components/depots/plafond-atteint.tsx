@@ -13,9 +13,12 @@ import { Button } from "@/components/ui/button";
 export function PlafondAtteint({
   remiseAZero,
   inscrit,
+  plafond,
 }: {
   remiseAZero: string;
   inscrit: boolean;
+  /** Passé en prop : ce composant est client, et la constante vit avec la base. */
+  plafond: number;
 }) {
   const [fait, rejoindre, enCours] = useActionState(async () => {
     await rejoindreListeDattenteAction();
@@ -26,7 +29,8 @@ export function PlafondAtteint({
     <div className="border-lichen pl-pas-4 gap-pas-3 flex max-w-xl flex-col border-l-2">
       {/* Les mêmes mots que le refus côté serveur : c'est la même limite. */}
       <p className="text-corps text-stone-900">
-        Tu as déposé tout ce que la journée permet. Le compteur repart {remiseAZero}.
+        Tu as retenu tout ce que la journée permet, {plafond} concepts. Le compteur repart{" "}
+        {remiseAZero}.
       </p>
       <p className="text-petit text-stone-500">
         Cette limite tient le coût des appels au modèle pendant que Cairn se construit. Si elle te

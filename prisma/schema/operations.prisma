@@ -122,7 +122,12 @@ model DailyUsage {
   /// Date locale de l'utilisateur.
   day    DateTime @db.Date
 
+  /// Dépôts écrits dans la journée. Second rideau du quota : chaque dépôt paie
+  /// une extraction, quoi qu'elle rende.
   generations Int @default(0)
+  /// Concepts retenus dans la journée. C'est le vrai plafond : le concept est
+  /// ce qui coûte, et la bonne unité pour l'utilisateur.
+  concepts    Int @default(0)
   reviews     Int @default(0)
 
   createdAt DateTime @default(now())

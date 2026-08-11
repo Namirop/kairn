@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db/client";
 import {
+  compterConceptsRetenus,
+  CONCEPTS_PAR_JOUR,
   DEPOTS_PAR_JOUR,
   estEnListeDattente,
   inscrireEnListeDattente,
@@ -62,25 +64,53 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
 
   await vieillirLesDepots(userId);
 
-  for (let numero = 4; numero <= DEPOTS_PAR_JOUR; numero += 1) {
-    const resultat = await deposerTexte(userId, `verif-quota-0${numero}`);
+  // Le quota porte sur les concepts, et l'extraction n'a pas lieu ici : on
+  // remplit le compteur comme le ferait le découpage, jusqu'à une place près.
+  await compterConceptsRetenus(userId, "Europe/Paris", CONCEPTS_PAR_JOUR - 1);
 
-    if (!resultat.ok) throw new Error(`Le dépôt ${numero} aurait dû passer : ${resultat.motif}`);
-    await vieillirLesDepots(userId);
-  }
-
-  const surnumeraire = await deposerTexte(userId, "verif-quota-06");
+  const dernier = await deposerTexte(userId, "verif-quota-limite");
   record(
-    `Quota — le dépôt ${DEPOTS_PAR_JOUR + 1} de la journée est refusé, et se sait refusé`,
+    "Quota — il reste une place tant qu'un concept manque au plafond",
+    dernier.ok,
+    dernier.ok ? "accepté" : dernier.motif,
+  );
+
+  await vieillirLesDepots(userId);
+  await compterConceptsRetenus(userId, "Europe/Paris", 1);
+
+  const surnumeraire = await deposerTexte(userId, "verif-quota-plein");
+  record(
+    `Quota — le dépôt qui suit les ${CONCEPTS_PAR_JOUR} concepts est refusé, et se sait refusé`,
     !surnumeraire.ok && surnumeraire.quota === true,
     surnumeraire.ok ? "accepté" : surnumeraire.motif,
   );
 
   const consommes = await prisma.dailyUsage.findFirst({ where: { userId } });
   record(
-    "Quota — un refus n'entame pas le compteur du jour",
-    (consommes?.generations ?? 0) === DEPOTS_PAR_JOUR,
-    `${consommes?.generations ?? 0} place(s) sur ${DEPOTS_PAR_JOUR}`,
+    "Quota — un refus n'entame ni les concepts ni les dépôts du jour",
+    (consommes?.concepts ?? 0) === CONCEPTS_PAR_JOUR && (consommes?.generations ?? 0) === 4,
+    `${consommes?.concepts ?? 0} concept(s) sur ${CONCEPTS_PAR_JOUR}, ${consommes?.generations ?? 0} dépôt(s)`,
+  );
+}
+
+/** Le second rideau : des dépôts d'une ligne paient quand même leur extraction. */
+export async function casPlafondDeDepots(userId: string): Promise<void> {
+  await repartirDeZero(userId);
+
+  for (let numero = 1; numero <= DEPOTS_PAR_JOUR; numero += 1) {
+    const resultat = await deposerTexte(userId, `verif-depots-${numero}`);
+
+    if (!resultat.ok) throw new Error(`Le dépôt ${numero} aurait dû passer : ${resultat.motif}`);
+    await vieillirLesDepots(userId);
+  }
+
+  const surnumeraire = await deposerTexte(userId, "verif-depots-trop");
+  const consommes = await prisma.dailyUsage.findFirst({ where: { userId } });
+
+  record(
+    `Quota — le dépôt ${DEPOTS_PAR_JOUR + 1} est refusé même sans un seul concept retenu`,
+    !surnumeraire.ok && surnumeraire.quota === true && (consommes?.concepts ?? 0) === 0,
+    surnumeraire.ok ? "accepté" : surnumeraire.motif,
   );
 }
 

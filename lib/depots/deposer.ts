@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { creerDepot, marquerEnCours } from "@/lib/db/ingestion";
-import { reserverDepot, rendreDepot } from "@/lib/db/quota-depots";
+import { CONCEPTS_PAR_JOUR, reserverDepot, rendreDepot } from "@/lib/db/quota-depots";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { preparerCapture, TAILLE_MAXIMALE_OCTETS } from "@/lib/images/capture";
 import { enqueueJob } from "@/lib/jobs/queue";
@@ -19,6 +19,17 @@ import { enqueueJob } from "@/lib/jobs/queue";
 export const SIGNES_MAXIMUM = 8000;
 
 const CLE_ILLISIBLE = "Ce dépôt n'a pas pu être identifié. Recharge la page et recommence.";
+
+/**
+ * Ce qu'un refus dit. Chacun nomme sa cause : « trop de dépôts » et « assez de
+ * concepts pour aujourd'hui » n'appellent pas la même conduite, et un message
+ * unique ferait attendre demain quelqu'un qui n'a qu'à patienter une minute.
+ */
+const MOTIFS_DE_REFUS = {
+  concepts: `Tu as retenu tout ce que la journée permet, ${CONCEPTS_PAR_JOUR} concepts. Ça repart demain.`,
+  depots: "Tu as fait tous les dépôts de la journée. Ça repart demain.",
+  debit: "Trop de dépôts coup sur coup. Laisse passer une minute.",
+} as const;
 
 const depotSchema = z.object({
   texte: z.string().max(SIGNES_MAXIMUM, {
@@ -68,14 +79,7 @@ export async function deposer(userId: string, donnees: FormData): Promise<Result
   const place = await reserverDepot(userId, fuseau);
 
   if (!place.accorde) {
-    return {
-      ok: false,
-      quota: place.motif === "quota",
-      motif:
-        place.motif === "quota"
-          ? "Tu as déposé tout ce que la journée permet."
-          : "Trop de dépôts coup sur coup. Laisse passer une minute.",
-    };
+    return { ok: false, quota: place.motif !== "debit", motif: MOTIFS_DE_REFUS[place.motif] };
   }
 
   const capture = champs.image ? await preparerCapture(champs.image) : null;

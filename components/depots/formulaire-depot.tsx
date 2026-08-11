@@ -113,7 +113,10 @@ export function FormulaireDepot({ restants, cleEnvoi }: { restants: number; cleE
         {etat.erreur ? (
           <span className="text-alerte">{etat.erreur}</span>
         ) : (
-          `Il te reste ${restants} ${restants === 1 ? "dépôt" : "dépôts"} aujourd'hui.`
+          // Ce qui reste se compte en concepts : une phrase en consomme un, un
+          // article en consomme huit. C'est la matière qui est plafonnée, pas
+          // le nombre de fois qu'on colle quelque chose.
+          `Il te reste ${restants} ${restants === 1 ? "concept" : "concepts"} à retenir aujourd'hui.`
         )}
       </p>
     </form>

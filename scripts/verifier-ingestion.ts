@@ -68,6 +68,7 @@ async function main(): Promise<void> {
 
     await limites.casDoubleEnvoi(userId);
     await limites.casDebitEtQuota(userId);
+    await limites.casPlafondDeDepots(userId);
     await limites.casListeDattente(userId);
 
     const octetsRestants = await prisma.input.count({

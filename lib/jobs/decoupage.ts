@@ -9,6 +9,8 @@ import {
   marquerPretSiPlusRienEnAttente,
 } from "@/lib/db/ingestion";
 import { creerJobsDeQuestions } from "@/lib/db/lots";
+import { compterConceptsRetenus } from "@/lib/db/quota-depots";
+import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import type { GenerationJob } from "@/lib/db/types";
 import { soumettreLotsEnAttente } from "./questions";
 
@@ -51,6 +53,14 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
   }
 
   const concepts = await enregistrerConcepts(depot.id, depot.userId, extraction.atoms);
+
+  // Le compteur du jour se remplit ici, et pas au dépôt : avant l'extraction,
+  // personne ne sait combien de concepts un texte porte. Les douteux comptent
+  // aussi — ils ont coûté la même extraction, et l'utilisateur peut encore les
+  // confirmer.
+  const fuseau = await lireFuseauUtilisateur(depot.userId);
+  await compterConceptsRetenus(depot.userId, fuseau, concepts.length);
+
   const aQuestionner = concepts
     .filter((concept) => !concept.uncertain)
     .map((concept) => concept.id);

@@ -4,7 +4,12 @@ import { FormulaireDepot } from "@/components/depots/formulaire-depot";
 import { PlafondAtteint } from "@/components/depots/plafond-atteint";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
-import { compterDepotsDuJour, DEPOTS_PAR_JOUR, estEnListeDattente } from "@/lib/db/quota-depots";
+import {
+  CONCEPTS_PAR_JOUR,
+  DEPOTS_PAR_JOUR,
+  estEnListeDattente,
+  lireUsageDuJour,
+} from "@/lib/db/quota-depots";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { quandRepartLeCompteur } from "@/lib/domain/remise-a-zero";
 
@@ -16,11 +21,14 @@ export default async function PageNouveauDepot() {
   if (!utilisateur) redirect(ROUTES.connexion);
 
   const fuseau = await lireFuseauUtilisateur(utilisateur.id);
-  const [deposes, inscrit] = await Promise.all([
-    compterDepotsDuJour(utilisateur.id, fuseau),
+  const [usage, inscrit] = await Promise.all([
+    lireUsageDuJour(utilisateur.id, fuseau),
     estEnListeDattente(utilisateur.id),
   ]);
-  const restants = Math.max(0, DEPOTS_PAR_JOUR - deposes);
+  // Ce qui reste, c'est ce qu'on peut encore retenir aujourd'hui. Le plafond de
+  // dépôts n'est qu'un second rideau : il ne s'annonce pas, il se rencontre.
+  const restants = Math.max(0, CONCEPTS_PAR_JOUR - usage.concepts);
+  const plein = restants === 0 || usage.depots >= DEPOTS_PAR_JOUR;
 
   return (
     <div className="gap-pas-8 flex flex-col">
@@ -31,8 +39,12 @@ export default async function PageNouveauDepot() {
         </p>
       </div>
 
-      {restants === 0 ? (
-        <PlafondAtteint remiseAZero={quandRepartLeCompteur(new Date(), fuseau)} inscrit={inscrit} />
+      {plein ? (
+        <PlafondAtteint
+          remiseAZero={quandRepartLeCompteur(new Date(), fuseau)}
+          inscrit={inscrit}
+          plafond={CONCEPTS_PAR_JOUR}
+        />
       ) : (
         // La clé d'un geste de dépôt, tirée à chaque affichage : elle rend le
         // double envoi inoffensif sans jamais confondre deux dépôts distincts.
