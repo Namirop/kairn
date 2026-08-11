@@ -29,10 +29,12 @@ export default async function CoquilleApplication({ children }: { children: Reac
         <Rail />
         <div className="md:pl-28">
           <EnTete utilisateur={utilisateur} />
-          {/* Aucune mesure ici : chaque écran est une pile de panneaux, et
-              chaque panneau porte la sienne. Un conteneur à cet endroit
-              empêcherait tout fond d'aller d'un bord à l'autre. */}
-          <main className="pb-32 md:pb-0">{children}</main>
+          {/* Aucune mesure ici, et aucun rembourrage : chaque écran est une
+              pile de panneaux qui porte les siens. Un conteneur à cet endroit
+              empêcherait un fond d'aller d'un bord à l'autre, et une marge
+              basse posée ici se peindrait de la couleur de la coquille, sous
+              le dernier panneau — la bande d'une autre couleur, encore elle. */}
+          <main>{children}</main>
         </div>
         <BarreBasse />
         <InviteInstallation />

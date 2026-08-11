@@ -26,6 +26,10 @@ export function PileDePanneaux({
       className={cn(
         // La hauteur de l'en-tête, seul élément fixe au-dessus de la pile.
         "flex min-h-[calc(100dvh-3.5rem)] flex-col md:min-h-[calc(100dvh-4rem)]",
+        // Le dégagement de la barre basse appartient à la pile : posé sur la
+        // coquille, il se peignait de la couleur du corps sous le dernier
+        // panneau.
+        "pb-28 md:pb-0",
         SURFACES[sol].fond,
       )}
     >

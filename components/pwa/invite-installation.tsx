@@ -42,7 +42,7 @@ export function InviteInstallation() {
   };
 
   return (
-    <div className="inset-x-pas-4 gap-pas-3 p-pas-4 md:right-pas-8 md:bottom-pas-8 fixed bottom-20 z-40 flex items-start border border-stone-300 bg-stone-50 md:left-auto md:w-80">
+    <div className="inset-x-pas-4 gap-pas-3 p-pas-6 md:right-pas-8 md:bottom-pas-8 rounded-carte bg-surface-ombre fixed bottom-24 z-40 flex items-start md:left-auto md:w-80">
       <div className="flex-1">
         <p className="font-medium">Installer Kairn</p>
         <p className="mt-pas-1 text-petit text-stone-500">
@@ -64,7 +64,7 @@ export function InviteInstallation() {
         type="button"
         onClick={ecarter}
         aria-label="Ne plus proposer"
-        className="p-pas-1 rounded-xs text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900"
+        className="p-pas-1 rounded-galet hover:bg-surface-papier text-stone-500 transition-colors hover:text-stone-900"
       >
         <X className="size-4" />
       </button>
