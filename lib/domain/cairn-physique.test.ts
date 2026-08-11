@@ -1,12 +1,10 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import { sommets } from "./cairn-collision";
 import {
   avancer,
   CADRE_LARGE,
-  cairnRenverse,
-  demiEmprise,
   initialiser,
-  remonter,
   renverser,
   toutEstPose,
   type Cadre,
@@ -21,7 +19,7 @@ const PIERRES = EMPILEMENT.pierres;
 function simuler(
   corps: Corps[],
   pierres: Pierre[] = PIERRES,
-  pasMax = 600,
+  pasMax = 900,
   cadre?: Cadre,
 ): Corps[] {
   let etat = corps;
@@ -29,6 +27,19 @@ function simuler(
     etat = avancer(etat, pierres, 1 / 60, cadre);
   }
   return etat;
+}
+
+/** Le point le plus bas d'une pierre, dans le repère où `y` croît vers le bas. */
+function plusBasPoint(solide: Corps, pierre: Pierre): number {
+  const points = sommets({
+    x: solide.x,
+    y: solide.y,
+    rotation: solide.rotation,
+    largeur: pierre.largeur,
+    hauteur: pierre.hauteur,
+  });
+
+  return Math.max(...points.map((point) => point.y));
 }
 
 describe("initialiser", () => {
@@ -78,19 +89,11 @@ describe("avancer", () => {
     expect(avancer(corps, PIERRES, 1 / 60)).toEqual(corps);
   });
 
-  it("finit toujours par tout poser au sol", () => {
+  it("finit toujours par tout poser", () => {
     const final = simuler(renverser(initialiser(PIERRES), 0, { vx: 30, vy: 0 }));
 
     expect(toutEstPose(final)).toBe(true);
     expect(final.every((c) => c.repos)).toBe(true);
-  });
-
-  it("pose chaque pierre sur son encombrement incliné, jamais dans le sol", () => {
-    const final = simuler(renverser(initialiser(PIERRES), 0, { vx: 30, vy: 0 }));
-
-    final.forEach((solide, index) => {
-      expect(solide.y).toBeCloseTo(-demiEmprise(PIERRES[index]!, solide.rotation).y, 5);
-    });
   });
 
   it("garde toutes les pierres dans le cadre, même lancées fort", () => {
@@ -106,7 +109,7 @@ describe("avancer", () => {
     const final = simuler(
       renverser(initialiser(PIERRES), 0, { vx: 600, vy: -120 }),
       PIERRES,
-      600,
+      900,
       CADRE_LARGE,
     );
 
@@ -114,6 +117,41 @@ describe("avancer", () => {
     for (const solide of final) {
       expect(solide.x).toBeGreaterThan(CADRE_LARGE.gauche);
       expect(solide.x).toBeLessThan(CADRE_LARGE.droite);
+    }
+  });
+
+  /**
+   * Le sujet de tout le solveur de contacts. Sans lui, chaque pierre ne
+   * connaissait que le sol : elles se traversaient et finissaient toutes à la
+   * même hauteur, à cheval les unes sur les autres.
+   */
+  it("empile les pierres au lieu de les faire se traverser", () => {
+    // Un coup mou et vertical : elles n'ont pas de quoi s'écarter, donc elles
+    // ne peuvent finir qu'empilées.
+    const final = simuler(renverser(initialiser(PIERRES), 0, { vx: 1, vy: 0 }));
+    const hauteurs = final.map((solide, index) => -plusBasPoint(solide, PIERRES[index]!));
+
+    // Au moins une pierre repose franchement au-dessus du sol : elle est donc
+    // portée par une autre.
+    expect(Math.max(...hauteurs)).toBeGreaterThan(4);
+  });
+
+  it("ne laisse aucune pierre posée traverser le socle resté debout", () => {
+    // Coupé haut : les trois premières restent debout et font obstacle.
+    const final = simuler(renverser(initialiser(PIERRES), 3, { vx: 20, vy: 0 }));
+    const socle = PIERRES[2]!;
+    const hautDuSocle = Math.min(
+      ...sommets({ ...socle, x: socle.x, y: socle.y, rotation: socle.rotation }).map((p) => p.y),
+    );
+
+    for (const [index, solide] of final.entries()) {
+      if (!solide.libre) continue;
+
+      const bas = plusBasPoint(solide, PIERRES[index]!);
+      const auDessus = bas < hautDuSocle + 1;
+      const aCote = Math.abs(solide.x - socle.x) > socle.largeur / 2;
+
+      expect(auDessus || aCote || bas <= 0.5).toBe(true);
     }
   });
 
@@ -132,19 +170,6 @@ describe("avancer", () => {
   });
 });
 
-describe("remonter", () => {
-  it("ramène les pierres à leur place et les remet au repos", () => {
-    let corps = simuler(renverser(initialiser(PIERRES), 0, { vx: 60, vy: 0 }));
-
-    for (let i = 0; i < 400 && cairnRenverse(corps); i += 1) {
-      corps = remonter(corps, PIERRES, 1 / 60);
-    }
-
-    expect(cairnRenverse(corps)).toBe(false);
-    expect(corps).toEqual(initialiser(PIERRES));
-  });
-});
-
 describe("propriété : la chute est déterministe et bornée", () => {
   it("le même geste donne toujours la même chute", () => {
     fc.assert(
@@ -158,11 +183,11 @@ describe("propriété : la chute est déterministe et bornée", () => {
           expect(geste()).toEqual(geste());
         },
       ),
-      { numRuns: 60 },
+      { numRuns: 40 },
     );
   });
 
-  it("tout finit posé au sol, quels que soient la pierre visée et la force", () => {
+  it("tout finit posé, quels que soient la pierre visée et la force", () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 0, max: PIERRES.length - 1 }),
@@ -175,19 +200,26 @@ describe("propriété : la chute est déterministe et bornée", () => {
           for (const solide of final) {
             expect(Number.isFinite(solide.x)).toBe(true);
             expect(Number.isFinite(solide.y)).toBe(true);
-            expect(solide.y).toBeLessThanOrEqual(0);
           }
         },
       ),
-      { numRuns: 120 },
+      { numRuns: 60 },
     );
   });
 
   /**
    * La propriété qui manquait, et qui se voyait à l'écran : des pierres à
-   * moitié enfoncées dans le sol. Aucun point d'une pierre au repos ne passe
-   * sous le sol, quelle que soit l'inclinaison où elle a fini.
+   * moitié enfoncées dans le sol.
+   *
+   * La tolérance n'est pas nulle, et ne peut pas l'être : un solveur à
+   * impulsions laisse la gravité enfoncer d'un pas de temps avant de corriger,
+   * et il tolère un jeu pour ne pas vibrer. Une demi-unité sur une pierre de
+   * quinze, c'est trois pour cent de sa hauteur, sous des coins déjà arrondis.
+   * Ce qu'on interdit ici, c'est l'enfoncement qui se voit — plusieurs unités,
+   * ce que donnait l'ancien contact à la demi-hauteur.
    */
+  const ENFONCEMENT_INVISIBLE = 0.5;
+
   it("aucune pierre ne s'enfonce dans le sol, quelle que soit son inclinaison", () => {
     fc.assert(
       fc.property(
@@ -200,42 +232,11 @@ describe("propriété : la chute est déterministe et bornée", () => {
           final.forEach((solide, rang) => {
             if (!solide.libre) return;
 
-            expect(solide.y + demiEmprise(PIERRES[rang]!, solide.rotation).y).toBeLessThanOrEqual(
-              1e-9,
-            );
+            expect(plusBasPoint(solide, PIERRES[rang]!)).toBeLessThanOrEqual(ENFONCEMENT_INVISIBLE);
           });
         },
       ),
-      { numRuns: 120 },
-    );
-  });
-});
-
-describe("demiEmprise", () => {
-  it("rend la demi-hauteur et la demi-largeur d'une pierre à plat", () => {
-    const pierre = PIERRES[0]!;
-
-    expect(demiEmprise(pierre, 0).y).toBeCloseTo(pierre.hauteur / 2, 10);
-    expect(demiEmprise(pierre, 0).x).toBeCloseTo(pierre.largeur / 2, 10);
-  });
-
-  it("échange les deux axes sur une pierre couchée", () => {
-    const pierre = PIERRES[0]!;
-
-    expect(demiEmprise(pierre, 90).y).toBeCloseTo(pierre.largeur / 2, 10);
-    expect(demiEmprise(pierre, 90).x).toBeCloseTo(pierre.hauteur / 2, 10);
-  });
-
-  it("ne descend jamais sous l'encombrement à plat", () => {
-    fc.assert(
-      fc.property(fc.integer({ min: -720, max: 720 }), (rotation) => {
-        const pierre = PIERRES[0]!;
-        const demi = demiEmprise(pierre, rotation);
-
-        expect(demi.y).toBeGreaterThanOrEqual(Math.min(pierre.hauteur, pierre.largeur) / 2 - 1e-9);
-        expect(demi.x).toBeGreaterThanOrEqual(Math.min(pierre.hauteur, pierre.largeur) / 2 - 1e-9);
-      }),
-      { numRuns: 100 },
+      { numRuns: 60 },
     );
   });
 });

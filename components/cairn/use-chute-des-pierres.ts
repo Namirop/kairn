@@ -6,12 +6,12 @@ import {
   cairnRenverse,
   CADRE_SERRE,
   initialiser,
-  remonter,
   renverser,
   toutEstPose,
   type Cadre,
   type Corps,
 } from "@/lib/domain/cairn-physique";
+import { remonter } from "@/lib/domain/cairn-remontee";
 import { pierreTraversee } from "@/lib/domain/cairn-contact";
 import type { Pierre } from "@/lib/domain/cairn-stack";
 
