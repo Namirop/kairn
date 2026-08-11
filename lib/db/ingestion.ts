@@ -128,6 +128,14 @@ export async function marquerPretSiPlusRienEnAttente(
 
   if (restants > 0) return false;
 
+  // Un dépôt déjà arrêté avec son motif ne se rouvre pas. Le découpage marque
+  // lui-même l'échec quand il n'y a rien à retenir — puis son job se termine
+  // normalement, puisqu'il a fait son travail. Sans cette garde, la clôture qui
+  // suit effacerait le motif et rendrait le dépôt « prêt » sans un concept.
+  const depot = await prisma.input.findUnique({ where: { id: inputId }, select: { status: true } });
+
+  if (depot?.status === "FAILED") return false;
+
   const enEchec = await prisma.generationJob.count({ where: { inputId, status: "FAILED" } });
   const concepts = await prisma.atom.count({ where: { inputId } });
 

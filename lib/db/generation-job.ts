@@ -81,13 +81,18 @@ export async function findResumableJobs(
 /**
  * Ferme les jobs bloqués qui ont épuisé leurs tentatives. Sans ça ils
  * resteraient RUNNING pour toujours, invisibles et jamais repris.
+ *
+ * Un job de questions parti en lot est exclu : il vit chez le fournisseur, et
+ * c'est la relève qui le termine. Un job de questions sans lot, lui, entre —
+ * depuis qu'ils partent en appel direct, ils peuvent se bloquer comme les
+ * autres.
  */
 export async function failExhaustedJobs(now: Date = new Date()): Promise<number> {
   const stallCutoff = new Date(now.getTime() - STALL_AFTER_MS);
 
   const bloques = await prisma.generationJob.findMany({
     where: {
-      kind: { in: ["OCR", "ATOMS"] },
+      batchId: null,
       status: "RUNNING",
       startedAt: { lt: stallCutoff },
       attempts: { gte: MAX_ATTEMPTS },

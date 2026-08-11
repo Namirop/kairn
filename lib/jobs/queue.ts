@@ -14,13 +14,23 @@ import { runJob } from "./runner";
 export async function enqueueJob(inputId: string, kind: GenerationKind): Promise<GenerationJob> {
   const job = await createGenerationJob(inputId, kind);
 
-  try {
-    after(async () => {
-      await runJob(job.id);
-    });
-  } catch (error) {
-    console.error(`Job ${job.id} créé mais non déclenché ; le cron le reprendra.`, error);
-  }
+  declencher(job.id);
 
   return job;
+}
+
+/**
+ * Lance un job déjà écrit, derrière la réponse.
+ *
+ * Séparé de la création parce que les jobs de questions sont écrits en groupe,
+ * par `creerJobsDeQuestions`, avant d'être lancés un à un.
+ */
+export function declencher(jobId: string): void {
+  try {
+    after(async () => {
+      await runJob(jobId);
+    });
+  } catch (error) {
+    console.error(`Job ${jobId} créé mais non déclenché ; le cron le reprendra.`, error);
+  }
 }

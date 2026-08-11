@@ -3,10 +3,9 @@ import { prisma } from "@/lib/db/client";
 import { confirmerConcept, modifierConcept } from "@/lib/db/concepts";
 import { deposer } from "@/lib/depots/deposer";
 import { TROU } from "@/lib/domain/reponse-cloze";
-import { releverLots, soumettreLotsEnAttente } from "@/lib/jobs/questions";
 import {
   compterQuestions,
-  executerJobsEnAttente,
+  executerToutLePipeline,
   formulaire,
   libererLaJournee,
 } from "./depot-simule";
@@ -37,12 +36,7 @@ quand la dernière se règle.`;
 
 async function fixerFacture(inputId: string): Promise<void> {
   // Hors requête HTTP, `after()` ne part pas : on déroule ce qui serait parti.
-  for (let passage = 0; passage < 3; passage += 1) {
-    if ((await executerJobsEnAttente(inputId)) === 0) break;
-  }
-
-  await soumettreLotsEnAttente();
-  await releverLots();
+  await executerToutLePipeline(inputId);
 }
 
 async function deposerEtDerouler(
@@ -72,6 +66,20 @@ export async function casDepotTexte(userId: string): Promise<void> {
     "Texte — le dépôt produit ses concepts puis ses questions",
     depot.status === "READY" && depot.atoms.length === 3 && questions === 12,
     `${depot.status}, ${depot.atoms.length} concepts, ${questions} questions`,
+  );
+
+  // Le cœur du §7 : les questions sont là sans qu'aucun lot soit parti. C'est
+  // la seule assertion qui distingue l'appel direct de l'envoi groupé, les deux
+  // écrivant les mêmes questions au bout du compte.
+  const lots = await prisma.aiBatch.count({ where: { jobs: { some: { inputId } } } });
+  const enAttente = await prisma.generationJob.count({
+    where: { inputId, kind: "VARIANTS", status: { in: ["QUEUED", "RUNNING"] } },
+  });
+
+  record(
+    "Texte — les questions arrivent en appel direct, sans passer par un lot",
+    questions === 12 && lots === 0 && enAttente === 0,
+    `${lots} lot(s) soumis, ${enAttente} job(s) de questions encore en file`,
   );
 
   const planifie = await prisma.variant.count({ where: { atom: { inputId }, retiredAt: null } });

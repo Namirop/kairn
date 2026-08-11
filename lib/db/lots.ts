@@ -1,13 +1,14 @@
 import { prisma } from "@/lib/db/client";
-import { MAX_ATTEMPTS } from "@/lib/db/generation-job";
+import { MAX_ATTEMPTS, STALL_AFTER_MS } from "@/lib/db/generation-job";
 import type { AiBatch, GenerationJob } from "@/lib/db/types";
 
 /**
  * Les jobs de questions et les lots qui les portent.
  *
- * Un job de questions ne passe pas par l'exécuteur : il est créé en attente,
- * soumis en groupe, puis terminé par la relève. C'est le seul chemin où le
- * travail et sa réponse sont séparés par des heures.
+ * Un job de questions naît en attente. Celui d'un dépôt est lancé aussitôt, en
+ * appel direct ; celui d'une régénération attend la soumission groupée, qui
+ * coûte moitié prix contre une latence de quelques heures. C'est le seul chemin
+ * où le travail et sa réponse sont séparés par des heures.
  */
 
 /** Concepts par requête. Au-delà, la sortie frôlerait `max_tokens`. */
@@ -33,14 +34,28 @@ export async function creerJobsDeQuestions(
   );
 }
 
-/** Les jobs de questions qui attendent une soumission, les plus vieux d'abord. */
-export async function trouverJobsASoumettre(limite: number): Promise<GenerationJob[]> {
+/**
+ * Les jobs de questions qui attendent une soumission, les plus vieux d'abord.
+ *
+ * Deux populations depuis que le dépôt écrit ses questions en appel direct :
+ * les régénérations, qui n'ont jamais été lancées et peuvent attendre ; et les
+ * jobs qu'un appel direct a laissés en plan — jamais déclenchés, ou interrompus
+ * en cours d'exécution. Le chemin groupé est leur rattrapage, et le seul
+ * consommateur de ces jobs-là : sans ça, un processus recyclé au mauvais moment
+ * laisserait un dépôt annoncer un travail en cours pour toujours.
+ */
+export async function trouverJobsASoumettre(
+  limite: number,
+  maintenant: Date = new Date(),
+): Promise<GenerationJob[]> {
+  const bloqueAvant = new Date(maintenant.getTime() - STALL_AFTER_MS);
+
   return prisma.generationJob.findMany({
     where: {
       kind: "VARIANTS",
-      status: "QUEUED",
       batchId: null,
       attempts: { lt: MAX_ATTEMPTS },
+      OR: [{ status: "QUEUED" }, { status: "RUNNING", startedAt: { lt: bloqueAvant } }],
     },
     orderBy: { createdAt: "asc" },
     take: limite,

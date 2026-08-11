@@ -40,7 +40,12 @@ export async function utilisateurDeTest(): Promise<string> {
   return cree.id;
 }
 
-/** Exécute les jobs en attente de ce dépôt, sauf ceux qui partent en lot. */
+/**
+ * Exécute les jobs en attente de ce dépôt, sauf les questions.
+ *
+ * Sert les cas qui éprouvent le chemin groupé : ils veulent des jobs de
+ * questions laissés en file, à soumettre en lot.
+ */
 export async function executerJobsEnAttente(inputId: string): Promise<number> {
   const jobs = await prisma.generationJob.findMany({
     where: { inputId, status: "QUEUED", kind: { in: ["OCR", "ATOMS"] } },
@@ -50,6 +55,30 @@ export async function executerJobsEnAttente(inputId: string): Promise<number> {
   for (const job of jobs) await runJob(job.id);
 
   return jobs.length;
+}
+
+/**
+ * Exécute tout ce qui attend, questions comprises — ce que fait `declencher()`
+ * derrière une vraie requête. Hors requête, `after()` ne part pas.
+ */
+export async function executerToutLePipeline(inputId: string): Promise<number> {
+  let executes = 0;
+
+  // Le découpage crée les jobs de questions : il faut donc repasser après lui.
+  for (let passage = 0; passage < 3; passage += 1) {
+    const jobs = await prisma.generationJob.findMany({
+      where: { inputId, status: "QUEUED" },
+      orderBy: { createdAt: "asc" },
+    });
+
+    if (jobs.length === 0) break;
+
+    for (const job of jobs) await runJob(job.id);
+
+    executes += jobs.length;
+  }
+
+  return executes;
 }
 
 /** Recule les dépôts déjà écrits hors de la fenêtre de débit. */

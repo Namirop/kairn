@@ -36,6 +36,10 @@ export async function runJob(jobId: string): Promise<JobOutcome> {
   try {
     await JOB_HANDLERS[job.kind](job);
     await finishJob(job.id, "DONE");
+    // Un job qui aboutit peut être le dernier du dépôt : c'est lui qui le
+    // referme. Le découpage, lui, vient de mettre les questions en file — le
+    // compte des jobs restants le voit, et le dépôt reste en cours.
+    await marquerPretSiPlusRienEnAttente(job.inputId);
     return "DONE";
   } catch (error) {
     const reason = describe(error);

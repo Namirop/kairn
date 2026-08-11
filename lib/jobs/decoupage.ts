@@ -1,4 +1,3 @@
-import { after } from "next/server";
 import { callAI } from "@/lib/ai/client";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
@@ -12,14 +11,15 @@ import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { compterConceptsRetenus } from "@/lib/db/quota-depots";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import type { GenerationJob } from "@/lib/db/types";
-import { soumettreLotsEnAttente } from "./questions";
+import { declencher } from "./queue";
 
 /**
  * Le découpage d'un dépôt en concepts.
  *
  * C'est le retour visible du geste : l'utilisateur veut voir « cinq concepts »
- * rapidement. Cette étape reste donc un appel normal, alors que les questions
- * qui suivent partent en envoi groupé.
+ * rapidement. Les questions suivent dans la foulée, en appel direct elles
+ * aussi — depuis que l'entraînement libre existe, elles servent à l'instant du
+ * dépôt et non plus seulement au lendemain.
  *
  * Un concept douteux ne part pas en génération. Lui écrire quatre questions
  * riverait une erreur qu'on n'a pas vérifiée ; il attend une décision.
@@ -70,18 +70,14 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
     return;
   }
 
-  await creerJobsDeQuestions(depot.id, aQuestionner);
+  const jobs = await creerJobsDeQuestions(depot.id, aQuestionner);
 
-  // La soumission part derrière la réponse, comme le reste du pipeline. Si elle
-  // ne part pas, les jobs restent en attente et le cron les soumettra.
-  try {
-    after(async () => {
-      await soumettreLotsEnAttente();
-    });
-  } catch (error) {
-    console.error(
-      `Lot du dépôt ${depot.id} non soumis dans la foulée ; le cron s'en chargera.`,
-      error,
-    );
-  }
+  // Les questions partent tout de suite, en appel direct, derrière la réponse.
+  // Ça double ce poste — de 0,005 $ à 0,01 $ par concept — et à ce niveau,
+  // casser le geste n'en vaut pas la peine : on dépose, on veut jouer.
+  //
+  // Si le déclenchement ne part pas — hors contexte de requête, processus
+  // recyclé —, les jobs restent en attente et la soumission groupée les
+  // ramassera. Les questions arrivent tard plutôt que jamais.
+  for (const job of jobs) declencher(job.id);
 }
