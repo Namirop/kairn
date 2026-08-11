@@ -27,7 +27,7 @@ export default async function CoquilleApplication({ children }: { children: Reac
     <TooltipProvider delayDuration={200}>
       <div className="bg-surface-papier min-h-dvh">
         <Rail />
-        <div className="md:pl-22">
+        <div className="md:pl-28">
           <EnTete utilisateur={utilisateur} />
           {/* Aucune mesure ici : chaque écran est une pile de panneaux, et
               chaque panneau porte la sienne. Un conteneur à cet endroit

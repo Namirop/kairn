@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { BoutonDeconnexion } from "@/components/compte/bouton-deconnexion";
 import { Panneau } from "@/components/coquille/panneau";
+import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -34,8 +35,8 @@ export default async function PageReglages() {
   const heure = `${String(reglages.dailyReminderHour).padStart(2, "0")} h 00`;
 
   return (
-    <>
-      <Panneau surface="papier">
+    <PileDePanneaux sol="ombre">
+      <Panneau surface="papier" mesure="colonne">
         <h1 className="text-h1-app leading-tight font-bold">Réglages</h1>
         <p className="mt-pas-2 text-petit max-w-md text-stone-500">
           Les réglages deviendront modifiables avec le moteur de révision.
@@ -44,8 +45,8 @@ export default async function PageReglages() {
 
       <Strates de="papier" vers="ombre" graine="reglages-liste" />
 
-      <Panneau surface="ombre" className="md:pb-pas-16">
-        <dl className="gap-pas-2 flex max-w-xl flex-col">
+      <Panneau surface="ombre" mesure="colonne" className="md:pb-pas-16 flex-1">
+        <dl className="gap-pas-2 flex flex-col">
           <Ligne intitule="Adresse" valeur={utilisateur.email} />
           <Ligne intitule="Fuseau horaire" valeur={reglages.timezone} />
           <Ligne
@@ -63,6 +64,6 @@ export default async function PageReglages() {
           <BoutonDeconnexion />
         </div>
       </Panneau>
-    </>
+    </PileDePanneaux>
   );
 }

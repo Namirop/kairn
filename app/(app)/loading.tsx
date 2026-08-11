@@ -1,5 +1,6 @@
 import { PileEnConstruction } from "@/components/cairn/pile-en-construction";
 import { Panneau } from "@/components/coquille/panneau";
+import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 
 /**
  * L'attente entre deux écrans de l'application.
@@ -11,11 +12,13 @@ import { Panneau } from "@/components/coquille/panneau";
  */
 export default function Chargement() {
   return (
-    <Panneau surface="papier" className="md:py-pas-16">
-      <div className="gap-pas-4 flex items-center">
-        <PileEnConstruction />
-        <p className="text-petit text-stone-500">Un instant.</p>
-      </div>
-    </Panneau>
+    <PileDePanneaux>
+      <Panneau surface="papier" mesure="texte" className="md:py-pas-16 flex-1">
+        <div className="gap-pas-4 flex items-center">
+          <PileEnConstruction />
+          <p className="text-petit text-stone-500">Un instant.</p>
+        </div>
+      </Panneau>
+    </PileDePanneaux>
   );
 }

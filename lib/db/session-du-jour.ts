@@ -3,7 +3,11 @@ import { questionServie, type QuestionServie } from "@/lib/db/question-servie";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { jourSuivant, localDay } from "@/lib/domain/local-day";
 import { choisirVariante } from "@/lib/domain/rotation-variantes";
-import { composerSession, jourOuIlRevient } from "@/lib/domain/selection-session";
+import {
+  composerSession,
+  estServableAujourdhui,
+  jourOuIlRevient,
+} from "@/lib/domain/selection-session";
 
 /**
  * Ce qu'il y a à réviser maintenant.
@@ -131,6 +135,34 @@ function prochainJourServi(
   fuseau: string,
 ): string | null {
   return concepts.map((concept) => jourOuIlRevient(concept, maintenant, fuseau)).sort()[0] ?? null;
+}
+
+/**
+ * Combien de concepts la session servirait maintenant.
+ *
+ * C'est le chiffre qu'annonce le tableau de bord, et il doit venir d'ici : le
+ * compter à part revenait à avoir deux définitions de « est dû », et elles
+ * avaient déjà divergé — l'accueil promettait cinq concepts, la session
+ * répondait « tu es à jour ». La règle est dans `estServableAujourdhui`, et
+ * elle n'a qu'un seul endroit où vivre.
+ */
+export async function compterDusAujourdhui(
+  userId: string,
+  maintenant: Date = new Date(),
+): Promise<number> {
+  const fuseau = await lireFuseauUtilisateur(userId);
+
+  const candidats = await prisma.atom.findMany({
+    where: {
+      userId,
+      uncertain: false,
+      variants: { some: { retiredAt: null } },
+      due: { lte: new Date(maintenant.getTime() + MARGE_MS) },
+    },
+    select: { due: true, lastReview: true },
+  });
+
+  return candidats.filter((atome) => estServableAujourdhui(atome, maintenant, fuseau)).length;
 }
 
 /**

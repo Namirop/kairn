@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Panneau } from "@/components/coquille/panneau";
+import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
 import { FormulaireDepot } from "@/components/depots/formulaire-depot";
 import { PlafondAtteint } from "@/components/depots/plafond-atteint";
@@ -33,8 +34,8 @@ export default async function PageNouveauDepot() {
   const plein = restants === 0 || usage.depots >= DEPOTS_PAR_JOUR;
 
   return (
-    <>
-      <Panneau surface="papier">
+    <PileDePanneaux sol="ombre">
+      <Panneau surface="papier" mesure="colonne">
         <h1 className="text-h1-app leading-tight font-bold">Dépose ce que tu veux retenir</h1>
         <p className="mt-pas-2 text-petit max-w-xl text-stone-500">
           Le découpage part tout seul. Tu retrouves tes concepts dans la liste, sans rien lancer.
@@ -43,7 +44,7 @@ export default async function PageNouveauDepot() {
 
       <Strates de="papier" vers="ombre" graine="depot-formulaire" />
 
-      <Panneau surface="ombre" className="md:pb-pas-16">
+      <Panneau surface="ombre" mesure="colonne" className="md:pb-pas-16 flex-1">
         {plein ? (
           <PlafondAtteint
             remiseAZero={quandRepartLeCompteur(new Date(), fuseau)}
@@ -56,6 +57,6 @@ export default async function PageNouveauDepot() {
           <FormulaireDepot restants={restants} cleEnvoi={crypto.randomUUID()} />
         )}
       </Panneau>
-    </>
+    </PileDePanneaux>
   );
 }

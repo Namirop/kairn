@@ -23,7 +23,7 @@ export function Rail() {
   return (
     <nav
       aria-label="Navigation principale"
-      className="pt-pas-16 px-pas-2 gap-pas-1 bg-surface-ombre fixed inset-y-0 left-0 z-30 hidden w-22 flex-col items-center md:flex"
+      className="pt-pas-16 px-pas-2 gap-pas-1 bg-surface-ombre fixed inset-y-0 left-0 z-30 hidden w-28 flex-col items-center md:flex"
     >
       {DESTINATIONS.map(({ href, libelle, icone: Icone }) => {
         const actif = chemin === href || chemin.startsWith(`${href}/`);
@@ -41,7 +41,9 @@ export function Rail() {
             )}
           >
             <Icone className="size-5" strokeWidth={1.75} aria-hidden />
-            <span className="text-mono font-mono tracking-[0.06em]">{libelle}</span>
+            {/* Le libellé tient sur une ligne, sans toucher les bords : c'est
+                « Aujourd'hui » qui commande la largeur du rail. */}
+            <span className="text-mono px-pas-2 font-mono tracking-normal">{libelle}</span>
           </Link>
         );
       })}

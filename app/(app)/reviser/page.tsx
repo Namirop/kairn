@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Panneau } from "@/components/coquille/panneau";
+import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { RienAReviser } from "@/components/revision/rien-a-reviser";
 import { SessionDeRevision } from "@/components/revision/session-de-revision";
 import { ROUTES } from "@/lib/auth/routes";
@@ -28,21 +29,25 @@ export default async function PageReviser() {
 
   if (session.questions.length === 0) {
     return (
-      <Panneau surface="papier" className="md:py-pas-16">
-        <RienAReviser
-          totalConcepts={session.totalConcepts}
-          conceptsEnAttenteDeQuestions={session.conceptsEnAttenteDeQuestions}
-          prochainJourServi={session.prochainJourServi}
-          fuseau={session.fuseau}
-          maintenant={maintenant}
-        />
-      </Panneau>
+      <PileDePanneaux>
+        <Panneau surface="papier" mesure="texte" className="md:py-pas-16 flex-1">
+          <RienAReviser
+            totalConcepts={session.totalConcepts}
+            conceptsEnAttenteDeQuestions={session.conceptsEnAttenteDeQuestions}
+            prochainJourServi={session.prochainJourServi}
+            fuseau={session.fuseau}
+            maintenant={maintenant}
+          />
+        </Panneau>
+      </PileDePanneaux>
     );
   }
 
   return (
-    <Panneau surface="papier" className="md:py-pas-16">
-      <SessionDeRevision questions={session.questions} />
-    </Panneau>
+    <PileDePanneaux>
+      <Panneau surface="papier" mesure="texte" className="md:py-pas-16 flex-1">
+        <SessionDeRevision questions={session.questions} />
+      </Panneau>
+    </PileDePanneaux>
   );
 }

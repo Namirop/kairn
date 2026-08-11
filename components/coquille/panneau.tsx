@@ -14,9 +14,17 @@ import { SURFACES, type Surface } from "./surfaces";
  * enfin, il ne sable pas les lettres puisqu'il passe dessous.
  */
 
-/** Mesures de contenu. `large` sert les pages à deux colonnes. */
+/**
+ * Mesures de contenu.
+ *
+ * Elles serrent le contenu au lieu de le laisser flotter : une colonne de 600
+ * pixels posée à gauche d'un conteneur de 1000 laissait deux fois plus de vide
+ * à droite qu'à gauche, et ça se voyait avant même de savoir pourquoi. Une page
+ * choisit la mesure de ce qu'elle porte, et ce qu'elle porte est centré dedans.
+ */
 const MESURES = {
   texte: "max-w-2xl",
+  colonne: "max-w-3xl",
   page: "max-w-5xl",
   large: "max-w-6xl",
 } as const;
@@ -43,7 +51,7 @@ export function Panneau({
   const { fond, encre, grain } = SURFACES[surface];
 
   return (
-    <section className={cn("relative w-full overflow-hidden", fond, encre, grain)}>
+    <section className={cn("relative w-full shrink-0 overflow-hidden", fond, encre, grain)}>
       {matiere ? <div aria-hidden>{matiere}</div> : null}
 
       <div

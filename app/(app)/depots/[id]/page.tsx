@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Panneau } from "@/components/coquille/panneau";
+import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
 import { ConceptCorrigeable } from "@/components/depots/concept-corrigeable";
 import { EtatVide } from "@/components/etats/etat-vide";
@@ -34,8 +35,8 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
   const texte = depot.rawContent.trim() || depot.extractedText || "";
 
   return (
-    <>
-      <Panneau surface="papier">
+    <PileDePanneaux sol="ombre">
+      <Panneau surface="papier" mesure="colonne">
         <Link
           href={ROUTES.depots}
           className="text-petit rounded-galet text-stone-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900"
@@ -59,7 +60,7 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
         ) : null}
 
         {texte ? (
-          <section className="mt-pas-8 max-w-3xl">
+          <section className="mt-pas-8">
             <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
               Ce que tu as déposé
             </h2>
@@ -72,13 +73,13 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
 
       <Strates de="papier" vers="ombre" graine="depot-concepts" />
 
-      <Panneau surface="ombre" className="md:pb-pas-16">
+      <Panneau surface="ombre" mesure="colonne" className="md:pb-pas-16 flex-1">
         <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
           Ce qu&apos;on en a tiré
         </h2>
 
         {depot.concepts.length === 0 ? (
-          <div className="mt-pas-2 max-w-3xl">
+          <div className="mt-pas-2">
             <EtatVide
               graine={depot.id}
               constat="Aucun concept pour l'instant."
@@ -90,13 +91,13 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
             />
           </div>
         ) : (
-          <ul className="mt-pas-4 gap-pas-2 flex max-w-3xl flex-col">
+          <ul className="mt-pas-4 gap-pas-2 flex flex-col">
             {depot.concepts.map((concept) => (
               <ConceptCorrigeable key={concept.id} concept={concept} inputId={depot.id} />
             ))}
           </ul>
         )}
       </Panneau>
-    </>
+    </PileDePanneaux>
   );
 }

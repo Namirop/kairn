@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import { listerDepots } from "@/lib/db/depots";
+import { compterDusAujourdhui } from "@/lib/db/session-du-jour";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import type { UserStats } from "@/lib/db/types";
 import type { DepotListe } from "@/lib/db/depots";
@@ -26,9 +27,10 @@ export async function lireTableauDeBord(
   maintenant: Date = new Date(),
 ): Promise<TableauDeBord> {
   const [dusAujourdhui, fuseau, stats, consolides, depots, totalAtoms] = await Promise.all([
-    prisma.atom.count({
-      where: { userId, due: { lte: maintenant }, state: { notIn: ["ARCHIVED", "CONSOLIDATED"] } },
-    }),
+    // Le même compte que celui de la session, et pas un compte parallèle : les
+    // deux avaient divergé, l'accueil promettant cinq concepts là où la session
+    // répondait « tu es à jour ». « Est dû » n'a qu'un seul endroit où vivre.
+    compterDusAujourdhui(userId, maintenant),
     lireFuseauUtilisateur(userId),
     prisma.userStats.findUnique({ where: { userId } }),
     prisma.atom.findMany({

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Panneau } from "@/components/coquille/panneau";
+import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
 import { ColonneCairn } from "@/components/tableau/colonne-cairn";
 import { CompteurDu } from "@/components/tableau/compteur-du";
@@ -12,12 +13,15 @@ import { lireTableauDeBord } from "@/lib/db/tableau-de-bord";
 export const metadata: Metadata = { title: "Aujourd'hui" };
 
 /**
- * Le tableau de bord, en trois panneaux.
+ * Le tableau de bord, en deux panneaux.
  *
- * Ce qu'il y a à faire sur le papier, ce qui a été construit sur la roche, ce
- * qu'on a déposé sur l'ombre. C'est le seul écran de l'application qui porte un
- * panneau sombre : l'empilement de pierres y prend la place d'un objet, au lieu
- * de tenir une colonne pendant que la moitié de l'écran reste blanche.
+ * Ce qu'il y a à faire et ce qu'on a déposé partagent le premier : deux
+ * colonnes, parce que le compteur seul laissait les trois quarts d'un écran
+ * large vides pendant que la liste attendait plus bas. Le second porte le
+ * cairn, sur la roche — l'un des deux panneaux sombres du produit.
+ *
+ * Le sol est la roche : la pile se prolonge jusqu'en bas de la fenêtre au lieu
+ * de s'arrêter sur une bande d'une autre couleur.
  */
 export default async function PageAujourdhui() {
   const utilisateur = await getCurrentUser();
@@ -28,16 +32,20 @@ export default async function PageAujourdhui() {
   const tableau = await lireTableauDeBord(utilisateur.id, maintenant);
 
   return (
-    <>
-      <Panneau surface="papier" className="md:py-pas-16">
+    <PileDePanneaux sol="roche">
+      <Panneau
+        surface="papier"
+        className="md:py-pas-16 gap-pas-12 md:gap-pas-16 grid md:grid-cols-[0.8fr_1.2fr]"
+      >
         <CompteurDu nombre={tableau.dusAujourdhui} aDesAtoms={tableau.totalAtoms > 0} />
+        <ListeDepots depots={tableau.depots} maintenant={maintenant} fuseau={tableau.fuseau} />
       </Panneau>
 
       <Strates de="papier" vers="roche" graine="aujourdhui-cairn" />
 
       <Panneau
         surface="roche"
-        className="md:py-pas-16 gap-pas-8 md:gap-pas-12 grid md:grid-cols-[1fr_auto] md:items-center"
+        className="md:py-pas-16 gap-pas-8 md:gap-pas-12 grid flex-1 items-center md:grid-cols-[1fr_auto]"
       >
         <div className="max-w-md">
           <h2 className="text-mono font-mono tracking-[0.14em] text-stone-300 uppercase">
@@ -59,12 +67,6 @@ export default async function PageAujourdhui() {
           streak={tableau.stats?.currentStreak ?? 0}
         />
       </Panneau>
-
-      <Strates de="roche" vers="ombre" graine="aujourdhui-depots" />
-
-      <Panneau surface="ombre" className="md:pb-pas-16">
-        <ListeDepots depots={tableau.depots} maintenant={maintenant} fuseau={tableau.fuseau} />
-      </Panneau>
-    </>
+    </PileDePanneaux>
   );
 }

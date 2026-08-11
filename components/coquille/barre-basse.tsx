@@ -36,7 +36,7 @@ export function BarreBasse() {
                 )}
               >
                 <Icone className="size-5" strokeWidth={1.75} aria-hidden />
-                <span className="text-mono font-mono tracking-[0.06em]">{libelle}</span>
+                <span className="text-mono font-mono tracking-normal">{libelle}</span>
               </Link>
             </li>
           );
