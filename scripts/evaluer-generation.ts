@@ -20,8 +20,9 @@ import { basename, join } from "node:path";
  *   MOCK_AI=false npm run eval:generation -- --emettre     # le passage complet
  *   MOCK_AI=false npm run eval:rejeu -- --emettre          # le rejeu du dernier figé
  *
- * `--depot <fragment>` restreint aux dépôts dont le nom contient ce fragment ;
- * `--rejeu <chemin>` désigne un figé précis.
+ * `--depot <fragments>` restreint aux dépôts dont le nom contient l'un de ces
+ * fragments, séparés par des virgules ; `--rejeu <chemin>` désigne un figé
+ * précis.
  */
 
 const RAPPORTS = join(import.meta.dirname, "evaluation", "rapports");
@@ -60,7 +61,8 @@ async function main(): Promise<void> {
   const { sumAiCalls } = await import("@/lib/db/ai-call");
   const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
 
-  const fragment = argument("--depot");
+  // Trois dépôts ajoutés au corpus se passent en un appel : `--depot 08,09,10`.
+  const fragments = (argument("--depot") ?? "").split(",").filter(Boolean);
   const rejeu = process.argv.includes("--rejeu");
   const figeDemande = rejeu ? (argument("--rejeu") ?? dernierFige()) : undefined;
 
@@ -69,15 +71,22 @@ async function main(): Promise<void> {
   }
 
   const garder = <T extends { nom: string }>(entrees: T[]) =>
-    entrees.filter((entree) => !fragment || entree.nom.includes(fragment));
+    entrees.filter(
+      (entree) => fragments.length === 0 || fragments.some((f) => entree.nom.includes(f)),
+    );
 
-  const corpus = garder(lireCorpus());
+  const corpusEntier = lireCorpus();
+  const corpus = garder(corpusEntier);
   const fige = figeDemande === undefined ? undefined : lireFige(figeDemande);
   const figes = garder(fige?.depots ?? []);
   const aTraiter = rejeu ? figes.length : corpus.length;
 
   if (aTraiter === 0) {
-    refuser(fragment ? `aucun dépôt ne contient « ${fragment} ».` : "il n'y a rien à traiter.");
+    refuser(
+      fragments.length > 0
+        ? `aucun dépôt ne contient « ${fragments.join(" » ni « ")} ».`
+        : "il n'y a rien à traiter.",
+    );
   }
 
   const { CONCEPTS_PAR_APPEL } = await import("@/lib/ai/schemas");
@@ -97,7 +106,9 @@ async function main(): Promise<void> {
     ? `rejeu du figé ${basename(figeDemande ?? "")} (${fige?.modele}, ${fige?.emisA.slice(0, 16)} UTC)`
     : "extraction du corpus";
 
-  console.info(`Passage : ${source}${fragment ? `, restreint à « ${fragment} »` : ""}.`);
+  const restriction = fragments.length > 0 ? `, restreint à « ${fragments.join(" », « ")} »` : "";
+
+  console.info(`Passage : ${source}${restriction}.`);
   console.info(`Modèle : ${process.env.AI_MODEL}, ${process.env.AI_MAX_TOKENS} tokens de sortie.`);
   const aRegenerer = aGenerer.reduce((total, concepts) => total + concepts, 0);
 
@@ -147,6 +158,7 @@ async function main(): Promise<void> {
       passages.map((passage) => passage.evaluation),
       modele,
       debut,
+      corpusEntier.map((depot) => depot.nom),
     );
     console.info(`Concepts figés dans ${fige}`);
   }
