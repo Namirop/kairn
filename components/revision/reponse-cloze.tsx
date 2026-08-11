@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { reponseAcceptee, TROU } from "@/lib/domain/reponse-cloze";
 import type { ReviewRating } from "@/lib/db/types";
+import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
  * Le texte à trou.
@@ -26,7 +27,7 @@ function PhraseTrouee({ phrase, comble }: { phrase: string; comble: string | nul
 
   return (
     <p className="text-corps leading-loose text-stone-900">
-      {avant}
+      <TexteTechnique>{avant}</TexteTechnique>
       {comble === null ? (
         // Un emplacement, pas un soulignement : c'est le geste central de ce
         // format, et un trait fin sous une ligne de texte se remarquait à peine.
@@ -39,7 +40,7 @@ function PhraseTrouee({ phrase, comble }: { phrase: string; comble: string | nul
           {comble}
         </span>
       )}
-      {suite.join(TROU)}
+      <TexteTechnique>{suite.join(TROU)}</TexteTechnique>
     </p>
   );
 }

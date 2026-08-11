@@ -2,6 +2,7 @@
 
 import { etalonUtile } from "@/components/revision/etalon-utile";
 import { Button } from "@/components/ui/button";
+import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
  * Ce qui suit une réponse à choix.
@@ -41,8 +42,8 @@ export function CorrectionFermee({
       </p>
 
       {!juste && complete ? (
-        <p className="mt-pas-3 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed text-stone-900">
-          {answerKey}
+        <p className="mt-pas-3 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed whitespace-pre-wrap text-stone-900">
+          <TexteTechnique>{answerKey}</TexteTechnique>
         </p>
       ) : null}
 

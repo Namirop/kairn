@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { PileDeSession } from "@/components/revision/pile-de-session";
+import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
  * La carte de révision.
@@ -51,7 +52,7 @@ export function CarteQuestion({
       </div>
 
       <h1 className="mt-pas-8 text-h1-app leading-snug font-bold text-pretty text-stone-900">
-        {question}
+        <TexteTechnique>{question}</TexteTechnique>
       </h1>
 
       {children}

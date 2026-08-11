@@ -51,6 +51,17 @@
   --alerte-surface: #f3e6e2;
 
   /*
+    Le jeton d'un terme de code cité dans une phrase.
+
+    De l'encre très diluée plutôt qu'une des surfaces nommées : le jeton se pose
+    aussi bien sur le papier que sur l'ombre, alors qu'une surface fixe
+    disparaîtrait sur l'une des deux. C'est le seul endroit du produit où une
+    couleur est définie en transparence, et c'est pour cette raison-là.
+  */
+  --jeton: color-mix(in oklab, var(--stone-900) 7%, transparent);
+  --jeton-bord: color-mix(in oklab, var(--stone-900) 14%, transparent);
+
+  /*
     Trois formes, trois sens. Le panneau est le sol, la carte est un objet posé
     dessus, la pilule est un geste. L'angle vif ne survit que sur les pleines
     largeurs : ailleurs, une interface faite d'angles droits et de traits fins
@@ -114,6 +125,8 @@
   --color-ember-deep: var(--ember-deep);
   --color-alerte: var(--alerte);
   --color-alerte-surface: var(--alerte-surface);
+  --color-jeton: var(--jeton);
+  --color-jeton-bord: var(--jeton-bord);
 
   --font-display: var(--police-display);
   --font-sans: var(--police-texte);

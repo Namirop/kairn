@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
  * Ce qui suit une pierre jetée.
@@ -30,12 +31,14 @@ export function PierreJetee({
     <div className="mt-pas-8">
       <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">La réponse</p>
 
-      <p className="mt-pas-3 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed text-stone-900">
-        {reponse}
+      <p className="mt-pas-3 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed whitespace-pre-wrap text-stone-900">
+        <TexteTechnique>{reponse}</TexteTechnique>
       </p>
 
       {precision ? (
-        <p className="mt-pas-3 text-petit max-w-lg leading-relaxed text-stone-500">{precision}</p>
+        <p className="mt-pas-3 text-petit max-w-lg leading-relaxed text-stone-500">
+          <TexteTechnique>{precision}</TexteTechnique>
+        </p>
       ) : null}
 
       {/* Ce qui est écrit, pas ce que ça déclenche : en entraînement rien ne se

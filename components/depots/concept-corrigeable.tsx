@@ -7,6 +7,7 @@ import {
   modifierConceptAction,
   supprimerConceptAction,
 } from "@/app/(app)/depots/actions";
+import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ConceptLu } from "@/lib/db/concepts";
@@ -76,7 +77,9 @@ export function ConceptCorrigeable({ concept, inputId }: { concept: ConceptLu; i
             {concept.archivedByUser ? <Badge>Sorti du cycle</Badge> : null}
           </div>
 
-          <p className="mt-pas-2 text-corps text-stone-900">{concept.concept}</p>
+          <p className="mt-pas-2 text-corps text-stone-900">
+            <TexteTechnique>{concept.concept}</TexteTechnique>
+          </p>
 
           {concept.uncertain ? (
             <p className="mt-pas-3 border-alerte pl-pas-3 text-petit border-l-2 text-stone-500">

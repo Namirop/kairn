@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import type { ReviewRating } from "@/lib/db/types";
+import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
  * Les formats où seule la personne peut juger : réponse courte, explication,
@@ -60,8 +61,8 @@ export function ReponseOuverte({
       <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
         L&apos;étalon
       </p>
-      <p className="mt-pas-2 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed text-stone-900">
-        {answerKey}
+      <p className="mt-pas-2 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed whitespace-pre-wrap text-stone-900">
+        <TexteTechnique>{answerKey}</TexteTechnique>
       </p>
 
       <p className="mt-pas-8 text-petit text-stone-500">Où en étais-tu ?</p>

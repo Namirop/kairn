@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
  * Les formats dont la justesse est connue sans jugement humain : QCM et vrai
@@ -69,7 +70,9 @@ export function ReponseFermee({
               <span aria-hidden className="text-mono font-mono text-stone-500">
                 {TOUCHES[rang]}
               </span>
-              <span className="text-corps">{option}</span>
+              <span className="text-corps">
+                <TexteTechnique>{option}</TexteTechnique>
+              </span>
             </Button>
           </li>
         );
