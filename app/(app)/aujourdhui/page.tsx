@@ -48,11 +48,14 @@ export default async function PageAujourdhui() {
         remplit
         className="md:py-pas-16 gap-pas-8 md:gap-pas-12 grid items-center md:grid-cols-[1fr_auto]"
       >
-        <div className="max-w-md">
+        <div className="max-w-lg">
           <h2 className="text-mono font-mono tracking-[0.14em] text-stone-300 uppercase">
             Ton cairn
           </h2>
-          <p className="mt-pas-4 text-corps leading-relaxed">
+          {/* Le texte qui porte la promesse du produit monte au registre d'un
+              titre de section sur grand écran, et reste au corps sur mobile où
+              il tenait déjà la largeur. */}
+          <p className="mt-pas-4 md:mt-pas-6 text-corps md:text-h2-app leading-relaxed">
             Une pierre par concept consolidé. Un concept l&apos;est quand il revient de loin et que
             tu le retrouves trois fois de suite — pas quand tu l&apos;as lu.
           </p>

@@ -22,11 +22,16 @@ export function ColonneCairn({
 }) {
   return (
     <aside className="flex flex-col items-center">
-      <div className="h-56 w-full max-w-56 md:h-72">
+      {/* Le cairn est l'élément signature, et il portait la taille d'une
+          vignette au milieu du plus grand panneau de l'application. Il gagne un
+          tiers de largeur sur grand écran — c'est la largeur qui le
+          dimensionne, l'empilement étant plus large que haut tant qu'il compte
+          peu de pierres. Le mobile ne bouge pas : il y tenait déjà l'écran. */}
+      <div className="h-56 w-full max-w-56 md:h-[22rem] md:max-w-80">
         <Cairn nombre={consolides} graines={graines} clair />
       </div>
 
-      <p className="mt-pas-4 text-petit text-center text-stone-300">
+      <p className="mt-pas-4 md:mt-pas-6 text-petit text-center text-stone-300">
         {consolides === 0
           ? "Le premier concept consolidé posera la première pierre."
           : `${consolides} ${consolides === 1 ? "concept consolidé" : "concepts consolidés"}`}

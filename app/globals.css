@@ -83,12 +83,18 @@
   --t-h1-site: 4rem;
 }
 
+/*
+  Sur grand écran, le corps de lecture monte d'un cran et les titres suivent.
+  Les deux registres du bas — `mono` pour les données et les étiquettes
+  techniques, `petit` pour ce qui commente — ne bougent pas : c'est ce qui creuse
+  l'écart. Un écran où tout grandit ensemble grandit sans se hiérarchiser.
+*/
 @media (min-width: 48rem) {
   :root {
-    --t-corps: 1rem;
-    --t-h2-app: 1.25rem;
-    --t-h1-app: 2.125rem;
-    --t-nombre: 4.5rem;
+    --t-corps: 1.125rem;
+    --t-h2-app: 1.5rem;
+    --t-h1-app: 2.5rem;
+    --t-nombre: 5.75rem;
     --t-h2-site: 3.75rem;
     --t-h1-site: 6.5rem;
   }

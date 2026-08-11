@@ -21,12 +21,20 @@ import { SURFACES, type Surface } from "./surfaces";
  * pixels posée à gauche d'un conteneur de 1000 laissait deux fois plus de vide
  * à droite qu'à gauche, et ça se voyait avant même de savoir pourquoi. Une page
  * choisit la mesure de ce qu'elle porte, et ce qu'elle porte est centré dedans.
+ *
+ * Les mesures à plusieurs colonnes ont gagné un cran, et un second au-delà de
+ * quinze cents pixels : sur un écran de deux mille cinq cents, un tableau de
+ * bord serré à mille occupait moins de la moitié de la fenêtre et se lisait
+ * comme une colonne perdue au milieu. Les mesures de lecture, elles, ne bougent
+ * pas — `texte` fait environ soixante-cinq signes au corps actuel, ce qui est
+ * exactement ce qu'on veut, et l'élargir dégraderait la lecture au lieu de
+ * l'améliorer.
  */
 const MESURES = {
   texte: "max-w-2xl",
   colonne: "max-w-3xl",
-  page: "max-w-5xl",
-  large: "max-w-6xl",
+  page: "max-w-6xl 2xl:max-w-[84rem]",
+  large: "max-w-7xl 2xl:max-w-[96rem]",
 } as const;
 
 export type Mesure = keyof typeof MESURES;
