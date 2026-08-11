@@ -1,5 +1,5 @@
 import { citeDuCode } from "@/lib/domain/controle-concept";
-import { FACETTES_ATTENDUES } from "@/lib/domain/controle-variants";
+import { FACETTES_ATTENDUES, FORMATS_LIBRES, LIBRES_MAXIMUM } from "@/lib/domain/controle-variants";
 import type { ConsommationFenetre } from "@/lib/db/ai-call";
 import type { DepotEvalue } from "./execution";
 
@@ -14,7 +14,14 @@ import type { DepotEvalue } from "./execution";
 
 export type Passage = { evaluation: DepotEvalue; consommation: ConsommationFenetre };
 
-const FORMATS = ["MCQ", "TRUE_FALSE", "SHORT_ANSWER", "CODE", "EXPLAIN"] as const;
+const FORMATS = ["MCQ", "CLOZE", "TRUE_FALSE", "SHORT_ANSWER", "CODE", "EXPLAIN"] as const;
+
+/** Les lots aboutis d'un passage : ni mis de côté, ni en échec. */
+function lotsAboutis(passages: Passage[]) {
+  return passages
+    .flatMap((passage) => passage.evaluation.concepts)
+    .filter((concept) => !concept.echec && !concept.misDeCote);
+}
 
 export function compter(passages: Passage[]) {
   const concepts = passages.flatMap((passage) => passage.evaluation.concepts);
@@ -64,27 +71,53 @@ export function rendreRepartition(passages: Passage[]): string[] {
     `| --- | ${FORMATS.map(() => "---").join(" | ")} |`,
     ...lignes,
     "",
+    mesureDuTexteLibre(passages),
+    "",
     mesureDuCode(passages),
     "",
   ];
 }
 
 /**
- * Deux nombres, pas un contrôle.
+ * Le quota de texte libre, lot par lot.
  *
- * La règle CODE se déclenche désormais sur une citation dans le concept, ce qui
- * est observable — mais un déclencheur trop large remplacerait un verrou par un
- * autre. Ces deux nombres disent si c'est arrivé ; savoir si la question CODE
- * éprouve quelque chose ou respecte une règle, ça se juge à l'œil.
+ * Le manquement s'affiche déjà sous le lot fautif, mais un rapport de huit
+ * cents lignes ne se compte pas à la main : ce nombre-là est la réponse à
+ * « est-ce que la contrainte a pris », et il se lit en tête.
+ */
+function mesureDuTexteLibre(passages: Passage[]): string {
+  const lots = lotsAboutis(passages);
+  const libres = lots.map(
+    (concept) =>
+      concept.variants.filter((variant) => FORMATS_LIBRES.includes(variant.format)).length,
+  );
+  const debordent = libres.filter((compte) => compte > LIBRES_MAXIMUM).length;
+  const aucune = libres.filter((compte) => compte === 0).length;
+
+  return `Texte libre : ${debordent} des ${lots.length} lots posent plus d'une question à s'auto-noter, ${aucune} n'en posent aucune.`;
+}
+
+/**
+ * Trois nombres, pas un contrôle.
+ *
+ * La règle CODE se déclenche sur une citation dans le concept, ce qui est
+ * observable — mais un déclencheur trop large remplacerait un verrou par un
+ * autre. Le troisième nombre est celui qu'on surveille depuis que le corpus
+ * n'est plus un corpus de développeur : une question de code posée sur un
+ * concept qui n'en cite pas, c'est le réflexe technique qui revient tout seul.
+ * Savoir si une question CODE éprouve quelque chose ou respecte une règle, ça
+ * se juge à l'œil.
  */
 function mesureDuCode(passages: Passage[]): string {
-  const lots = passages
-    .flatMap((passage) => passage.evaluation.concepts)
-    .filter((concept) => !concept.echec && !concept.misDeCote);
+  const lots = lotsAboutis(passages);
+  const porte = (concept: (typeof lots)[number]) =>
+    concept.variants.some((variant) => variant.format === "CODE");
   const declenchent = lots.filter((concept) => citeDuCode(concept.concept.concept));
-  const porteurs = declenchent.filter((concept) =>
-    concept.variants.some((variant) => variant.format === "CODE"),
-  );
+  const porteurs = declenchent.filter(porte);
+  const indus = lots.filter((concept) => !citeDuCode(concept.concept.concept) && porte(concept));
 
-  return `CODE : ${declenchent.length} des ${lots.length} lots partent d'un concept qui cite du code, ${porteurs.length} en portent une question.`;
+  return [
+    `CODE : ${declenchent.length} des ${lots.length} lots partent d'un concept qui cite du code, ${porteurs.length} en portent une question.`,
+    `${indus.length} lots portent une question CODE sans que leur concept en cite : ${indus.map((concept) => concept.concept.tags.join("/")).join(", ") || "aucun"}.`,
+  ].join(" ");
 }
