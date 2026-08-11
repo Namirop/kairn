@@ -15,6 +15,13 @@ import type { AiImagePart } from "@/lib/ai/message";
  * à la volée. Ils exercent le texte à trou sur des connaissances qui ne citent
  * aucun code, là où la règle `CODE` ne doit jamais se déclencher.
  *
+ * `11-sigles-scientifiques.txt` tend le piège inverse, et c'est volontaire. Le
+ * déclencheur de la règle CODE cherche trois majuscules d'affilée et de la
+ * casse mixte : `UVB`, `ADN`, `OMS`, `pH` les lui donnent sans qu'il y ait la
+ * moindre ligne de code. Le prompt porte la même règle, formulée de la même
+ * façon — ce dépôt existe pour voir si le modèle y tombe aussi, parce que c'est
+ * ce que déposera un utilisateur qui apprend autre chose que l'informatique.
+ *
  * `07-capture-assistant.png` est une interface reconstituée, pas une vraie
  * capture : elle porte de l'habillage — barre de titre, liste de
  * conversations, horodatage, compteur de mentions, suggestions, zone de
