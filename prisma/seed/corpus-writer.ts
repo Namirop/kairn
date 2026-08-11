@@ -28,8 +28,8 @@ async function writeVariants(atomId: string, atom: SeedAtom, reviews: ReplayedRe
           question: variant.question,
           answerKey: variant.answerKey,
           payload: variant.payload,
-          seenCount: seen.length,
-          lastSeenAt: last?.reviewedAt ?? null,
+          sessionCount: seen.length,
+          lastSessionAt: last?.reviewedAt ?? null,
         },
       }),
     );

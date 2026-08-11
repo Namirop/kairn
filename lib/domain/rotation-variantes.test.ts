@@ -1,24 +1,31 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
 import {
+  apresLePassage,
+  assezEspacee,
   choisirVariante,
   doitRegenerer,
+  JOURS_ENTRE_REGENERATIONS,
   PASSAGES_AVANT_REGENERATION,
   type VarianteServable,
 } from "./rotation-variantes";
+
+const JOUR_MS = 24 * 60 * 60 * 1000;
 
 const FACETTES = ["RECOGNITION", "MECHANISM", "BOUNDARY", "APPLICATION"] as const;
 
 function variante(
   facet: string,
-  seenCount = 0,
-  lastSeenAt: string | null = null,
+  sessionCount = 0,
+  lastSessionAt: string | null = null,
+  trainingCount = 0,
 ): VarianteServable {
   return {
-    id: `${facet}-${seenCount}`,
+    id: `${facet}-${sessionCount}`,
     facet,
-    seenCount,
-    lastSeenAt: lastSeenAt ? new Date(lastSeenAt) : null,
+    sessionCount,
+    trainingCount,
+    lastSessionAt: lastSessionAt ? new Date(lastSessionAt) : null,
   };
 }
 
@@ -93,7 +100,7 @@ describe("choisirVariante", () => {
       derniere = choisie.facet;
       variantes = variantes.map((v) =>
         v.id === choisie.id
-          ? { ...v, seenCount: v.seenCount + 1, lastSeenAt: new Date(2026, 0, tour + 1) }
+          ? { ...v, sessionCount: v.sessionCount + 1, lastSessionAt: new Date(2026, 0, tour + 1) }
           : v,
       );
     }
@@ -107,7 +114,8 @@ describe("choisirVariante", () => {
         fc.array(
           fc.record({
             facet: fc.constantFrom(...FACETTES),
-            seenCount: fc.integer({ min: 0, max: 9 }),
+            sessionCount: fc.integer({ min: 0, max: 9 }),
+            trainingCount: fc.integer({ min: 0, max: 30 }),
             vue: fc.integer({ min: 0, max: 40 }),
           }),
           { minLength: 1, maxLength: 12 },
@@ -117,8 +125,9 @@ describe("choisirVariante", () => {
           const variantes = entrees.map((entree, rang) => ({
             id: `v-${rang}`,
             facet: entree.facet,
-            seenCount: entree.seenCount,
-            lastSeenAt: new Date(2026, 0, 1 + entree.vue),
+            sessionCount: entree.sessionCount,
+            trainingCount: entree.trainingCount,
+            lastSessionAt: new Date(2026, 0, 1 + entree.vue),
           }));
 
           const choisie = choisirVariante(variantes, derniere);
@@ -135,11 +144,55 @@ describe("choisirVariante", () => {
   });
 });
 
+describe("choisirVariante et les deux compteurs", () => {
+  it("ne regarde pas les passages d'entraînement pour choisir", () => {
+    // La première a été tournée vingt fois à l'entraînement, la seconde jamais.
+    // Si l'entraînement pesait sur la rotation, c'est la seconde qui sortirait.
+    const variantes = [
+      variante("RECOGNITION", 0, "2026-01-01", 20),
+      variante("MECHANISM", 1, "2026-01-02", 0),
+    ];
+
+    expect(choisirVariante(variantes, null)?.facet).toBe("RECOGNITION");
+  });
+
+  it("rend le même choix quel que soit l'usage en entraînement", () => {
+    fc.assert(
+      fc.property(
+        fc.array(fc.nat({ max: 50 }), { minLength: 4, maxLength: 4 }),
+        (entrainements) => {
+          const sans = FACETTES.map((facet, rang) => variante(facet, rang, "2026-01-01", 0));
+          const avec = sans.map((v, rang) => ({ ...v, trainingCount: entrainements[rang] ?? 0 }));
+
+          return choisirVariante(sans, null)?.id === choisirVariante(avec, null)?.id;
+        },
+      ),
+      { numRuns: 200 },
+    );
+  });
+});
+
 describe("doitRegenerer", () => {
   it("attend que chaque facette ait atteint le seuil", () => {
     const variantes = FACETTES.map((facet) => variante(facet, PASSAGES_AVANT_REGENERATION));
 
     expect(doitRegenerer(variantes)).toBe(true);
+  });
+
+  it("additionne les deux modes : l'entraînement use les questions", () => {
+    const variantes = FACETTES.map((facet) =>
+      variante(facet, 1, "2026-01-01", PASSAGES_AVANT_REGENERATION - 1),
+    );
+
+    expect(doitRegenerer(variantes)).toBe(true);
+  });
+
+  it("ne déclenche pas quand la somme des deux reste sous le seuil", () => {
+    const variantes = FACETTES.map((facet) =>
+      variante(facet, 0, "2026-01-01", PASSAGES_AVANT_REGENERATION - 1),
+    );
+
+    expect(doitRegenerer(variantes)).toBe(false);
   });
 
   it("ne déclenche pas tant qu'une facette est en retard", () => {
@@ -166,5 +219,97 @@ describe("doitRegenerer", () => {
     ];
 
     expect(doitRegenerer(variantes)).toBe(true);
+  });
+});
+
+describe("assezEspacee", () => {
+  const maintenant = new Date("2026-06-15T10:00:00Z");
+
+  it("laisse passer un concept qui n'a jamais eu de questions", () => {
+    expect(assezEspacee(null, maintenant)).toBe(true);
+  });
+
+  it("refuse tant que le délai n'est pas écoulé", () => {
+    const hier = new Date(maintenant.getTime() - JOUR_MS);
+
+    expect(assezEspacee(hier, maintenant)).toBe(false);
+  });
+
+  it("accepte au jour près", () => {
+    const pile = new Date(maintenant.getTime() - JOURS_ENTRE_REGENERATIONS * JOUR_MS);
+    const juste = new Date(pile.getTime() + 1);
+
+    expect(assezEspacee(pile, maintenant)).toBe(true);
+    expect(assezEspacee(juste, maintenant)).toBe(false);
+  });
+
+  it("ne dépend pas du fuseau : c'est une durée, pas une date de calendrier", () => {
+    fc.assert(
+      fc.property(fc.integer({ min: -400, max: 400 }), fc.nat({ max: 23 }), (jours, heure) => {
+        const derniere = new Date(maintenant.getTime() - jours * JOUR_MS - heure * 3600 * 1000);
+        const ecoules = maintenant.getTime() - derniere.getTime();
+
+        return (
+          assezEspacee(derniere, maintenant) === ecoules >= JOURS_ENTRE_REGENERATIONS * JOUR_MS
+        );
+      }),
+      { numRuns: 300 },
+    );
+  });
+});
+
+describe("apresLePassage", () => {
+  it("compte le passage sur le compteur du mode, et sur lui seul", () => {
+    const variantes = lotNeuf();
+    const servie = variantes[1];
+
+    if (!servie) throw new Error("Une variante était attendue.");
+
+    const session = apresLePassage(variantes, servie.id, "SESSION");
+    const entrainement = apresLePassage(variantes, servie.id, "TRAINING");
+
+    expect(session[1]).toMatchObject({ sessionCount: 1, trainingCount: 0 });
+    expect(entrainement[1]).toMatchObject({ sessionCount: 0, trainingCount: 1 });
+  });
+
+  it("laisse les autres variantes intactes", () => {
+    const variantes = lotNeuf();
+    const apres = apresLePassage(variantes, "RECOGNITION-0", "TRAINING");
+
+    expect(apres.slice(1)).toEqual(variantes.slice(1));
+  });
+
+  it("ne modifie pas ce qu'on lui donne", () => {
+    const variantes = lotNeuf();
+
+    apresLePassage(variantes, "RECOGNITION-0", "SESSION");
+
+    expect(variantes[0]?.sessionCount).toBe(0);
+  });
+
+  it("ne compte rien quand la variante servie n'est pas du lot", () => {
+    const variantes = lotNeuf();
+
+    expect(apresLePassage(variantes, "inconnue", "SESSION")).toEqual(variantes);
+  });
+
+  it("mène au seuil par un mode comme par l'autre", () => {
+    fc.assert(
+      fc.property(fc.constantFrom("SESSION" as const, "TRAINING" as const), (mode) => {
+        let variantes = FACETTES.map((facet) =>
+          variante(facet, 0, null, PASSAGES_AVANT_REGENERATION - 1),
+        );
+
+        // Il manque un passage à chaque facette : aucun mode ne doit suffire à
+        // déclencher avant que les quatre l'aient reçu.
+        for (const cible of [...variantes]) {
+          expect(doitRegenerer(variantes)).toBe(false);
+          variantes = apresLePassage(variantes, cible.id, mode);
+        }
+
+        return doitRegenerer(variantes);
+      }),
+      { numRuns: 50 },
+    );
   });
 });

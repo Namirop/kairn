@@ -57,6 +57,19 @@ enum VariantFacet {
   APPLICATION
 }
 
+/// Sous quel mode un passage a eu lieu.
+///
+/// `SESSION` est la session du jour : elle compte, elle replanifie.
+/// `TRAINING` est l'entraînement libre : il ne touche à rien de la mémoire —
+/// ni échéance, ni stabilité, ni difficulté, ni état de maîtrise. Cinq passages
+/// dans l'heure sur un même concept, c'est de la mémoire de travail ; les
+/// laisser allonger l'intervalle serait exactement ce que le produit existe
+/// pour empêcher.
+enum ReviewMode {
+  SESSION
+  TRAINING
+}
+
 /// Notation donnée par l'utilisateur sur une Review, alignée sur ts-fsrs.
 enum ReviewRating {
   AGAIN

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/client";
-import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { planifier } from "@/lib/db/planification";
+import { regenererSiUsees } from "@/lib/db/regeneration";
 import type { ReviewRating } from "@/lib/db/types";
 import {
   compterReussitesConsecutives,
@@ -9,7 +9,7 @@ import {
   JOURS_AVANT_ARCHIVAGE,
   type EtatMaitrise,
 } from "@/lib/domain/etat-maitrise";
-import { doitRegenerer } from "@/lib/domain/rotation-variantes";
+import { apresLePassage } from "@/lib/domain/rotation-variantes";
 import { signalDeMaitrise, type SignalDeMaitrise } from "@/lib/domain/signal-maitrise";
 
 /**
@@ -83,7 +83,13 @@ export async function enregistrerRevision(
       masterySignaledAt: true,
       variants: {
         where: { retiredAt: null },
-        select: { id: true, facet: true, seenCount: true, lastSeenAt: true },
+        select: {
+          id: true,
+          facet: true,
+          sessionCount: true,
+          trainingCount: true,
+          lastSessionAt: true,
+        },
       },
       reviews: {
         orderBy: { reviewedAt: "desc" },
@@ -133,6 +139,7 @@ export async function enregistrerRevision(
         userId: revision.userId,
         rating: revision.note,
         responseTimeMs: revision.tempsMs,
+        mode: "SESSION",
         selfMastered: revision.maitrise,
         stabilityBefore: plan.stabiliteAvant,
         stabilityAfter: plan.stabiliteApres,
@@ -141,7 +148,7 @@ export async function enregistrerRevision(
     }),
     prisma.variant.update({
       where: { id: variante.id },
-      data: { seenCount: { increment: 1 }, lastSeenAt: maintenant },
+      data: { sessionCount: { increment: 1 }, lastSessionAt: maintenant },
     }),
     prisma.atom.update({
       where: { id: atome.id },
@@ -154,79 +161,11 @@ export async function enregistrerRevision(
     }),
   ]);
 
-  await mettreEnFileUneRegeneration(atome, variante.id);
+  await regenererSiUsees(atome, apresLePassage(atome.variants, variante.id, "SESSION"), maintenant);
 
   return {
     etat,
     prochaineEcheance: echeance,
     signal: atome.masterySignaledAt ? null : signalDeMaitrise(chronometres),
   };
-}
-
-/**
- * Les questions de ce concept sont-elles usées ?
- *
- * La régénération part par le chemin groupé de la phase 2 : c'est du travail qui
- * peut attendre. On ne remet rien en file tant qu'un job couvre déjà ce concept,
- * sans quoi chaque passage au-delà du seuil en empilerait un de plus.
- */
-async function mettreEnFileUneRegeneration(
-  atome: {
-    id: string;
-    inputId: string;
-    variants: { id: string; facet: string; seenCount: number; lastSeenAt: Date | null }[];
-  },
-  varianteServieId: string,
-): Promise<void> {
-  const apresLePassage = atome.variants.map((variante) =>
-    variante.id === varianteServieId
-      ? { ...variante, seenCount: variante.seenCount + 1 }
-      : variante,
-  );
-
-  if (!doitRegenerer(apresLePassage)) return;
-
-  const dejaEnFile = await prisma.generationJob.count({
-    where: {
-      kind: "VARIANTS",
-      status: { in: ["QUEUED", "RUNNING"] },
-      atomIds: { has: atome.id },
-    },
-  });
-
-  if (dejaEnFile > 0) return;
-
-  await creerJobsDeQuestions(atome.inputId, [atome.id]);
-}
-
-/**
- * Réclame la carte de maîtrise pour le premier concept qui n'en a jamais eu.
- *
- * Au plus une par session, jamais deux fois pour le même concept : la première
- * règle tient parce qu'on ne réclame qu'une fois, en fin de session ; la seconde
- * parce que la marque est posée en base, sous condition qu'elle soit encore
- * vide. Deux onglets qui réclameraient en même temps n'en obtiennent qu'une.
- */
-export async function reclamerSignalDeMaitrise(
-  userId: string,
-  atomIds: string[],
-  maintenant: Date = new Date(),
-): Promise<{ atomId: string; concept: string } | null> {
-  for (const atomId of atomIds) {
-    const { count } = await prisma.atom.updateMany({
-      where: { id: atomId, userId, masterySignaledAt: null },
-      data: { masterySignaledAt: maintenant },
-    });
-
-    if (count === 0) continue;
-
-    const atome = await prisma.atom.findFirst({
-      where: { id: atomId, userId },
-      select: { concept: true },
-    });
-
-    if (atome) return { atomId, concept: atome.concept };
-  }
-
-  return null;
 }

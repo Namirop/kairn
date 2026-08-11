@@ -120,8 +120,9 @@ export async function lireSessionDuJour(
             question: true,
             answerKey: true,
             payload: true,
-            seenCount: true,
-            lastSeenAt: true,
+            sessionCount: true,
+            lastSessionAt: true,
+            trainingCount: true,
           },
         },
         // Le dernier passage donne la facette à ne pas resservir.

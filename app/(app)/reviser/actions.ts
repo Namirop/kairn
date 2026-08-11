@@ -2,7 +2,8 @@
 
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth/session";
-import { enregistrerRevision, reclamerSignalDeMaitrise } from "@/lib/db/revision";
+import { reclamerSignalDeMaitrise } from "@/lib/db/carte-de-maitrise";
+import { enregistrerRevision } from "@/lib/db/revision";
 import { compterDusDemain } from "@/lib/db/session-du-jour";
 import type { SignalDeMaitrise } from "@/lib/domain/signal-maitrise";
 

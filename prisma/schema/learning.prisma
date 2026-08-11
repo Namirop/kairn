@@ -103,8 +103,15 @@ model Variant {
   /// Données propres au format : options d'un QCM, langage d'un extrait de code.
   payload   Json?
 
-  seenCount  Int       @default(0)
-  lastSeenAt DateTime?
+  /// Passages en session du jour. C'est le seul compteur que lit la rotation :
+  /// tourner dix fois sur un concept à l'entraînement ne doit pas décider de la
+  /// formulation qu'on servira demain.
+  sessionCount  Int       @default(0)
+  lastSessionAt DateTime?
+  /// Passages en entraînement libre. Il ne pilote rien, il use : additionné au
+  /// premier, il dit quand les formulations ont fait leur temps.
+  trainingCount  Int       @default(0)
+  lastTrainedAt  DateTime?
   /// Un Variant retiré n'est plus proposé mais reste lié à ses Reviews passées.
   retiredAt  DateTime?
 
@@ -126,6 +133,9 @@ model Review {
 
   rating          ReviewRating
   responseTimeMs  Int
+  /// Sous quel mode ce passage a eu lieu. Un passage d'entraînement est de
+  /// l'histoire, jamais de la planification : il n'a déplacé aucune échéance.
+  mode            ReviewMode   @default(SESSION)
   /// L'utilisateur a déclaré maîtriser le concept et l'a sorti du cycle.
   selfMastered    Boolean      @default(false)
   /// Stabilité de l'Atom avant et après le passage, pour rejouer une courbe.

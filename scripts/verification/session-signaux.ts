@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/client";
 import { desarchiverConcept } from "@/lib/db/concepts";
-import { enregistrerRevision, reclamerSignalDeMaitrise } from "@/lib/db/revision";
+import { reclamerSignalDeMaitrise } from "@/lib/db/carte-de-maitrise";
+import { enregistrerRevision } from "@/lib/db/revision";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
 import { JOURS_AVANT_ARCHIVAGE } from "@/lib/domain/etat-maitrise";
 import { record } from "./journal";
