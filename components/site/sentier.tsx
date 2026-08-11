@@ -2,12 +2,12 @@ const ETAPES = [
   {
     titre: "Tu déposes",
     texte:
-      "Une phrase notée à la volée, une réponse d'assistant collée en entier, la capture d'une diapositive. Rien à formater, rien à découper toi-même.",
+      "Une phrase notée à la volée pendant un cours, un article collé en entier, la photo d'une page de livre. Rien à formater, rien à découper toi-même.",
   },
   {
     titre: "Cairn découpe",
     texte:
-      "Le dépôt devient des concepts unitaires, chacun avec trois ou quatre façons d'être questionné. La formulation tourne pour que tu retiennes l'idée, pas la phrase.",
+      "Le dépôt devient des concepts unitaires, chacun avec trois ou quatre façons d'être questionné : un terme à retrouver dans une phrase, un choix à faire, une explication à donner. La formulation tourne pour que tu retiennes l'idée, pas la phrase.",
   },
   {
     titre: "Ça revient",

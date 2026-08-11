@@ -45,7 +45,7 @@ export function FormulaireDepot({ restants, cleEnvoi }: { restants: number; cleE
           autoFocus
           value={texte}
           onChange={(evenement) => setTexte(evenement.target.value)}
-          placeholder="Colle ici ce que tu veux retenir. Une phrase, un pavé, une réponse d'assistant."
+          placeholder="Colle ici ce que tu veux retenir. Une phrase, un article, une explication qu'on vient de te donner."
           className="p-pas-4 text-corps field-sizing-content min-h-56 w-full resize-y rounded-xs border border-stone-300 bg-stone-50 leading-relaxed text-stone-900 placeholder:text-stone-500"
         />
       </div>

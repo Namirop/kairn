@@ -19,8 +19,9 @@ export function Hero() {
         </h1>
 
         <p className="mt-pas-6 max-w-md text-stone-500">
-          Cairn prend ce que tu déposes — une phrase, un pavé collé, une capture — le découpe en
-          concepts, et te les repose juste avant que tu les oublies.
+          Un article, une réponse qu&apos;on t&apos;a donnée, une page de manuel, ce qu&apos;un
+          collègue vient de t&apos;expliquer. Cairn le découpe en concepts et te les repose juste
+          avant que tu les oublies.
         </p>
 
         <div className="mt-pas-8 gap-pas-3 flex flex-col sm:flex-row">
