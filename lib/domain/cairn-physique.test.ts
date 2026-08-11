@@ -187,6 +187,15 @@ describe("propriété : la chute est déterministe et bornée", () => {
     );
   });
 
+  /**
+   * La chute s'arrête, quelle que soit la façon dont on frappe.
+   *
+   * Ce n'est pas gratuit : un solveur à impulsions garde des configurations
+   * sans fin — une pierre en équilibre sur l'arête d'une autre oscille sans
+   * jamais passer sous le seuil de repos, et la boucle d'animation tourne alors
+   * indéfiniment. C'est l'amortissement au contact qui les tue, et c'est cette
+   * propriété qui garde la garantie.
+   */
   it("tout finit posé, quels que soient la pierre visée et la force", () => {
     fc.assert(
       fc.property(

@@ -146,25 +146,35 @@ function lister(mobiles: Mobile[], cadre: Cadre): { liens: Lien[]; appuis: Appui
 }
 
 /**
- * Résout tous les contacts d'une image, et rend l'appui final de chaque mobile.
+ * Résout tous les contacts d'une image, et rend l'appui de chaque mobile.
  *
  * Les positions se corrigent en plusieurs passes, en refaisant la liste des
  * contacts entre chacune. Une passe unique ne remontait l'écartement que d'un
  * étage par image : dans une pile de six, la pierre du bas restait enfoncée de
  * deux unités dans le sol pendant que tout le reste avait l'air posé. Refaire
  * la liste est ce qui coûte, et pour sept pierres ça ne coûte rien.
+ *
+ * L'appui rendu mélange les deux bouts, et c'est voulu : le contact vient du
+ * relevé d'entrée, l'enfoncement du relevé de sortie. Tout prendre à la sortie
+ * faisait qu'une pierre bien dégagée par la correction se retrouvait sans
+ * contact du tout — donc jamais posée, donc en vol perpétuel à un centième
+ * d'unité par seconde, et la boucle d'animation ne s'arrêtait plus.
  */
 export function resoudre(mobiles: Mobile[], cadre: Cadre): Appui[] {
-  let etat = lister(mobiles, cadre);
+  const entree = lister(mobiles, cadre);
+  let sortie = entree;
 
   for (let tour = 0; tour < ITERATIONS; tour += 1) {
-    for (const lien of etat.liens) corrigerVitesses(lien);
+    for (const lien of entree.liens) corrigerVitesses(lien);
   }
 
   for (let tour = 0; tour < PASSES_DE_POSITION; tour += 1) {
-    for (const lien of etat.liens) corrigerPositions(lien);
-    etat = lister(mobiles, cadre);
+    for (const lien of sortie.liens) corrigerPositions(lien);
+    sortie = lister(mobiles, cadre);
   }
 
-  return etat.appuis;
+  return entree.appuis.map((appui, index) => ({
+    touche: appui.touche,
+    enfoncement: sortie.appuis[index]?.enfoncement ?? 0,
+  }));
 }

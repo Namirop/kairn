@@ -26,6 +26,18 @@ import type { Pierre } from "@/lib/domain/cairn-stack";
 
 /** Temps d'arrêt avant que le cairn ne se reconstruise, en millisecondes. */
 const AVANT_REMONTEE = 1600;
+/**
+ * Durée maximale d'une chute, en millisecondes.
+ *
+ * Un solveur à impulsions a des configurations sans fin : une pierre debout en
+ * équilibre sur l'arête d'une autre peut osciller indéfiniment sans jamais
+ * franchir le seuil de repos. Le balayage exhaustif n'en trouve plus une seule,
+ * mais « plus une seule aujourd'hui » n'est pas une garantie, et le prix d'une
+ * boucle d'animation qui ne s'arrête jamais est trop élevé pour se contenter
+ * d'un réglage bien choisi. Passé ce délai, la chute est déclarée finie et le
+ * cairn se reconstruit.
+ */
+const CHUTE_MAXIMALE = 9000;
 /** Au-delà, un geste est considéré comme un coup porté. */
 const VITESSE_MINIMALE = 40;
 /**
@@ -48,6 +60,7 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cad
   const posePrecedente = useRef<{ x: number; y: number; t: number } | null>(null);
   const boucle = useRef<number | null>(null);
   const posee = useRef(0);
+  const debutChute = useRef(0);
 
   const peindre = useCallback(() => {
     corps.current.forEach((solide, index) => {
@@ -64,7 +77,7 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cad
 
       if (phase.current === "chute") {
         corps.current = avancer(corps.current, pierres, dt, cadre);
-        if (toutEstPose(corps.current)) {
+        if (toutEstPose(corps.current) || instant - debutChute.current > CHUTE_MAXIMALE) {
           phase.current = "attente";
           posee.current = instant;
         }
@@ -114,6 +127,7 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cad
         vx: ((vers.x - depuis.x) / longueur) * force,
         vy: ((vers.y - depuis.y) / longueur) * force * 0.4,
       });
+      if (phase.current !== "chute") debutChute.current = performance.now();
       phase.current = "chute";
       relancer();
     },

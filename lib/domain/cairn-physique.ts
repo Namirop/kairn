@@ -41,7 +41,10 @@ const GRAVITE = 300;
 const SEUIL_REPOS = 5;
 const SEUIL_ROTATION = 30;
 const SEUIL_ENFONCEMENT = 0.6;
-const SEUIL_FIGE = 0.05;
+const SEUIL_FIGE = 0.35;
+/** Ce qu'une pierre garde de sa vitesse d'une image à l'autre, au contact. */
+const AMORTI_AU_CONTACT = 0.9;
+const AMORTI_LENT = 0.72;
 /** Pas de temps maximal : un onglet qui reprend la main ne téléporte rien. */
 const PAS_MAX = 1 / 30;
 
@@ -185,13 +188,21 @@ export function avancer(
     const posee =
       appui.touche && immobile && (appui.enfoncement < SEUIL_ENFONCEMENT || vitesse < SEUIL_FIGE);
 
+    // Une pierre appuyée et déjà lente est freinée jusqu'à l'arrêt. C'est le
+    // frottement de contact, et c'est aussi ce qui garantit la fin : une pierre
+    // coincée contre un bord et le socle vibrait de quelques dixièmes d'unité
+    // par seconde indéfiniment, trop lente pour qu'on la voie bouger et trop
+    // vive pour qu'on la déclare posée. La boucle tournait alors sans fin sur
+    // une image immobile.
+    const freine = posee || !appui.touche ? 1 : immobile ? AMORTI_LENT : AMORTI_AU_CONTACT;
+
     return {
       x: mobile.boite.x,
       y: mobile.boite.y,
       rotation: mobile.boite.rotation,
-      vx: posee ? 0 : mobile.vx,
-      vy: posee ? 0 : mobile.vy,
-      vr: posee ? 0 : mobile.vr,
+      vx: posee ? 0 : mobile.vx * freine,
+      vy: posee ? 0 : mobile.vy * freine,
+      vr: posee ? 0 : mobile.vr * freine,
       libre: true,
       repos: posee,
     };
