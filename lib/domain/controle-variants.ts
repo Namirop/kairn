@@ -1,32 +1,20 @@
+import { controlerQuestion, type VariantAControler } from "./controle-question";
 import type { Manquement } from "./manquement";
 
 /**
- * Ce qui se vérifie sur les quatre questions d'un même Atom : leur composition
- * en tant que lot, puis chacune prise à part.
+ * Ce qui se vérifie sur les quatre questions d'un même Atom en tant que lot :
+ * les facettes servies, leur ordre, la diversité des formats, et la part de
+ * questions qu'on ne peut noter soi-même.
+ *
+ * Ce qui se juge question par question — les options d'un QCM, le trou d'un
+ * texte à trou, la réponse qui se lit dans l'énoncé — vit dans
+ * `controle-question.ts`.
  */
 
-export type VariantAControler = {
-  format: string;
-  facet: string;
-  question: string;
-  answerKey: string;
-  options: string[] | null;
-  correctIndex: number | null;
-};
+export type { VariantAControler } from "./controle-question";
 
 /** L'ordre annoncé par le prompt. Miroir de l'enum `VariantFacet`. */
 export const FACETTES_ATTENDUES = ["RECOGNITION", "MECHANISM", "BOUNDARY", "APPLICATION"] as const;
-
-/**
- * Ce qu'on tolère entre la plus longue et la plus courte option d'un MCQ.
- *
- * Deux seuils, parce qu'un seul se trompe : sur des options courtes — quatre
- * expressions de code — le rapport s'envole sans que la bonne réponse se
- * repère, et sur des options longues c'est l'écart absolu qui ne dit rien.
- * Une option n'est signalée que si elle dépasse les deux.
- */
-export const ECART_MAX_OPTIONS = 2;
-export const ECART_MINIMUM_SIGNIFICATIF = 30;
 
 /**
  * Formats distincts attendus sur un lot de quatre questions.
@@ -37,21 +25,21 @@ export const ECART_MINIMUM_SIGNIFICATIF = 30;
  */
 export const FORMATS_MINIMUM = 3;
 
-/** Nombre de mots en deçà duquel une réponse citée ne prouve rien. */
-const MOTS_MINIMUM_POUR_CITER = 3;
-
-function motsNormalises(texte: string): string {
-  return ` ${texte
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim()} `;
-}
+/**
+ * Les formats où la personne écrit puis se juge elle-même.
+ *
+ * Trois questions à s'auto-noter d'affilée ne se notent plus : on clique « je
+ * savais » pour avancer, et la planification enregistre du bruit. Le compte de
+ * formats distincts ne voyait rien de ce défaut — un quatuor de quatre formats
+ * dont trois sont auto-notés le satisfaisait.
+ */
+export const FORMATS_LIBRES = ["SHORT_ANSWER", "EXPLAIN"];
+export const LIBRES_MAXIMUM = 1;
 
 function controlerLot(variants: VariantAControler[]): Manquement[] {
   const facettes = variants.map((variant) => variant.facet);
   const formats = new Set(variants.map((variant) => variant.format));
+  const libres = variants.filter((variant) => FORMATS_LIBRES.includes(variant.format));
   const manquements: Manquement[] = [];
 
   if (variants.length !== FACETTES_ATTENDUES.length) {
@@ -71,54 +59,14 @@ function controlerLot(variants: VariantAControler[]): Manquement[] {
     });
   }
 
+  if (libres.length > LIBRES_MAXIMUM) {
+    manquements.push({
+      regle: "texte libre",
+      detail: `${libres.length} questions à s'auto-noter : ${libres.map((variant) => variant.format).join(", ")}`,
+    });
+  }
+
   return manquements;
-}
-
-function controlerMcq(variant: VariantAControler): Manquement[] {
-  const { options, correctIndex } = variant;
-
-  if (variant.format !== "MCQ") {
-    return options === null && correctIndex === null
-      ? []
-      : [{ regle: "options", detail: `format ${variant.format} avec des options` }];
-  }
-
-  if (options === null || options.length !== 4) {
-    return [{ regle: "options", detail: `${options?.length ?? 0} options au lieu de quatre` }];
-  }
-
-  if (correctIndex === null || correctIndex < 0 || correctIndex >= options.length) {
-    return [{ regle: "options", detail: `correctIndex hors des options : ${correctIndex}` }];
-  }
-
-  const longueurs = options.map((option) => option.length);
-  const plusCourte = Math.min(...longueurs);
-  const plusLongue = Math.max(...longueurs);
-  const rapport = plusLongue / plusCourte;
-
-  if (rapport <= ECART_MAX_OPTIONS || plusLongue - plusCourte <= ECART_MINIMUM_SIGNIFICATIF) {
-    return [];
-  }
-
-  return [
-    {
-      regle: "longueurs",
-      detail: `la plus longue option fait ${rapport.toFixed(1)}× la plus courte (${plusLongue} contre ${plusCourte} signes)`,
-    },
-  ];
-}
-
-/** La réponse attendue ne doit pas se lire dans l'énoncé. */
-function controlerReponseCachee(variant: VariantAControler): Manquement[] {
-  const [premierePhrase = ""] = variant.answerKey.split(/[.\n]/);
-  const reponse = motsNormalises(premierePhrase);
-
-  if (reponse.trim().split(" ").filter(Boolean).length < MOTS_MINIMUM_POUR_CITER) return [];
-  if (!motsNormalises(variant.question).includes(reponse)) return [];
-
-  return [
-    { regle: "réponse citée", detail: `« ${premierePhrase.trim()} » figure dans la question` },
-  ];
 }
 
 /**
@@ -131,10 +79,7 @@ export function controlerVariants(variants: VariantAControler[]): Manquement[] {
   return [
     ...controlerLot(variants),
     ...variants.flatMap((variant, rang) =>
-      [...controlerMcq(variant), ...controlerReponseCachee(variant)].map((manquement) => ({
-        ...manquement,
-        rang,
-      })),
+      controlerQuestion(variant).map((manquement) => ({ ...manquement, rang })),
     ),
   ];
 }
