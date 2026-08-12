@@ -77,13 +77,16 @@ const eslintConfig = [
   },
   prettier,
   {
+    // Ancrés sur `**/` et non sur la racine : un artefact de build qui atterrit
+    // ailleurs qu'à la racine — dossier dupliqué, build lancé depuis un parent —
+    // noyait le rapport sous des milliers d'erreurs venues de code généré.
     ignores: [
-      "node_modules/**",
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
-      "lib/db/generated/**",
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/out/**",
+      "**/build/**",
+      "**/next-env.d.ts",
+      "**/lib/db/generated/**",
     ],
   },
 ];

@@ -21,7 +21,12 @@ export class AIDisabledError extends AiError {
   }
 }
 
-/** Plafond journalier atteint. Vérifié avant l'émission, jamais après. */
+/**
+ * Plafond journalier **global** atteint. Vérifié avant l'émission, jamais après.
+ *
+ * C'est un report, pas un échec : rien ne s'est cassé, et le même travail
+ * réussira demain à l'identique. `runJob` la traite à part pour cette raison.
+ */
 export class AIQuotaError extends AiError {
   readonly code = "AI_QUOTA";
 
@@ -30,6 +35,24 @@ export class AIQuotaError extends AiError {
     readonly cap: number,
   ) {
     super(`Plafond d'appels du jour atteint : ${used}/${cap}.`);
+  }
+}
+
+/**
+ * Ce compte a pris toute sa part de la journée.
+ *
+ * Distincte de la précédente, et il faut qu'elle le reste : l'une dit « le
+ * produit est plein », l'autre « tu es plein ». La première se reporte au
+ * lendemain sans rien coûter à personne ; la seconde regarde son auteur.
+ */
+export class AIUserQuotaError extends AiError {
+  readonly code = "AI_USER_QUOTA";
+
+  constructor(
+    readonly used: number,
+    readonly cap: number,
+  ) {
+    super(`Part d'appels du jour atteinte pour ce compte : ${used}/${cap}.`);
   }
 }
 

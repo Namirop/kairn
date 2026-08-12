@@ -63,9 +63,22 @@ export async function ecrireQuestions(
   return ecrites.count;
 }
 
-/** Les anciennes questions d'un concept réécrit : elles ne le décrivent plus. */
-export async function effacerQuestions(atomId: string): Promise<number> {
-  const { count } = await prisma.variant.deleteMany({ where: { atomId } });
+/**
+ * Les anciennes questions d'un concept réécrit : elles ne le décrivent plus.
+ *
+ * Retirées, jamais supprimées. `Review.variantId` est en cascade : les
+ * supprimer emportait tous les passages donnés sur ce concept — donc l'histoire
+ * qui alimente la consolidation et le signal de maîtrise. Corriger une faute de
+ * frappe effaçait des mois de révision, sans un mot.
+ *
+ * C'est déjà ce que fait `ecrireQuestions` quelques lignes plus haut, et pour
+ * la même raison. Il n'y avait pas deux règles, il y en avait une et un oubli.
+ */
+export async function retirerQuestions(atomId: string, maintenant = new Date()): Promise<number> {
+  const { count } = await prisma.variant.updateMany({
+    where: { atomId, retiredAt: null },
+    data: { retiredAt: maintenant },
+  });
 
   return count;
 }

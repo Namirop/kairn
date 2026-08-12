@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/client";
-import { creerJobsDeQuestions } from "@/lib/db/lots";
-import { effacerQuestions } from "@/lib/db/variants";
+import { demanderDesQuestions } from "@/lib/db/demande-de-questions";
+import { retirerQuestions } from "@/lib/db/variants";
 import type { AtomState, GenerationKind, InputStatus } from "@/lib/db/types";
 import { compterReussitesConsecutives, etatApresRevision } from "@/lib/domain/etat-maitrise";
 
@@ -39,8 +39,9 @@ export type DepotDetaille = {
   createdAt: Date;
   concepts: ConceptLu[];
   /** Travaux encore en cours ou en attente, avec leur nature : c'est elle qui
-   * dit à l'utilisateur ce qu'il attend. */
-  travauxEnCours: { kind: GenerationKind }[];
+   * dit à l'utilisateur ce qu'il attend. `differe` distingue ce qui s'écrit
+   * maintenant de ce qui a rendez-vous. */
+  travauxEnCours: { kind: GenerationKind; differe: boolean }[];
 };
 
 export async function lireDepotDetaille(
@@ -68,18 +69,25 @@ export async function lireDepotDetaille(
           _count: { select: { variants: { where: { retiredAt: null } } } },
         },
       },
-      jobs: { where: { status: { in: ["QUEUED", "RUNNING"] } }, select: { kind: true } },
+      jobs: {
+        where: { status: { in: ["QUEUED", "RUNNING"] } },
+        select: { kind: true, notBefore: true },
+      },
     },
   });
 
   if (!depot) return null;
 
   const { atoms, jobs, ...reste } = depot;
+  const maintenant = new Date();
 
   return {
     ...reste,
     concepts: atoms.map(({ _count, ...atome }) => ({ ...atome, questions: _count.variants })),
-    travauxEnCours: jobs,
+    travauxEnCours: jobs.map(({ kind, notBefore }) => ({
+      kind,
+      differe: notBefore !== null && notBefore > maintenant,
+    })),
   };
 }
 
@@ -98,46 +106,77 @@ const CARTE_NEUVE = {
   lastReview: null,
 } as const;
 
-async function relancerLesQuestions(atomId: string, inputId: string): Promise<void> {
-  await effacerQuestions(atomId);
-  await creerJobsDeQuestions(inputId, [atomId]);
+/**
+ * Les questions de ce concept ne le décrivent plus : elles sortent, et on en
+ * redemande.
+ *
+ * Les deux gestes sont indissociables et dans cet ordre. Garder les anciennes
+ * en attendant les neuves servirait des questions qui contredisent le texte —
+ * c'est le seul des trois résultats possibles qui soit malhonnête. Un concept
+ * momentanément sans question ne l'est pas : l'écran dit qu'elles arrivent.
+ *
+ * La demande passe par le point de passage unique, comme le seuil d'usure : si
+ * le plafond hebdomadaire la refuse, elle est écrite avec sa date et part toute
+ * seule ce jour-là. Elle n'est jamais jetée.
+ *
+ * Rend les jobs à lancer tout de suite, jamais vide sauf report. Corriger un
+ * concept est un geste où l'on attend un résultat : ses questions partent en
+ * appel direct, comme celles d'un dépôt, et non par le chemin groupé qui coûte
+ * moitié prix mais rend le lendemain. C'est l'appelant qui les déclenche — la
+ * couche données n'a pas à connaître l'exécuteur.
+ */
+async function relancerLesQuestions(atomId: string, inputId: string): Promise<string[]> {
+  await retirerQuestions(atomId);
+
+  const demande = await demanderDesQuestions({ id: atomId, inputId }, new Date(), {
+    reporter: true,
+  });
+
   await prisma.input.update({ where: { id: inputId }, data: { status: "PROCESSING" } });
+
+  return demande.etat === "partie" ? demande.jobs : [];
 }
 
 /**
- * Réécrit un concept. Ses questions ne le décrivent plus : elles disparaissent
- * et repartent en écriture. Pour la mémoire, c'est un concept neuf même s'il
- * garde son identifiant — la planification recommence.
+ * Ce qu'un geste sur un concept rend à son appelant.
+ *
+ * `null` quand le concept n'est pas le sien : il n'est pas trouvé, donc pas
+ * touché. Sinon, les jobs à déclencher — vides quand la demande a été reportée,
+ * ce qui reste un succès du point de vue du geste.
+ */
+export type GesteSurConcept = string[] | null;
+
+/**
+ * Réécrit un concept. Ses questions ne le décrivent plus : elles sortent du
+ * tirage et repartent en écriture. Pour la mémoire, c'est un concept neuf même
+ * s'il garde son identifiant — la planification recommence.
  */
 export async function modifierConcept(
   atomId: string,
   userId: string,
   texte: string,
-): Promise<boolean> {
+): Promise<GesteSurConcept> {
   const atome = await prisma.atom.findFirst({ where: { id: atomId, userId } });
 
-  if (!atome) return false;
+  if (!atome) return null;
 
   await prisma.atom.update({
     where: { id: atomId },
     data: { concept: texte, uncertain: false, ...CARTE_NEUVE, due: new Date() },
   });
 
-  await relancerLesQuestions(atomId, atome.inputId);
-
-  return true;
+  return relancerLesQuestions(atomId, atome.inputId);
 }
 
 /** Confirme un concept douteux : il repart en écriture de questions. */
-export async function confirmerConcept(atomId: string, userId: string): Promise<boolean> {
+export async function confirmerConcept(atomId: string, userId: string): Promise<GesteSurConcept> {
   const atome = await prisma.atom.findFirst({ where: { id: atomId, userId, uncertain: true } });
 
-  if (!atome) return false;
+  if (!atome) return null;
 
   await prisma.atom.update({ where: { id: atomId }, data: { uncertain: false } });
-  await relancerLesQuestions(atomId, atome.inputId);
 
-  return true;
+  return relancerLesQuestions(atomId, atome.inputId);
 }
 
 /**
@@ -148,9 +187,11 @@ export async function confirmerConcept(atomId: string, userId: string): Promise<
  * mois sans aucun retour possible — une perte de données déguisée en geste
  * réversible.
  *
- * Seul l'archivage déclaré se défait. Celui que le produit pose au-delà de six
- * mois d'intervalle n'est pas une décision de l'utilisateur : le défaire le
- * ferait rearchiver dans la seconde.
+ * `archivedByUser` est redondant avec l'état depuis que le produit n'archive
+ * plus rien de lui-même — mais c'est le champ le plus étroit, et une ligne
+ * écrite sous l'ancienne règle qu'une migration aurait ratée porterait encore
+ * `ARCHIVED` sans que personne ne l'ait demandé. On lit l'intention, pas
+ * l'étiquette.
  *
  * La planification ne repart pas de zéro — le concept a une histoire et elle
  * reste vraie. Seule l'échéance revient à maintenant : qui remet un concept en

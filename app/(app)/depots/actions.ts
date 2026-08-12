@@ -14,7 +14,7 @@ import { inscrireEnListeDattente } from "@/lib/db/quota-depots";
 import { supprimerDepot } from "@/lib/db/reprise-depot";
 import { deposer, SIGNES_MAXIMUM } from "@/lib/depots/deposer";
 import { redecouper, type ResultatRedecoupage } from "@/lib/depots/redecouper";
-import { soumettreLotsEnAttente } from "@/lib/jobs/questions";
+import { declencher } from "@/lib/jobs/queue";
 
 /**
  * Les gestes de l'ingestion.
@@ -46,6 +46,18 @@ export async function deposerAction(_precedent: EtatDepot, donnees: FormData): P
   redirect(ROUTES.depots);
 }
 
+/**
+ * Lance les questions demandées par un geste, derrière la réponse.
+ *
+ * En appel direct, comme un dépôt depuis la phase 3.5 : corriger un concept est
+ * un geste où l'on attend un résultat, et le chemin groupé rendait le lendemain
+ * pour une remise de moitié qu'un lot d'une seule requête ne vaut pas. Un job
+ * qui ne part pas reste en attente, et le cron le ramassera.
+ */
+function lancer(jobs: string[]): void {
+  for (const jobId of jobs) declencher(jobId);
+}
+
 export async function modifierConceptAction(donnees: FormData): Promise<void> {
   const userId = await utilisateurOuRefus();
   const atomId = (donnees.get("atomId") ?? "").toString();
@@ -53,17 +65,20 @@ export async function modifierConceptAction(donnees: FormData): Promise<void> {
 
   if (texte.length < 20 || texte.length > SIGNES_MAXIMUM) return;
 
-  if (await modifierConcept(atomId, userId, texte)) {
-    await soumettreLotsEnAttente();
+  const jobs = await modifierConcept(atomId, userId, texte);
+
+  if (jobs) {
+    lancer(jobs);
     revalidatePath(`${ROUTES.depots}/${(donnees.get("inputId") ?? "").toString()}`);
   }
 }
 
 export async function confirmerConceptAction(donnees: FormData): Promise<void> {
   const userId = await utilisateurOuRefus();
+  const jobs = await confirmerConcept((donnees.get("atomId") ?? "").toString(), userId);
 
-  if (await confirmerConcept((donnees.get("atomId") ?? "").toString(), userId)) {
-    await soumettreLotsEnAttente();
+  if (jobs) {
+    lancer(jobs);
     revalidatePath(`${ROUTES.depots}/${(donnees.get("inputId") ?? "").toString()}`);
   }
 }

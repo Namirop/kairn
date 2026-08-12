@@ -23,6 +23,10 @@ export async function createGenerationJob(
 /**
  * Prend le job s'il est encore à prendre : en attente, ou bloqué en cours
  * depuis plus de dix minutes. Rend `null` si quelqu'un d'autre l'a déjà pris.
+ *
+ * Une demande reportée est refusée jusqu'à sa date. La garde est ici et nulle
+ * part ailleurs : c'est le seul passage obligé vers l'exécution, et un
+ * déclenchement direct la contournerait partout où on l'aurait mise plus haut.
  */
 export async function claimJob(
   jobId: string,
@@ -34,7 +38,8 @@ export async function claimJob(
     where: {
       id: jobId,
       attempts: { lt: MAX_ATTEMPTS },
-      OR: [{ status: "QUEUED" }, { status: "RUNNING", startedAt: { lt: stallCutoff } }],
+      OR: [{ notBefore: null }, { notBefore: { lte: now } }],
+      AND: [{ OR: [{ status: "QUEUED" }, { status: "RUNNING", startedAt: { lt: stallCutoff } }] }],
     },
     data: { status: "RUNNING", startedAt: now, attempts: { increment: 1 } },
   });
@@ -42,6 +47,21 @@ export async function claimJob(
   if (claimed.count !== 1) return null;
 
   return prisma.generationJob.findUnique({ where: { id: jobId } });
+}
+
+/**
+ * Rend le job à la file sans lui compter sa tentative.
+ *
+ * Réservé au plafond d'appels atteint. Ce n'est pas un échec : rien ne s'est
+ * cassé, la journée est simplement pleine, et le même travail réussira demain
+ * à l'identique. Lui compter une tentative le condamnerait au bout de trois
+ * journées chargées, pour une raison qui ne le concerne pas.
+ */
+export async function reporterJob(jobId: string, motif: string): Promise<void> {
+  await prisma.generationJob.update({
+    where: { id: jobId },
+    data: { status: "QUEUED", startedAt: null, attempts: { decrement: 1 }, lastError: motif },
+  });
 }
 
 export async function finishJob(
@@ -71,7 +91,8 @@ export async function findResumableJobs(
     where: {
       kind: { in: ["OCR", "ATOMS"] },
       attempts: { lt: MAX_ATTEMPTS },
-      OR: [{ status: "QUEUED" }, { status: "RUNNING", startedAt: { lt: stallCutoff } }],
+      OR: [{ notBefore: null }, { notBefore: { lte: now } }],
+      AND: [{ OR: [{ status: "QUEUED" }, { status: "RUNNING", startedAt: { lt: stallCutoff } }] }],
     },
     orderBy: { createdAt: "asc" },
     take: limit,

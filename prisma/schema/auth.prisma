@@ -18,6 +18,7 @@ model User {
   atoms      Atom[]
   reviews    Review[]
   aiCalls    AiCall[]
+  aiQuota    AiUserQuota[]
   dailyUsage DailyUsage[]
   emailsSent EmailDelivery[]
   waitlist   WaitlistEntry?

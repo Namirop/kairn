@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
   const abandonnes = await failExhaustedJobs();
   const jobs = await findResumableJobs(BATCH_SIZE);
-  const comptes: Record<JobOutcome, number> = { DONE: 0, FAILED: 0, SKIPPED: 0 };
+  const comptes: Record<JobOutcome, number> = { DONE: 0, FAILED: 0, SKIPPED: 0, REPORTE: 0 };
 
   for (const job of jobs) {
     comptes[await runJob(job.id)] += 1;
@@ -34,6 +34,9 @@ export async function GET(request: Request) {
     termines: comptes.DONE,
     echoues: comptes.FAILED,
     ignores: comptes.SKIPPED,
+    // Le plafond du jour était plein : ces jobs sont revenus à la file intacts,
+    // ils repartiront au prochain passage. Ce n'est pas une ligne d'échec.
+    reportes: comptes.REPORTE,
     abandonnes,
   });
 }

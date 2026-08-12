@@ -21,9 +21,25 @@
  */
 
 export type EtatDepot =
-  "lecture" | "decoupage" | "questions" | "pret" | "vide" | "rejete" | "echec";
+  | "lecture"
+  | "decoupage"
+  | "questions"
+  | "questions-differees"
+  | "pret"
+  | "vide"
+  | "rejete"
+  | "echec";
 
-export type TravailEnCours = { kind: "OCR" | "ATOMS" | "VARIANTS" };
+export type TravailEnCours = {
+  kind: "OCR" | "ATOMS" | "VARIANTS";
+  /**
+   * Le travail est écrit mais attend sa date. Un concept ne redemande des
+   * questions qu'une fois par semaine ; quand la demande arrive trop tôt, elle
+   * patiente au lieu d'être jetée. Dire « écriture en cours » pendant six jours
+   * serait faux, et taire l'attente le serait aussi.
+   */
+  differe?: boolean;
+};
 
 export type AvancementDepot = {
   status: "PENDING" | "PROCESSING" | "READY" | "REJECTED" | "FAILED";
@@ -40,11 +56,17 @@ export function etatDuDepot(avancement: AvancementDepot): EtatDepot {
   // ou en échec, pas prêt. C'est donc que l'utilisateur les a supprimés.
   if (avancement.status === "READY") return avancement.concepts > 0 ? "pret" : "vide";
 
-  const kinds = new Set(avancement.travaux.map((travail) => travail.kind));
+  const kinds = new Set(
+    avancement.travaux.filter((travail) => !travail.differe).map((travail) => travail.kind),
+  );
 
   if (kinds.has("OCR")) return "lecture";
   if (kinds.has("ATOMS")) return "decoupage";
   if (kinds.has("VARIANTS")) return "questions";
+
+  // Il ne reste que des travaux qui attendent leur date. Le dépôt n'est pas en
+  // panne et il n'est pas fini : il a rendez-vous.
+  if (avancement.travaux.some((travail) => travail.differe)) return "questions-differees";
 
   // Plus rien en attente sans être passé à READY : la clôture n'a pas encore
   // eu lieu. Les concepts sont là ou non, c'est ce qui décide.
@@ -55,6 +77,7 @@ const LIBELLES: Record<EtatDepot, string> = {
   lecture: "Lecture de la capture",
   decoupage: "Découpage en concepts",
   questions: "Écriture des questions",
+  "questions-differees": "Questions en attente",
   pret: "Prêt",
   vide: "Vidé",
   rejete: "Rien à retenir",
@@ -67,7 +90,7 @@ export function libelleEtat(etat: EtatDepot): string {
 
 /** Un dépôt dont les concepts sont déjà lisibles, même s'il travaille encore. */
 export function conceptsLisibles(etat: EtatDepot): boolean {
-  return etat === "questions" || etat === "pret";
+  return etat === "questions" || etat === "questions-differees" || etat === "pret";
 }
 
 /**

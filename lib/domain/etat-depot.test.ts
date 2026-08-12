@@ -26,6 +26,22 @@ describe("etatDuDepot", () => {
     expect(etatDuDepot(enCours)).toBe("questions");
   });
 
+  it("distingue des questions qui s'écrivent de questions qui attendent leur date", () => {
+    const differe = avancement({ travaux: [{ kind: "VARIANTS", differe: true }], concepts: 3 });
+
+    expect(etatDuDepot(differe)).toBe("questions-differees");
+    expect(conceptsLisibles(etatDuDepot(differe))).toBe(true);
+  });
+
+  it("laisse un travail qui part passer devant un travail qui attend", () => {
+    const melange = avancement({
+      travaux: [{ kind: "VARIANTS", differe: true }, { kind: "VARIANTS" }],
+      concepts: 3,
+    });
+
+    expect(etatDuDepot(melange)).toBe("questions");
+  });
+
   it("prend l'étape la plus en amont quand plusieurs travaux attendent", () => {
     const melange = avancement({ travaux: [{ kind: "VARIANTS" }, { kind: "OCR" }] });
 

@@ -16,10 +16,21 @@ export const CONCEPTS_PAR_JOB = 3;
 
 export type JobDeQuestions = GenerationJob & { atomIds: string[] };
 
+/**
+ * Ce qui distingue une réécriture d'un premier jeu de questions.
+ *
+ * `partiraLe` diffère le départ : le job existe, il attend. `regeneration` dit
+ * que ce job compte dans le plafond hebdomadaire du concept. Les deux ne sont
+ * posés que par `lib/db/demande-de-questions.ts` — le découpage d'un dépôt,
+ * lui, écrit des premiers jeux, qui ne diffèrent rien et ne comptent pas.
+ */
+export type FormeDuJob = { partiraLe?: Date; regeneration?: boolean };
+
 /** Un job par groupe de trois concepts, dans l'ordre d'extraction. */
 export async function creerJobsDeQuestions(
   inputId: string,
   atomIds: string[],
+  forme: FormeDuJob = {},
 ): Promise<GenerationJob[]> {
   const groupes: string[][] = [];
 
@@ -29,7 +40,15 @@ export async function creerJobsDeQuestions(
 
   return prisma.$transaction(
     groupes.map((groupe) =>
-      prisma.generationJob.create({ data: { inputId, kind: "VARIANTS", atomIds: groupe } }),
+      prisma.generationJob.create({
+        data: {
+          inputId,
+          kind: "VARIANTS",
+          atomIds: groupe,
+          notBefore: forme.partiraLe ?? null,
+          regeneration: forme.regeneration ?? false,
+        },
+      }),
     ),
   );
 }
@@ -47,6 +66,8 @@ export async function creerJobsDeQuestions(
 export async function trouverJobsASoumettre(
   limite: number,
   maintenant: Date = new Date(),
+  /** Restreint aux jobs d'un compte. Absent depuis le cron, qui ramasse tout. */
+  userId?: string,
 ): Promise<GenerationJob[]> {
   const bloqueAvant = new Date(maintenant.getTime() - STALL_AFTER_MS);
 
@@ -55,7 +76,11 @@ export async function trouverJobsASoumettre(
       kind: "VARIANTS",
       batchId: null,
       attempts: { lt: MAX_ATTEMPTS },
-      OR: [{ status: "QUEUED" }, { status: "RUNNING", startedAt: { lt: bloqueAvant } }],
+      // Une demande reportée n'entre pas dans un lot avant sa date : elle
+      // existe pour occuper la place, pas pour partir tout de suite.
+      OR: [{ notBefore: null }, { notBefore: { lte: maintenant } }],
+      AND: [{ OR: [{ status: "QUEUED" }, { status: "RUNNING", startedAt: { lt: bloqueAvant } }] }],
+      ...(userId ? { input: { userId } } : {}),
     },
     orderBy: { createdAt: "asc" },
     take: limite,

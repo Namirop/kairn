@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import { localDay } from "@/lib/domain/local-day";
+import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
 
 /**
  * Réservation d'une place d'appel modèle pour la journée en cours.
@@ -72,6 +72,87 @@ export async function reserverAppelModele(
   maintenant: Date = new Date(),
 ): Promise<Reservation> {
   return reserverAppelsModele(plafond, 1, maintenant);
+}
+
+/**
+ * La part d'un compte dans les appels du jour.
+ *
+ * Le plafond global protège le budget ; il ne protège personne de son voisin.
+ * Un compte qui le consommait entièrement fermait la journée de tous les
+ * autres, et il n'avait pas besoin d'être malveillant pour ça. Cette réserve
+ * est le second verrou, pris **avant** la place globale.
+ *
+ * Même instruction, même raison qu'au-dessus : incrémenter et refuser d'un
+ * seul mouvement. La journée se compte en UTC, comme le plafond global — deux
+ * fenêtres qui se ferment à des instants différents dérivent l'une de l'autre.
+ */
+export async function reserverPlacesDeCompte(
+  userId: string,
+  plafond: number,
+  places: number,
+  maintenant: Date = new Date(),
+): Promise<Reservation> {
+  // Même garde que pour le plafond global : la clause `WHERE` ne tient que le
+  // `DO UPDATE`, donc la première réservation d'une journée passerait sans être
+  // confrontée au plafond.
+  if (places > plafond) {
+    return { obtenue: false, utilisees: await lirePlacesDeCompte(userId, maintenant) };
+  }
+
+  const jour = jourUtc(maintenant);
+  const lignes = await prisma.$queryRaw<{ reserved: number }[]>`
+    INSERT INTO "AiUserQuota" ("userId", "day", "reserved", "createdAt", "updatedAt")
+    VALUES (${userId}, ${jour}::date, ${places}, now(), now())
+    ON CONFLICT ("userId", "day") DO UPDATE
+      SET "reserved" = "AiUserQuota"."reserved" + ${places},
+          "updatedAt" = now()
+      WHERE "AiUserQuota"."reserved" + ${places} <= ${plafond}
+    RETURNING "reserved"
+  `;
+
+  const obtenue = lignes[0];
+
+  if (obtenue) return { obtenue: true, utilisees: obtenue.reserved };
+
+  return { obtenue: false, utilisees: await lirePlacesDeCompte(userId, maintenant) };
+}
+
+export async function reserverPlaceDeCompte(
+  userId: string,
+  plafond: number,
+  maintenant: Date = new Date(),
+): Promise<Reservation> {
+  return reserverPlacesDeCompte(userId, plafond, 1, maintenant);
+}
+
+/**
+ * Rend des places de compte prises pour rien.
+ *
+ * Le seul cas : la place globale a été refusée juste après. Contrairement à la
+ * place globale, celles-ci n'ont rien émis — rien n'a été consommé, rien n'est
+ * dû.
+ */
+export async function rendrePlacesDeCompte(
+  userId: string,
+  places = 1,
+  maintenant: Date = new Date(),
+): Promise<void> {
+  await prisma.aiUserQuota.updateMany({
+    where: { userId, day: dayToUtcDate(jourUtc(maintenant)), reserved: { gte: places } },
+    data: { reserved: { decrement: places } },
+  });
+}
+
+export async function lirePlacesDeCompte(
+  userId: string,
+  maintenant: Date = new Date(),
+): Promise<number> {
+  const lignes = await prisma.$queryRaw<{ reserved: number }[]>`
+    SELECT "reserved" FROM "AiUserQuota"
+    WHERE "userId" = ${userId} AND "day" = ${jourUtc(maintenant)}::date
+  `;
+
+  return lignes[0]?.reserved ?? 0;
 }
 
 /** Places déjà prises aujourd'hui. Pour l'observation et les messages d'erreur. */

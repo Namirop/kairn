@@ -18,6 +18,24 @@ model GenerationJob {
   batchId String?
   batch   AiBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
 
+  /// Ce job réécrit les questions d'un concept qui en avait déjà.
+  ///
+  /// C'est lui, et lui seul, que compte le plafond hebdomadaire. Le premier
+  /// jeu de questions d'un concept n'est pas une réécriture : le compter
+  /// revenait à punir le geste le plus normal du produit — déposer, voir un
+  /// concept mal découpé, le corriger dans la minute — d'une semaine sans
+  /// questions. La fenêtre part de la première correction, pas du dépôt.
+  regeneration Boolean @default(false)
+
+  /// Avant cet instant, le job existe mais ne part pas.
+  ///
+  /// Un concept ne redemande des questions qu'une fois par semaine. Quand la
+  /// demande arrive trop tôt, on ne la jette pas — la jeter laisserait un
+  /// concept réécrit sans aucune question, pour toujours. On l'écrit avec la
+  /// date à laquelle elle devient légitime, et elle part toute seule ce jour-là.
+  /// Nul pour un job qui part tout de suite, c'est-à-dire presque tous.
+  notBefore DateTime?
+
   createdAt  DateTime  @default(now())
   startedAt  DateTime?
   finishedAt DateTime?
@@ -82,6 +100,32 @@ model AiCallQuota {
   updatedAt DateTime @updatedAt
 }
 
+/// La part d'un compte dans les appels du jour, en UTC comme le plafond global.
+///
+/// Le plafond global protège le budget ; il ne protège personne de son voisin.
+/// Un seul compte pouvait le consommer entièrement et fermer la journée de tous
+/// les autres. Cette réserve est le second verrou : elle se prend **avant** la
+/// place globale, et elle est rendue si la globale est refusée — contrairement
+/// à la globale, elle n'a rien émis.
+///
+/// La journée se compte en UTC, comme `AiCallQuota` et pour la même raison :
+/// deux fenêtres qui ne se ferment pas au même instant dérivent l'une de
+/// l'autre. Ce n'est pas le compteur que voit l'utilisateur — celui-là est dans
+/// `DailyUsage`, dans son calendrier à lui.
+model AiUserQuota {
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Minuit UTC du jour concerné.
+  day    DateTime @db.Date
+
+  reserved Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, day])
+}
+
 /// Une ligne par appel réel au modèle, succès comme échec. C'est le registre
 /// qui sert la comptabilité et l'observation ; l'autorisation, elle, passe par
 /// `AiCallQuota`.
@@ -129,6 +173,23 @@ model DailyUsage {
   /// ce qui coûte, et la bonne unité pour l'utilisateur.
   concepts    Int @default(0)
   reviews     Int @default(0)
+
+  /// Fenêtre courte des dépôts, et ce qu'on y a compté.
+  ///
+  /// Elle vit sur cette ligne et pas ailleurs, et c'est tout l'intérêt :
+  /// compter les dépôts récents par une requête à part était une course — dix
+  /// envois simultanés lisaient zéro et passaient tous. Ici, la fenêtre est
+  /// dans la ligne qu'on verrouille pour prendre sa place, donc l'incrément et
+  /// le refus tiennent dans la même instruction. Un redécoupage, qui n'écrit
+  /// aucun dépôt, y entre au même titre : c'est la place qui compte, pas la
+  /// trace qu'elle laisse.
+  depositWindowStart DateTime @default(now())
+  depositWindowCount Int      @default(0)
+
+  /// Même mécanisme pour les gestes de révision et d'entraînement. Ils ne
+  /// coûtent aucun appel modèle, mais ils écrivent sans limite et lisent large.
+  actionWindowStart DateTime @default(now())
+  actionWindowCount Int      @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

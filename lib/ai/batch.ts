@@ -1,9 +1,13 @@
 import { recordAiCall } from "@/lib/db/ai-call";
-import { reserverAppelsModele } from "@/lib/db/ai-quota";
+import {
+  rendrePlacesDeCompte,
+  reserverAppelsModele,
+  reserverPlacesDeCompte,
+} from "@/lib/db/ai-quota";
 import { sdkFor } from "./client";
 import { readAiConfig } from "./config";
 import { apercuBrut } from "./diagnostic";
-import { AIDisabledError, AIQuotaError } from "./errors";
+import { AIDisabledError, AIQuotaError, AIUserQuotaError } from "./errors";
 import { loadFixture } from "./fixtures";
 import { lireSortieStructuree } from "./lecture";
 import { deposerLotSimule, lotSimulePresent, releverLotSimule } from "./lot-simule";
@@ -42,8 +46,17 @@ export type LotSoumis = { providerId: string; requetes: number };
 /**
  * Soumet le lot et rend son identifiant. Les places au plafond sont prises ici,
  * toutes ensemble : un lot à moitié réservé n'aurait aucun sens.
+ *
+ * `userId` est renseigné quand le lot ne porte que le travail d'un compte —
+ * c'est le cas depuis que la soumission à la demande est scopée. Sa part est
+ * alors prise avant la place globale, dans le même ordre et pour la même raison
+ * que dans `callAI` : la part se rend, la place globale non. Le lot du cron,
+ * lui, mélange les comptes et ne passe que le plafond global.
  */
-export async function submitAIBatch<T>(requetes: RequeteGroupee<T>[]): Promise<LotSoumis> {
+export async function submitAIBatch<T>(
+  requetes: RequeteGroupee<T>[],
+  userId?: string,
+): Promise<LotSoumis> {
   const config = readAiConfig();
 
   if (!config.enabled) throw new AIDisabledError();
@@ -55,9 +68,17 @@ export async function submitAIBatch<T>(requetes: RequeteGroupee<T>[]): Promise<L
     return { providerId: deposerLotSimule(requetes), requetes: requetes.length };
   }
 
+  if (userId) {
+    const part = await reserverPlacesDeCompte(userId, config.userDailyCallCap, requetes.length);
+
+    if (!part.obtenue) throw new AIUserQuotaError(part.utilisees, config.userDailyCallCap);
+  }
+
   const reservation = await reserverAppelsModele(config.dailyCallCap, requetes.length);
 
   if (!reservation.obtenue) {
+    if (userId) await rendrePlacesDeCompte(userId, requetes.length);
+
     throw new AIQuotaError(reservation.utilisees, config.dailyCallCap);
   }
 

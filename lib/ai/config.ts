@@ -12,6 +12,11 @@ const configSchema = z.object({
   enabled: booleanFromEnv,
   mock: booleanFromEnv,
   dailyCallCap: z.coerce.number().int().positive(),
+  /**
+   * Ce qu'un seul compte peut prendre dans la journée. Le plafond global
+   * protège le budget ; celui-ci protège les utilisateurs les uns des autres.
+   */
+  userDailyCallCap: z.coerce.number().int().positive(),
   model: z.string().min(1),
   maxTokens: z.coerce.number().int().positive(),
   apiKey: z.string().min(1).optional(),
@@ -24,6 +29,7 @@ export function readAiConfig(): AiConfig {
     enabled: process.env.AI_ENABLED,
     mock: process.env.MOCK_AI,
     dailyCallCap: process.env.AI_DAILY_CALL_CAP,
+    userDailyCallCap: process.env.AI_DAILY_CALL_CAP_PAR_COMPTE,
     model: process.env.AI_MODEL,
     maxTokens: process.env.AI_MAX_TOKENS,
     apiKey: process.env.ANTHROPIC_API_KEY || undefined,

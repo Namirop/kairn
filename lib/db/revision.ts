@@ -81,11 +81,16 @@ export async function enregistrerRevision(
       fsrsState: true,
       lastReview: true,
       masterySignaledAt: true,
+      // Les variantes retirées entrent aussi. Une question posée à l'écran a pu
+      // être retirée entre-temps — le concept réécrit dans un autre onglet, ou
+      // ses questions renouvelées — et la personne a quand même répondu. Refuser
+      // le passage perdrait un fait réel pour une raison qui ne la regarde pas.
+      // C'est `actives` qui sert la rotation ; la retirée ne sert qu'à écrire.
       variants: {
-        where: { retiredAt: null },
         select: {
           id: true,
           facet: true,
+          retiredAt: true,
           sessionCount: true,
           trainingCount: true,
           lastSessionAt: true,
@@ -104,6 +109,10 @@ export async function enregistrerRevision(
   const variante = atome.variants.find((candidate) => candidate.id === revision.variantId);
 
   if (!variante) return null;
+
+  // L'usure se juge sur ce qui est encore servable : une variante retirée n'a
+  // plus à peser dans la décision de renouveler.
+  const actives = atome.variants.filter((candidate) => candidate.retiredAt === null);
 
   const plan = planifier(atome, revision.note, maintenant);
 
@@ -161,7 +170,7 @@ export async function enregistrerRevision(
     }),
   ]);
 
-  await regenererSiUsees(atome, apresLePassage(atome.variants, variante.id, "SESSION"), maintenant);
+  await regenererSiUsees(atome, apresLePassage(actives, variante.id, "SESSION"), maintenant);
 
   return {
     etat,
