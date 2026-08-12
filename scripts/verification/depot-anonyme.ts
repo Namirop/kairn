@@ -67,7 +67,7 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
   const second = await deposerSansCompte(TEXTE, adresse, essai.sessionId);
 
   record(
-    "Essai — une seconde tentative depuis la même visite est refusée",
+    "Essai — un essai qui a donné des concepts ferme la visite",
     !second.ok,
     second.ok ? "acceptée" : second.motif,
   );
@@ -93,6 +93,54 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
   );
 
   await prisma.input.deleteMany({ where: { userId } });
+  await repartirDeZero(adresse);
+}
+
+/**
+ * L'essai qui ne donne rien laisse une seconde chance, et une seule.
+ *
+ * Sans elle, quelqu'un qui colle le mauvais texte du premier coup se retrouve
+ * devant une page morte : sa visite est consommée, il n'a rien vu du produit, et
+ * la seule page qui convertit devient une impasse.
+ */
+export async function casSecondeChance(): Promise<void> {
+  const adresse = "203.0.113.55";
+  await repartirDeZero(adresse);
+
+  // Une liste de courses : la chaîne tourne et conclut qu'il n'y a rien.
+  const rate = await deposerSansCompte(
+    "Lentilles corail, tomates pelées, pain de seigle, deux citrons et du persil plat.",
+    adresse,
+    null,
+  );
+
+  if (!rate.ok) throw new Error(`Le premier essai a été refusé : ${rate.motif}`);
+
+  await executerToutLePipeline(rate.inputId);
+
+  const concepts = await prisma.atom.count({ where: { anonymousSessionId: rate.sessionId } });
+  const retente = await deposerSansCompte(TEXTE, adresse, rate.sessionId);
+
+  record(
+    "Essai — un essai qui n'a rien donné laisse retenter",
+    concepts === 0 && retente.ok,
+    concepts === 0
+      ? retente.ok
+        ? "seconde chance accordée"
+        : retente.motif
+      : `${concepts} concept(s)`,
+  );
+
+  if (retente.ok) await executerToutLePipeline(retente.inputId);
+
+  const troisieme = await deposerSansCompte(TEXTE, adresse, rate.sessionId);
+
+  record(
+    "Essai — la seconde chance ne se répète pas",
+    !troisieme.ok,
+    troisieme.ok ? "un troisième essai est passé" : troisieme.motif,
+  );
+
   await repartirDeZero(adresse);
 }
 

@@ -2,12 +2,8 @@
 
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
-import {
-  avancementDeLEssaiAction,
-  essayerAction,
-  type AvancementDeLEssai,
-  type EtatEssai,
-} from "@/app/(marketing)/actions";
+import { avancementDeLEssaiAction, essayerAction, type EtatEssai } from "@/app/(marketing)/actions";
+import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 import { ConceptsEnAttente } from "@/components/site/concepts-en-attente";
 import { Button } from "@/components/ui/button";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
@@ -31,9 +27,19 @@ import { ROUTES } from "@/lib/auth/routes";
 const RYTHME_MS = 1000;
 const ESSAIS_MAXIMUM = 60;
 
-export function EssaiDeDepot({ invite }: { invite: string }) {
+export function EssaiDeDepot({
+  invite,
+  essaiPrecedent,
+}: {
+  invite: string;
+  /** Ce qu'une visite antérieure a déjà produit. Lu côté serveur au chargement. */
+  essaiPrecedent: AvancementDeLEssai | null;
+}) {
   const [etat, action, enCours] = useActionState<EtatEssai, FormData>(essayerAction, {});
-  const [avancement, setAvancement] = useState<AvancementDeLEssai | null>(null);
+  const [avancement, setAvancement] = useState<AvancementDeLEssai | null>(essaiPrecedent);
+  // Remet le champ après un essai qui n'a rien donné. La base tranchera : elle
+  // n'accorde qu'une seconde chance, et seulement si la première a échoué.
+  const [recommence, setRecommence] = useState(false);
 
   useEffect(() => {
     if (!etat.sessionId) return;
@@ -62,7 +68,11 @@ export function EssaiDeDepot({ invite }: { invite: string }) {
   // L'attente commence au clic et non au retour de l'action : entre les deux
   // il y a un aller-retour, et pendant cet aller-retour seul le libellé du
   // bouton changeait — l'écran avait l'air de n'avoir rien reçu.
-  if (enCours || etat.sessionId) return <ResultatDeLEssai avancement={avancement} />;
+  // Un essai déjà fait se remontre plutôt que de laisser un champ vide : sinon
+  // le refus d'un second essai désigne des concepts que personne ne voit.
+  if (!recommence && (enCours || etat.sessionId || essaiPrecedent)) {
+    return <ResultatDeLEssai avancement={avancement} setRecommence={setRecommence} />;
+  }
 
   return (
     <form action={action} noValidate className="gap-pas-3 flex flex-col">
@@ -92,7 +102,13 @@ export function EssaiDeDepot({ invite }: { invite: string }) {
   );
 }
 
-function ResultatDeLEssai({ avancement }: { avancement: AvancementDeLEssai | null }) {
+function ResultatDeLEssai({
+  avancement,
+  setRecommence,
+}: {
+  avancement: AvancementDeLEssai | null;
+  setRecommence: (valeur: boolean) => void;
+}) {
   if (!avancement || avancement.enCours) return <ConceptsEnAttente />;
 
   if (avancement.concepts.length === 0) {
@@ -102,9 +118,18 @@ function ResultatDeLEssai({ avancement }: { avancement: AvancementDeLEssai | nul
           {avancement.motifDechec ?? "Ce texte n'a rien donné à retenir."}
         </p>
         <p className="text-petit text-stone-500">
-          Essaie avec une explication, une règle, un mécanisme — quelque chose que tu voudrais
+          Retente avec une explication, une règle, un mécanisme — quelque chose que tu voudrais
           savoir dans un mois.
         </p>
+
+        {/* Une seconde chance, et une seule : sans elle, la page la plus
+            importante du produit devient une impasse pour qui a collé le mauvais
+            texte du premier coup. */}
+        <div>
+          <Button type="button" variant="outline" onClick={() => setRecommence(true)}>
+            Réessayer
+          </Button>
+        </div>
       </div>
     );
   }

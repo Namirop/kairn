@@ -73,6 +73,7 @@ async function main(): Promise<void> {
     await limites.casListeDattente(userId);
 
     await anonyme.casEssaiPuisCompte(userId);
+    await anonyme.casSecondeChance();
     await anonyme.casLimiteParAdresse();
     await anonyme.casOubliDesVisites();
 

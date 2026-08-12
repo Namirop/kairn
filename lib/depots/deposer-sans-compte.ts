@@ -44,7 +44,7 @@ const TROP_DE_DEPOTS =
   "Beaucoup d'essais sont partis d'ici récemment. Crée un compte pour continuer — c'est gratuit.";
 
 const DEJA_DEPOSE =
-  "Tu as déjà fait ton essai. Crée un compte pour garder ces concepts et en déposer d'autres.";
+  "Tu as fait ton essai. Crée un compte pour garder tes concepts et en déposer d'autres.";
 
 /**
  * Dépose sans compte, ou dit pourquoi c'est refusé.

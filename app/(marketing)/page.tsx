@@ -5,6 +5,7 @@ import { Hero } from "@/components/site/hero";
 import { PasCeci } from "@/components/site/pas-ceci";
 import { Sentier } from "@/components/site/sentier";
 import { ROUTES } from "@/lib/auth/routes";
+import { lireLEssaiEnCours } from "@/lib/depots/essai-en-cours";
 import { inviteDeDepot } from "@/lib/domain/invites-de-depot";
 
 /**
@@ -17,10 +18,14 @@ import { inviteDeDepot } from "@/lib/domain/invites-de-depot";
 /** Rendue à la demande : l'invite du champ change à chaque chargement. */
 export const dynamic = "force-dynamic";
 
-export default function PageAccueil() {
+export default async function PageAccueil() {
+  // Lu ici et non dans le composant : quelqu'un qui revient doit retrouver ses
+  // concepts au premier rendu, pas après un aller-retour.
+  const essaiPrecedent = await lireLEssaiEnCours();
+
   return (
     <>
-      <Hero invite={inviteDeDepot(Math.random())} />
+      <Hero invite={inviteDeDepot(Math.random())} essaiPrecedent={essaiPrecedent} />
       <Strates de="papier" vers="ombre" graine="accueil-sentier" />
       <Sentier />
       <Strates de="ombre" vers="roche" graine="accueil-pas-ceci" />

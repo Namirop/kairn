@@ -66,14 +66,33 @@ export async function ouvrirUneSession(adresse: string): Promise<OuvertureDeSess
   return { ouverte: true, sessionId: session.id };
 }
 
-/** La session existe-t-elle encore, et n'a-t-elle pas déjà déposé ? */
+/**
+ * Essais tolérés par visite quand le premier n'a rien donné.
+ *
+ * Un essai qui ne rend aucun concept — une liste de courses, un lien nu —
+ * laisserait sinon quelqu'un devant une page morte : la visite est consommée, il
+ * ne peut plus rien tenter, et il n'a rien vu du produit. Une seconde chance
+ * coûte une extraction et sauve la seule page qui convertit. Un essai **réussi**,
+ * lui, ferme la visite : il a montré ce qu'il avait à montrer.
+ */
+export const ESSAIS_PAR_VISITE = 2;
+
+/** Cette visite peut-elle encore déposer ? */
 export async function sessionDisponible(sessionId: string): Promise<boolean> {
   const session = await prisma.anonymousSession.findUnique({
     where: { id: sessionId },
-    select: { claimedAt: true, _count: { select: { inputs: true } } },
+    select: {
+      claimedAt: true,
+      _count: { select: { inputs: true, atoms: true } },
+    },
   });
 
-  return session !== null && session.claimedAt === null && session._count.inputs === 0;
+  if (!session || session.claimedAt !== null) return false;
+
+  // Des concepts existent : l'essai a abouti, il n'y a plus rien à démontrer.
+  if (session._count.atoms > 0) return false;
+
+  return session._count.inputs < ESSAIS_PAR_VISITE;
 }
 
 export type DepotAnonyme = {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CairnRenversable } from "@/components/cairn/cairn-renversable";
 import { Panneau } from "@/components/coquille/panneau";
 import { EssaiDeDepot } from "@/components/site/essai-de-depot";
+import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
@@ -15,7 +16,13 @@ import { ROUTES } from "@/lib/auth/routes";
  * cairn qui occupe la colonne désormais — il monte à toute la hauteur du
  * panneau plutôt que de flotter au milieu d'un rectangle.
  */
-export function Hero({ invite }: { invite: string }) {
+export function Hero({
+  invite,
+  essaiPrecedent,
+}: {
+  invite: string;
+  essaiPrecedent: AvancementDeLEssai | null;
+}) {
   return (
     <Panneau
       surface="papier"
@@ -40,7 +47,7 @@ export function Hero({ invite }: { invite: string }) {
             un compte avant d'avoir rien montré était la friction la plus chère
             du produit. */}
         <div className="mt-pas-8">
-          <EssaiDeDepot invite={invite} />
+          <EssaiDeDepot invite={invite} essaiPrecedent={essaiPrecedent} />
         </div>
 
         <p className="mt-pas-6 text-petit text-stone-500">
