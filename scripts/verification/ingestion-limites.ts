@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/db/client";
 import {
   compterConceptsRetenus,
-  CONCEPTS_PAR_JOUR,
-  DEPOTS_PAR_JOUR,
+  CONCEPTS_PAR_PERIODE,
+  DEPOTS_PAR_PERIODE,
   estEnListeDattente,
   inscrireEnListeDattente,
 } from "@/lib/db/quota-depots";
@@ -31,7 +31,7 @@ export async function casDoubleEnvoi(userId: string): Promise<void> {
   const premier = await deposerTexte(userId, "verif-double-01");
   const second = await deposerTexte(userId, "verif-double-01");
   const ecrits = await prisma.input.count({ where: { userId, submissionKey: "verif-double-01" } });
-  const consommes = await prisma.dailyUsage.findFirst({ where: { userId } });
+  const consommes = await prisma.monthlyUsage.findFirst({ where: { userId } });
 
   record(
     "Double envoi — le même geste n'écrit qu'un dépôt",
@@ -41,8 +41,8 @@ export async function casDoubleEnvoi(userId: string): Promise<void> {
 
   record(
     "Double envoi — la place prise à tort est rendue",
-    (consommes?.generations ?? 0) === 1,
-    `${consommes?.generations ?? 0} place(s) consommée(s)`,
+    (consommes?.deposits ?? 0) === 1,
+    `${consommes?.deposits ?? 0} place(s) consommée(s)`,
   );
 }
 
@@ -66,7 +66,7 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
 
   // Le quota porte sur les concepts, et l'extraction n'a pas lieu ici : on
   // remplit le compteur comme le ferait le découpage, jusqu'à une place près.
-  await compterConceptsRetenus(userId, "Europe/Paris", CONCEPTS_PAR_JOUR - 1);
+  await compterConceptsRetenus(userId, "Europe/Paris", CONCEPTS_PAR_PERIODE - 1);
 
   const dernier = await deposerTexte(userId, "verif-quota-limite");
   record(
@@ -80,16 +80,16 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
 
   const surnumeraire = await deposerTexte(userId, "verif-quota-plein");
   record(
-    `Quota — le dépôt qui suit les ${CONCEPTS_PAR_JOUR} concepts est refusé, et se sait refusé`,
+    `Quota — le dépôt qui suit les ${CONCEPTS_PAR_PERIODE} concepts est refusé, et se sait refusé`,
     !surnumeraire.ok && surnumeraire.quota === true,
     surnumeraire.ok ? "accepté" : surnumeraire.motif,
   );
 
-  const consommes = await prisma.dailyUsage.findFirst({ where: { userId } });
+  const consommes = await prisma.monthlyUsage.findFirst({ where: { userId } });
   record(
-    "Quota — un refus n'entame ni les concepts ni les dépôts du jour",
-    (consommes?.concepts ?? 0) === CONCEPTS_PAR_JOUR && (consommes?.generations ?? 0) === 4,
-    `${consommes?.concepts ?? 0} concept(s) sur ${CONCEPTS_PAR_JOUR}, ${consommes?.generations ?? 0} dépôt(s)`,
+    "Quota — un refus n'entame ni les concepts ni les dépôts de la période",
+    (consommes?.concepts ?? 0) === CONCEPTS_PAR_PERIODE && (consommes?.deposits ?? 0) === 4,
+    `${consommes?.concepts ?? 0} concept(s) sur ${CONCEPTS_PAR_PERIODE}, ${consommes?.deposits ?? 0} dépôt(s)`,
   );
 }
 
@@ -97,7 +97,7 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
 export async function casPlafondDeDepots(userId: string): Promise<void> {
   await repartirDeZero(userId);
 
-  for (let numero = 1; numero <= DEPOTS_PAR_JOUR; numero += 1) {
+  for (let numero = 1; numero <= DEPOTS_PAR_PERIODE; numero += 1) {
     const resultat = await deposerTexte(userId, `verif-depots-${numero}`);
 
     if (!resultat.ok) throw new Error(`Le dépôt ${numero} aurait dû passer : ${resultat.motif}`);
@@ -105,10 +105,10 @@ export async function casPlafondDeDepots(userId: string): Promise<void> {
   }
 
   const surnumeraire = await deposerTexte(userId, "verif-depots-trop");
-  const consommes = await prisma.dailyUsage.findFirst({ where: { userId } });
+  const consommes = await prisma.monthlyUsage.findFirst({ where: { userId } });
 
   record(
-    `Quota — le dépôt ${DEPOTS_PAR_JOUR + 1} est refusé même sans un seul concept retenu`,
+    `Quota — le dépôt ${DEPOTS_PAR_PERIODE + 1} est refusé même sans un seul concept retenu`,
     !surnumeraire.ok && surnumeraire.quota === true && (consommes?.concepts ?? 0) === 0,
     surnumeraire.ok ? "accepté" : surnumeraire.motif,
   );

@@ -203,6 +203,35 @@ model AiCall {
   @@index([userId, createdAt])
 }
 
+/// Le budget d'un compte sur sa période, et ce qu'il en a consommé.
+///
+/// Le plafond gratuit se compte au mois et non au jour : trente concepts par
+/// jour tenaient tant que le produit ne servait qu'à son auteur, mais un compte
+/// gratuit qui sature tous les jours coûte une trentaine de dollars par mois.
+/// Trente par mois ramène le coût maximal d'un compte gratuit sous le demi-dollar.
+///
+/// La période n'est pas le mois civil : elle est ancrée sur le jour
+/// d'inscription — voir `lib/domain/periode-de-quota.ts`. Une ligne par période
+/// et par compte, et la clé primaire fait que prendre sa place est une seule
+/// instruction qui incrémente et refuse dans le même mouvement.
+model MonthlyUsage {
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Premier jour de la période, dans le calendrier de l'utilisateur.
+  periodStart DateTime @db.Date
+
+  /// Concepts retenus dans la période. C'est le plafond que l'écran annonce.
+  concepts Int @default(0)
+  /// Dépôts écrits dans la période. Second rideau : chaque dépôt paie une
+  /// extraction, quoi qu'elle rende, et un dépôt rejeté n'en rend aucun.
+  deposits Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, periodStart])
+}
+
 /// Compteurs par utilisateur et par jour, pour les quotas d'usage.
 model DailyUsage {
   userId String

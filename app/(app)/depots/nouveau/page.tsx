@@ -8,14 +8,15 @@ import { PlafondAtteint } from "@/components/depots/plafond-atteint";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import {
-  CONCEPTS_PAR_JOUR,
-  DEPOTS_PAR_JOUR,
+  CONCEPTS_PAR_PERIODE,
+  DEPOTS_PAR_PERIODE,
   estEnListeDattente,
-  lireUsageDuJour,
+  lireUsageDeLaPeriode,
 } from "@/lib/db/quota-depots";
 import { compterLesDepots } from "@/lib/db/depots";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { inviteDeDepot } from "@/lib/domain/invites-de-depot";
+import { localDay } from "@/lib/domain/local-day";
 import { quandRepartLeCompteur } from "@/lib/domain/remise-a-zero";
 
 export const metadata: Metadata = { title: "Déposer" };
@@ -27,17 +28,17 @@ export default async function PageNouveauDepot() {
 
   const fuseau = await lireFuseauUtilisateur(utilisateur.id);
   const [usage, inscrit, depotsFaits] = await Promise.all([
-    lireUsageDuJour(utilisateur.id, fuseau),
+    lireUsageDeLaPeriode(utilisateur.id, fuseau),
     estEnListeDattente(utilisateur.id),
     compterLesDepots(utilisateur.id),
   ]);
   // Le premier dépôt d'un compte : c'est le seul moment où les exemples
   // servent, et le seul où l'écran doit dire ce qu'on attend de lui.
   const aucunDepot = depotsFaits === 0;
-  // Ce qui reste, c'est ce qu'on peut encore retenir aujourd'hui. Le plafond de
-  // dépôts n'est qu'un second rideau : il ne s'annonce pas, il se rencontre.
-  const restants = Math.max(0, CONCEPTS_PAR_JOUR - usage.concepts);
-  const plein = restants === 0 || usage.depots >= DEPOTS_PAR_JOUR;
+  // Ce qui reste, c'est ce qu'on peut encore retenir sur la période. Le plafond
+  // de dépôts n'est qu'un second rideau : il ne s'annonce pas, il se rencontre.
+  const restants = Math.max(0, CONCEPTS_PAR_PERIODE - usage.concepts);
+  const plein = restants === 0 || usage.depots >= DEPOTS_PAR_PERIODE;
 
   return (
     <PileDePanneaux sol="ombre">
@@ -53,9 +54,9 @@ export default async function PageNouveauDepot() {
       <Panneau surface="ombre" mesure="colonne" remplit className="md:pb-pas-16">
         {plein ? (
           <PlafondAtteint
-            remiseAZero={quandRepartLeCompteur(new Date(), fuseau)}
+            remiseAZero={quandRepartLeCompteur(localDay(new Date(), fuseau), usage.periode.fin)}
             inscrit={inscrit}
-            plafond={CONCEPTS_PAR_JOUR}
+            plafond={CONCEPTS_PAR_PERIODE}
           />
         ) : (
           // La clé d'un geste de dépôt, tirée à chaque affichage : elle rend le

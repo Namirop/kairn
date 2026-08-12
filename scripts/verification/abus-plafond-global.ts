@@ -4,7 +4,7 @@ import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
 import { prisma } from "@/lib/db/client";
 import { lirePlacesDeCompte, lireReservationsDuJour } from "@/lib/db/ai-quota";
-import { lireUsageDuJour } from "@/lib/db/quota-depots";
+import { lireUsageDeLaPeriode } from "@/lib/db/quota-depots";
 import { deposer } from "@/lib/depots/deposer";
 import { enModeCompteur, viderLeCompte } from "./abus-fabrique";
 import { executerToutLePipeline, formulaire } from "./depot-simule";
@@ -63,7 +63,7 @@ export async function casVoisinBloquant(premier: string, second: string): Promis
       where: { inputId: voisin.inputId },
       select: { status: true, attempts: true, lastError: true },
     });
-    const usage = await lireUsageDuJour(second, FUSEAU);
+    const usage = await lireUsageDeLaPeriode(second, FUSEAU);
 
     record(
       "Plafond global — le dépôt du voisin n'est pas déclaré en échec",

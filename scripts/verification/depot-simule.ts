@@ -82,8 +82,8 @@ export async function executerToutLePipeline(inputId: string): Promise<number> {
 }
 
 /**
- * Recule la fenêtre de débit, pour éprouver le quota du jour sans attendre une
- * minute entre deux dépôts.
+ * Recule la fenêtre de débit, pour éprouver le quota de la période sans attendre
+ * une minute entre deux dépôts.
  *
  * La fenêtre ne se lit plus sur les dépôts écrits : elle vit sur la ligne de
  * `DailyUsage`, parce qu'un compteur lu à part laissait passer tout ce qui
@@ -107,12 +107,14 @@ export async function vieillirLesDepots(userId: string): Promise<void> {
 export async function libererLaJournee(userId: string): Promise<void> {
   await vieillirLesDepots(userId);
   await prisma.dailyUsage.deleteMany({ where: { userId } });
+  await prisma.monthlyUsage.deleteMany({ where: { userId } });
 }
 
 /** Remet le compte du jour et les dépôts à zéro entre deux vérifications. */
 export async function repartirDeZero(userId: string): Promise<void> {
   await prisma.input.deleteMany({ where: { userId } });
   await prisma.dailyUsage.deleteMany({ where: { userId } });
+  await prisma.monthlyUsage.deleteMany({ where: { userId } });
   await prisma.waitlistEntry.deleteMany({ where: { userId } });
   await prisma.aiBatch.deleteMany({ where: { jobs: { none: {} } } });
 }

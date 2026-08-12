@@ -1,16 +1,17 @@
 import { readFileSync } from "node:fs";
 import { prisma } from "@/lib/db/client";
 import {
-  CONCEPTS_PAR_JOUR,
-  DEPOTS_PAR_JOUR,
+  CONCEPTS_PAR_PERIODE,
+  DEPOTS_PAR_PERIODE,
   compterConceptsRetenus,
-  lireUsageDuJour,
+  lireUsageDeLaPeriode,
+  periodeDuCompte,
 } from "@/lib/db/quota-depots";
 import { deposer, SIGNES_MAXIMUM, type ResultatDepot } from "@/lib/depots/deposer";
 import { MOTIFS_DE_REFUS } from "@/lib/depots/refus-de-quota";
 import { GESTES_PAR_FENETRE, prendreUnGeste } from "@/lib/db/limite-de-gestes";
 import { enregistrerEntrainement } from "@/lib/db/entrainement";
-import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
+import { debutEnDate } from "@/lib/domain/periode-de-quota";
 import { executerToutLePipeline, formulaire } from "./depot-simule";
 import { fabriquerConcept, viderLeCompte } from "./abus-fabrique";
 import { record } from "./journal";
@@ -35,15 +36,17 @@ Le navigateur sert alors sa copie, ce qui économise la bande passante mais pas 
 /** Assez long pour que la fixture rende huit concepts, comme un article collé. */
 const ARTICLE = Array.from({ length: 6 }, () => PARAGRAPHE).join("\n\n");
 
-function jourDuCompte(): Date {
-  return dayToUtcDate(localDay(new Date(), FUSEAU));
-}
+/**
+ * Remplit le compteur de la période, pour l'amener à deux places de son plafond
+ * sans passer par autant de dépôts réels.
+ */
+async function poserLesDepotsDeLaPeriode(userId: string, deposits: number): Promise<void> {
+  const periode = await periodeDuCompte(userId, FUSEAU);
 
-async function poserLesDepotsDuJour(userId: string, generations: number): Promise<void> {
-  await prisma.dailyUsage.upsert({
-    where: { userId_day: { userId, day: jourDuCompte() } },
-    create: { userId, day: jourDuCompte(), generations, concepts: 0, reviews: 0 },
-    update: { generations },
+  await prisma.monthlyUsage.upsert({
+    where: { userId_periodStart: { userId, periodStart: debutEnDate(periode) } },
+    create: { userId, periodStart: debutEnDate(periode), deposits, concepts: 0 },
+    update: { deposits },
   });
 }
 
@@ -70,23 +73,23 @@ export async function casDebitConcurrent(userId: string): Promise<void> {
 /** Le plafond de dépôts du jour, éprouvé sur les deux dernières places. */
 export async function casPlafondConcurrent(userId: string): Promise<void> {
   await viderLeCompte(userId);
-  await poserLesDepotsDuJour(userId, DEPOTS_PAR_JOUR - 2);
+  await poserLesDepotsDeLaPeriode(userId, DEPOTS_PAR_PERIODE - 2);
 
   const resultats = await Promise.all(enParallele(userId, "verif-plafond-simultane"));
   const acceptes = resultats.filter((resultat) => resultat.ok).length;
-  const usage = await lireUsageDuJour(userId, FUSEAU);
+  const usage = await lireUsageDeLaPeriode(userId, FUSEAU);
 
   record(
     `Quota — ${SIMULTANES} dépôts simultanés sur deux places libres n'en prennent que deux`,
-    acceptes === 2 && usage.depots === DEPOTS_PAR_JOUR,
-    `${acceptes} accepté(s), compteur à ${usage.depots}/${DEPOTS_PAR_JOUR}`,
+    acceptes === 2 && usage.depots === DEPOTS_PAR_PERIODE,
+    `${acceptes} accepté(s), compteur à ${usage.depots}/${DEPOTS_PAR_PERIODE}`,
   );
 }
 
 /** Le décompte des concepts a lieu après l'extraction, faute de savoir avant. */
 export async function casDecompteApresExtraction(userId: string): Promise<void> {
   await viderLeCompte(userId);
-  await compterConceptsRetenus(userId, FUSEAU, CONCEPTS_PAR_JOUR - 1);
+  await compterConceptsRetenus(userId, FUSEAU, CONCEPTS_PAR_PERIODE - 1);
 
   const depot = await deposer(
     userId,
@@ -97,7 +100,7 @@ export async function casDecompteApresExtraction(userId: string): Promise<void> 
 
   await executerToutLePipeline(depot.inputId);
 
-  const usage = await lireUsageDuJour(userId, FUSEAU);
+  const usage = await lireUsageDeLaPeriode(userId, FUSEAU);
   const ecrits = await prisma.atom.count({ where: { inputId: depot.inputId } });
 
   // Le débordement du dernier dépôt est assumé : refuser à mi-extraction serait
@@ -114,7 +117,7 @@ export async function casDecompteApresExtraction(userId: string): Promise<void> 
     !suivant.ok && suivant.quota === true,
     suivant.ok
       ? "accepté"
-      : `${ecrits} concept(s) sur la dernière place, compteur à ${usage.concepts}/${CONCEPTS_PAR_JOUR} — puis « ${suivant.motif} »`,
+      : `${ecrits} concept(s) sur la dernière place, compteur à ${usage.concepts}/${CONCEPTS_PAR_PERIODE} — puis « ${suivant.motif} »`,
   );
 
   record(
@@ -125,7 +128,7 @@ export async function casDecompteApresExtraction(userId: string): Promise<void> 
 
   const avant = usage.concepts;
   await prisma.input.delete({ where: { id: depot.inputId } });
-  const apres = await lireUsageDuJour(userId, FUSEAU);
+  const apres = await lireUsageDeLaPeriode(userId, FUSEAU);
 
   record(
     "Quota — supprimer un dépôt ne rend jamais ce qu'il a consommé",
@@ -161,7 +164,7 @@ export async function casRejetEtPanne(userId: string): Promise<void> {
 
   await executerToutLePipeline(rejete.inputId);
 
-  const apresRejet = await lireUsageDuJour(userId, FUSEAU);
+  const apresRejet = await lireUsageDeLaPeriode(userId, FUSEAU);
   const etatRejet = await prisma.input.findUniqueOrThrow({
     where: { id: rejete.inputId },
     select: { status: true },
@@ -187,7 +190,7 @@ export async function casRejetEtPanne(userId: string): Promise<void> {
   await executerToutLePipeline(enPanne.inputId);
   process.env.AI_ENABLED = "true";
 
-  const apresPanne = await lireUsageDuJour(userId, FUSEAU);
+  const apresPanne = await lireUsageDeLaPeriode(userId, FUSEAU);
   const etatPanne = await prisma.input.findUniqueOrThrow({
     where: { id: enPanne.inputId },
     select: { status: true },
@@ -337,7 +340,7 @@ export async function casBornesDentree(userId: string): Promise<void> {
     lourd.ok ? "accepté" : lourd.motif,
   );
 
-  const usage = await lireUsageDuJour(userId, FUSEAU);
+  const usage = await lireUsageDeLaPeriode(userId, FUSEAU);
 
   record(
     "Bornes — un dépôt refusé à l'entrée ne consomme aucune place du jour",

@@ -40,6 +40,7 @@ export async function effacerComptes(ids: string[]): Promise<void> {
 export async function viderLeCompte(userId: string): Promise<void> {
   await prisma.input.deleteMany({ where: { userId } });
   await prisma.dailyUsage.deleteMany({ where: { userId } });
+  await prisma.monthlyUsage.deleteMany({ where: { userId } });
   await prisma.aiUserQuota.deleteMany({ where: { userId } });
   await prisma.waitlistEntry.deleteMany({ where: { userId } });
 }

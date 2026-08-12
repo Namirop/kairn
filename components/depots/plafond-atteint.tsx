@@ -29,9 +29,9 @@ export function PlafondAtteint({
     <div className="border-lichen pl-pas-4 gap-pas-3 flex max-w-xl flex-col border-l-2">
       {/* Les mêmes mots que le refus côté serveur : c'est la même limite.
           « Autour de » parce qu'un dépôt rend ce qu'il rend : le dernier de la
-          journée peut passer le plafond sans qu'on l'ait mal compté. */}
+          période peut passer le plafond sans qu'on l'ait mal compté. */}
       <p className="text-corps text-stone-900">
-        Tu as atteint la limite du jour, autour de {plafond} concepts. Le compteur repart{" "}
+        Tu as atteint la limite du mois, autour de {plafond} concepts. Le compteur repart{" "}
         {remiseAZero}.
       </p>
       <p className="text-petit text-stone-500">

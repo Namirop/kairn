@@ -1,53 +1,65 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
-import { minutesAvantMinuit, quandRepartLeCompteur } from "./remise-a-zero";
+import { joursAvantLaBascule, quandRepartLeCompteur } from "./remise-a-zero";
 
-const PARIS = "Europe/Paris";
-const KATMANDOU = "Asia/Kathmandu";
-
-describe("minutesAvantMinuit", () => {
-  it("compte depuis l'heure de l'utilisateur, pas celle du serveur", () => {
-    // 22 h 30 UTC, soit 23 h 30 à Paris en janvier : trente minutes.
-    const instant = new Date("2026-01-15T22:30:00Z");
-
-    expect(minutesAvantMinuit(instant, PARIS)).toBe(30);
-    expect(minutesAvantMinuit(instant, "UTC")).toBe(90);
+describe("joursAvantLaBascule", () => {
+  it("compte les jours pleins jusqu'au basculement", () => {
+    expect(joursAvantLaBascule("2026-09-01", "2026-09-12")).toBe(11);
   });
 
-  it("tient sur un fuseau à décalage non entier", () => {
-    // 18 h 00 UTC, soit 23 h 45 à Katmandou (+5 h 45).
-    expect(minutesAvantMinuit(new Date("2026-01-15T18:00:00Z"), KATMANDOU)).toBe(15);
+  it("rend zéro le jour du basculement", () => {
+    expect(joursAvantLaBascule("2026-09-12", "2026-09-12")).toBe(0);
+  });
+
+  it("ne rend jamais de négatif sur une période déjà passée", () => {
+    expect(joursAvantLaBascule("2026-09-20", "2026-09-12")).toBe(0);
+  });
+
+  /**
+   * Les journées locales font 23 ou 25 heures aux changements d'heure. Le calcul
+   * passe par minuit UTC des étiquettes de jour, pas par des heures locales :
+   * l'étiquette avance toujours d'un cran.
+   */
+  it("enjambe les changements d'heure sans perdre ni gagner un jour", () => {
+    expect(joursAvantLaBascule("2026-03-28", "2026-03-30")).toBe(2);
+    expect(joursAvantLaBascule("2026-10-24", "2026-10-26")).toBe(2);
+  });
+
+  it("enjambe un changement d'année", () => {
+    expect(joursAvantLaBascule("2026-12-28", "2027-01-04")).toBe(7);
   });
 });
 
 describe("quandRepartLeCompteur", () => {
-  it("dit les minutes quand il en reste moins d'une heure", () => {
-    expect(quandRepartLeCompteur(new Date("2026-01-15T22:30:00Z"), PARIS)).toBe("dans 30 minutes");
+  it("dit demain à un jour", () => {
+    expect(quandRepartLeCompteur("2026-09-11", "2026-09-12")).toBe("demain");
   });
 
-  it("dit les heures quand la soirée est encore longue", () => {
-    expect(quandRepartLeCompteur(new Date("2026-01-15T19:00:00Z"), PARIS)).toBe("dans 4 heures");
+  it("compte en jours tant que c'est proche", () => {
+    expect(quandRepartLeCompteur("2026-09-08", "2026-09-12")).toBe("dans 4 jours");
   });
 
-  it("renvoie à minuit quand la journée entière reste", () => {
-    expect(quandRepartLeCompteur(new Date("2026-01-15T08:00:00Z"), PARIS)).toBe("à minuit");
+  /** Au-delà d'une semaine, « dans 26 jours » se convertit de tête : on nomme. */
+  it("nomme la date quand elle est lointaine", () => {
+    expect(quandRepartLeCompteur("2026-08-17", "2026-09-12")).toBe("le 12 septembre");
   });
-});
 
-describe("propriétés", () => {
-  it("reste dans une journée, quel que soit l'instant et le fuseau", () => {
+  it("ne promet rien de faux le jour même", () => {
+    expect(quandRepartLeCompteur("2026-09-12", "2026-09-12")).toBe("d'un instant à l'autre");
+  });
+
+  it("rend toujours une phrase, quelles que soient les bornes", () => {
     fc.assert(
       fc.property(
-        fc.date({
-          min: new Date("2020-01-01T00:00:00Z"),
-          max: new Date("2030-01-01T00:00:00Z"),
-          noInvalidDate: true,
-        }),
-        fc.constantFrom(PARIS, KATMANDOU, "UTC", "Pacific/Auckland", "America/Los_Angeles"),
-        (instant, fuseau) => {
-          const minutes = minutesAvantMinuit(instant, fuseau);
+        fc.date({ min: new Date("2025-01-01"), max: new Date("2028-12-31"), noInvalidDate: true }),
+        fc.integer({ min: -400, max: 400 }),
+        (jour, ecart) => {
+          const aujourdhui = jour.toISOString().slice(0, 10);
+          const fin = new Date(jour.getTime() + ecart * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .slice(0, 10);
 
-          return minutes > 0 && minutes <= 24 * 60;
+          return quandRepartLeCompteur(aujourdhui, fin).length > 0;
         },
       ),
       { numRuns: 300 },

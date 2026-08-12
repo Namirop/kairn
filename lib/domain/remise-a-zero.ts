@@ -1,34 +1,40 @@
-import { localHour } from "./local-day";
+import { dayToUtcDate } from "./local-day";
 
 /**
- * Quand le compteur du jour repart.
+ * Quand le compteur repart.
  *
- * C'est minuit chez l'utilisateur, pas chez le serveur. Dire « demain » à
- * quelqu'un qui dépose à 23 h 50 serait faux d'exactement dix minutes.
+ * Depuis que le plafond se compte au mois, ce n'est plus minuit mais le jour
+ * d'ancrage de la période — le 12 pour qui s'est inscrit un 12. Dire « à
+ * minuit » à quelqu'un dont la période repart dans trois semaines serait faux de
+ * trois semaines, et c'est le genre de phrase qu'on croit sur parole.
  */
 
-/** Minutes restantes avant le prochain minuit local. */
-export function minutesAvantMinuit(maintenant: Date, fuseau: string): number {
-  const heure = localHour(maintenant, fuseau);
-  const minutesDeLHeure = Number.parseInt(
-    new Intl.DateTimeFormat("en-GB", { timeZone: fuseau, minute: "2-digit" }).format(maintenant),
-    10,
-  );
+const JOUR_MS = 24 * 60 * 60 * 1000;
 
-  return (24 - heure) * 60 - (Number.isNaN(minutesDeLHeure) ? 0 : minutesDeLHeure);
+const DATE_COURTE = new Intl.DateTimeFormat("fr-BE", { day: "numeric", month: "long" });
+
+/** Jours pleins entre aujourd'hui et le basculement, dans le calendrier local. */
+export function joursAvantLaBascule(aujourdhui: string, finDePeriode: string): number {
+  return Math.max(
+    0,
+    Math.round(
+      (dayToUtcDate(finDePeriode).getTime() - dayToUtcDate(aujourdhui).getTime()) / JOUR_MS,
+    ),
+  );
 }
 
-/** Le même instant, dit en français : « dans deux heures », « demain ». */
-export function quandRepartLeCompteur(maintenant: Date, fuseau: string): string {
-  const minutes = minutesAvantMinuit(maintenant, fuseau);
+/**
+ * Le moment de la remise à zéro, dit en français.
+ *
+ * Une échéance proche se compte en jours, une échéance lointaine se nomme : « le
+ * 12 septembre » situe mieux que « dans 26 jours », qu'il faut convertir de tête.
+ */
+export function quandRepartLeCompteur(aujourdhui: string, finDePeriode: string): string {
+  const jours = joursAvantLaBascule(aujourdhui, finDePeriode);
 
-  if (minutes <= 1) return "dans une minute";
-  if (minutes < 60) return `dans ${minutes} minutes`;
+  if (jours <= 0) return "d'un instant à l'autre";
+  if (jours === 1) return "demain";
+  if (jours <= 7) return `dans ${jours} jours`;
 
-  const heures = Math.round(minutes / 60);
-
-  if (heures === 1) return "dans une heure";
-  if (heures <= 6) return `dans ${heures} heures`;
-
-  return "à minuit";
+  return `le ${DATE_COURTE.format(dayToUtcDate(finDePeriode))}`;
 }
