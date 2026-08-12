@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BoutonDeconnexion } from "@/components/compte/bouton-deconnexion";
+import { MesDonnees } from "@/components/compte/mes-donnees";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
@@ -83,6 +84,8 @@ export default async function PageReglages() {
         <div className="mt-pas-8">
           <BoutonDeconnexion />
         </div>
+
+        <MesDonnees />
       </Panneau>
     </PileDePanneaux>
   );

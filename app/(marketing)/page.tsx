@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { Panneau } from "@/components/coquille/panneau";
 import { Strates } from "@/components/coquille/strates";
 import { Hero } from "@/components/site/hero";
 import { PasCeci } from "@/components/site/pas-ceci";
 import { Sentier } from "@/components/site/sentier";
+import { ROUTES } from "@/lib/auth/routes";
 
 /**
  * La page publique : une pile de panneaux, chacun avec sa surface, séparés par
@@ -22,9 +24,29 @@ export default function PageAccueil() {
       <Strates de="roche" vers="papier" graine="accueil-pied" />
 
       <Panneau surface="papier">
-        <p className="text-mono text-stone-500">
-          Kairn — un cairn balise un sentier, une pierre à la fois.
-        </p>
+        <div className="gap-pas-4 flex flex-wrap items-baseline justify-between">
+          <p className="text-mono text-stone-500">
+            Kairn — un cairn balise un sentier, une pierre à la fois.
+          </p>
+
+          {/* Atteignables sans compte, et depuis la seule page publique : une
+              politique de confidentialité derrière une connexion ne sert à
+              personne. */}
+          <nav className="gap-pas-4 text-mono flex flex-wrap">
+            <Link
+              href={ROUTES.mentionsLegales}
+              className="rounded-galet text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
+            >
+              Mentions légales
+            </Link>
+            <Link
+              href={ROUTES.confidentialite}
+              className="rounded-galet text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
+            >
+              Confidentialité
+            </Link>
+          </nav>
+        </div>
       </Panneau>
     </>
   );

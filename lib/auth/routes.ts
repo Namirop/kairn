@@ -5,6 +5,8 @@
  */
 export const ROUTES = {
   accueil: "/",
+  mentionsLegales: "/mentions-legales",
+  confidentialite: "/confidentialite",
   connexion: "/connexion",
   inscription: "/inscription",
   aujourdhui: "/aujourdhui",

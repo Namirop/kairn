@@ -81,8 +81,9 @@ async function main(): Promise<void> {
   const entrainement = await import("./verification/entrainement-etanche");
   const usure = await import("./verification/regeneration-usee");
   const phase4 = await import("./verification/progression-et-signalement");
+  const compte = await import("./verification/compte-efface");
 
-  const comptes = [IDENTIFIANT, ENTRAINEMENT];
+  const comptes = [IDENTIFIANT, ENTRAINEMENT, "verification-effacement"];
 
   await prisma.aiCall.deleteMany({ where: { userId: { in: comptes } } });
   await prisma.user.deleteMany({ where: { id: { in: comptes } } });
@@ -122,6 +123,11 @@ async function main(): Promise<void> {
     await phase4.casSerieAutourDeMinuit(utilisateur.id);
     await phase4.casSignalementTrace(utilisateur.id);
     phase4.casAdministrationFermee();
+
+    // En dernier, et sur son propre compte : le cas efface ce qu'il éprouve.
+    const aEffacer = await creerCompte("verification-effacement", "Vérification effacement");
+    await compte.casExportComplet(aEffacer.id, "Europe/Paris");
+    await compte.casSuppressionComplete(aEffacer.id, "Europe/Paris");
 
     const appels = await prisma.aiCall.count({ where: { userId: { in: comptes } } });
     record(
