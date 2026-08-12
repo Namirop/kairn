@@ -20,6 +20,11 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  * L'avancement est là parce qu'une session se finit mieux quand on en voit le
  * bout. Ce n'est ni un score ni une série : il disparaît avec la session.
  *
+ * Le rythme vertical dit la structure : le sujet et la question sont une unité,
+ * donc ils se touchent presque ; répondre est une autre affaire, donc l'écart
+ * double ; ce qui vient après la réponse s'en détache plus encore. Les mêmes
+ * trente-deux pixels partout aplatissaient les trois en une seule coulée.
+ *
  * Ce qui vit sous le trait dépend du mode. La session du jour y met « Je
  * maîtrise ça », qui sort le concept du cycle ; l'entraînement libre n'y met
  * rien, puisqu'il ne décide de rien.
@@ -55,19 +60,19 @@ export function CarteQuestion({
         <PileDeSession rang={rang} total={total} chiffree={chiffree} />
       </div>
 
-      <h1 className="mt-pas-8 text-h1-app leading-snug font-bold text-pretty text-stone-900">
+      <h1 className="mt-pas-6 text-h1-app leading-snug font-bold text-pretty text-stone-900">
         <TexteTechnique>{question}</TexteTechnique>
       </h1>
 
       {children}
 
-      {actions ? <div className="mt-pas-12 pt-pas-6">{actions}</div> : null}
+      {actions ? <div className="mt-pas-16">{actions}</div> : null}
 
       {/* Sous tout le reste, et volontairement en retrait : c'est un défaut à
           remonter, pas une note à donner. Elle doit être trouvable quand on la
           cherche et invisible quand on révise. */}
       {variantId ? (
-        <div className={actions ? "mt-pas-6" : "mt-pas-12"}>
+        <div className={actions ? "mt-pas-6" : "mt-pas-16"}>
           <SignalerLaQuestion key={variantId} variantId={variantId} />
         </div>
       ) : null}

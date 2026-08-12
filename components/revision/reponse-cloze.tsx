@@ -81,14 +81,14 @@ export function ReponseCloze({
 
   if (rate) {
     return (
-      <div className="mt-pas-8">
+      <div className="mt-pas-12">
         <PhraseTrouee phrase={sentence} comble={attendu} />
 
         <p className="mt-pas-6 text-petit text-stone-500">
           Tu as écrit <span className="font-mono text-stone-900">{propre}</span>.
         </p>
 
-        <div className="gap-pas-2 mt-pas-3 flex flex-wrap">
+        <div className="gap-pas-2 mt-pas-8 flex flex-wrap">
           <Button
             type="button"
             variant="outline"
@@ -106,7 +106,7 @@ export function ReponseCloze({
   }
 
   return (
-    <div className="mt-pas-8">
+    <div className="mt-pas-12">
       <PhraseTrouee phrase={sentence} comble={propre.length > 0 ? propre : null} />
 
       <form

@@ -53,7 +53,7 @@ export function FinDeSession({
     <section className="mx-auto flex w-full max-w-2xl flex-col">
       <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">Session</p>
 
-      <h1 className="mt-pas-4 text-h1-app leading-tight font-bold text-stone-900">
+      <h1 className="mt-pas-2 text-h1-app leading-tight font-bold text-stone-900">
         {revus === 0
           ? "Rien n'a été revu."
           : `${revus} ${revus === 1 ? "concept revu" : "concepts revus"}.`}
@@ -84,7 +84,7 @@ export function FinDeSession({
       {/* Déposer d'abord, s'entraîner ensuite. La boucle de croissance du
           produit, ce sont les dépôts : quelqu'un avec deux concepts n'a pas un
           problème de session, il a un problème de contenu. */}
-      <div className="gap-pas-3 mt-pas-12 flex flex-col sm:flex-row">
+      <div className="gap-pas-3 mt-pas-16 flex flex-col sm:flex-row">
         <Button asChild>
           <Link href={`${ROUTES.depots}/nouveau`}>Déposer autre chose</Link>
         </Button>

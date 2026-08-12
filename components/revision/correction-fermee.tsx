@@ -32,7 +32,7 @@ export function CorrectionFermee({
   const complete = etalonUtile(answerKey, bonneOption);
 
   return (
-    <div className="mt-pas-8 pt-pas-6">
+    <div className="mt-pas-12">
       <p className="text-mono font-mono tracking-[0.12em] uppercase">
         {juste ? (
           <span className="text-lichen-deep">Réponse juste</span>
@@ -47,7 +47,7 @@ export function CorrectionFermee({
         </p>
       ) : null}
 
-      <div className="gap-pas-2 mt-pas-6 flex flex-wrap">
+      <div className="gap-pas-2 mt-pas-8 flex flex-wrap">
         <Button type="button" disabled={enCours} onClick={onSuite}>
           {dernier ? "Terminer" : "Continuer"}
         </Button>

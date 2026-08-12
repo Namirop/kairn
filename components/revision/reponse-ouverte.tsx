@@ -1,5 +1,6 @@
 "use client";
 
+import { BarreDeNotation } from "@/components/revision/barre-de-notation";
 import { Button } from "@/components/ui/button";
 import type { ReviewRating } from "@/lib/db/types";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
@@ -16,19 +17,6 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  * et c'est la personne qui compare.
  */
 
-/**
- * Les quatre niveaux, dits du point de vue de celui qui se juge.
- *
- * Aucun n'est une note ni un compliment : « J'y étais » constate, « Sans
- * hésiter » constate aussi. La récompense est la progression, pas l'étiquette.
- */
-const NIVEAUX: { note: ReviewRating; libelle: string }[] = [
-  { note: "AGAIN", libelle: "Je ne l'avais pas" },
-  { note: "HARD", libelle: "Approchant" },
-  { note: "GOOD", libelle: "J'y étais" },
-  { note: "EASY", libelle: "Sans hésiter" },
-];
-
 export function ReponseOuverte({
   answerKey,
   revelee,
@@ -44,11 +32,11 @@ export function ReponseOuverte({
 }) {
   if (!revelee) {
     return (
-      <div className="mt-pas-8">
+      <div className="mt-pas-12">
         <Button type="button" onClick={onReveler} className="w-full sm:w-auto">
           Comparer à l&apos;étalon
         </Button>
-        <p className="mt-pas-3 text-petit text-stone-500">
+        <p className="mt-pas-3 text-petit max-w-prose text-stone-500">
           Formule ta réponse d&apos;abord, même de tête. C&apos;est l&apos;effort de la retrouver
           qui la fixe.
         </p>
@@ -57,27 +45,18 @@ export function ReponseOuverte({
   }
 
   return (
-    <div className="mt-pas-8">
+    <div className="mt-pas-12">
+      {/* L'intitulé colle à son contenu : ils sont une seule chose. */}
       <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
         L&apos;étalon
       </p>
-      <p className="mt-pas-2 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed whitespace-pre-wrap text-stone-900">
+      <p className="mt-pas-2 text-corps pl-pas-4 border-l-2 border-stone-300 leading-relaxed whitespace-pre-wrap text-stone-900">
         <TexteTechnique>{answerKey}</TexteTechnique>
       </p>
 
-      <p className="mt-pas-8 text-petit text-stone-500">Où en étais-tu ?</p>
-      <div className="gap-pas-2 mt-pas-3 grid grid-cols-2 sm:flex sm:flex-wrap">
-        {NIVEAUX.map((niveau) => (
-          <Button
-            key={niveau.note}
-            type="button"
-            variant="outline"
-            disabled={enCours}
-            onClick={() => onSeJuger(niveau.note)}
-          >
-            {niveau.libelle}
-          </Button>
-        ))}
+      {/* Se juger est un autre geste que lire : l'écart le dit. */}
+      <div className="mt-pas-12">
+        <BarreDeNotation enCours={enCours} onNoter={onSeJuger} />
       </div>
     </div>
   );

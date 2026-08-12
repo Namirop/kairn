@@ -44,7 +44,7 @@ export function ReponseFermee({
   }, [options.length, onChoisir, repondu]);
 
   return (
-    <ul className="gap-pas-2 mt-pas-6 flex flex-col">
+    <ul className="gap-pas-2 mt-pas-12 flex flex-col">
       {options.map((option, rang) => {
         const estBonne = rang === correctIndex;
         const estChoisie = rang === choisi;
