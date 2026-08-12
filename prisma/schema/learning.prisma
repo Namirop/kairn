@@ -58,6 +58,15 @@ model Atom {
   /// Distingue l'archivage décidé par l'utilisateur de celui décidé par le produit.
   archivedByUser Boolean   @default(false)
 
+  /// Dernier passage d'entraînement sur ce concept, tous variants confondus.
+  ///
+  /// Ce n'est pas de la planification et ça n'en approche pas : aucune échéance
+  /// ne le lit. C'est le curseur qui fait tourner l'entraînement — un tour ne
+  /// tire que douze questions, il n'a jamais eu besoin de lire tout le corpus,
+  /// et servir d'abord ce qui a été travaillé il y a le plus longtemps borne la
+  /// lecture sans que personne ne sorte jamais de la rotation.
+  trainedAt DateTime?
+
   /// Quand la carte « tu maîtrises ça » a été montrée pour ce concept.
   /// Ce qui est rare fait plaisir : sans cette trace, le même concept
   /// rappellerait sa victoire à chaque série qui accélère, et la carte
@@ -87,6 +96,8 @@ model Atom {
   @@index([userId, due])
   @@index([userId, state])
   @@index([inputId])
+  /// La fenêtre d'un tour d'entraînement : le moins récemment travaillé d'abord.
+  @@index([userId, trainedAt])
 }
 
 model Variant {

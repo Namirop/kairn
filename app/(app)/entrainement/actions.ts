@@ -3,7 +3,8 @@
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth/session";
 import { enregistrerEntrainement, lireTourDentrainement } from "@/lib/db/entrainement";
-import { marquerPrincipeVu } from "@/lib/db/user-settings";
+import { prendreUnGeste } from "@/lib/db/limite-de-gestes";
+import { lireFuseauUtilisateur, marquerPrincipeVu } from "@/lib/db/user-settings";
 import type { QuestionServie } from "@/lib/db/question-servie";
 
 /**
@@ -38,14 +39,28 @@ export async function sentrainerAction(donnees: PassageDonne): Promise<boolean> 
 
   if (!valide.success) return false;
 
+  if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
+    return false;
+  }
+
   return enregistrerEntrainement({ userId: utilisateur.id, ...valide.data });
 }
 
-/** Un tour de plus, sans quitter l'écran. */
+/**
+ * Un tour de plus, sans quitter l'écran.
+ *
+ * Le geste le plus cher en lecture des trois — il parcourt les concepts du
+ * compte pour en tirer douze questions. Il passe donc par la même limite de
+ * débit, et la lecture qu'il déclenche est bornée côté base.
+ */
 export async function tourSuivantAction(): Promise<QuestionServie[]> {
   const utilisateur = await getCurrentUser();
 
   if (!utilisateur) return [];
+
+  if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
+    return [];
+  }
 
   return lireTourDentrainement(utilisateur.id);
 }

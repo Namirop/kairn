@@ -27,9 +27,11 @@ export function PlafondAtteint({
 
   return (
     <div className="border-lichen pl-pas-4 gap-pas-3 flex max-w-xl flex-col border-l-2">
-      {/* Les mêmes mots que le refus côté serveur : c'est la même limite. */}
+      {/* Les mêmes mots que le refus côté serveur : c'est la même limite.
+          « Environ » parce qu'un dépôt rend ce qu'il rend : le dernier de la
+          journée peut passer le plafond sans qu'on l'ait mal compté. */}
       <p className="text-corps text-stone-900">
-        Tu as retenu tout ce que la journée permet, {plafond} concepts. Le compteur repart{" "}
+        Tu as retenu tout ce que la journée permet, environ {plafond} concepts. Le compteur repart{" "}
         {remiseAZero}.
       </p>
       <p className="text-petit text-stone-500">

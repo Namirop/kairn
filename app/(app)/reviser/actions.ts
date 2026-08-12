@@ -3,8 +3,10 @@
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth/session";
 import { reclamerSignalDeMaitrise } from "@/lib/db/carte-de-maitrise";
+import { prendreUnGeste } from "@/lib/db/limite-de-gestes";
 import { enregistrerRevision } from "@/lib/db/revision";
 import { compterDusDemain } from "@/lib/db/session-du-jour";
+import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import type { SignalDeMaitrise } from "@/lib/domain/signal-maitrise";
 
 /**
@@ -25,6 +27,15 @@ import type { SignalDeMaitrise } from "@/lib/domain/signal-maitrise";
  * un nombre qui fausserait le signal de maîtrise.
  */
 const TEMPS_MAXIMUM_MS = 15 * 60 * 1000;
+
+/**
+ * Ce qu'on dit quand la limite de débit refuse un geste.
+ *
+ * Personne ne verra cette phrase en révisant : la limite est très au-dessus de
+ * ce qu'un humain produit. Elle existe pour ce qui n'est pas humain, et elle
+ * doit quand même savoir se dire.
+ */
+const TROP_VITE = "Trop de réponses coup sur coup. Laisse passer quelques secondes.";
 
 const reponseSchema = z.object({
   atomId: z.string().min(1),
@@ -48,6 +59,10 @@ export async function repondreAction(donnees: ReponseDonnee): Promise<ResultatRe
 
   if (!valide.success) {
     return { ok: false, motif: "Cette réponse n'a pas pu être enregistrée." };
+  }
+
+  if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
+    return { ok: false, motif: TROP_VITE };
   }
 
   const resultat = await enregistrerRevision({ userId: utilisateur.id, ...valide.data });

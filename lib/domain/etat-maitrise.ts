@@ -13,7 +13,15 @@
 export const JOURS_AVANT_REVIEWING = 7;
 export const JOURS_AVANT_CONSOLIDATION = 21;
 /**
- * Trois mois. Au-delà, le concept sort du cycle de lui-même.
+ * Trois mois : l'échéance que pose « je maîtrise ça ».
+ *
+ * Ce n'était pas seulement une échéance : un intervalle qui dépassait trois mois
+ * archivait le concept de lui-même. On a retiré cette règle. Elle affichait
+ * « sorti du cycle » sur un concept qui n'en était pas sorti — il revenait bien
+ * en session à son échéance —, et cette étiquette mensongère servait ensuite à
+ * décider ailleurs, notamment à écarter de l'entraînement ce qu'on sait le
+ * mieux. `CONSOLIDATED` disait déjà « bien su ». `ARCHIVED` ne signifie plus
+ * qu'une chose, et c'est ce qui le rend lisible : l'utilisateur l'a demandé.
  *
  * Six mois laissaient l'oubli faire son travail deux fois plutôt qu'une, et
  * surtout c'était une promesse qu'on n'ose pas afficher : « on te le repose
@@ -59,9 +67,13 @@ export function compterReussitesConsecutives(notes: readonly Note[]): number {
 /**
  * L'état après un passage.
  *
- * L'archivage passe en premier : une déclaration de l'utilisateur ou un
- * intervalle au-delà de trois mois sortent le concept du cycle, quel que soit le
- * reste. Un concept espacé mais pas encore régulier reste en `REVIEWING` — la
+ * `ARCHIVED` ne se pose que sur une déclaration de l'utilisateur — c'est le seul
+ * état que le produit ne décide pas. Aucun intervalle, si long soit-il, ne sort
+ * un concept du cycle : la thèse tient qu'on croit savoir et qu'on oublie, et
+ * un concept bien su revient à son échéance comme les autres. Ce qu'il y avait
+ * à dire de lui, `CONSOLIDATED` le dit déjà.
+ *
+ * Un concept espacé mais pas encore régulier reste en `REVIEWING` — la
  * consolidation demande les deux, la durée **et** la régularité.
  */
 export function etatApresRevision(
@@ -70,7 +82,6 @@ export function etatApresRevision(
   archiveParUtilisateur: boolean,
 ): EtatMaitrise {
   if (archiveParUtilisateur) return "ARCHIVED";
-  if (intervalleJours > JOURS_AVANT_ARCHIVAGE) return "ARCHIVED";
 
   if (intervalleJours > JOURS_AVANT_CONSOLIDATION) {
     return reussitesConsecutives >= REUSSITES_POUR_CONSOLIDER ? "CONSOLIDATED" : "REVIEWING";

@@ -6,6 +6,14 @@ import { apresLePassage } from "@/lib/domain/rotation-variantes";
 import { composerEntrainement, QUESTIONS_PAR_TOUR } from "@/lib/domain/selection-entrainement";
 
 /**
+ * Concepts lus pour composer un tour.
+ *
+ * Dix fois ce qu'un tour sert : de quoi alterner les sujets et piocher des
+ * facettes fraîches, sans que la lecture grandisse avec le corpus.
+ */
+const CONCEPTS_PAR_TOUR = 120;
+
+/**
  * L'entraînement libre : lire un tour de questions, écrire un passage.
  *
  * **Rien de ce qui est écrit ici ne touche à la mémoire.** Pas d'échéance, pas
@@ -23,9 +31,13 @@ import { composerEntrainement, QUESTIONS_PAR_TOUR } from "@/lib/domain/selection
 /**
  * Un tour de questions tirées des concepts de cette personne.
  *
- * Les concepts archivés en sont exclus : ils sont sortis du cycle, les
- * reproposer à l'entraînement contredirait le geste. Tout le reste entre, échu
- * ou non — l'entraînement ne regarde aucune échéance, c'est tout son intérêt.
+ * Seuls les concepts que l'utilisateur a lui-même sortis du cycle en sont
+ * exclus : les reproposer contredirait le geste. L'archivage que le produit
+ * pose au-delà de trois mois d'intervalle, lui, n'est qu'une étiquette d'état —
+ * l'exclure reviendrait à retirer de l'entraînement précisément ce qu'on sait
+ * le mieux, alors que la thèse du produit est qu'on croit savoir et qu'on
+ * oublie. Tout le reste entre, échu ou non : l'entraînement ne regarde aucune
+ * échéance, c'est tout son intérêt.
  */
 export async function lireTourDentrainement(
   userId: string,
@@ -35,9 +47,20 @@ export async function lireTourDentrainement(
     where: {
       userId,
       uncertain: false,
-      state: { not: "ARCHIVED" },
+      archivedByUser: false,
       variants: { some: { retiredAt: null } },
     },
+    // Un tour tire douze questions : il n'a jamais eu besoin de tout le corpus,
+    // et le lire entier — concepts et variantes — était une lecture sans borne
+    // qu'un clic répétait à volonté.
+    //
+    // L'ordre est celui du concept touché il y a le plus longtemps, et c'est ce
+    // qui fait tourner la fenêtre : chaque passage d'entraînement horodate son
+    // concept, donc celui qui vient de servir passe en fin de file et laisse la
+    // place aux suivants. Sur un corpus plus grand que la fenêtre, tout finit
+    // par passer.
+    orderBy: { trainedAt: { sort: "asc", nulls: "first" } },
+    take: CONCEPTS_PAR_TOUR,
     select: {
       id: true,
       concept: true,
@@ -113,11 +136,14 @@ export async function enregistrerEntrainement(
       id: true,
       inputId: true,
       stability: true,
+      // Retirées comprises, pour la même raison qu'en session : une question
+      // posée puis retirée pendant qu'on y répondait reste une question à
+      // laquelle on a répondu.
       variants: {
-        where: { retiredAt: null },
         select: {
           id: true,
           facet: true,
+          retiredAt: true,
           sessionCount: true,
           trainingCount: true,
           lastSessionAt: true,
@@ -129,6 +155,8 @@ export async function enregistrerEntrainement(
   const variante = atome?.variants.find((candidate) => candidate.id === passage.variantId);
 
   if (!atome || !variante) return false;
+
+  const actives = atome.variants.filter((candidate) => candidate.retiredAt === null);
 
   await prisma.$transaction([
     prisma.review.create({
@@ -149,17 +177,16 @@ export async function enregistrerEntrainement(
       where: { id: variante.id },
       data: { trainingCount: { increment: 1 }, lastTrainedAt: maintenant },
     }),
+    // Le curseur de rotation des tours, et rien d'autre. Aucune échéance ne le
+    // lit : l'entraînement ne touche toujours à rien de la mémoire.
+    prisma.atom.update({ where: { id: atome.id }, data: { trainedAt: maintenant } }),
   ]);
 
   // Le seul effet de l'entraînement au-delà de son propre compteur : les
   // questions s'usent d'être lues, quel que soit le mode. Ce n'est pas de la
   // planification — aucune échéance ne bouge —, c'est du renouvellement de
   // stock, et il est plafonné à une écriture par concept et par semaine.
-  await regenererSiUsees(
-    atome,
-    apresLePassage(atome.variants, variante.id, "TRAINING"),
-    maintenant,
-  );
+  await regenererSiUsees(atome, apresLePassage(actives, variante.id, "TRAINING"), maintenant);
 
   return true;
 }

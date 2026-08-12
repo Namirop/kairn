@@ -140,8 +140,8 @@ export async function casCaptureIllisible(userId: string, image: File): Promise<
   const depot = await prisma.input.findUniqueOrThrow({ where: { id: inputId } });
 
   record(
-    "Capture illisible — le dépôt échoue avec un motif, sans garder l'image",
-    depot.status === "FAILED" && (depot.failureReason ?? "").length > 0 && !depot.imageData,
+    "Capture illisible — le dépôt est rejeté avec un motif, sans garder l'image",
+    depot.status === "REJECTED" && (depot.failureReason ?? "").length > 0 && !depot.imageData,
     depot.failureReason ?? "aucun motif",
   );
 }
@@ -155,7 +155,7 @@ export async function casRejet(userId: string): Promise<void> {
 
   record(
     "Rien à retenir — le dépôt porte le motif du refus",
-    depot.status === "FAILED" && (depot.failureReason ?? "").length > 0,
+    depot.status === "REJECTED" && (depot.failureReason ?? "").length > 0,
     depot.failureReason ?? "aucun motif",
   );
 }
@@ -195,24 +195,40 @@ export async function casCorrectionDeConcept(userId: string): Promise<void> {
     data: { state: "REVIEWING", reps: 4, lapses: 1, stability: 12 },
   });
 
+  // Ce concept vient d'être découpé, donc ses questions viennent d'être
+  // demandées : une correction dans la foulée tomberait sous le plafond
+  // hebdomadaire et partirait en demande différée. On vieillit la demande
+  // précédente pour éprouver ici ce que ce cas éprouve — la réécriture — et non
+  // le plafond, qui a ses propres lignes dans `verify:abus`.
+  await prisma.generationJob.updateMany({
+    where: { kind: "VARIANTS", atomIds: { has: atome.id } },
+    data: { createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+  });
+
   await modifierConcept(
     atome.id,
     userId,
     "Une reformulation écrite à la main, assez longue pour passer.",
   );
 
-  const survivantes = await prisma.variant.count({ where: { id: { in: avant } } });
+  // Retirées, pas supprimées : `Review.variantId` est en cascade, et les
+  // effacer emporterait tous les passages donnés sur ce concept. Ce qui doit
+  // disparaître, c'est leur présence dans le tirage, pas leur existence.
+  const servables = await prisma.variant.count({
+    where: { id: { in: avant }, retiredAt: null },
+  });
+  const gardees = await prisma.variant.count({ where: { id: { in: avant } } });
   record(
-    "Correction — les anciennes questions disparaissent",
-    survivantes === 0,
-    `${survivantes} question(s) survivante(s) sur ${avant.length}`,
+    "Correction — les anciennes questions sortent du tirage sans sortir de la base",
+    servables === 0 && gardees === avant.length,
+    `${servables} servable(s), ${gardees} conservée(s) sur ${avant.length}`,
   );
 
   await fixerFacture(atome.inputId);
 
   const apres = await prisma.atom.findUniqueOrThrow({
     where: { id: atome.id },
-    include: { variants: true },
+    include: { variants: { where: { retiredAt: null } } },
   });
   record(
     "Correction — la planification repart de zéro et les questions sont réécrites",

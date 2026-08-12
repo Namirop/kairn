@@ -59,24 +59,25 @@ surchargeables par `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`.
 
 ## Variables d'environnement
 
-| Nom                    | Requis | Description                                                                 |
-| ---------------------- | ------ | --------------------------------------------------------------------------- |
-| `DATABASE_URL`         | oui    | Connexion applicative. Sur Neon, l'endpoint poolé.                          |
-| `DIRECT_URL`           | oui    | Connexion directe, sans pooler. Utilisée par Migrate et par le seed.        |
-| `BETTER_AUTH_SECRET`   | oui    | Signature des sessions, et des jetons de désinscription.                    |
-| `BETTER_AUTH_URL`      | oui    | URL publique de l'application, sans slash final.                            |
-| `GOOGLE_CLIENT_ID`     | non    | Sans lui et son secret, le fournisseur Google n'est simplement pas proposé. |
-| `GOOGLE_CLIENT_SECRET` | non    | Voir ci-dessus.                                                             |
-| `ANTHROPIC_API_KEY`    | non    | Inutile tant que `MOCK_AI=true`.                                            |
-| `RESEND_API_KEY`       | non    | Sans elle, les emails sont journalisés au lieu d'être envoyés.              |
-| `EMAIL_FROM`           | non    | Expéditeur des emails transactionnels.                                      |
-| `CRON_SECRET`          | oui    | Jeton `Authorization: Bearer` des routes cron.                              |
-| `MOCK_AI`              | oui    | `true` sert des fixtures locales, sans aucune requête réseau.               |
-| `AI_ENABLED`           | oui    | `false` fait échouer immédiatement tout appel modèle.                       |
-| `AI_DAILY_CALL_CAP`    | oui    | Plafond global d'appels réels par jour, vérifié avant émission.             |
-| `AI_MODEL`             | oui    | Identifiant du modèle.                                                      |
-| `AI_MAX_TOKENS`        | oui    | `max_tokens` par défaut, toujours envoyé ; une sortie coupée est un échec.  |
-| `SEED_USER_*`          | non    | Adresse, mot de passe et fuseau du compte de démonstration.                 |
+| Nom                            | Requis | Description                                                                 |
+| ------------------------------ | ------ | --------------------------------------------------------------------------- |
+| `DATABASE_URL`                 | oui    | Connexion applicative. Sur Neon, l'endpoint poolé.                          |
+| `DIRECT_URL`                   | oui    | Connexion directe, sans pooler. Utilisée par Migrate et par le seed.        |
+| `BETTER_AUTH_SECRET`           | oui    | Signature des sessions, et des jetons de désinscription.                    |
+| `BETTER_AUTH_URL`              | oui    | URL publique de l'application, sans slash final.                            |
+| `GOOGLE_CLIENT_ID`             | non    | Sans lui et son secret, le fournisseur Google n'est simplement pas proposé. |
+| `GOOGLE_CLIENT_SECRET`         | non    | Voir ci-dessus.                                                             |
+| `ANTHROPIC_API_KEY`            | non    | Inutile tant que `MOCK_AI=true`.                                            |
+| `RESEND_API_KEY`               | non    | Sans elle, les emails sont journalisés au lieu d'être envoyés.              |
+| `EMAIL_FROM`                   | non    | Expéditeur des emails transactionnels.                                      |
+| `CRON_SECRET`                  | oui    | Jeton `Authorization: Bearer` des routes cron.                              |
+| `MOCK_AI`                      | oui    | `true` sert des fixtures locales, sans aucune requête réseau.               |
+| `AI_ENABLED`                   | oui    | `false` fait échouer immédiatement tout appel modèle.                       |
+| `AI_DAILY_CALL_CAP`            | oui    | Plafond global d'appels réels par jour, vérifié avant émission.             |
+| `AI_DAILY_CALL_CAP_PAR_COMPTE` | oui    | Part d'un seul compte dans ce plafond, réservée avant lui.                  |
+| `AI_MODEL`                     | oui    | Identifiant du modèle.                                                      |
+| `AI_MAX_TOKENS`                | oui    | `max_tokens` par défaut, toujours envoyé ; une sortie coupée est un échec.  |
+| `SEED_USER_*`                  | non    | Adresse, mot de passe et fuseau du compte de démonstration.                 |
 
 Les valeurs réelles vivent dans `.env`, qui n'est pas versionné. `.env.example` sert de référence.
 
@@ -97,6 +98,8 @@ Les valeurs réelles vivent dans `.env`, qui n'est pas versionné. `.env.example
 | `npm run db:studio`        | Prisma Studio                                             |
 | `npm run verify:ai`        | Vérifie les garde-fous d'appel modèle à l'exécution       |
 | `npm run verify:ingestion` | Rejoue l'ingestion de bout en bout, en mode mock          |
+| `npm run verify:session`   | Rejoue le moteur de révision et l'entraînement libre      |
+| `npm run verify:abus`      | Passe d'audit : quotas, débit, propriété, cycle de vie    |
 
 `npm run eval:generation` existe aussi : c'est le banc d'évaluation, décrit plus bas. C'est le seul
 script du dépôt qui émet de vrais appels, et il ne part pas sans qu'on le lui dise deux fois.
@@ -155,6 +158,23 @@ La réservation passe par la table `AiCallQuota`, une ligne par jour UTC, et tie
 instruction qui incrémente et refuse dans le même mouvement. Compter les lignes d'`AiCall` avant
 d'émettre serait une course : deux appels simultanés liraient la même valeur et passeraient tous
 les deux. Une place prise n'est jamais rendue — un appel qui échoue a pu consommer des tokens.
+
+Un appel qui porte un utilisateur prend **deux** places, dans cet ordre : d'abord sa part du jour
+(`AiUserQuota`, plafonnée par `AI_DAILY_CALL_CAP_PAR_COMPTE`), puis la place globale. Si la globale
+est refusée, la part du compte lui est rendue — contrairement à la globale, elle n'a rien émis. Le
+plafond global protège le budget ; il ne protégeait personne de son voisin, et un seul compte
+pouvait fermer la journée de tous les autres.
+
+Le refus global n'est pas un échec de job. `runJob` remet le travail en file sans lui compter de
+tentative : la journée est pleine, le même appel réussira demain, et le dépôt continue d'annoncer
+un travail en cours au lieu d'annoncer une panne.
+
+**Dimensionner ces deux plafonds.** Un compte qui sature ses quotas d'ingestion consomme autour de
+vingt-cinq appels par jour. Une part par compte protège d'un abuseur, pas du succès : à quatre
+comptes actifs, la somme des parts dépasse déjà un plafond global posé à cent cinquante. Le réglage
+à terme n'est donc pas un nombre d'appels mais un plafond de **dépense**, posé au-dessus de la somme
+des parts attendues et indexé sur le nombre de comptes actifs. Tant que ce n'est pas fait, `AI_DAILY_CALL_CAP`
+doit rester nettement supérieur à `AI_DAILY_CALL_CAP_PAR_COMPTE` multiplié par le nombre de comptes actifs.
 
 `npm run verify:ai` pose un piège sur `fetch` et vérifie ces garde-fous à l'exécution plutôt que sur
 parole.
@@ -216,9 +236,20 @@ concepts, et l'écran dit ce qui manque. Un concept marqué douteux par le modè
 génération — lui écrire des questions riverait une erreur que personne n'a vérifiée ; il attend
 d'être confirmé, réécrit ou supprimé.
 
-Deux limites bornent le geste : cinq dépôts par jour et par compte, comptés dans le calendrier de
-l'utilisateur, et trois dépôts par minute pour le débit. Le plafond atteint propose une liste
+Trois limites bornent le geste, toutes prises dans la même instruction sur la ligne du jour :
+environ trente concepts et quinze dépôts par jour et par compte, comptés dans le calendrier de
+l'utilisateur, et trois dépôts par minute pour le débit. « Environ » n'est pas une approximation
+d'écriture : un dépôt est autorisé tant qu'il reste une place et rend ensuite ce qu'il rend, donc le
+dernier de la journée peut retenir huit concepts sur une seule place. Passé le plafond, plus rien ne
+part. Un redécoupage prend une place comme un dépôt, et entre dans la fenêtre de débit au même titre.
+
+Une place prise sur un dépôt qui s'arrête en **panne** — timeout, sortie illisible, plafond global —
+est rendue. Une place prise sur un dépôt **rejeté** ne l'est pas : la chaîne a tourné, l'appel est dû,
+et seuls les concepts, qui n'existent pas, ne sont pas comptés. Le plafond atteint propose une liste
 d'attente plutôt qu'un mur.
+
+Réviser et s'entraîner ne coûtent aucun appel modèle, mais écrivent et lisent : les trois gestes
+correspondants passent par une fenêtre de cent vingt par minute et par compte, sur le même mécanisme.
 
 ### Travaux asynchrones
 
@@ -257,6 +288,14 @@ texte et dépôt image jusqu'aux questions écrites, capture illisible, dépôt 
 concept douteux puis confirmé, concept réécrit, lot perdu, échec à mi-parcours, double envoi, débit,
 quota, liste d'attente. Le même piège sur `fetch` y est armé : la vérification échoue si une requête
 part vers l'API.
+
+`verify:abus` est la passe d'audit : cycle de vie des concepts, vecteurs de régénération comptés en
+appels réellement émis, atomicité des compteurs sous concurrence, remboursement d'une panne,
+propriété des ressources entre deux comptes, et part de compte face au plafond global. Chaque
+constat y est écrit comme la règle qu'on veut voir tenir, si bien qu'une ligne en échec est un trou
+et non une panne de la vérification. Les cas qui comptent des appels coupent le mode mock — qui ne
+réserve ni n'enregistre rien, donc ne peut rien compter — et émettent sans clé vers un port fermé :
+ce qui se compte est ce que le produit aurait facturé, sans qu'une requête sorte.
 
 ## Licence
 

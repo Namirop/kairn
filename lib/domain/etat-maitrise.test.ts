@@ -65,13 +65,16 @@ describe("etatApresRevision aux bornes", () => {
     expect(etatApresRevision(JOURS_AVANT_ARCHIVAGE, REGULIER, false)).toBe("CONSOLIDATED");
   });
 
-  it("archive au-delà de trois mois", () => {
-    expect(etatApresRevision(JOURS_AVANT_ARCHIVAGE + 1, REGULIER, false)).toBe("ARCHIVED");
+  it("n'archive jamais sur la seule longueur de l'intervalle", () => {
+    expect(etatApresRevision(JOURS_AVANT_ARCHIVAGE + 1, REGULIER, false)).toBe("CONSOLIDATED");
+    expect(etatApresRevision(800, REGULIER, false)).toBe("CONSOLIDATED");
+    expect(etatApresRevision(800, REGULIER - 1, false)).toBe("REVIEWING");
   });
 
   it("archive dès que l'utilisateur le déclare, quel que soit l'intervalle", () => {
     expect(etatApresRevision(1, 0, true)).toBe("ARCHIVED");
     expect(etatApresRevision(JOURS_AVANT_CONSOLIDATION + 1, REGULIER, true)).toBe("ARCHIVED");
+    expect(etatApresRevision(800, REGULIER, true)).toBe("ARCHIVED");
   });
 
   it("traite un intervalle nul comme un apprentissage", () => {
@@ -91,6 +94,17 @@ describe("propriétés", () => {
 
           return ["LEARNING", "REVIEWING", "CONSOLIDATED", "ARCHIVED"].includes(etat);
         },
+      ),
+      { numRuns: 300 },
+    );
+  });
+
+  it("n'archive que sur déclaration de l'utilisateur, jamais sur un intervalle", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 5000 }),
+        fc.integer({ min: 0, max: 20 }),
+        (intervalle, reussites) => etatApresRevision(intervalle, reussites, false) !== "ARCHIVED",
       ),
       { numRuns: 300 },
     );
