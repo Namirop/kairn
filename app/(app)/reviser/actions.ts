@@ -6,7 +6,8 @@ import { reclamerSignalDeMaitrise } from "@/lib/db/carte-de-maitrise";
 import { prendreUnGeste } from "@/lib/db/limite-de-gestes";
 import { enregistrerRevision } from "@/lib/db/revision";
 import { compterDusDemain } from "@/lib/db/session-du-jour";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { signalerUneQuestion } from "@/lib/db/signalement";
+import { lireFuseauUtilisateur, marquerEspacementVu } from "@/lib/db/user-settings";
 import type { SignalDeMaitrise } from "@/lib/domain/signal-maitrise";
 
 /**
@@ -74,6 +75,47 @@ export async function repondreAction(donnees: ReponseDonnee): Promise<ResultatRe
   return { ok: true, signal: resultat.signal };
 }
 
+const signalementSchema = z.object({
+  variantId: z.string().min(1),
+  motif: z.enum(["INCOMPREHENSIBLE", "FAUSSE", "HORS_SUJET", "TROP_FACILE"]),
+  // Facultatif, et borné : c'est une précision, pas un canal de discussion.
+  commentaire: z.string().trim().max(500).default(""),
+});
+
+export type SignalementDonne = z.input<typeof signalementSchema>;
+
+/**
+ * Signale une question qui ne va pas.
+ *
+ * Le client n'envoie que l'identifiant de la question et un motif. Tout le
+ * contexte — la question, sa réponse, le concept, le format, la facette, le
+ * modèle, l'empreinte du prompt — est relu en base : ce qui sert à diagnostiquer
+ * ne doit pas pouvoir être arrangé par ce qui signale.
+ *
+ * La limite de débit s'applique comme aux autres gestes : c'est une écriture, et
+ * elle est répétable autant qu'on veut sans coûter d'appel modèle.
+ */
+export async function signalerAction(donnees: SignalementDonne): Promise<boolean> {
+  const utilisateur = await getCurrentUser();
+
+  if (!utilisateur) return false;
+
+  const valide = signalementSchema.safeParse(donnees);
+
+  if (!valide.success) return false;
+
+  if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
+    return false;
+  }
+
+  return signalerUneQuestion({
+    userId: utilisateur.id,
+    variantId: valide.data.variantId,
+    motif: valide.data.motif,
+    commentaire: valide.data.commentaire.length > 0 ? valide.data.commentaire : null,
+  });
+}
+
 const reclamationSchema = z.array(z.string().min(1)).max(50);
 
 /**
@@ -107,4 +149,19 @@ export async function compterDemainAction(): Promise<number> {
   if (!utilisateur) return 0;
 
   return compterDusDemain(utilisateur.id);
+}
+
+/**
+ * L'espacement a été expliqué. Il ne le sera plus.
+ *
+ * Appelée à l'affichage de l'explication et non à sa lecture : rien ne dit
+ * qu'elle a été lue, et une explication qui revient jusqu'à ce qu'on l'accuse
+ * est une fenêtre modale déguisée.
+ */
+export async function espacementVuAction(): Promise<void> {
+  const utilisateur = await getCurrentUser();
+
+  if (!utilisateur) return;
+
+  await marquerEspacementVu(utilisateur.id);
 }

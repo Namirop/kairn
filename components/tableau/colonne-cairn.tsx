@@ -15,10 +15,14 @@ export function ColonneCairn({
   consolides,
   graines,
   streak,
+  niveau,
+  xp,
 }: {
   consolides: number;
   graines: string[];
   streak: number;
+  niveau: number;
+  xp: number;
 }) {
   return (
     <aside className="flex flex-col items-center">
@@ -44,6 +48,22 @@ export function ColonneCairn({
           </TooltipTrigger>
           <TooltipContent>
             Nombre de jours consécutifs avec au moins un passage, dans ton fuseau horaire.
+          </TooltipContent>
+        </Tooltip>
+      ) : null}
+
+      {/* Le niveau se lit en prose, sous le cairn, et pas dans une carte à
+          chiffre : il n'est pas actionnable, il n'a pas à être scanné. Trois
+          tuiles côte à côte auraient donné trois fois le poids d'une donnée qui
+          n'en mérite qu'un tiers — c'est le cairn qui porte la progression. */}
+      {xp > 0 ? (
+        <Tooltip>
+          <TooltipTrigger className="mt-pas-3 text-mono rounded-galet font-mono text-stone-500 tabular-nums">
+            Niveau {niveau} · {xp} XP
+          </TooltipTrigger>
+          <TooltipContent>
+            Un point par question passée en session, un de plus quand tu retrouves un concept que tu
+            avais raté. La justesse n&apos;entre pas dans le calcul.
           </TooltipContent>
         </Tooltip>
       ) : null}

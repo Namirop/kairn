@@ -3,10 +3,10 @@ import { reclamerSignalDeMaitrise } from "@/lib/db/carte-de-maitrise";
 import {
   confirmerConcept,
   desarchiverConcept,
-  lireDepotDetaille,
   modifierConcept,
   supprimerConcept,
 } from "@/lib/db/concepts";
+import { lireDepotDetaille } from "@/lib/db/depot-detaille";
 import { enregistrerEntrainement, lireTourDentrainement } from "@/lib/db/entrainement";
 import { supprimerDepot } from "@/lib/db/reprise-depot";
 import { enregistrerRevision } from "@/lib/db/revision";

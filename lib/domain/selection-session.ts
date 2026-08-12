@@ -1,4 +1,6 @@
+import { alternerLesSujets } from "./alternance-des-sujets";
 import { jourSuivant, localDay } from "./local-day";
+import { parUrgence } from "./urgence-de-revision";
 
 /**
  * Ce qui compose une session : ce qui est dû, dans quel ordre, et jusqu'où.
@@ -14,8 +16,9 @@ import { jourSuivant, localDay } from "./local-day";
 
 /**
  * Au-delà, la session devient une corvée qu'on abandonne à mi-parcours. Le
- * reste n'est pas perdu : il est encore dû demain, et passera en tête puisque
- * l'échéance la plus dépassée sort la première.
+ * reste n'est pas perdu : il est encore dû demain, et ce qui sera alors le plus
+ * en train d'être oublié passera en tête — c'est `parUrgence` qui en décide, pas
+ * l'ordre d'arrivée.
  */
 export const PLAFOND_SESSION = 20;
 
@@ -27,6 +30,8 @@ export type ConceptDu = {
   inputId: string;
   /** Dernier passage sur ce concept, quel qu'en ait été le résultat. */
   lastReview: Date | null;
+  /** L'intervalle que ts-fsrs avait prévu, en jours. Zéro pour un concept neuf. */
+  scheduledDays: number;
 };
 
 /** Vrai si l'échéance tombe au plus tard dans la journée en cours chez l'utilisateur. */
@@ -99,61 +104,13 @@ export function jourOuIlRevient(
   return echeance > aujourdhui ? echeance : jourSuivant(aujourdhui);
 }
 
-/** Ce qui définit un sujet pour l'alternance : le premier tag, sinon le dépôt. */
-function sujet(concept: ConceptDu): string {
-  return concept.tags[0] ?? concept.inputId;
-}
-
-/**
- * Alterne les domaines au lieu de les grouper.
- *
- * Réviser par blocs est plus confortable sur le moment et retient moins bien.
- * On sert donc à chaque tour le sujet le plus fourni parmi ceux qui ne viennent
- * pas d'être servis : sans cette préférence au plus fourni, le sujet majoritaire
- * finirait la session d'un bloc, ce qu'on cherchait justement à éviter.
- *
- * Deux fois la même entrée rend deux fois la même sortie : rien ici n'est tiré
- * au hasard.
- */
-export function alternerLesSujets<T extends ConceptDu>(concepts: T[]): T[] {
-  const files = new Map<string, T[]>();
-
-  for (const concept of concepts) {
-    const cle = sujet(concept);
-    const file = files.get(cle);
-
-    if (file) file.push(concept);
-    else files.set(cle, [concept]);
-  }
-
-  const ordonnes: T[] = [];
-  let precedent: string | null = null;
-
-  while (ordonnes.length < concepts.length) {
-    const restants = [...files.entries()].filter(([, file]) => file.length > 0);
-    const autres = restants.filter(([cle]) => cle !== precedent);
-    // Répéter un sujet vaut mieux que tronquer la session : quand il ne reste
-    // que lui, il repasse.
-    const tirage = autres.length > 0 ? autres : restants;
-    const choisi = tirage.reduce((a, b) => (b[1].length > a[1].length ? b : a));
-    const suivant = choisi[1].shift();
-
-    if (!suivant) break;
-
-    ordonnes.push(suivant);
-    precedent = choisi[0];
-  }
-
-  return ordonnes;
-}
-
 /**
  * La session du jour : ce qui est échu, borné, et mélangé.
  *
- * Le plafond s'applique **avant** l'alternance et après le tri par échéance :
- * on garde d'abord ce qui attend depuis le plus longtemps, puis on ordonne ce
- * qu'on a gardé. L'inverse laisserait passer devant un concept échu ce matin
- * pendant qu'un autre attend depuis trois jours.
+ * Le plafond s'applique **avant** l'alternance et après le tri par urgence : on
+ * garde d'abord ce qui est le plus en train d'être oublié, puis on ordonne ce
+ * qu'on a gardé. L'inverse laisserait un concept solide passer devant un
+ * concept fragile pour une raison d'affichage.
  */
 export function composerSession<T extends ConceptDu>(
   concepts: T[],
@@ -163,9 +120,23 @@ export function composerSession<T extends ConceptDu>(
 ): T[] {
   const dus = concepts
     .filter((concept) => estServableAujourdhui(concept, maintenant, fuseau))
-    // L'identifiant départage : sans lui, deux échéances égales pourraient
-    // sortir dans un ordre différent d'un appel à l'autre.
-    .sort((a, b) => a.due.getTime() - b.due.getTime() || a.id.localeCompare(b.id));
+    .sort(parUrgence(maintenant));
 
   return alternerLesSujets(dus.slice(0, Math.max(0, plafond)));
+}
+
+/**
+ * Ce que la session sert aujourd'hui, et ce qu'elle reporte.
+ *
+ * Le tableau de bord annonçait le total échu. Trente-huit est un chiffre qui
+ * décourage sans rien apprendre : la session n'en servira que vingt, et les
+ * dix-huit autres reviennent demain sans que personne n'ait rien perdu. Voir le
+ * total est utile ; le voir sans le plafond ne l'est pas.
+ */
+export type ChargeDuJour = { aujourdhui: number; enAttente: number };
+
+export function chargeDuJour(dus: number, plafond: number = PLAFOND_SESSION): ChargeDuJour {
+  const borne = Math.max(0, plafond);
+
+  return { aujourdhui: Math.min(dus, borne), enAttente: Math.max(0, dus - borne) };
 }

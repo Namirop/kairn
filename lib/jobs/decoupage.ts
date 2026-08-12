@@ -1,12 +1,8 @@
 import { callAI } from "@/lib/ai/client";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
-import {
-  enregistrerConcepts,
-  lireDepot,
-  marquerPretSiPlusRienEnAttente,
-  marquerRejet,
-} from "@/lib/db/ingestion";
+import { enregistrerConcepts, lireDepot } from "@/lib/db/ingestion";
+import { marquerPretSiPlusRienEnAttente, marquerRejet } from "@/lib/db/fin-de-depot";
 import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { compterConceptsRetenus } from "@/lib/db/quota-depots";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";

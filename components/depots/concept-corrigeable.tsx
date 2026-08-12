@@ -10,7 +10,7 @@ import {
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { ConceptLu } from "@/lib/db/concepts";
+import type { ConceptLu } from "@/lib/db/depot-detaille";
 
 /**
  * Un concept, son état, et ce qu'on peut en faire.

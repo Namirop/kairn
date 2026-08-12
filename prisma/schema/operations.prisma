@@ -73,6 +73,50 @@ model AiBatch {
   @@index([status, createdAt])
 }
 
+/// Une question qui n'allait pas, et tout ce qu'il faut pour comprendre pourquoi.
+///
+/// C'est la seule instrumentation du produit : les prompts ont été réglés sur
+/// onze dépôts d'exemple, et rien d'autre ne dira quand une question part en
+/// vrille chez quelqu'un d'autre.
+///
+/// **Le texte est recopié, pas référencé.** L'utilisateur qui signale une
+/// question fausse supprime souvent le concept dans la foulée — c'est le geste
+/// naturel —, et c'est précisément ce signalement-là qu'on veut lire. Les liens
+/// se détachent, la question reste lisible.
+model Signalement {
+  id String @id @default(cuid())
+
+  /// Détachés plutôt que supprimés, pour survivre au ménage de leur auteur.
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  variantId String?
+  variant   Variant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  /// Gardés en clair : ils servent à recouper plusieurs signalements d'un même
+  /// dépôt, même une fois les lignes parties.
+  atomId    String?
+  inputId   String?
+
+  motif       MotifDeSignalement
+  /// Facultatif, et c'est voulu : exiger une phrase fait renoncer.
+  commentaire String?            @db.Text
+
+  /// Ce qu'on relira, figé au moment du signalement.
+  question String @db.Text
+  concept  String @db.Text
+  reponse  String @db.Text
+
+  format        VariantFormat
+  facet         VariantFacet
+  model         String
+  /// L'empreinte du prompt qui a écrit la question. La donnée la plus utile.
+  promptVersion String?
+
+  createdAt DateTime @default(now())
+
+  /// Requête de l'écran d'administration : les plus récents d'abord.
+  @@index([createdAt])
+}
+
 /// Les gens qui veulent plus que le plafond du jour. Une table et un bouton :
 /// un signal de demande gratuit, bien avant d'avoir quoi que ce soit à vendre.
 model WaitlistEntry {

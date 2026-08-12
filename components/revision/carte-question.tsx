@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { PileDeSession } from "@/components/revision/pile-de-session";
+import { SignalerLaQuestion } from "@/components/revision/signaler-la-question";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
@@ -29,6 +30,7 @@ export function CarteQuestion({
   chiffree,
   tags,
   question,
+  variantId,
   actions,
   children,
 }: {
@@ -38,6 +40,8 @@ export function CarteQuestion({
   chiffree?: boolean;
   tags: string[];
   question: string;
+  /** La question qu'on peut signaler. Absent, l'action ne s'affiche pas. */
+  variantId?: string;
   actions?: ReactNode;
   children: ReactNode;
 }) {
@@ -58,6 +62,15 @@ export function CarteQuestion({
       {children}
 
       {actions ? <div className="mt-pas-12 pt-pas-6">{actions}</div> : null}
+
+      {/* Sous tout le reste, et volontairement en retrait : c'est un défaut à
+          remonter, pas une note à donner. Elle doit être trouvable quand on la
+          cherche et invisible quand on révise. */}
+      {variantId ? (
+        <div className={actions ? "mt-pas-6" : "mt-pas-12"}>
+          <SignalerLaQuestion key={variantId} variantId={variantId} />
+        </div>
+      ) : null}
     </section>
   );
 }

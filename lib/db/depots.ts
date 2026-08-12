@@ -54,3 +54,14 @@ export async function listerDepots(userId: string, limite = 50): Promise<DepotLi
     nombreAtoms: ligne._count.atoms,
   }));
 }
+
+/**
+ * Combien de dépôts ce compte a écrits.
+ *
+ * Sert à reconnaître le premier : c'est le seul moment où l'écran de dépôt doit
+ * dire ce qu'on attend de lui, et le seul où les exemples servent à quelque
+ * chose. Après, ils encombreraient le geste qu'ils étaient censés déclencher.
+ */
+export async function compterLesDepots(userId: string): Promise<number> {
+  return prisma.input.count({ where: { userId } });
+}

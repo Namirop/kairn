@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/client";
-import { lireDepotDetaille, modifierConcept } from "@/lib/db/concepts";
+import { modifierConcept } from "@/lib/db/concepts";
+import { lireDepotDetaille } from "@/lib/db/depot-detaille";
 import { regenererSiUsees } from "@/lib/db/regeneration";
 import { etatDuDepot, libelleEtat } from "@/lib/domain/etat-depot";
 import { deposer } from "@/lib/depots/deposer";

@@ -12,6 +12,8 @@ export const ROUTES = {
   entrainement: "/entrainement",
   depots: "/depots",
   reglages: "/reglages",
+  commentCaMarche: "/comment-ca-marche",
+  signalements: "/signalements",
 } as const;
 
 /** Chemins qui exigent une session. */
@@ -21,6 +23,8 @@ export const PROTECTED_PATHS = [
   ROUTES.entrainement,
   ROUTES.depots,
   ROUTES.reglages,
+  ROUTES.commentCaMarche,
+  ROUTES.signalements,
 ] as const;
 
 /** Paramètre qui mémorise où l'utilisateur voulait aller avant la connexion. */

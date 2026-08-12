@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
 import {
-  alternerLesSujets,
+  chargeDuJour,
   composerSession,
   dejaRevuAujourdhui,
   estDu,
@@ -20,6 +20,7 @@ function concept(
   tags: string[] = [],
   inputId = "depot",
   lastReview: string | null = null,
+  scheduledDays = 0,
 ): ConceptDu {
   return {
     id,
@@ -27,6 +28,33 @@ function concept(
     tags,
     inputId,
     lastReview: lastReview ? new Date(lastReview) : null,
+    scheduledDays,
+  };
+}
+
+const JOUR_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Un concept déjà révisé, décrit par ce qui décide de son urgence : l'intervalle
+ * qu'on lui avait promis, et le retard qu'il a pris dessus.
+ */
+function revu(
+  id: string,
+  maintenant: string,
+  intervalleJours: number,
+  retardJours: number,
+  tags: string[] = [id],
+): ConceptDu {
+  const instant = new Date(maintenant).getTime();
+  const echeance = instant - retardJours * JOUR_MS;
+
+  return {
+    id,
+    due: new Date(echeance),
+    tags,
+    inputId: `depot-${id}`,
+    lastReview: new Date(echeance - intervalleJours * JOUR_MS),
+    scheduledDays: intervalleJours,
   };
 }
 
@@ -76,110 +104,6 @@ describe("estDu", () => {
   });
 });
 
-describe("alternerLesSujets", () => {
-  it("ne sert jamais deux fois le même sujet d'affilée quand un autre attend", () => {
-    const concepts = [
-      concept("a1", "2026-01-01", ["postgres"]),
-      concept("a2", "2026-01-01", ["postgres"]),
-      concept("a3", "2026-01-01", ["postgres"]),
-      concept("b1", "2026-01-01", ["react"]),
-      concept("b2", "2026-01-01", ["react"]),
-    ];
-
-    const sujets = alternerLesSujets(concepts).map((c) => c.tags[0]);
-
-    expect(sujets).toEqual(["postgres", "react", "postgres", "react", "postgres"]);
-  });
-
-  it("répète le sujet restant plutôt que de tronquer la session", () => {
-    const concepts = [
-      concept("a1", "2026-01-01", ["postgres"]),
-      concept("a2", "2026-01-01", ["postgres"]),
-      concept("a3", "2026-01-01", ["postgres"]),
-      concept("b1", "2026-01-01", ["react"]),
-    ];
-
-    const ordonnes = alternerLesSujets(concepts);
-
-    expect(ordonnes).toHaveLength(4);
-    expect(new Set(ordonnes.map((c) => c.id)).size).toBe(4);
-  });
-
-  it("retombe sur le dépôt quand le concept n'a pas de tag", () => {
-    const concepts = [
-      concept("a1", "2026-01-01", [], "depot-1"),
-      concept("a2", "2026-01-01", [], "depot-1"),
-      concept("b1", "2026-01-01", [], "depot-2"),
-    ];
-
-    expect(alternerLesSujets(concepts).map((c) => c.inputId)).toEqual([
-      "depot-1",
-      "depot-2",
-      "depot-1",
-    ]);
-  });
-
-  it("rend le même ordre pour la même entrée", () => {
-    const concepts = [
-      concept("a1", "2026-01-01", ["postgres"]),
-      concept("b1", "2026-01-01", ["react"]),
-      concept("c1", "2026-01-01", ["http"]),
-      concept("a2", "2026-01-01", ["postgres"]),
-    ];
-
-    expect(alternerLesSujets([...concepts])).toEqual(alternerLesSujets([...concepts]));
-  });
-
-  it("ne perd ni ne duplique aucun concept", () => {
-    fc.assert(
-      fc.property(
-        fc.array(
-          fc.record({
-            id: fc.string({ minLength: 1, maxLength: 6 }),
-            sujet: fc.constantFrom("a", "b", "c", "d"),
-          }),
-          { maxLength: 40 },
-        ),
-        (entrees) => {
-          const concepts = entrees.map((entree, rang) =>
-            concept(`${entree.id}-${rang}`, "2026-01-01", [entree.sujet]),
-          );
-          const ordonnes = alternerLesSujets(concepts);
-
-          return (
-            ordonnes.length === concepts.length &&
-            new Set(ordonnes.map((c) => c.id)).size === concepts.length
-          );
-        },
-      ),
-      { numRuns: 300 },
-    );
-  });
-
-  it("n'accole deux fois un sujet que lorsqu'il ne reste que lui", () => {
-    fc.assert(
-      fc.property(fc.array(fc.constantFrom("a", "b", "c"), { maxLength: 30 }), (sujets) => {
-        const concepts = sujets.map((s, rang) => concept(`${s}-${rang}`, "2026-01-01", [s]));
-        const ordonnes = alternerLesSujets(concepts);
-
-        for (let rang = 1; rang < ordonnes.length; rang += 1) {
-          const precedent = ordonnes[rang - 1]?.tags[0];
-          const courant = ordonnes[rang]?.tags[0];
-
-          if (precedent !== courant) continue;
-
-          // Accolés : il faut qu'aucun autre sujet n'ait attendu son tour.
-          const restants = ordonnes.slice(rang).map((c) => c.tags[0]);
-          if (new Set(restants).size > 1) return false;
-        }
-
-        return true;
-      }),
-      { numRuns: 300 },
-    );
-  });
-});
-
 describe("composerSession", () => {
   it("ne retient que ce qui est échu et ne complète jamais", () => {
     const concepts = [
@@ -193,16 +117,65 @@ describe("composerSession", () => {
     expect(session.map((c) => c.id).sort()).toEqual(["du-1", "du-2"]);
   });
 
-  it("garde la plus dépassée quand le plafond coupe", () => {
+  it("garde le plus en train d'être oublié quand le plafond coupe", () => {
+    const maintenant = "2026-01-15T09:00:00Z";
     const concepts = [
-      concept("vieux", "2026-01-01T08:00:00Z", ["a"]),
-      concept("moyen", "2026-01-05T08:00:00Z", ["b"]),
-      concept("frais", "2026-01-15T08:00:00Z", ["c"]),
+      // Trois jours de retard sur un intervalle de 90 : il ne risque rien.
+      revu("solide", maintenant, 90, 3),
+      // Trois jours de retard sur un intervalle de 3 : il est déjà oublié.
+      revu("fragile", maintenant, 3, 3),
+      revu("tiede", maintenant, 20, 3),
     ];
 
-    const session = composerSession(concepts, new Date("2026-01-15T09:00:00Z"), PARIS, 2);
+    const session = composerSession(concepts, new Date(maintenant), PARIS, 2);
 
-    expect(session.map((c) => c.id).sort()).toEqual(["moyen", "vieux"]);
+    expect(session.map((c) => c.id).sort()).toEqual(["fragile", "tiede"]);
+  });
+
+  /**
+   * Le cas qui justifie tout le tri : le solide est plus en retard en jours, le
+   * fragile est plus en retard par rapport à ce qu'il pouvait tenir. C'est le
+   * second qu'on est en train de perdre.
+   */
+  it("fait passer un intervalle court en léger retard devant un long en gros retard", () => {
+    const maintenant = "2026-01-15T09:00:00Z";
+    const concepts = [revu("solide", maintenant, 90, 10), revu("fragile", maintenant, 3, 1)];
+
+    const session = composerSession(concepts, new Date(maintenant), PARIS, 1);
+
+    expect(session.map((c) => c.id)).toEqual(["fragile"]);
+  });
+
+  it("ne laisse pas un arriéré enterrer un dépôt du jour", () => {
+    const maintenant = "2026-01-15T09:00:00Z";
+    const arriere = Array.from({ length: 40 }, (_, rang) =>
+      revu(`arriere-${rang}`, maintenant, 30, 4, ["arriere"]),
+    );
+    const neuf = concept("neuf", "2026-01-15T08:00:00Z", ["neuf"], "depot-neuf");
+
+    const session = composerSession([...arriere, neuf], new Date(maintenant), PARIS, 20);
+
+    expect(session.map((c) => c.id)).toContain("neuf");
+  });
+
+  it("rend le même ordre quel que soit celui de la requête", () => {
+    const maintenant = "2026-01-15T09:00:00Z";
+    const concepts = [
+      revu("un", maintenant, 3, 3),
+      revu("deux", maintenant, 90, 3),
+      revu("trois", maintenant, 3, 3),
+      concept("quatre", "2026-01-10T08:00:00Z", ["d"], "depot-d"),
+    ];
+
+    fc.assert(
+      fc.property(fc.shuffledSubarray(concepts, { minLength: 4 }), (melange) => {
+        const attendu = composerSession(concepts, new Date(maintenant), PARIS);
+        const obtenu = composerSession(melange, new Date(maintenant), PARIS);
+
+        return obtenu.map((c) => c.id).join() === attendu.map((c) => c.id).join();
+      }),
+      { numRuns: 100 },
+    );
   });
 
   it("rend une session vide plutôt que d'avancer sur du non échu", () => {
@@ -352,6 +325,35 @@ describe("jourOuIlRevient", () => {
         },
       ),
       { numRuns: 400 },
+    );
+  });
+});
+
+describe("chargeDuJour", () => {
+  it("ne renvoie que ce qui est dû quand la session n'est pas pleine", () => {
+    expect(chargeDuJour(12, 20)).toEqual({ aujourdhui: 12, enAttente: 0 });
+  });
+
+  it("sépare ce qui passe aujourd'hui de ce qui attend", () => {
+    expect(chargeDuJour(38, 20)).toEqual({ aujourdhui: 20, enAttente: 18 });
+  });
+
+  it("tient le compte à zéro", () => {
+    expect(chargeDuJour(0, 20)).toEqual({ aujourdhui: 0, enAttente: 0 });
+  });
+
+  it("conserve le total, quoi qu'il arrive", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 5000 }),
+        fc.integer({ min: 0, max: 100 }),
+        (dus, plafond) => {
+          const { aujourdhui, enAttente } = chargeDuJour(dus, plafond);
+
+          return aujourdhui + enAttente === dus && aujourdhui <= Math.max(0, plafond);
+        },
+      ),
+      { numRuns: 300 },
     );
   });
 });

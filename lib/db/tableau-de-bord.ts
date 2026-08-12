@@ -1,7 +1,9 @@
+import { suivreLArriere } from "@/lib/db/arriere-de-revision";
 import { prisma } from "@/lib/db/client";
 import { listerDepots } from "@/lib/db/depots";
 import { compterDusAujourdhui } from "@/lib/db/session-du-jour";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { chargeDuJour, type ChargeDuJour } from "@/lib/domain/selection-session";
 import type { UserStats } from "@/lib/db/types";
 import type { DepotListe } from "@/lib/db/depots";
 
@@ -12,7 +14,8 @@ import type { DepotListe } from "@/lib/db/depots";
  */
 
 export type TableauDeBord = {
-  dusAujourdhui: number;
+  /** Ce que la session servira maintenant, et ce qu'elle reporte à demain. */
+  charge: ChargeDuJour;
   /** Fuseau de l'utilisateur : toute échéance se lit dans son calendrier. */
   fuseau: string;
   stats: UserStats | null;
@@ -20,34 +23,47 @@ export type TableauDeBord = {
   grainesDuCairn: string[];
   depots: DepotListe[];
   totalAtoms: number;
+  /** L'arriéré dure depuis assez longtemps pour qu'il faille le dire. */
+  detteInstallee: boolean;
+  /** Des concepts existent mais aucun ne porte encore de question. */
+  questionsEnRoute: boolean;
 };
 
 export async function lireTableauDeBord(
   userId: string,
   maintenant: Date = new Date(),
 ): Promise<TableauDeBord> {
-  const [dusAujourdhui, fuseau, stats, consolides, depots, totalAtoms] = await Promise.all([
-    // Le même compte que celui de la session, et pas un compte parallèle : les
-    // deux avaient divergé, l'accueil promettant cinq concepts là où la session
-    // répondait « tu es à jour ». « Est dû » n'a qu'un seul endroit où vivre.
-    compterDusAujourdhui(userId, maintenant),
-    lireFuseauUtilisateur(userId),
-    prisma.userStats.findUnique({ where: { userId } }),
-    prisma.atom.findMany({
-      where: { userId, state: "CONSOLIDATED" },
-      orderBy: { updatedAt: "asc" },
-      select: { id: true },
-    }),
-    listerDepots(userId, 3),
-    prisma.atom.count({ where: { userId } }),
-  ]);
+  const [dusAujourdhui, fuseau, stats, consolides, depots, totalAtoms, sansQuestions] =
+    await Promise.all([
+      // Le même compte que celui de la session, et pas un compte parallèle : les
+      // deux avaient divergé, l'accueil promettant cinq concepts là où la session
+      // répondait « tu es à jour ». « Est dû » n'a qu'un seul endroit où vivre.
+      compterDusAujourdhui(userId, maintenant),
+      lireFuseauUtilisateur(userId),
+      prisma.userStats.findUnique({ where: { userId } }),
+      prisma.atom.findMany({
+        where: { userId, state: "CONSOLIDATED" },
+        orderBy: { updatedAt: "asc" },
+        select: { id: true },
+      }),
+      listerDepots(userId, 3),
+      prisma.atom.count({ where: { userId } }),
+      prisma.atom.count({ where: { userId, uncertain: false, variants: { none: {} } } }),
+    ]);
+
+  const charge = chargeDuJour(dusAujourdhui);
+  const detteInstallee = await suivreLArriere(userId, charge.enAttente > 0, fuseau, maintenant);
 
   return {
-    dusAujourdhui,
+    charge,
     fuseau,
     stats,
     grainesDuCairn: consolides.map((atom) => atom.id),
     totalAtoms,
     depots,
+    detteInstallee,
+    // Des concepts sans une seule question : le troisième écran vide, celui où
+    // il n'y a rien à faire mais où rien n'est en panne non plus.
+    questionsEnRoute: totalAtoms > 0 && sansQuestions > 0,
   };
 }

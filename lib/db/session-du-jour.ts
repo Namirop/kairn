@@ -61,6 +61,8 @@ export async function lireSessionDuJour(
         due: true,
         inputId: true,
         lastReview: true,
+        // L'intervalle promis : c'est lui qui dit si le retard est grave.
+        scheduledDays: true,
         variants: {
           where: { retiredAt: null },
           select: {

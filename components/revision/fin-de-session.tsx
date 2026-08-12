@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { compterDemainAction } from "@/app/(app)/reviser/actions";
+import { PrincipeDeLEspacement } from "@/components/revision/principe-de-lespacement";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
@@ -25,9 +26,12 @@ function phraseDemain(nombre: number | null): string {
 export function FinDeSession({
   revus,
   carte,
+  expliquerLEspacement = false,
 }: {
   revus: number;
   carte: { atomId: string; concept: string } | null;
+  /** Première session de ce compte : c'est le moment de dire pourquoi ça s'arrête. */
+  expliquerLEspacement?: boolean;
 }) {
   const [demain, setDemain] = useState<number | null>(null);
 
@@ -58,6 +62,12 @@ export function FinDeSession({
       {/* L'espace est réservé : la phrase arrive après un aller-retour, elle ne
           doit pas pousser le bouton vers le bas en apparaissant. */}
       <p className="mt-pas-3 text-corps min-h-6 text-stone-500">{phraseDemain(demain)}</p>
+
+      {expliquerLEspacement ? (
+        <div className="mt-pas-12">
+          <PrincipeDeLEspacement />
+        </div>
+      ) : null}
 
       {carte ? (
         <div className="mt-pas-12 border-lichen pl-pas-4 border-l-2">

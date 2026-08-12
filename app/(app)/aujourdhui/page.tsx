@@ -6,6 +6,7 @@ import { Strates } from "@/components/coquille/strates";
 import { ColonneCairn } from "@/components/tableau/colonne-cairn";
 import { CompteurDu } from "@/components/tableau/compteur-du";
 import { ListeDepots } from "@/components/tableau/liste-depots";
+import { SignalDeDette } from "@/components/tableau/signal-de-dette";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireTableauDeBord } from "@/lib/db/tableau-de-bord";
@@ -37,7 +38,20 @@ export default async function PageAujourdhui() {
         surface="papier"
         className="md:py-pas-16 gap-pas-12 md:gap-pas-16 grid md:grid-cols-[0.8fr_1.2fr]"
       >
-        <CompteurDu nombre={tableau.dusAujourdhui} aDesAtoms={tableau.totalAtoms > 0} />
+        <div>
+          <CompteurDu
+            charge={tableau.charge}
+            aDesAtoms={tableau.totalAtoms > 0}
+            questionsEnRoute={tableau.questionsEnRoute}
+          />
+
+          {tableau.detteInstallee ? (
+            <div className="mt-pas-8">
+              <SignalDeDette enAttente={tableau.charge.enAttente} />
+            </div>
+          ) : null}
+        </div>
+
         <ListeDepots depots={tableau.depots} maintenant={maintenant} fuseau={tableau.fuseau} />
       </Panneau>
 
@@ -69,6 +83,8 @@ export default async function PageAujourdhui() {
           consolides={tableau.stats?.atomsConsolidated ?? 0}
           graines={tableau.grainesDuCairn}
           streak={tableau.stats?.currentStreak ?? 0}
+          niveau={tableau.stats?.level ?? 1}
+          xp={tableau.stats?.xp ?? 0}
         />
       </Panneau>
     </PileDePanneaux>

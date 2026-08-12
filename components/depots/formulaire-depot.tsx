@@ -3,6 +3,7 @@
 import { useActionState, useRef, useState } from "react";
 import { Paperclip, X } from "lucide-react";
 import { deposerAction, type EtatDepot } from "@/app/(app)/depots/actions";
+import { ExemplesDeDepot } from "@/components/depots/exemples-de-depot";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -23,7 +24,19 @@ const SIGNES_MAXIMUM = 8000;
 /** Au-delà, on montre le compteur : avant, il n'apprend rien à personne. */
 const SEUIL_COMPTEUR = 6000;
 
-export function FormulaireDepot({ restants, cleEnvoi }: { restants: number; cleEnvoi: string }) {
+export function FormulaireDepot({
+  restants,
+  cleEnvoi,
+  invite,
+  premierDepot = false,
+}: {
+  restants: number;
+  cleEnvoi: string;
+  /** Tirée côté serveur : un tirage ici ferait diverger le rendu de l'hydratation. */
+  invite: string;
+  /** Le compte n'a encore rien déposé : les exemples remplacent l'explication. */
+  premierDepot?: boolean;
+}) {
   const [etat, action, enCours] = useActionState<EtatDepot, FormData>(deposerAction, {});
   const [texte, setTexte] = useState("");
   const [capture, setCapture] = useState<string | null>(null);
@@ -33,6 +46,8 @@ export function FormulaireDepot({ restants, cleEnvoi }: { restants: number; cleE
   return (
     <form action={action} noValidate className="gap-pas-4 flex max-w-3xl flex-col">
       <input type="hidden" name="cleEnvoi" value={cleEnvoi} />
+
+      {premierDepot ? <ExemplesDeDepot onChoisir={setTexte} /> : null}
 
       <div>
         <label htmlFor="texte" className="sr-only">
@@ -45,7 +60,7 @@ export function FormulaireDepot({ restants, cleEnvoi }: { restants: number; cleE
           autoFocus
           value={texte}
           onChange={(evenement) => setTexte(evenement.target.value)}
-          placeholder="Colle ici ce que tu veux retenir. Une phrase, un article, une explication qu'on vient de te donner."
+          placeholder={invite}
           className="p-pas-4 text-corps field-sizing-content min-h-56 w-full resize-y rounded-xs border border-stone-300 bg-stone-50 leading-relaxed text-stone-900 placeholder:text-stone-500"
         />
       </div>

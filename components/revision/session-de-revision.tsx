@@ -18,7 +18,13 @@ import type { QuestionServie } from "@/lib/db/question-servie";
  * Ce qui est propre à ce mode et à lui seul : la replanification, la sortie du
  * cycle, et la carte de maîtrise réclamée à la fin.
  */
-export function SessionDeRevision({ questions }: { questions: QuestionServie[] }) {
+export function SessionDeRevision({
+  questions,
+  expliquerLEspacement = false,
+}: {
+  questions: QuestionServie[];
+  expliquerLEspacement?: boolean;
+}) {
   const [termine, setTermine] = useState(false);
   const [revus, setRevus] = useState(0);
   const [carte, setCarte] = useState<{ atomId: string; concept: string } | null>(null);
@@ -60,7 +66,7 @@ export function SessionDeRevision({ questions }: { questions: QuestionServie[] }
   }, []);
 
   if (termine || questions.length === 0) {
-    return <FinDeSession revus={revus} carte={carte} />;
+    return <FinDeSession revus={revus} carte={carte} expliquerLEspacement={expliquerLEspacement} />;
   }
 
   return (

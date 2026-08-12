@@ -21,6 +21,12 @@ model UserSettings {
   /// le réexplique plus : une fenêtre qui barre la route à chaque fois devient
   /// un péage qu'on apprend à cliquer sans le lire.
   trainingIntroSeenAt  DateTime?
+  /// Quand l'espacement a été expliqué, à la fin de la première session.
+  ///
+  /// Même mécanisme, même raison, et le moment est choisi : c'est là qu'on se
+  /// demande pourquoi c'est déjà fini. Expliquer l'espacement avant d'avoir vécu
+  /// une session, c'est répondre à une question que personne ne se pose encore.
+  spacingIntroSeenAt   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -39,6 +45,14 @@ model UserStats {
   lastReviewedOn    DateTime? @db.Date
   /// Nombre d'Atoms en CONSOLIDATED. C'est la hauteur du cairn affiché.
   atomsConsolidated Int       @default(0)
+
+  /// Jour local où l'arriéré a commencé à dépasser le plafond de session.
+  ///
+  /// Un seul jour suffit à tout dire, et c'est ce qui rend le suivi robuste :
+  /// le nombre de jours s'en déduit, donc il n'y a rien à incrémenter, donc rien
+  /// à désynchroniser si la personne ne passe pas un jour. Nul quand l'arriéré
+  /// tient sous le plafond — le signal disparaît avec lui.
+  backlogSince      DateTime? @db.Date
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

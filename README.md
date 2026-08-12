@@ -16,12 +16,15 @@ Le découpage et la génération de questions passent par un modèle de langage,
 point d'entrée `callAI()` qui porte les garde-fous de budget. En développement, un mode mock rend
 des fixtures : toute l'interface et tout le pipeline se développent sans un seul appel réel.
 
-**État : phase 2.** Le socle est en place — schéma de données complet, authentification, wrapper
-d'appel modèle, file de travaux asynchrones, plomberie de notification, identité visuelle et
-tableau de bord. Les prompts de génération, leurs schémas de sortie, les fixtures de référence et
-le banc d'évaluation le sont aussi. L'ingestion tourne de bout en bout : dépôt de texte ou de
-capture, lecture d'image, découpage en concepts, écriture des questions en envoi groupé, écrans de
-liste et de détail, correction d'un concept. Le moteur de révision arrive à la phase suivante.
+**État : phase 4.** Le produit tourne de bout en bout. L'ingestion prend un texte ou une capture,
+la lit, la découpe en concepts et écrit leurs questions. Le moteur de révision sert la session du
+jour, fait tourner les formulations, replanifie avec ts-fsrs et propose un entraînement libre qui
+ne touche à rien de la mémoire. La progression compte l'effort et la consolidation, jamais la
+justesse. Les garde-fous de budget sont posés et vérifiés à l'exécution : plafond global, part par
+compte, quotas d'ingestion, limites de débit.
+
+Ce qui manque : les réglages ne sont pas encore modifiables depuis l'interface, et le rappel
+quotidien calcule sa sélection sans envoyer.
 
 ## Stack
 
@@ -76,6 +79,7 @@ surchargeables par `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`.
 | `AI_DAILY_CALL_CAP`            | oui    | Plafond global d'appels réels par jour, vérifié avant émission.             |
 | `AI_DAILY_CALL_CAP_PAR_COMPTE` | oui    | Part d'un seul compte dans ce plafond, réservée avant lui.                  |
 | `AI_MODEL`                     | oui    | Identifiant du modèle.                                                      |
+| `ADMIN_EMAILS`                 | non    | Adresses autorisées à lire les signalements. Vide n'autorise personne.      |
 | `AI_MAX_TOKENS`                | oui    | `max_tokens` par défaut, toujours envoyé ; une sortie coupée est un échec.  |
 | `SEED_USER_*`                  | non    | Adresse, mot de passe et fuseau du compte de démonstration.                 |
 
@@ -288,6 +292,10 @@ texte et dépôt image jusqu'aux questions écrites, capture illisible, dépôt 
 concept douteux puis confirmé, concept réécrit, lot perdu, échec à mi-parcours, double envoi, débit,
 quota, liste d'attente. Le même piège sur `fetch` y est armé : la vérification échoue si une requête
 part vers l'API.
+
+`verify:session` rejoue le moteur de révision et l'entraînement libre, plus ce que la phase 4 y
+ajoute : la progression comptée, la série autour de minuit local, la trace qu'un signalement laisse
+quand le concept est supprimé, et la fermeture de l'écran d'administration.
 
 `verify:abus` est la passe d'audit : cycle de vie des concepts, vecteurs de régénération comptés en
 appels réellement émis, atomicité des compteurs sous concurrence, remboursement d'une panne,

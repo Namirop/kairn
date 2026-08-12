@@ -1,3 +1,5 @@
+import { readAiConfig } from "@/lib/ai/config";
+import { PROMPT_VERSIONS } from "@/lib/ai/prompts";
 import { prisma } from "@/lib/db/client";
 import type { VariantFacet, VariantFormat } from "@/lib/db/types";
 
@@ -56,6 +58,10 @@ export async function ecrireQuestions(
         question: question.question,
         answerKey: question.answerKey,
         payload: payloadDe(question),
+        // Le réglage sous lequel cette question a été écrite. Posé ici, à la
+        // création, parce qu'il n'y a pas d'autre moment où on le connaisse.
+        promptVersion: PROMPT_VERSIONS.generate_variants,
+        model: readAiConfig().model,
       })),
     }),
   ]);

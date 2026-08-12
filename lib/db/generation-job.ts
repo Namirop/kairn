@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import { marquerPretSiPlusRienEnAttente } from "@/lib/db/ingestion";
+import { marquerPretSiPlusRienEnAttente } from "@/lib/db/fin-de-depot";
 import type { GenerationJob, GenerationKind, JobStatus } from "@/lib/db/types";
 
 /**

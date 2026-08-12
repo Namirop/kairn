@@ -139,6 +139,7 @@ export function DerouleQuestions({
       chiffree={chiffree}
       tags={question.tags}
       question={question.question}
+      variantId={question.variantId}
       actions={actions?.({ question, enCours, valider: suivre })}
     >
       {jetee ? (

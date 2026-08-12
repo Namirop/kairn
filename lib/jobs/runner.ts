@@ -1,6 +1,6 @@
 import { AIQuotaError } from "@/lib/ai/errors";
 import { claimJob, finishJob, reporterJob } from "@/lib/db/generation-job";
-import { marquerPretSiPlusRienEnAttente } from "@/lib/db/ingestion";
+import { marquerPretSiPlusRienEnAttente } from "@/lib/db/fin-de-depot";
 import type { GenerationKind } from "@/lib/db/types";
 import { JOB_HANDLERS } from "./handlers";
 

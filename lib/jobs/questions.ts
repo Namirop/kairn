@@ -2,7 +2,7 @@ import { batchTermine, readAIBatch, submitAIBatch } from "@/lib/ai/batch";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import { GENERATE_VARIANTS } from "@/lib/ai/schemas";
 import { finishJob } from "@/lib/db/generation-job";
-import { marquerPretSiPlusRienEnAttente } from "@/lib/db/ingestion";
+import { marquerPretSiPlusRienEnAttente } from "@/lib/db/fin-de-depot";
 import {
   cloreLot,
   enregistrerLot,

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BoutonDeconnexion } from "@/components/compte/bouton-deconnexion";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
 import { ROUTES } from "@/lib/auth/routes";
+import { estAdministrateur } from "@/lib/auth/admin";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireReglages } from "@/lib/db/user-settings";
 
@@ -59,6 +61,24 @@ export default async function PageReglages() {
           />
           <Ligne intitule="Emails" valeur={reglages.emailOptOutAt ? "désinscrit" : "activés"} />
         </dl>
+
+        <div className="gap-pas-4 mt-pas-8 flex flex-col items-start">
+          <Link
+            href={ROUTES.commentCaMarche}
+            className="rounded-galet text-petit text-stone-300 underline-offset-4 hover:text-stone-50 hover:underline focus-visible:underline"
+          >
+            Comment ça marche
+          </Link>
+
+          {estAdministrateur(utilisateur.email) ? (
+            <Link
+              href={ROUTES.signalements}
+              className="rounded-galet text-petit text-stone-300 underline-offset-4 hover:text-stone-50 hover:underline focus-visible:underline"
+            >
+              Signalements
+            </Link>
+          ) : null}
+        </div>
 
         <div className="mt-pas-8">
           <BoutonDeconnexion />

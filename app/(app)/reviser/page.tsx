@@ -7,6 +7,7 @@ import { SessionDeRevision } from "@/components/revision/session-de-revision";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
+import { lireReglages } from "@/lib/db/user-settings";
 
 export const metadata: Metadata = { title: "Réviser" };
 
@@ -25,7 +26,10 @@ export default async function PageReviser() {
   if (!utilisateur) redirect(ROUTES.connexion);
 
   const maintenant = new Date();
-  const session = await lireSessionDuJour(utilisateur.id, maintenant);
+  const [session, reglages] = await Promise.all([
+    lireSessionDuJour(utilisateur.id, maintenant),
+    lireReglages(utilisateur.id),
+  ]);
 
   if (session.questions.length === 0) {
     return (
@@ -46,7 +50,10 @@ export default async function PageReviser() {
   return (
     <PileDePanneaux>
       <Panneau surface="papier" mesure="texte" remplit className="md:py-pas-16">
-        <SessionDeRevision questions={session.questions} />
+        <SessionDeRevision
+          questions={session.questions}
+          expliquerLEspacement={reglages.spacingIntroSeenAt === null}
+        />
       </Panneau>
     </PileDePanneaux>
   );

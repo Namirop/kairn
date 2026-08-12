@@ -84,3 +84,17 @@ export async function optOutOfEmails(userId: string, at: Date = new Date()): Pro
     data: { emailOptOutAt: at, dailyReminderEnabled: false, streakAlertEnabled: false },
   });
 }
+
+/**
+ * Note que l'espacement a été expliqué, à la fin de la première session.
+ *
+ * Même écriture conditionnelle que `marquerPrincipeVu`, et pour la même raison :
+ * la date du premier passage est celle qui compte, et une seconde session ne
+ * doit pas la repousser.
+ */
+export async function marquerEspacementVu(userId: string, at: Date = new Date()): Promise<void> {
+  await prisma.userSettings.updateMany({
+    where: { userId, spacingIntroSeenAt: null },
+    data: { spacingIntroSeenAt: at },
+  });
+}

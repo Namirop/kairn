@@ -1,0 +1,101 @@
+import { prisma } from "@/lib/db/client";
+import { localDay } from "@/lib/domain/local-day";
+import { progressionPourXp, serieApresPassage, xpDuPassage } from "@/lib/domain/progression";
+
+/**
+ * L'écriture de la progression, après un passage en session du jour.
+ *
+ * `UserStats` existait depuis la phase 0 sans que rien ne l'alimente. C'est ce
+ * fichier, et lui seul : l'entraînement libre n'y passe pas, et le fait qu'il
+ * n'ait aucune raison d'importer ce module est la garantie la plus solide qu'on
+ * puisse lui donner.
+ *
+ * Tout se joue dans une transaction interactive parce que la série se déduit de
+ * la valeur précédente : lire puis écrire hors transaction laisserait deux
+ * passages simultanés poser deux fois le même jour. C'est une écriture par
+ * révision sur une ligne qui n'appartient qu'à une personne — la contention est
+ * celle d'un utilisateur avec lui-même.
+ */
+
+export type PassageCompte = {
+  userId: string;
+  /** Le passage précédent sur ce concept avait échoué. */
+  ratePrecedemment: boolean;
+  reussiMaintenant: boolean;
+  fuseau: string;
+};
+
+export type ProgressionEcrite = {
+  xp: number;
+  niveau: number;
+  /** Vrai quand ce passage vient de faire monter d'un niveau. */
+  niveauFranchi: boolean;
+  serie: number;
+  /** Vrai quand ce passage ouvre un jour de plus dans la série. */
+  serieAllongee: boolean;
+  consolides: number;
+};
+
+/**
+ * Compte un passage de session, et rend l'état d'après.
+ *
+ * Le nombre de concepts consolidés est recompté plutôt qu'incrémenté : un
+ * concept peut entrer en `CONSOLIDATED` comme en sortir, et un compteur qui
+ * dérive d'un seul point de vue finit toujours par mentir sur la hauteur du
+ * cairn. C'est une requête de comptage par révision, sur un index existant.
+ */
+export async function compterLePassage(
+  passage: PassageCompte,
+  maintenant: Date = new Date(),
+): Promise<ProgressionEcrite> {
+  const jour = localDay(maintenant, passage.fuseau);
+  const gain = xpDuPassage(passage.ratePrecedemment, passage.reussiMaintenant);
+
+  const consolides = await prisma.atom.count({
+    where: { userId: passage.userId, state: "CONSOLIDATED" },
+  });
+
+  return prisma.$transaction(async (tx) => {
+    const avant = await tx.userStats.findUnique({
+      where: { userId: passage.userId },
+      select: { xp: true, currentStreak: true, longestStreak: true, lastReviewedOn: true },
+    });
+
+    const dernierJour = avant?.lastReviewedOn
+      ? avant.lastReviewedOn.toISOString().slice(0, 10)
+      : null;
+    const xp = (avant?.xp ?? 0) + gain;
+    const serie = serieApresPassage(dernierJour, jour, avant?.currentStreak ?? 0);
+    const niveau = progressionPourXp(xp).niveau;
+
+    await tx.userStats.upsert({
+      where: { userId: passage.userId },
+      create: {
+        userId: passage.userId,
+        xp,
+        level: niveau,
+        currentStreak: serie,
+        longestStreak: serie,
+        lastReviewedOn: new Date(`${jour}T00:00:00.000Z`),
+        atomsConsolidated: consolides,
+      },
+      update: {
+        xp,
+        level: niveau,
+        currentStreak: serie,
+        longestStreak: Math.max(avant?.longestStreak ?? 0, serie),
+        lastReviewedOn: new Date(`${jour}T00:00:00.000Z`),
+        atomsConsolidated: consolides,
+      },
+    });
+
+    return {
+      xp,
+      niveau,
+      niveauFranchi: niveau > progressionPourXp(avant?.xp ?? 0).niveau,
+      serie,
+      serieAllongee: dernierJour !== jour,
+      consolides,
+    };
+  });
+}

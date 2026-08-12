@@ -20,6 +20,7 @@ model User {
   aiCalls    AiCall[]
   aiQuota    AiUserQuota[]
   dailyUsage DailyUsage[]
+  reports    Signalement[]
   emailsSent EmailDelivery[]
   waitlist   WaitlistEntry?
 }

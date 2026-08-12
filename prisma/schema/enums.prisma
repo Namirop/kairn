@@ -111,3 +111,16 @@ enum BatchStatus {
   ENDED
   FAILED
 }
+
+/// Ce qui ne va pas dans une question, du point de vue de qui la reçoit.
+///
+/// Quatre motifs, choisis en un clic. Ils ne se recouvrent pas et ils pointent
+/// chacun vers un défaut de prompt différent : une question incompréhensible est
+/// mal écrite, une question fausse a inventé, une question hors sujet a mal lu
+/// le dépôt, une question trop facile ne mesure rien.
+enum MotifDeSignalement {
+  INCOMPREHENSIBLE
+  FAUSSE
+  HORS_SUJET
+  TROP_FACILE
+}

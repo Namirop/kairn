@@ -10,7 +10,7 @@ import { VideDuDepot } from "@/components/depots/vide-du-depot";
 import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
-import { lireDepotDetaille } from "@/lib/db/concepts";
+import { lireDepotDetaille } from "@/lib/db/depot-detaille";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";

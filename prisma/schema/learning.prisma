@@ -126,9 +126,21 @@ model Variant {
   /// Un Variant retiré n'est plus proposé mais reste lié à ses Reviews passées.
   retiredAt  DateTime?
 
+  /// Sous quel réglage cette question a été écrite.
+  ///
+  /// C'est la donnée qu'on oublie de garder et la plus utile le jour où une
+  /// question part en vrille : sans elle, on ne sait pas si le défaut vient d'un
+  /// réglage déjà corrigé. Une empreinte du prompt plutôt qu'un numéro à
+  /// incrémenter, pour qu'elle change exactement quand le prompt change et jamais
+  /// parce qu'on a pensé à la bumper. Le modèle est posé ici pour la même raison :
+  /// celui d'aujourd'hui ne dit rien de celui qui a écrit cette question-là.
+  promptVersion String?
+  model         String?
+
   createdAt DateTime @default(now())
 
-  reviews Review[]
+  reviews  Review[]
+  reports  Signalement[]
 
   @@index([atomId, retiredAt])
 }

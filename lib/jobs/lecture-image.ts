@@ -2,13 +2,8 @@ import { z } from "zod";
 import { callAI } from "@/lib/ai/client";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import { OCR_EXTRACT } from "@/lib/ai/schemas";
-import {
-  enregistrerTexteLu,
-  lireDepot,
-  marquerEchec,
-  marquerRejet,
-  oublierImage,
-} from "@/lib/db/ingestion";
+import { enregistrerTexteLu, lireDepot, oublierImage } from "@/lib/db/ingestion";
+import { marquerEchec, marquerRejet } from "@/lib/db/fin-de-depot";
 import type { GenerationJob } from "@/lib/db/types";
 import { enqueueJob } from "./queue";
 

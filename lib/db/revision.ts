@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db/client";
 import { planifier } from "@/lib/db/planification";
+import { compterLePassage, type ProgressionEcrite } from "@/lib/db/progression";
 import { regenererSiUsees } from "@/lib/db/regeneration";
+import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import type { ReviewRating } from "@/lib/db/types";
 import {
   compterReussitesConsecutives,
@@ -48,6 +50,8 @@ export type ResultatRevision = {
    * la session n'en montre qu'une, c'est `reclamerSignalDeMaitrise` qui tranche.
    */
   signal: SignalDeMaitrise | null;
+  /** Ce que ce passage a rapporté. Nul si la progression n'a pas pu s'écrire. */
+  progression: ProgressionEcrite | null;
 };
 
 function dansTroisMois(maintenant: Date): Date {
@@ -172,9 +176,24 @@ export async function enregistrerRevision(
 
   await regenererSiUsees(atome, apresLePassage(actives, variante.id, "SESSION"), maintenant);
 
+  // La progression se compte après l'écriture du passage, et sur l'état qui en
+  // résulte : c'est le nombre de concepts consolidés d'après qui donne la
+  // hauteur du cairn. Le passage précédent est celui qui précède celui-ci —
+  // `atome.reviews` a été lu avant qu'on écrive, il porte donc bien l'avant.
+  const progression = await compterLePassage(
+    {
+      userId: revision.userId,
+      ratePrecedemment: passes.at(-1)?.rating === "AGAIN",
+      reussiMaintenant: estReussite(revision.note),
+      fuseau: await lireFuseauUtilisateur(revision.userId),
+    },
+    maintenant,
+  );
+
   return {
     etat,
     prochaineEcheance: echeance,
     signal: atome.masterySignaledAt ? null : signalDeMaitrise(chronometres),
+    progression,
   };
 }
