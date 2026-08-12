@@ -66,7 +66,7 @@ export default async function PageReglages() {
         <div className="gap-pas-4 mt-pas-8 flex flex-col items-start">
           <Link
             href={ROUTES.commentCaMarche}
-            className="rounded-galet text-petit text-stone-300 underline-offset-4 hover:text-stone-50 hover:underline focus-visible:underline"
+            className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
           >
             Comment ça marche
           </Link>
@@ -74,7 +74,7 @@ export default async function PageReglages() {
           {estAdministrateur(utilisateur.email) ? (
             <Link
               href={ROUTES.signalements}
-              className="rounded-galet text-petit text-stone-300 underline-offset-4 hover:text-stone-50 hover:underline focus-visible:underline"
+              className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
             >
               Signalements
             </Link>

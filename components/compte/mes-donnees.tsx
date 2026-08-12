@@ -25,11 +25,11 @@ export function MesDonnees() {
 
   return (
     <section className="mt-pas-12">
-      <h2 className="text-mono font-mono tracking-[0.14em] text-stone-300 uppercase">
+      <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
         Tes données
       </h2>
 
-      <p className="mt-pas-4 text-petit max-w-prose text-stone-300">
+      <p className="mt-pas-4 text-petit max-w-prose text-stone-500">
         Tu peux emporter ce que tu as déposé à tout moment : un fichier avec tes dépôts, les
         concepts qui en ont été tirés, leurs questions et tes passages.
       </p>
@@ -40,34 +40,34 @@ export function MesDonnees() {
         <a
           href="/api/mon-compte/export"
           download
-          className="rounded-galet text-petit text-stone-50 underline underline-offset-4 hover:text-stone-50/80"
+          className="rounded-galet text-petit text-stone-900 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900"
         >
           Télécharger mes données
         </a>
       </div>
 
-      <div className="mt-pas-8 pt-pas-6 border-t border-stone-800">
+      <div className="mt-pas-8 pt-pas-6 border-t border-stone-300">
         {ouvert ? (
           <form action={action} noValidate className="max-w-prose">
-            <p className="text-petit text-stone-300">
+            <p className="text-petit text-stone-500">
               Ça efface le compte, tes dépôts, tes concepts, leurs questions et tous tes passages.
               C&apos;est immédiat et il n&apos;y a pas de retour en arrière. Pense à télécharger tes
               données avant.
             </p>
 
-            <label htmlFor="confirmation" className="mt-pas-4 text-petit block text-stone-300">
+            <label htmlFor="confirmation" className="mt-pas-4 text-petit block text-stone-500">
               Recopie « {MOT_DE_CONFIRMATION} » pour confirmer
             </label>
             <input
               id="confirmation"
               name="confirmation"
               autoComplete="off"
-              className="rounded-galet mt-pas-2 px-pas-3 py-pas-2 text-petit focus-visible:border-ember w-full max-w-64 border border-stone-800 bg-transparent text-stone-50 outline-none"
+              className="rounded-galet mt-pas-2 px-pas-3 py-pas-2 text-petit focus-visible:border-alerte w-full max-w-64 border border-stone-300 bg-transparent text-stone-900 outline-none"
             />
 
             {/* L'espace du message est réservé : l'erreur ne décale pas les boutons. */}
             <p className="mt-pas-2 text-petit min-h-5" role="status" aria-live="polite">
-              {etat.erreur ? <span className="text-ember">{etat.erreur}</span> : null}
+              {etat.erreur ? <span className="text-alerte">{etat.erreur}</span> : null}
             </p>
 
             <div className="gap-pas-3 mt-pas-4 flex flex-wrap">
@@ -83,7 +83,7 @@ export function MesDonnees() {
           <button
             type="button"
             onClick={() => setOuvert(true)}
-            className="rounded-galet text-petit text-stone-300 underline-offset-4 hover:text-stone-50 hover:underline focus-visible:underline"
+            className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
           >
             Supprimer mon compte
           </button>

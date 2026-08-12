@@ -43,7 +43,7 @@ export function ColonneCairn({
 
       {streak > 0 ? (
         <Tooltip>
-          <TooltipTrigger className="mt-pas-6 text-mono text-ember rounded-galet font-mono tracking-[0.14em] uppercase">
+          <TooltipTrigger className="mt-pas-6 text-mono text-ember-clair rounded-galet font-mono tracking-[0.14em] uppercase">
             {streak} {streak === 1 ? "jour" : "jours"} d&apos;affilée
           </TooltipTrigger>
           <TooltipContent>
@@ -58,7 +58,7 @@ export function ColonneCairn({
           n'en mérite qu'un tiers — c'est le cairn qui porte la progression. */}
       {xp > 0 ? (
         <Tooltip>
-          <TooltipTrigger className="mt-pas-3 text-mono rounded-galet font-mono text-stone-500 tabular-nums">
+          <TooltipTrigger className="mt-pas-3 text-mono rounded-galet font-mono text-stone-400 tabular-nums">
             Niveau {niveau} · {xp} XP
           </TooltipTrigger>
           <TooltipContent>

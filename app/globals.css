@@ -33,6 +33,11 @@
   --stone-50: #f2f2ef;
   --stone-100: #e4e4df;
   --stone-300: #bfc0ba;
+  /* Texte secondaire sur surface sombre. `stone-500` y tombait à 2,88 pour 1 :
+     un gris pensé pour du papier ne tient pas sur de la roche, et « Niveau 3 ·
+     564 XP » y était quasi illisible. Celui-ci donne 6,63 sur la roche et 5,16
+     sur l'ombre — AA franchi sur les deux, à température identique. */
+  --stone-400: #9aa09b;
   --stone-500: #5e635f;
   --stone-700: #3d4240;
   --stone-800: #2a2e2c;
@@ -45,6 +50,11 @@
   /* Réservé au streak, nulle part ailleurs. */
   --ember: #b4552f;
   --ember-deep: #9e4526;
+  /* Le même accent, éclairci pour les surfaces sombres. Un accent chaud réglé
+     sur du clair ne tient pas sur du sombre : l'ember d'origine y donnait 3,60,
+     assez pour un grand titre et pas pour la ligne de série, qui est petite et
+     en capitales. Celui-ci donne 6,54 et 5,09. */
+  --ember-clair: #d98a63;
 
   /* Sémantique : un échec n'est pas la couleur du produit. */
   --alerte: #9a3b2c;
@@ -115,6 +125,7 @@
   --color-stone-50: var(--stone-50);
   --color-stone-100: var(--stone-100);
   --color-stone-300: var(--stone-300);
+  --color-stone-400: var(--stone-400);
   --color-stone-500: var(--stone-500);
   --color-stone-700: var(--stone-700);
   --color-stone-800: var(--stone-800);
@@ -123,6 +134,7 @@
   --color-lichen-deep: var(--lichen-deep);
   --color-ember: var(--ember);
   --color-ember-deep: var(--ember-deep);
+  --color-ember-clair: var(--ember-clair);
   --color-alerte: var(--alerte);
   --color-alerte-surface: var(--alerte-surface);
   --color-jeton: var(--jeton);
