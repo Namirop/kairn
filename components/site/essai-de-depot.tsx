@@ -8,6 +8,7 @@ import {
   type AvancementDeLEssai,
   type EtatEssai,
 } from "@/app/(marketing)/actions";
+import { ConceptsEnAttente } from "@/components/site/concepts-en-attente";
 import { Button } from "@/components/ui/button";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { ROUTES } from "@/lib/auth/routes";
@@ -25,8 +26,10 @@ import { ROUTES } from "@/lib/auth/routes";
  * chaîne s'est arrêtée.
  */
 
-const RYTHME_MS = 1500;
-const ESSAIS_MAXIMUM = 40;
+// Une seconde : le résultat apparaît au plus tard une seconde après être prêt.
+// L'appel est léger, et une demi-seconde de retard se voit sur cinq secondes.
+const RYTHME_MS = 1000;
+const ESSAIS_MAXIMUM = 60;
 
 export function EssaiDeDepot({ invite }: { invite: string }) {
   const [etat, action, enCours] = useActionState<EtatEssai, FormData>(essayerAction, {});
@@ -56,7 +59,10 @@ export function EssaiDeDepot({ invite }: { invite: string }) {
     };
   }, [etat.sessionId]);
 
-  if (etat.sessionId) return <ResultatDeLEssai avancement={avancement} />;
+  // L'attente commence au clic et non au retour de l'action : entre les deux
+  // il y a un aller-retour, et pendant cet aller-retour seul le libellé du
+  // bouton changeait — l'écran avait l'air de n'avoir rien reçu.
+  if (enCours || etat.sessionId) return <ResultatDeLEssai avancement={avancement} />;
 
   return (
     <form action={action} noValidate className="gap-pas-3 flex flex-col">
@@ -87,16 +93,7 @@ export function EssaiDeDepot({ invite }: { invite: string }) {
 }
 
 function ResultatDeLEssai({ avancement }: { avancement: AvancementDeLEssai | null }) {
-  if (!avancement || avancement.enCours) {
-    return (
-      <div className="gap-pas-2 flex flex-col" role="status" aria-live="polite">
-        <p className="text-corps text-stone-900">Découpage en cours…</p>
-        <p className="text-petit text-stone-500">
-          Quelques secondes. Tes concepts apparaissent ici, pas dans un écran d&apos;inscription.
-        </p>
-      </div>
-    );
-  }
+  if (!avancement || avancement.enCours) return <ConceptsEnAttente />;
 
   if (avancement.concepts.length === 0) {
     return (
