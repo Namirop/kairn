@@ -79,8 +79,11 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
 
   return (
     <Dialog open={ouvert} onOpenChange={setOuvert}>
+      {/* Ce que la personne pense au moment où elle clique, pas ce que le
+          système fait de son clic. « Signaler » était tiède, et tiède veut dire
+          qu'on ne clique pas. */}
       <DialogTrigger className="text-petit rounded-galet text-stone-500 underline-offset-4 hover:underline focus-visible:underline">
-        Signaler cette question
+        Cette question ne va pas
       </DialogTrigger>
 
       <DialogContent className="max-w-lg">

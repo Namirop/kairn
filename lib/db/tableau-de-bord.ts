@@ -1,4 +1,4 @@
-import { suivreLArriere } from "@/lib/db/arriere-de-revision";
+import { suivreLArriere, type ArriereSuivi } from "@/lib/db/arriere-de-revision";
 import { prisma } from "@/lib/db/client";
 import { listerDepots } from "@/lib/db/depots";
 import { compterDusAujourdhui } from "@/lib/db/session-du-jour";
@@ -23,8 +23,8 @@ export type TableauDeBord = {
   grainesDuCairn: string[];
   depots: DepotListe[];
   totalAtoms: number;
-  /** L'arriéré dure depuis assez longtemps pour qu'il faille le dire. */
-  detteInstallee: boolean;
+  /** L'arriéré, et depuis quand. Ce qui décide si on le dit, et comment. */
+  arriere: ArriereSuivi;
   /** Des concepts existent mais aucun ne porte encore de question. */
   questionsEnRoute: boolean;
 };
@@ -52,7 +52,7 @@ export async function lireTableauDeBord(
     ]);
 
   const charge = chargeDuJour(dusAujourdhui);
-  const detteInstallee = await suivreLArriere(userId, charge.enAttente > 0, fuseau, maintenant);
+  const arriere = await suivreLArriere(userId, charge.enAttente > 0, fuseau, maintenant);
 
   return {
     charge,
@@ -61,7 +61,7 @@ export async function lireTableauDeBord(
     grainesDuCairn: consolides.map((atom) => atom.id),
     totalAtoms,
     depots,
-    detteInstallee,
+    arriere,
     // Des concepts sans une seule question : le troisième écran vide, celui où
     // il n'y a rien à faire mais où rien n'est en panne non plus.
     questionsEnRoute: totalAtoms > 0 && sansQuestions > 0,

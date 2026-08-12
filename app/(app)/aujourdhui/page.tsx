@@ -45,9 +45,9 @@ export default async function PageAujourdhui() {
             questionsEnRoute={tableau.questionsEnRoute}
           />
 
-          {tableau.detteInstallee ? (
+          {tableau.arriere.signaler ? (
             <div className="mt-pas-8">
-              <SignalDeDette enAttente={tableau.charge.enAttente} />
+              <SignalDeDette enAttente={tableau.charge.enAttente} jours={tableau.arriere.jours} />
             </div>
           ) : null}
         </div>

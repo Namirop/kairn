@@ -12,11 +12,11 @@ import { CONCEPTS_PAR_JOUR } from "@/lib/db/quota-depots";
  * termes.
  */
 export const MOTIFS_DE_REFUS = {
-  // « Environ », et c'est exact. Un dépôt est autorisé tant qu'il reste une
+  // « Autour de », et c'est exact. Un dépôt est autorisé tant qu'il reste une
   // place, puis rend ce qu'il rend : le dernier de la journée peut retenir huit
   // concepts sur une place. Annoncer un nombre rond que le produit dépasse d'un
   // quart, c'était afficher un plafond qui est en fait un plancher.
-  concepts: `Tu as retenu tout ce que la journée permet, environ ${CONCEPTS_PAR_JOUR} concepts. Ça repart demain.`,
+  concepts: `Tu as atteint la limite du jour, autour de ${CONCEPTS_PAR_JOUR} concepts. Ça repart demain.`,
   depots: "Tu as fait tous les dépôts de la journée. Ça repart demain.",
   debit: "Trop de dépôts coup sur coup. Laisse passer une minute.",
 } as const;

@@ -119,7 +119,7 @@ export async function casDecompteApresExtraction(userId: string): Promise<void> 
 
   record(
     "Quota — le plafond s'annonce pour ce qu'il est, approximatif",
-    MOTIFS_DE_REFUS.concepts.includes("environ"),
+    MOTIFS_DE_REFUS.concepts.includes("autour de"),
     MOTIFS_DE_REFUS.concepts,
   );
 

@@ -12,12 +12,16 @@ import { ROUTES } from "@/lib/auth/routes";
  * Il n'apparaît qu'au-delà du seuil et disparaît dès que l'arriéré redescend.
  * Une bannière permanente devient un élément de décor, et on cesse de la lire
  * au moment précis où elle aurait quelque chose à dire.
+ *
+ * Le nombre de jours est donné, pas arrondi en « quelques ». On le connaît, et
+ * le flou fait plus peur que le chiffre : « quelques jours » se lit comme un
+ * reproche qu'on n'ose pas chiffrer, « six jours » se lit comme un fait.
  */
-export function SignalDeDette({ enAttente }: { enAttente: number }) {
+export function SignalDeDette({ enAttente, jours }: { enAttente: number; jours: number }) {
   return (
     <div className="border-ember/40 pl-pas-4 border-l-2">
       <p className="text-corps max-w-prose leading-relaxed text-stone-900">
-        Ça fait quelques jours que l&apos;arriéré ne descend pas : {enAttente} concepts attendent
+        Ça fait {jours} jours que l&apos;arriéré ne descend pas : {enAttente} concepts attendent
         derrière la session du jour.
       </p>
       <p className="mt-pas-2 text-petit max-w-prose text-stone-500">

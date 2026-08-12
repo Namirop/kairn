@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/client";
 import {
   doitSignalerLaDette,
+  joursDArriere,
   suiviApresObservation,
   type SuiviDeLArriere,
 } from "@/lib/domain/dette-de-revision";
@@ -22,12 +23,19 @@ import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
  * dure ne réécrit rien, donc la très grande majorité des affichages ne font
  * qu'une lecture.
  */
+export type ArriereSuivi = {
+  /** Assez long pour qu'on le dise. */
+  signaler: boolean;
+  /** Depuis combien de jours, aujourd'hui compris. Zéro quand il n'y en a pas. */
+  jours: number;
+};
+
 export async function suivreLArriere(
   userId: string,
   enArriere: boolean,
   fuseau: string,
   maintenant: Date = new Date(),
-): Promise<boolean> {
+): Promise<ArriereSuivi> {
   const jour = localDay(maintenant, fuseau);
   const stats = await prisma.userStats.findUnique({
     where: { userId },
@@ -36,7 +44,7 @@ export async function suivreLArriere(
 
   // Aucune ligne de statistiques : le compte n'a jamais révisé, il n'a pas
   // d'arriéré à raconter. On ne crée pas la ligne pour y écrire un vide.
-  if (!stats) return false;
+  if (!stats) return { signaler: false, jours: 0 };
 
   const avant: SuiviDeLArriere = {
     depuis: stats.backlogSince ? stats.backlogSince.toISOString().slice(0, 10) : null,
@@ -50,5 +58,8 @@ export async function suivreLArriere(
     });
   }
 
-  return doitSignalerLaDette(apres, enArriere, jour);
+  return {
+    signaler: doitSignalerLaDette(apres, enArriere, jour),
+    jours: enArriere ? joursDArriere(apres, jour) : 0,
+  };
 }
