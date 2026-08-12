@@ -37,7 +37,7 @@ export function Hero() {
 
         <div className="mt-pas-8 gap-pas-3 flex flex-col sm:flex-row">
           <Button asChild size="lg">
-            <Link href={ROUTES.inscription}>Créer un compte</Link>
+            <Link href={ROUTES.connexion}>Commencer</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
             <Link href={ROUTES.connexion}>Se connecter</Link>

@@ -1,40 +1,17 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { BoutonGoogle } from "@/components/compte/bouton-google";
-import { FormulaireInscription } from "@/components/compte/formulaire-inscription";
-import { isGoogleEnabled } from "@/lib/auth/config";
+import { permanentRedirect } from "next/navigation";
 import { ROUTES } from "@/lib/auth/routes";
 
-export const metadata: Metadata = { title: "Créer un compte" };
-
+/**
+ * L'inscription n'existe plus comme écran séparé.
+ *
+ * Sans mot de passe, s'inscrire et se connecter sont le même geste : on donne
+ * son adresse, on reçoit un lien, et le lien crée le compte s'il n'existe pas.
+ * Deux écrans auraient obligé quelqu'un à savoir s'il a déjà un compte, ce
+ * qu'on ne sait pas toujours — et à revenir en arrière quand on s'est trompé.
+ *
+ * La route reste, en redirection permanente : elle est dans des liens déjà
+ * envoyés, et peut-être dans un signet.
+ */
 export default function PageInscription() {
-  return (
-    <div className="gap-pas-8 flex flex-col">
-      <div>
-        <h1 className="text-h1-app leading-tight font-bold">Poser la première pierre</h1>
-        <p className="mt-pas-2 text-petit text-stone-500">
-          Dépose ce que tu apprends. Kairn le découpe et te le repose au bon moment.
-        </p>
-      </div>
-
-      <FormulaireInscription suite={ROUTES.aujourdhui} />
-
-      {isGoogleEnabled ? (
-        <div className="gap-pas-4 flex flex-col">
-          <span className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">ou</span>
-          <BoutonGoogle suite={ROUTES.aujourdhui} />
-        </div>
-      ) : null}
-
-      <p className="text-petit text-stone-500">
-        Déjà un compte ?{" "}
-        <Link
-          href={ROUTES.connexion}
-          className="rounded-xs text-stone-900 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900"
-        >
-          Se connecter
-        </Link>
-      </p>
-    </div>
-  );
+  permanentRedirect(ROUTES.connexion);
 }

@@ -27,11 +27,31 @@ export const EMAIL_STYLE = { ...PALETTE, SANS, MONO } as const;
 export type ShellContent = {
   preheader: string;
   body: string;
-  unsubscribeUrl: string;
+  /**
+   * Absent sur un email dont on ne peut pas se désabonner.
+   *
+   * Un lien de connexion en est un : il ne s'envoie que sur demande, il est le
+   * moyen d'entrer, et proposer d'y renoncer n'aurait aucun sens. Y coller un
+   * `List-Unsubscribe` serait pire — le client mail rangerait un message
+   * transactionnel avec les envois de masse.
+   */
+  unsubscribeUrl?: string;
+  /** Ce qui justifie l'envoi, dit au pied. Sans lui, le pied disparaît. */
+  raisonDeLEnvoi?: string;
 };
 
 /** Enveloppe le contenu : largeur fixe, fond papier, pied de désinscription. */
-export function renderShell({ preheader, body, unsubscribeUrl }: ShellContent): string {
+export function renderShell({
+  preheader,
+  body,
+  unsubscribeUrl,
+  raisonDeLEnvoi,
+}: ShellContent): string {
+  const pied = unsubscribeUrl
+    ? `${raisonDeLEnvoi ?? "Tu reçois ce message parce que le rappel quotidien est activé sur ton compte."}
+<a href="${unsubscribeUrl}" style="color:${PALETTE.muted};">Ne plus en recevoir</a>.`
+    : (raisonDeLEnvoi ?? "");
+
   return `<!doctype html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
@@ -45,12 +65,15 @@ export function renderShell({ preheader, body, unsubscribeUrl }: ShellContent): 
 ${body}
 </td></tr>
 </table>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
+${
+  pied
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
 <tr><td style="padding:20px 28px;font-size:12px;line-height:18px;color:${PALETTE.muted};">
-Tu reçois ce message parce que le rappel quotidien est activé sur ton compte.
-<a href="${unsubscribeUrl}" style="color:${PALETTE.muted};">Ne plus en recevoir</a>.
+${pied}
 </td></tr>
-</table>
+</table>`
+    : ""
+}
 </td></tr>
 </table>
 </body>

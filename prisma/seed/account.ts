@@ -1,13 +1,19 @@
-import { hashPassword } from "better-auth/crypto";
 import { prisma } from "@/lib/db/client";
 
 /**
- * Le compte de démonstration. Ses identifiants vivent ici et dans `.env`,
- * jamais dans la documentation du dépôt.
+ * Le compte de démonstration.
+ *
+ * Il n'a plus de mot de passe : l'authentification passe par un lien envoyé à
+ * l'adresse, donc il n'y a rien à poser d'autre que l'adresse elle-même. On y
+ * entre en demandant un lien depuis l'écran de connexion — better-auth
+ * reconnaît le compte existant et l'ouvre au lieu d'en créer un.
+ *
+ * L'adresse par défaut est neutre à dessein : la vraie vit dans `.env`, qui
+ * n'est pas versionné. Une adresse personnelle en dur dans le code serait une
+ * adresse personnelle publiée.
  */
 export const SEED_USER_ID = "seed-compte-demonstration";
 export const SEED_EMAIL = process.env.SEED_USER_EMAIL ?? "demo@cairn.test";
-export const SEED_PASSWORD = process.env.SEED_USER_PASSWORD ?? "sentier-de-pierres-2026";
 export const SEED_TIMEZONE = process.env.SEED_USER_TIMEZONE ?? "Europe/Brussels";
 
 /**
@@ -24,7 +30,6 @@ export async function resetSeedAccount(): Promise<void> {
 }
 
 export async function createSeedAccount(): Promise<string> {
-  const passwordHash = await hashPassword(SEED_PASSWORD);
   const now = new Date();
 
   await prisma.$transaction([
@@ -34,17 +39,6 @@ export async function createSeedAccount(): Promise<string> {
         name: "Compte de démonstration",
         email: SEED_EMAIL,
         emailVerified: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-    }),
-    prisma.account.create({
-      data: {
-        id: `${SEED_USER_ID}-credential`,
-        accountId: SEED_USER_ID,
-        providerId: "credential",
-        userId: SEED_USER_ID,
-        password: passwordHash,
         createdAt: now,
         updatedAt: now,
       },

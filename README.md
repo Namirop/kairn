@@ -32,7 +32,7 @@ quotidien calcule sa sélection sans envoyer.
 | ------------------ | ---------------------------------------------------------------- |
 | Framework          | Next.js 15 (App Router, Turbopack), React 19, TypeScript strict  |
 | Base de données    | PostgreSQL, Prisma 7 avec le driver adapter `@prisma/adapter-pg` |
-| Authentification   | better-auth (email/mot de passe, Google en option)               |
+| Authentification   | better-auth (lien par email, Google en option)                   |
 | Répétition espacée | `ts-fsrs`                                                        |
 | Modèle             | SDK Anthropic, sorties structurées contraintes, validation Zod   |
 | Interface          | Tailwind v4, primitives shadcn/ui retokenisées, Motion           |
@@ -57,8 +57,9 @@ npm run db:seed             # remplit la base avec un compte de démonstration
 npm run dev
 ```
 
-Le compte créé par le seed et son mot de passe sont définis dans `prisma/seed/account.ts`, et
-surchargeables par `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`.
+L'adresse du compte de démonstration est définie dans `prisma/seed/account.ts` et surchargeable
+par `SEED_USER_EMAIL`. Il n'a pas de mot de passe : on y entre en demandant un lien depuis l'écran
+de connexion, comme sur n'importe quel compte.
 
 ## Variables d'environnement
 
@@ -81,7 +82,7 @@ surchargeables par `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`.
 | `AI_MODEL`                     | oui    | Identifiant du modèle.                                                      |
 | `ADMIN_EMAILS`                 | non    | Adresses autorisées à lire les signalements. Vide n'autorise personne.      |
 | `AI_MAX_TOKENS`                | oui    | `max_tokens` par défaut, toujours envoyé ; une sortie coupée est un échec.  |
-| `SEED_USER_*`                  | non    | Adresse, mot de passe et fuseau du compte de démonstration.                 |
+| `SEED_USER_*`                  | non    | Adresse et fuseau du compte de démonstration.                               |
 
 Les valeurs réelles vivent dans `.env`, qui n'est pas versionné. `.env.example` sert de référence.
 

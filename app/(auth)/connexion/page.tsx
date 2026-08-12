@@ -24,9 +24,10 @@ export default async function PageConnexion({
   return (
     <div className="gap-pas-8 flex flex-col">
       <div>
-        <h1 className="text-h1-app leading-tight font-bold">Reprendre le sentier</h1>
+        <h1 className="text-h1-app leading-tight font-bold">Entrer dans Kairn</h1>
         <p className="mt-pas-2 text-petit text-stone-500">
-          Tes concepts t&apos;attendent là où tu les as laissés.
+          Ton adresse suffit. On t&apos;envoie un lien, il ouvre ta session — et il crée ton compte
+          si tu n&apos;en as pas encore.
         </p>
       </div>
 
@@ -40,13 +41,14 @@ export default async function PageConnexion({
       ) : null}
 
       <p className="text-petit text-stone-500">
-        Pas encore de compte ?{" "}
+        En continuant, tu acceptes la{" "}
         <Link
-          href={ROUTES.inscription}
+          href={ROUTES.confidentialite}
           className="rounded-xs text-stone-900 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900"
         >
-          En créer un
+          politique de confidentialité
         </Link>
+        .
       </p>
     </div>
   );
