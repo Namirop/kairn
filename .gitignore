@@ -51,13 +51,10 @@ next-env.d.ts
 /.agents
 /skills-lock.json
 /CLAUDE.md
-/phase-0-prompt.md
-/phase-0.5-prompt.md
-/claude-md-section-tests.md
-/phase-1-prompt.md
+# Les consignes de phase : elles disent comment le produit a été construit,
+# pas ce qu'il fait. Rangées ensemble depuis la phase 4.
+/archive/
 
 # Rapports du banc d’évaluation : produits localement, jamais commités.
 /scripts/evaluation/rapports/
-/phase-1.1-prompt.md
 /scripts/evaluation/concepts/
-/phase-1.2-prompt.md
