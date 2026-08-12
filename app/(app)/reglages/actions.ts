@@ -5,6 +5,7 @@ import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { supprimerLeCompte } from "@/lib/db/compte";
+import { confirmationValide, MOT_DE_CONFIRMATION } from "@/lib/domain/confirmation-de-suppression";
 
 /**
  * Les gestes irréversibles d'un compte.
@@ -15,21 +16,8 @@ import { supprimerLeCompte } from "@/lib/db/compte";
  * d'un écran qui ne la demande pas.
  */
 
-/**
- * Ce qu'il faut taper pour confirmer.
- *
- * Pas une case à cocher : une case se coche sans lire. Recopier un mot demande
- * de regarder ce qu'on est en train de faire, et c'est le seul frein
- * proportionné à une action qu'on ne peut pas défaire.
- */
-export const MOT_DE_CONFIRMATION = "supprimer";
-
 const confirmationSchema = z.object({
-  confirmation: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .refine((valeur) => valeur === MOT_DE_CONFIRMATION),
+  confirmation: z.string().refine(confirmationValide),
 });
 
 export type EtatSuppression = { erreur?: string };

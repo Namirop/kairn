@@ -1,12 +1,9 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import {
-  MOT_DE_CONFIRMATION,
-  supprimerMonCompteAction,
-  type EtatSuppression,
-} from "@/app/(app)/reglages/actions";
+import { supprimerMonCompteAction, type EtatSuppression } from "@/app/(app)/reglages/actions";
 import { Button } from "@/components/ui/button";
+import { MOT_DE_CONFIRMATION } from "@/lib/domain/confirmation-de-suppression";
 
 /**
  * Emporter ses données, ou les effacer.

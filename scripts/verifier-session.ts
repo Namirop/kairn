@@ -1,5 +1,6 @@
 import "dotenv/config";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { conclure, record } from "./verification/journal";
 
 /**
@@ -70,6 +71,48 @@ function verifierQueLaVarianteNePlanifiePas(): void {
   );
 }
 
+/** Tous les `actions.ts` de l'arborescence des routes. */
+function fichiersDActions(dossier: string): string[] {
+  return readdirSync(dossier, { withFileTypes: true }).flatMap((entree) => {
+    const chemin = join(dossier, entree.name);
+
+    if (entree.isDirectory()) return fichiersDActions(chemin);
+
+    return entree.name === "actions.ts" ? [chemin] : [];
+  });
+}
+
+/**
+ * Un fichier `"use server"` n'exporte que des fonctions async.
+ *
+ * Ni TypeScript ni ESLint ne connaissent cette règle : elle appartient à Next, et
+ * elle ne se manifeste qu'au moment où le module est atteint depuis un composant
+ * client — donc à la compilation, souvent longtemps après l'avoir écrite. Une
+ * constante partagée entre l'action et son formulaire est la façon la plus
+ * naturelle de tomber dedans, et c'est exactement ce qui est arrivé.
+ *
+ * Les `export type` sont effacés à la compilation et ne comptent pas.
+ */
+function verifierQueLesActionsNExportentQueDesFonctions(): void {
+  const fautifs: string[] = [];
+
+  for (const fichier of fichiersDActions("app")) {
+    const source = readFileSync(fichier, "utf8");
+
+    if (!source.includes('"use server"')) continue;
+
+    const exports = source.match(/^export (?!async function |type )\S+/gm) ?? [];
+
+    if (exports.length > 0) fautifs.push(`${fichier} (${exports.length})`);
+  }
+
+  record(
+    "Architecture — les fichiers d'actions n'exportent que des fonctions async",
+    fautifs.length === 0,
+    fautifs.length === 0 ? "aucun export de valeur" : fautifs.join(", "),
+  );
+}
+
 async function main(): Promise<void> {
   process.env.AI_ENABLED = "true";
   process.env.MOCK_AI = "true";
@@ -109,6 +152,7 @@ async function main(): Promise<void> {
 
   try {
     verifierQueLaVarianteNePlanifiePas();
+    verifierQueLesActionsNExportentQueDesFonctions();
 
     await fuseaux.casDeuxFuseaux(utilisateur.id);
     await session.casSessionComplete(utilisateur.id, maintenant);
