@@ -96,7 +96,7 @@ export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
     contract: GENERATE_VARIANTS,
     system: SYSTEM_PROMPTS.generate_variants,
     jobId: job.id,
-    userId: depot?.userId,
+    userId: depot?.userId ?? undefined,
     messages: [{ role: "user", content: messageDuGroupe(concepts) }],
   });
 

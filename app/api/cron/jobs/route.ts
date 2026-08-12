@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAuthorizedCron } from "@/lib/cron/authorization";
 import { failExhaustedJobs, findResumableJobs } from "@/lib/db/generation-job";
+import { oublierLesVisitesAbandonnees } from "@/lib/db/session-anonyme";
 import { runJob, type JobOutcome } from "@/lib/jobs/runner";
 
 /**
@@ -22,6 +23,9 @@ export async function GET(request: Request) {
   }
 
   const abandonnes = await failExhaustedJobs();
+  // Les essais que personne n'a réclamés : leur texte n'a pas à rester, et
+  // personne n'a accepté qu'il reste. Les cascades emportent concepts compris.
+  const visitesOubliees = await oublierLesVisitesAbandonnees();
   const jobs = await findResumableJobs(BATCH_SIZE);
   const comptes: Record<JobOutcome, number> = { DONE: 0, FAILED: 0, SKIPPED: 0, REPORTE: 0 };
 
@@ -38,5 +42,6 @@ export async function GET(request: Request) {
     // ils repartiront au prochain passage. Ce n'est pas une ligne d'échec.
     reportes: comptes.REPORTE,
     abandonnes,
+    visitesOubliees,
   });
 }

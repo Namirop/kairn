@@ -38,7 +38,7 @@ export async function lireImage(job: GenerationJob): Promise<void> {
     contract: OCR_EXTRACT,
     system: SYSTEM_PROMPTS.ocr_extract,
     jobId: job.id,
-    userId: depot.userId,
+    userId: depot.userId ?? undefined,
     messages: [
       {
         role: "user",

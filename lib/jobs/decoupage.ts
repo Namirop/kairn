@@ -37,7 +37,7 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
     contract: EXTRACT_ATOMS,
     system: SYSTEM_PROMPTS.extract_atoms,
     jobId: job.id,
-    userId: depot.userId,
+    userId: depot.userId ?? undefined,
     messages: [{ role: "user", content: texte }],
   });
 
@@ -51,14 +51,23 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
     return;
   }
 
-  const concepts = await enregistrerConcepts(depot.id, depot.userId, extraction.atoms);
+  const concepts = await enregistrerConcepts(depot.id, extraction.atoms);
 
-  // Le compteur du jour se remplit ici, et pas au dépôt : avant l'extraction,
-  // personne ne sait combien de concepts un texte porte. Les douteux comptent
-  // aussi — ils ont coûté la même extraction, et l'utilisateur peut encore les
-  // confirmer.
-  const fuseau = await lireFuseauUtilisateur(depot.userId);
-  await compterConceptsRetenus(depot.userId, fuseau, concepts.length);
+  // Le compteur de la période se remplit ici, et pas au dépôt : avant
+  // l'extraction, personne ne sait combien de concepts un texte porte. Les
+  // douteux comptent aussi — ils ont coûté la même extraction, et l'utilisateur
+  // peut encore les confirmer.
+  //
+  // Un dépôt anonyme n'a pas de compteur : il est borné autrement, par une
+  // session à un seul dépôt et par une limite d'empreinte d'adresse. Il n'a pas
+  // non plus de questions — c'est là que s'arrête sa dépense.
+  if (depot.userId) {
+    const fuseau = await lireFuseauUtilisateur(depot.userId);
+    await compterConceptsRetenus(depot.userId, fuseau, concepts.length);
+  } else {
+    await marquerPretSiPlusRienEnAttente(depot.id);
+    return;
+  }
 
   const aQuestionner = concepts
     .filter((concept) => !concept.uncertain)

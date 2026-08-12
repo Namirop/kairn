@@ -93,15 +93,31 @@ export async function oublierImage(inputId: string): Promise<void> {
   });
 }
 
+/**
+ * Écrit les concepts d'un dépôt, sous le même propriétaire que lui.
+ *
+ * Le propriétaire n'est pas passé par l'appelant mais relu sur le dépôt : un
+ * concept qui n'appartiendrait pas à qui a déposé serait invisible pour lui, ou
+ * pire, visible pour quelqu'un d'autre. Il n'y a qu'une source de vérité.
+ */
 export async function enregistrerConcepts(
   inputId: string,
-  userId: string,
   concepts: ConceptAEcrire[],
 ): Promise<{ id: string; concept: string; uncertain: boolean }[]> {
+  const depot = await prisma.input.findUniqueOrThrow({
+    where: { id: inputId },
+    select: { userId: true, anonymousSessionId: true },
+  });
+
   return prisma.$transaction(
     concepts.map((concept) =>
       prisma.atom.create({
-        data: { inputId, userId, ...concept },
+        data: {
+          inputId,
+          userId: depot.userId,
+          anonymousSessionId: depot.anonymousSessionId,
+          ...concept,
+        },
         select: { id: true, concept: true, uncertain: true },
       }),
     ),

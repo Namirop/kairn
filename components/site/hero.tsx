@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CairnRenversable } from "@/components/cairn/cairn-renversable";
 import { Panneau } from "@/components/coquille/panneau";
-import { Button } from "@/components/ui/button";
+import { EssaiDeDepot } from "@/components/site/essai-de-depot";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
@@ -15,7 +15,7 @@ import { ROUTES } from "@/lib/auth/routes";
  * cairn qui occupe la colonne désormais — il monte à toute la hauteur du
  * panneau plutôt que de flotter au milieu d'un rectangle.
  */
-export function Hero() {
+export function Hero({ invite }: { invite: string }) {
   return (
     <Panneau
       surface="papier"
@@ -35,14 +35,23 @@ export function Hero() {
           avant que tu les oublies.
         </p>
 
-        <div className="mt-pas-8 gap-pas-3 flex flex-col sm:flex-row">
-          <Button asChild size="lg">
-            <Link href={ROUTES.connexion}>Commencer</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href={ROUTES.connexion}>Se connecter</Link>
-          </Button>
+        {/* Le champ, et pas un bouton vers une inscription : c'est le
+            découpage qui convainc, et le montrer coûte une extraction. Demander
+            un compte avant d'avoir rien montré était la friction la plus chère
+            du produit. */}
+        <div className="mt-pas-8">
+          <EssaiDeDepot invite={invite} />
         </div>
+
+        <p className="mt-pas-6 text-petit text-stone-500">
+          Déjà un compte ?{" "}
+          <Link
+            href={ROUTES.connexion}
+            className="rounded-xs text-stone-900 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900"
+          >
+            Se connecter
+          </Link>
+        </p>
       </div>
 
       <div className="flex justify-center">

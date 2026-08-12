@@ -57,7 +57,9 @@ async function rembourserLaPlace(inputId: string): Promise<void> {
     select: { userId: true },
   });
 
-  if (!depot) return;
+  // Un dépôt anonyme n'a pris aucune place à un compteur de compte : il n'y a
+  // rien à lui rendre.
+  if (!depot?.userId) return;
 
   await rendreDepot(depot.userId, await lireFuseauUtilisateur(depot.userId));
 }

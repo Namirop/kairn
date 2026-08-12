@@ -5,6 +5,7 @@ import { Hero } from "@/components/site/hero";
 import { PasCeci } from "@/components/site/pas-ceci";
 import { Sentier } from "@/components/site/sentier";
 import { ROUTES } from "@/lib/auth/routes";
+import { inviteDeDepot } from "@/lib/domain/invites-de-depot";
 
 /**
  * La page publique : une pile de panneaux, chacun avec sa surface, séparés par
@@ -13,10 +14,13 @@ import { ROUTES } from "@/lib/auth/routes";
  * Chaque jointure porte sa propre graine — les trois coupes ne se ressemblent
  * pas, et c'est ce qui les empêche de redevenir un séparateur de gabarit.
  */
+/** Rendue à la demande : l'invite du champ change à chaque chargement. */
+export const dynamic = "force-dynamic";
+
 export default function PageAccueil() {
   return (
     <>
-      <Hero />
+      <Hero invite={inviteDeDepot(Math.random())} />
       <Strates de="papier" vers="ombre" graine="accueil-sentier" />
       <Sentier />
       <Strates de="ombre" vers="roche" graine="accueil-pas-ceci" />

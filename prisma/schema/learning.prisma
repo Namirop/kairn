@@ -3,9 +3,20 @@
 // difficulté ne doit apparaître sur Variant : ce serait un bug d'architecture.
 
 model Input {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
+
+  /// À qui ce dépôt appartient : un compte, ou une session anonyme.
+  ///
+  /// Exactement l'un des deux est renseigné. Un visiteur dépose avant d'avoir un
+  /// compte — c'est ce qui lui montre le produit au lieu de le lui promettre —
+  /// et son dépôt passe au compte à l'inscription. Les deux colonnes plutôt
+  /// qu'un compte fantôme : `User` appartient à better-auth, et y écrire des
+  /// visiteurs fausserait tout ce qui compte des comptes.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  anonymousSessionId String?
+  anonymousSession   AnonymousSession? @relation(fields: [anonymousSessionId], references: [id], onDelete: Cascade)
 
   /// Ce que l'utilisateur a déposé, mot pour mot. Jamais réécrit après création.
   rawContent String          @db.Text
@@ -37,14 +48,22 @@ model Input {
   @@unique([userId, submissionKey])
   @@index([userId, createdAt])
   @@index([status, createdAt])
+  @@index([anonymousSessionId])
 }
 
 model Atom {
   id      String @id @default(cuid())
   inputId String
   input   Input  @relation(fields: [inputId], references: [id], onDelete: Cascade)
-  userId  String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Le même couple que sur `Input`, et pour la même raison. Un concept anonyme
+  /// est invisible de toute requête de compte : elles filtrent toutes sur
+  /// `userId`, et il vaut nul tant que personne ne l'a réclamé.
+  userId  String?
+  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  anonymousSessionId String?
+  anonymousSession   AnonymousSession? @relation(fields: [anonymousSessionId], references: [id], onDelete: Cascade)
 
   concept String   @db.Text
   tags    String[]
@@ -96,6 +115,7 @@ model Atom {
   @@index([userId, due])
   @@index([userId, state])
   @@index([inputId])
+  @@index([anonymousSessionId])
   /// La fenêtre d'un tour d'entraînement : le moins récemment travaillé d'abord.
   @@index([userId, trainedAt])
 }

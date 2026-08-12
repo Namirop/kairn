@@ -285,3 +285,43 @@ model EmailDelivery {
 
   @@id([userId, type, day])
 }
+
+/// Un visiteur qui dépose avant d'avoir un compte.
+///
+/// C'est la friction la plus coûteuse du produit qu'on retire : demander un
+/// compte avant d'avoir rien montré. On dépose, l'extraction tourne, les
+/// concepts s'affichent vraiment — et c'est **ça** qui convertit. Les faire
+/// miroiter derrière une inscription fait fermer l'onglet.
+///
+/// **L'économie tient parce qu'on s'arrête à l'extraction.** Les questions, qui
+/// coûtent l'essentiel, ne sont écrites qu'une fois le compte créé. Un visiteur
+/// qui repart coûte le prix d'une extraction, et rien de plus.
+///
+/// C'est le seul endroit du produit qui dépense sans compte identifié : il est
+/// donc le plus serré. Un dépôt par session, et une poignée par empreinte
+/// d'adresse.
+model AnonymousSession {
+  id String @id @default(cuid())
+
+  /// Empreinte de l'adresse IP, jamais l'adresse elle-même.
+  ///
+  /// Ce qu'on veut compter, c'est « combien de dépôts viennent d'ici » — une
+  /// empreinte y répond aussi bien qu'une adresse, sans conserver de donnée qui
+  /// désigne quelqu'un. Elle est salée par le secret d'application : une
+  /// empreinte volée ne se retourne pas en liste d'adresses.
+  ipHash String
+
+  /// Non nul dès qu'un compte a réclamé ce dépôt. Ce qui reste nul est du
+  /// passage : le cron l'efface au bout de quelques jours.
+  claimedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  inputs Input[]
+  atoms  Atom[]
+
+  /// Requête de la limite par adresse : combien de sessions depuis cette empreinte.
+  @@index([ipHash, createdAt])
+  /// Requête du cron de nettoyage : les non réclamées, les plus vieilles d'abord.
+  @@index([claimedAt, createdAt])
+}

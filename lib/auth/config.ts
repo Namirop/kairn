@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { magicLink } from "better-auth/plugins";
 import { TIMEZONE_HEADER } from "@/lib/auth/en-tetes";
+import { reprendreLaVisite } from "@/lib/auth/reprise-de-visite";
 import { provisionAccount } from "@/lib/db/account-provisioning";
 import { prisma } from "@/lib/db/client";
 import { envoyerLeLienDeConnexion, MINUTES_DE_VALIDITE } from "@/lib/email/connexion";
@@ -61,6 +62,13 @@ export const auth = betterAuth({
           const timezone = submitted && isSupportedTimeZone(submitted) ? submitted : "UTC";
 
           await provisionAccount(user.id, timezone);
+
+          // Ce qu'un visiteur avait déposé avant de créer son compte lui revient
+          // ici, et c'est ici seulement : c'est le seul instant où l'on tient à
+          // la fois le compte neuf et le cookie de la visite. Les questions
+          // partent dans la foulée — c'est le moment où la dépense reprend, et
+          // il coïncide avec celui où quelqu'un s'engage.
+          await reprendreLaVisite(user.id);
         },
       },
     },

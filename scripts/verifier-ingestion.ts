@@ -47,6 +47,7 @@ async function main(): Promise<void> {
   const pipeline = await import("./verification/ingestion-pipeline");
   const reprise = await import("./verification/ingestion-reprise");
   const limites = await import("./verification/ingestion-limites");
+  const anonyme = await import("./verification/depot-anonyme");
 
   const userId = await utilisateurDeTest();
   await repartirDeZero(userId);
@@ -70,6 +71,10 @@ async function main(): Promise<void> {
     await limites.casDebitEtQuota(userId);
     await limites.casPlafondDeDepots(userId);
     await limites.casListeDattente(userId);
+
+    await anonyme.casEssaiPuisCompte(userId);
+    await anonyme.casLimiteParAdresse();
+    await anonyme.casOubliDesVisites();
 
     const octetsRestants = await prisma.input.count({
       where: { userId, imageData: { not: null } },

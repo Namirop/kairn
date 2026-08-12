@@ -48,7 +48,7 @@ export function PasCeci() {
           size="lg"
           className="mt-pas-8 bg-stone-50 text-stone-900 hover:bg-stone-300"
         >
-          <Link href={ROUTES.connexion}>Commencer</Link>
+          <Link href={ROUTES.connexion}>Créer mon compte</Link>
         </Button>
       </div>
     </Panneau>
