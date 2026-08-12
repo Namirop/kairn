@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/db/client";
+import { rendreDepot } from "@/lib/db/quota-depots";
+import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import type { Input } from "@/lib/db/types";
 
 /**
@@ -105,18 +107,50 @@ export async function enregistrerConcepts(
 }
 
 /**
- * Le dépôt s'arrête sur une panne. Retenter a du sens.
+ * Le dépôt s'arrête sur une panne, et sa place lui est rendue.
  *
- * À réserver aux vraies casses : une image introuvable, une sortie de modèle
- * illisible, un job abandonné après ses reprises. Ce que le contenu ne porte
- * pas relève de `marquerRejet` — appeler ça un échec revient à annoncer une
- * panne du produit à quelqu'un qui a simplement collé une URL nue.
+ * **La règle du remboursement est : qui a payé l'appel.** Un rejet a fait
+ * tourner le modèle — la place du dépôt est due, et seuls les concepts, qui
+ * n'existent pas, ne sont pas comptés. Une panne n'a rien fait tourner du côté
+ * de l'utilisateur : timeout, sortie illisible, plafond du produit atteint. Lui
+ * facturer une de ses quinze places pour un incident dont il n'est pas l'auteur
+ * est le plus sûr moyen de le perdre, et quinze incidents lui prenaient sa
+ * journée sans qu'il ait rien retenu.
+ *
+ * La transition fait foi, et elle est conditionnelle : un dépôt déjà arrêté ne
+ * se rembourse pas une seconde fois. C'est ce qui rend la fonction sûre à
+ * appeler depuis les deux chemins qui arrêtent un dépôt.
+ *
+ * À réserver aux vraies casses. Ce que le contenu ne porte pas relève de
+ * `marquerRejet` — appeler ça un échec revient à annoncer une panne du produit
+ * à quelqu'un qui a simplement collé une URL nue.
  */
 export async function marquerEchec(inputId: string, motif: string): Promise<void> {
-  await prisma.input.update({
-    where: { id: inputId },
+  const { count } = await prisma.input.updateMany({
+    where: { id: inputId, status: { notIn: ["FAILED", "REJECTED"] } },
     data: { status: "FAILED", failureReason: motif, imageData: null, imageMediaType: null },
   });
+
+  if (count === 1) await rembourserLaPlace(inputId);
+}
+
+/**
+ * Rend au compteur du jour la place qu'un dépôt en panne avait prise.
+ *
+ * Le jour se recalcule à cet instant, comme partout ailleurs. Si la panne
+ * survient après le minuit de l'utilisateur, le remboursement tombe sur une
+ * journée où il n'a rien pris et la clause `generations > 0` le laisse sans
+ * effet : on rate un remboursement plutôt que d'en accorder un faux.
+ */
+async function rembourserLaPlace(inputId: string): Promise<void> {
+  const depot = await prisma.input.findUnique({
+    where: { id: inputId },
+    select: { userId: true },
+  });
+
+  if (!depot) return;
+
+  await rendreDepot(depot.userId, await lireFuseauUtilisateur(depot.userId));
 }
 
 /**
@@ -170,16 +204,23 @@ export async function marquerPretSiPlusRienEnAttente(
   // bout ; si l'appel lève, ou si le job est abandonné après trois reprises,
   // c'est ici — et nulle part ailleurs — que le dépôt cesse d'attendre. La
   // capture d'un utilisateur ne doit pas survivre précisément à l'échec.
+  const enPanne = enEchec > 0 && concepts === 0;
+
   await prisma.input.update({
     where: { id: inputId },
     data: {
       imageData: null,
       imageMediaType: null,
-      ...(enEchec > 0 && concepts === 0
+      ...(enPanne
         ? { status: "FAILED" as const, failureReason: motifSiVide }
         : { status: "READY" as const }),
     },
   });
+
+  // Le dépôt s'arrête sans avoir rien produit, et par une panne : sa place lui
+  // revient. La garde ci-dessus a déjà écarté un dépôt déjà arrêté, donc on ne
+  // rembourse qu'une fois.
+  if (enPanne) await rembourserLaPlace(inputId);
 
   return true;
 }

@@ -34,8 +34,17 @@ const LOTS_PAR_PASSAGE = 10;
 /** Au-delà, un lot sans réponse est signalé, pas relancé en boucle. */
 const ATTENTE_MAXIMALE_MS = 24 * 60 * 60 * 1000;
 
-export async function soumettreLotsEnAttente(): Promise<number> {
-  const jobs = await trouverJobsASoumettre(REQUETES_PAR_LOT);
+/**
+ * Soumet les jobs de questions en attente, pour un compte ou pour tous.
+ *
+ * `userId` est renseigné quand un geste d'utilisateur déclenche la soumission —
+ * corriger un concept, confirmer un concept douteux. Sans lui, le geste d'un
+ * compte soumettait les jobs en attente de tous les autres, et prenait des
+ * places au plafond global pour du travail qui n'était pas le sien. Le cron,
+ * lui, appelle sans identifiant : c'est son rôle de tout ramasser.
+ */
+export async function soumettreLotsEnAttente(userId?: string): Promise<number> {
+  const jobs = await trouverJobsASoumettre(REQUETES_PAR_LOT, new Date(), userId);
 
   if (jobs.length === 0) return 0;
 
@@ -59,7 +68,7 @@ export async function soumettreLotsEnAttente(): Promise<number> {
 
   if (requetes.length === 0) return 0;
 
-  const lot = await submitAIBatch(requetes);
+  const lot = await submitAIBatch(requetes, userId);
   await enregistrerLot(
     lot.providerId,
     requetes.map((requete) => requete.reference),

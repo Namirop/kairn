@@ -81,11 +81,22 @@ export async function executerToutLePipeline(inputId: string): Promise<number> {
   return executes;
 }
 
-/** Recule les dépôts déjà écrits hors de la fenêtre de débit. */
+/**
+ * Recule la fenêtre de débit, pour éprouver le quota du jour sans attendre une
+ * minute entre deux dépôts.
+ *
+ * La fenêtre ne se lit plus sur les dépôts écrits : elle vit sur la ligne de
+ * `DailyUsage`, parce qu'un compteur lu à part laissait passer tout ce qui
+ * partait ensemble. C'est donc cette ligne qu'on vieillit. Les horodatages des
+ * dépôts suivent, pour que le décor reste cohérent avec ce qu'on raconte.
+ */
 export async function vieillirLesDepots(userId: string): Promise<void> {
-  await prisma.input.updateMany({
+  const passe = new Date(Date.now() - 10 * 60 * 1000);
+
+  await prisma.input.updateMany({ where: { userId }, data: { createdAt: passe } });
+  await prisma.dailyUsage.updateMany({
     where: { userId },
-    data: { createdAt: new Date(Date.now() - 10 * 60 * 1000) },
+    data: { depositWindowStart: passe, actionWindowStart: passe },
   });
 }
 

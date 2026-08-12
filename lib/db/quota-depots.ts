@@ -31,8 +31,8 @@ export const CONCEPTS_PAR_JOUR = 30;
 export const DEPOTS_PAR_JOUR = 15;
 
 /** Fenêtre courte du débit, et ce qu'on y tolère. */
-const FENETRE_DEBIT_MS = 60 * 1000;
-const DEPOTS_PAR_FENETRE = 3;
+export const FENETRE_DEBIT_SECONDES = 60;
+export const DEPOTS_PAR_FENETRE = 3;
 
 export type Autorisation =
   | { accorde: true; restants: number }
@@ -59,54 +59,86 @@ export async function lireUsageDuJour(
 /**
  * Prend une place du jour, ou la refuse.
  *
- * L'incrément et le refus tiennent dans une seule instruction : deux dépôts
- * simultanés ne peuvent pas prendre la même place. Le refus porte sur les
- * concepts déjà retenus — un compteur que ce dépôt-ci ne remplira qu'après son
- * extraction, puisqu'on ignore encore ce qu'il rendra.
+ * **Une seule instruction pour les trois limites.** La fenêtre courte se lisait
+ * autrefois à part, en comptant les dépôts de la dernière minute avant de
+ * décider : c'était exactement la course qu'on avait fermée sur `AiCallQuota`,
+ * restée ouverte deux lignes plus haut, et dix envois simultanés lisaient tous
+ * zéro. Elle vit maintenant sur la ligne qu'on verrouille pour prendre sa
+ * place, donc elle se compte et se refuse dans le même mouvement.
  *
- * Le dernier dépôt d'une journée peut donc déborder le plafond : il est autorisé
+ * Ça règle du même coup le redécoupage, qui prend une place sans écrire de
+ * dépôt : compter des `Input` ne le voyait pas, compter des places le voit
+ * forcément. Une seule mesure vaut mieux que deux qui doivent s'accorder.
+ *
+ * Le refus porte sur les concepts déjà retenus — un compteur que ce dépôt-ci ne
+ * remplira qu'après son extraction, puisqu'on ignore encore ce qu'il rendra. Le
+ * dernier dépôt d'une journée peut donc déborder le plafond : il est autorisé
  * tant qu'il reste un concept de marge, et rendra ce qu'il rendra. Réserver une
  * estimation reviendrait à refuser un dépôt d'une ligne parce qu'un article
- * aurait pu tenir à sa place.
+ * aurait pu tenir à sa place. C'est pour ce débordement-là que le plafond est
+ * annoncé comme approximatif.
  */
 export async function reserverDepot(
   userId: string,
   fuseau: string,
   maintenant: Date = new Date(),
 ): Promise<Autorisation> {
-  const recents = await prisma.input.count({
-    where: { userId, createdAt: { gte: new Date(maintenant.getTime() - FENETRE_DEBIT_MS) } },
-  });
-
-  if (recents >= DEPOTS_PAR_FENETRE) {
-    return { accorde: false, motif: "debit", restants: 0 };
-  }
-
   const jour = localDay(maintenant, fuseau);
-  const lignes = await prisma.$queryRaw<{ generations: number; concepts: number }[]>`
-    INSERT INTO "DailyUsage" ("userId", "day", "generations", "concepts", "reviews", "createdAt", "updatedAt")
-    VALUES (${userId}, ${jour}::date, 1, 0, 0, now(), now())
+  const lignes = await prisma.$queryRaw<
+    { generations: number; concepts: number; depositWindowCount: number }[]
+  >`
+    INSERT INTO "DailyUsage" (
+      "userId", "day", "generations", "concepts", "reviews",
+      "depositWindowStart", "depositWindowCount",
+      "actionWindowStart", "actionWindowCount",
+      "createdAt", "updatedAt"
+    )
+    VALUES (${userId}, ${jour}::date, 1, 0, 0, now(), 1, now(), 0, now(), now())
     ON CONFLICT ("userId", "day") DO UPDATE
       SET "generations" = "DailyUsage"."generations" + 1,
+          "depositWindowStart" = CASE
+            WHEN "DailyUsage"."depositWindowStart"
+                 < now() - make_interval(secs => ${FENETRE_DEBIT_SECONDES}::double precision)
+            THEN now() ELSE "DailyUsage"."depositWindowStart" END,
+          "depositWindowCount" = CASE
+            WHEN "DailyUsage"."depositWindowStart"
+                 < now() - make_interval(secs => ${FENETRE_DEBIT_SECONDES}::double precision)
+            THEN 1 ELSE "DailyUsage"."depositWindowCount" + 1 END,
           "updatedAt" = now()
       WHERE "DailyUsage"."concepts" < ${CONCEPTS_PAR_JOUR}
         AND "DailyUsage"."generations" < ${DEPOTS_PAR_JOUR}
-    RETURNING "generations", "concepts"
+        AND (
+          "DailyUsage"."depositWindowStart"
+            < now() - make_interval(secs => ${FENETRE_DEBIT_SECONDES}::double precision)
+          OR "DailyUsage"."depositWindowCount" < ${DEPOTS_PAR_FENETRE}
+        )
+    RETURNING "generations", "concepts", "depositWindowCount"
   `;
 
   const prise = lignes[0];
 
-  if (!prise) {
-    const usage = await lireUsageDuJour(userId, fuseau, maintenant);
-
-    return {
-      accorde: false,
-      motif: usage.concepts >= CONCEPTS_PAR_JOUR ? "concepts" : "depots",
-      restants: 0,
-    };
-  }
+  if (!prise) return { accorde: false, ...(await motifDuRefus(userId, fuseau, maintenant)) };
 
   return { accorde: true, restants: Math.max(0, CONCEPTS_PAR_JOUR - prise.concepts) };
+}
+
+/**
+ * Pourquoi la place a été refusée.
+ *
+ * Lu après coup et non deviné : les trois causes n'appellent pas la même
+ * conduite, et « attends une minute » ne se dit pas comme « reviens demain ».
+ */
+async function motifDuRefus(
+  userId: string,
+  fuseau: string,
+  maintenant: Date,
+): Promise<{ motif: "concepts" | "depots" | "debit"; restants: number }> {
+  const usage = await lireUsageDuJour(userId, fuseau, maintenant);
+
+  if (usage.concepts >= CONCEPTS_PAR_JOUR) return { motif: "concepts", restants: 0 };
+  if (usage.depots >= DEPOTS_PAR_JOUR) return { motif: "depots", restants: 0 };
+
+  return { motif: "debit", restants: Math.max(0, CONCEPTS_PAR_JOUR - usage.concepts) };
 }
 
 /** Le dépôt n'a finalement pas été écrit : sa place retourne au compteur. */
