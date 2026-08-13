@@ -13,8 +13,14 @@ import { debutDuJourUtc, ilYA } from "@/lib/domain/fenetre-utc";
  * mesures qui porte de la logique, et elle en porte assez pour son fichier.
  */
 
-/** Nombre de jours montrés dans le tableau des volumes. */
-const JOURS_MONTRES = 14;
+/**
+ * Nombre de jours montrés par les séries et les tableaux.
+ *
+ * La même fenêtre partout, et pas une par écran : deux séries de longueurs
+ * différentes posées sur le même écran se comparent à l'œil sans qu'on remarque
+ * qu'elles ne couvrent pas la même chose.
+ */
+export const JOURS_MONTRES = 14;
 
 export type BlocComptes = {
   total: number;
@@ -67,7 +73,7 @@ type LigneDeComptes = {
  * n'a pas — c'est aussi la colonne que porte l'index `[userId, reviewedAt]`,
  * donc celle qui rend le décompte des actifs gratuit.
  */
-async function lireLesComptes(maintenant: Date): Promise<BlocComptes> {
+export async function lireLesComptes(maintenant: Date = new Date()): Promise<BlocComptes> {
   const sept = ilYA(maintenant, 7);
   const trente = ilYA(maintenant, 30);
 
@@ -100,7 +106,7 @@ type LigneDeVolume = { jour: string; depots: number; concepts: number };
  * un jour sans dépôt doit apparaître à zéro. Une série de jours qui saute les
  * jours vides se lit comme une activité continue.
  */
-async function lireLesVolumes(maintenant: Date): Promise<LigneDeJour[]> {
+export async function lireLesVolumes(maintenant: Date = new Date()): Promise<LigneDeJour[]> {
   const premier = debutDuJourUtc(ilYA(maintenant, JOURS_MONTRES - 1));
   const dernier = debutDuJourUtc(maintenant);
 
@@ -131,7 +137,9 @@ async function lireLesVolumes(maintenant: Date): Promise<LigneDeJour[]> {
  * journée se lisent pareil dans une liste triée par date, et ne veulent pas dire
  * du tout la même chose — le second est un prompt qui vient de casser.
  */
-async function lireLesSignalements(maintenant: Date): Promise<BlocSignalements> {
+export async function compterLesSignalements(
+  maintenant: Date = new Date(),
+): Promise<BlocSignalements> {
   const [total, sur7j] = await Promise.all([
     prisma.signalement.count(),
     prisma.signalement.count({ where: { createdAt: { gte: ilYA(maintenant, 7) } } }),
@@ -145,7 +153,7 @@ export async function lireLAdministration(maintenant: Date = new Date()): Promis
     lireLesComptes(maintenant),
     lireLaDepenseDuJour(maintenant),
     lireLesVolumes(maintenant),
-    lireLesSignalements(maintenant),
+    compterLesSignalements(maintenant),
   ]);
 
   return { comptes, depense, volumes, signalements };

@@ -61,6 +61,23 @@
   --alerte-surface: #f3e6e2;
 
   /*
+    Les marques des graphiques de l'écran interne, et de nulle part ailleurs.
+
+    Une seule teinte par graphique : tous ceux de cet écran mesurent une
+    grandeur — combien on a dépensé, combien de concepts sont entrés — et une
+    grandeur n'a pas d'identité à distinguer. Une palette catégorielle y
+    peindrait des couleurs qui ne veulent rien dire, ce qui est le contresens le
+    plus courant du genre.
+
+    C'est le lichen approfondi, pour tenir 4,7:1 sur le papier là où le lichen
+    d'origine tombe à 3,2 — une barre de trois pixels de large a besoin de plus
+    de contraste qu'un aplat. La barre à zéro garde une amorce grise : un jour
+    sans dépense doit se voir comme un zéro et non comme un trou dans la série.
+  */
+  --data-mark: #5f6e3b;
+  --data-mark-zero: #cfd0ca;
+
+  /*
     Le jeton d'un terme de code cité dans une phrase.
 
     De l'encre très diluée plutôt qu'une des surfaces nommées : le jeton se pose
@@ -174,6 +191,9 @@
   --spacing-pas-12: var(--pas-12);
   --spacing-pas-16: var(--pas-16);
   --spacing-pas-24: var(--pas-24);
+
+  --color-data-mark: var(--data-mark);
+  --color-data-mark-zero: var(--data-mark-zero);
 
   --color-surface-papier: var(--surface-papier);
   --color-surface-ombre: var(--surface-ombre);

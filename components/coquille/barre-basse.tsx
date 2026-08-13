@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { DESTINATIONS } from "./destinations";
+import { dansLAdministration, destinationsPour, estActive } from "./destinations";
 import { cn } from "@/lib/utils";
 
 /**
@@ -12,21 +12,30 @@ import { cn } from "@/lib/utils";
  * l'icône : la destination active porte la surface de la page.
  *
  * Le rembourrage bas suit l'encoche gestuelle plutôt qu'une constante.
+ *
+ * L'administration en compte sept, et sept parts égales sur trois cent
+ * soixante-quinze pixels ne laissent pas la place d'écrire « Signalements ». Ses
+ * onglets gardent donc une largeur fixe et la barre défile, plutôt que d'abréger
+ * des mots qui sont le vocabulaire du produit. Le défilement est acceptable là
+ * où il ne l'est pas dans le produit : cet écran a un seul lecteur, qui connaît
+ * ses sections.
  */
 export function BarreBasse() {
   const chemin = usePathname();
+  const interne = dansLAdministration(chemin);
 
   return (
     <nav
       aria-label="Navigation principale"
       className="bg-surface-ombre p-pas-2 fixed inset-x-0 bottom-0 z-30 pb-[calc(env(safe-area-inset-bottom)+var(--pas-2))] md:hidden"
     >
-      <ul className="gap-pas-1 flex">
-        {DESTINATIONS.map(({ href, libelle, icone: Icone }) => {
-          const actif = chemin === href || chemin.startsWith(`${href}/`);
+      <ul className={cn("gap-pas-1 flex", interne && "overflow-x-auto")}>
+        {destinationsPour(chemin).map((destination) => {
+          const { href, libelle, icone: Icone } = destination;
+          const actif = estActive(destination, chemin);
 
           return (
-            <li key={href} className="flex-1">
+            <li key={href} className={cn(interne ? "w-20 shrink-0" : "flex-1")}>
               <Link
                 href={href}
                 aria-current={actif ? "page" : undefined}

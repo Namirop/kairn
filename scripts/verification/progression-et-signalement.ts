@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { prisma } from "@/lib/db/client";
 import { enregistrerEntrainement } from "@/lib/db/entrainement";
 import { enregistrerRevision } from "@/lib/db/revision";
@@ -227,18 +228,38 @@ export function casAdministrationFermee(): void {
 
   // La garde doit être sur la page elle-même, pas seulement dans le lien qui y
   // mène : une URL se tape à la main.
-  // L'ancienne adresse compte autant que la nouvelle : un renvoi non gardé
-  // apprendrait à n'importe qui que l'écran existe, et à quelle adresse.
-  const pages = ["app/(app)/admin/page.tsx", "app/(app)/signalements/page.tsx"];
-  const nues = pages.filter((chemin) => {
-    const source = readFileSync(chemin, "utf8");
+  // Chaque page du dossier, et pas seulement celle de tête : l'écran est
+  // devenu six pages, donc six occasions d'oublier la garde. Une page qui
+  // l'oublie ne casse rien, ne fait échouer aucun rendu, et s'ouvre à tout le
+  // monde.
+  const internes = pagesDuDossier("app/(app)/admin").filter(
+    (chemin) => !readFileSync(chemin, "utf8").includes("exigerUnAdministrateur"),
+  );
 
-    return !(source.includes("estAdministrateur") && source.includes("notFound"));
-  });
+  // L'ancienne adresse ne passe pas par l'aide commune — elle renvoie au lieu
+  // d'afficher — mais elle doit se garder tout autant : un renvoi non gardé
+  // apprendrait à n'importe qui que l'écran existe, et à quelle adresse.
+  const ancienne = readFileSync("app/(app)/signalements/page.tsx", "utf8");
+  const ancienneNue = !(ancienne.includes("estAdministrateur") && ancienne.includes("notFound"));
 
   record(
-    "Administration — la page se garde elle-même, et n'admet pas son existence",
-    nues.length === 0,
-    nues.length === 0 ? "404 pour qui n'y a pas droit, ancienne adresse comprise" : nues.join(", "),
+    "Administration — chacune de ses pages se garde, et n'admet pas son existence",
+    internes.length === 0 && !ancienneNue,
+    internes.length === 0 && !ancienneNue
+      ? `${pagesDuDossier("app/(app)/admin").length} page(s) gardées, ancienne adresse comprise`
+      : [...internes, ancienneNue ? "app/(app)/signalements/page.tsx" : ""]
+          .filter(Boolean)
+          .join(", "),
   );
+}
+
+/** Tous les `page.tsx` sous un dossier de routes. */
+function pagesDuDossier(dossier: string): string[] {
+  return readdirSync(dossier, { withFileTypes: true }).flatMap((entree) => {
+    const chemin = join(dossier, entree.name);
+
+    if (entree.isDirectory()) return pagesDuDossier(chemin);
+
+    return entree.name === "page.tsx" ? [chemin] : [];
+  });
 }

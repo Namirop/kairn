@@ -104,13 +104,58 @@ export type SignalementLu = {
   createdAt: Date;
 };
 
-/** Les signalements, les plus récents d'abord. Lecture d'administration. */
-export async function listerLesSignalements(limite = 100): Promise<SignalementLu[]> {
+export type PageDeSignalements = {
+  lignes: SignalementLu[];
+  /** Le total de la table, pas celui de la page : c'est lui qui pagine. */
+  total: number;
+  page: number;
+  pages: number;
+};
+
+/**
+ * Une page de signalements, la plus récente d'abord.
+ *
+ * La liste entière tenait sur l'écran tant qu'il y en avait dix. À cent, elle
+ * fait une page qu'on ne lit pas — et un signalement qu'on ne lit pas ne sert à
+ * rien, puisque c'est la seule instrumentation qualitative du produit.
+ *
+ * Le rang demandé est ramené dans les bornes plutôt que refusé : un numéro de
+ * page vient d'une URL, donc de n'importe qui, et une page vide serait un cul-de-
+ * sac là où la dernière page est manifestement ce qu'on voulait.
+ */
+export async function listerLesSignalementsPagines(
+  rang: number,
+  parPage: number,
+): Promise<PageDeSignalements> {
+  const total = await prisma.signalement.count();
+  const pages = Math.max(1, Math.ceil(total / parPage));
+  const page = Math.min(Math.max(1, Math.trunc(rang) || 1), pages);
+
   const lignes = await prisma.signalement.findMany({
     orderBy: { createdAt: "desc" },
-    take: limite,
+    skip: (page - 1) * parPage,
+    take: parPage,
   });
 
+  return { lignes: await enrichir(lignes), total, page, pages };
+}
+
+/** Les signalements, les plus récents d'abord. Lecture d'administration. */
+export async function listerLesSignalements(limite = 100): Promise<SignalementLu[]> {
+  return enrichir(
+    await prisma.signalement.findMany({ orderBy: { createdAt: "desc" }, take: limite }),
+  );
+}
+
+/**
+ * Dit, pour chaque ligne, si le concept dont elle est tirée existe encore.
+ *
+ * En une requête pour toute la page et non une par ligne : le signalement porte
+ * une copie de son concept, mais pas la preuve qu'il n'a pas été supprimé depuis.
+ */
+async function enrichir(
+  lignes: Awaited<ReturnType<typeof prisma.signalement.findMany>>,
+): Promise<SignalementLu[]> {
   const atomIds = lignes.flatMap((ligne) => (ligne.atomId ? [ligne.atomId] : []));
   const vivants = new Set(
     (await prisma.atom.findMany({ where: { id: { in: atomIds } }, select: { id: true } })).map(

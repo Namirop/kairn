@@ -203,6 +203,12 @@ async function main(): Promise<void> {
   } finally {
     await prisma.aiCall.deleteMany({ where: { userId: { in: comptes } } });
     await prisma.user.deleteMany({ where: { id: { in: comptes } } });
+
+    // Le signalement du cas de suppression survit au compte — c'est ce que le
+    // cas démontre —, donc il survit aussi à la vérification. Sans ce balayage,
+    // chaque exécution en laisse un de plus, détaché, et l'écran interne finit
+    // par compter des signalements qui ne viennent de personne.
+    await prisma.signalement.deleteMany({ where: { concept: compte.CONCEPT_EFFACE } });
   }
 }
 

@@ -16,6 +16,11 @@ export const ROUTES = {
   reglages: "/reglages",
   commentCaMarche: "/comment-ca-marche",
   admin: "/admin",
+  adminDepense: "/admin/depense",
+  adminComptes: "/admin/comptes",
+  adminContenu: "/admin/contenu",
+  adminSignalements: "/admin/signalements",
+  adminReglages: "/admin/reglages",
   /** L'ancienne adresse de l'écran interne, gardée le temps des favoris. */
   signalements: "/signalements",
 } as const;

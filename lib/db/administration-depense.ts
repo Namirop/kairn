@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import { debutDuJourUtc } from "@/lib/domain/fenetre-utc";
+import { debutDuJourUtc, ilYA } from "@/lib/domain/fenetre-utc";
 import { localDay } from "@/lib/domain/local-day";
 import { coutSelonConventions } from "@/lib/domain/tarifs";
 
@@ -22,6 +22,14 @@ export type LigneDIntention = {
   sortie: number;
   coutCatalogue: number;
   /** Nul quand un modèle de la ligne n'a pas de conversion par facteur unique. */
+  coutReel: number | null;
+};
+
+export type LigneDeDepenseParJour = {
+  jour: string;
+  appels: number;
+  echecs: number;
+  coutCatalogue: number;
   coutReel: number | null;
 };
 
@@ -57,6 +65,81 @@ function ajouterReel(cumul: number | null | undefined, ajout: number | null): nu
   if (cumul === null || ajout === null) return null;
 
   return (cumul ?? 0) + ajout;
+}
+
+type LigneDeJourEtModele = {
+  jour: string;
+  model: string | null;
+  appels: number;
+  echecs: number;
+  cout: number;
+};
+
+/**
+ * La dépense jour par jour, sur une fenêtre glissante.
+ *
+ * Le total du jour dit combien on a dépensé ; il ne dit pas si c'est habituel.
+ * C'est la seule question à laquelle un chiffre seul ne répond jamais, et c'est
+ * pour elle que cette série existe — trois centimes ne veulent rien dire tant
+ * qu'on ne sait pas si les jours d'avant en faisaient trois ou trente.
+ *
+ * Les jours vides sont engendrés par la base, comme pour les volumes : une série
+ * qui saute les jours sans appel dessinerait une dépense continue.
+ *
+ * La maille de groupement est le **jour et le modèle**, parce que la conversion
+ * de tarif appartient à un modèle et à une date. On replie ensuite par jour.
+ */
+export async function lireLaDepenseParJour(
+  maintenant: Date,
+  jours: number,
+): Promise<LigneDeDepenseParJour[]> {
+  const premier = debutDuJourUtc(ilYA(maintenant, jours - 1));
+  const dernier = debutDuJourUtc(maintenant);
+
+  const lignes = await prisma.$queryRaw<LigneDeJourEtModele[]>`
+    SELECT
+      to_char(j, 'YYYY-MM-DD') AS jour,
+      a."model" AS model,
+      count(a.*)::int AS appels,
+      count(a.*) FILTER (WHERE NOT a."success")::int AS echecs,
+      COALESCE(sum(a."costUsd"), 0)::float8 AS cout
+    FROM generate_series(${premier}::timestamptz, ${dernier}::timestamptz, interval '1 day') AS j
+    LEFT JOIN "AiCall" a ON a."createdAt" >= j AND a."createdAt" < j + interval '1 day'
+    GROUP BY j, a."model"
+    ORDER BY j DESC
+  `;
+
+  const parJour = new Map<string, LigneDeDepenseParJour>();
+
+  for (const ligne of lignes) {
+    const vide: LigneDeDepenseParJour = {
+      jour: ligne.jour,
+      appels: 0,
+      echecs: 0,
+      coutCatalogue: 0,
+      coutReel: 0,
+    };
+    const cumul = parJour.get(ligne.jour) ?? vide;
+
+    // Un jour sans appel arrive quand même, par la jointure ouverte : il porte
+    // un modèle nul et des compteurs à zéro. Il doit rester dans la série.
+    if (ligne.model === null) {
+      parJour.set(ligne.jour, cumul);
+      continue;
+    }
+
+    const { catalogue, reel } = coutSelonConventions(ligne.cout, ligne.model, ligne.jour);
+
+    parJour.set(ligne.jour, {
+      jour: ligne.jour,
+      appels: cumul.appels + ligne.appels,
+      echecs: cumul.echecs + ligne.echecs,
+      coutCatalogue: cumul.coutCatalogue + catalogue,
+      coutReel: ajouterReel(cumul.coutReel, reel),
+    });
+  }
+
+  return [...parJour.values()];
 }
 
 /**

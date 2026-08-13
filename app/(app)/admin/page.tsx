@@ -1,101 +1,79 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
 import { Bandeau } from "@/components/administration/bandeau";
-import { BlocComptes } from "@/components/administration/bloc-comptes";
-import { BlocDepense } from "@/components/administration/bloc-depense";
-import { BlocJournal } from "@/components/administration/bloc-journal";
-import { BlocReglages } from "@/components/administration/bloc-reglages";
-import { BlocSignalements } from "@/components/administration/bloc-signalements";
-import { BlocVolumes } from "@/components/administration/bloc-volumes";
-import { Panneau } from "@/components/coquille/panneau";
-import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
+import { Carte, GraphiqueBarres } from "@/components/administration/graphique-barres";
+import { dollars, nombre } from "@/components/administration/formats";
+import { PageAdmin } from "@/components/administration/page-admin";
 import { lireLaConfigEffective } from "@/lib/ai/reglages-effectifs";
-import { estAdministrateur } from "@/lib/auth/admin";
-import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
-import { lireLAdministration } from "@/lib/db/administration";
-import { lireLeJournal, lireLesReglagesPosés } from "@/lib/db/reglages";
-import { listerLesSignalements } from "@/lib/db/signalement";
+import { exigerUnAdministrateur } from "@/lib/auth/garde-admin";
+import { JOURS_MONTRES, lireLAdministration } from "@/lib/db/administration";
+import { lireLaDepenseParJour } from "@/lib/db/administration-depense";
 
 export const metadata: Metadata = { title: "Administration" };
 
 /**
- * L'écran interne : ce que le produit coûte, ce qu'il sert, ce qu'on lui
- * reproche, et les six réglages qui le pilotent.
+ * La synthèse : quatre chiffres et deux courbes, et rien d'autre.
  *
- * L'écran est ordonné du plus urgent au plus rare. Le bandeau porte les quatre
- * chiffres qui décident si la journée demande une action ; viennent ensuite les
- * mesures qu'on lit quand l'un d'eux surprend, puis les réglages qu'on touche
- * une fois par mois. Empilées à plat, ces trois choses avaient toutes le même
- * poids et l'écran se lisait de haut en bas sans savoir où s'arrêter.
+ * C'est l'écran qu'on ouvre sans question précise. Il doit donc répondre à
+ * celles qu'on ne s'est pas encore formulées — est-ce que ça coûte plus que
+ * d'habitude, est-ce qu'il entre encore quelque chose — et renvoyer au détail
+ * pour le reste. Tout ce qui demande à être lu ligne par ligne vit dans les
+ * cinq autres onglets.
  *
- * Pas de graphique et pas de filtre. Un graphique demande à être interprété ;
- * ces chiffres-là doivent répondre à une question qu'on se pose déjà — combien
- * ça coûte aujourd'hui, est-ce qu'on approche du plafond, est-ce que les gens
- * reviennent, est-ce que les questions se sont mises à casser.
- *
- * Le registre est l'inverse de celui du produit : pas de police display, pas
- * d'accent, pas d'élément signature — de la densité et des libellés qui se
- * scannent. Le lecteur change, donc le registre change.
- *
- * Un compte non autorisé reçoit un 404 et non un 403 : l'existence de cette page
- * n'a pas à se confirmer à qui n'y a pas droit.
+ * Les deux séries partagent la même fenêtre de jours. Deux longueurs
+ * différentes posées côte à côte se comparent à l'œil sans qu'on remarque
+ * qu'elles ne recouvrent pas la même chose.
  */
 export const dynamic = "force-dynamic";
 
-export default async function PageAdministration() {
-  const utilisateur = await getCurrentUser();
+export default async function PageSynthese() {
+  await exigerUnAdministrateur();
 
-  if (!utilisateur) redirect(ROUTES.connexion);
-  if (!estAdministrateur(utilisateur.email)) notFound();
-
-  const [chiffres, signalements, reglages, journal, config] = await Promise.all([
+  const [chiffres, serie, config] = await Promise.all([
     lireLAdministration(),
-    listerLesSignalements(),
-    lireLesReglagesPosés(),
-    lireLeJournal(),
+    lireLaDepenseParJour(new Date(), JOURS_MONTRES),
     lireLaConfigEffective(),
   ]);
 
-  // Les valeurs d'environnement voyagent jusqu'au formulaire pour qu'un champ
-  // vide veuille dire quelque chose. Aucune n'est un secret : ce sont les six
-  // réglages d'exploitation, et rien d'autre ne quitte le serveur.
-  const environnement = {
-    AI_ENABLED: process.env.AI_ENABLED,
-    MOCK_AI: process.env.MOCK_AI,
-    AI_DAILY_CALL_CAP: process.env.AI_DAILY_CALL_CAP,
-    AI_DAILY_CALL_CAP_PAR_COMPTE: process.env.AI_DAILY_CALL_CAP_PAR_COMPTE,
-    AI_MAX_TOKENS: process.env.AI_MAX_TOKENS,
-    AI_MODEL: process.env.AI_MODEL,
-  };
+  // Les lectures rendent le plus récent d'abord, ce qui est l'ordre d'un
+  // tableau ; un axe du temps va dans l'autre sens.
+  const depense = [...serie]
+    .reverse()
+    .map((ligne) => ({ jour: ligne.jour, valeur: ligne.coutReel ?? ligne.coutCatalogue }));
+  const concepts = [...chiffres.volumes]
+    .reverse()
+    .map((ligne) => ({ jour: ligne.jour, valeur: ligne.concepts }));
 
   return (
-    <PileDePanneaux sol="papier">
-      <Panneau surface="papier" mesure="page" remplit>
-        <h1 className="text-h1-app font-bold text-stone-900">Administration</h1>
-        <p className="mt-pas-2 text-petit max-w-prose text-stone-500">
-          Les fenêtres et les journées sont en UTC, comme les compteurs qu&apos;elles résument.
-          Seuls les réglages, en bas, se modifient.
-        </p>
+    <PageAdmin
+      titre="Administration"
+      contexte="Les fenêtres et les journées sont en UTC, comme les compteurs qu'elles résument. Le détail de chaque mesure est dans son onglet."
+    >
+      <Bandeau
+        comptes={chiffres.comptes}
+        depense={chiffres.depense}
+        signalements={chiffres.signalements}
+        plafond={config.dailyCallCap}
+      />
 
-        <div className="mt-pas-8">
-          <Bandeau
-            comptes={chiffres.comptes}
-            depense={chiffres.depense}
-            signalements={chiffres.signalements}
-            plafond={config.dailyCallCap}
+      <div className="gap-pas-6 mt-pas-12 grid lg:grid-cols-2">
+        <Carte
+          titre="Dépense par jour"
+          contexte={`${JOURS_MONTRES} derniers jours, au tarif réellement facturé. La dernière barre est la journée en cours.`}
+        >
+          <GraphiqueBarres points={depense} format={dollars} intitule="Dépense par jour, en dollars" />
+        </Carte>
+
+        <Carte
+          titre="Concepts extraits par jour"
+          contexte={`${JOURS_MONTRES} derniers jours. C'est ce qui entre vraiment dans le produit, dépôts mis à part.`}
+        >
+          <GraphiqueBarres
+            points={concepts}
+            format={nombre}
+            intitule="Concepts extraits par jour"
           />
-        </div>
-
-        <div className="mt-pas-12">
-          <BlocDepense chiffres={chiffres.depense} />
-          <BlocComptes chiffres={chiffres.comptes} />
-          <BlocVolumes jours={chiffres.volumes} />
-          <BlocSignalements signalements={signalements} />
-          <BlocReglages poses={reglages} environnement={environnement} />
-          <BlocJournal lignes={journal} />
-        </div>
-      </Panneau>
-    </PileDePanneaux>
+        </Carte>
+      </div>
+    </PageAdmin>
   );
 }

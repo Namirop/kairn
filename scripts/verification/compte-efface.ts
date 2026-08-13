@@ -72,12 +72,25 @@ async function compterPour(table: string, userId: string): Promise<number> {
   return Number(lignes[0]?.lignes ?? 0n);
 }
 
+/**
+ * Le libellé du concept que ce cas fabrique, et la seule prise qu'on ait sur ce
+ * qu'il laisse derrière lui.
+ *
+ * Le signalement écrit ici **survit volontairement** à la suppression du compte
+ * — c'est ce que le cas vérifie. Mais survivre à la suppression du compte veut
+ * dire survivre à la vérification elle-même : chaque exécution en abandonnait un
+ * de plus, détaché de tout, et l'écran d'administration a fini par en compter
+ * vingt-six qui ne venaient de personne. Le nettoyage final s'appuie sur ce
+ * libellé, et rattrape donc aussi ceux des exécutions passées.
+ */
+export const CONCEPT_EFFACE = "Un concept à effacer";
+
 /** Un compte qui a vécu : dépôt, concepts, passages, progression, signalement. */
 async function compteRempli(userId: string, fuseau: string): Promise<void> {
   await reserverDepot(userId, fuseau);
   await compterConceptsRetenus(userId, fuseau, 3);
 
-  const concept = await fabriquerConcept(userId, { libelle: "Un concept à effacer" });
+  const concept = await fabriquerConcept(userId, { libelle: CONCEPT_EFFACE });
 
   await enregistrerRevision({
     userId,

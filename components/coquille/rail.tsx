@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { DESTINATIONS } from "./destinations";
+import { destinationsPour, estActive } from "./destinations";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,8 +25,9 @@ export function Rail() {
       aria-label="Navigation principale"
       className="pt-pas-16 px-pas-2 gap-pas-1 bg-surface-ombre fixed inset-y-0 left-0 z-30 hidden w-28 flex-col items-center md:flex"
     >
-      {DESTINATIONS.map(({ href, libelle, icone: Icone }) => {
-        const actif = chemin === href || chemin.startsWith(`${href}/`);
+      {destinationsPour(chemin).map((destination) => {
+        const { href, libelle, icone: Icone } = destination;
+        const actif = estActive(destination, chemin);
 
         return (
           <Link

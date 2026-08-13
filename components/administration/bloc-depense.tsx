@@ -26,8 +26,8 @@ import type { BlocDepense as Chiffres } from "@/lib/db/administration-depense";
 export function BlocDepense({ chiffres }: { chiffres: Chiffres }) {
   return (
     <Section
-      intitule="Dépense du jour"
-      contexte={`Journée ${chiffres.jour} en UTC, le calendrier du plafond d'appels. Le coût réel tient compte des remises en cours ; le catalogue est ce qu'enregistre le registre.`}
+      intitule="Par intention"
+      contexte={`Journée ${chiffres.jour}. Le coût réel tient compte des remises en cours ; le catalogue est ce qu'enregistre le registre.`}
     >
       {chiffres.parIntention.length === 0 ? (
         <p className="text-petit text-stone-500">
