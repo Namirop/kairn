@@ -171,13 +171,44 @@ pourquoi, une fuite de clé. On coupe, on regarde, on rallume — sans déployer
 toucher au code.
 
 La configuration est relue **à chaque appel** et non au chargement du module,
-précisément pour ça : couper doit prendre effet tout de suite. Sur un hébergeur
-qui injecte les variables au déploiement, il faut tout de même redéployer pour que
-la nouvelle valeur atteigne le code — c'est le prix du serverless, et ça reste plus
-rapide que de corriger un bug.
+précisément pour ça : couper doit prendre effet tout de suite.
 
 En production, `true` — sinon le produit ne fait rien. C'est un frein de secours,
 pas un réglage.
+
+## Les six réglages qui se changent sans redéployer
+
+Une variable d'environnement se change au déploiement. C'est très bien pour une
+adresse ou un secret, et très mauvais pour un frein de secours : le moment où l'on
+veut couper les appels est rarement celui où l'on a envie d'attendre un build.
+
+Six réglages ont donc une **surcharge en base**, modifiable depuis l'écran
+d'administration : `AI_ENABLED`, `MOCK_AI`, les deux plafonds d'appels,
+`AI_MAX_TOKENS` et `AI_MODEL`. Ce qui est posé là s'applique **au prochain
+appel**, sans redéploiement.
+
+La règle de lecture ne change pas pour autant, elle s'étend :
+
+> L'environnement donne la valeur par défaut. La base pose l'exception.
+> Un réglage vidé rend la main au défaut.
+
+C'est ce qui évite le piège habituel de ce genre de mécanisme : on n'a pas besoin
+de se rappeler ce que valait l'environnement pour y revenir — il suffit d'effacer
+la surcharge.
+
+Trois garde-fous vont avec, et ils ne sont pas décoratifs :
+
+- **`ADMIN_EMAILS` n'en fait pas partie.** C'est la liste qui décide qui ouvre
+  l'écran depuis lequel on écrit ces réglages. On ne met pas la serrure derrière
+  la porte qu'elle ferme — elle reste en variable d'environnement, changeable
+  seulement par qui a accès à l'hébergeur.
+- **Toute valeur posée est revalidée** avant d'atteindre le moteur. Un plafond à
+  zéro passerait le typage, se poserait sans bruit et couperait l'ingestion en
+  annonçant « quota atteint » dès le premier appel du jour. Il lève à la place.
+- **Chaque changement est journalisé** — quoi, depuis quelle valeur, vers
+  laquelle, par qui. Un réglage qui se change en un clic doit laisser une trace,
+  sinon « pourquoi la génération est coupée depuis mardi » devient une question
+  sans réponse.
 
 ### `AI_DAILY_CALL_CAP` et `AI_DAILY_CALL_CAP_PAR_COMPTE` — deux plafonds qui protègent deux choses
 
@@ -220,10 +251,10 @@ invalides, la validation échoue et _tout_ appel au modèle lève : plus d'inges
 plus de génération de questions. Ce ne sont pas des réglages facultatifs de
 développement, ce sont des paramètres de fonctionnement.
 
-Le fait qu'elles soient relues à chaque appel, et non une fois au démarrage, est
-voulu : couper les appels doit prendre effet immédiatement. Sur un hébergeur qui
-injecte les variables au déploiement, il faut tout de même redéployer pour qu'une
-nouvelle valeur atteigne le code.
+Elles restent quand même ajustables sans redéployer : ce sont deux des six
+réglages qui acceptent une surcharge en base, posée depuis l'écran
+d'administration. L'environnement donne la valeur de départ, la surcharge la
+corrige le jour où il faut aller vite.
 
 ### `SEED_USER_EMAIL` — une variable qui n'existe pas en production
 

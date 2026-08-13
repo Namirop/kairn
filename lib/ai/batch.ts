@@ -5,7 +5,7 @@ import {
   reserverPlacesDeCompte,
 } from "@/lib/db/ai-quota";
 import { sdkFor } from "./client";
-import { readAiConfig } from "./config";
+import { lireLaConfigEffective } from "./reglages-effectifs";
 import { apercuBrut } from "./diagnostic";
 import { AIDisabledError, AIQuotaError, AIUserQuotaError } from "./errors";
 import { loadFixture } from "./fixtures";
@@ -57,7 +57,7 @@ export async function submitAIBatch<T>(
   requetes: RequeteGroupee<T>[],
   userId?: string,
 ): Promise<LotSoumis> {
-  const config = readAiConfig();
+  const config = await lireLaConfigEffective();
 
   if (!config.enabled) throw new AIDisabledError();
 
@@ -101,7 +101,7 @@ export async function submitAIBatch<T>(
 
 /** Le lot a-t-il fini de travailler ? */
 export async function batchTermine(providerId: string): Promise<boolean> {
-  const config = readAiConfig();
+  const config = await lireLaConfigEffective();
 
   if (config.mock) return lotSimulePresent(providerId);
 
@@ -130,7 +130,7 @@ export async function readAIBatch<T>(
   contract: AiContract<T>,
   jobIdParReference: Map<string, string> = new Map(),
 ): Promise<ResultatGroupe<T>[]> {
-  const config = readAiConfig();
+  const config = await lireLaConfigEffective();
 
   if (config.mock) {
     return releverLotSimule(providerId).map(({ reference, texte }) => {

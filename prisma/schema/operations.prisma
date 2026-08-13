@@ -325,3 +325,55 @@ model AnonymousSession {
   /// Requête du cron de nettoyage : les non réclamées, les plus vieilles d'abord.
   @@index([claimedAt, createdAt])
 }
+
+/// Les réglages d'exploitation, modifiables sans redéploiement.
+///
+/// Une variable d'environnement se change au déploiement ; ces réglages-là
+/// doivent pouvoir se changer *pendant* un incident. `readAiConfig()` étant déjà
+/// relu à chaque appel, une valeur posée ici prend effet immédiatement.
+///
+/// **Une colonne nulle veut dire « non surchargé »** : la valeur de
+/// l'environnement s'applique alors. C'est ce qui garde l'environnement comme
+/// source par défaut et cette table comme exception assumée — et ce qui permet
+/// de revenir au défaut sans avoir à s'en souvenir.
+///
+/// `ADMIN_EMAILS` n'est délibérément pas ici : c'est la liste qui décide qui
+/// ouvre l'écran d'où l'on modifie cette table. On ne met pas la serrure
+/// derrière la porte qu'elle ferme.
+model Reglages {
+  /// Une seule ligne, et la clé fixe l'y contraint.
+  id String @id @default("reglages")
+
+  aiEnabled        Boolean?
+  mockAi           Boolean?
+  dailyCallCap     Int?
+  userDailyCallCap Int?
+  model            String?
+  maxTokens        Int?
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+/// Ce qui a été changé, par qui, et depuis quelle valeur.
+///
+/// Sans ce journal, « pourquoi la génération est coupée depuis mardi » est une
+/// question sans réponse. Un réglage qu'on peut changer en un clic doit laisser
+/// une trace, sinon le gain de réactivité se paie en enquêtes.
+model ReglageJournal {
+  id String @id @default(cuid())
+
+  /// Le nom du réglage, tel qu'il apparaît dans `Reglages`.
+  reglage String
+  /// Les valeurs sont écrites en clair : nul veut dire « rendu au défaut ».
+  avant String?
+  apres String?
+
+  /// L'adresse de qui a changé, recopiée. Le compte peut disparaître, la trace
+  /// doit rester lisible.
+  parEmail String
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

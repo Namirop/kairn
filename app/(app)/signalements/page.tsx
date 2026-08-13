@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { BlocComptes } from "@/components/administration/bloc-comptes";
 import { BlocDepense } from "@/components/administration/bloc-depense";
+import { BlocJournal } from "@/components/administration/bloc-journal";
+import { BlocReglages } from "@/components/administration/bloc-reglages";
 import { BlocVolumes } from "@/components/administration/bloc-volumes";
 import { Section } from "@/components/administration/section";
 import { Panneau } from "@/components/coquille/panneau";
@@ -11,6 +13,7 @@ import { ROUTES } from "@/lib/auth/routes";
 import { estAdministrateur } from "@/lib/auth/admin";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireLAdministration } from "@/lib/db/administration";
+import { lireLeJournal, lireLesReglagesPosés } from "@/lib/db/reglages";
 import { listerLesSignalements } from "@/lib/db/signalement";
 
 export const metadata: Metadata = { title: "Administration" };
@@ -39,10 +42,24 @@ export default async function PageAdministration() {
   if (!utilisateur) redirect(ROUTES.connexion);
   if (!estAdministrateur(utilisateur.email)) notFound();
 
-  const [chiffres, signalements] = await Promise.all([
+  const [chiffres, signalements, reglages, journal] = await Promise.all([
     lireLAdministration(),
     listerLesSignalements(),
+    lireLesReglagesPosés(),
+    lireLeJournal(),
   ]);
+
+  // Les valeurs d'environnement voyagent jusqu'au formulaire pour qu'un champ
+  // vide veuille dire quelque chose. Aucune n'est un secret : ce sont les six
+  // réglages d'exploitation, et rien d'autre ne quitte le serveur.
+  const environnement = {
+    AI_ENABLED: process.env.AI_ENABLED,
+    MOCK_AI: process.env.MOCK_AI,
+    AI_DAILY_CALL_CAP: process.env.AI_DAILY_CALL_CAP,
+    AI_DAILY_CALL_CAP_PAR_COMPTE: process.env.AI_DAILY_CALL_CAP_PAR_COMPTE,
+    AI_MAX_TOKENS: process.env.AI_MAX_TOKENS,
+    AI_MODEL: process.env.AI_MODEL,
+  };
 
   return (
     <PileDePanneaux sol="papier">
@@ -57,6 +74,8 @@ export default async function PageAdministration() {
           <BlocComptes chiffres={chiffres.comptes} />
           <BlocDepense chiffres={chiffres.depense} />
           <BlocVolumes jours={chiffres.volumes} />
+          <BlocReglages poses={reglages} environnement={environnement} />
+          <BlocJournal lignes={journal} />
 
           <Section
             intitule="Signalements"

@@ -42,3 +42,43 @@ export function readAiConfig(): AiConfig {
 
   return parsed.data;
 }
+
+/**
+ * La même configuration, mais déjà typée — celle qu'on obtient après avoir posé
+ * des surcharges par-dessus l'environnement.
+ *
+ * Elle est revalidée et non pas seulement fusionnée : une valeur venue de la base
+ * n'a pas traversé le schéma de l'environnement, et un plafond à zéro ou un
+ * modèle vide couperait toute l'ingestion sans rien dire. Mieux vaut lever ici,
+ * avec un message, que servir une configuration absurde.
+ */
+const configEffectiveSchema = z.object({
+  enabled: z.boolean(),
+  mock: z.boolean(),
+  dailyCallCap: z.number().int().positive(),
+  userDailyCallCap: z.number().int().positive(),
+  model: z.string().min(1),
+  maxTokens: z.number().int().positive(),
+  apiKey: z.string().min(1).optional(),
+});
+
+/** Ce qu'une surcharge peut porter. Une clé absente laisse l'environnement. */
+export type SurchargesDeConfig = Partial<Omit<AiConfig, "apiKey">>;
+
+/**
+ * L'environnement, puis ce que la base pose par-dessus.
+ *
+ * L'ordre est le sens de la règle : l'environnement est la valeur par défaut, la
+ * base est l'exception qu'on assume. Retirer une surcharge suffit donc à revenir
+ * au défaut, sans avoir à se souvenir de ce qu'il valait.
+ */
+export function appliquerLesSurcharges(base: AiConfig, surcharges: SurchargesDeConfig): AiConfig {
+  const parsed = configEffectiveSchema.safeParse({ ...base, ...surcharges });
+
+  if (!parsed.success) {
+    const issues = parsed.error.issues.map((issue) => `${issue.path.join(".")} : ${issue.message}`);
+    throw new AIConfigError(`Réglage posé invalide — ${issues.join(" ; ")}`);
+  }
+
+  return parsed.data;
+}

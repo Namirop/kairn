@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { recordAiCall } from "@/lib/db/ai-call";
-import { readAiConfig, type AiConfig } from "./config";
+import { type AiConfig } from "./config";
+import { lireLaConfigEffective } from "./reglages-effectifs";
 import { reserverLesDeuxPlaces } from "./reservation";
 import {
   AICallFailedError,
@@ -148,7 +149,7 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
  * comme échec. Aucun retry.
  */
 export async function callAI<T>(params: CallAIParams<T>): Promise<T> {
-  const config = readAiConfig();
+  const config = await lireLaConfigEffective();
 
   if (!config.enabled) {
     throw new AIDisabledError();

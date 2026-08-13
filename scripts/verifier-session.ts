@@ -125,6 +125,7 @@ async function main(): Promise<void> {
   const usure = await import("./verification/regeneration-usee");
   const phase4 = await import("./verification/progression-et-signalement");
   const administration = await import("./verification/administration");
+  const reglages = await import("./verification/reglages");
   const compte = await import("./verification/compte-efface");
 
   const comptes = [IDENTIFIANT, ENTRAINEMENT, "verification-effacement"];
@@ -174,6 +175,13 @@ async function main(): Promise<void> {
     await administration.casChiffresLisibles(maintenant);
     await administration.casJoursVidesMontres(maintenant);
     await administration.casMoyenneCalculee(utilisateur.id, maintenant);
+
+    // Les réglages posés l'emportent sur l'environnement : un oubli en base ne
+    // salirait pas un test, il ferait dépenser un poste de développement.
+    await reglages.casSurchargeEtRetour();
+    await reglages.casValeurAbsurdeRefusee();
+    await reglages.casJournalTrace();
+    await reglages.casAucunResteEnBase();
 
     // En dernier, et sur son propre compte : le cas efface ce qu'il éprouve.
     const aEffacer = await creerCompte("verification-effacement", "Vérification effacement");

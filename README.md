@@ -36,8 +36,8 @@ Ce qui manque, et qui se voit :
 - **Les réglages sont en lecture seule.** L'écran affiche fuseau, heure de rappel et état des
   emails ; il ne les modifie pas. Le fuseau se réconcilie tout seul au premier affichage, et la
   désinscription passe par le lien des emails.
-- **Le tableau de bord d'administration se limite aux signalements.** Ni comptes, ni dépense API,
-  ni volumes.
+- **Le tableau de bord d'administration est fonctionnel mais austère.** Les chiffres y sont ;
+  la mise en forme est celle d'une pile de sections denses, pas d'un tableau de bord.
 
 ## Stack
 
