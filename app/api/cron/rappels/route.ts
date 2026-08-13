@@ -15,6 +15,13 @@ import { selectDueForReminder } from "@/lib/domain/reminder-selection";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Le passage est court aujourd'hui — il sélectionne et journalise. Il enverra
+ * un email par compte retenu le jour où l'envoi sera branché, et c'est cette
+ * boucle-là qui a besoin de durer.
+ */
+export const maxDuration = 300;
+
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
     return NextResponse.json({ erreur: "Non autorisé." }, { status: 401 });

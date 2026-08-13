@@ -16,6 +16,13 @@ import { releverLots, soumettreLotsEnAttente } from "@/lib/jobs/questions";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * La relève interroge l'API pour chaque lot ouvert, puis en soumet d'autres :
+ * autant d'allers-retours réseau qui ne tiennent pas dans une durée par défaut
+ * dès qu'il y a plus d'une poignée de lots en vol.
+ */
+export const maxDuration = 300;
+
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
     return NextResponse.json({ erreur: "Non autorisé." }, { status: 401 });
