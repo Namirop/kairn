@@ -124,6 +124,7 @@ async function main(): Promise<void> {
   const entrainement = await import("./verification/entrainement-etanche");
   const usure = await import("./verification/regeneration-usee");
   const phase4 = await import("./verification/progression-et-signalement");
+  const administration = await import("./verification/administration");
   const compte = await import("./verification/compte-efface");
 
   const comptes = [IDENTIFIANT, ENTRAINEMENT, "verification-effacement"];
@@ -167,6 +168,12 @@ async function main(): Promise<void> {
     await phase4.casSerieAutourDeMinuit(utilisateur.id);
     await phase4.casSignalementTrace(utilisateur.id);
     phase4.casAdministrationFermee();
+
+    // L'écran d'administration lit du SQL écrit à la main : il ne casse qu'à
+    // l'exécution, et sur un écran qu'on ouvre rarement.
+    await administration.casChiffresLisibles(maintenant);
+    await administration.casJoursVidesMontres(maintenant);
+    await administration.casMoyenneCalculee(utilisateur.id, maintenant);
 
     // En dernier, et sur son propre compte : le cas efface ce qu'il éprouve.
     const aEffacer = await creerCompte("verification-effacement", "Vérification effacement");

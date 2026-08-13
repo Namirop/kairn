@@ -1,23 +1,18 @@
+import { tarifCatalogue, type Tarif } from "@/lib/domain/tarifs";
+
 /**
- * Tarifs en dollars par million de tokens, entrée et sortie séparées.
+ * Ce qu'un appel coûte, au **tarif catalogue**.
  *
- * Ce sont les tarifs catalogue. Sonnet 5 est en tarif d'introduction réduit
- * (2 $ / 10 $) jusqu'au 31 août 2026 : compter au tarif plein surestime la
- * dépense, ce qui est le bon sens de l'erreur pour un garde-fou de budget.
+ * Les tarifs eux-mêmes vivent dans `lib/domain/tarifs.ts`, avec les remises
+ * d'introduction qui les accompagnent : deux tables de prix dans deux fichiers
+ * finiraient par diverger, et c'est le genre d'écart qui ne se voit pas avant
+ * qu'on compare une facture à un tableau de bord.
+ *
+ * On écrit le catalogue plutôt que le tarif réellement facturé parce que
+ * surestimer est le bon sens de l'erreur pour un garde-fou de budget. Le
+ * tableau de bord d'administration, lui, montre les deux côte à côte.
  */
-export type ModelPricing = {
-  inputPerMillion: number;
-  outputPerMillion: number;
-};
-
-const PRICING: Record<string, ModelPricing> = {
-  "claude-opus-5": { inputPerMillion: 5, outputPerMillion: 25 },
-  "claude-sonnet-5": { inputPerMillion: 3, outputPerMillion: 15 },
-  "claude-haiku-4-5": { inputPerMillion: 1, outputPerMillion: 5 },
-};
-
-/** Tarif retenu pour un modèle inconnu : le plus cher de la table. */
-const FALLBACK: ModelPricing = { inputPerMillion: 5, outputPerMillion: 25 };
+export type ModelPricing = Tarif;
 
 /**
  * Écrire dans le cache coûte un quart de plus qu'une entrée normale, y lire
@@ -40,7 +35,7 @@ export type Consommation = {
 };
 
 export function pricingFor(model: string): ModelPricing {
-  return PRICING[model] ?? FALLBACK;
+  return tarifCatalogue(model);
 }
 
 /**
@@ -51,14 +46,14 @@ export function pricingFor(model: string): ModelPricing {
  * trois. Les additionner au même tarif ferait mentir le chiffre.
  */
 export function computeCostUsd(model: string, consommation: Consommation): string {
-  const { inputPerMillion, outputPerMillion } = pricingFor(model);
+  const { entreePerMillion, sortiePerMillion } = pricingFor(model);
   const entree =
     consommation.inputTokens +
     (consommation.cacheCreationTokens ?? 0) * ECRITURE_CACHE +
     (consommation.cacheReadTokens ?? 0) * LECTURE_CACHE;
   const remise = consommation.groupe ? REMISE_GROUPEE : 1;
   const dollars =
-    ((entree * inputPerMillion + consommation.outputTokens * outputPerMillion) * remise) / 1e6;
+    ((entree * entreePerMillion + consommation.outputTokens * sortiePerMillion) * remise) / 1e6;
 
   return dollars.toFixed(8);
 }
