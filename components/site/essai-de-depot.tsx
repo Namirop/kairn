@@ -75,17 +75,39 @@ export function EssaiDeDepot({
   }
 
   return (
-    <form action={action} noValidate className="gap-pas-3 flex flex-col">
+    <form action={action} noValidate className="gap-pas-6 flex flex-col">
       <label htmlFor="essai" className="sr-only">
         Ce que tu veux retenir
       </label>
-      <textarea
-        id="essai"
-        name="texte"
-        rows={5}
-        placeholder={invite}
-        className="p-pas-4 text-corps field-sizing-content min-h-36 w-full resize-y rounded-xs border border-stone-300 bg-stone-50 leading-relaxed text-stone-900 placeholder:text-stone-500"
-      />
+
+      {/* Un sol, pas une boîte.
+          Le rectangle bordé à coins arrondis était le seul objet posé de la
+          page : partout ailleurs, ce qui sépare est une surface ou une coupe de
+          roche, et ce qui soutient est un trait — celui sous le cairn, dont le
+          composant dit déjà « le sol : un trait, pas une ombre portée ». Le
+          champ s'écrit donc à même le papier, sur ce trait-là.
+
+          Le trait porte aussi le focus, et c'est pour ça qu'il fait deux pixels
+          au repos : un `:focus-visible` s'applique à un champ de texte même
+          cliqué à la souris, et l'anneau du thème aurait redessiné la boîte
+          qu'on vient d'enlever. Le passage au lichen le remplace — le lichen
+          signale, c'est son emploi. Épaissir au lieu de changer de teinte aurait
+          décalé le bouton d'un pixel à chaque entrée dans le champ.
+
+          Le trait est en `stone-500` et non dans le gris du sol sous le cairn :
+          sans bordure ni fond, il est devenu la seule chose qui dit qu'il y a un
+          champ ici, et à ce titre il lui faut trois pour un contre le papier.
+          Le gris du cairn n'en donnait que 1,63 — assez pour une décoration,
+          pas pour une limite de composant. */}
+      <div className="focus-within:border-lichen-deep border-b-2 border-stone-500 transition-colors">
+        <textarea
+          id="essai"
+          name="texte"
+          rows={4}
+          placeholder={invite}
+          className="pb-pas-4 text-h2-app field-sizing-content min-h-32 w-full resize-none border-0 bg-transparent leading-relaxed text-stone-900 outline-none placeholder:text-stone-500 focus-visible:outline-none"
+        />
+      </div>
 
       <div className="gap-pas-4 flex flex-wrap items-center">
         <Button type="submit" size="lg" disabled={enCours}>
