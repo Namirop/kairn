@@ -1,9 +1,14 @@
 import { headers } from "next/headers";
+import { cache } from "react";
 import { auth } from "./config";
 
 /**
  * La session, côté serveur. Un `userId` vient toujours d'ici, jamais d'un
  * paramètre de requête ou d'un champ de formulaire.
+ *
+ * La lecture est mémoïsée sur le rendu : une mise en page et la page qu'elle
+ * enveloppe demandent toutes les deux qui est là, et sans ça chacune paierait
+ * son aller-retour en base pour la même réponse.
  */
 
 export type SessionUser = {
@@ -22,7 +27,7 @@ export class UnauthenticatedError extends Error {
   }
 }
 
-export async function getCurrentUser(): Promise<SessionUser | null> {
+export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) return null;
@@ -33,7 +38,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     email: session.user.email,
     image: session.user.image ?? null,
   };
-}
+});
 
 /**
  * L'utilisateur de la session, ou une erreur. À utiliser dans les route

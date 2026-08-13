@@ -17,7 +17,7 @@ import { ROUTES } from "@/lib/auth/routes";
  * déborde du panneau et sort du cadre : une forme entière, posée bien au
  * milieu, redeviendrait une illustration.
  */
-export function PasCeci() {
+export function PasCeci({ connecte }: { connecte: boolean }) {
   return (
     <Panneau
       surface="roche"
@@ -48,7 +48,9 @@ export function PasCeci() {
           size="lg"
           className="mt-pas-8 bg-stone-50 text-stone-900 hover:bg-stone-300"
         >
-          <Link href={ROUTES.connexion}>Créer mon compte</Link>
+          <Link href={connecte ? ROUTES.aujourdhui : ROUTES.connexion}>
+            {connecte ? "Aujourd'hui" : "Créer mon compte"}
+          </Link>
         </Button>
       </div>
     </Panneau>

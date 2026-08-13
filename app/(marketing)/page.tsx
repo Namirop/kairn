@@ -5,6 +5,7 @@ import { Hero } from "@/components/site/hero";
 import { PasCeci } from "@/components/site/pas-ceci";
 import { Sentier } from "@/components/site/sentier";
 import { ROUTES } from "@/lib/auth/routes";
+import { getCurrentUser } from "@/lib/auth/session";
 import { lireLEssaiEnCours } from "@/lib/depots/essai-en-cours";
 import { inviteDeDepot } from "@/lib/domain/invites-de-depot";
 
@@ -22,14 +23,19 @@ export default async function PageAccueil() {
   // Lu ici et non dans le composant : quelqu'un qui revient doit retrouver ses
   // concepts au premier rendu, pas après un aller-retour.
   const essaiPrecedent = await lireLEssaiEnCours();
+  const connecte = (await getCurrentUser()) !== null;
 
   return (
     <>
-      <Hero invite={inviteDeDepot(Math.random())} essaiPrecedent={essaiPrecedent} />
+      <Hero
+        invite={inviteDeDepot(Math.random())}
+        essaiPrecedent={essaiPrecedent}
+        connecte={connecte}
+      />
       <Strates de="papier" vers="ombre" graine="accueil-sentier" />
       <Sentier />
       <Strates de="ombre" vers="roche" graine="accueil-pas-ceci" />
-      <PasCeci />
+      <PasCeci connecte={connecte} />
       <Strates de="roche" vers="papier" graine="accueil-pied" />
 
       <Panneau surface="papier">

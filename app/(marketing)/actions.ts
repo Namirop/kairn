@@ -1,5 +1,8 @@
 "use server";
 
+import { redirect } from "next/navigation";
+import { ROUTES } from "@/lib/auth/routes";
+import { getCurrentUser } from "@/lib/auth/session";
 import { adresseDuVisiteur, lireLaVisite, poserLaVisite } from "@/lib/auth/visite";
 import { deposerSansCompte } from "@/lib/depots/deposer-sans-compte";
 import { lireLEssaiEnCours, type AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
@@ -7,15 +10,23 @@ import { lireLEssaiEnCours, type AvancementDeLEssai } from "@/lib/depots/essai-e
 /**
  * Le geste d'essai, depuis la landing.
  *
- * Il n'y a pas de session à vérifier : c'est tout l'intérêt. Ce qui remplace la
- * vérification, ce sont les deux verrous de `deposerSansCompte` — un dépôt par
- * cookie de visite, une poignée par empreinte d'adresse — et le fait que la
- * chaîne s'arrête à l'extraction.
+ * Il n'y a pas de session à exiger : c'est tout l'intérêt. Ce qui la remplace,
+ * ce sont les deux verrous de `deposerSansCompte` — un dépôt par cookie de
+ * visite, une poignée par empreinte d'adresse — et le fait que la chaîne
+ * s'arrête à l'extraction.
+ *
+ * Une session est en revanche un motif de **refus**. Un compte connecté qui
+ * passerait par ici verrait son texte rattaché à un cookie plutôt qu'à lui, et
+ * effacé sept jours plus tard par le cron de nettoyage : une perte silencieuse,
+ * sur un geste qu'il a fait correctement. L'écran ne propose plus ce champ à qui
+ * est entré, et l'action ne compte pas là-dessus pour autant.
  */
 
 export type EtatEssai = { erreur?: string; sessionId?: string };
 
 export async function essayerAction(_precedent: EtatEssai, donnees: FormData): Promise<EtatEssai> {
+  if (await getCurrentUser()) redirect(`${ROUTES.depots}/nouveau`);
+
   const texte = (donnees.get("texte") ?? "").toString();
   const resultat = await deposerSansCompte(texte, await adresseDuVisiteur(), await lireLaVisite());
 

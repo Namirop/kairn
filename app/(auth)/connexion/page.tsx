@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { BoutonGoogle } from "@/components/compte/bouton-google";
 import { FormulaireConnexion } from "@/components/compte/formulaire-connexion";
 import { isGoogleEnabled } from "@/lib/auth/config";
 import { RETURN_TO_PARAM, ROUTES } from "@/lib/auth/routes";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: "Connexion" };
 
@@ -20,6 +22,11 @@ export default async function PageConnexion({
   const params = await searchParams;
   const brut = params[RETURN_TO_PARAM];
   const suite = destination(Array.isArray(brut) ? brut[0] : brut);
+
+  // Demander son adresse à quelqu'un qui est déjà entré lui ferait croire qu'il
+  // ne l'est pas, et le renverrait chercher un lien dans sa boîte pour une
+  // session qu'il a déjà. On le mène là où il allait.
+  if (await getCurrentUser()) redirect(suite);
 
   return (
     <div className="gap-pas-8 flex flex-col">
