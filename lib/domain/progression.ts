@@ -81,6 +81,40 @@ export function progressionPourXp(xp: number): Progression {
   return { niveau, seuilDuNiveau: xpDuNiveau(niveau), seuilSuivant: xpDuNiveau(niveau + 1) };
 }
 
+export type AvancementDuNiveau = {
+  niveau: number;
+  /** Part du palier courant déjà parcourue, entre 0 et 1. */
+  part: number;
+  /** XP qu'il reste à gagner avant le palier suivant. */
+  restant: number;
+};
+
+/**
+ * Où l'on en est *dans* son niveau.
+ *
+ * « Niveau 2 · 34 XP » dit ce qui est acquis et rien de ce qui vient : deux
+ * chiffres qu'on ne peut situer l'un par rapport à l'autre, donc rien à quoi se
+ * raccrocher. Ce qui motive est la part parcourue et ce qu'il reste, pas le
+ * cumul. Les paliers étant de plus en plus chers, la part ne se devine pas non
+ * plus — elle se calcule, et c'est ici.
+ */
+export function avancementDuNiveau(xp: number): AvancementDuNiveau {
+  const acquis = Math.max(0, Math.floor(xp));
+  const { niveau, seuilDuNiveau, seuilSuivant } = progressionPourXp(acquis);
+  const palier = seuilSuivant - seuilDuNiveau;
+
+  // Un palier de largeur nulle n'existe pas dans la courbe actuelle, mais une
+  // division par zéro rendrait NaN et une barre de progression invisible : on
+  // préfère un palier plein à un écran cassé.
+  if (palier <= 0) return { niveau, part: 1, restant: 0 };
+
+  return {
+    niveau,
+    part: Math.min(1, Math.max(0, (acquis - seuilDuNiveau) / palier)),
+    restant: Math.max(0, seuilSuivant - acquis),
+  };
+}
+
 /**
  * La série après un passage, dans le calendrier de l'utilisateur.
  *

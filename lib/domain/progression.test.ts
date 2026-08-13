@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
 import {
+  avancementDuNiveau,
   progressionPourXp,
   serieApresPassage,
   xpDuNiveau,
@@ -132,6 +133,75 @@ describe("serieApresPassage", () => {
         (dernier, serie) => serieApresPassage(dernier, "2026-03-10", serie) >= 1,
       ),
       { numRuns: 200 },
+    );
+  });
+});
+
+describe("avancementDuNiveau", () => {
+  it("part de zéro à l'entrée d'un palier", () => {
+    // 20 XP ouvre le niveau 2 : on y entre à peine, rien n'est parcouru.
+    expect(avancementDuNiveau(XP_DU_PREMIER_PALIER)).toEqual({
+      niveau: 2,
+      part: 0,
+      restant: xpDuNiveau(3) - XP_DU_PREMIER_PALIER,
+    });
+  });
+
+  it("compte un compte neuf comme un palier entamé, pas comme un niveau acquis", () => {
+    const debut = avancementDuNiveau(0);
+
+    expect(debut.niveau).toBe(1);
+    expect(debut.part).toBe(0);
+    expect(debut.restant).toBe(XP_DU_PREMIER_PALIER);
+  });
+
+  it("rend la moitié du palier à mi-chemin", () => {
+    // Le palier du niveau 2 va de 20 à 60 : 40 XP en est le milieu.
+    const milieu = avancementDuNiveau(40);
+
+    expect(milieu.niveau).toBe(2);
+    expect(milieu.part).toBeCloseTo(0.5, 10);
+    expect(milieu.restant).toBe(20);
+  });
+
+  it("traite une XP négative comme une XP nulle", () => {
+    expect(avancementDuNiveau(-50)).toEqual(avancementDuNiveau(0));
+  });
+
+  /**
+   * La part est une part : elle ne sort jamais de son intervalle, et le reste
+   * ne devient jamais négatif. Une barre de progression qui déborde ou un
+   * « il te reste -3 XP » sont deux façons de perdre la confiance d'un coup.
+   */
+  it("reste dans ses bornes pour n'importe quelle XP", () => {
+    fc.assert(
+      fc.property(fc.integer({ min: -1000, max: 5_000_000 }), (xp) => {
+        const { part, restant, niveau } = avancementDuNiveau(xp);
+
+        expect(part).toBeGreaterThanOrEqual(0);
+        expect(part).toBeLessThanOrEqual(1);
+        expect(restant).toBeGreaterThanOrEqual(0);
+        expect(niveau).toBeGreaterThanOrEqual(1);
+        expect(Number.isFinite(part)).toBe(true);
+      }),
+      { numRuns: 300 },
+    );
+  });
+
+  it("avance sans jamais reculer quand l'XP monte", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 100_000 }),
+        fc.integer({ min: 1, max: 5000 }),
+        (xp, gain) => {
+          const avant = avancementDuNiveau(xp);
+          const apres = avancementDuNiveau(xp + gain);
+
+          // Soit on progresse dans le même palier, soit on en a changé.
+          expect(apres.niveau > avant.niveau || apres.part >= avant.part - 1e-12).toBe(true);
+        },
+      ),
+      { numRuns: 300 },
     );
   });
 });

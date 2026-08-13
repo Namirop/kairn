@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { compterLaVisiteReprise, lireUsageDeLaPeriode } from "@/lib/db/quota-depots";
 import {
   DEPOTS_PAR_ADRESSE,
   JOURS_AVANT_OUBLI,
@@ -82,6 +83,25 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
     "Reprise — dépôt et concepts passent au compte, sans reste",
     repris.atomIds.length > 0 && aMoi === repris.atomIds.length && orphelins === 0,
     `${aMoi} concept(s) au compte, ${orphelins} resté(s) sur la visite`,
+  );
+
+  // Ce que l'essai a rendu doit entrer au compteur du mois. Sans ça, la limite
+  // annoncée cesse d'être la limite réelle : un compte neuf démarrait avec ses
+  // concepts d'essai en plus de ses trente.
+  const avant = await lireUsageDeLaPeriode(userId, "UTC");
+  await compterLaVisiteReprise(userId, "UTC", repris.atomIds.length);
+  const apres = await lireUsageDeLaPeriode(userId, "UTC");
+
+  record(
+    "Reprise — les concepts de l'essai entrent au plafond du mois",
+    apres.concepts === avant.concepts + repris.atomIds.length && apres.concepts > 0,
+    `${avant.concepts} → ${apres.concepts} concept(s) comptés pour ${repris.atomIds.length} repris`,
+  );
+
+  record(
+    "Reprise — l'extraction de l'essai compte aussi comme un dépôt",
+    apres.depots === avant.depots + 1,
+    `${avant.depots} → ${apres.depots} dépôt(s)`,
   );
 
   const reprise = await rattacherAuCompte(essai.sessionId, userId);

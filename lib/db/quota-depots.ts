@@ -242,6 +242,41 @@ export async function compterConceptsRetenus(
   `;
 }
 
+/**
+ * Ce qu'un essai fait sans compte prend au compteur, une fois réclamé.
+ *
+ * Un compte neuf démarrait avec les concepts de son essai **en plus** de ses
+ * trente : le chemin anonyme ne passe par aucun quota, et la reprise ne
+ * comptait rien. Trois concepts offerts par compte n'est pas ruineux, mais la
+ * limite annoncée cessait d'être la limite réelle, et c'est ça qu'on ne veut
+ * pas — un plafond qu'on affiche se tient.
+ *
+ * Le dépôt entre aussi. Le second rideau borne les extractions payées quoi
+ * qu'elles rendent, et celle-là l'a été comme les autres.
+ *
+ * C'est un décompte, pas une réservation : la dépense a déjà eu lieu, il n'y a
+ * plus rien à refuser. Un compte peut donc passer au-dessus du plafond à cet
+ * instant précis, et c'est le seul endroit où ça arrive.
+ */
+export async function compterLaVisiteReprise(
+  userId: string,
+  fuseau: string,
+  concepts: number,
+  maintenant: Date = new Date(),
+): Promise<void> {
+  const periode = await periodeDuCompte(userId, fuseau, maintenant);
+  const retenus = Math.max(concepts, 0);
+
+  await prisma.$executeRaw`
+    INSERT INTO "MonthlyUsage" ("userId", "periodStart", "concepts", "deposits", "createdAt", "updatedAt")
+    VALUES (${userId}, ${periode.debut}::date, ${retenus}, 1, now(), now())
+    ON CONFLICT ("userId", "periodStart") DO UPDATE
+      SET "concepts" = "MonthlyUsage"."concepts" + ${retenus},
+          "deposits" = "MonthlyUsage"."deposits" + 1,
+          "updatedAt" = now()
+  `;
+}
+
 export async function inscrireEnListeDattente(userId: string, motif?: string): Promise<void> {
   await prisma.waitlistEntry.upsert({
     where: { userId },

@@ -83,7 +83,6 @@ export default async function PageAujourdhui() {
           consolides={tableau.stats?.atomsConsolidated ?? 0}
           graines={tableau.grainesDuCairn}
           streak={tableau.stats?.currentStreak ?? 0}
-          niveau={tableau.stats?.level ?? 1}
           xp={tableau.stats?.xp ?? 0}
         />
       </Panneau>
