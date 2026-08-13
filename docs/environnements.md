@@ -59,6 +59,41 @@ Même raisonnement pour les clés d'API de services tiers, avec une raison de pl
 des clés distinctes te laissent lire la dépense de production séparément de tes
 essais, et en révoquer une sans casser l'autre.
 
+#### Fabriquer un secret
+
+`BETTER_AUTH_SECRET` et `CRON_SECRET` ne viennent d'aucun service : ce sont
+simplement des chaînes que personne ne peut deviner. Elles se génèrent en local,
+une valeur différente par secret et par environnement :
+
+```bash
+openssl rand -base64 32
+```
+
+Sans `openssl` — sous PowerShell, par exemple — Node fait le même travail :
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+**Jamais depuis un générateur en ligne.** Un site qui fabrique ton secret l'a vu,
+et rien ne prouve qu'il ne l'a pas gardé : un secret qui a transité par un
+serveur tiers n'en est plus un. La même règle vaut pour le transport — un secret
+collé dans une conversation, un ticket ou un canal d'équipe doit être considéré
+comme public, et régénéré.
+
+#### Révoquer
+
+Chez la plupart des fournisseurs, **supprimer une clé est la révocation** : il n'y
+a pas d'action distincte, et la supprimer l'invalide immédiatement. Une clé n'est
+pas une ressource, c'est un droit d'accès — on n'en perd rien en la supprimant, on
+en crée une autre.
+
+Les identifiants de base de données ne se suppriment pas, eux : ils se
+**réinitialisent**. Chez Neon, on remet à zéro le mot de passe du rôle sur la
+branche concernée, ce qui produit une nouvelle chaîne de connexion et tue
+l'ancienne. Il faut alors reporter la nouvelle chaîne partout où elle servait,
+sous peine de couper l'application.
+
 ### 3. Les interrupteurs — ils changent le comportement du code
 
 Certaines variables ne désignent rien, elles décident. `NODE_ENV`, `DEBUG`,
@@ -118,6 +153,31 @@ d'être vérifiée deux fois.
 
 En développement, la règle du projet est `true` par défaut. On la bascule
 volontairement, le temps d'éprouver la vraie génération, puis on la remet.
+
+**Les deux doivent être posées sur l'hébergeur.** `readAiConfig()` les valide par
+un schéma Zod : absentes, la validation échoue et tout appel au modèle lève. Ce ne
+sont pas des variables facultatives.
+
+### `AI_ENABLED` — l'interrupteur d'arrêt
+
+`MOCK_AI` détourne les appels vers des fixtures ; `AI_ENABLED` les **interdit**.
+À `false`, `callAI()` lève immédiatement, avant toute autre vérification — pas de
+fixture, pas de réseau, rien. Un dépôt en cours échoue proprement et le dépôt
+cesse d'annoncer un travail en cours.
+
+C'est la poignée qu'on tire quand quelque chose part de travers : une boucle qui
+consomme le plafond en dix minutes, une facture qui grimpe sans qu'on comprenne
+pourquoi, une fuite de clé. On coupe, on regarde, on rallume — sans déployer, sans
+toucher au code.
+
+La configuration est relue **à chaque appel** et non au chargement du module,
+précisément pour ça : couper doit prendre effet tout de suite. Sur un hébergeur
+qui injecte les variables au déploiement, il faut tout de même redéployer pour que
+la nouvelle valeur atteigne le code — c'est le prix du serverless, et ça reste plus
+rapide que de corriger un bug.
+
+En production, `true` — sinon le produit ne fait rien. C'est un frein de secours,
+pas un réglage.
 
 ### `AI_DAILY_CALL_CAP` et `AI_DAILY_CALL_CAP_PAR_COMPTE` — deux plafonds qui protègent deux choses
 
