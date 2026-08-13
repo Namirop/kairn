@@ -1,105 +1,27 @@
-import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { BlocComptes } from "@/components/administration/bloc-comptes";
-import { BlocDepense } from "@/components/administration/bloc-depense";
-import { BlocJournal } from "@/components/administration/bloc-journal";
-import { BlocReglages } from "@/components/administration/bloc-reglages";
-import { BlocVolumes } from "@/components/administration/bloc-volumes";
-import { Section } from "@/components/administration/section";
-import { Panneau } from "@/components/coquille/panneau";
-import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
-import { LigneDeSignalement } from "@/components/signalements/ligne-de-signalement";
-import { ROUTES } from "@/lib/auth/routes";
 import { estAdministrateur } from "@/lib/auth/admin";
+import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
-import { lireLAdministration } from "@/lib/db/administration";
-import { lireLeJournal, lireLesReglagesPosés } from "@/lib/db/reglages";
-import { listerLesSignalements } from "@/lib/db/signalement";
-
-export const metadata: Metadata = { title: "Administration" };
 
 /**
- * L'écran interne : ce que le produit coûte, ce qu'il sert, ce qu'on lui
- * reproche.
+ * L'ancienne adresse de l'écran interne.
  *
- * Quatre mesures en lecture seule, sans graphique et sans filtre. Un graphique
- * demande à être interprété ; ces chiffres-là doivent se lire d'un coup d'œil et
- * répondre à une question qu'on se pose déjà — combien ça coûte aujourd'hui, est-ce
- * que les gens reviennent, est-ce que le découpage rend ce qu'il devrait.
+ * L'écran a grossi au-delà des signalements — il porte la dépense, les comptes,
+ * les volumes et les réglages —, et une route qui annonce une seule de ces
+ * choses ment sur ce qu'elle ouvre. Elle est devenue `/admin` ; celle-ci n'est
+ * plus qu'un renvoi, pour le favori qui existe déjà.
  *
- * Le registre est l'inverse de celui du produit : pas de police display, pas
- * d'accent, pas d'élément signature — de la densité et des libellés qui se
- * scannent. Le lecteur change, donc le registre change.
- *
- * Un compte non autorisé reçoit un 404 et non un 403 : l'existence de cette page
- * n'a pas à se confirmer à qui n'y a pas droit.
+ * Elle se garde exactement comme la vraie. Un renvoi non gardé serait une
+ * confirmation gratuite : il apprendrait à n'importe qui que `/admin` existe,
+ * ce que le 404 de la page d'arrivée s'applique justement à taire.
  */
 export const dynamic = "force-dynamic";
 
-export default async function PageAdministration() {
+export default async function AncienneAdresseDeLAdministration(): Promise<never> {
   const utilisateur = await getCurrentUser();
 
   if (!utilisateur) redirect(ROUTES.connexion);
   if (!estAdministrateur(utilisateur.email)) notFound();
 
-  const [chiffres, signalements, reglages, journal] = await Promise.all([
-    lireLAdministration(),
-    listerLesSignalements(),
-    lireLesReglagesPosés(),
-    lireLeJournal(),
-  ]);
-
-  // Les valeurs d'environnement voyagent jusqu'au formulaire pour qu'un champ
-  // vide veuille dire quelque chose. Aucune n'est un secret : ce sont les six
-  // réglages d'exploitation, et rien d'autre ne quitte le serveur.
-  const environnement = {
-    AI_ENABLED: process.env.AI_ENABLED,
-    MOCK_AI: process.env.MOCK_AI,
-    AI_DAILY_CALL_CAP: process.env.AI_DAILY_CALL_CAP,
-    AI_DAILY_CALL_CAP_PAR_COMPTE: process.env.AI_DAILY_CALL_CAP_PAR_COMPTE,
-    AI_MAX_TOKENS: process.env.AI_MAX_TOKENS,
-    AI_MODEL: process.env.AI_MODEL,
-  };
-
-  return (
-    <PileDePanneaux sol="papier">
-      <Panneau surface="papier" mesure="page" remplit>
-        <h1 className="text-h2-app font-bold text-stone-900">Administration</h1>
-        <p className="mt-pas-2 text-petit max-w-prose text-stone-500">
-          Lecture seule. Les fenêtres et les journées sont en UTC, comme les compteurs qu&apos;elles
-          résument.
-        </p>
-
-        <div className="mt-pas-12">
-          <BlocComptes chiffres={chiffres.comptes} />
-          <BlocDepense chiffres={chiffres.depense} />
-          <BlocVolumes jours={chiffres.volumes} />
-          <BlocReglages poses={reglages} environnement={environnement} />
-          <BlocJournal lignes={journal} />
-
-          <Section
-            intitule="Signalements"
-            contexte={
-              signalements.length === 0
-                ? "Rien pour l'instant."
-                : "Les plus récents d'abord. L'empreinte dit sous quel prompt la question a été écrite."
-            }
-          >
-            {signalements.length === 0 ? (
-              <p className="text-petit max-w-prose text-stone-500">
-                Les questions signalées pendant une session arriveront ici, avec le concept dont
-                elles sont tirées et le réglage qui les a écrites.
-              </p>
-            ) : (
-              <ul className="divide-y divide-stone-300">
-                {signalements.map((signalement) => (
-                  <LigneDeSignalement key={signalement.id} signalement={signalement} />
-                ))}
-              </ul>
-            )}
-          </Section>
-        </div>
-      </Panneau>
-    </PileDePanneaux>
-  );
+  redirect(ROUTES.admin);
 }

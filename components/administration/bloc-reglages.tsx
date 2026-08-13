@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { poserLesReglagesAction, type EtatDesReglages } from "@/app/(app)/signalements/actions";
+import { poserLesReglagesAction, type EtatDesReglages } from "@/app/(app)/admin/actions";
 import { Champ, Interrupteur } from "@/components/administration/champs-de-reglage";
 import { Section } from "@/components/administration/section";
 import { Button } from "@/components/ui/button";

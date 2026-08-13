@@ -35,10 +35,17 @@ export type LigneDeJour = {
   moyenne: number | null;
 };
 
+export type BlocSignalements = {
+  total: number;
+  /** Ce qui est arrivé dans la fenêtre, seule mesure qui dise si ça s'aggrave. */
+  sur7j: number;
+};
+
 export type Administration = {
   comptes: BlocComptes;
   depense: BlocDepense;
   volumes: LigneDeJour[];
+  signalements: BlocSignalements;
 };
 
 type LigneDeComptes = {
@@ -116,12 +123,30 @@ async function lireLesVolumes(maintenant: Date): Promise<LigneDeJour[]> {
   }));
 }
 
+/**
+ * Combien de questions ont été signalées, et combien récemment.
+ *
+ * La liste des signalements dit lesquels ; elle ne dit pas si le rythme change.
+ * Un total qui monte de deux en un mois et un total qui monte de deux en une
+ * journée se lisent pareil dans une liste triée par date, et ne veulent pas dire
+ * du tout la même chose — le second est un prompt qui vient de casser.
+ */
+async function lireLesSignalements(maintenant: Date): Promise<BlocSignalements> {
+  const [total, sur7j] = await Promise.all([
+    prisma.signalement.count(),
+    prisma.signalement.count({ where: { createdAt: { gte: ilYA(maintenant, 7) } } }),
+  ]);
+
+  return { total, sur7j };
+}
+
 export async function lireLAdministration(maintenant: Date = new Date()): Promise<Administration> {
-  const [comptes, depense, volumes] = await Promise.all([
+  const [comptes, depense, volumes, signalements] = await Promise.all([
     lireLesComptes(maintenant),
     lireLaDepenseDuJour(maintenant),
     lireLesVolumes(maintenant),
+    lireLesSignalements(maintenant),
   ]);
 
-  return { comptes, depense, volumes };
+  return { comptes, depense, volumes, signalements };
 }

@@ -209,7 +209,8 @@ base — et les écrans de ce produit en font plusieurs.
 - [ ] Le lien de connexion arrive, et il ouvre bien une session
 - [ ] La connexion Google fonctionne sur le domaine de production
 - [ ] La session survit à une fermeture du navigateur
-- [ ] `/signalements` rend 404 depuis un compte qui n'est pas dans `ADMIN_EMAILS`
+- [ ] `/admin` rend 404 depuis un compte qui n'est pas dans `ADMIN_EMAILS`, et
+      `/signalements`, son ancienne adresse, aussi
 - [ ] L'export de données rend un fichier, la suppression de compte efface tout
 - [ ] Les trois routes planifiées répondent avec le jeton, et refusent sans lui
 - [ ] Le déclencheur externe les appelle vraiment — vérifier un passage dans ses

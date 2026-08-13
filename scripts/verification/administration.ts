@@ -16,7 +16,7 @@ import { record } from "./journal";
 
 /** Les lectures tournent et rendent des nombres, pas des chaînes ni des BigInt. */
 export async function casChiffresLisibles(maintenant: Date): Promise<void> {
-  const { comptes, depense } = await lireLAdministration(maintenant);
+  const { comptes, depense, signalements } = await lireLAdministration(maintenant);
 
   const entiers = [
     comptes.total,
@@ -43,6 +43,12 @@ export async function casChiffresLisibles(maintenant: Date): Promise<void> {
     "Administration — les actifs ne dépassent jamais les comptes existants",
     comptes.actifs30j <= comptes.total && comptes.actifs7j <= comptes.actifs30j,
     `${comptes.actifs7j} sur 7 j, ${comptes.actifs30j} sur 30 j, ${comptes.total} comptes`,
+  );
+
+  record(
+    "Administration — la fenêtre de signalements tient dans le total",
+    signalements.sur7j <= signalements.total,
+    `${signalements.sur7j} sur 7 j, ${signalements.total} au total`,
   );
 
   record(

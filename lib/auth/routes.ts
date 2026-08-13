@@ -15,6 +15,8 @@ export const ROUTES = {
   depots: "/depots",
   reglages: "/reglages",
   commentCaMarche: "/comment-ca-marche",
+  admin: "/admin",
+  /** L'ancienne adresse de l'écran interne, gardée le temps des favoris. */
   signalements: "/signalements",
 } as const;
 
@@ -26,6 +28,7 @@ export const PROTECTED_PATHS = [
   ROUTES.depots,
   ROUTES.reglages,
   ROUTES.commentCaMarche,
+  ROUTES.admin,
   ROUTES.signalements,
 ] as const;
 

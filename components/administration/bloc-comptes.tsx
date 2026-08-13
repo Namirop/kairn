@@ -9,6 +9,10 @@ import type { BlocComptes as Chiffres } from "@/lib/db/administration";
  * côte : un écart qui se creuse entre inscriptions et comptes actifs est le
  * signal le plus précoce qu'on ait — il apparaît des semaines avant que le
  * nombre d'inscriptions, lui, cesse de monter.
+ *
+ * Le total et les actifs sur sept jours ne sont plus ici : ils sont montés dans
+ * le bandeau, où ils forment l'une des quatre réponses de l'écran. Les laisser
+ * aux deux endroits aurait fait une synthèse qui ne synthétise rien.
  */
 export function BlocComptes({ chiffres }: { chiffres: Chiffres }) {
   return (
@@ -17,10 +21,8 @@ export function BlocComptes({ chiffres }: { chiffres: Chiffres }) {
       contexte="Est actif un compte qui a fait au moins un passage dans la fenêtre — ouvrir l'écran ne compte pas."
     >
       <dl>
-        <Mesure intitule="Comptes au total" valeur={nombre(chiffres.total)} />
         <Mesure intitule="Inscriptions sur 7 jours" valeur={nombre(chiffres.nouveaux7j)} />
         <Mesure intitule="Inscriptions sur 30 jours" valeur={nombre(chiffres.nouveaux30j)} />
-        <Mesure intitule="Actifs sur 7 jours" valeur={nombre(chiffres.actifs7j)} />
         <Mesure intitule="Actifs sur 30 jours" valeur={nombre(chiffres.actifs30j)} />
         <Mesure intitule="Séries en cours" valeur={nombre(chiffres.seriesEnCours)} />
         <Mesure

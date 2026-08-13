@@ -227,11 +227,18 @@ export function casAdministrationFermee(): void {
 
   // La garde doit être sur la page elle-même, pas seulement dans le lien qui y
   // mène : une URL se tape à la main.
-  const page = readFileSync("app/(app)/signalements/page.tsx", "utf8");
+  // L'ancienne adresse compte autant que la nouvelle : un renvoi non gardé
+  // apprendrait à n'importe qui que l'écran existe, et à quelle adresse.
+  const pages = ["app/(app)/admin/page.tsx", "app/(app)/signalements/page.tsx"];
+  const nues = pages.filter((chemin) => {
+    const source = readFileSync(chemin, "utf8");
+
+    return !(source.includes("estAdministrateur") && source.includes("notFound"));
+  });
 
   record(
     "Administration — la page se garde elle-même, et n'admet pas son existence",
-    page.includes("estAdministrateur") && page.includes("notFound"),
-    page.includes("notFound") ? "404 pour qui n'y a pas droit" : "aucune garde",
+    nues.length === 0,
+    nues.length === 0 ? "404 pour qui n'y a pas droit, ancienne adresse comprise" : nues.join(", "),
   );
 }

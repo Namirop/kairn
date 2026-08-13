@@ -25,6 +25,7 @@ export const config = {
     "/depots/:path*",
     "/reglages/:path*",
     "/comment-ca-marche/:path*",
+    "/admin/:path*",
     "/signalements/:path*",
   ],
 };

@@ -73,10 +73,10 @@ export default async function PageReglages() {
 
           {estAdministrateur(utilisateur.email) ? (
             <Link
-              href={ROUTES.signalements}
+              href={ROUTES.admin}
               className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
             >
-              Signalements
+              Administration
             </Link>
           ) : null}
         </div>

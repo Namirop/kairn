@@ -36,8 +36,6 @@ Ce qui manque, et qui se voit :
 - **Les réglages sont en lecture seule.** L'écran affiche fuseau, heure de rappel et état des
   emails ; il ne les modifie pas. Le fuseau se réconcilie tout seul au premier affichage, et la
   désinscription passe par le lien des emails.
-- **Le tableau de bord d'administration est fonctionnel mais austère.** Les chiffres y sont ;
-  la mise en forme est celle d'une pile de sections denses, pas d'un tableau de bord.
 
 ## Stack
 
@@ -99,7 +97,7 @@ d'autre porte que Google. Renseigne l'une des deux avant de vouloir entrer dans 
 | `AI_DAILY_CALL_CAP`            | oui    | Plafond global d'appels réels par jour, vérifié avant émission.             |
 | `AI_DAILY_CALL_CAP_PAR_COMPTE` | oui    | Part d'un seul compte dans ce plafond, réservée avant lui.                  |
 | `AI_MODEL`                     | oui    | Identifiant du modèle.                                                      |
-| `ADMIN_EMAILS`                 | non    | Adresses autorisées à lire les signalements. Vide n'autorise personne.      |
+| `ADMIN_EMAILS`                 | non    | Adresses autorisées à ouvrir `/admin`. Vide n'autorise personne.            |
 | `AI_MAX_TOKENS`                | oui    | `max_tokens` par défaut, toujours envoyé ; une sortie coupée est un échec.  |
 | `SEED_USER_*`                  | non    | Adresse et fuseau du compte de démonstration.                               |
 
