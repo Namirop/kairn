@@ -16,34 +16,49 @@ Le découpage et la génération de questions passent par un modèle de langage,
 point d'entrée `callAI()` qui porte les garde-fous de budget. En développement, un mode mock rend
 des fixtures : toute l'interface et tout le pipeline se développent sans un seul appel réel.
 
-**État : phase 4.** Le produit tourne de bout en bout. L'ingestion prend un texte ou une capture,
-la lit, la découpe en concepts et écrit leurs questions. Le moteur de révision sert la session du
-jour, fait tourner les formulations, replanifie avec ts-fsrs et propose un entraînement libre qui
-ne touche à rien de la mémoire. La progression compte l'effort et la consolidation, jamais la
-justesse. Les garde-fous de budget sont posés et vérifiés à l'exécution : plafond global, part par
-compte, quotas d'ingestion, limites de débit.
+**État.** Le produit tourne de bout en bout. L'ingestion prend un texte ou une capture, la lit, la
+découpe en concepts et écrit leurs questions. Le moteur de révision sert la session du jour, fait
+tourner les formulations, replanifie avec ts-fsrs et propose un entraînement libre qui ne touche à
+rien de la mémoire. La progression compte l'effort et la consolidation, jamais la justesse. Les
+garde-fous de budget sont posés et vérifiés à l'exécution : plafond global, part par compte, quotas
+d'ingestion, limites de débit.
 
-Ce qui manque : les réglages ne sont pas encore modifiables depuis l'interface, et le rappel
-quotidien calcule sa sélection sans envoyer.
+L'entrée est ouverte : on dépose depuis la page publique, sans compte, et le découpage s'affiche
+avant qu'on demande quoi que ce soit (voir « Le dépôt avant compte »). La connexion se fait par lien
+envoyé à l'adresse, sans mot de passe nulle part. Un compte peut exporter ses données et se
+supprimer lui-même.
+
+Ce qui manque, et qui se voit :
+
+- **Le rappel quotidien n'envoie rien.** `GET /api/cron/rappels` sélectionne les comptes à l'heure,
+  écarte ceux déjà notifiés, journalise — et rend `envoyes: 0`. L'envoi reste à brancher sur
+  `sendNotification()`.
+- **Les réglages sont en lecture seule.** L'écran affiche fuseau, heure de rappel et état des
+  emails ; il ne les modifie pas. Le fuseau se réconcilie tout seul au premier affichage, et la
+  désinscription passe par le lien des emails.
+- **Le tableau de bord d'administration se limite aux signalements.** Ni comptes, ni dépense API,
+  ni volumes.
 
 ## Stack
 
-| Domaine            | Choix                                                            |
-| ------------------ | ---------------------------------------------------------------- |
-| Framework          | Next.js 15 (App Router, Turbopack), React 19, TypeScript strict  |
-| Base de données    | PostgreSQL, Prisma 7 avec le driver adapter `@prisma/adapter-pg` |
-| Authentification   | better-auth (lien par email, Google en option)                   |
-| Répétition espacée | `ts-fsrs`                                                        |
-| Modèle             | SDK Anthropic, sorties structurées contraintes, validation Zod   |
-| Interface          | Tailwind v4, primitives shadcn/ui retokenisées, Motion           |
-| Email              | Resend                                                           |
+| Domaine            | Choix                                                                 |
+| ------------------ | --------------------------------------------------------------------- |
+| Framework          | Next.js 15 (App Router, Turbopack), React 19, TypeScript strict       |
+| Base de données    | PostgreSQL, Prisma 7 avec le driver adapter `@prisma/adapter-pg`      |
+| Authentification   | better-auth : lien par email, Google si configuré, aucun mot de passe |
+| Répétition espacée | `ts-fsrs`                                                             |
+| Modèle             | SDK Anthropic, sorties structurées contraintes, validation Zod        |
+| Interface          | Tailwind v4, primitives shadcn/ui retokenisées, Motion                |
+| Email              | Resend                                                                |
 
 ## Prérequis
 
 - Node.js 20 ou plus récent
 - Une base PostgreSQL 16+ accessible (le projet est développé sur Neon)
-- Facultatif : compte Resend, identifiants OAuth Google, clé API Anthropic — l'application démarre
-  et se développe sans aucun des trois
+- Une clé API Anthropic est inutile tant que `MOCK_AI=true` : tout le pipeline se développe sur
+  fixtures
+- Un compte Resend **ou** des identifiants OAuth Google, en revanche, sont nécessaires pour entrer
+  dans un compte — voir la note sous l'installation
 
 ## Installation
 
@@ -60,6 +75,10 @@ npm run dev
 L'adresse du compte de démonstration est définie dans `prisma/seed/account.ts` et surchargeable
 par `SEED_USER_EMAIL`. Il n'a pas de mot de passe : on y entre en demandant un lien depuis l'écran
 de connexion, comme sur n'importe quel compte.
+
+**Se connecter en local demande donc un fournisseur d'email.** Sans `RESEND_API_KEY`, `sendEmail()`
+journalise l'objet du message et jamais son contenu — le lien n'apparaît nulle part, et il n'y a pas
+d'autre porte que Google. Renseigne l'une des deux avant de vouloir entrer dans un compte.
 
 ## Variables d'environnement
 
@@ -88,23 +107,24 @@ Les valeurs réelles vivent dans `.env`, qui n'est pas versionné. `.env.example
 
 ## Scripts
 
-| Commande                   | Effet                                                     |
-| -------------------------- | --------------------------------------------------------- |
-| `npm run dev`              | Serveur de développement                                  |
-| `npm run build`            | Build de production                                       |
-| `npm run typecheck`        | `tsc --noEmit`                                            |
-| `npm run lint`             | ESLint, frontières d'architecture comprises               |
-| `npm test`                 | Vitest sur `lib/domain/`, propriétés fast-check comprises |
-| `npm run test:watch`       | Vitest en veille                                          |
-| `npm run format`           | Prettier en écriture                                      |
-| `npm run db:migrate`       | `prisma migrate dev`                                      |
-| `npm run db:deploy`        | `prisma migrate deploy`, pour un environnement déployé    |
-| `npm run db:seed`          | Remplit la base ; rejouable sans dupliquer                |
-| `npm run db:studio`        | Prisma Studio                                             |
-| `npm run verify:ai`        | Vérifie les garde-fous d'appel modèle à l'exécution       |
-| `npm run verify:ingestion` | Rejoue l'ingestion de bout en bout, en mode mock          |
-| `npm run verify:session`   | Rejoue le moteur de révision et l'entraînement libre      |
-| `npm run verify:abus`      | Passe d'audit : quotas, débit, propriété, cycle de vie    |
+| Commande                    | Effet                                                     |
+| --------------------------- | --------------------------------------------------------- |
+| `npm run dev`               | Serveur de développement                                  |
+| `npm run build`             | Build de production                                       |
+| `npm run typecheck`         | `tsc --noEmit`                                            |
+| `npm run lint`              | ESLint, frontières d'architecture comprises               |
+| `npm test`                  | Vitest sur `lib/domain/`, propriétés fast-check comprises |
+| `npm run test:watch`        | Vitest en veille                                          |
+| `npm run format`            | Prettier en écriture                                      |
+| `npm run db:migrate`        | `prisma migrate dev`                                      |
+| `npm run db:deploy`         | `prisma migrate deploy`, pour un environnement déployé    |
+| `npm run db:seed`           | Remplit la base ; rejouable sans dupliquer                |
+| `npm run db:studio`         | Prisma Studio                                             |
+| `npm run verify:ai`         | Vérifie les garde-fous d'appel modèle à l'exécution       |
+| `npm run verify:ingestion`  | Rejoue l'ingestion de bout en bout, en mode mock          |
+| `npm run verify:session`    | Rejoue le moteur de révision et l'entraînement libre      |
+| `npm run verify:abus`       | Passe d'audit : quotas, débit, propriété, cycle de vie    |
+| `npm run verify:contrastes` | Mesure les ratios WCAG des couples posés par l'interface  |
 
 `npm run eval:generation` existe aussi : c'est le banc d'évaluation, décrit plus bas. C'est le seul
 script du dépôt qui émet de vrais appels, et il ne part pas sans qu'on le lui dise deux fois.
@@ -113,17 +133,20 @@ script du dépôt qui émet de vrais appels, et il ne part pas sans qu'on le lui
 
 ```
 app/
-  (marketing)/   Landing publique, page de désinscription
+  (marketing)/   Landing et son champ de dépôt, mentions légales,
+                 confidentialité, désinscription
   (auth)/        Connexion, inscription
   (app)/         Application authentifiée
-  api/           Route handlers, dont les trois routes cron
+  api/           Route handlers, dont les trois routes cron, l'export de
+                 compte et le réglage de fuseau
 components/
   ui/            Primitives shadcn retokenisées, sans logique métier
   cairn/         L'empilement de pierres
+  pwa/           Invite d'installation
   <domaine>/     Composants de présentation
 lib/
   domain/        Logique pure : géométrie du cairn, échéances, jours locaux,
-                 contrôles automatiques sur une génération
+                 période de quota, contrôles automatiques sur une génération
   db/            Seul endroit qui importe le client Prisma
   ai/            callAI(), envoi groupé, prompts système, schémas Zod, fixtures
   depots/        Le geste de dépôt côté serveur
@@ -241,12 +264,17 @@ concepts, et l'écran dit ce qui manque. Un concept marqué douteux par le modè
 génération — lui écrire des questions riverait une erreur que personne n'a vérifiée ; il attend
 d'être confirmé, réécrit ou supprimé.
 
-Trois limites bornent le geste, toutes prises dans la même instruction sur la ligne du jour :
-environ trente concepts et quinze dépôts par jour et par compte, comptés dans le calendrier de
-l'utilisateur, et trois dépôts par minute pour le débit. « Environ » n'est pas une approximation
-d'écriture : un dépôt est autorisé tant qu'il reste une place et rend ensuite ce qu'il rend, donc le
-dernier de la journée peut retenir huit concepts sur une seule place. Passé le plafond, plus rien ne
-part. Un redécoupage prend une place comme un dépôt, et entre dans la fenêtre de débit au même titre.
+Trois limites bornent le geste. Deux se comptent **au mois**, sur une période ancrée au jour
+d'inscription et lue dans le calendrier de l'utilisateur : environ trente concepts, et soixante
+dépôts en second rideau. La troisième est le débit, trois dépôts par minute, et elle reste courte —
+elle protège le serveur sur la minute, pas le budget sur le mois. Le plafond porte sur le concept
+parce que c'est lui qui coûte, et parce que déposer une phrase ne doit pas coûter autant que coller
+un article ; les places non consommées ne se reportent pas.
+
+« Environ » n'est pas une approximation d'écriture : un dépôt est autorisé tant qu'il reste une
+place et rend ensuite ce qu'il rend, donc le dernier de la période peut retenir huit concepts sur
+une seule place. Passé le plafond, plus rien ne part. Un redécoupage prend une place comme un dépôt,
+et entre dans la fenêtre de débit au même titre.
 
 Une place prise sur un dépôt qui s'arrête en **panne** — timeout, sortie illisible, plafond global —
 est rendue. Une place prise sur un dépôt **rejeté** ne l'est pas : la chaîne a tourné, l'appel est dû,
@@ -255,6 +283,44 @@ d'attente plutôt qu'un mur.
 
 Réviser et s'entraîner ne coûtent aucun appel modèle, mais écrivent et lisent : les trois gestes
 correspondants passent par une fenêtre de cent vingt par minute et par compte, sur le même mécanisme.
+
+### Le dépôt avant compte
+
+La page publique porte le champ de dépôt. On dépose, l'extraction tourne, les concepts s'affichent —
+et c'est seulement ensuite qu'on propose de créer un compte pour les retrouver. `Input` et `Atom`
+sont rattachés à une `AnonymousSession` que désigne un cookie de visite, et l'inscription les
+transfère au compte dans une transaction, depuis le hook `user.create.after` de better-auth : c'est
+le seul instant où l'on tient à la fois le compte neuf et le cookie.
+
+**La chaîne s'arrête à l'extraction.** Les questions, qui coûtent l'essentiel, ne sont demandées
+qu'une fois le compte créé — un visiteur qui repart coûte un appel de découpage. C'est ce qui rend
+l'ouverture tenable, et c'est pour ça que la reprise rend les identifiants des concepts à l'appelant
+plutôt que de générer elle-même : la dépense reprend là où quelqu'un s'engage.
+
+C'est le seul endroit du produit qui dépense sans compte identifié, donc le plus serré :
+
+| Verrou                  | Valeur                                                               |
+| ----------------------- | -------------------------------------------------------------------- |
+| Par visite (cookie)     | deux essais, mais un essai **qui rend des concepts** ferme la visite |
+| Par empreinte d'adresse | trois visites sur vingt-quatre heures glissantes                     |
+| Conservation            | sept jours, puis le cron efface ce que personne n'a réclamé          |
+
+Le second essai existe pour le cas où le premier ne rend rien — une liste de courses, un lien nu —
+qui laisserait sinon quelqu'un devant une page morte sans avoir rien vu du produit.
+
+Aucune adresse IP n'est conservée : `AnonymousSession.ipHash` porte un SHA-256 salé par
+`BETTER_AUTH_SECRET`, tronqué. La question à laquelle il répond est « combien de visites viennent
+d'ici », et une empreinte y répond sans garder de donnée qui désigne quelqu'un. Le refus par
+empreinte se lit puis s'écrit, donc deux visiteurs simultanés depuis la même adresse peuvent passer
+à quatre : la course est assumée, sa conséquence est une extraction de plus.
+
+### Compte et données
+
+Depuis les réglages, un compte exporte ce qu'il a déposé et sa progression en JSON
+(`GET /api/mon-compte/export`), et se supprime lui-même — le compte, ses dépôts, ses concepts, leurs
+formulations et leurs révisions partent avec, par les cascades du schéma. Les emails transactionnels
+portent un lien de désinscription signé, qui mène à une page publique sans demander de connexion :
+quelqu'un qui veut sortir n'a pas à rentrer d'abord.
 
 ### Travaux asynchrones
 
@@ -291,12 +357,15 @@ l'atomicité d'une instruction Postgres, pas dans le code TypeScript.
 `verify:ingestion` rejoue le pipeline entier sur un compte de vérification créé puis effacé : dépôt
 texte et dépôt image jusqu'aux questions écrites, capture illisible, dépôt sans rien à retenir,
 concept douteux puis confirmé, concept réécrit, lot perdu, échec à mi-parcours, double envoi, débit,
-quota, liste d'attente. Le même piège sur `fetch` y est armé : la vérification échoue si une requête
-part vers l'API.
+quota, liste d'attente. Il couvre aussi le dépôt sans compte : la visite consommée, le second essai
+ouvert par un premier resté vide, la limite par empreinte d'adresse, la reprise au compte et l'oubli
+de ce que personne n'a réclamé. Le même piège sur `fetch` y est armé : la vérification échoue si une
+requête part vers l'API.
 
-`verify:session` rejoue le moteur de révision et l'entraînement libre, plus ce que la phase 4 y
-ajoute : la progression comptée, la série autour de minuit local, la trace qu'un signalement laisse
-quand le concept est supprimé, et la fermeture de l'écran d'administration.
+`verify:session` rejoue le moteur de révision et l'entraînement libre, la progression comptée, la
+série autour de minuit local, la trace qu'un signalement laisse quand le concept est supprimé, la
+fermeture de l'écran d'administration, et la suppression de compte — qui doit ne laisser aucune
+ligne derrière elle, dans aucune table.
 
 `verify:abus` est la passe d'audit : cycle de vie des concepts, vecteurs de régénération comptés en
 appels réellement émis, atomicité des compteurs sous concurrence, remboursement d'une panne,
@@ -305,6 +374,12 @@ constat y est écrit comme la règle qu'on veut voir tenir, si bien qu'une ligne
 et non une panne de la vérification. Les cas qui comptent des appels coupent le mode mock — qui ne
 réserve ni n'enregistre rien, donc ne peut rien compter — et émettent sans clé vers un port fermé :
 ce qui se compte est ce que le produit aurait facturé, sans qu'une requête sorte.
+
+`verify:contrastes` lit les jetons de couleur dans `app/globals.css` et calcule les ratios WCAG des
+couples que l'interface pose réellement, surface sombre comprise. « Ça se lit » n'est pas une
+vérification : deux gris passables sur un écran calibré deviennent illisibles au soleil, et le nom
+d'une surface suffit à s'y tromper — celle qui s'appelle « ombre » est claire, seule « roche » est
+sombre.
 
 ## Licence
 
