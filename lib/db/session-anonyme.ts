@@ -15,8 +15,22 @@ import { prisma } from "@/lib/db/client";
  * une base volée ne se retourne pas en liste d'adresses.
  */
 
-/** Sessions anonymes tolérées par empreinte d'adresse, sur la fenêtre. */
-export const DEPOTS_PAR_ADRESSE = 3;
+/**
+ * Sessions anonymes tolérées par empreinte d'adresse, sur la fenêtre.
+ *
+ * Deux, et pas une. Une seule par adresse serait le réglage évident si une
+ * adresse désignait une personne — mais elle n'en désigne pas une. Un bureau, un
+ * coworking, une école ou un opérateur mobile derrière son CGNAT sortent tous
+ * par une seule IPv4 : à une visite par adresse, le premier arrivé grillerait
+ * l'essai de tous les autres pour la journée, et précisément dans les endroits
+ * où quelqu'un partage un outil à ses collègues.
+ *
+ * Serrer davantage ne protégerait d'ailleurs de personne : basculer en 4G ou
+ * ouvrir un VPN change d'adresse en cinq secondes. Ce verrou-ci freine le
+ * passant qui recommence, pas l'abuseur — c'est `AI_DAILY_CALL_CAP` qui borne la
+ * dépense, et lui ne se contourne pas.
+ */
+export const DEPOTS_PAR_ADRESSE = 2;
 
 /** La fenêtre de la limite par adresse. Un jour : on n'est pas à la minute. */
 export const FENETRE_ADRESSE_HEURES = 24;

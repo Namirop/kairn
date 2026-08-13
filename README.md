@@ -302,11 +302,17 @@ C'est le seul endroit du produit qui dépense sans compte identifié, donc le pl
 | Verrou                  | Valeur                                                               |
 | ----------------------- | -------------------------------------------------------------------- |
 | Par visite (cookie)     | deux essais, mais un essai **qui rend des concepts** ferme la visite |
-| Par empreinte d'adresse | trois visites sur vingt-quatre heures glissantes                     |
+| Par empreinte d'adresse | deux visites sur vingt-quatre heures glissantes                      |
 | Conservation            | sept jours, puis le cron efface ce que personne n'a réclamé          |
 
 Le second essai existe pour le cas où le premier ne rend rien — une liste de courses, un lien nu —
 qui laisserait sinon quelqu'un devant une page morte sans avoir rien vu du produit.
+
+Deux visites par adresse et non une, parce qu'une adresse ne désigne pas une personne : un bureau,
+une école ou un opérateur mobile derrière son CGNAT sortent par une seule IPv4, et le premier arrivé
+grillerait l'essai de tous les autres. Serrer davantage ne protégerait de personne — basculer en 4G
+change d'adresse en cinq secondes. Ce verrou freine le passant qui recommence ; c'est
+`AI_DAILY_CALL_CAP` qui borne la dépense.
 
 Aucune adresse IP n'est conservée : `AnonymousSession.ipHash` porte un SHA-256 salé par
 `BETTER_AUTH_SECRET`, tronqué. La question à laquelle il répond est « combien de visites viennent
