@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
  * autant d'allers-retours réseau qui ne tiennent pas dans une durée par défaut
  * dès qu'il y a plus d'une poignée de lots en vol.
  */
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {

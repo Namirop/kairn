@@ -120,9 +120,10 @@ prévisualisation pointant sur la base de production la migrerait sans qu'on l'a
 demandé. Le prix de ce choix est qu'il faut y penser — une migration oubliée se
 voit à la première requête sur une colonne absente.
 
-## Les crons
+## Les passages planifiés
 
-Trois passages, déclarés dans `vercel.json` :
+Trois passages à déclencher, **depuis un service externe et non depuis
+l'hébergeur** :
 
 | Chemin              | Cadence           | Ce qu'il fait                                                                                                                      |
 | ------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -130,20 +131,60 @@ Trois passages, déclarés dans `vercel.json` :
 | `/api/cron/lots`    | toutes les 15 min | Relève les envois groupés terminés, soumet ceux qui attendent                                                                      |
 | `/api/cron/rappels` | toutes les heures | Sélectionne les comptes dont l'heure locale correspond à leur heure de rappel                                                      |
 
-Les trois exigent `Authorization: Bearer $CRON_SECRET`. Vercel pose cet en-tête
-tout seul sur ses appels de cron dès que `CRON_SECRET` existe dans
-l'environnement — il n'y a rien d'autre à câbler, mais il faut que la variable
-soit là **avant** le déploiement, sinon les trois routes répondent 401 en silence.
+Les trois sont des `GET` et exigent l'en-tête `Authorization: Bearer <CRON_SECRET>`,
+comparé en temps constant. C'est tout ce qu'ils demandent : ils ne connaissent
+rien de l'hébergeur, et n'importe quel service capable d'appeler une URL avec un
+en-tête fait l'affaire.
 
-Le passage horaire des rappels n'est pas négociable : la route compare l'heure
-**locale** de chaque compte à son heure de rappel, et une cadence plus lâche
-sauterait des fuseaux entiers.
+### Pourquoi un service externe
 
-**À vérifier avant de compter dessus** : les plans d'hébergement limitent le
-nombre de tâches planifiées et leur fréquence, et le plan d'entrée de Vercel ne
-permet historiquement qu'un passage quotidien. Trois tâches à la cadence
-ci-dessus supposent un plan qui les autorise. C'est une dépense récurrente, donc
-une décision, pas un détail d'installation.
+Le palier gratuit de Vercel limite le nombre de tâches planifiées et n'en
+autorise qu'un passage quotidien — très loin des cadences ci-dessus. Déclarer ces
+trois passages dans `vercel.json` y ferait échouer le déploiement, c'est pourquoi
+le fichier ne porte que la région.
+
+Un déclencheur externe coûte zéro et fait le même travail. Le jour où
+l'hébergement passe à un palier qui autorise les crons natifs, il suffit de
+remettre un bloc `crons` dans `vercel.json` et de couper le service externe :
+aucune ligne de code ne change, parce que rien dans les routes ne dépend de qui
+les appelle.
+
+### Ce qu'il faut configurer
+
+Pour chacun des trois, chez le déclencheur choisi :
+
+- méthode `GET`, URL `https://<domaine>/api/cron/<nom>`
+- en-tête `Authorization` valant `Bearer <CRON_SECRET>`
+- la cadence du tableau ci-dessus
+
+Vérifier ensuite que le service **envoie bien les en-têtes personnalisés** —
+certains les ignorent en offre gratuite, et les routes répondent alors 401 en
+silence. Un appel sans jeton doit renvoyer 401 : c'est le test le plus rapide que
+la configuration est bonne, avant même de regarder les journaux.
+
+`CRON_SECRET` doit exister dans l'environnement **avant** le premier
+déploiement : sans elle, `isAuthorizedCron` refuse tout, jeton correct ou non.
+
+### La cadence des rappels
+
+Le passage horaire n'est pas négociable : la route compare l'heure **locale** de
+chaque compte à son heure de rappel, et une cadence plus lâche sauterait des
+fuseaux entiers. C'est le seul des trois où un retard se voit — les deux autres
+rattrapent au passage suivant.
+
+C'est aussi ce qui écarte les planificateurs qui décalent ou sautent des
+exécutions sous charge : pour les jobs et les lots, un retard de dix minutes est
+invisible ; pour un rappel quotidien, une heure de décalage le fait tomber dans
+la mauvaise journée locale.
+
+### Le plafond de durée
+
+Les trois routes déclarent `maxDuration = 60`, le maximum du palier gratuit. La
+reprise des jobs en traite trois par passage pour tenir dans cette minute, chacun
+pouvant porter un appel modèle de dix à trente secondes. Si la file prend du
+retard, ce sont ces deux valeurs qu'il faut relever **ensemble** — `BATCH_SIZE`
+dans `app/api/cron/jobs/route.ts` et le `maxDuration` de la même route. L'une
+sans l'autre ne sert à rien.
 
 ## La région d'exécution
 
@@ -162,7 +203,9 @@ base — et les écrans de ce produit en font plusieurs.
 - [ ] La session survit à une fermeture du navigateur
 - [ ] `/signalements` rend 404 depuis un compte qui n'est pas dans `ADMIN_EMAILS`
 - [ ] L'export de données rend un fichier, la suppression de compte efface tout
-- [ ] Les trois routes cron répondent, et refusent un appel sans le jeton
+- [ ] Les trois routes planifiées répondent avec le jeton, et refusent sans lui
+- [ ] Le déclencheur externe les appelle vraiment — vérifier un passage dans ses
+      journaux, pas seulement sa configuration
 - [ ] Une ingestion réelle écrit bien une ligne dans `AiCall`, avec son coût
 - [ ] Les pages légales et le lien de désinscription sont atteignables sans compte
 

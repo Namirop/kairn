@@ -17,24 +17,28 @@ export const dynamic = "force-dynamic";
 /**
  * Le passage a le droit de durer : il enchaîne des appels modèle.
  *
- * Sans ce plafond, la fonction est coupée à la durée par défaut de
- * l'hébergeur — quelques dizaines de secondes — au milieu d'un job. Le travail
- * en cours redevient reprenable au passage suivant, donc rien n'est perdu, mais
- * la file n'avancerait jamais que d'un ou deux jobs par passage sans qu'aucune
- * erreur ne le dise.
+ * Soixante secondes, parce que c'est le plafond du palier d'hébergement gratuit.
+ * Sans cette déclaration, la fonction est coupée bien plus tôt encore, au milieu
+ * d'un job. Rien n'est perdu — le travail redevient reprenable au passage
+ * suivant — mais la file n'avancerait que d'un job ou deux par passage sans
+ * qu'aucune erreur ne le dise. C'est le pire genre de panne : celle qui
+ * ressemble à de la lenteur. À monter le jour où l'hébergement le permet.
  */
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 /**
  * Borne le travail d'un passage : le reste attendra le passage suivant.
  *
- * Dix et non vingt. Les jobs tournent en série et chacun peut porter un appel
- * modèle de dix à trente secondes : vingt ne tenaient pas dans les cinq minutes
- * accordées. À dix par passage et un passage toutes les dix minutes, la file
- * absorbe soixante jobs à l'heure — très au-delà de ce que les plafonds
- * journaliers autorisent à produire.
+ * Les jobs tournent en série et chacun peut porter un appel modèle de dix à
+ * trente secondes : trois est ce qui rentre dans la minute accordée, avec de la
+ * marge pour un appel lent. À un passage toutes les dix minutes, la file absorbe
+ * dix-huit jobs à l'heure — au-delà de ce qu'un compte peut produire en une
+ * journée, puisque son plafond mensuel est de trente concepts.
+ *
+ * C'est la valeur à relever d'abord si la file prend du retard, en même temps
+ * que `maxDuration` : les deux vont ensemble et l'une sans l'autre ne sert rien.
  */
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 3;
 
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {

@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
  * un email par compte retenu le jour où l'envoi sera branché, et c'est cette
  * boucle-là qui a besoin de durer.
  */
-export const maxDuration = 300;
+export const maxDuration = 60;
 
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
