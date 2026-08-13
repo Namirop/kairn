@@ -257,4 +257,58 @@ ni ne se régénèrent, elles **disparaissent**.
 | `ADMIN_EMAILS`                                      | Réglage — identique                                                                                                                              |
 | `SEED_USER_EMAIL`, `SEED_USER_TIMEZONE`             | **Absentes**                                                                                                                                     |
 
+## Comment le code arrive en production
+
+Une variable décrit ce qu'il y a autour du code. Reste à savoir comment le code
+lui-même passe d'une machine à l'autre — et la réponse tient dans une branche.
+
+**`main` est la branche de production.** L'hébergeur la surveille : tout ce qui y
+arrive part en ligne, sans confirmation. Une branche de travail, elle, ne
+déclenche qu'un déploiement de prévisualisation — une URL à part, jetable, qui ne
+touche pas au site public.
+
+Ce découpage donne la règle : **on ne commite jamais sur `main`, on l'avance.**
+Avancer `main` n'est pas un geste de version, c'est le geste de mise en ligne — le
+seul moment où on décide que ce qui marchait chez soi devient ce que voient les
+autres.
+
+### Le cycle
+
+```bash
+# 1. Travailler sur la branche de travail, autant de commits qu'on veut
+git add -A
+git commit -m "…"
+git push origin phase-5-production        # la production ne bouge pas
+
+# 2. Vérifier : tests, build, et l'écran dans un navigateur
+
+# 3. Mettre en ligne
+git switch main
+git merge --ff-only phase-5-production
+git push origin main                      # le déploiement part
+git switch phase-5-production             # et on retourne travailler
+```
+
+`--ff-only` est ce qui rend l'étape 3 sûre : la fusion **échoue** si `main` a
+divergé au lieu de fabriquer un commit de fusion en silence. Un refus à cet
+endroit veut dire que quelque chose est arrivé sur `main` qu'on n'a pas — et
+c'est exactement le moment où l'on veut être arrêté.
+
+### Les migrations passent avant le code
+
+Un commit qui ajoute une migration Prisma ne l'applique pas. Si on pousse `main`
+sans avoir migré, le code déployé interroge une colonne qui n'existe pas encore,
+et l'erreur ne ressemble pas à un oubli de migration — elle ressemble à une panne.
+
+L'ordre est donc toujours le même : **migrer la base de production, puis pousser
+`main`**. Voir `DEPLOIEMENT.md` pour la commande.
+
+### Revenir en arrière
+
+Le retour arrière ne se joue pas dans git. L'hébergeur garde les déploiements
+précédents et sait en repromouvoir un en production en quelques secondes — c'est
+plus rapide et plus sûr qu'un commit de correction poussé dans l'urgence.
+
+Git sert à réparer ensuite, une fois le site déjà revenu à un état qui marche.
+
 La marche à suivre complète pour la mise en ligne est dans `DEPLOIEMENT.md`.
