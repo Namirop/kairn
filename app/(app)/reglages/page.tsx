@@ -6,6 +6,7 @@ import { MesDonnees } from "@/components/compte/mes-donnees";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
+import { estAdministrateur } from "@/lib/auth/admin";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireReglages } from "@/lib/db/user-settings";
@@ -36,6 +37,19 @@ export default async function PageReglages() {
   const reglages = await lireReglages(utilisateur.id);
   const heure = `${String(reglages.dailyReminderHour).padStart(2, "0")} h 00`;
 
+  /**
+   * L'exploitant n'a pas les mêmes besoins que la personne qui apprend.
+   *
+   * « Comment ça marche » explique le produit à qui le découvre ; l'export et la
+   * suppression de compte sont des droits qu'on exerce contre celui qui détient
+   * les données — or ici c'est la même personne, avec un accès direct à la base.
+   * Les lui montrer ne lui offre rien qu'il n'ait déjà, et met un bouton qui
+   * efface tout à un clic d'un écran qu'il ouvre pour vérifier son fuseau.
+   *
+   * Rien n'est retiré à personne d'autre : un compte ordinaire garde les trois.
+   */
+  const administrateur = estAdministrateur(utilisateur.email);
+
   return (
     <PileDePanneaux sol="ombre">
       <Panneau surface="papier" mesure="colonne">
@@ -65,20 +79,22 @@ export default async function PageReglages() {
         {/* L'accès à l'administration a quitté cette page : il est dans le rail,
             à la place qu'occupaient les réglages. Un raccourci qui existe à deux
             endroits finit par en avoir un des deux qui ment. */}
-        <div className="gap-pas-4 mt-pas-8 flex flex-col items-start">
-          <Link
-            href={ROUTES.commentCaMarche}
-            className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
-          >
-            Comment ça marche
-          </Link>
-        </div>
+        {administrateur ? null : (
+          <div className="gap-pas-4 mt-pas-8 flex flex-col items-start">
+            <Link
+              href={ROUTES.commentCaMarche}
+              className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
+            >
+              Comment ça marche
+            </Link>
+          </div>
+        )}
 
         <div className="mt-pas-8">
           <BoutonDeconnexion />
         </div>
 
-        <MesDonnees />
+        {administrateur ? null : <MesDonnees />}
       </Panneau>
     </PileDePanneaux>
   );

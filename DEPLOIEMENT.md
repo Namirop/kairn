@@ -45,6 +45,14 @@ Les deux pointent la même base et ne diffèrent que par l'hôte. L'application 
 lit que `DATABASE_URL` ; `DIRECT_URL` n'est lue que par `prisma.config.ts`, parce
 que le pooler en mode transaction casse les verrous consultatifs de Migrate.
 
+**Les deux se terminent par `?sslmode=verify-full&channel_binding=require`.** La
+console Neon propose `sslmode=require`, que le pilote traite aujourd'hui comme
+`verify-full` — en le disant à sa place, et en avertissant que la prochaine
+version majeure de `pg` lui rendra le sens plus faible de libpq. Écrire
+`verify-full` demande donc exactement ce qu'on obtient déjà, fait taire
+l'avertissement, et empêche le jour où une mise à jour de dépendance
+dégraderait la vérification du certificat sans que rien ne le signale.
+
 ### Authentification
 
 | Nom                    | Ce que c'est                                                             |
