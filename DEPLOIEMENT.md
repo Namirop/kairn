@@ -64,6 +64,17 @@ dégraderait la vérification du certificat sans que rien ne le signale.
 
 L'URI de redirection à déclarer côté Google est `{BETTER_AUTH_URL}/api/auth/callback/google`.
 
+**`BETTER_AUTH_URL` désigne un seul hôte, et le site ne doit répondre que sur
+celui-là.** Vercel attache volontiers `kairn.me` et `www.kairn.me` au même
+projet ; si les deux servent l'application, une connexion demandée depuis le
+mauvais est refusée en 403 avec `[Better Auth]: Invalid origin`, avant même
+qu'un email soit tenté. Le correctif est dans **Settings → Domains** : un
+domaine principal, l'autre en **redirection** vers lui.
+
+Ne pas régler ça en déclarant les deux origines comme fiables. Un cookie de
+session appartient à l'hôte qui l'a posé : on serait connecté sur l'un et
+déconnecté sur l'autre, sans que rien ne l'explique à l'écran.
+
 `BETTER_AUTH_SECRET` ne doit **pas** être celui du développement : il signe les
 cookies de session, et le partager entre deux environnements permet de forger une
 session de production depuis une base de développement. Le changer déconnecte
