@@ -26,6 +26,14 @@ Quatre choses ne s'obtiennent pas depuis le code et bloquent tout le reste :
 
 Toutes se posent dans le projet Vercel, sur l'environnement **Production**.
 
+**Aucune ne se recopie du `.env` de développement sans y réfléchir.** Chacune
+tombe dans l'un de quatre cas : une **adresse** qui désigne un endroit différent,
+un **secret** qu'il faut régénérer, un **interrupteur** dont la bonne valeur
+dépend du but, ou un **réglage** qui se recopie tel quel. Deux d'entre elles ne
+se posent pas du tout. `docs/environnements.md` explique le classement, la règle
+de chaque cas et le récapitulatif variable par variable ; les sections ci-dessous
+donnent ce qu'il faut renseigner.
+
 ### Base de données
 
 | Nom            | Ce que c'est                                                               |

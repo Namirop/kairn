@@ -105,6 +105,9 @@ d'autre porte que Google. Renseigne l'une des deux avant de vouloir entrer dans 
 
 Les valeurs réelles vivent dans `.env`, qui n'est pas versionné. `.env.example` sert de référence.
 
+Ce que chacune vaut en production — et pourquoi certaines se régénèrent au lieu de se recopier —
+est dans `docs/environnements.md`.
+
 ## Scripts
 
 | Commande                    | Effet                                                     |
