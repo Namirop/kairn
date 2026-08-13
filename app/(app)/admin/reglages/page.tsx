@@ -5,7 +5,7 @@ import { PageAdmin } from "@/components/administration/page-admin";
 import { exigerUnAdministrateur } from "@/lib/auth/garde-admin";
 import { lireLeJournal, lireLesReglagesPosés } from "@/lib/db/reglages";
 
-export const metadata: Metadata = { title: "Pilotage · Administration" };
+export const metadata: Metadata = { title: "Réglages · Administration" };
 
 /**
  * Le seul écran interne qui écrit quelque chose.
@@ -15,16 +15,17 @@ export const metadata: Metadata = { title: "Pilotage · Administration" };
  * Il est en fin de navigation pour cette raison : ce qu'on touche une fois par
  * mois ne se met pas devant ce qu'on regarde tous les jours.
  *
- * « Pilotage » et non « réglages » : le rail interne porte aussi les réglages du
- * produit, qui appartiennent à la personne et n'ont rien à voir avec ceux-ci.
- * Deux entrées du même nom dans la même navigation ne se distinguent pas.
+ * Ce sont les réglages **du modèle**. Ceux du compte — fuseau, heure de rappel,
+ * export, suppression — vivent dans le produit, et le rail interne y renvoie
+ * sous « Mon compte » : deux entrées appelées « Réglages » dans la même
+ * navigation ne se distingueraient pas.
  *
  * `ADMIN_EMAILS` n'y est pas et n'y sera pas : la liste qui décide qui ouvre cet
  * écran ne se modifie pas depuis cet écran.
  */
 export const dynamic = "force-dynamic";
 
-export default async function PagePilotage() {
+export default async function PageReglagesAdmin() {
   await exigerUnAdministrateur();
 
   const [reglages, journal] = await Promise.all([lireLesReglagesPosés(), lireLeJournal()]);
@@ -43,7 +44,7 @@ export default async function PagePilotage() {
 
   return (
     <PageAdmin
-      titre="Pilotage"
+      titre="Réglages"
       contexte="Les réglages du modèle. Ce qui est posé ici s'applique au prochain appel, sans redéploiement ; un champ vide laisse la variable d'environnement décider."
     >
       <BlocReglages poses={reglages} environnement={environnement} />

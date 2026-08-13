@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  CircleUser,
   Coins,
   Flag,
   Gauge,
@@ -8,7 +9,6 @@ import {
   Mountain,
   SlidersHorizontal,
   Users,
-  Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { ROUTES } from "@/lib/auth/routes";
@@ -74,12 +74,13 @@ export const DESTINATIONS_ADMIN: Destination[] = [
   { href: ROUTES.adminComptes, libelle: "Comptes", icone: Users },
   { href: ROUTES.adminContenu, libelle: "Contenu", icone: Layers },
   { href: ROUTES.adminSignalements, libelle: "Signalements", icone: Flag },
-  { href: ROUTES.adminPilotage, libelle: "Pilotage", icone: Wrench },
-  // Les réglages du produit, ceux qui appartiennent à la personne : ils ont
-  // quitté son rail de produit pour laisser la place à « Admin », donc ils
-  // doivent se retrouver ici. Le fuseau, l'heure de rappel, l'export et la
-  // suppression de compte n'ont pas d'autre porte.
-  { href: ROUTES.reglages, libelle: "Réglages", icone: SlidersHorizontal, exact: true },
+  { href: ROUTES.adminReglages, libelle: "Réglages", icone: SlidersHorizontal },
+  // Les réglages du compte, et non ceux du modèle. Ils ont quitté le rail du
+  // produit pour laisser la place à « Admin », donc ils doivent se retrouver
+  // ici : le fuseau, l'heure de rappel, l'export, la suppression de compte et
+  // la déconnexion n'ont pas d'autre porte. Sous un autre nom, faute de quoi
+  // deux entrées appelées « Réglages » se suivraient sans se distinguer.
+  { href: ROUTES.reglages, libelle: "Mon compte", icone: CircleUser, exact: true },
   { href: ROUTES.aujourdhui, libelle: "Quitter", icone: ArrowLeft, exact: true },
 ];
 

@@ -69,7 +69,7 @@ export async function poserLesReglagesAction(
   const voulus: ReglagesPosés = lu.data;
   const { changements } = await poserLesReglages(voulus, utilisateur.email);
 
-  revalidatePath(ROUTES.adminPilotage);
+  revalidatePath(ROUTES.adminReglages);
 
   if (changements === 0) return { message: "Rien n'a changé." };
 
