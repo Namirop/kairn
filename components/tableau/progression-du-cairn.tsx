@@ -9,24 +9,31 @@ import { avancementDuNiveau } from "@/lib/domain/progression";
  * ne félicite jamais quelqu'un pour une bonne réponse, on lui montre ce qu'il a
  * construit. Une récompense qu'on chuchote ne récompense pas.
  *
- * Deux mesures, deux traitements, parce qu'elles ne disent pas la même chose.
- * **La série** est un nombre qu'on regarde : elle passe au grand chiffre, en
- * display, et garde l'ember — c'est la seule occurrence du produit, et elle est
- * ici. **Le niveau** est un chemin : il lui fallait sa part parcourue, parce que
- * « Niveau 2 · 34 XP » ne situe rien. La barre est en gris et jamais en accent :
- * sur ce panneau, le lichen appartient au sommet du cairn.
+ * Elle a donc quitté la colonne du cairn pour prendre toute la largeur du
+ * panneau, en bande centrée sous les deux colonnes. Le panneau est le plus grand
+ * de l'application et son tiers bas était vide ; c'est là que ces deux mesures
+ * ont la place de compter, et le grand chiffre y devient lisible de loin.
  *
- * Rien n'est mis en carte. Trois cartes côte à côte auraient donné le même poids
- * à trois choses inégales, et posé des contenants sur le seul panneau du produit
- * qui n'en porte aucun.
+ * Deux mesures, deux traitements, parce qu'elles ne disent pas la même chose.
+ * **La série** est un nombre qu'on regarde : grand chiffre, en display, et
+ * l'ember — c'est la seule occurrence du produit, et elle est ici. **Le niveau**
+ * est un chemin : il lui fallait sa part parcourue, parce que « Niveau 2 · 34 XP »
+ * ne situe rien. La barre est en gris et jamais en accent : sur ce panneau, le
+ * lichen appartient au sommet du cairn.
+ *
+ * Rien n'est mis en carte. Deux cartes côte à côte auraient posé des contenants
+ * sur le seul panneau du produit qui n'en porte aucun.
  */
+
+const ETIQUETTE = "text-mono font-mono tracking-[0.14em] text-stone-400 uppercase";
+const CHIFFRE = "font-display text-nombre mt-pas-2 leading-none font-medium tabular-nums";
 
 function Serie({ streak }: { streak: number }) {
   if (streak === 0) {
     return (
       <div>
-        <p className="text-mono font-mono tracking-[0.14em] text-stone-400 uppercase">Série</p>
-        <p className="mt-pas-2 text-petit text-stone-300">
+        <p className={ETIQUETTE}>Série</p>
+        <p className="mt-pas-3 text-corps text-stone-300">
           Une session aujourd&apos;hui ouvre ta série.
         </p>
       </div>
@@ -35,12 +42,10 @@ function Serie({ streak }: { streak: number }) {
 
   return (
     <Tooltip>
-      <TooltipTrigger className="rounded-galet block text-left">
-        <p className="text-mono font-mono tracking-[0.14em] text-stone-400 uppercase">Série</p>
-        <p className="font-display text-h1-app text-ember-clair mt-pas-1 leading-none font-medium tabular-nums">
-          {streak}
-        </p>
-        <p className="text-mono text-ember-clair mt-pas-1 font-mono tracking-[0.14em] uppercase">
+      <TooltipTrigger className="rounded-galet block w-full text-center">
+        <p className={ETIQUETTE}>Série</p>
+        <p className={`${CHIFFRE} text-ember-clair`}>{streak}</p>
+        <p className="text-mono text-ember-clair mt-pas-2 font-mono tracking-[0.14em] uppercase">
           {streak === 1 ? "jour d'affilée" : "jours d'affilée"}
         </p>
       </TooltipTrigger>
@@ -56,21 +61,18 @@ function Niveau({ xp }: { xp: number }) {
 
   return (
     <Tooltip>
-      <TooltipTrigger className="rounded-galet block w-full text-left">
-        <p className="text-mono font-mono tracking-[0.14em] text-stone-400 uppercase">Niveau</p>
-        <p className="font-display text-h1-app mt-pas-1 leading-none font-medium tabular-nums">
-          {niveau}
-        </p>
+      <TooltipTrigger className="rounded-galet block w-full text-center">
+        <p className={ETIQUETTE}>Niveau</p>
+        <p className={CHIFFRE}>{niveau}</p>
 
         {/* La strate qui se remplit. Pleine largeur et à angles vifs plutôt
             qu'une gouttière arrondie : c'est une couche qui monte, pas une jauge
             de tableau de bord.
 
-            Le fond est en `stone-500` et non dans le gris des séparateurs : un
+            Le rail est en `stone-500` et non dans le gris des séparateurs : un
             rail invisible ne dit pas ce qui reste, et c'est justement ce qu'on
-            est venu montrer. Quatre pixels, sans quoi ni le rail ni le remplissage
-            ne se lisent au début d'un palier. */}
-        <span aria-hidden className="mt-pas-3 block h-1 w-full overflow-hidden bg-stone-500">
+            est venu montrer. */}
+        <span aria-hidden className="mt-pas-4 block h-1 w-full overflow-hidden bg-stone-500">
           <span
             className="block h-full bg-stone-50"
             style={{ width: `${Math.round(part * 100)}%` }}
@@ -90,13 +92,13 @@ function Niveau({ xp }: { xp: number }) {
 }
 
 /**
- * Les deux mesures restent côte à côte dès le mobile : empilées, elles rendaient
- * une colonne d'étiquettes qui n'en finissait plus sous le cairn. C'est la
- * gouttière qui se resserre à la place.
+ * La bande est centrée et bornée : étalée sur toute la largeur du panneau, les
+ * deux mesures se seraient retrouvées aux extrémités de l'écran, sans rapport
+ * l'une avec l'autre. Elles se lisent ensemble, donc elles tiennent ensemble.
  */
 export function ProgressionDuCairn({ streak, xp }: { streak: number; xp: number }) {
   return (
-    <div className="mt-pas-8 gap-pas-4 md:gap-pas-8 pt-pas-6 grid w-full grid-cols-2 items-start border-t border-stone-700">
+    <div className="pt-pas-8 gap-pas-8 md:gap-pas-16 mx-auto grid w-full max-w-2xl grid-cols-2 items-start border-t border-stone-700">
       <Serie streak={streak} />
       <Niveau xp={xp} />
     </div>

@@ -6,6 +6,7 @@ import { Strates } from "@/components/coquille/strates";
 import { ColonneCairn } from "@/components/tableau/colonne-cairn";
 import { CompteurDu } from "@/components/tableau/compteur-du";
 import { ListeDepots } from "@/components/tableau/liste-depots";
+import { ProgressionDuCairn } from "@/components/tableau/progression-du-cairn";
 import { SignalDeDette } from "@/components/tableau/signal-de-dette";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -57,31 +58,41 @@ export default async function PageAujourdhui() {
 
       <Strates de="papier" vers="roche" graine="aujourdhui-cairn" />
 
+      {/* Deux étages plutôt qu'une seule rangée : la promesse et le cairn en
+          haut, la progression en bande dessous. Le tiers bas de ce panneau était
+          vide, et c'est le plus grand de l'application — les deux mesures y
+          gagnent la largeur qu'elles n'avaient pas dans la colonne, et le cairn
+          redescend à hauteur du texte qu'il accompagne. */}
       <Panneau
         surface="roche"
         remplit
-        className="md:py-pas-16 gap-pas-8 md:gap-pas-12 grid items-center md:grid-cols-[1fr_auto]"
+        className="md:py-pas-16 gap-pas-12 md:gap-pas-16 flex flex-col justify-center"
       >
-        <div className="max-w-lg">
-          <h2 className="text-mono font-mono tracking-[0.14em] text-stone-300 uppercase">
-            Ton cairn
-          </h2>
-          {/* Le texte qui porte la promesse du produit monte au registre d'un
-              titre de section sur grand écran, et reste au corps sur mobile où
-              il tenait déjà la largeur. */}
-          <p className="mt-pas-4 md:mt-pas-6 text-corps md:text-h2-app leading-relaxed">
-            Une pierre par concept consolidé. Un concept l&apos;est quand il revient de loin et que
-            tu le retrouves trois fois de suite — pas quand tu l&apos;as lu.
-          </p>
-          <p className="mt-pas-4 text-petit text-stone-300">
-            La forme de chaque pierre est tirée du concept qu&apos;elle représente. Personne
-            n&apos;empile les mêmes.
-          </p>
+        <div className="gap-pas-8 md:gap-pas-12 grid items-center md:grid-cols-[1fr_auto]">
+          <div className="max-w-lg">
+            <h2 className="text-mono font-mono tracking-[0.14em] text-stone-300 uppercase">
+              Ton cairn
+            </h2>
+            {/* Le texte qui porte la promesse du produit monte au registre d'un
+                titre de section sur grand écran, et reste au corps sur mobile où
+                il tenait déjà la largeur. */}
+            <p className="mt-pas-4 md:mt-pas-6 text-corps md:text-h2-app leading-relaxed">
+              Une pierre par concept consolidé. Un concept l&apos;est quand il revient de loin et
+              que tu le retrouves trois fois de suite — pas quand tu l&apos;as lu.
+            </p>
+            <p className="mt-pas-4 text-petit text-stone-300">
+              La forme de chaque pierre est tirée du concept qu&apos;elle représente. Personne
+              n&apos;empile les mêmes.
+            </p>
+          </div>
+
+          <ColonneCairn
+            consolides={tableau.stats?.atomsConsolidated ?? 0}
+            graines={tableau.grainesDuCairn}
+          />
         </div>
 
-        <ColonneCairn
-          consolides={tableau.stats?.atomsConsolidated ?? 0}
-          graines={tableau.grainesDuCairn}
+        <ProgressionDuCairn
           streak={tableau.stats?.currentStreak ?? 0}
           xp={tableau.stats?.xp ?? 0}
         />

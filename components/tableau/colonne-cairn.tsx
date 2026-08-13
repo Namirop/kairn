@@ -1,6 +1,5 @@
 import { Cairn } from "@/components/cairn/cairn";
 import { PierreAVenir } from "@/components/cairn/pierre-a-venir";
-import { ProgressionDuCairn } from "@/components/tableau/progression-du-cairn";
 
 /**
  * L'élément signature et ce qu'il compte.
@@ -9,23 +8,14 @@ import { ProgressionDuCairn } from "@/components/tableau/progression-du-cairn";
  * pierres s'y inversent en gris clairs, et le sommet garde son lichen : c'est
  * la constante de l'identité, et la seule occurrence d'accent sur ce panneau.
  *
- * Sous l'empilement, la série et le niveau — voir `ProgressionDuCairn`. Ils
- * étaient trois lignes de la même taille tassées dans un coin ; c'est la seule
- * récompense du produit, elle ne se chuchote pas.
+ * La colonne ne porte plus que l'empilement et son décompte. La série et le
+ * niveau sont descendus en bande sous les deux colonnes — voir
+ * `ProgressionDuCairn` : ils y ont la largeur qui leur manquait, et le cairn
+ * retrouve la hauteur du texte qu'il accompagne.
  */
-export function ColonneCairn({
-  consolides,
-  graines,
-  streak,
-  xp,
-}: {
-  consolides: number;
-  graines: string[];
-  streak: number;
-  xp: number;
-}) {
+export function ColonneCairn({ consolides, graines }: { consolides: number; graines: string[] }) {
   return (
-    <aside className="flex w-full flex-col items-center md:max-w-[26rem]">
+    <aside className="flex w-full flex-col items-center md:max-w-80">
       {/* Le cairn est l'élément signature, et il portait la taille d'une
           vignette au milieu du plus grand panneau de l'application. Il gagne un
           tiers de largeur sur grand écran — c'est la largeur qui le
@@ -54,8 +44,6 @@ export function ColonneCairn({
           ? "Le premier concept consolidé posera la première pierre."
           : `${consolides} ${consolides === 1 ? "concept consolidé" : "concepts consolidés"}`}
       </p>
-
-      <ProgressionDuCairn streak={streak} xp={xp} />
     </aside>
   );
 }
