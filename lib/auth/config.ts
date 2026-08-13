@@ -26,10 +26,32 @@ function socialProviders() {
 
 export const isGoogleEnabled = Object.keys(socialProviders()).length > 0;
 
+/**
+ * Les origines admises en plus de `baseURL` : celle du déploiement courant.
+ *
+ * Chaque déploiement Vercel porte son propre domaine, et le client vise
+ * l'origine de la page. Sans cette ligne, une preview refuse toute connexion en
+ * 403 — donc on ne peut pas éprouver une branche avant de la fusionner, ce qui
+ * est précisément le moment où l'on voudrait le faire.
+ *
+ * Ce n'est pas la même chose que d'ajouter `www` à côté de l'apex, et il ne faut
+ * surtout pas en conclure qu'on peut. Un cookie de session appartient à l'hôte
+ * qui l'a posé : deux hôtes servant le **même** environnement donneraient deux
+ * sessions distinctes, et on serait connecté sur l'un en étant déconnecté sur
+ * l'autre. Une preview, elle, est un environnement séparé — sa session n'a
+ * aucune raison d'être celle de la production.
+ */
+function trustedOrigins(): string[] {
+  const deploiement = process.env.VERCEL_URL;
+
+  return deploiement ? [`https://${deploiement}`] : [];
+}
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
+  trustedOrigins: trustedOrigins(),
   // Plus de mot de passe, nulle part. Kairn écrit tous les jours : l'adresse
   // doit être valide et vérifiée dès le premier jour, et un lien par email le
   // garantit par construction là où un mot de passe demande une étape de

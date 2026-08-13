@@ -89,7 +89,7 @@ d'autre porte que Google. Renseigne l'une des deux avant de vouloir entrer dans 
 | `GOOGLE_CLIENT_ID`             | non    | Sans lui et son secret, le fournisseur Google n'est simplement pas proposé. |
 | `GOOGLE_CLIENT_SECRET`         | non    | Voir ci-dessus.                                                             |
 | `ANTHROPIC_API_KEY`            | non    | Inutile tant que `MOCK_AI=true`.                                            |
-| `RESEND_API_KEY`               | non    | Sans elle, les emails sont journalisés au lieu d'être envoyés.              |
+| `RESEND_API_KEY`               | non    | Sans elle, les emails sont journalisés en dev — et l'envoi lève en prod.    |
 | `EMAIL_FROM`                   | non    | Expéditeur des emails transactionnels.                                      |
 | `CRON_SECRET`                  | oui    | Jeton `Authorization: Bearer` des routes cron.                              |
 | `MOCK_AI`                      | oui    | `true` sert des fixtures locales, sans aucune requête réseau.               |

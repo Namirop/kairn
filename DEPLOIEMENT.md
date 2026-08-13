@@ -85,6 +85,12 @@ Ne pas régler ça en déclarant les deux origines comme fiables. Un cookie de
 session appartient à l'hôte qui l'a posé : on serait connecté sur l'un et
 déconnecté sur l'autre, sans que rien ne l'explique à l'écran.
 
+L'origine du **déploiement courant** (`VERCEL_URL`) est admise, elle, et c'est
+un cas différent : elle sert à pouvoir se connecter sur une preview pour
+éprouver une branche avant de la fusionner. Une preview est un environnement
+séparé — sa session n'a aucune raison d'être celle de la production, donc rien
+ne se scinde.
+
 `BETTER_AUTH_SECRET` ne doit **pas** être celui du développement : il signe les
 cookies de session, et le partager entre deux environnements permet de forger une
 session de production depuis une base de développement. Le changer déconnecte
@@ -92,12 +98,12 @@ tout le monde — d'où l'intérêt de le poser une bonne fois avant l'ouverture
 
 ### Services externes
 
-| Nom                 | Ce que c'est                                                   |
-| ------------------- | -------------------------------------------------------------- |
-| `ANTHROPIC_API_KEY` | Clé de production, distincte de celle de développement.        |
-| `RESEND_API_KEY`    | Sans elle, les emails sont journalisés au lieu d'être envoyés. |
-| `EMAIL_FROM`        | Expéditeur, sur le domaine vérifié chez Resend.                |
-| `CRON_SECRET`       | Jeton des routes cron. Voir la section « Les crons ».          |
+| Nom                 | Ce que c'est                                                 |
+| ------------------- | ------------------------------------------------------------ |
+| `ANTHROPIC_API_KEY` | Clé de production, distincte de celle de développement.      |
+| `RESEND_API_KEY`    | **Obligatoire en ligne** : sans elle, tout envoi lève.       |
+| `EMAIL_FROM`        | Expéditeur, sur le domaine vérifié chez Resend. Obligatoire. |
+| `CRON_SECRET`       | Jeton des routes cron. Voir la section « Les crons ».        |
 
 ### Garde-fous du modèle
 
