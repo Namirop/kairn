@@ -200,12 +200,23 @@ Le refus global n'est pas un échec de job. `runJob` remet le travail en file sa
 tentative : la journée est pleine, le même appel réussira demain, et le dépôt continue d'annoncer
 un travail en cours au lieu d'annoncer une panne.
 
-**Dimensionner ces deux plafonds.** Un compte qui sature ses quotas d'ingestion consomme autour de
-vingt-cinq appels par jour. Une part par compte protège d'un abuseur, pas du succès : à quatre
-comptes actifs, la somme des parts dépasse déjà un plafond global posé à cent cinquante. Le réglage
-à terme n'est donc pas un nombre d'appels mais un plafond de **dépense**, posé au-dessus de la somme
-des parts attendues et indexé sur le nombre de comptes actifs. Tant que ce n'est pas fait, `AI_DAILY_CALL_CAP`
-doit rester nettement supérieur à `AI_DAILY_CALL_CAP_PAR_COMPTE` multiplié par le nombre de comptes actifs.
+**Dimensionner ces deux plafonds.** Les deux se comptent en appels par jour UTC, mais ce n'est pas
+en appels qu'ils se règlent — c'est en dépense, et la dépense se mesure au registre `AiCall` plutôt
+qu'elle ne s'estime. Sur les appels enregistrés : une extraction coûte environ 0,011 $, une écriture
+de questions groupée environ 0,014 $, une lecture de capture environ 0,015 $. Un appel du chemin de
+production revient donc autour de **0,013 $**.
+
+Le plafond **par compte** ne borne pas la dépense d'un compte — c'est le quota mensuel de concepts
+qui le fait. Il borne sa **vitesse** : un compte qui sature son mois consomme une vingtaine d'appels
+en tout, soit un quart de dollar, et la part journalière décide seulement s'il peut le faire en une
+heure ou en trois jours.
+
+Le plafond **global** est un coupe-circuit, pas un rationnement. Il ne devrait jamais être atteint
+par un usage normal : quand il l'est, tout s'arrête pour tout le monde jusqu'au lendemain UTC — y
+compris l'essai sans compte de la page publique, si bien que la seule page qui convertit cesse de
+convertir sans que rien ne le signale. Le poser revient donc à choisir ce qu'on accepte de perdre sur
+une journée qui tourne mal, puis à diviser par le coût d'un appel : cinq dollars par jour font environ
+quatre cents appels.
 
 `npm run verify:ai` pose un piège sur `fetch` et vérifie ces garde-fous à l'exécution plutôt que sur
 parole.
