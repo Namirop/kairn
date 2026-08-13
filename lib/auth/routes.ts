@@ -20,7 +20,15 @@ export const ROUTES = {
   adminComptes: "/admin/comptes",
   adminContenu: "/admin/contenu",
   adminSignalements: "/admin/signalements",
-  adminReglages: "/admin/reglages",
+  /**
+   * Les réglages du modèle, et non ceux de l'utilisateur.
+   *
+   * « Pilotage » et pas « réglages » parce que le rail interne porte les deux :
+   * ceux du produit, qui appartiennent à la personne, et ceux-ci, qui coupent
+   * les appels et changent les plafonds. Deux entrées du même nom dans la même
+   * navigation ne se distinguent pas.
+   */
+  adminPilotage: "/admin/pilotage",
   /** L'ancienne adresse de l'écran interne, gardée le temps des favoris. */
   signalements: "/signalements",
 } as const;

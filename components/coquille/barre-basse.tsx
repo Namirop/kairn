@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
  * où il ne l'est pas dans le produit : cet écran a un seul lecteur, qui connaît
  * ses sections.
  */
-export function BarreBasse() {
+export function BarreBasse({ administrateur }: { administrateur: boolean }) {
   const chemin = usePathname();
   const interne = dansLAdministration(chemin);
 
@@ -30,7 +30,7 @@ export function BarreBasse() {
       className="bg-surface-ombre p-pas-2 fixed inset-x-0 bottom-0 z-30 pb-[calc(env(safe-area-inset-bottom)+var(--pas-2))] md:hidden"
     >
       <ul className={cn("gap-pas-1 flex", interne && "overflow-x-auto")}>
-        {destinationsPour(chemin).map((destination) => {
+        {destinationsPour(chemin, administrateur).map((destination) => {
           const { href, libelle, icone: Icone } = destination;
           const actif = estActive(destination, chemin);
 

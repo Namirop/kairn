@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
  * cairn ; un état de navigation se lit très bien sans lui, et chaque
  * occurrence de lichen en moins rend les autres plus fortes.
  */
-export function Rail() {
+export function Rail({ administrateur }: { administrateur: boolean }) {
   const chemin = usePathname();
 
   return (
@@ -25,7 +25,7 @@ export function Rail() {
       aria-label="Navigation principale"
       className="pt-pas-16 px-pas-2 gap-pas-1 bg-surface-ombre fixed inset-y-0 left-0 z-30 hidden w-28 flex-col items-center md:flex"
     >
-      {destinationsPour(chemin).map((destination) => {
+      {destinationsPour(chemin, administrateur).map((destination) => {
         const { href, libelle, icone: Icone } = destination;
         const actif = estActive(destination, chemin);
 

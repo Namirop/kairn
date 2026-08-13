@@ -5,6 +5,7 @@ import { EnTete } from "@/components/coquille/en-tete";
 import { Rail } from "@/components/coquille/rail";
 import { InviteInstallation } from "@/components/pwa/invite-installation";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { estAdministrateur } from "@/lib/auth/admin";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
@@ -23,10 +24,16 @@ export default async function CoquilleApplication({ children }: { children: Reac
 
   const fuseau = await lireFuseauUtilisateur(utilisateur.id);
 
+  // La navigation d'un administrateur n'est pas celle des autres : « Admin »
+  // prend la place de « Réglages », qui repasse dans le rail interne. C'est un
+  // raccourci et rien d'autre — l'accès, lui, est gardé page par page, côté
+  // serveur, sur l'adresse vérifiée de la session.
+  const administrateur = estAdministrateur(utilisateur.email);
+
   return (
     <TooltipProvider delayDuration={200}>
       <div className="bg-surface-papier min-h-dvh">
-        <Rail />
+        <Rail administrateur={administrateur} />
         <div className="md:pl-28">
           <EnTete utilisateur={utilisateur} />
           {/* Aucune mesure ici, et aucun rembourrage : chaque écran est une
@@ -36,7 +43,7 @@ export default async function CoquilleApplication({ children }: { children: Reac
               le dernier panneau — la bande d'une autre couleur, encore elle. */}
           <main>{children}</main>
         </div>
-        <BarreBasse />
+        <BarreBasse administrateur={administrateur} />
         <InviteInstallation />
         <AccordFuseau enregistre={fuseau} />
       </div>

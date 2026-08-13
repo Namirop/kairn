@@ -8,6 +8,7 @@ import {
   Mountain,
   SlidersHorizontal,
   Users,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { ROUTES } from "@/lib/auth/routes";
@@ -38,6 +39,22 @@ export const DESTINATIONS: Destination[] = [
 ];
 
 /**
+ * Le même rail, vu par un administrateur.
+ *
+ * « Admin » prend la place de « Réglages » plutôt que de s'ajouter en
+ * quatrième : l'administrateur est la seule personne qui ait deux outils à
+ * atteindre, et lui donner un rail plus long qu'aux autres ferait payer sa
+ * particularité à la mise en page de tout le monde. Ses réglages personnels ne
+ * disparaissent pas — ils passent dans le rail interne, où il est de toute façon
+ * en train de travailler.
+ */
+export const DESTINATIONS_PRODUIT_ADMIN: Destination[] = [
+  { href: ROUTES.aujourdhui, libelle: "Aujourd'hui", icone: Mountain },
+  { href: ROUTES.depots, libelle: "Dépôts", icone: Inbox },
+  { href: ROUTES.admin, libelle: "Admin", icone: Gauge },
+];
+
+/**
  * La navigation bascule entièrement en mode administration.
  *
  * L'écran interne n'est pas une page de l'application, c'est un autre outil qui
@@ -57,7 +74,12 @@ export const DESTINATIONS_ADMIN: Destination[] = [
   { href: ROUTES.adminComptes, libelle: "Comptes", icone: Users },
   { href: ROUTES.adminContenu, libelle: "Contenu", icone: Layers },
   { href: ROUTES.adminSignalements, libelle: "Signalements", icone: Flag },
-  { href: ROUTES.adminReglages, libelle: "Réglages", icone: SlidersHorizontal },
+  { href: ROUTES.adminPilotage, libelle: "Pilotage", icone: Wrench },
+  // Les réglages du produit, ceux qui appartiennent à la personne : ils ont
+  // quitté son rail de produit pour laisser la place à « Admin », donc ils
+  // doivent se retrouver ici. Le fuseau, l'heure de rappel, l'export et la
+  // suppression de compte n'ont pas d'autre porte.
+  { href: ROUTES.reglages, libelle: "Réglages", icone: SlidersHorizontal, exact: true },
   { href: ROUTES.aujourdhui, libelle: "Quitter", icone: ArrowLeft, exact: true },
 ];
 
@@ -66,9 +88,18 @@ export function dansLAdministration(chemin: string): boolean {
   return chemin === ROUTES.admin || chemin.startsWith(`${ROUTES.admin}/`);
 }
 
-/** La liste que porte la navigation à cet endroit du produit. */
-export function destinationsPour(chemin: string): Destination[] {
-  return dansLAdministration(chemin) ? DESTINATIONS_ADMIN : DESTINATIONS;
+/**
+ * La liste que porte la navigation à cet endroit, pour ce lecteur.
+ *
+ * Deux questions, dans cet ordre : est-on dans l'outil interne, et a-t-on le
+ * droit d'y entrer. La seconde ne décide que d'une entrée du rail ; c'est la
+ * garde des pages qui décide de l'accès, et elle est côté serveur. Un rail est
+ * un raccourci, jamais une autorisation.
+ */
+export function destinationsPour(chemin: string, administrateur = false): Destination[] {
+  if (dansLAdministration(chemin)) return DESTINATIONS_ADMIN;
+
+  return administrateur ? DESTINATIONS_PRODUIT_ADMIN : DESTINATIONS;
 }
 
 /** Vrai si ce chemin est celui que la destination désigne. */

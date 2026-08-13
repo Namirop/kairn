@@ -5,22 +5,26 @@ import { PageAdmin } from "@/components/administration/page-admin";
 import { exigerUnAdministrateur } from "@/lib/auth/garde-admin";
 import { lireLeJournal, lireLesReglagesPosés } from "@/lib/db/reglages";
 
-export const metadata: Metadata = { title: "Réglages · Administration" };
+export const metadata: Metadata = { title: "Pilotage · Administration" };
 
 /**
  * Le seul écran interne qui écrit quelque chose.
  *
  * Les cinq autres se lisent ; celui-ci se manœuvre — c'est ici qu'on coupe les
  * appels pendant un incident, qu'on baisse un plafond, qu'on change de modèle.
- * Il est en dernier dans la navigation pour cette raison : ce qu'on touche une
- * fois par mois ne se met pas devant ce qu'on regarde tous les jours.
+ * Il est en fin de navigation pour cette raison : ce qu'on touche une fois par
+ * mois ne se met pas devant ce qu'on regarde tous les jours.
+ *
+ * « Pilotage » et non « réglages » : le rail interne porte aussi les réglages du
+ * produit, qui appartiennent à la personne et n'ont rien à voir avec ceux-ci.
+ * Deux entrées du même nom dans la même navigation ne se distinguent pas.
  *
  * `ADMIN_EMAILS` n'y est pas et n'y sera pas : la liste qui décide qui ouvre cet
  * écran ne se modifie pas depuis cet écran.
  */
 export const dynamic = "force-dynamic";
 
-export default async function PageReglagesAdmin() {
+export default async function PagePilotage() {
   await exigerUnAdministrateur();
 
   const [reglages, journal] = await Promise.all([lireLesReglagesPosés(), lireLeJournal()]);
@@ -39,8 +43,8 @@ export default async function PageReglagesAdmin() {
 
   return (
     <PageAdmin
-      titre="Réglages"
-      contexte="Ce qui est posé ici s'applique au prochain appel, sans redéploiement. Un champ vide laisse la variable d'environnement décider."
+      titre="Pilotage"
+      contexte="Les réglages du modèle. Ce qui est posé ici s'applique au prochain appel, sans redéploiement ; un champ vide laisse la variable d'environnement décider."
     >
       <BlocReglages poses={reglages} environnement={environnement} />
       <BlocJournal lignes={journal} />
