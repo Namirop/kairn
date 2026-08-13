@@ -24,20 +24,86 @@ const configSchema = z.object({
 
 export type AiConfig = z.infer<typeof configSchema>;
 
+/** La variable derrière chaque champ. Sans elle, l'erreur ne dit pas quoi corriger. */
+const VARIABLE: Record<string, string> = {
+  enabled: "AI_ENABLED",
+  mock: "MOCK_AI",
+  dailyCallCap: "AI_DAILY_CALL_CAP",
+  userDailyCallCap: "AI_DAILY_CALL_CAP_PAR_COMPTE",
+  model: "AI_MODEL",
+  maxTokens: "AI_MAX_TOKENS",
+};
+
+/**
+ * Une valeur d'environnement débarrassée de ce qu'une recopie y ajoute.
+ *
+ * Les espaces de bord et une paire de guillemets, rien de plus. `dotenv` fait
+ * déjà ce nettoyage sur un fichier ; l'interface d'un hébergeur ne fait rien du
+ * tout, et c'est là qu'une valeur arrive avec un guillemet ou une espace en
+ * trop. Une variable vide vaut absente : sur ces formulaires, effacer un champ
+ * laisse une chaîne vide et non rien.
+ *
+ * On ne va pas plus loin. Retirer un `# …` de fin de ligne réparerait le collage
+ * malheureux le plus courant, mais un `#` peut appartenir à une valeur —
+ * deviner l'intention est le début d'une configuration qui ment.
+ */
+function propre(valeur: string | undefined): string | undefined {
+  const nette = valeur
+    ?.trim()
+    .replace(/^(["'])([\s\S]*)\1$/, "$2")
+    .trim();
+
+  return nette === "" ? undefined : nette;
+}
+
+/** Assez pour reconnaître la valeur, pas assez pour noyer le journal. */
+function extrait(valeur: string): string {
+  return valeur.length > 60 ? `${valeur.slice(0, 60)}…` : valeur;
+}
+
+/**
+ * Ce qui a été refusé, et ce qui avait été reçu.
+ *
+ * Le message dit la variable et la valeur, parce que « expected one of
+ * "true"|"false" » sans la valeur laisse chercher : on lit la bonne valeur dans
+ * l'interface de l'hébergeur, on la croit juste, et on ne voit pas l'espace ou
+ * le commentaire qui la suit. La montrer transforme une soirée en dix secondes.
+ *
+ * `ANTHROPIC_API_KEY` n'est pas dans la table et n'a donc jamais de valeur
+ * montrée — un message d'erreur part dans des journaux qu'on partage.
+ */
+function diagnostic(erreur: z.ZodError, brut: Record<string, string | undefined>): string {
+  return erreur.issues
+    .map((issue) => {
+      const champ = String(issue.path[0] ?? "");
+      const nom = VARIABLE[champ];
+
+      if (!nom) return `${champ} : ${issue.message}`;
+
+      const recu = brut[champ];
+
+      return `${nom} : ${issue.message} — reçu ${recu === undefined ? "rien" : `« ${extrait(recu)} »`}`;
+    })
+    .join(" ; ");
+}
+
 export function readAiConfig(): AiConfig {
+  const brut: Record<string, string | undefined> = {
+    enabled: propre(process.env.AI_ENABLED),
+    mock: propre(process.env.MOCK_AI),
+    dailyCallCap: propre(process.env.AI_DAILY_CALL_CAP),
+    userDailyCallCap: propre(process.env.AI_DAILY_CALL_CAP_PAR_COMPTE),
+    model: propre(process.env.AI_MODEL),
+    maxTokens: propre(process.env.AI_MAX_TOKENS),
+  };
+
   const parsed = configSchema.safeParse({
-    enabled: process.env.AI_ENABLED,
-    mock: process.env.MOCK_AI,
-    dailyCallCap: process.env.AI_DAILY_CALL_CAP,
-    userDailyCallCap: process.env.AI_DAILY_CALL_CAP_PAR_COMPTE,
-    model: process.env.AI_MODEL,
-    maxTokens: process.env.AI_MAX_TOKENS,
-    apiKey: process.env.ANTHROPIC_API_KEY || undefined,
+    ...brut,
+    apiKey: propre(process.env.ANTHROPIC_API_KEY),
   });
 
   if (!parsed.success) {
-    const issues = parsed.error.issues.map((issue) => `${issue.path.join(".")} : ${issue.message}`);
-    throw new AIConfigError(`Configuration IA invalide — ${issues.join(" ; ")}`);
+    throw new AIConfigError(`Configuration IA invalide — ${diagnostic(parsed.error, brut)}`);
   }
 
   return parsed.data;
