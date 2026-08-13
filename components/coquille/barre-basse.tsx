@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { dansLAdministration, destinationsPour, estActive } from "./destinations";
+import { destinationsPour, estActive, railInterne } from "./destinations";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
  */
 export function BarreBasse({ administrateur }: { administrateur: boolean }) {
   const chemin = usePathname();
-  const interne = dansLAdministration(chemin);
+  const interne = railInterne(chemin, administrateur);
 
   return (
     <nav

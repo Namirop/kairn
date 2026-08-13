@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import { sommets } from "./cairn-collision";
 import {
   avancer,
-  CADRE_LARGE,
   initialiser,
   renverser,
+  SANS_BORDS,
   toutEstPose,
   type Cadre,
   type Corps,
@@ -105,19 +105,46 @@ describe("avancer", () => {
     }
   });
 
-  it("laisse les pierres sortir du dessin quand le cadre est large", () => {
+  it("laisse les pierres sortir du dessin quand il n'y a pas de bords", () => {
     const final = simuler(
       renverser(initialiser(PIERRES), 0, { vx: 600, vy: -120 }),
       PIERRES,
       900,
-      CADRE_LARGE,
+      SANS_BORDS,
     );
 
     expect(final.some((solide) => solide.x > LARGEUR_VUE)).toBe(true);
-    for (const solide of final) {
-      expect(solide.x).toBeGreaterThan(CADRE_LARGE.gauche);
-      expect(solide.x).toBeLessThan(CADRE_LARGE.droite);
-    }
+
+    // Sans mur pour les arrêter, le frottement au sol reste seul à le faire :
+    // c'est lui qui garantit que la simulation se termine, et il doit suffire.
+    expect(toutEstPose(final)).toBe(true);
+  });
+
+  /**
+   * Le défaut qu'on corrige, des deux côtés à la fois.
+   *
+   * Le cadre valait `{ gauche: -2 × largeur, droite: 3 × largeur }` : symétrique
+   * autour du dessin, mais le dessin n'est pas au milieu de la fenêtre. Il
+   * occupe la colonne droite du hero, si bien que le bord droit tombait au-delà
+   * de la fenêtre — les pierres sortaient de l'écran sans jamais l'atteindre —
+   * pendant que le gauche tombait en plein dans la colonne de texte, où on les
+   * voyait s'écraser contre rien.
+   *
+   * Les bornes de ce test sont exactement les deux anciens murs. Un jet franc
+   * les dépasse largement — on mesure 306 unités à gauche et 417 à droite —,
+   * donc les rétablir, d'un côté comme de l'autre, fait échouer ce cas.
+   *
+   * On ne mesure pas une portée égale entre les deux sens : les pierres n'ont
+   * ni la même forme ni la même place, et un empilement n'est pas symétrique.
+   */
+  it("ne retient les pierres à aucune distance fixe, ni à gauche ni à droite", () => {
+    const lance = (vx: number) =>
+      simuler(renverser(initialiser(PIERRES), 0, { vx, vy: -120 }), PIERRES, 900, SANS_BORDS).map(
+        (solide) => solide.x,
+      );
+
+    expect(Math.min(...lance(-600))).toBeLessThan(-2 * LARGEUR_VUE);
+    expect(Math.max(...lance(600))).toBeGreaterThan(3 * LARGEUR_VUE);
   });
 
   /**

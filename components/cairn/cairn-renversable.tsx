@@ -6,7 +6,7 @@ import { Cairn } from "@/components/cairn/cairn";
 import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
 import { SolDuCairn } from "@/components/cairn/sol-du-cairn";
 import { useChuteDesPierres } from "@/components/cairn/use-chute-des-pierres";
-import { CADRE_LARGE } from "@/lib/domain/cairn-physique";
+import { SANS_BORDS } from "@/lib/domain/cairn-physique";
 import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 import { cn } from "@/lib/utils";
 
@@ -17,11 +17,11 @@ import { cn } from "@/lib/utils";
  * concept que l'utilisateur a consolidé, et le faire tomber d'un mouvement de
  * souris serait un mauvais message. Ici, l'empilement est décoratif.
  *
- * Il n'a pas de boîte. Le dessin déborde de son SVG — `overflow-visible` — et
- * les pierres tombent dans un cadre plusieurs fois plus large que lui : selon la
- * force du geste, elles glissent sur le titre, sortent par le côté, ou
- * s'écroulent sur place. Un empilement qui rebondit sur des murs invisibles à
- * dix pixels de sa base ne se coupe pas, il se secoue.
+ * Il n'a pas de boîte, et pas de bords non plus. Le dessin déborde de son SVG —
+ * `overflow-visible` — et rien n'arrête les pierres latéralement : selon la
+ * force du geste, elles glissent sur le titre, sortent de la fenêtre par un côté
+ * comme par l'autre, ou s'écroulent sur place. Un empilement qui rebondit sur
+ * des murs invisibles ne se coupe pas, il se secoue.
  *
  * Quand l'utilisateur refuse le mouvement, le composant rend le cairn ordinaire
  * et ne pose aucun gestionnaire : l'effet disparaît entièrement plutôt qu'à
@@ -38,7 +38,7 @@ export function CairnRenversable({
 }) {
   const immobile = useReducedMotion() ?? false;
   const { pierres, hauteur, ySol } = useMemo(() => empiler(nombre, graines), [nombre, graines]);
-  const chute = useChuteDesPierres(pierres, !immobile, CADRE_LARGE);
+  const chute = useChuteDesPierres(pierres, !immobile, SANS_BORDS);
 
   if (immobile) return <Cairn nombre={nombre} graines={graines} className={className} />;
 

@@ -9,6 +9,7 @@ import {
   Mountain,
   SlidersHorizontal,
   Users,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { ROUTES } from "@/lib/auth/routes";
@@ -74,19 +75,33 @@ export const DESTINATIONS_ADMIN: Destination[] = [
   { href: ROUTES.adminComptes, libelle: "Comptes", icone: Users },
   { href: ROUTES.adminContenu, libelle: "Contenu", icone: Layers },
   { href: ROUTES.adminSignalements, libelle: "Signalements", icone: Flag },
-  { href: ROUTES.adminReglages, libelle: "Réglages", icone: SlidersHorizontal },
+  { href: ROUTES.adminPilotage, libelle: "Pilotage", icone: Wrench },
   // Les réglages du compte, et non ceux du modèle. Ils ont quitté le rail du
   // produit pour laisser la place à « Admin », donc ils doivent se retrouver
   // ici : le fuseau, l'heure de rappel, l'export, la suppression de compte et
-  // la déconnexion n'ont pas d'autre porte. Sous un autre nom, faute de quoi
-  // deux entrées appelées « Réglages » se suivraient sans se distinguer.
+  // la déconnexion n'ont pas d'autre porte.
   { href: ROUTES.reglages, libelle: "Mon compte", icone: CircleUser, exact: true },
   { href: ROUTES.aujourdhui, libelle: "Quitter", icone: ArrowLeft, exact: true },
 ];
 
-/** Vrai quand on est dans l'outil interne plutôt que dans le produit. */
-export function dansLAdministration(chemin: string): boolean {
-  return chemin === ROUTES.admin || chemin.startsWith(`${ROUTES.admin}/`);
+/**
+ * Vrai quand la navigation doit être celle de l'outil interne.
+ *
+ * Ce n'est pas tout à fait « l'adresse commence par `/admin` », et la nuance est
+ * la porte de sortie de « Mon compte ». Les réglages du compte vivent dans le
+ * produit, mais un administrateur n'y a **plus aucune entrée** depuis son rail
+ * de produit — « Admin » a pris la place. Basculer sur le rail du produit en y
+ * arrivant le renvoyait donc dans une page dont il ne pouvait plus revenir sans
+ * repasser par l'administration, et le rail changeait sous ses yeux au milieu
+ * d'un aller-retour qu'il n'avait pas demandé.
+ *
+ * Un compte ordinaire n'est pas concerné : son rail porte ses réglages, et cette
+ * page lui appartient.
+ */
+export function railInterne(chemin: string, administrateur = false): boolean {
+  if (chemin === ROUTES.admin || chemin.startsWith(`${ROUTES.admin}/`)) return true;
+
+  return administrateur && chemin === ROUTES.reglages;
 }
 
 /**
@@ -98,7 +113,7 @@ export function dansLAdministration(chemin: string): boolean {
  * un raccourci, jamais une autorisation.
  */
 export function destinationsPour(chemin: string, administrateur = false): Destination[] {
-  if (dansLAdministration(chemin)) return DESTINATIONS_ADMIN;
+  if (railInterne(chemin, administrateur)) return DESTINATIONS_ADMIN;
 
   return administrateur ? DESTINATIONS_PRODUIT_ADMIN : DESTINATIONS;
 }

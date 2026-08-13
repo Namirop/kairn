@@ -20,7 +20,24 @@ import { LARGEUR_VUE, type Pierre } from "./cairn-stack";
 export type { Cadre } from "./cairn-collision";
 
 export const CADRE_SERRE: Cadre = { gauche: 0, droite: LARGEUR_VUE };
-export const CADRE_LARGE: Cadre = { gauche: -2 * LARGEUR_VUE, droite: 3 * LARGEUR_VUE };
+
+/**
+ * Le cairn de la page publique n'a pas de bords du tout.
+ *
+ * Il en avait, posés à deux largeurs de dessin de chaque côté, et c'était censé
+ * les mettre hors de vue. Ça ne pouvait pas marcher : ces deux largeurs sont
+ * comptées en unités de dessin, autour d'un dessin qui n'est pas au milieu de la
+ * fenêtre. Le cairn occupe la colonne droite du hero, donc le bord droit tombait
+ * au-delà de la fenêtre — les pierres sortaient par là sans jamais le toucher —
+ * pendant que le gauche, lui, tombait en plein écran, au travers de la colonne
+ * de texte. On voyait les pierres s'écraser contre rien.
+ *
+ * Aucune distance finie ne répare ça : elle serait toujours dépassée par une
+ * fenêtre plus large ou une mise en page différente. Ce qui arrête une pierre,
+ * c'est le frottement au sol, et c'est lui qui garantit la fin de la simulation
+ * — les bords ne servaient à rien d'autre qu'à créer le défaut.
+ */
+export const SANS_BORDS: Cadre = { gauche: -Infinity, droite: Infinity };
 
 /** Unités de viewBox par seconde au carré. */
 const GRAVITE = 300;

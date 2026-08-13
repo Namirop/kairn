@@ -5,7 +5,7 @@ import { PageAdmin } from "@/components/administration/page-admin";
 import { exigerUnAdministrateur } from "@/lib/auth/garde-admin";
 import { lireLeJournal, lireLesReglagesPosés } from "@/lib/db/reglages";
 
-export const metadata: Metadata = { title: "Réglages · Administration" };
+export const metadata: Metadata = { title: "Pilotage · Administration" };
 
 /**
  * Le seul écran interne qui écrit quelque chose.
@@ -25,7 +25,7 @@ export const metadata: Metadata = { title: "Réglages · Administration" };
  */
 export const dynamic = "force-dynamic";
 
-export default async function PageReglagesAdmin() {
+export default async function PagePilotage() {
   await exigerUnAdministrateur();
 
   const [reglages, journal] = await Promise.all([lireLesReglagesPosés(), lireLeJournal()]);
@@ -44,7 +44,7 @@ export default async function PageReglagesAdmin() {
 
   return (
     <PageAdmin
-      titre="Réglages"
+      titre="Pilotage"
       contexte="Les réglages du modèle. Ce qui est posé ici s'applique au prochain appel, sans redéploiement ; un champ vide laisse la variable d'environnement décider."
     >
       <BlocReglages poses={reglages} environnement={environnement} />
