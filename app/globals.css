@@ -94,9 +94,9 @@
   --pas-24: 6rem;
 
   /* Échelle typographique. Deux registres : marketing et interne. */
-  --t-mono: 0.6875rem;
-  --t-petit: 0.8125rem;
-  --t-corps: 0.9375rem;
+  --t-mono: 0.75rem;
+  --t-petit: 0.875rem;
+  --t-corps: 1rem;
   --t-h2-app: 1.125rem;
   --t-h1-app: 1.625rem;
   --t-nombre: 3.5rem;
@@ -105,13 +105,25 @@
 }
 
 /*
-  Sur grand écran, le corps de lecture monte d'un cran et les titres suivent.
-  Les deux registres du bas — `mono` pour les données et les étiquettes
-  techniques, `petit` pour ce qui commente — ne bougent pas : c'est ce qui creuse
-  l'écart. Un écran où tout grandit ensemble grandit sans se hiérarchiser.
+  Sur grand écran, tout le bas de l'échelle monte, mais moins vite que le corps.
+
+  Les deux registres du bas restaient fixes, pour creuser l'écart avec le corps
+  et hiérarchiser. L'intention était juste, le réglage non : sur un écran large,
+  `mono` tenait 61 % du corps et `petit` 72 %, si bien que tout le second plan de
+  l'application — étiquettes de navigation, séries, niveaux, commentaires
+  d'écran, et jusqu'au texte déposé par l'utilisateur — vivait à onze ou treize
+  pixels sous un corps de dix-huit. Ce n'était plus de la hiérarchie, c'était du
+  petit.
+
+  Ils montent donc aussi, d'un cran de moins que le corps : la hiérarchie tient
+  dans le *rapport*, pas dans l'immobilité. Treize, quinze, dix-huit sur grand
+  écran ; douze, quatorze, seize sur mobile, où seize est le plancher de lecture
+  qu'on ne descend pas.
 */
 @media (min-width: 48rem) {
   :root {
+    --t-mono: 0.8125rem;
+    --t-petit: 0.9375rem;
     --t-corps: 1.125rem;
     --t-h2-app: 1.5rem;
     --t-h1-app: 2.5rem;

@@ -42,9 +42,29 @@ const SEUIL_REPOS = 5;
 const SEUIL_ROTATION = 30;
 const SEUIL_ENFONCEMENT = 0.6;
 const SEUIL_FIGE = 0.35;
-/** Ce qu'une pierre garde de sa vitesse d'une image à l'autre, au contact. */
-const AMORTI_AU_CONTACT = 0.9;
-const AMORTI_LENT = 0.72;
+/**
+ * Ce qu'une pierre garde de sa vitesse après **une seconde** de contact.
+ *
+ * Par seconde, et non d'une image à l'autre — c'était la seconde façon de le
+ * lire, et elle donnait un tout autre effet. Retenir 0,9 à chaque image revient
+ * à retenir 0,9^60 en une seconde, soit deux millièmes : la pierre frappée
+ * partait, perdait presque tout en un tiers de seconde, s'arrêtait net en l'air
+ * puis tombait. On ne voyait pas une pierre fauchée, on voyait une pierre qui
+ * renonce. Le geste franc que `VITESSE_MAXIMALE` autorise n'arrivait jamais
+ * jusqu'à l'image.
+ *
+ * Élevé au pas de temps, l'amortissement cesse aussi de dépendre de la cadence
+ * d'affichage : la même chute sur un écran à 120 Hz et sur un écran à 60.
+ */
+const AMORTI_AU_CONTACT = 0.35;
+/**
+ * Le frein des lentes, qui garantit la fin.
+ *
+ * Beaucoup plus mordant que l'autre, et c'est voulu : c'est lui qui tue les
+ * pierres qui vibrent sous le seuil de repos sans jamais s'y poser. Il n'agit
+ * que sur ce qui est déjà trop lent pour se voir bouger.
+ */
+const AMORTI_LENT = 0.02;
 /** Pas de temps maximal : un onglet qui reprend la main ne téléporte rien. */
 const PAS_MAX = 1 / 30;
 
@@ -194,7 +214,8 @@ export function avancer(
     // par seconde indéfiniment, trop lente pour qu'on la voie bouger et trop
     // vive pour qu'on la déclare posée. La boucle tournait alors sans fin sur
     // une image immobile.
-    const freine = posee || !appui.touche ? 1 : immobile ? AMORTI_LENT : AMORTI_AU_CONTACT;
+    const parSeconde = immobile ? AMORTI_LENT : AMORTI_AU_CONTACT;
+    const freine = posee || !appui.touche ? 1 : parSeconde ** pas;
 
     return {
       x: mobile.boite.x,

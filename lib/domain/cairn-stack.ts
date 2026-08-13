@@ -26,8 +26,14 @@ const AFFINEMENT = 0.45;
  *
  * Le remplissage est opaque : ce que le chevauchement enfouit ne se voit pas,
  * seule la pile raccourcit un peu.
+ *
+ * La valeur se cherche entre deux défauts, et les deux se voient. Trop peu, un
+ * liseré de fond passe et les pierres lévitent. Trop, elles s'enfoncent les unes
+ * dans les autres et la pile devient un bloc où l'on ne distingue plus ce qui
+ * est posé sur quoi. Un peu moins d'un pixel de viewBox suffit à fermer le jour
+ * sans manger les faces.
  */
-const CHEVAUCHEMENT = 2.2;
+const CHEVAUCHEMENT = 0.9;
 const MARGE_HAUTE = 6;
 const HAUTEUR_SOL = 4;
 

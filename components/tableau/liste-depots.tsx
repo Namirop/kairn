@@ -99,7 +99,11 @@ export function ListeDepots({
                     : "bg-surface-ombre hover:bg-surface-ombre/70",
                 )}
               >
-                <p className="text-petit line-clamp-2">
+                {/* Au corps de lecture : c'est le texte que la personne a
+                    déposé, donc la seule raison d'être de la carte. Il était en
+                    dessous de l'interface qui l'entoure — un contenu ne se lit
+                    pas plus petit que le cadre qui le montre. */}
+                <p className="text-corps line-clamp-2">
                   {depot.sourceType === "IMAGE" ? "Capture — " : null}
                   {depot.apercu || "Capture en cours de lecture"}
                 </p>
