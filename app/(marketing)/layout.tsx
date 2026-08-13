@@ -22,13 +22,17 @@ export default async function CoquilleSite({ children }: { children: React.React
   return (
     <div className="bg-surface-papier min-h-dvh">
       <header className="bg-surface-papier relative z-20">
-        <div className="px-pas-4 md:px-pas-8 mx-auto flex h-16 w-full max-w-5xl items-center justify-between">
+        {/* La même mesure que la mesure « page » d'un Panneau, aux mêmes
+            gouttières : sur un grand écran, un en-tête plus étroit que ce qu'il
+            coiffe posait la marque en retrait du titre qu'elle surplombe, et le
+            décalage se voyait avant qu'on sache le nommer. */}
+        <div className="px-pas-4 md:px-pas-8 mx-auto flex h-16 w-full max-w-6xl items-center justify-between 2xl:max-w-[84rem]">
           <Link href={ROUTES.accueil} className="rounded-galet">
             <Marque />
           </Link>
           <Link
             href={utilisateur ? ROUTES.aujourdhui : ROUTES.connexion}
-            className="text-petit rounded-galet px-pas-4 py-pas-2 hover:bg-surface-ombre text-stone-500 transition-colors hover:text-stone-900"
+            className="text-corps rounded-galet px-pas-4 py-pas-2 hover:bg-surface-ombre text-stone-500 transition-colors hover:text-stone-900"
           >
             {utilisateur ? "Aujourd'hui" : "Se connecter"}
           </Link>

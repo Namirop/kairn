@@ -1,3 +1,4 @@
+import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { empiler, LARGEUR_VUE } from "./cairn-stack";
 
@@ -59,7 +60,7 @@ describe("empiler", () => {
     expect(largeur(pierres.at(-1)!.chemin)).toBeLessThan(largeur(pierres[0]!.chemin));
   });
 
-  it("empile vers le haut, sans chevauchement d'ordonnée", () => {
+  it("empile vers le haut, chaque pierre au-dessus de la précédente", () => {
     const { pierres } = empiler(6);
     const ordonnees = pierres.map((p) => p.y);
 
@@ -68,6 +69,35 @@ describe("empiler", () => {
     for (let i = 1; i < ordonnees.length; i += 1) {
       expect(ordonnees[i]!).toBeLessThan(ordonnees[i - 1]!);
     }
+  });
+
+  /**
+   * La propriété qui empêche le cairn de léviter.
+   *
+   * Deux pierres posées bord à bord laissent passer un liseré de fond dès que
+   * l'une penche — et elles penchent toutes. Elles doivent donc se recouvrir,
+   * quelle que soit la graine et quel que soit le nombre. C'est une propriété et
+   * non un exemple : un tirage particulier qui la respecte ne prouve rien, et
+   * c'est un tirage particulier qui la casserait.
+   */
+  it("fait se recouvrir deux pierres voisines, pour n'importe quel cairn", () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 2, max: 40 }), fc.string({ minLength: 1 }), (nombre, sel) => {
+        const graines = Array.from({ length: nombre }, (_, i) => `${sel}-${i}`);
+        const { pierres } = empiler(nombre, graines);
+
+        for (let i = 1; i < pierres.length; i += 1) {
+          const dessous = pierres[i - 1]!;
+          const dessus = pierres[i]!;
+          // y croît vers le bas : le bas de la pierre du dessus doit passer
+          // sous le haut de celle du dessous.
+          const basDuDessus = dessus.y + dessus.hauteur / 2;
+          const hautDuDessous = dessous.y - dessous.hauteur / 2;
+
+          expect(basDuDessus).toBeGreaterThan(hautDuDessous);
+        }
+      }),
+    );
   });
 
   it("garde chaque pierre dans le cadre", () => {

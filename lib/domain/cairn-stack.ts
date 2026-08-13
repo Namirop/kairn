@@ -14,7 +14,20 @@ export const LARGEUR_VUE = 100;
 const LARGEUR_BASE = 60;
 /** Un vrai cairn s'affine en montant. */
 const AFFINEMENT = 0.45;
-const JEU_VERTICAL = 1.2;
+/**
+ * De combien chaque pierre mord celle du dessous.
+ *
+ * C'était un **jeu** — un espace positif entre deux pierres — et ça se voyait :
+ * un liseré de fond passait entre chacune, et l'empilement avait l'air de
+ * léviter au lieu de reposer. Deux pierres qui se touchent vraiment n'ont pas de
+ * jour entre elles ; celles-ci ont en plus des arêtes penchées et une rotation,
+ * dont les coins écartent encore le contact apparent. Elles se chevauchent donc,
+ * de quoi absorber la pente d'une face et l'inclinaison des deux.
+ *
+ * Le remplissage est opaque : ce que le chevauchement enfouit ne se voit pas,
+ * seule la pile raccourcit un peu.
+ */
+const CHEVAUCHEMENT = 2.2;
 const MARGE_HAUTE = 6;
 const HAUTEUR_SOL = 4;
 
@@ -129,7 +142,7 @@ export function empiler(nombre: number, graines?: string[]): Empilement {
       cle,
       chemin,
       x: arrondi(LARGEUR_VUE / 2 + (tirage() * 2 - 1) * largeur * 0.1 * instabilite),
-      y: arrondi(-(hauteurCumulee - hauteur / 2) - JEU_VERTICAL * index),
+      y: arrondi(-(hauteurCumulee - hauteur / 2) + CHEVAUCHEMENT * index),
       rotation: arrondi((tirage() * 2 - 1) * 3.5 * instabilite),
       largeur: arrondi(largeur),
       hauteur: arrondi(hauteur),
@@ -137,7 +150,7 @@ export function empiler(nombre: number, graines?: string[]): Empilement {
     });
   }
 
-  const hauteurPile = hauteurCumulee + JEU_VERTICAL * Math.max(total - 1, 0);
+  const hauteurPile = hauteurCumulee - CHEVAUCHEMENT * Math.max(total - 1, 0);
 
   return {
     pierres,

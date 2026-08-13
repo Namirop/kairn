@@ -22,16 +22,18 @@ export function PasCeci({ connecte }: { connecte: boolean }) {
     <Panneau
       surface="roche"
       aere
-      className="gap-pas-8 md:gap-pas-16 grid md:grid-cols-[1fr_1.2fr]"
+      className="gap-pas-8 md:gap-pas-16 grid md:grid-cols-[1fr_minmax(0,36rem)]"
       fond={
         <SilhouetteDeCairn className="absolute -right-8 bottom-0 h-[130%] md:right-8 md:h-[150%]" />
       }
     >
       <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
-        Ce que ce n&apos;est pas.
+        Ce que ce
+        <br />
+        n&apos;est pas.
       </h2>
 
-      <div className="max-w-xl text-stone-300">
+      <div className="text-stone-300">
         <p>
           Ce n&apos;est pas une application de fiches à écrire soi-même : personne ne tient un jeu
           de cartes plus de trois semaines. Ce n&apos;est pas un outil de prise de notes — tu en as

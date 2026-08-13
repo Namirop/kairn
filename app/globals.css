@@ -228,8 +228,13 @@
     outline-offset: 2px;
   }
 
+  /* L'encre autant que le fond. Sans elle, la sélection héritait de la couleur
+     du texte : sur la roche, du texte clair se posait sur un fond clair et
+     disparaissait au moment précis où on le sélectionnait. Un fond de sélection
+     ne se choisit pas seul, il se choisit avec ce qui s'écrit dessus. */
   ::selection {
     background: var(--stone-300);
+    color: var(--stone-900);
   }
 }
 

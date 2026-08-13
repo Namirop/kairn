@@ -26,13 +26,16 @@ const ETAPES = [
  * sujets, il relie trois étapes qui s'enchaînent. Il s'épaissit pour qu'on voie
  * qu'il est voulu, et non oublié d'une passe précédente.
  *
- * Le titre tient sa colonne à gauche et les étapes occupent la droite : sur un
- * écran large, la moitié droite portait du vide alors que le contenu existait
- * déjà pour la remplir.
+ * Le titre tient sa colonne à gauche, les étapes occupent la droite, et la
+ * colonne de droite vaut exactement la mesure de lecture. Laissée en fraction,
+ * elle s'ouvrait plus large que le texte qu'elle porte : le paragraphe se coupait
+ * à sa propre mesure et abandonnait le reste, ce qui creusait un vide contre le
+ * bord droit et faisait pencher toute la section à gauche. Le mou est maintenant
+ * entre les deux colonnes, où il se lit comme une séparation voulue.
  */
 export function Sentier() {
   return (
-    <Panneau surface="ombre" aere className="gap-pas-12 grid md:grid-cols-[1fr_1.6fr]">
+    <Panneau surface="ombre" aere className="gap-pas-12 grid md:grid-cols-[1fr_minmax(0,36rem)]">
       <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
         Trois gestes,
         <br />
@@ -45,13 +48,17 @@ export function Sentier() {
             key={etape.titre}
             className="gap-pas-6 pb-pas-8 not-last:before:top-pas-6 relative flex not-last:before:absolute not-last:before:bottom-0 not-last:before:left-[7px] not-last:before:w-0.5 not-last:before:bg-stone-300 last:pb-0"
           >
+            {/* Posée sur l'axe optique du titre, pas sur son bord haut : à
+                `pas-2` la pierre flottait trois pixels au-dessus de la ligne
+                qu'elle est censée marquer, et l'œil le voyait sans savoir le
+                nommer. */}
             <span
               aria-hidden
-              className="mt-pas-2 relative z-10 h-2 w-4 shrink-0 rounded-xs bg-stone-900"
+              className="mt-pas-3 relative z-10 h-2 w-4 shrink-0 rounded-xs bg-stone-900"
             />
             <div>
               <h3 className="text-h2-app leading-tight font-bold">{etape.titre}</h3>
-              <p className="mt-pas-2 max-w-xl text-stone-500">{etape.texte}</p>
+              <p className="mt-pas-2 text-stone-500">{etape.texte}</p>
             </div>
           </li>
         ))}
