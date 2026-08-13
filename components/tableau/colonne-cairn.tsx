@@ -1,4 +1,5 @@
 import { Cairn } from "@/components/cairn/cairn";
+import { PierreAVenir } from "@/components/cairn/pierre-a-venir";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 /**
@@ -31,9 +32,23 @@ export function ColonneCairn({
           tiers de largeur sur grand écran — c'est la largeur qui le
           dimensionne, l'empilement étant plus large que haut tant qu'il compte
           peu de pierres. Le mobile ne bouge pas : il y tenait déjà l'écran. */}
-      <div className="h-56 w-full max-w-56 md:h-[22rem] md:max-w-80">
-        <Cairn nombre={consolides} graines={graines} clair />
-      </div>
+      {/* À zéro, le cairn ne rendait qu'un trait de sol au milieu du panneau :
+          l'élément signature du produit y était un vide. On marque la place de
+          la première pierre plutôt que d'en offrir une — voir `PierreAVenir`.
+
+          La boîte se resserre en même temps. Une pierre seule est large et
+          plate ; lui garder la hauteur d'un empilement de douze rendait le même
+          vide qu'avant, avec un contour au milieu. Ce qui occupe la place, c'est
+          la pile quand elle existe, pas la réserve qu'on lui garde. */}
+      {consolides === 0 ? (
+        <div className="h-24 w-full max-w-56 md:h-32 md:max-w-80">
+          <PierreAVenir clair />
+        </div>
+      ) : (
+        <div className="h-56 w-full max-w-56 md:h-[22rem] md:max-w-80">
+          <Cairn nombre={consolides} graines={graines} clair />
+        </div>
+      )}
 
       <p className="mt-pas-4 md:mt-pas-6 text-petit text-center text-stone-300">
         {consolides === 0
