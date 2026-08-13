@@ -19,6 +19,15 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
  *
  * Le compte reste dit sans survol pour qui ne survole pas : `Cairn` porte son
  * `aria-label`, et il énonce le nombre de pierres.
+ *
+ * La colonne est posée un cran sous l'axe du texte plutôt qu'exactement dessus.
+ * Centré au pixel, l'empilement paraissait encore haut : sa masse visible est en
+ * bas — le sol et les grosses pierres — alors que sa boîte compte aussi l'air
+ * au-dessus du sommet. L'œil aligne les masses, pas les boîtes.
+ *
+ * La marge vaut le double de la descente obtenue : la rangée centre ses deux
+ * colonnes, donc elle en reprend la moitié. Régler ça au jugé sans mesurer
+ * donnait un décalage deux fois trop discret.
  */
 
 function legende(consolides: number): string {
@@ -29,13 +38,13 @@ function legende(consolides: number): string {
 
 export function ColonneCairn({ consolides, graines }: { consolides: number; graines: string[] }) {
   return (
-    <aside className="flex w-full flex-col items-center md:max-w-96">
+    <aside className="md:mt-pas-16 flex w-full flex-col items-center md:max-w-96">
       <Tooltip>
         {/* Le déclencheur reste le bouton que Radix rend par défaut, comme pour
             la série et le niveau. Poser le dessin en `asChild` sur un `div`
             aurait sorti la légende du parcours clavier : un `div` ne prend pas
             le focus, et l'info-bulle ne se serait ouverte qu'à la souris. */}
-        <TooltipTrigger className="rounded-galet w-full cursor-help">
+        <TooltipTrigger className="rounded-galet w-full">
           {/* À zéro, le cairn ne rendait qu'un trait de sol au milieu du
                 panneau : l'élément signature du produit y était un vide. On
                 marque la place de la première pierre plutôt que d'en offrir une
