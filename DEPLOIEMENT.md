@@ -71,6 +71,16 @@ mauvais est refusée en 403 avec `[Better Auth]: Invalid origin`, avant même
 qu'un email soit tenté. Le correctif est dans **Settings → Domains** : un
 domaine principal, l'autre en **redirection** vers lui.
 
+Le principal doit être **celui que nomme `BETTER_AUTH_URL`**, et c'est le seul
+point qui décide du coût de l'opération. Dans ce sens-là, il n'y a rien d'autre
+à faire. Dans l'autre, il faut aussi changer la variable, redéployer pour
+qu'elle soit relue, et déclarer une nouvelle URI de redirection côté Google.
+
+Attention en vérifiant : une redirection 308 est **permanente**, et le
+navigateur la garde en cache. Après avoir inversé les deux réglages, il continue
+d'envoyer sur l'ancien hôte et on croit que rien n'a changé. Tester en
+navigation privée.
+
 Ne pas régler ça en déclarant les deux origines comme fiables. Un cookie de
 session appartient à l'hôte qui l'a posé : on serait connecté sur l'un et
 déconnecté sur l'autre, sans que rien ne l'explique à l'écran.
