@@ -5,8 +5,8 @@ import { useActionState, useEffect, useState } from "react";
 import { avancementDeLEssaiAction, essayerAction, type EtatEssai } from "@/app/(marketing)/actions";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 import { ConceptsEnAttente } from "@/components/site/concepts-en-attente";
+import { PileDeConcepts } from "@/components/site/pile-de-concepts";
 import { Button } from "@/components/ui/button";
-import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
@@ -100,12 +100,28 @@ export function EssaiDeDepot({
           Le gris du cairn n'en donnait que 1,63 — assez pour une décoration,
           pas pour une limite de composant. */}
       <div className="focus-within:border-lichen-deep border-b-2 border-stone-500 transition-colors">
+        {/* Le champ grandit avec ce qu'on y met, jusqu'à une borne.
+            Sans elle, un article collé poussait le bouton hors de l'écran : le
+            geste suivant disparaissait au moment où on venait de le préparer.
+            Au-delà, c'est le champ qui défile, pas la page.
+
+            La borne se dit en `rem` et non en lignes mesurées, contrairement à
+            la liste de concepts : on écrit ici, et la seule chose qui doive
+            rester visible est la ligne courante — le navigateur y descend tout
+            seul. Pour la même raison, l'ascenseur reste au lieu d'être remplacé
+            par un chevron : il faudrait le poser sur la ligne qu'on tape.
+            Retokenisé, faute de quoi le rail gris de Windows serait le seul
+            objet de la page dessiné par quelqu'un d'autre.
+
+            La taille passe au corps de texte. En `h2-app`, un pavé collé
+            s'affichait plus gros que les concepts qui le remplacent à l'écran
+            juste après, et l'échange des deux se voyait comme un saut. */}
         <textarea
           id="essai"
           name="texte"
           rows={4}
           placeholder={invite}
-          className="pb-pas-4 text-h2-app field-sizing-content min-h-32 w-full resize-none border-0 bg-transparent leading-relaxed text-stone-900 outline-none placeholder:text-stone-500 focus-visible:outline-none"
+          className="pb-pas-4 text-corps field-sizing-content ascenseur-discret max-h-[14rem] min-h-32 w-full resize-none overflow-y-auto border-0 bg-transparent leading-relaxed text-stone-900 outline-none placeholder:text-stone-500 focus-visible:outline-none"
         />
       </div>
 
@@ -163,15 +179,7 @@ function ResultatDeLEssai({
         {avancement.concepts.length === 1 ? "concept trouvé" : "concepts trouvés"}
       </p>
 
-      <ul className="gap-pas-3 flex flex-col">
-        {avancement.concepts.map((concept) => (
-          <li key={concept.id} className="border-lichen pl-pas-4 border-l-2">
-            <p className="text-corps leading-relaxed text-stone-900">
-              <TexteTechnique>{concept.concept}</TexteTechnique>
-            </p>
-          </li>
-        ))}
-      </ul>
+      <PileDeConcepts concepts={avancement.concepts} />
 
       <div className="mt-pas-2 gap-pas-3 flex flex-wrap items-center">
         <Button asChild size="lg">

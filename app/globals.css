@@ -270,6 +270,45 @@
   }
 }
 
+/* Une zone qui défile sans le dire par une barre.
+   Réservé aux endroits où autre chose porte l'information — un fondu, un
+   chevron. Retirer l'ascenseur sans le remplacer supprime la seule indication
+   qu'il reste du contenu, et le clavier n'y accède plus que si la zone est
+   focalisable : les deux vont ensemble, ou l'utilitaire ne s'emploie pas. */
+@utility sans-ascenseur {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* L'ascenseur qu'on garde, mais dans la palette.
+   Pour les zones où l'on écrit : là, la barre est la seule chose qui dise
+   qu'il reste du texte au-dessus ou en dessous du curseur, et un chevron ne
+   peut pas la remplacer puisqu'il faudrait le poser sur la ligne en cours de
+   frappe. Elle reste, débarrassée de son rail système — sous Windows, une
+   barre grise pleine largeur est le seul objet de la page qui vienne d'un
+   autre dessin que le sien. */
+@utility ascenseur-discret {
+  scrollbar-width: thin;
+  scrollbar-color: var(--stone-300) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--stone-300);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
