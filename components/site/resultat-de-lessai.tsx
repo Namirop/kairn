@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ConceptsEnAttente } from "@/components/site/concepts-en-attente";
+import { AttenteInterrompue, ConceptsEnAttente } from "@/components/site/concepts-en-attente";
 import { PileDeConcepts } from "@/components/site/pile-de-concepts";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
@@ -18,11 +18,22 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 export function ResultatDeLEssai({
   avancement,
   setRecommence,
+  attenteInterrompue,
+  onVerifier,
 }: {
   avancement: AvancementDeLEssai | null;
   setRecommence: (valeur: boolean) => void;
+  /** L'écran a cessé d'interroger sans que la chaîne ait rendu quoi que ce soit. */
+  attenteInterrompue: boolean;
+  onVerifier: () => void;
 }) {
-  if (!avancement || avancement.enCours) return <ConceptsEnAttente />;
+  if (!avancement || avancement.enCours) {
+    return attenteInterrompue ? (
+      <AttenteInterrompue onVerifier={onVerifier} />
+    ) : (
+      <ConceptsEnAttente />
+    );
+  }
 
   if (avancement.concepts.length === 0) {
     return <EssaiSansConcept avancement={avancement} setRecommence={setRecommence} />;

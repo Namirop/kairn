@@ -50,9 +50,18 @@ export function EssaiDeDepot({
   const [recommence, setRecommence] = useState(false);
   const [texte, setTexte] = useState("");
   const trop = texte.length > CARACTERES_MAXIMUM_ANONYME;
+  // L'interrogation s'est arrêtée sans résultat. Un état à part et non l'absence
+  // d'intervalle : c'est ce que l'écran doit dire, et il faut qu'il le sache.
+  const [attenteInterrompue, setAttenteInterrompue] = useState(false);
+  const [relance, setRelance] = useState(0);
+
+  // On interroge aussi quand la page se charge sur un découpage déjà en route.
+  // Sans ça, un rechargement pendant l'extraction figeait l'écran sur l'attente :
+  // l'intervalle ne démarrait qu'au retour de l'action, et il n'y en avait pas.
+  const aPoursuivre = Boolean(etat.sessionId) || Boolean(essaiPrecedent?.enCours);
 
   useEffect(() => {
-    if (!etat.sessionId) return;
+    if (!aPoursuivre) return;
 
     let vivant = true;
     let tours = 0;
@@ -66,14 +75,29 @@ export function EssaiDeDepot({
 
       setAvancement(suite);
 
-      if (!suite?.enCours || tours >= ESSAIS_MAXIMUM) clearInterval(battement);
+      if (!suite?.enCours) {
+        clearInterval(battement);
+        return;
+      }
+
+      if (tours >= ESSAIS_MAXIMUM) {
+        clearInterval(battement);
+        setAttenteInterrompue(true);
+      }
     }, RYTHME_MS);
 
     return () => {
       vivant = false;
       clearInterval(battement);
     };
-  }, [etat.sessionId]);
+  }, [aPoursuivre, relance]);
+
+  // Reprend l'interrogation pour un tour complet. La minute est repartie de
+  // zéro : c'est un geste volontaire, pas une reprise automatique.
+  const verifierANouveau = () => {
+    setAttenteInterrompue(false);
+    setRelance((tour) => tour + 1);
+  };
 
   // L'attente commence au clic et non au retour de l'action : entre les deux
   // il y a un aller-retour, et pendant cet aller-retour seul le libellé du
@@ -81,7 +105,14 @@ export function EssaiDeDepot({
   // Un essai déjà fait se remontre plutôt que de laisser un champ vide : sinon
   // le refus d'un second essai désigne des concepts que personne ne voit.
   if (!recommence && (enCours || etat.sessionId || essaiPrecedent)) {
-    return <ResultatDeLEssai avancement={avancement} setRecommence={setRecommence} />;
+    return (
+      <ResultatDeLEssai
+        avancement={avancement}
+        setRecommence={setRecommence}
+        attenteInterrompue={attenteInterrompue}
+        onVerifier={verifierANouveau}
+      />
+    );
   }
 
   return (

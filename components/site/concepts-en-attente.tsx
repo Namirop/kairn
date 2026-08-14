@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 /**
  * Les quelques secondes où le découpage tourne.
@@ -71,6 +72,41 @@ export function ConceptsEnAttente() {
           ? "C'est plus long que d'habitude. Ça arrive, laisse-lui encore un instant."
           : "Quelques secondes. Tes concepts s'affichent ici même, pas dans un écran d'inscription."}
       </p>
+    </div>
+  );
+}
+
+/**
+ * L'attente qu'on a cessé de surveiller.
+ *
+ * Au bout d'une minute, l'écran arrêtait d'interroger sans rien changer à ce
+ * qu'il montrait : les emplacements continuaient de battre, pour toujours, sur
+ * la seule page qui convertit. Se taire indéfiniment est pire que dire qu'on ne
+ * sait pas — le visiteur finit par croire à un produit cassé.
+ *
+ * Le cas arrive vraiment. Un job reporté parce que le plafond journalier
+ * d'appels est atteint reste en file et repartira, mais pas dans la minute :
+ * côté serveur c'est un report légitime, et rien ne s'est cassé.
+ *
+ * Ce qu'on dit est donc vrai au mot près. Le texte est en base, le cookie de
+ * visite dure sept jours, et revenir sur la page suffit à retrouver ses
+ * concepts — c'est déjà comme ça que l'écran se recharge.
+ */
+export function AttenteInterrompue({ onVerifier }: { onVerifier: () => void }) {
+  return (
+    <div className="gap-pas-3 flex flex-col" role="status">
+      <p className="text-corps text-stone-900">Le découpage prend plus de temps que prévu.</p>
+
+      <p className="text-petit max-w-md text-stone-500">
+        Ton texte n&apos;est pas perdu. Reviens sur cette page dans un moment : tes concepts t&apos;y
+        attendront.
+      </p>
+
+      <div className="mt-pas-1">
+        <Button type="button" variant="outline" onClick={onVerifier}>
+          Vérifier maintenant
+        </Button>
+      </div>
     </div>
   );
 }
