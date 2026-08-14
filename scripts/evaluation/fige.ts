@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
+import { NATURES_DE_DEPOT } from "@/lib/domain/nature-du-depot";
 import type { DepotEvalue } from "./execution";
 
 /**
@@ -26,6 +27,11 @@ const figeSchema = z.object({
       nom: z.string(),
       texte: z.string(),
       lecture: z.object({ langue: z.string().nullable(), exploitable: z.boolean() }).optional(),
+      // Facultative : les figés écrits avant ce champ n'en portent pas, et les
+      // rendre invalides ferait taire toute la référence d'un coup — `lirePrecedent`
+      // se contenterait de prévenir, et le rejeu repartirait de rien.
+      nature: z.enum(NATURES_DE_DEPOT).optional(),
+      langue: z.string().optional(),
       rejet: z.string().nullable(),
       concepts: z.array(
         z.object({
@@ -100,6 +106,8 @@ export function ecrireFige(
         nom: evaluation.nom,
         texte: evaluation.texte,
         lecture: evaluation.lecture,
+        nature: evaluation.nature,
+        langue: evaluation.langue,
         rejet: evaluation.rejet,
         concepts: evaluation.concepts.map((evalue) => evalue.concept),
       })),

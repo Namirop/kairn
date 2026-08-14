@@ -30,6 +30,10 @@ const PAYLOAD_CLOZE = z.object({
   accepted: z.array(z.string().min(1)).min(1),
 });
 
+const FICTION = `Le dragon des cendres ne crache pas de flamme mais une poussière brûlante, qui
+s'enflamme au contact de l'air humide. On ne l'approche donc jamais par temps de pluie, sous peine
+de déclencher la charge avant qu'il ne la libère lui-même.`;
+
 const DOUTEUX = `En JavaScript, les promesses lancées concurrently s'exécutent sur plusieurs cœurs,
 ce qui rend Promise.all réellement parallèle. Un tableau de promesses passé à Promise.all se règle
 quand la dernière se règle.`;
@@ -180,6 +184,33 @@ export async function casConceptDouteux(userId: string): Promise<void> {
     "Concept douteux — le confirmer lui écrit ses questions",
     apresConfirmation === 4,
     `${apresConfirmation} questions`,
+  );
+}
+
+/**
+ * Un dépôt dont les énoncés n'ont pas à être vrais du monde.
+ *
+ * C'était le chemin mort du produit : les règles d'un jeu, la chronologie d'un
+ * univers de fiction ou une procédure interne ressortaient toutes marquées
+ * douteuses, donc sans une seule question. Le dépôt était accepté, il comptait
+ * au quota, et il ne produisait rien.
+ *
+ * Les deux concepts de la fixture sont douteux, et c'est le point : ce cas
+ * échoue si le doute reprend la main sur autre chose que du factuel.
+ */
+export async function casDepotDeFiction(userId: string): Promise<void> {
+  const inputId = await deposerEtDerouler(userId, { texte: FICTION, cleEnvoi: "verif-fiction-01" });
+  const depot = await prisma.input.findUniqueOrThrow({
+    where: { id: inputId },
+    include: { atoms: true },
+  });
+  const douteux = depot.atoms.filter((atome) => atome.uncertain).length;
+  const questions = await compterQuestions(inputId);
+
+  record(
+    "Fiction — un dépôt qui n'a pas à être vrai obtient quand même ses questions",
+    depot.nature === "FICTION" && douteux === 2 && questions === 8,
+    `nature ${depot.nature ?? "absente"}, ${douteux} douteux, ${questions} questions`,
   );
 }
 

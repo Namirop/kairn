@@ -18,6 +18,10 @@ function rendreManquements(manquements: Manquement[]): string[] {
 export function rendreEchec(titre: string, echec: Echec): string[] {
   const lignes = [`**${titre}** ${echec.motif}`, ""];
 
+  // Avant la sortie brute, qui est tronquée : le compte, lui, tient sur une
+  // ligne et c'est le seul chiffre qui serve à décider d'une borne.
+  if (echec.elements) lignes.push(`Éléments rendus par le modèle — ${echec.elements}`, "");
+
   if (!echec.brut) return lignes;
 
   return [...lignes, "Sortie brute reçue :", "", "```json", echec.brut, "```", ""];

@@ -60,6 +60,7 @@ async function main(): Promise<void> {
     await pipeline.casCaptureIllisible(userId, capture);
     await pipeline.casRejet(userId);
     await pipeline.casConceptDouteux(userId);
+    await pipeline.casDepotDeFiction(userId);
     await pipeline.casCorrectionDeConcept(userId);
 
     await reprise.casDecoupageImpossible(userId);
@@ -74,6 +75,10 @@ async function main(): Promise<void> {
 
     await anonyme.casEssaiPuisCompte(userId);
     await anonyme.casSecondeChance();
+    await anonyme.casRepriseApresRejet();
+    await anonyme.casPanneNeConsommePasDEssai();
+    await anonyme.casPlafondDesPannes();
+    await anonyme.casDeuxOngletsSimultanes();
     await anonyme.casLimiteParAdresse();
     await anonyme.casOubliDesVisites();
 

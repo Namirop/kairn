@@ -65,7 +65,7 @@ export function rendreRepartition(passages: Passage[]): string[] {
   });
 
   return [
-    "## Répartition des formats par facette",
+    "### Formats par facette",
     "",
     `| Facette | ${FORMATS.join(" | ")} |`,
     `| --- | ${FORMATS.map(() => "---").join(" | ")} |`,

@@ -12,6 +12,10 @@ import {
 } from "@/lib/ai/schemas";
 import { controlerConcept } from "@/lib/domain/controle-concept";
 import { controlerVariants } from "@/lib/domain/controle-variants";
+import { messageDuGroupe as construireLEnvoi } from "@/lib/domain/envoi-de-questions";
+import { conceptsAQuestionner, type NatureDuDepot } from "@/lib/domain/nature-du-depot";
+import { ordonnerLesOptions } from "@/lib/domain/ordre-des-options";
+import { cibleDuVraiOuFaux } from "@/lib/domain/vrai-ou-faux";
 import type { Manquement } from "@/lib/domain/manquement";
 import type { Depot } from "./corpus";
 import type { DepotFige } from "./fige";
@@ -30,12 +34,66 @@ import type { DepotFige } from "./fige";
 
 type Concept = ExtractAtomsOutput["atoms"][number];
 
-export type Echec = { motif: string; brut?: string };
+export type Echec = {
+  motif: string;
+  brut?: string;
+  /** Ce que le modèle avait rendu, tableau par tableau. Voir `compterLesElements`. */
+  elements?: string;
+};
+
+/**
+ * Combien d'éléments le modèle avait rendus dans chaque tableau de sa sortie.
+ *
+ * Quand une validation refuse pour dépassement, c'est exactement le nombre qu'on
+ * cherche — c'est lui qui dit à quelle hauteur poser une borne. Il a fallu
+ * l'estimer à la main sur `23-pave-maximal`, parce que le rapport tronquait la
+ * sortie brute et ne le disait nulle part.
+ *
+ * Ne lit que le premier niveau : au-delà, on additionnerait des choux et des
+ * carottes. Une sortie illisible le dit plutôt que de se taire.
+ */
+function compterLesElements(brut: string | undefined): string | undefined {
+  if (brut === undefined) return undefined;
+
+  try {
+    const lu: unknown = JSON.parse(brut);
+
+    if (typeof lu !== "object" || lu === null) return undefined;
+
+    const tableaux = Object.entries(lu).filter(([, valeur]) => Array.isArray(valeur));
+
+    if (tableaux.length === 0) return undefined;
+
+    return tableaux.map(([nom, valeur]) => `${nom} : ${valeur.length}`).join(", ");
+  } catch {
+    return "sortie illisible, rien à compter";
+  }
+}
+
+type VariantRendu = GenerateVariantsOutput["lots"][number]["variants"][number];
+
+/**
+ * Une question telle qu'elle sera servie, et le souvenir de l'ordre reçu.
+ *
+ * Le banc mesure ce que le produit montre : il fait donc passer les options par
+ * la même remise en ordre que l'écriture d'un Variant. Sans ça il mesurerait la
+ * sortie brute du modèle, et le contrôle de position ne verrait jamais la
+ * correction qu'il est censé surveiller.
+ *
+ * `rangBrut` garde la position que le modèle avait donnée, pour que le rapport
+ * puisse montrer les deux répartitions côte à côte — c'est l'écart entre elles
+ * qui dit combien de travail fait le serveur.
+ */
+export type VariantEvalue = VariantRendu & {
+  rangBrut: number | null;
+  /** La valeur que l'envoi avait imposée, sur les vrai ou faux seulement. */
+  cible: boolean | null;
+};
 
 export type ConceptEvalue = {
   concept: Concept;
   manquements: Manquement[];
-  variants: GenerateVariantsOutput["lots"][number]["variants"];
+  variants: VariantEvalue[];
   manquementsVariants: Manquement[];
   echec?: Echec;
   /** Douteux : aucune question n'a été demandée pour ce concept. */
@@ -46,14 +104,27 @@ export type DepotEvalue = {
   nom: string;
   texte: string;
   lecture?: { langue: string | null; exploitable: boolean };
+  /** Absentes quand l'extraction a échoué : le modèle n'a rien rendu de lisible. */
+  nature?: NatureDuDepot;
+  langue?: string;
   rejet: string | null;
   concepts: ConceptEvalue[];
   echec?: Echec;
+  /**
+   * Ce que les deux coupes du serveur ont retiré à l'extraction. Absentes sur
+   * un rejeu, qui repart d'un figé et ne rappelle pas l'extraction.
+   */
+  derives?: number;
+  tronque?: boolean;
 };
 
 function decrire(erreur: unknown): Echec {
   if (erreur instanceof AIInvalidOutputError) {
-    return { motif: erreur.message, brut: erreur.raw };
+    return {
+      motif: erreur.message,
+      brut: erreur.raw,
+      elements: compterLesElements(erreur.raw),
+    };
   }
 
   return { motif: erreur instanceof Error ? erreur.message : String(erreur) };
@@ -78,11 +149,17 @@ async function lireImage(
   return { texte: lu.extractedText, lecture: { langue: lu.language, exploitable: lu.usable } };
 }
 
-/** Les concepts d'un envoi, numérotés : c'est ce rang que la sortie référence. */
+/**
+ * L'envoi du groupe, construit par le même code que celui du produit.
+ *
+ * La graine est le texte du concept et non un identifiant, pour la raison dite
+ * plus bas à propos des options : le banc n'écrit rien en base, et un concept
+ * figé porte le même texte d'un passage à l'autre.
+ */
 function messageDuGroupe(groupe: Concept[]): AiMessage[] {
-  const contenu = groupe
-    .map((concept, index) => `Concept ${index + 1}.\n${concept.concept}`)
-    .join("\n\n");
+  const contenu = construireLEnvoi(
+    groupe.map((entree) => ({ graine: entree.concept, concept: entree.concept })),
+  );
 
   return [{ role: "user", content: contenu }];
 }
@@ -95,6 +172,30 @@ function grouper(concepts: Concept[]): Concept[][] {
   }
 
   return groupes;
+}
+
+/**
+ * Les options remises dans l'ordre où elles seront montrées.
+ *
+ * La graine est le texte du concept, et non un identifiant : le banc n'écrit
+ * rien en base, et un concept figé porte le même texte d'un passage à l'autre.
+ * Deux rejeux se comparent donc question par question.
+ */
+function servir(variants: VariantRendu[], concept: string): VariantEvalue[] {
+  return variants.map((variant) => {
+    const graine = `${concept}:${variant.facet}`;
+    // La même graine que celle de l'envoi : c'est ce qui permet de relire la
+    // sortie contre la valeur qui avait été demandée.
+    const cible = variant.format === "TRUE_FALSE" ? cibleDuVraiOuFaux(graine) : null;
+
+    if (variant.options === null || variant.correctIndex === null) {
+      return { ...variant, rangBrut: null, cible };
+    }
+
+    const servi = ordonnerLesOptions(variant.options, variant.correctIndex, graine);
+
+    return { ...variant, ...servi, rangBrut: variant.correctIndex, cible };
+  });
 }
 
 async function genererPourGroupe(groupe: Concept[]): Promise<ConceptEvalue[]> {
@@ -122,11 +223,9 @@ async function genererPourGroupe(groupe: Concept[]): Promise<ConceptEvalue[]> {
         };
       }
 
-      return {
-        ...entree,
-        variants: lot.variants,
-        manquementsVariants: controlerVariants(lot.variants),
-      };
+      const variants = servir(lot.variants, entree.concept.concept);
+
+      return { ...entree, variants, manquementsVariants: controlerVariants(variants) };
     });
   } catch (erreur) {
     const echec = decrire(erreur);
@@ -135,9 +234,15 @@ async function genererPourGroupe(groupe: Concept[]): Promise<ConceptEvalue[]> {
   }
 }
 
-async function evaluerConcepts(concepts: Concept[]): Promise<ConceptEvalue[]> {
+async function evaluerConcepts(
+  concepts: Concept[],
+  nature: NatureDuDepot | undefined,
+): Promise<ConceptEvalue[]> {
+  // La même règle que l'ingestion, et pas une copie : sur un dépôt de fiction,
+  // le doute n'écarte plus rien, et le banc doit le voir comme le produit.
+  const retenus = conceptsAQuestionner(concepts, nature);
   const douteux = concepts
-    .filter((concept) => concept.uncertain)
+    .filter((concept) => !retenus.includes(concept))
     .map((concept) => ({
       concept,
       manquements: controlerConcept(concept.concept),
@@ -148,7 +253,7 @@ async function evaluerConcepts(concepts: Concept[]): Promise<ConceptEvalue[]> {
 
   const evalues: ConceptEvalue[] = [];
 
-  for (const groupe of grouper(concepts.filter((concept) => !concept.uncertain))) {
+  for (const groupe of grouper(retenus)) {
     evalues.push(...(await genererPourGroupe(groupe)));
   }
 
@@ -171,8 +276,12 @@ export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
       ...vide,
       texte,
       lecture,
+      nature: extraction.nature,
+      langue: extraction.langue,
       rejet: extraction.rejected,
-      concepts: await evaluerConcepts(extraction.atoms),
+      derives: extraction.derives,
+      tronque: extraction.tronque,
+      concepts: await evaluerConcepts(extraction.atoms, extraction.nature),
     };
   } catch (erreur) {
     return { ...vide, echec: decrire(erreur) };
@@ -185,7 +294,9 @@ export async function rejouerDepot(fige: DepotFige): Promise<DepotEvalue> {
     nom: fige.nom,
     texte: fige.texte,
     lecture: fige.lecture,
+    nature: fige.nature,
+    langue: fige.langue,
     rejet: fige.rejet,
-    concepts: await evaluerConcepts(fige.concepts),
+    concepts: await evaluerConcepts(fige.concepts, fige.nature),
   };
 }

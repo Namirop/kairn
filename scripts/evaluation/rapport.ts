@@ -2,6 +2,10 @@ import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import type { ConsommationFenetre } from "@/lib/db/ai-call";
 import { compter, rendreRepartition, type Passage } from "./rapport-chiffres";
 import { rendreConcept, rendreEchec } from "./rapport-concept";
+import { rendreDistributions } from "./rapport-distributions";
+import { manquementsDeLangue } from "./controle-de-langue";
+import { manquementsDeGranularite } from "./controle-de-granularite";
+import { rendreTemoins } from "./temoins";
 
 /**
  * Le rapport. Les contrôles automatiques disent où regarder ; le reste — est-ce
@@ -56,6 +60,27 @@ function rendreDepot({ evaluation, consommation }: Passage): string[] {
     `> ${extrait(evaluation.texte) || "(aucun texte lu)"}`,
     "",
   ];
+
+  if (evaluation.nature) {
+    const langue = evaluation.langue ? `, langue \`${evaluation.langue}\`` : "";
+    lignes.push(`Nature lue : \`${evaluation.nature}\`${langue}.`, "");
+  }
+
+  for (const manquement of manquementsDeLangue(evaluation)) {
+    lignes.push(`> **Manquement — langue** : ${manquement}`, "");
+  }
+
+  for (const manquement of manquementsDeGranularite(evaluation)) {
+    lignes.push(`> **Manquement — granularité** : ${manquement}`, "");
+  }
+
+  if (evaluation.derives !== undefined && evaluation.derives > 0) {
+    const coupe = evaluation.tronque ? ", puis tronqué au plafond" : "";
+    lignes.push(
+      `${accorder(evaluation.derives, "concept écarté", "concepts écartés")} comme dérivé(s) d'un voisin${coupe}.`,
+      "",
+    );
+  }
 
   if (evaluation.lecture) {
     const { langue, exploitable } = evaluation.lecture;
@@ -133,6 +158,8 @@ export function rendreRapport(
     "",
     longueursDesPrompts(),
     "",
+    ...rendreTemoins(passages),
+    ...rendreDistributions(passages),
     ...rendreRepartition(passages),
     ...passages.flatMap((passage) => [...rendreDepot(passage), "---", ""]),
   ].join("\n");
@@ -149,9 +176,15 @@ export function resumeConsole(passages: Passage[]): string[] {
     const { aboutis, misDeCote, generations, manquements } = compter([
       { evaluation, consommation },
     ]);
-    const etat = manquements === 0 && generations === 0 ? "ok     " : "à voir ";
+    // La langue compte dans le verdict. Sans ça, `18-anglais` ressortait « ok,
+    // 0 manquement » en rendant des concepts français : le fichier prouvait le
+    // bug, et le score l'effaçait.
+    const langue = manquementsDeLangue(evaluation).length;
+    const granularite = manquementsDeGranularite(evaluation).length;
+    const total = manquements + langue + granularite;
+    const etat = total === 0 && generations === 0 ? "ok     " : "à voir ";
     const cotes = misDeCote > 0 ? `, ${misDeCote} mis de côté` : "";
 
-    return `${etat} ${evaluation.nom} — ${accorder(aboutis, "lot")}${cotes}, ${generations} en échec, ${accorder(manquements, "manquement")} · ${cout}`;
+    return `${etat} ${evaluation.nom} — ${accorder(aboutis, "lot")}${cotes}, ${generations} en échec, ${accorder(total, "manquement")} · ${cout}`;
   });
 }
