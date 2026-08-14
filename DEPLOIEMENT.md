@@ -113,12 +113,13 @@ tout le monde — d'où l'intérêt de le poser une bonne fois avant l'ouverture
 | `AI_ENABLED`                   | `true` — `false` coupe tout appel et fait échouer l'ingestion    |
 | `AI_DAILY_CALL_CAP`            | Plafond global d'appels réels par jour                           |
 | `AI_DAILY_CALL_CAP_PAR_COMPTE` | Part d'un seul compte dans ce plafond                            |
+| `AI_DAILY_CALL_CAP_ANONYME`    | Part des essais sans compte dans ce plafond                      |
 | `AI_MODEL`                     | Identifiant du modèle                                            |
 | `AI_MAX_TOKENS`                | `max_tokens` par défaut, toujours envoyé                         |
 
 `MOCK_AI` est le réglage à ne pas rater dans les deux sens : laissé à `true`, le
 produit rend des fixtures identiques à tout le monde sans qu'aucune erreur ne le
-signale. Le dimensionnement des deux plafonds est expliqué dans le README, à la
+signale. Le dimensionnement des trois plafonds est expliqué dans le README, à la
 section « Appels au modèle » ; garder `AI_DAILY_CALL_CAP` nettement au-dessus de
 `AI_DAILY_CALL_CAP_PAR_COMPTE` multiplié par le nombre de comptes actifs.
 

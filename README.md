@@ -96,6 +96,7 @@ d'autre porte que Google. Renseigne l'une des deux avant de vouloir entrer dans 
 | `AI_ENABLED`                   | oui    | `false` fait échouer immédiatement tout appel modèle.                       |
 | `AI_DAILY_CALL_CAP`            | oui    | Plafond global d'appels réels par jour, vérifié avant émission.             |
 | `AI_DAILY_CALL_CAP_PAR_COMPTE` | oui    | Part d'un seul compte dans ce plafond, réservée avant lui.                  |
+| `AI_DAILY_CALL_CAP_ANONYME`    | oui    | Part du trafic sans compte dans ce plafond, tous visiteurs confondus.       |
 | `AI_MODEL`                     | oui    | Identifiant du modèle.                                                      |
 | `ADMIN_EMAILS`                 | non    | Adresses autorisées à ouvrir `/admin`. Vide n'autorise personne.            |
 | `AI_MAX_TOKENS`                | oui    | `max_tokens` par défaut, toujours envoyé ; une sortie coupée est un échec.  |
@@ -188,11 +189,19 @@ instruction qui incrémente et refuse dans le même mouvement. Compter les ligne
 d'émettre serait une course : deux appels simultanés liraient la même valeur et passeraient tous
 les deux. Une place prise n'est jamais rendue — un appel qui échoue a pu consommer des tokens.
 
-Un appel qui porte un utilisateur prend **deux** places, dans cet ordre : d'abord sa part du jour
-(`AiUserQuota`, plafonnée par `AI_DAILY_CALL_CAP_PAR_COMPTE`), puis la place globale. Si la globale
-est refusée, la part du compte lui est rendue — contrairement à la globale, elle n'a rien émis. Le
-plafond global protège le budget ; il ne protégeait personne de son voisin, et un seul compte
-pouvait fermer la journée de tous les autres.
+Un appel prend **deux** places, dans cet ordre : d'abord la part de qui le demande, puis la place
+globale. Si la globale est refusée, la part lui est rendue — contrairement à la globale, elle n'a
+rien émis.
+
+La part dépend de la provenance. Un appel qui porte un utilisateur prend dans `AiUserQuota`
+(`AI_DAILY_CALL_CAP_PAR_COMPTE`) ; un essai sans compte prend dans `AiAnonymousQuota`
+(`AI_DAILY_CALL_CAP_ANONYME`), un seul seau pour tous les visiteurs ; un appel interne — reprise
+par le cron, outil, évaluation — ne passe que le plafond global, n'ayant personne derrière à
+protéger.
+
+Le plafond global protège le budget ; il ne protégeait personne de son voisin, et un seul compte
+pouvait fermer la journée de tous les autres. La part anonyme joue le même rôle entre le trafic
+public et le trafic identifié, dans les deux sens.
 
 Le refus global n'est pas un échec de job. `runJob` remet le travail en file sans lui compter de
 tentative : la journée est pleine, le même appel réussira demain, et le dépôt continue d'annoncer

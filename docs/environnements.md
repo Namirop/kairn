@@ -176,14 +176,14 @@ précisément pour ça : couper doit prendre effet tout de suite.
 En production, `true` — sinon le produit ne fait rien. C'est un frein de secours,
 pas un réglage.
 
-## Les six réglages qui se changent sans redéployer
+## Les sept réglages qui se changent sans redéployer
 
 Une variable d'environnement se change au déploiement. C'est très bien pour une
 adresse ou un secret, et très mauvais pour un frein de secours : le moment où l'on
 veut couper les appels est rarement celui où l'on a envie d'attendre un build.
 
-Six réglages ont donc une **surcharge en base**, modifiable depuis l'écran
-d'administration : `AI_ENABLED`, `MOCK_AI`, les deux plafonds d'appels,
+Sept réglages ont donc une **surcharge en base**, modifiable depuis l'écran
+d'administration : `AI_ENABLED`, `MOCK_AI`, les trois plafonds d'appels,
 `AI_MAX_TOKENS` et `AI_MODEL`. Ce qui est posé là s'applique **au prochain
 appel**, sans redéploiement.
 
@@ -210,9 +210,9 @@ Trois garde-fous vont avec, et ils ne sont pas décoratifs :
   sinon « pourquoi la génération est coupée depuis mardi » devient une question
   sans réponse.
 
-### `AI_DAILY_CALL_CAP` et `AI_DAILY_CALL_CAP_PAR_COMPTE` — deux plafonds qui protègent deux choses
+### Les trois plafonds d'appels — ils protègent trois choses différentes
 
-Ce sont deux compteurs d'**appels au modèle**, remis à zéro chaque jour **UTC**,
+Ce sont trois compteurs d'**appels au modèle**, remis à zéro chaque jour **UTC**,
 et ils ne défendent pas la même chose.
 
 **`AI_DAILY_CALL_CAP` protège ton budget.** C'est le nombre maximal d'appels réels
@@ -228,6 +228,27 @@ plafond global, seul, ne protège personne de son voisin : un compte enthousiast
 tous les autres jusqu'à minuit. Cette part-là borne ce qu'un compte peut prendre
 dans le plafond global.
 
+**`AI_DAILY_CALL_CAP_ANONYME` protège la landing et les comptes l'un de l'autre.**
+Un essai sans compte n'appartient à personne : il ne se confrontait donc qu'au
+plafond global, et les deux populations partageaient une ressource sans qu'aucune
+ne soit protégée de l'autre. La landing pouvait fermer la journée aux comptes
+connectés, et l'inverse était vrai aussi. Ce n'est pas un problème d'argent — le
+plafond global borne la dépense, c'est son travail — c'est un déni de service
+croisé, et il jouait dans les deux sens.
+
+Un seul seau pour tous les visiteurs, et pas un par empreinte : ce qui répartit à
+l'intérieur du pool, c'est `VISITES_PAR_ADRESSE`, et ça se joue avant l'appel.
+
+Un refus de cette part-là n'est pas un report mais une **panne** : le dépôt part
+en échec, et l'essai n'est pas compté à la visite. Un report laisserait un
+visiteur devant une attente sans fin sur la seule page qui convertit — c'est le
+bon comportement pour un compte, qui reviendra demain, pas pour quelqu'un qui
+découvre le produit.
+
+**Un appel interne** — une reprise par le cron, un outil, une évaluation — ne
+passe que le plafond global. Il n'a personne derrière à protéger de qui que ce
+soit.
+
 L'ordre dans lequel les deux places se prennent n'est pas indifférent. La part du
 compte se prend **en premier**, parce qu'elle se rend : tant que rien n'est parti,
 elle ne doit rien. La place globale se prend ensuite et **ne se rend jamais** — un
@@ -237,15 +258,20 @@ du compte lui est rendue.
 Un appel qui n'appartient à personne — une reprise par le cron, un outil interne —
 ne passe que le plafond global. Il n'a pas de compte à qui prendre une part.
 
-**Le rapport entre les deux est le vrai réglage.** À 150 et 40, quatre comptes
-qui saturent leur part dépassent déjà le plafond global : le quatrième se fait
-refuser par le global alors que sa part était libre. Ce n'est pas un bug, c'est le
-budget qui parle — mais ça veut dire que le global doit rester nettement au-dessus
-de la part multipliée par le nombre de comptes actifs attendus. C'est le genre de
-nombre qu'on choisit pour la production plutôt que d'hériter de ses valeurs
-d'essai.
+**Le rapport entre les trois est le vrai réglage.** Une part qui approche du
+plafond global ne protège de rien : à 40 sur 50, un seul compte fermait la
+journée du produit, ce qui était exactement ce que la variable devait empêcher.
+Elle est descendue à 20, et la part du public à 15 sur ces mêmes 50.
 
-**Oui, les deux doivent être posées sur l'hébergeur.** `readAiConfig()` les lit
+Les parts n'ont aucune raison de faire la somme du global, et ce n'est pas un
+défaut : à 20 et 20, trois comptes qui saturent dépassent déjà 50, et le
+troisième se fait refuser par le global alors que sa part était libre. C'est le
+budget qui parle. Ça veut simplement dire que le global doit rester nettement
+au-dessus de la part multipliée par le nombre de comptes actifs attendus — le
+genre de nombre qu'on choisit pour la production plutôt que d'hériter de ses
+valeurs d'essai.
+
+**Oui, les trois doivent être posées sur l'hébergeur.** `readAiConfig()` les lit
 dans `process.env` et les valide par un schéma Zod à **chaque appel**. Absentes ou
 invalides, la validation échoue et _tout_ appel au modèle lève : plus d'ingestion,
 plus de génération de questions. Ce ne sont pas des réglages facultatifs de
@@ -300,7 +326,7 @@ ni ne se régénèrent, elles **disparaissent**.
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`          | Réutilisables si l'URI de redirection de production est déclarée côté Google, et si l'écran de consentement est **publié** et non en « Testing » |
 | `MOCK_AI`                                           | Interrupteur — **`false`**                                                                                                                       |
 | `AI_ENABLED`                                        | Interrupteur — `true`                                                                                                                            |
-| `AI_DAILY_CALL_CAP`, `AI_DAILY_CALL_CAP_PAR_COMPTE` | Réglages — à choisir pour la charge réelle, pas à hériter du développement                                                                       |
+| `AI_DAILY_CALL_CAP`, `AI_DAILY_CALL_CAP_PAR_COMPTE`, `AI_DAILY_CALL_CAP_ANONYME` | Réglages — à choisir pour la charge réelle, pas à hériter du développement                                    |
 | `AI_MODEL`, `AI_MAX_TOKENS`                         | Réglages — identiques                                                                                                                            |
 | `EMAIL_FROM`                                        | Réglage — sur le domaine vérifié chez le fournisseur d'emails                                                                                    |
 | `ADMIN_EMAILS`                                      | Réglage — identique                                                                                                                              |
