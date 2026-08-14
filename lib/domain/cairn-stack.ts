@@ -1,3 +1,5 @@
+import { tirageDe } from "./tirage-deterministe";
+
 /**
  * Géométrie de l'empilement de pierres.
  *
@@ -57,26 +59,6 @@ export type Empilement = {
   ySol: number;
 };
 
-function empreinte(graine: string): number {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < graine.length; index += 1) {
-    hash ^= graine.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return hash >>> 0;
-}
-
-/** Générateur mulberry32 : court, rapide, suffisamment bien réparti. */
-function generateur(etat: number): () => number {
-  let courant = etat;
-  return () => {
-    courant = (courant + 0x6d2b79f5) >>> 0;
-    let melange = Math.imul(courant ^ (courant >>> 15), 1 | courant);
-    melange = (melange + Math.imul(melange ^ (melange >>> 7), 61 | melange)) ^ melange;
-    return ((melange ^ (melange >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
 function arrondi(valeur: number): number {
   return Math.round(valeur * 100) / 100;
 }
@@ -131,7 +113,7 @@ export function empiler(nombre: number, graines?: string[]): Empilement {
 
   for (let index = 0; index < total; index += 1) {
     const cle = graineDe(index, graines);
-    const tirage = generateur(empreinte(cle));
+    const tirage = tirageDe(cle);
     const progression = total === 1 ? 0 : index / (total - 1);
     const largeur = LARGEUR_BASE * (1 - progression * AFFINEMENT) * (0.86 + tirage() * 0.24);
     const hauteur = 10 + tirage() * 9;

@@ -1,3 +1,5 @@
+import { tirageDe } from "./tirage-deterministe";
+
 /**
  * Géométrie d'une jointure entre deux panneaux : une coupe de roche.
  *
@@ -32,30 +34,6 @@ export type Strates = {
   veines: [string, string];
 };
 
-function empreinte(graine: string): number {
-  let hash = 0x811c9dc5;
-
-  for (let index = 0; index < graine.length; index += 1) {
-    hash ^= graine.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-
-  return hash >>> 0;
-}
-
-/** Générateur mulberry32, le même que celui du cairn. */
-function generateur(etat: number): () => number {
-  let courant = etat;
-
-  return () => {
-    courant = (courant + 0x6d2b79f5) >>> 0;
-    let melange = Math.imul(courant ^ (courant >>> 15), 1 | courant);
-    melange = (melange + Math.imul(melange ^ (melange >>> 7), 61 | melange)) ^ melange;
-
-    return ((melange ^ (melange >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
 function arrondi(valeur: number): number {
   return Math.round(valeur * 100) / 100;
 }
@@ -89,7 +67,7 @@ function jusquenBas(chemin: string): string {
 }
 
 export function strates(graine: string): Strates {
-  const tirage = generateur(empreinte(graine));
+  const tirage = tirageDe(graine);
 
   // Les trois lignes descendent, et chacune ondule un peu moins que la
   // précédente : la couche du dessus est celle qui a été le plus attaquée.

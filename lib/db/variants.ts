@@ -2,6 +2,7 @@ import { readAiConfig } from "@/lib/ai/config";
 import { PROMPT_VERSIONS } from "@/lib/ai/prompts";
 import { prisma } from "@/lib/db/client";
 import type { VariantFacet, VariantFormat } from "@/lib/db/types";
+import { ordonnerLesOptions } from "@/lib/domain/ordre-des-options";
 
 /**
  * Écriture des questions d'un concept.
@@ -22,12 +23,24 @@ export type QuestionAEcrire = {
   cloze: { sentence: string; accepted: string[] } | null;
 };
 
-/** Ce que le format ajoute à la question, ou rien s'il n'ajoute rien. */
-function payloadDe(question: QuestionAEcrire) {
+/**
+ * Ce que le format ajoute à la question, ou rien s'il n'ajoute rien.
+ *
+ * Les options d'un QCM sont remises en ordre avant d'être écrites : le modèle
+ * place la bonne réponse en première position neuf fois sur dix, et ce qui est
+ * stocké ici est ce qui sera montré. La raison complète est dans
+ * `lib/domain/ordre-des-options.ts`.
+ *
+ * La graine est le concept et la facette plutôt que l'id du Variant, qui
+ * n'existe pas encore — `createMany` les fait naître en base. Elle en a les deux
+ * propriétés utiles : une facette n'apparaît qu'une fois par lot, donc chaque
+ * question a la sienne, et elle ne bouge pas d'une régénération à l'autre.
+ */
+function payloadDe(question: QuestionAEcrire, atomId: string) {
   if (question.cloze) return question.cloze;
 
   if (question.options && question.correctIndex !== null) {
-    return { options: question.options, correctIndex: question.correctIndex };
+    return ordonnerLesOptions(question.options, question.correctIndex, `${atomId}:${question.facet}`);
   }
 
   return undefined;
@@ -57,7 +70,7 @@ export async function ecrireQuestions(
         facet: question.facet,
         question: question.question,
         answerKey: question.answerKey,
-        payload: payloadDe(question),
+        payload: payloadDe(question, atomId),
         // Le réglage sous lequel cette question a été écrite. Posé ici, à la
         // création, parce qu'il n'y a pas d'autre moment où on le connaisse.
         promptVersion: PROMPT_VERSIONS.generate_variants,
