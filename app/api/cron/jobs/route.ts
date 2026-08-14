@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAuthorizedCron } from "@/lib/cron/authorization";
 import { failExhaustedJobs, findResumableJobs } from "@/lib/db/generation-job";
-import { oublierLesVisitesAbandonnees } from "@/lib/db/session-anonyme";
+import { oublierLesVisitesAbandonnees } from "@/lib/db/depot-de-visite";
 import { runJob, type JobOutcome } from "@/lib/jobs/runner";
 
 /**

@@ -12,7 +12,7 @@ import {
 } from "@/lib/db/concepts";
 import { inscrireEnListeDattente } from "@/lib/db/quota-depots";
 import { supprimerDepot } from "@/lib/db/reprise-depot";
-import { deposer, SIGNES_MAXIMUM } from "@/lib/depots/deposer";
+import { deposer, CARACTERES_MAXIMUM } from "@/lib/depots/deposer";
 import { redecouper, type ResultatRedecoupage } from "@/lib/depots/redecouper";
 import { declencher } from "@/lib/jobs/queue";
 
@@ -63,7 +63,7 @@ export async function modifierConceptAction(donnees: FormData): Promise<void> {
   const atomId = (donnees.get("atomId") ?? "").toString();
   const texte = (donnees.get("concept") ?? "").toString().trim();
 
-  if (texte.length < 20 || texte.length > SIGNES_MAXIMUM) return;
+  if (texte.length < 20 || texte.length > CARACTERES_MAXIMUM) return;
 
   const jobs = await modifierConcept(atomId, userId, texte);
 

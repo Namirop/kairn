@@ -74,7 +74,7 @@ function controlerMcq(variant: VariantAControler): Manquement[] {
   return [
     {
       regle: "longueurs",
-      detail: `la plus longue option fait ${rapport.toFixed(1)}× la plus courte (${plusLongue} contre ${plusCourte} signes)`,
+      detail: `la plus longue option fait ${rapport.toFixed(1)}× la plus courte (${plusLongue} contre ${plusCourte} caractères)`,
     },
   ];
 }

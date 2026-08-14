@@ -17,13 +17,13 @@ import { enqueueJob } from "@/lib/jobs/queue";
  * ce qui a été déposé, pas ce qui a été tenté.
  */
 
-export const SIGNES_MAXIMUM = 8000;
+export const CARACTERES_MAXIMUM = 8000;
 
 const CLE_ILLISIBLE = "Ce dépôt n'a pas pu être identifié. Recharge la page et recommence.";
 
 const depotSchema = z.object({
-  texte: z.string().max(SIGNES_MAXIMUM, {
-    error: `Ce dépôt dépasse ${SIGNES_MAXIMUM} signes. Coupe-le en deux : deux dépôts valent mieux qu'un tronqué.`,
+  texte: z.string().max(CARACTERES_MAXIMUM, {
+    error: `Ce dépôt dépasse ${CARACTERES_MAXIMUM} caractères. Coupe-le en deux : deux dépôts valent mieux qu'un tronqué.`,
   }),
   // L'utilisateur ne remplit jamais ce champ : s'il ne tient pas, c'est le
   // formulaire qui est en défaut, pas ce qu'on a écrit dedans. Le message reste

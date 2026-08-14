@@ -1,12 +1,12 @@
 import { prisma } from "@/lib/db/client";
 import { compterLaVisiteReprise, lireUsageDeLaPeriode } from "@/lib/db/quota-depots";
 import {
-  DEPOTS_PAR_ADRESSE,
   JOURS_AVANT_OUBLI,
   lireLeDepotAnonyme,
   oublierLesVisitesAbandonnees,
   rattacherAuCompte,
-} from "@/lib/db/session-anonyme";
+} from "@/lib/db/depot-de-visite";
+import { DEPOTS_PAR_ADRESSE } from "@/lib/db/session-anonyme";
 import { deposerSansCompte } from "@/lib/depots/deposer-sans-compte";
 import { executerToutLePipeline } from "./depot-simule";
 import { record } from "./journal";

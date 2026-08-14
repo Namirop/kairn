@@ -1,5 +1,6 @@
 import { lireLaVisite } from "@/lib/auth/visite";
-import { lireLeDepotAnonyme } from "@/lib/db/session-anonyme";
+import { lireLeDepotAnonyme } from "@/lib/db/depot-de-visite";
+import { sessionDisponible } from "@/lib/db/session-anonyme";
 
 /**
  * Où en est l'essai de ce visiteur, s'il en a un.
@@ -17,6 +18,22 @@ export type AvancementDeLEssai = {
   concepts: { id: string; concept: string; tags: string[] }[];
   /** Renseigné quand la chaîne s'est arrêtée sans rien produire. */
   motifDechec: string | null;
+  /**
+   * L'arrêt vient de nous et non du texte déposé.
+   *
+   * Les deux ne se disent pas de la même façon : un rejet demande de retenter
+   * avec autre chose, une panne ne demande rien du tout à qui n'y est pour rien.
+   */
+  panne: boolean;
+  /**
+   * La visite garde-t-elle de quoi retenter ?
+   *
+   * Lu ici plutôt que déduit du nombre de concepts : c'est la base qui décide, et
+   * elle ne compte pas nos pannes. L'écran s'en sert pour ne montrer « Réessayer »
+   * que quand le geste aboutira — un bouton qui promet ce que le serveur refuse
+   * est pire que pas de bouton.
+   */
+  peutRedeposer: boolean;
 };
 
 /** Les trois fins possibles d'une extraction. Tout le reste est en cours. */
@@ -34,10 +51,15 @@ export async function lireLEssaiEnCours(): Promise<AvancementDeLEssai | null> {
   if (!depot) return null;
 
   const arrete = estArrete(depot.statut);
+  const vide = depot.concepts.length === 0;
 
   return {
     enCours: !arrete,
     concepts: depot.concepts,
-    motifDechec: depot.concepts.length === 0 && arrete ? depot.motifDechec : null,
+    motifDechec: vide && arrete ? depot.motifDechec : null,
+    panne: vide && depot.statut === "FAILED",
+    // Inutile de le demander tant que la chaîne tourne, et faux tant qu'elle
+    // tourne : le dépôt en cours compte déjà comme un essai pris.
+    peutRedeposer: vide && arrete ? await sessionDisponible(visite) : false,
   };
 }

@@ -1,13 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { avancementDeLEssaiAction, essayerAction, type EtatEssai } from "@/app/(marketing)/actions";
-import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
-import { ConceptsEnAttente } from "@/components/site/concepts-en-attente";
-import { PileDeConcepts } from "@/components/site/pile-de-concepts";
+import { ResultatDeLEssai } from "@/components/site/resultat-de-lessai";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/lib/auth/routes";
+import { CARACTERES_MAXIMUM_ANONYME } from "@/lib/depots/bornes-de-lessai";
+import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
 /**
  * L'essai, sur la landing : on dépose, et les concepts arrivent pour de vrai.
@@ -27,6 +25,16 @@ import { ROUTES } from "@/lib/auth/routes";
 const RYTHME_MS = 1000;
 const ESSAIS_MAXIMUM = 60;
 
+/**
+ * Au-delà, on montre le compteur : avant, il n'apprend rien à personne.
+ *
+ * Trois quarts du maximum, comme dans le formulaire du produit. La borne, elle,
+ * est importée et non recopiée : deux nombres qui doivent être égaux et qui
+ * vivent à deux endroits finissent par diverger, et c'est l'écran qui ment
+ * pendant que le serveur refuse.
+ */
+const SEUIL_COMPTEUR = Math.floor(CARACTERES_MAXIMUM_ANONYME * 0.75);
+
 export function EssaiDeDepot({
   invite,
   essaiPrecedent,
@@ -40,6 +48,8 @@ export function EssaiDeDepot({
   // Remet le champ après un essai qui n'a rien donné. La base tranchera : elle
   // n'accorde qu'une seconde chance, et seulement si la première a échoué.
   const [recommence, setRecommence] = useState(false);
+  const [texte, setTexte] = useState("");
+  const trop = texte.length > CARACTERES_MAXIMUM_ANONYME;
 
   useEffect(() => {
     if (!etat.sessionId) return;
@@ -120,16 +130,36 @@ export function EssaiDeDepot({
           id="essai"
           name="texte"
           rows={4}
+          value={texte}
+          onChange={(evenement) => setTexte(evenement.target.value)}
           placeholder={invite}
           className="pb-pas-4 text-corps field-sizing-content ascenseur-discret max-h-[14rem] min-h-32 w-full resize-none overflow-y-auto border-0 bg-transparent leading-relaxed text-stone-900 outline-none placeholder:text-stone-500 focus-visible:outline-none"
         />
       </div>
 
       <div className="gap-pas-4 flex flex-wrap items-center">
-        <Button type="submit" size="lg" disabled={enCours}>
+        <Button type="submit" size="lg" disabled={enCours || trop}>
           {enCours ? "Découpage en cours…" : "Voir ce que ça donne"}
         </Button>
-        <span className="text-petit text-stone-500">Sans compte, sans email.</span>
+
+        {/* Le compteur ne paraît qu'à l'approche de la borne. Avant, il n'apprend
+            rien et compte à voix haute pendant qu'on écrit ; après, il est la
+            seule chose qui dise pourquoi le bouton refuse. Le même seuil que
+            dans le formulaire du produit — trois quarts du maximum.
+
+            Il remplace le libellé rassurant plutôt que de s'ajouter à côté :
+            « sans compte, sans email » n'a plus rien à faire là au moment où on
+            annonce un refus. */}
+        {texte.length > SEUIL_COMPTEUR ? (
+          <span
+            className={`text-mono font-mono tabular-nums ${trop ? "text-alerte" : "text-stone-500"}`}
+          >
+            {texte.length.toLocaleString("fr-FR")} /{" "}
+            {CARACTERES_MAXIMUM_ANONYME.toLocaleString("fr-FR")}
+          </span>
+        ) : (
+          <span className="text-petit text-stone-500">Sans compte, sans email.</span>
+        )}
       </div>
 
       {/* L'espace du message est réservé : l'erreur ne décale pas le bouton. */}
@@ -140,55 +170,3 @@ export function EssaiDeDepot({
   );
 }
 
-function ResultatDeLEssai({
-  avancement,
-  setRecommence,
-}: {
-  avancement: AvancementDeLEssai | null;
-  setRecommence: (valeur: boolean) => void;
-}) {
-  if (!avancement || avancement.enCours) return <ConceptsEnAttente />;
-
-  if (avancement.concepts.length === 0) {
-    return (
-      <div className="gap-pas-3 flex flex-col" role="status">
-        <p className="text-corps text-stone-900">
-          {avancement.motifDechec ?? "Ce texte n'a rien donné à retenir."}
-        </p>
-        <p className="text-petit text-stone-500">
-          Retente avec une explication, une règle, un mécanisme — quelque chose que tu voudrais
-          savoir dans un mois.
-        </p>
-
-        {/* Une seconde chance, et une seule : sans elle, la page la plus
-            importante du produit devient une impasse pour qui a collé le mauvais
-            texte du premier coup. */}
-        <div>
-          <Button type="button" variant="outline" onClick={() => setRecommence(true)}>
-            Réessayer
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="gap-pas-4 flex flex-col" role="status">
-      <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-        {avancement.concepts.length}{" "}
-        {avancement.concepts.length === 1 ? "concept trouvé" : "concepts trouvés"}
-      </p>
-
-      <PileDeConcepts concepts={avancement.concepts} />
-
-      <div className="mt-pas-2 gap-pas-3 flex flex-wrap items-center">
-        <Button asChild size="lg">
-          <Link href={ROUTES.connexion}>Les garder</Link>
-        </Button>
-        <span className="text-petit max-w-sm text-stone-500">
-          Ton adresse suffit. On te les repose au bon moment, et tu récupères ceux-ci.
-        </span>
-      </div>
-    </div>
-  );
-}

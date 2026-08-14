@@ -1,7 +1,11 @@
 import { z } from "zod";
 import { prisma } from "@/lib/db/client";
 import { marquerEnCours } from "@/lib/db/ingestion";
-import { ouvrirUneSession, sessionDisponible } from "@/lib/db/session-anonyme";
+import { essaiAbouti, ouvrirUneSession, sessionDisponible } from "@/lib/db/session-anonyme";
+import {
+  CARACTERES_MAXIMUM_ANONYME,
+  CARACTERES_MINIMUM_ANONYME,
+} from "@/lib/depots/bornes-de-lessai";
 import { essaiSansLimite, VARIABLE_SANS_LIMITE } from "@/lib/depots/essai-sans-limite";
 import { enqueueJob } from "@/lib/jobs/queue";
 
@@ -22,19 +26,15 @@ import { enqueueJob } from "@/lib/jobs/queue";
  * Le texte suffit à montrer ce que fait le produit.
  */
 
-export const SIGNES_MAXIMUM_ANONYME = 4000;
-/** En dessous, il n'y a rien à découper, et la démonstration tombe à plat. */
-export const SIGNES_MINIMUM_ANONYME = 40;
-
 const anonymeSchema = z.object({
   texte: z
     .string()
     .trim()
-    .min(SIGNES_MINIMUM_ANONYME, {
+    .min(CARACTERES_MINIMUM_ANONYME, {
       error: "Colle un peu plus de matière : une phrase ou deux, au minimum.",
     })
-    .max(SIGNES_MAXIMUM_ANONYME, {
-      error: `Ce texte dépasse ${SIGNES_MAXIMUM_ANONYME} signes. Crée un compte pour déposer plus long.`,
+    .max(CARACTERES_MAXIMUM_ANONYME, {
+      error: `Ce texte dépasse ${CARACTERES_MAXIMUM_ANONYME} caractères. Crée un compte pour déposer plus long.`,
     }),
 });
 
@@ -46,6 +46,16 @@ const TROP_DE_DEPOTS =
 
 const DEJA_DEPOSE =
   "Tu as fait ton essai. Crée un compte pour garder tes concepts et en déposer d'autres.";
+
+/**
+ * Le même refus, mais sans concepts derrière.
+ *
+ * L'essai n'a rien donné, deux fois. Lui parler de « tes concepts » désignerait
+ * du vide et ferait passer l'invitation pour un bug ; on dit ce qui s'est passé,
+ * et ce qu'un compte change — des dépôts plus longs, et des reprises.
+ */
+const ESSAIS_EPUISES =
+  "Tes essais sont faits pour cette visite. Un compte lève la limite, accepte des textes plus longs, et c'est gratuit.";
 
 /**
  * Dépose sans compte, ou dit pourquoi c'est refusé.
@@ -79,7 +89,9 @@ export async function deposerSansCompte(
   }
 
   if (!sansLimite && sessionExistante && !(await sessionDisponible(sessionExistante))) {
-    return { ok: false, motif: DEJA_DEPOSE };
+    const abouti = await essaiAbouti(sessionExistante);
+
+    return { ok: false, motif: abouti ? DEJA_DEPOSE : ESSAIS_EPUISES };
   }
 
   const session =

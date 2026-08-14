@@ -7,7 +7,7 @@ import {
   lireUsageDeLaPeriode,
   periodeDuCompte,
 } from "@/lib/db/quota-depots";
-import { deposer, SIGNES_MAXIMUM, type ResultatDepot } from "@/lib/depots/deposer";
+import { deposer, CARACTERES_MAXIMUM, type ResultatDepot } from "@/lib/depots/deposer";
 import { MOTIFS_DE_REFUS } from "@/lib/depots/refus-de-quota";
 import { GESTES_PAR_FENETRE, prendreUnGeste } from "@/lib/db/limite-de-gestes";
 import { enregistrerEntrainement } from "@/lib/db/entrainement";
@@ -297,11 +297,11 @@ export async function casBornesDentree(userId: string): Promise<void> {
 
   const trop = await deposer(
     userId,
-    formulaire({ texte: "a".repeat(SIGNES_MAXIMUM + 1), cleEnvoi: "verif-borne-texte" }),
+    formulaire({ texte: "a".repeat(CARACTERES_MAXIMUM + 1), cleEnvoi: "verif-borne-texte" }),
   );
 
   record(
-    `Bornes — un texte de plus de ${SIGNES_MAXIMUM} signes est refusé côté serveur`,
+    `Bornes — un texte de plus de ${CARACTERES_MAXIMUM} caractères est refusé côté serveur`,
     !trop.ok,
     trop.ok ? "accepté" : trop.motif,
   );

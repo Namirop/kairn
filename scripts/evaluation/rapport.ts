@@ -103,7 +103,7 @@ function appelsParDepot(passages: Passage[]): string {
 }
 
 function longueursDesPrompts(): string {
-  return `Prompts : extraction ${SYSTEM_PROMPTS.extract_atoms.length} signes, questions ${SYSTEM_PROMPTS.generate_variants.length}, lecture ${SYSTEM_PROMPTS.ocr_extract.length}`;
+  return `Prompts : extraction ${SYSTEM_PROMPTS.extract_atoms.length} caractères, questions ${SYSTEM_PROMPTS.generate_variants.length}, lecture ${SYSTEM_PROMPTS.ocr_extract.length}`;
 }
 
 export function rendreRapport(

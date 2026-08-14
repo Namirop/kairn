@@ -1,6 +1,6 @@
 import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { compterLaVisiteReprise } from "@/lib/db/quota-depots";
-import { rattacherAuCompte } from "@/lib/db/session-anonyme";
+import { rattacherAuCompte } from "@/lib/db/depot-de-visite";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { lireLaVisite, oublierLaVisite } from "@/lib/auth/visite";
 import { declencher } from "@/lib/jobs/queue";

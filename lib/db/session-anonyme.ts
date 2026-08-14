@@ -35,15 +35,6 @@ export const DEPOTS_PAR_ADRESSE = 2;
 /** La fenêtre de la limite par adresse. Un jour : on n'est pas à la minute. */
 export const FENETRE_ADRESSE_HEURES = 24;
 
-/**
- * Au-delà, un dépôt anonyme que personne n'a réclamé n'intéresse plus personne.
- *
- * Assez long pour qu'on revienne le lendemain finir ce qu'on a commencé, assez
- * court pour ne pas garder indéfiniment le texte de quelqu'un qui n'a jamais
- * créé de compte — et qui n'a donc accepté aucune conservation.
- */
-export const JOURS_AVANT_OUBLI = 7;
-
 export function empreinteDeLAdresse(adresse: string): string {
   const sel = process.env.BETTER_AUTH_SECRET ?? "";
 
@@ -102,14 +93,36 @@ export async function ouvrirUneSession(
  */
 export const ESSAIS_PAR_VISITE = 2;
 
-/** Cette visite peut-elle encore déposer ? */
+/**
+ * Le plafond dur, celui que même nos propres pannes ne franchissent pas.
+ *
+ * Une panne ne consomme pas d'essai — voir plus bas — et sans cette borne, une
+ * panne *systématique* rendrait la visite infinie : chaque reprise repart pour
+ * une extraction, et la seule chose qui finirait par arrêter la page serait le
+ * plafond journalier du produit entier. Quatre laisse deux reprises franches
+ * par-dessus les deux essais dus, et referme après.
+ */
+export const ESSAIS_MAXIMUM_PAR_VISITE = 4;
+
+/**
+ * Cette visite peut-elle encore déposer ?
+ *
+ * **Une panne ne compte pas.** Un dépôt en `FAILED` est un incident de notre
+ * côté — appel qui lève, sortie illisible, plafond atteint — et facturer un
+ * essai pour ça revient à dire « tu as fait tes deux tentatives » à quelqu'un
+ * qui n'en a réellement fait aucune. Le produit se serait cassé et aurait fermé
+ * la porte derrière lui, sur la page qui convertit. Seul un `REJECTED` compte :
+ * là, la chaîne a tourné, l'extraction est due, et c'est le texte qui n'avait
+ * rien à retenir.
+ *
+ * La règle est la même que celle de `marquerEchec` pour un compte, qui rembourse
+ * sa place à un dépôt en panne. Elle s'applique ici à la seule monnaie qu'ait un
+ * visiteur : ses essais.
+ */
 export async function sessionDisponible(sessionId: string): Promise<boolean> {
   const session = await prisma.anonymousSession.findUnique({
     where: { id: sessionId },
-    select: {
-      claimedAt: true,
-      _count: { select: { inputs: true, atoms: true } },
-    },
+    select: { claimedAt: true, _count: { select: { atoms: true } } },
   });
 
   if (!session || session.claimedAt !== null) return false;
@@ -117,115 +130,24 @@ export async function sessionDisponible(sessionId: string): Promise<boolean> {
   // Des concepts existent : l'essai a abouti, il n'y a plus rien à démontrer.
   if (session._count.atoms > 0) return false;
 
-  return session._count.inputs < ESSAIS_PAR_VISITE;
-}
-
-export type DepotAnonyme = {
-  inputId: string;
-  statut: string;
-  motifDechec: string | null;
-  concepts: { id: string; concept: string; tags: string[] }[];
-};
-
-/** Ce qu'une session a produit, pour l'afficher à qui vient de déposer. */
-export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonyme | null> {
-  const depot = await prisma.input.findFirst({
-    where: { anonymousSessionId: sessionId },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      status: true,
-      failureReason: true,
-      atoms: {
-        orderBy: { createdAt: "asc" },
-        select: { id: true, concept: true, tags: true },
-      },
-    },
-  });
-
-  if (!depot) return null;
-
-  return {
-    inputId: depot.id,
-    statut: depot.status,
-    motifDechec: depot.failureReason,
-    concepts: depot.atoms,
-  };
-}
-
-/**
- * Rattache à un compte ce qu'une session anonyme a produit.
- *
- * Tout se joue dans une transaction : un dépôt qui passerait au compte sans ses
- * concepts, ou l'inverse, laisserait quelqu'un devant une liste vide en lui
- * disant qu'elle est à lui. La session est marquée réclamée dans le même
- * mouvement, ce qui la met hors de portée du cron de nettoyage.
- *
- * Rend les identifiants des concepts repris : c'est à l'appelant de leur
- * demander des questions, parce que c'est **là** que la dépense reprend, et
- * qu'elle doit se voir dans le code qui décide.
- */
-export async function rattacherAuCompte(
-  sessionId: string,
-  userId: string,
-  maintenant: Date = new Date(),
-): Promise<{ inputIds: string[]; atomIds: string[] }> {
-  const session = await prisma.anonymousSession.findUnique({
-    where: { id: sessionId },
-    select: { claimedAt: true },
-  });
-
-  // Déjà réclamée : deux onglets, ou un rechargement. Le premier a gagné.
-  if (!session || session.claimedAt !== null) return { inputIds: [], atomIds: [] };
-
-  const depots = await prisma.input.findMany({
-    where: { anonymousSessionId: sessionId },
-    select: { id: true, atoms: { select: { id: true } } },
-  });
-
-  if (depots.length === 0) {
-    await prisma.anonymousSession.update({
-      where: { id: sessionId },
-      data: { claimedAt: maintenant },
-    });
-
-    return { inputIds: [], atomIds: [] };
-  }
-
-  await prisma.$transaction([
-    prisma.input.updateMany({
-      where: { anonymousSessionId: sessionId },
-      data: { userId, anonymousSessionId: null },
-    }),
-    prisma.atom.updateMany({
-      where: { anonymousSessionId: sessionId },
-      data: { userId, anonymousSessionId: null },
-    }),
-    prisma.anonymousSession.update({
-      where: { id: sessionId },
-      data: { claimedAt: maintenant },
-    }),
+  const [total, imputables] = await Promise.all([
+    prisma.input.count({ where: { anonymousSessionId: sessionId } }),
+    prisma.input.count({ where: { anonymousSessionId: sessionId, status: { not: "FAILED" } } }),
   ]);
 
-  return {
-    inputIds: depots.map((depot) => depot.id),
-    atomIds: depots.flatMap((depot) => depot.atoms.map((atome) => atome.id)),
-  };
+  if (total >= ESSAIS_MAXIMUM_PAR_VISITE) return false;
+
+  return imputables < ESSAIS_PAR_VISITE;
 }
 
 /**
- * Efface les visites que personne n'a réclamées.
+ * L'essai de cette visite a-t-il produit quelque chose ?
  *
- * Les cascades emportent le dépôt et ses concepts. C'est une obligation autant
- * qu'un ménage : quelqu'un qui n'a jamais créé de compte n'a accepté aucune
- * conservation, et son texte n'a pas à rester.
+ * Sert à choisir ce qu'on dit en refusant un dépôt de plus. « Crée un compte pour
+ * garder tes concepts » à quelqu'un qui n'en a aucun désigne du vide, et fait
+ * passer une invitation pour une erreur.
  */
-export async function oublierLesVisitesAbandonnees(maintenant: Date = new Date()): Promise<number> {
-  const limite = new Date(maintenant.getTime() - JOURS_AVANT_OUBLI * 24 * 60 * 60 * 1000);
-
-  const { count } = await prisma.anonymousSession.deleteMany({
-    where: { claimedAt: null, createdAt: { lt: limite } },
-  });
-
-  return count;
+export async function essaiAbouti(sessionId: string): Promise<boolean> {
+  return (await prisma.atom.count({ where: { anonymousSessionId: sessionId } })) > 0;
 }
+

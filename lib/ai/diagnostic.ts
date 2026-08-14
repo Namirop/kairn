@@ -18,7 +18,7 @@ export function apercuBrut(entree: unknown, max = APERCU_MAX): string {
 
   if (texte === undefined) return String(entree);
 
-  return texte.length > max ? `${texte.slice(0, max)}… (${texte.length} signes en tout)` : texte;
+  return texte.length > max ? `${texte.slice(0, max)}… (${texte.length} caractères en tout)` : texte;
 }
 
 function entrer(valeur: unknown, cle: PropertyKey): unknown {

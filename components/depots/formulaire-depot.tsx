@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
  * puisqu'elle décrit une position dans l'arbre, pas un geste.
  */
 
-const SIGNES_MAXIMUM = 8000;
+const CARACTERES_MAXIMUM = 8000;
 
 /** Au-delà, on montre le compteur : avant, il n'apprend rien à personne. */
 const SEUIL_COMPTEUR = 6000;
@@ -41,7 +41,7 @@ export function FormulaireDepot({
   const [texte, setTexte] = useState("");
   const [capture, setCapture] = useState<string | null>(null);
   const fichier = useRef<HTMLInputElement>(null);
-  const trop = texte.length > SIGNES_MAXIMUM;
+  const trop = texte.length > CARACTERES_MAXIMUM;
 
   return (
     <form action={action} noValidate className="gap-pas-4 flex max-w-3xl flex-col">
@@ -113,7 +113,7 @@ export function FormulaireDepot({
             <span
               className={`text-mono font-mono tabular-nums ${trop ? "text-alerte" : "text-stone-500"}`}
             >
-              {texte.length.toLocaleString("fr-FR")} / {SIGNES_MAXIMUM.toLocaleString("fr-FR")}
+              {texte.length.toLocaleString("fr-FR")} / {CARACTERES_MAXIMUM.toLocaleString("fr-FR")}
             </span>
           ) : null}
           <Button type="submit" disabled={enCours || trop}>
