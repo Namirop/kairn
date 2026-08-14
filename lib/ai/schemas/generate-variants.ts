@@ -192,7 +192,16 @@ const generateVariantsValidation = sortieLue.transform((sortie) => {
     FACETTES.every(([cle]) => !inexploitable(entree[cle])),
   );
 
+  // Les rangs que *nous* avons retirés, distingués de ceux que le modèle n'a
+  // jamais rendus. Sans ce compte, une relecture trop sévère et un modèle
+  // avare produisent exactement le même silence, et on ne saurait pas lequel
+  // des deux on regarde.
+  const ecartes = uniques
+    .filter((entree) => !servables.includes(entree))
+    .map((entree) => entree.rang);
+
   return {
+    ecartes,
     lots: servables.map((entree) => ({
       rang: entree.rang,
       variants: FACETTES.map(([cle, facet]) => {

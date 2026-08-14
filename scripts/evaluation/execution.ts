@@ -206,7 +206,7 @@ async function genererPourGroupe(groupe: Concept[]): Promise<ConceptEvalue[]> {
   }));
 
   try {
-    const { lots } = await callAI({
+    const { lots, ecartes } = await callAI({
       // L'emplacement du trou est décidé par le serveur et imposé par la
       // grammaire de cet appel-là. La graine est celle du premier concept du
       // groupe : la contrainte vaut pour tout l'envoi.
@@ -219,12 +219,14 @@ async function genererPourGroupe(groupe: Concept[]): Promise<ConceptEvalue[]> {
       const lot = lots.find((candidat) => candidat.rang === index + 1);
 
       if (!lot) {
-        return {
-          ...entree,
-          variants: [],
-          manquementsVariants: [],
-          echec: { motif: `aucun lot rendu pour le concept ${index + 1} de l'envoi` },
-        };
+        // Deux silences très différents : un lot que le modèle n'a pas rendu,
+        // et un lot qu'on a retiré nous-mêmes parce qu'on n'aurait pas su le
+        // servir. Les confondre reviendrait à ne plus voir sa propre relecture.
+        const motif = ecartes.includes(index + 1)
+          ? `lot écarté à la relecture : le concept ${index + 1} portait une question inexploitable`
+          : `aucun lot rendu pour le concept ${index + 1} de l'envoi`;
+
+        return { ...entree, variants: [], manquementsVariants: [], echec: { motif } };
       }
 
       const variants = servir(lot.variants, entree.concept.concept);
