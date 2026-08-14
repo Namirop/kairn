@@ -5,7 +5,11 @@ import { rejoindreListeDattenteAction } from "@/app/(app)/depots/actions";
 import { Button } from "@/components/ui/button";
 
 /**
- * Ce qu'on montre quand la journée est pleine.
+ * Ce qu'on montre quand la période est pleine.
+ *
+ * La période est le mois, pas la journée : elle court depuis la date
+ * d'inscription et se renouvelle en `use-it-or-lose-it`. Le texte le dit déjà ;
+ * ce commentaire disait l'inverse.
  *
  * Ce n'est pas une erreur : l'utilisateur n'a rien fait de mal. L'écran dit ce
  * qui se passe, quand ça se remet à zéro, et ouvre une porte.

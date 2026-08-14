@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { creerDepot, marquerEnCours } from "@/lib/db/ingestion";
 import { reserverDepot, rendreDepot } from "@/lib/db/quota-depots";
+import { CARACTERES_MAXIMUM, longueurEnClair } from "@/lib/depots/bornes-du-depot";
 import { refusDeQuota } from "@/lib/depots/refus-de-quota";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { preparerCapture, TAILLE_MAXIMALE_OCTETS } from "@/lib/images/capture";
@@ -17,13 +18,11 @@ import { enqueueJob } from "@/lib/jobs/queue";
  * ce qui a été déposé, pas ce qui a été tenté.
  */
 
-export const CARACTERES_MAXIMUM = 8000;
-
 const CLE_ILLISIBLE = "Ce dépôt n'a pas pu être identifié. Recharge la page et recommence.";
 
 const depotSchema = z.object({
   texte: z.string().max(CARACTERES_MAXIMUM, {
-    error: `Ce dépôt dépasse ${CARACTERES_MAXIMUM} caractères. Coupe-le en deux : deux dépôts valent mieux qu'un tronqué.`,
+    error: `Ce dépôt dépasse ${longueurEnClair(CARACTERES_MAXIMUM)}. Coupe-le en deux : deux dépôts valent mieux qu'un tronqué.`,
   }),
   // L'utilisateur ne remplit jamais ce champ : s'il ne tient pas, c'est le
   // formulaire qui est en défaut, pas ce qu'on a écrit dedans. Le message reste

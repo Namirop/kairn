@@ -34,6 +34,10 @@ export type DepotDetaille = {
   extractedText: string | null;
   status: InputStatus;
   failureReason: string | null;
+  /** Le dépôt portait plus de concepts que le plafond ; on a gardé la tête. */
+  conceptsTronques: boolean;
+  /** La capture portait plus de texte qu'un dépôt n'en accepte. */
+  texteTronque: boolean;
   createdAt: Date;
   concepts: ConceptLu[];
   /** Travaux encore en cours ou en attente, avec leur nature : c'est elle qui
@@ -54,6 +58,8 @@ export async function lireDepotDetaille(
       extractedText: true,
       status: true,
       failureReason: true,
+      conceptsTronques: true,
+      texteTronque: true,
       createdAt: true,
       atoms: {
         orderBy: { createdAt: "asc" },

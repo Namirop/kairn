@@ -15,6 +15,8 @@ import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";
 import { etatDuDepot, libelleEtat, redecoupable } from "@/lib/domain/etat-depot";
+import { PLAFOND_CONCEPTS_PAR_DEPOT } from "@/lib/domain/plafond-de-concepts";
+import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 
 export const metadata: Metadata = { title: "Dépôt" };
 
@@ -75,6 +77,12 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
             <p className="mt-pas-3 p-pas-4 text-petit rounded-carte bg-surface-ombre whitespace-pre-wrap text-stone-700">
               {texte}
             </p>
+            {depot.texteTronque ? (
+              <p className="mt-pas-2 text-petit text-stone-500">
+                La capture portait plus de texte qu&apos;un dépôt n&apos;en accepte. La lecture
+                s&apos;arrête à {CARACTERES_MAXIMUM.toLocaleString("fr-FR")} caractères.
+              </p>
+            ) : null}
           </section>
         ) : null}
       </Panneau>
@@ -85,6 +93,15 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
         <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
           Ce qu&apos;on en a tiré
         </h2>
+
+        {depot.conceptsTronques ? (
+          // La borne est la nôtre : le message dit ce qui s'est passé et ouvre
+          // une porte, sans conseiller de déposer moins ni reprocher la longueur.
+          <p className="mt-pas-2 text-petit text-stone-500">
+            Ce texte en portait plus. On a gardé les {PLAFOND_CONCEPTS_PAR_DEPOT} plus importants —
+            dépose la suite si tu veux le reste.
+          </p>
+        ) : null}
 
         {depot.concepts.length === 0 ? (
           <div className="mt-pas-2">

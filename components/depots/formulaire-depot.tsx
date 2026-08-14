@@ -5,6 +5,7 @@ import { Paperclip, X } from "lucide-react";
 import { deposerAction, type EtatDepot } from "@/app/(app)/depots/actions";
 import { ExemplesDeDepot } from "@/components/depots/exemples-de-depot";
 import { Button } from "@/components/ui/button";
+import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 
 /**
  * Le geste de dépôt : un champ, une pièce jointe facultative, un bouton.
@@ -19,10 +20,8 @@ import { Button } from "@/components/ui/button";
  * puisqu'elle décrit une position dans l'arbre, pas un geste.
  */
 
-const CARACTERES_MAXIMUM = 8000;
-
 /** Au-delà, on montre le compteur : avant, il n'apprend rien à personne. */
-const SEUIL_COMPTEUR = 6000;
+const SEUIL_COMPTEUR = Math.floor(CARACTERES_MAXIMUM * 0.75);
 
 export function FormulaireDepot({
   restants,
@@ -131,7 +130,13 @@ export function FormulaireDepot({
           // Ce qui reste se compte en concepts : une phrase en consomme un, un
           // article en consomme huit. C'est la matière qui est plafonnée, pas
           // le nombre de fois qu'on colle quelque chose.
-          `Il te reste ${restants} ${restants === 1 ? "concept" : "concepts"} à retenir aujourd'hui.`
+          //
+          // « Ce mois-ci » et non « aujourd'hui » : `restants` vient de
+          // `CONCEPTS_PAR_PERIODE`, qui est mensuel. L'écran annonçait donc
+          // trente concepts pour la journée, et quelqu'un qui les déposait
+          // trouvait zéro le lendemain sans comprendre. La valeur était juste,
+          // le mot à côté était faux.
+          `Il te reste ${restants} ${restants === 1 ? "concept" : "concepts"} à retenir ce mois-ci.`
         )}
       </p>
     </form>

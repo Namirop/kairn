@@ -32,10 +32,21 @@ export const CONCEPTS_PAR_PERIODE = 30;
 /**
  * Second rideau : au-delà, ce sont les extractions qu'on paie pour rien.
  *
- * Le double du plafond de concepts. Un dépôt rend un à huit concepts, donc
- * trente concepts s'atteignent en cinq dépôts d'article comme en trente dépôts
- * d'une phrase ; soixante laisse la place aux deux usages et borne à 0,30 $ ce
- * que coûterait quelqu'un qui ne déposerait que des textes rejetés.
+ * C'est le seul endroit où la longueur d'un texte échappe au quota en concepts.
+ * Un dépôt rejeté paie son extraction et ne rend aucun concept : il n'entre donc
+ * jamais dans le compteur que `CONCEPTS_PAR_PERIODE` surveille, et sans ce
+ * rideau-là quelqu'un pourrait ne déposer que des textes rejetés, sans fin.
+ *
+ * Le chiffre vient de là : soixante extractions de 8 000 caractères, autour de
+ * 2 400 tokens d'entrée chacune, coûtent près de **0,45 $**. Ce commentaire
+ * annonçait 0,30 $, calculés sur des extractions courtes — l'ordre de grandeur
+ * tenait, la justification écrite était fausse, et c'est elle qu'on relira le
+ * jour où on voudra changer la valeur.
+ *
+ * Le double du plafond de concepts. Un dépôt rend un à vingt concepts
+ * (`PLAFOND_CONCEPTS_PAR_DEPOT`) : trente concepts s'atteignent donc en deux
+ * articles denses comme en trente phrases, et soixante dépôts laissent la place
+ * aux deux usages.
  */
 export const DEPOTS_PAR_PERIODE = 60;
 

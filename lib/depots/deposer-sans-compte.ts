@@ -1,11 +1,19 @@
 import { z } from "zod";
 import { prisma } from "@/lib/db/client";
 import { marquerEnCours } from "@/lib/db/ingestion";
-import { essaiAbouti, ouvrirUneSession, sessionDisponible } from "@/lib/db/session-anonyme";
 import {
+  compterLesDepots,
+  essaiAbouti,
+  ouvrirUneSession,
+  PANNES_TOLEREES,
+  sessionDisponible,
+} from "@/lib/db/session-anonyme";
+import {
+  CARACTERES_MAXIMUM,
   CARACTERES_MAXIMUM_ANONYME,
   CARACTERES_MINIMUM_ANONYME,
-} from "@/lib/depots/bornes-de-lessai";
+  longueurEnClair,
+} from "@/lib/depots/bornes-du-depot";
 import { essaiSansLimite, VARIABLE_SANS_LIMITE } from "@/lib/depots/essai-sans-limite";
 import { enqueueJob } from "@/lib/jobs/queue";
 
@@ -34,7 +42,7 @@ const anonymeSchema = z.object({
       error: "Colle un peu plus de matière : une phrase ou deux, au minimum.",
     })
     .max(CARACTERES_MAXIMUM_ANONYME, {
-      error: `Ce texte dépasse ${CARACTERES_MAXIMUM_ANONYME} caractères. Crée un compte pour déposer plus long.`,
+      error: `Ce texte dépasse ${longueurEnClair(CARACTERES_MAXIMUM_ANONYME)}. Crée un compte pour aller jusqu'à ${longueurEnClair(CARACTERES_MAXIMUM)}.`,
     }),
 });
 
@@ -54,8 +62,31 @@ const DEJA_DEPOSE =
  * du vide et ferait passer l'invitation pour un bug ; on dit ce qui s'est passé,
  * et ce qu'un compte change — des dépôts plus longs, et des reprises.
  */
-const ESSAIS_EPUISES =
-  "Tes essais sont faits pour cette visite. Un compte lève la limite, accepte des textes plus longs, et c'est gratuit.";
+const ESSAIS_EPUISES = `Tes essais sont faits pour cette visite. Un compte lève la limite, accepte ${longueurEnClair(CARACTERES_MAXIMUM)}, et c'est gratuit.`;
+
+/**
+ * La visite s'est fermée sur nos pannes, pas sur ses essais.
+ *
+ * Ses essais sont intacts — c'est toute la règle — donc lui dire qu'ils sont
+ * faits serait le troisième message faux de ce chemin. On dit ce qui se passe
+ * vraiment, et le compte devient la seule suite qu'on ait à offrir.
+ */
+const DECOUPAGE_INDISPONIBLE =
+  "Le découpage ne répond pas en ce moment, et ça ne vient pas de ton texte. Crée un compte : tu pourras reprendre dès que ce sera rétabli.";
+
+/**
+ * Pourquoi la visite est fermée. Trois causes, trois phrases.
+ *
+ * Lu après coup plutôt que deviné : « crée un compte pour garder tes concepts »
+ * n'a de sens que s'il y en a, et « tes essais sont faits » que s'ils l'ont été.
+ */
+async function motifDuRefus(sessionId: string): Promise<string> {
+  if (await essaiAbouti(sessionId)) return DEJA_DEPOSE;
+
+  const { pannes } = await compterLesDepots(sessionId);
+
+  return pannes >= PANNES_TOLEREES ? DECOUPAGE_INDISPONIBLE : ESSAIS_EPUISES;
+}
 
 /**
  * Dépose sans compte, ou dit pourquoi c'est refusé.
@@ -89,9 +120,7 @@ export async function deposerSansCompte(
   }
 
   if (!sansLimite && sessionExistante && !(await sessionDisponible(sessionExistante))) {
-    const abouti = await essaiAbouti(sessionExistante);
-
-    return { ok: false, motif: abouti ? DEJA_DEPOSE : ESSAIS_EPUISES };
+    return { ok: false, motif: await motifDuRefus(sessionExistante) };
   }
 
   const session =
