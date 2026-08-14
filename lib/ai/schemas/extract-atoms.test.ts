@@ -65,11 +65,20 @@ describe("validation de extract_atoms", () => {
     expect(EXTRACT_ATOMS.validation.parse(sortie(1, { langue: " EN " })).langue).toBe("en");
   });
 
-  it("refuse encore une sortie qui se contredit sur le rejet", () => {
-    expect(() =>
-      EXTRACT_ATOMS.validation.parse(sortie(3, { rejected: "Rien à retenir." })),
-    ).toThrow();
-    expect(() => EXTRACT_ATOMS.validation.parse(sortie(0, { rejected: null }))).toThrow();
+  it("ignore un motif de rejet posé à côté de concepts extraits", () => {
+    // Ce désaccord jetait l'extraction entière. Le compte tranche : s'il reste
+    // des concepts, il n'y a pas de rejet, quoi que le modèle ait écrit.
+    const lu = EXTRACT_ATOMS.validation.parse(sortie(3, { rejected: "Rien à retenir." }));
+
+    expect(lu.atoms).toHaveLength(3);
+    expect(lu.rejected).toBeNull();
+  });
+
+  it("accepte une liste vide sans motif, que l'appelant sait remplacer", () => {
+    const lu = EXTRACT_ATOMS.validation.parse(sortie(0, { rejected: null }));
+
+    expect(lu.atoms).toHaveLength(0);
+    expect(lu.rejected).toBeNull();
   });
 
   it("refuse une nature que la base ne saurait pas écrire", () => {
@@ -78,20 +87,23 @@ describe("validation de extract_atoms", () => {
 });
 
 /**
- * La coupe de granularité, sur la relecture réelle et pas sur la fonction pure
- * seule : c'est l'ordre des deux coupes qui se joue ici.
+ * `deriveDe` se mesure et ne coupe pas.
+ *
+ * Il a coupé le temps d'un passage de banc, et le corpus est tombé de 129
+ * concepts à 85. Ces tests disent que le champ traverse la relecture sans rien
+ * retirer : c'est la propriété qu'on ne veut plus jamais perdre par distraction.
  */
-describe("les concepts dérivés d'un voisin", () => {
+describe("les concepts qui se déclarent dérivés d'un voisin", () => {
   const avecRenvois = (renvois: (number | null)[]) =>
     sortie(0, {
       atoms: renvois.map((deriveDe, rang) => ({ ...concept(rang), deriveDe })),
       rejected: null,
     });
 
-  it("écarte un concept qui découle d'un autre et le compte", () => {
+  it("les compte sans en écarter un seul", () => {
     const lu = EXTRACT_ATOMS.validation.parse(avecRenvois([null, 1, null, 3]));
 
-    expect(lu.atoms).toHaveLength(2);
+    expect(lu.atoms).toHaveLength(4);
     expect(lu.derives).toBe(2);
     expect(lu.rendus).toBe(4);
   });
@@ -113,22 +125,22 @@ describe("les concepts dérivés d'un voisin", () => {
     expect(lu.derives).toBe(0);
   });
 
-  it("coupe la granularité avant le plafond, jamais l'inverse", () => {
-    // Vingt-cinq rendus dont les cinq premiers dérivés : couper d'abord au
-    // plafond garderait ces cinq-là et jetterait cinq concepts autoportants.
+  it("garde tout un dépôt dont chaque concept se déclare dérivé", () => {
+    const lu = EXTRACT_ATOMS.validation.parse(avecRenvois([2, 1]));
+
+    expect(lu.atoms).toHaveLength(2);
+    expect(lu.derives).toBe(2);
+  });
+
+  it("laisse le plafond faire seul son travail", () => {
+    // Vingt-cinq rendus dont les cinq premiers se déclarent dérivés : ce sont
+    // bien les vingt premiers qui restent, dans l'ordre d'importance rendu.
     const renvois = Array.from({ length: 25 }, (_, rang) => (rang < 5 ? 25 : null));
     const lu = EXTRACT_ATOMS.validation.parse(avecRenvois(renvois));
 
     expect(lu.derives).toBe(5);
     expect(lu.atoms).toHaveLength(PLAFOND_CONCEPTS_PAR_DEPOT);
-    expect(lu.atoms[0]?.concept).toContain("numéro 5");
-    expect(lu.tronque).toBe(false);
-  });
-
-  it("ne vide pas un dépôt dont tous les concepts se déclarent dérivés", () => {
-    const lu = EXTRACT_ATOMS.validation.parse(avecRenvois([2, 1]));
-
-    expect(lu.atoms).toHaveLength(2);
-    expect(lu.derives).toBe(0);
+    expect(lu.atoms[0]?.concept).toContain("numéro 0");
+    expect(lu.tronque).toBe(true);
   });
 });

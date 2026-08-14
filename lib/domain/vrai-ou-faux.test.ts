@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { cibleDuVraiOuFaux, ciblesDuLot, FACETTES_DU_VRAI_OU_FAUX } from "./vrai-ou-faux";
+import { cibleDuVraiOuFaux } from "./vrai-ou-faux";
 
 /**
  * Ce qui compte ici est une propriété de distribution — c'est tout l'objet du
@@ -40,31 +40,12 @@ describe("cibleDuVraiOuFaux", () => {
   });
 });
 
-describe("ciblesDuLot", () => {
-  it("donne une cible à chaque facette qui peut porter un vrai ou faux", () => {
-    expect(ciblesDuLot("atome").map((cible) => cible.facette)).toEqual([
-      ...FACETTES_DU_VRAI_OU_FAUX,
-    ]);
-  });
-
-  it("tire chaque facette indépendamment des autres", () => {
-    // Sur mille concepts, trois facettes qui suivraient le même tirage
-    // donneraient mille lots uniformes. C'est le défaut que la graine par
-    // facette existe pour éviter.
-    const uniformes = Array.from({ length: TIRAGES }, (_, rang) =>
-      ciblesDuLot(`atome-${rang}`).map((cible) => cible.vraie),
-    ).filter((lot) => new Set(lot).size === 1).length;
-
-    // Un quart des lots est uniforme quand les tirages sont indépendants.
-    expect(uniformes).toBeGreaterThan(TIRAGES / 8);
-    expect(uniformes).toBeLessThan(TIRAGES / 2);
-  });
-
-  it("ne change pas d'un appel à l'autre", () => {
-    fc.assert(
-      fc.property(fc.string(), (graine) => {
-        expect(ciblesDuLot(graine)).toEqual(ciblesDuLot(graine));
-      }),
-    );
+describe("la graine de la cible", () => {
+  it("ne porte plus la facette : un lot n'a qu'une cible", () => {
+    // La première version tirait par facette et l'envoi les annonçait toutes
+    // les trois, ce qui se lisait comme une invitation à écrire des vrai ou
+    // faux. Une cible par concept, lue par la question qui porte le format.
+    expect(cibleDuVraiOuFaux("atome-7")).toBe(cibleDuVraiOuFaux("atome-7"));
+    expect(cibleDuVraiOuFaux("atome-7:BOUNDARY")).toBe(cibleDuVraiOuFaux("atome-7:BOUNDARY"));
   });
 });

@@ -1,6 +1,7 @@
 import { callAI } from "@/lib/ai/client";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
-import { GENERATE_VARIANTS } from "@/lib/ai/schemas";
+import { contratDeGeneration } from "@/lib/ai/schemas";
+import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
 import { prisma } from "@/lib/db/client";
 import { finishJob } from "@/lib/db/generation-job";
 import type { GenerationJob } from "@/lib/db/types";
@@ -38,6 +39,17 @@ export async function conceptsDuJob(atomIds: string[]) {
  */
 export function messageDuGroupe(concepts: { id: string; concept: string }[]): string {
   return construireLEnvoi(concepts.map(({ id, concept }) => ({ graine: id, concept })));
+}
+
+/**
+ * Le contrat de cet envoi-là : l'emplacement du texte à trou y est déjà décidé.
+ *
+ * Il se dérive du premier Atom du groupe et vaut pour tout l'appel, parce que la
+ * grammaire est compilée une fois par appel. Deux régénérations du même job
+ * retombent donc sur le même emplacement.
+ */
+export function contratDuGroupe(concepts: { id: string }[]) {
+  return contratDeGeneration(emplacementDuTexteATrou(concepts[0]?.id ?? ""));
 }
 
 type LotRendu = { rang: number; variants: Parameters<typeof ecrireQuestions>[1] };
@@ -101,7 +113,7 @@ export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
   }
 
   const { lots } = await callAI({
-    contract: GENERATE_VARIANTS,
+    contract: contratDuGroupe(concepts),
     system: SYSTEM_PROMPTS.generate_variants,
     jobId: job.id,
     userId: depot?.userId ?? undefined,

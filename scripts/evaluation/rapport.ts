@@ -75,11 +75,16 @@ function rendreDepot({ evaluation, consommation }: Passage): string[] {
   }
 
   if (evaluation.derives !== undefined && evaluation.derives > 0) {
-    const coupe = evaluation.tronque ? ", puis tronqué au plafond" : "";
+    // Une mesure, pas une coupe : ces concepts sont tous là. Voir
+    // `lib/domain/concepts-derives.ts`.
     lignes.push(
-      `${accorder(evaluation.derives, "concept écarté", "concepts écartés")} comme dérivé(s) d'un voisin${coupe}.`,
+      `${accorder(evaluation.derives, "concept se déclare", "concepts se déclarent")} dérivé(s) d'un voisin — aucun n'a été écarté.`,
       "",
     );
+  }
+
+  if (evaluation.tronque) {
+    lignes.push("Le plafond de concepts a coupé la queue de la liste.", "");
   }
 
   if (evaluation.lecture) {

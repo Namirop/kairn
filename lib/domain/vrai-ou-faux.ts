@@ -26,33 +26,19 @@ import { tirageDe } from "./tirage-deterministe";
  */
 
 /**
- * Les facettes où une affirmation vraie ou fausse peut atterrir.
+ * La cible d'un lot : `true` si son affirmation doit être vraie.
  *
- * Miroir de la table des formats de `lib/ai/schemas/generate-variants-question.ts` :
- * `TRUE_FALSE` est ouvert aux trois facettes vérifiables et fermé sur
- * `MECHANISM`, qui garde le texte libre. `lib/domain/` ne peut pas importer
- * `lib/ai/` — le sens des dépendances l'interdit —, donc la table est recopiée
- * ici et un test l'aligne sur le schéma.
- */
-export const FACETTES_DU_VRAI_OU_FAUX = ["recognition", "boundary", "application"] as const;
-
-export type FacetteDuVraiOuFaux = (typeof FACETTES_DU_VRAI_OU_FAUX)[number];
-
-/**
- * La cible d'une question : `true` si l'affirmation doit être vraie.
+ * **Une valeur par concept, et surtout pas une par facette.** La première
+ * version en annonçait trois dans l'envoi — « si tu écris un TRUE_FALSE sur ces
+ * facettes… » — et le passage du 19h38 a montré que cette table se lisait comme
+ * une invitation : `TRUE_FALSE` est monté de 25 % à 54 % des questions du
+ * corpus, en emportant le texte à trou avec lui. La cible se lit maintenant
+ * depuis la question qui porte effectivement le format, quelle qu'elle soit, et
+ * l'envoi ne nomme plus aucune facette.
  *
- * La graine porte déjà la facette — `<id de l'Atom>:BOUNDARY` en production,
- * `<texte du concept>:BOUNDARY` au banc, qui n'écrit rien en base. Deux
- * questions du même concept tirent donc indépendamment.
+ * La graine est l'id de l'Atom en production, le texte du concept au banc, qui
+ * n'écrit rien en base et doit pouvoir comparer deux passages.
  */
 export function cibleDuVraiOuFaux(graine: string): boolean {
   return tirageDe(graine)() < 0.5;
-}
-
-/** Ce qui se dit au modèle : la cible de chaque facette qui peut la porter. */
-export function ciblesDuLot(graine: string): { facette: FacetteDuVraiOuFaux; vraie: boolean }[] {
-  return FACETTES_DU_VRAI_OU_FAUX.map((facette) => ({
-    facette,
-    vraie: cibleDuVraiOuFaux(`${graine}:${facette.toUpperCase()}`),
-  }));
 }

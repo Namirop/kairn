@@ -4,14 +4,15 @@ import type { AiMessage } from "@/lib/ai/message";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import {
   CONCEPTS_PAR_APPEL,
+  contratDeGeneration,
   EXTRACT_ATOMS,
-  GENERATE_VARIANTS,
   OCR_EXTRACT,
   type ExtractAtomsOutput,
   type GenerateVariantsOutput,
 } from "@/lib/ai/schemas";
 import { controlerConcept } from "@/lib/domain/controle-concept";
 import { controlerVariants } from "@/lib/domain/controle-variants";
+import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
 import { messageDuGroupe as construireLEnvoi } from "@/lib/domain/envoi-de-questions";
 import { conceptsAQuestionner, type NatureDuDepot } from "@/lib/domain/nature-du-depot";
 import { ordonnerLesOptions } from "@/lib/domain/ordre-des-options";
@@ -184,9 +185,9 @@ function grouper(concepts: Concept[]): Concept[][] {
 function servir(variants: VariantRendu[], concept: string): VariantEvalue[] {
   return variants.map((variant) => {
     const graine = `${concept}:${variant.facet}`;
-    // La même graine que celle de l'envoi : c'est ce qui permet de relire la
-    // sortie contre la valeur qui avait été demandée.
-    const cible = variant.format === "TRUE_FALSE" ? cibleDuVraiOuFaux(graine) : null;
+    // La cible se sème sur le concept seul, sans la facette : l'envoi n'en
+    // annonce qu'une, et n'importe laquelle des quatre questions peut la porter.
+    const cible = variant.format === "TRUE_FALSE" ? cibleDuVraiOuFaux(concept) : null;
 
     if (variant.options === null || variant.correctIndex === null) {
       return { ...variant, rangBrut: null, cible };
@@ -206,7 +207,10 @@ async function genererPourGroupe(groupe: Concept[]): Promise<ConceptEvalue[]> {
 
   try {
     const { lots } = await callAI({
-      contract: GENERATE_VARIANTS,
+      // L'emplacement du trou est décidé par le serveur et imposé par la
+      // grammaire de cet appel-là. La graine est celle du premier concept du
+      // groupe : la contrainte vaut pour tout l'envoi.
+      contract: contratDeGeneration(emplacementDuTexteATrou(groupe[0]?.concept ?? "")),
       system: SYSTEM_PROMPTS.generate_variants,
       messages: messageDuGroupe(groupe),
     });

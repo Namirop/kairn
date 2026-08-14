@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { InputNature } from "@/lib/db/types";
-import { ecarterLesDerives } from "@/lib/domain/concepts-derives";
+import { compterLesDerives } from "@/lib/domain/concepts-derives";
 import { NATURES_DE_DEPOT } from "@/lib/domain/nature-du-depot";
 import { appliquerLePlafond } from "@/lib/domain/plafond-de-concepts";
 import type { AiContract } from "./contract";
@@ -109,39 +109,33 @@ export const extractAtomsForme = sortieLue.extend({
 /** Trois étiquettes suffisent à regrouper ; au-delà, elles décrivent. */
 const TAGS_MAXIMUM = 3;
 
-const extractAtomsValidation = sortieLue
-  // Les deux champs se répondent : un rejet sans motif ne dit rien à
-  // l'utilisateur, un motif à côté de concepts extraits se contredit.
-  .refine((sortie) => (sortie.atoms.length === 0) === ((sortie.rejected ?? null) !== null), {
-    error: "rejected doit être renseigné si et seulement si atoms est vide",
-    path: ["rejected"],
-  })
-  // Le modèle omet une clé là où le schéma acceptait `null`. La base, elle, ne
-  // verra jamais d'`undefined`.
-  .transform((sortie) => {
-    // La granularité d'abord, le plafond ensuite. Tronquer en premier garderait
-    // des exemples en coupant des concepts autoportants classés plus bas.
-    const { gardes: autoportants, ecartes } = ecarterLesDerives(sortie.atoms);
-    const { gardes, tronque } = appliquerLePlafond(autoportants);
+// Le modèle omet une clé là où le schéma acceptait `null`. La base, elle, ne
+// verra jamais d'`undefined`.
+const extractAtomsValidation = sortieLue.transform((sortie) => {
+  const { gardes, tronque } = appliquerLePlafond(sortie.atoms);
 
-    return {
-      nature: sortie.nature,
-      langue: sortie.langue.trim().toLowerCase(),
-      // `deriveDe` ne survit pas à la relecture : la relation a servi à couper,
-      // elle n'a rien à faire en base. Ce qui reste ne dérive de rien.
-      atoms: gardes.map((atome) => ({
-        concept: atome.concept,
-        tags: atome.tags.slice(0, TAGS_MAXIMUM),
-        uncertain: atome.uncertain,
-      })),
-      rejected: sortie.rejected ?? null,
-      /** Ce que le modèle avait rendu, avant toute coupe. Pour le journal. */
-      rendus: sortie.atoms.length,
-      /** Écartés parce qu'ils découlaient d'un voisin. Pour le journal. */
-      derives: ecartes,
-      tronque,
-    };
-  });
+  return {
+    nature: sortie.nature,
+    langue: sortie.langue.trim().toLowerCase(),
+    // `deriveDe` ne survit pas à la relecture : c'est une mesure, pas une
+    // donnée du produit. Voir `lib/domain/concepts-derives.ts` pour ce qu'il a
+    // coûté quand il coupait.
+    atoms: gardes.map((atome) => ({
+      concept: atome.concept,
+      tags: atome.tags.slice(0, TAGS_MAXIMUM),
+      uncertain: atome.uncertain,
+    })),
+    // Un motif de rejet à côté de concepts extraits se contredisait, et ce
+    // désaccord jetait l'extraction entière. Le compte tranche : s'il reste des
+    // concepts, il n'y a pas de rejet, quoi que le modèle ait écrit.
+    rejected: gardes.length === 0 ? (sortie.rejected ?? null) : null,
+    /** Ce que le modèle avait rendu, avant le plafond. Pour le journal. */
+    rendus: sortie.atoms.length,
+    /** Combien se déclarent découler d'un voisin. Mesuré, jamais appliqué. */
+    derives: compterLesDerives(sortie.atoms),
+    tronque,
+  };
+});
 
 export type ExtractAtomsOutput = z.infer<typeof extractAtomsValidation>;
 

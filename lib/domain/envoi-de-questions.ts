@@ -1,4 +1,4 @@
-import { ciblesDuLot } from "./vrai-ou-faux";
+import { cibleDuVraiOuFaux } from "./vrai-ou-faux";
 
 /**
  * Le message qui part au modèle pour faire écrire les questions d'un groupe.
@@ -25,20 +25,25 @@ export type ConceptAEnvoyer = {
   concept: string;
 };
 
-/** « recognition : vraie · boundary : fausse · application : vraie » */
-function ligneDesCibles(graine: string): string {
-  const cibles = ciblesDuLot(graine)
-    .map(({ facette, vraie }) => `${facette} : ${vraie ? "vraie" : "fausse"}`)
-    .join(" · ");
+/**
+ * La cible, dite sans nommer de facette.
+ *
+ * La version précédente listait les trois facettes ouvertes au format, et cette
+ * table se lisait comme une consigne d'en écrire : `TRUE_FALSE` a doublé sa part
+ * du corpus en un passage. Une seule phrase, conditionnelle, qui ne désigne rien
+ * et n'appelle rien.
+ */
+function ligneDeLaCible(graine: string): string {
+  const vraie = cibleDuVraiOuFaux(graine) ? "vraie" : "fausse";
 
-  return `Si tu écris un TRUE_FALSE sur ces facettes, l'affirmation doit être — ${cibles}`;
+  return `Si une question de ce lot est un vrai ou faux, son affirmation doit être ${vraie}.`;
 }
 
 /** Les concepts d'un envoi, numérotés : c'est ce rang que la sortie référence. */
 export function messageDuGroupe(concepts: readonly ConceptAEnvoyer[]): string {
   return concepts
     .map((entree, rang) =>
-      [`Concept ${rang + 1}.`, entree.concept, ligneDesCibles(entree.graine)].join("\n"),
+      [`Concept ${rang + 1}.`, entree.concept, ligneDeLaCible(entree.graine)].join("\n"),
     )
     .join("\n\n");
 }

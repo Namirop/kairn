@@ -21,6 +21,8 @@ export type VariantAControler = {
   estVraie?: boolean | null;
   /** Ce que l'envoi lui demandait. Absente quand l'appelant ne la connaît pas. */
   cible?: boolean | null;
+  /** Une charge jointe à un format qui n'en porte pas, écartée à la relecture. */
+  chargeIgnoree?: boolean;
 };
 
 /**
@@ -169,12 +171,29 @@ function controlerReponseCachee(variant: VariantAControler): Manquement[] {
   ];
 }
 
+/**
+ * La charge écartée à la relecture.
+ *
+ * La sortie ne porte plus la trace de ce qui a été retiré — c'est le but — donc
+ * le contrôle ne peut pas la retrouver. Il lit le drapeau posé par le schéma.
+ * Sans ce manquement, un modèle qui joint systématiquement une phrase trouée à
+ * la mauvaise question serait rattrapé en silence, indéfiniment.
+ */
+function controlerCharge(variant: VariantAControler): Manquement[] {
+  if (!variant.chargeIgnoree) return [];
+
+  return [
+    { regle: "charge", detail: `une charge jointe à un format ${variant.format}, écartée` },
+  ];
+}
+
 /** Tout ce qu'on peut reprocher à une question sans regarder les autres. */
 export function controlerQuestion(variant: VariantAControler): Manquement[] {
   return [
     ...controlerMcq(variant),
     ...controlerCloze(variant),
     ...controlerVraiOuFaux(variant),
+    ...controlerCharge(variant),
     ...controlerReponseCachee(variant),
   ];
 }

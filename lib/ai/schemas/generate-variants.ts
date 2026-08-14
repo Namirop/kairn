@@ -1,10 +1,12 @@
 import { z } from "zod";
+import type { FacetteDuLot } from "@/lib/domain/emplacement-du-trou";
 import { normaliserLesOptions } from "@/lib/domain/options-de-qcm";
 import type { AiContract } from "./contract";
 import {
   FORMATS_DU_MECANISME,
   FORMATS_VERIFIABLES,
   question,
+  questionATrou,
   questionLue,
 } from "./generate-variants-question";
 
@@ -20,10 +22,11 @@ import {
  * facettes : c'est la forme sous laquelle le reste du projet lit une
  * génération.
  *
- * **Elle ne rejette plus sur un compte.** Un lot de trop, une option de trop,
- * une forme acceptée de trop : tout ça se rattrape, et un appel qui porte les
- * questions de trois concepts est trop cher pour être jeté sur un dépassement
- * que la grammaire n'a jamais fait respecter.
+ * **Elle ne rejette plus rien du tout.** Un lot de trop, une option de trop, une
+ * forme acceptée de trop, une charge jointe au mauvais format : tout ça se
+ * rattrape. Ce qu'on ne sait pas servir fait disparaître son lot, seul, et le
+ * rang manquant remonte à l'appelant — les deux autres concepts du même appel
+ * sont écrits. Un appel qui porte trois concepts est trop cher pour être jeté.
  */
 
 /** Concepts traités en un appel. Au-delà, la sortie frôlerait `max_tokens`. */
@@ -32,38 +35,66 @@ export const CONCEPTS_PAR_APPEL = 3;
 /** Assez de variantes pour accepter une réponse ; au-delà, on n'en lit plus. */
 const FORMES_ACCEPTEES_MAXIMUM = 8;
 
-const lot = z.object({
-  rang: z
-    .number()
-    .int()
-    .min(1)
-    .max(CONCEPTS_PAR_APPEL)
-    .describe("Le numéro du concept traité, tel qu'il est donné dans l'envoi."),
-  recognition: question(
-    FORMATS_VERIFIABLES,
-    "De quoi s'agit-il, comment le nommerait-on, à quoi le reconnaît-on.",
-  ),
-  mechanism: question(
-    FORMATS_DU_MECANISME,
-    "Pourquoi ça marche, ce qui se passe réellement, dans quel ordre.",
-  ),
-  boundary: question(
-    FORMATS_VERIFIABLES,
-    "Ce que ce n'est pas, quand ça ne s'applique pas, la confusion classique.",
-  ),
-  application: question(
-    FORMATS_VERIFIABLES,
-    "S'en servir dans une situation concrète qui n'est pas celle du concept.",
-  ),
-});
+/** Ce que chaque facette demande, et les formats qu'elle ouvre. */
+const FACETTE = {
+  recognition: {
+    formats: FORMATS_VERIFIABLES,
+    consigne: "De quoi s'agit-il, comment le nommerait-on, à quoi le reconnaît-on.",
+  },
+  mechanism: {
+    formats: FORMATS_DU_MECANISME,
+    consigne: "Pourquoi ça marche, ce qui se passe réellement, dans quel ordre.",
+  },
+  boundary: {
+    formats: FORMATS_VERIFIABLES,
+    consigne: "Ce que ce n'est pas, quand ça ne s'applique pas, la confusion classique.",
+  },
+  application: {
+    formats: FORMATS_VERIFIABLES,
+    consigne: "S'en servir dans une situation concrète qui n'est pas celle du concept.",
+  },
+} as const satisfies Record<FacetteDuLot, unknown>;
 
-export const generateVariantsForme = z.object({
-  lots: z
-    .array(lot)
-    .min(1)
-    .max(CONCEPTS_PAR_APPEL)
-    .describe("Un lot de quatre questions par concept reçu, un rang par concept."),
-});
+/**
+ * La forme d'un envoi, avec l'emplacement du texte à trou déjà décidé.
+ *
+ * C'est la seule partie du contrat qui varie d'un appel à l'autre, et elle varie
+ * par la grammaire plutôt que par une phrase : la facette désignée n'ouvre que
+ * `CLOZE` et exige sa charge. La relecture, elle, ne bouge pas — `CLOZE` est un
+ * format légitime pour les quatre facettes, donc `lotLu` la lit sans rien savoir
+ * de l'emplacement choisi.
+ */
+function formeDuLot(trou: FacetteDuLot | undefined) {
+  const champ = (facette: FacetteDuLot) =>
+    facette === trou
+      ? questionATrou(FACETTE[facette].consigne)
+      : question(FACETTE[facette].formats, FACETTE[facette].consigne);
+
+  return z.object({
+    rang: z
+      .number()
+      .int()
+      .min(1)
+      .max(CONCEPTS_PAR_APPEL)
+      .describe("Le numéro du concept traité, tel qu'il est donné dans l'envoi."),
+    recognition: champ("recognition"),
+    mechanism: champ("mechanism"),
+    boundary: champ("boundary"),
+    application: champ("application"),
+  });
+}
+
+function formeDeLEnvoi(trou: FacetteDuLot | undefined) {
+  return z.object({
+    lots: z
+      .array(formeDuLot(trou))
+      .min(1)
+      .max(CONCEPTS_PAR_APPEL)
+      .describe("Un lot de quatre questions par concept reçu, un rang par concept."),
+  });
+}
+
+export const generateVariantsForme = formeDeLEnvoi(undefined);
 
 /** Le même lot, relu : plus aucune borne de comptage, les énumérations restent. */
 const lotLu = z.object({
@@ -87,16 +118,53 @@ const FACETTES = [
 type QuestionLue = z.infer<typeof lotLu>["recognition"];
 
 /**
- * Les options d'un QCM, ramenées à un jeu utilisable.
+ * La charge d'une question, quand elle correspond au format déclaré.
  *
- * Le cas irrécupérable — un index qui ne désigne aucune option — a déjà été
- * refusé par la validation croisée ci-dessous. Il reste traité ici parce qu'une
- * fonction qui rend `null` doit être lue jusqu'au bout, pas parce qu'il arrive.
+ * Une charge qui ne correspond pas est **ignorée**, jamais refusée : sur
+ * `18-anglais`, le modèle a joint une phrase trouée à une question qui n'était
+ * pas un texte à trou, et l'envoi entier — trois concepts, appel payé — a été
+ * jeté pour ce seul champ en trop. C'est la classe de `.max(12)`, et la règle
+ * est la même : rien de ce qui se relit ne fait échouer un appel déjà payé.
+ *
+ * Elle est ignorée mais pas oubliée : `chargeIgnoree` la signale au contrôle,
+ * qui en fait un manquement. Un défaut silencieusement rattrapé est un défaut
+ * qu'on ne corrige jamais.
  */
+function chargesDe(posee: QuestionLue) {
+  const mcq = posee.format === "MCQ" ? (posee.mcq ?? null) : null;
+  const cloze = posee.format === "CLOZE" ? (posee.cloze ?? null) : null;
+  const enTrop = (posee.mcq ?? null) !== null || (posee.cloze ?? null) !== null;
+
+  return { mcq, cloze, chargeIgnoree: enTrop && mcq === null && cloze === null };
+}
+
+/**
+ * Une question qu'on ne saurait pas servir, et le seul motif qui coûte encore
+ * quelque chose.
+ *
+ * Un QCM sans options, ou dont la bonne réponse ne désigne aucune option, et un
+ * texte à trou sans phrase trouée : la donnée est inexploitable, pas seulement
+ * hors bornes. Servir la question reviendrait à noter faux quelqu'un qui a
+ * raison, ou à montrer un trou vide.
+ *
+ * Ça ne fait plus tomber l'envoi pour autant : c'est le **lot** qui disparaît,
+ * et son rang manquant est rapporté par l'appelant. Les deux autres concepts du
+ * même appel sont écrits.
+ */
+function inexploitable(posee: QuestionLue): boolean {
+  const { mcq, cloze } = chargesDe(posee);
+
+  if (posee.format === "MCQ") {
+    return mcq === null || normaliserLesOptions(mcq.options, mcq.correctIndex) === null;
+  }
+
+  return posee.format === "CLOZE" && cloze === null;
+}
+
+/** Les options d'un QCM, ramenées à un jeu utilisable. */
 function optionsDe(posee: QuestionLue) {
-  const normalisees = posee.mcq
-    ? normaliserLesOptions(posee.mcq.options, posee.mcq.correctIndex)
-    : null;
+  const { mcq } = chargesDe(posee);
+  const normalisees = mcq ? normaliserLesOptions(mcq.options, mcq.correctIndex) : null;
 
   return {
     options: normalisees?.options ?? null,
@@ -104,85 +172,67 @@ function optionsDe(posee: QuestionLue) {
   };
 }
 
-const generateVariantsValidation = sortieLue
-  .superRefine((sortie, ctx) => {
-    // Les deux contraintes croisées : la clé du format et le format lui-même
-    // vont ensemble. Elles vivent ici et non dans la forme — un « si et
-    // seulement si » ne s'exprime pas en JSON Schema sans union, et une union
-    // dégraderait la grammaire envoyée au modèle.
-    for (const [index, entree] of sortie.lots.entries()) {
-      for (const [cle] of FACETTES) {
-        const posee = entree[cle];
+const generateVariantsValidation = sortieLue.transform((sortie) => {
+  // Deux lots au même rang ne se refusent plus : le premier gagne, et les
+  // rangs restés sans réponse sont signalés par l'appelant. Refuser aurait
+  // emporté les lots corrects du même envoi.
+  const vus = new Set<number>();
+  const uniques = sortie.lots.filter((entree) => {
+    if (vus.has(entree.rang)) return false;
 
-        if ((posee.format === "MCQ") !== ((posee.mcq ?? null) !== null)) {
-          ctx.addIssue({
-            code: "custom",
-            message: "mcq est renseigné si et seulement si le format est MCQ",
-            path: ["lots", index, cle, "mcq"],
-          });
-        }
+    vus.add(entree.rang);
 
-        if ((posee.format === "CLOZE") !== ((posee.cloze ?? null) !== null)) {
-          ctx.addIssue({
-            code: "custom",
-            message: "cloze est renseigné si et seulement si le format est CLOZE",
-            path: ["lots", index, cle, "cloze"],
-          });
-        }
+    return true;
+  });
 
-        // Le seul dépassement qu'on ne sait pas rattraper : sans savoir quelle
-        // option est la bonne, servir la question reviendrait à noter faux
-        // quelqu'un qui a raison. C'est l'exception assumée à la règle « on
-        // tronque, on ne rejette pas » — la donnée est inexploitable, pas
-        // seulement hors bornes.
-        if (posee.mcq && normaliserLesOptions(posee.mcq.options, posee.mcq.correctIndex) === null) {
-          ctx.addIssue({
-            code: "custom",
-            message: `la bonne réponse désigne l'option ${posee.mcq.correctIndex}, absente des ${posee.mcq.options.length} rendues`,
-            path: ["lots", index, cle, "mcq", "correctIndex"],
-          });
-        }
-      }
-    }
-  })
-  .transform((sortie) => {
-    // Deux lots au même rang ne se refusent plus : le premier gagne, et les
-    // rangs restés sans réponse sont signalés par l'appelant. Refuser aurait
-    // emporté les lots corrects du même envoi.
-    const vus = new Set<number>();
-    const uniques = sortie.lots.filter((entree) => {
-      if (vus.has(entree.rang)) return false;
+  // Plus aucune validation croisée ne peut faire tomber l'envoi. Le lot qui
+  // porte une question inexploitable disparaît seul, et son rang manquant
+  // remonte à l'appelant, qui le rapporte concept par concept.
+  const servables = uniques.filter((entree) =>
+    FACETTES.every(([cle]) => !inexploitable(entree[cle])),
+  );
 
-      vus.add(entree.rang);
+  return {
+    lots: servables.map((entree) => ({
+      rang: entree.rang,
+      variants: FACETTES.map(([cle, facet]) => {
+        const { cloze, chargeIgnoree } = chargesDe(entree[cle]);
 
-      return true;
-    });
-
-    return {
-      lots: uniques.map((entree) => ({
-        rang: entree.rang,
-        variants: FACETTES.map(([cle, facet]) => ({
+        return {
           format: entree[cle].format,
           facet,
           question: entree[cle].question,
           answerKey: entree[cle].answerKey,
           estVraie: entree[cle].estVraie ?? null,
+          chargeIgnoree,
           ...optionsDe(entree[cle]),
-          cloze: entree[cle].cloze
+          cloze: cloze
             ? {
-                sentence: entree[cle].cloze.sentence,
-                accepted: entree[cle].cloze.accepted.slice(0, FORMES_ACCEPTEES_MAXIMUM),
+                sentence: cloze.sentence,
+                accepted: cloze.accepted.slice(0, FORMES_ACCEPTEES_MAXIMUM),
               }
             : null,
-        })),
-      })),
-    };
-  });
+        };
+      }),
+    })),
+  };
+});
 
 export type GenerateVariantsOutput = z.infer<typeof generateVariantsValidation>;
 
-export const GENERATE_VARIANTS: AiContract<GenerateVariantsOutput> = {
-  purpose: "generate_variants",
-  forme: generateVariantsForme,
-  validation: generateVariantsValidation,
-};
+/**
+ * Le contrat d'un envoi, avec l'emplacement du trou qui lui a été assigné.
+ *
+ * `purpose` ne change pas : c'est la même dépense, le même registre, la même
+ * fixture en mode mock. Seule la grammaire montrée au modèle diffère.
+ */
+export function contratDeGeneration(trou?: FacetteDuLot): AiContract<GenerateVariantsOutput> {
+  return {
+    purpose: "generate_variants",
+    forme: formeDeLEnvoi(trou),
+    validation: generateVariantsValidation,
+  };
+}
+
+/** Le contrat sans emplacement imposé : les tests et les fixtures s'en servent. */
+export const GENERATE_VARIANTS = contratDeGeneration();

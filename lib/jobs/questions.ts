@@ -12,7 +12,12 @@ import {
   rendreJobsALaFile,
   trouverJobsASoumettre,
 } from "@/lib/db/lots";
-import { conceptsDuJob, ecrireLesQuestionsDuJob, messageDuGroupe } from "./redaction-questions";
+import {
+  conceptsDuJob,
+  contratDuGroupe,
+  ecrireLesQuestionsDuJob,
+  messageDuGroupe,
+} from "./redaction-questions";
 
 /**
  * L'envoi groupé des questions, du départ à la relève.
@@ -60,7 +65,7 @@ export async function soumettreLotsEnAttente(userId?: string): Promise<number> {
 
     requetes.push({
       reference: job.id,
-      contract: GENERATE_VARIANTS,
+      contract: contratDuGroupe(concepts),
       system: SYSTEM_PROMPTS.generate_variants,
       messages: [{ role: "user" as const, content: messageDuGroupe(concepts) }],
     });

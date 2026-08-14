@@ -40,24 +40,18 @@ export const ocrExtractForme = z.object({
 /** La même forme, relue : la longueur n'y refuse plus rien. */
 const sortieLue = ocrExtractForme.extend({ extractedText: z.string() });
 
-const ocrExtractValidation = sortieLue
-  // Une image sans texte n'a pas de langue : en exiger une ferait inventer une
-  // réponse, et une réponse inventée casse un cas normal.
-  .refine((sortie) => sortie.usable === porteDuTexte(sortie.extractedText), {
-    error: "extractedText est vide si et seulement si usable est faux",
-    path: ["extractedText"],
-  })
-  .refine((sortie) => sortie.usable === ((sortie.language ?? null) !== null), {
-    error: "language est renseigné si et seulement si usable est vrai",
-    path: ["language"],
-  })
-  .transform((sortie) => ({
-    extractedText: sortie.extractedText.slice(0, CARACTERES_MAXIMUM),
-    language: sortie.language ?? null,
-    usable: sortie.usable,
-    /** La capture disait plus que ce qu'un dépôt peut porter : on l'a coupée. */
-    tronque: sortie.extractedText.length > CARACTERES_MAXIMUM,
-  }));
+const ocrExtractValidation = sortieLue.transform((sortie) => ({
+  extractedText: sortie.extractedText.slice(0, CARACTERES_MAXIMUM),
+  language: sortie.language ?? null,
+  // `usable` se déduit du texte au lieu d'être cru sur parole. Les deux
+  // cohérences étaient vérifiées par des refus — un `usable` à vrai sur un texte
+  // vide jetait la lecture entière — alors que la réponse est sous nos yeux :
+  // une capture est exploitable si elle a rendu du texte. Le modèle n'a pas à
+  // trancher ce que le serveur peut lire.
+  usable: porteDuTexte(sortie.extractedText),
+  /** La capture disait plus que ce qu'un dépôt peut porter : on l'a coupée. */
+  tronque: sortie.extractedText.length > CARACTERES_MAXIMUM,
+}));
 
 export type OcrExtractOutput = z.infer<typeof ocrExtractValidation>;
 

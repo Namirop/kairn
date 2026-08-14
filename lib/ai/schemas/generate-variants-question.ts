@@ -129,6 +129,34 @@ export function question(formats: readonly [VariantFormat, ...VariantFormat[]], 
 }
 
 /**
+ * La question dont le serveur a décidé qu'elle serait un texte à trou.
+ *
+ * Une énumération à une seule valeur et une charge **requise** : ce sont les
+ * deux mots-clés que la grammaire tient réellement (`enum`, `required`), donc le
+ * modèle ne peut ni choisir un autre format, ni omettre la phrase trouée. La
+ * consigne « une des quatre questions au moins est un CLOZE » n'existe plus dans
+ * le prompt — elle a tenu jusqu'à ce qu'une autre consigne tire dans l'autre
+ * sens, et 41 lots sur 80 se sont retrouvés sans aucun trou.
+ *
+ * Ni `mcq` ni `estVraie` n'y figurent : la clé absente de la forme ne peut pas
+ * revenir.
+ */
+export function questionATrou(facette: string) {
+  return z
+    .object({
+      format: z.enum(["CLOZE"]),
+      question: z.string().min(10).max(800),
+      answerKey: z
+        .string()
+        .min(1)
+        .max(2000)
+        .describe("Le terme masqué, en clair, et ce qu'il fallait avoir compris pour le trouver."),
+      cloze: cloze(),
+    })
+    .describe(facette);
+}
+
+/**
  * La même question, relue.
  *
  * L'énumération des formats reste, et c'est délibéré : c'est elle qui rend la

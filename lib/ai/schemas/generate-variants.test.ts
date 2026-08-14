@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { FACETTES_DU_VRAI_OU_FAUX } from "@/lib/domain/vrai-ou-faux";
+import { FACETTES_DU_LOT, type FacetteDuLot } from "@/lib/domain/emplacement-du-trou";
 import { toOutputSchema } from "../output-schema";
-import { CONCEPTS_PAR_APPEL, GENERATE_VARIANTS, generateVariantsForme } from "./generate-variants";
+import {
+  CONCEPTS_PAR_APPEL,
+  contratDeGeneration,
+  GENERATE_VARIANTS,
+  generateVariantsForme,
+} from "./generate-variants";
 
 /**
  * Le premier passage du banc a rendu quatre lots sur vingt-quatre, dont seize
@@ -170,43 +175,52 @@ describe("forme de sortie de generate_variants", () => {
     expect(servi?.options?.[servi.correctIndex ?? -1]).toBe("bonne");
   });
 
-  it("refuse un QCM dont la bonne réponse ne désigne aucune option", () => {
-    // La seule exception assumée : sans savoir laquelle est la bonne, servir la
-    // question reviendrait à noter faux quelqu'un qui a raison.
+  /**
+   * Plus rien ne fait tomber l'envoi.
+   *
+   * `18-anglais` a perdu son seul lot parce qu'une phrase trouée était jointe à
+   * une question qui n'était pas un texte à trou : un champ en trop, un appel
+   * payé, un dépôt entier perdu. Ce qui se rattrape se rattrape ; ce qui ne se
+   * sert pas fait disparaître son lot, seul.
+   */
+  const envoiDeTrois = (fautif: unknown) => ({ lots: [fautif, lot(2), lot(3)] });
+
+  it("écarte la charge posée sur un format qui n'en porte pas, et la signale", () => {
+    const cloze = { sentence: "Le lichen est une ___ entre deux espèces.", accepted: ["symbiose"] };
+    const enTrop = { ...lot(1), mechanism: { ...question("EXPLAIN"), cloze } };
+    const sortie = GENERATE_VARIANTS.validation.parse(envoiDeTrois(enTrop));
+
+    expect(sortie.lots).toHaveLength(3);
+    expect(sortie.lots[0]?.variants[1]?.cloze).toBeNull();
+    expect(sortie.lots[0]?.variants[1]?.chargeIgnoree).toBe(true);
+    expect(sortie.lots[0]?.variants[0]?.chargeIgnoree).toBe(false);
+  });
+
+  it("fait disparaître le seul lot dont un QCM n'a pas d'options servables", () => {
     const perdue = {
       ...lot(1),
-      application: {
-        ...question("MCQ"),
-        mcq: { options: ["a", "b", "c", "d"], correctIndex: 9 },
-      },
+      application: { ...question("MCQ"), mcq: { options: ["a", "b", "c", "d"], correctIndex: 9 } },
     };
+    const sortie = GENERATE_VARIANTS.validation.parse(envoiDeTrois(perdue));
 
-    expect(GENERATE_VARIANTS.validation.safeParse({ lots: [perdue] }).success).toBe(false);
+    // Les deux autres concepts du même appel sont écrits. Le rang manquant est
+    // rapporté par l'appelant, qui sait à quel concept il correspond.
+    expect(sortie.lots.map((rendu) => rendu.rang)).toEqual([2, 3]);
   });
 
-  it("refuse un mcq posé sur un format libre, et un MCQ sans options", () => {
+  it("fait de même pour un QCM sans options et un texte à trou sans phrase", () => {
     const sansOptions = { ...lot(1), application: question("MCQ") };
-    const optionsEnTrop = {
-      ...lot(1),
-      mechanism: {
-        ...question("EXPLAIN"),
-        mcq: { options: ["a", "b", "c", "d"], correctIndex: 0 },
-      },
-    };
+    const sansTrou = { ...lot(1), boundary: question("CLOZE") };
 
-    expect(GENERATE_VARIANTS.validation.safeParse({ lots: [sansOptions] }).success).toBe(false);
-    expect(GENERATE_VARIANTS.validation.safeParse({ lots: [optionsEnTrop] }).success).toBe(false);
+    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansOptions)).lots).toHaveLength(2);
+    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansTrou)).lots).toHaveLength(2);
   });
 
-  it("refuse un CLOZE sans phrase trouée, et une phrase trouée sur un autre format", () => {
+  it("garde un texte à trou complet", () => {
     const cloze = { sentence: "Le lichen est une ___ entre deux espèces.", accepted: ["symbiose"] };
-    const sansTrou = { ...lot(1), boundary: question("CLOZE") };
-    const trouEnTrop = { ...lot(1), mechanism: { ...question("EXPLAIN"), cloze } };
     const juste = { ...lot(1), boundary: { ...question("CLOZE"), cloze } };
 
-    expect(GENERATE_VARIANTS.validation.safeParse({ lots: [sansTrou] }).success).toBe(false);
-    expect(GENERATE_VARIANTS.validation.safeParse({ lots: [trouEnTrop] }).success).toBe(false);
-    expect(GENERATE_VARIANTS.validation.safeParse({ lots: [juste] }).success).toBe(true);
+    expect(GENERATE_VARIANTS.validation.parse({ lots: [juste] }).lots).toHaveLength(1);
   });
 
   it("rend la phrase trouée et ses formes acceptées à plat, avec la question", () => {
@@ -240,24 +254,56 @@ describe("forme de sortie de generate_variants", () => {
 });
 
 /**
- * Le garde-fou de la table recopiée.
+ * L'emplacement du texte à trou, imposé par la grammaire et non par une phrase.
  *
- * `lib/domain/vrai-ou-faux.ts` doit nommer les facettes qui peuvent porter un
- * `TRUE_FALSE`, et `lib/domain/` ne peut pas importer `lib/ai/` — le sens des
- * dépendances l'interdit. La table est donc écrite deux fois, et c'est ce test
- * qui empêche les deux de diverger : le jour où une facette s'ouvre ou se
- * ferme, l'envoi annoncerait sinon une cible que la grammaire refuse, ou en
- * tairait une qu'elle accepte.
+ * C'est ce qui remplace « une des quatre questions au moins est un CLOZE » :
+ * cette consigne a tenu jusqu'à ce qu'une autre tire dans l'autre sens, et 41
+ * lots sur 80 se sont retrouvés sans aucun trou. Ce test prouve ce que le modèle
+ * voit — une énumération à une valeur et une charge requise, les deux seuls
+ * mots-clés que le décodage contraint fait respecter.
  */
-describe("les facettes qui peuvent porter un vrai ou faux", () => {
-  it("sont exactement celles que le domaine annonce", () => {
-    const acceptees = FACETTES.filter(
-      (facette) =>
-        GENERATE_VARIANTS.validation.safeParse({
-          lots: [{ ...lot(1), [facette]: { ...question("TRUE_FALSE"), estVraie: true } }],
-        }).success,
+describe("l'emplacement du texte à trou", () => {
+  const facetteDe = (trou: FacetteDuLot, cle: string) =>
+    chemin(
+      toOutputSchema(contratDeGeneration(trou).forme).schema,
+      "properties",
+      "lots",
+      "items",
+      "properties",
+      cle,
     );
 
-    expect(acceptees).toEqual([...FACETTES_DU_VRAI_OU_FAUX]);
+  it("ne laisse que CLOZE sur la facette désignée", () => {
+    for (const trou of FACETTES_DU_LOT) {
+      expect(chemin(facetteDe(trou, trou), "properties", "format", "enum")).toEqual(["CLOZE"]);
+    }
+  });
+
+  it("exige la phrase trouée sur cette facette, au lieu de l'accepter", () => {
+    expect(chemin(facetteDe("boundary", "boundary"), "required")).toContain("cloze");
+  });
+
+  it("laisse les trois autres facettes choisir leur format", () => {
+    for (const cle of FACETTES_DU_LOT.filter((facette) => facette !== "boundary")) {
+      const formats = chemin(facetteDe("boundary", cle), "properties", "format", "enum");
+
+      expect(Array.isArray(formats) && formats.length).toBeGreaterThan(1);
+    }
+  });
+
+  it("n'impose rien quand aucun emplacement n'est demandé", () => {
+    const formats = chemin(
+      toOutputSchema(GENERATE_VARIANTS.forme).schema,
+      "properties",
+      "lots",
+      "items",
+      "properties",
+      "boundary",
+      "properties",
+      "format",
+      "enum",
+    );
+
+    expect(Array.isArray(formats) && formats.length).toBeGreaterThan(1);
   });
 });

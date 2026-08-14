@@ -1,7 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { messageDuGroupe } from "./envoi-de-questions";
-import { ciblesDuLot } from "./vrai-ou-faux";
+import { cibleDuVraiOuFaux } from "./vrai-ou-faux";
 
 const envoi = [
   { graine: "atome-un", concept: "Le fond épais supprime le point brûlant." },
@@ -21,16 +21,22 @@ describe("messageDuGroupe", () => {
     expect(messageDuGroupe(envoi)).toContain("Le fond épais supprime le point brûlant.");
   });
 
-  it("annonce la cible de chaque facette qui peut porter un vrai ou faux", () => {
+  it("annonce la cible du lot, une seule fois par concept", () => {
     const message = messageDuGroupe([envoi[0]!]);
+    const vraie = cibleDuVraiOuFaux("atome-un") ? "vraie" : "fausse";
 
-    for (const { facette, vraie } of ciblesDuLot("atome-un")) {
-      expect(message).toContain(`${facette} : ${vraie ? "vraie" : "fausse"}`);
-    }
+    expect(message).toContain(`son affirmation doit être ${vraie}`);
   });
 
-  it("ne parle pas de mechanism, qui ne peut pas porter de vrai ou faux", () => {
-    expect(messageDuGroupe(envoi)).not.toContain("mechanism");
+  it("ne nomme aucune facette", () => {
+    // La table des facettes ouvertes au vrai ou faux se lisait comme une
+    // consigne d'en écrire : le format a doublé sa part du corpus en un
+    // passage. L'envoi ne désigne plus rien.
+    const message = messageDuGroupe(envoi);
+
+    for (const facette of ["recognition", "mechanism", "boundary", "application"]) {
+      expect(message).not.toContain(facette);
+    }
   });
 
   it("donne des cibles différentes à deux concepts, le plus souvent", () => {
