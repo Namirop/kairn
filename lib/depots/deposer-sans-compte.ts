@@ -2,6 +2,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db/client";
 import { marquerEnCours } from "@/lib/db/ingestion";
 import { ouvrirUneSession, sessionDisponible } from "@/lib/db/session-anonyme";
+import { essaiSansLimite, VARIABLE_SANS_LIMITE } from "@/lib/depots/essai-sans-limite";
 import { enqueueJob } from "@/lib/jobs/queue";
 
 /**
@@ -52,6 +53,11 @@ const DEJA_DEPOSE =
  * `sessionExistante` vient du cookie. Une session qui a déjà déposé est refusée
  * plutôt que réutilisée : c'est le verrou principal, et le rendre glissant en
  * ferait un compte gratuit déguisé.
+ *
+ * `ESSAI_ANONYME_SANS_LIMITE` lève les deux verrous d'un coup — voir
+ * `essai-sans-limite.ts` pour ce que ça ouvre et ce que ça n'ouvre pas. Le
+ * cookie est alors ignoré plutôt que réutilisé : une visite rouverte
+ * accumulerait ses dépôts, et l'écran n'en montre qu'un.
  */
 export async function deposerSansCompte(
   texte: string,
@@ -64,13 +70,22 @@ export async function deposerSansCompte(
     return { ok: false, motif: valide.error.issues[0]?.message ?? "Ce dépôt n'est pas recevable." };
   }
 
-  if (sessionExistante && !(await sessionDisponible(sessionExistante))) {
+  const sansLimite = essaiSansLimite();
+
+  if (sansLimite) {
+    console.warn(
+      `[essai] ${VARIABLE_SANS_LIMITE}=true : dépôt anonyme accepté sans vérifier les verrous`,
+    );
+  }
+
+  if (!sansLimite && sessionExistante && !(await sessionDisponible(sessionExistante))) {
     return { ok: false, motif: DEJA_DEPOSE };
   }
 
-  const session = sessionExistante
-    ? { ouverte: true as const, sessionId: sessionExistante }
-    : await ouvrirUneSession(adresse);
+  const session =
+    sessionExistante && !sansLimite
+      ? { ouverte: true as const, sessionId: sessionExistante }
+      : await ouvrirUneSession(adresse, sansLimite);
 
   if (!session.ouverte) return { ok: false, motif: TROP_DE_DEPOTS };
 

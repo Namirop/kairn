@@ -256,6 +256,24 @@ réglages qui acceptent une surcharge en base, posée depuis l'écran
 d'administration. L'environnement donne la valeur de départ, la surcharge la
 corrige le jour où il faut aller vite.
 
+### `ESSAI_ANONYME_SANS_LIMITE` — une variable qu'on pose et qu'on retire
+
+L'essai de la landing porte deux verrous, tous deux à deux : une visite ne dépose
+qu'une fois si elle a rendu des concepts, et une empreinte d'adresse n'ouvre que
+deux visites sur vingt-quatre heures **glissantes**. Ils tiennent le budget d'une
+page publique où personne n'a de compte à qui facturer.
+
+Ils rendent aussi cette page intestable dès le troisième essai — et c'est la
+seule qu'on ne peut éprouver qu'en production, puisque le découpage n'y tourne
+pour de vrai qu'avec la vraie clé. À `true`, les deux verrous sont levés : chaque
+dépôt ouvre une visite neuve, sans compter.
+
+**Ce n'est pas un réglage, c'est un geste.** On la pose le temps d'une
+vérification, on la retire après. Absente, tout est fermé — c'est le seul état
+dans lequel la production doit rester. Elle n'ouvre rien d'autre : le plafond
+journalier d'appels borne la dépense quoi qu'il arrive, et chaque dépôt qu'elle
+laisse passer écrit une ligne dans le journal, pour qu'un oubli se voie.
+
 ### `SEED_USER_EMAIL` — une variable qui n'existe pas en production
 
 Elle désigne l'adresse du compte de démonstration que `prisma db seed` fabrique.
@@ -286,6 +304,7 @@ ni ne se régénèrent, elles **disparaissent**.
 | `AI_MODEL`, `AI_MAX_TOKENS`                         | Réglages — identiques                                                                                                                            |
 | `EMAIL_FROM`                                        | Réglage — sur le domaine vérifié chez le fournisseur d'emails                                                                                    |
 | `ADMIN_EMAILS`                                      | Réglage — identique                                                                                                                              |
+| `ESSAI_ANONYME_SANS_LIMITE`                         | **Absente**, sauf le temps d'une vérification en ligne                                                                                           |
 | `SEED_USER_EMAIL`, `SEED_USER_TIMEZONE`             | **Absentes**                                                                                                                                     |
 
 ## Comment le code arrive en production

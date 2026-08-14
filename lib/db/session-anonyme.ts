@@ -61,16 +61,27 @@ export type OuvertureDeSession =
  * peuvent passer à trois. C'est assumé — la conséquence d'une course ici est un
  * dépôt de plus, soit deux centimes, là où la fermer demanderait une table de
  * compteurs pour des lignes qu'on efface au bout d'une semaine.
+ *
+ * `sansCompte` porte l'échappement de vérification en ligne, décidé par
+ * `lib/depots/essai-sans-limite.ts` et passé en paramètre plutôt que relu ici :
+ * l'accès aux données ne lit pas d'interrupteur, sinon la même fonction ne fait
+ * plus la même chose selon l'environnement et les scripts de vérification n'ont
+ * plus de prise dessus.
  */
-export async function ouvrirUneSession(adresse: string): Promise<OuvertureDeSession> {
+export async function ouvrirUneSession(
+  adresse: string,
+  sansCompte = false,
+): Promise<OuvertureDeSession> {
   const ipHash = empreinteDeLAdresse(adresse);
-  const depuis = new Date(Date.now() - FENETRE_ADRESSE_HEURES * 60 * 60 * 1000);
 
-  const recentes = await prisma.anonymousSession.count({
-    where: { ipHash, createdAt: { gte: depuis } },
-  });
+  if (!sansCompte) {
+    const depuis = new Date(Date.now() - FENETRE_ADRESSE_HEURES * 60 * 60 * 1000);
+    const recentes = await prisma.anonymousSession.count({
+      where: { ipHash, createdAt: { gte: depuis } },
+    });
 
-  if (recentes >= DEPOTS_PAR_ADRESSE) return { ouverte: false, motif: "adresse" };
+    if (recentes >= DEPOTS_PAR_ADRESSE) return { ouverte: false, motif: "adresse" };
+  }
 
   const session = await prisma.anonymousSession.create({
     data: { ipHash },
