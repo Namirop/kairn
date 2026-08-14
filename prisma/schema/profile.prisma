@@ -52,7 +52,7 @@ model UserStats {
   /// le nombre de jours s'en déduit, donc il n'y a rien à incrémenter, donc rien
   /// à désynchroniser si la personne ne passe pas un jour. Nul quand l'arriéré
   /// tient sous le plafond — le signal disparaît avec lui.
-  backlogSince      DateTime? @db.Date
+  backlogSince DateTime? @db.Date
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

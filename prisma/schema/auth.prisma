@@ -10,20 +10,20 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  sessions   Session[]
-  accounts   Account[]
-  settings   UserSettings?
-  stats      UserStats?
-  inputs     Input[]
-  atoms      Atom[]
-  reviews    Review[]
-  aiCalls    AiCall[]
-  aiQuota    AiUserQuota[]
-  dailyUsage DailyUsage[]
+  sessions     Session[]
+  accounts     Account[]
+  settings     UserSettings?
+  stats        UserStats?
+  inputs       Input[]
+  atoms        Atom[]
+  reviews      Review[]
+  aiCalls      AiCall[]
+  aiQuota      AiUserQuota[]
+  dailyUsage   DailyUsage[]
   monthlyUsage MonthlyUsage[]
-  reports    Signalement[]
-  emailsSent EmailDelivery[]
-  waitlist   WaitlistEntry?
+  reports      Signalement[]
+  emailsSent   EmailDelivery[]
+  waitlist     WaitlistEntry?
 }
 
 model Session {

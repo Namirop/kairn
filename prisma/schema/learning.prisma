@@ -30,10 +30,27 @@ model Input {
   imageData      Bytes?
   imageMediaType String?
   /// Texte tiré d'une image par l'OCR. Nul pour un Input textuel.
-  extractedText  String?  @db.Text
+  extractedText  String?     @db.Text
   /// Ce qu'on dit à l'utilisateur quand le dépôt n'a pas abouti.
   failureReason  String?
   status         InputStatus @default(PENDING)
+
+  /// Ce que l'extraction a lu de la nature du dépôt. Elle décide si le doute
+  /// écarte un concept de la génération de questions — sans elle, on ne peut
+  /// plus reconstruire pourquoi un dépôt n'a rien produit.
+  nature         InputNature?
+
+  /// L'extraction a rendu plus de concepts que le plafond du produit, et on a
+  /// gardé les plus importants. Le compte réellement rendu ne vit pas ici : il
+  /// part au journal, parce qu'il sert à savoir si le palier est le bon et que
+  /// ce n'est pas une information d'écran.
+  conceptsTronques Boolean @default(false)
+
+  /// La capture portait plus de texte qu'un dépôt ne peut en accepter, et la
+  /// lecture a été coupée. Distinct du précédent : ce n'est ni la même perte,
+  /// ni le même message. Toujours faux sur un dépôt texte, dont la longueur est
+  /// refusée avant l'envoi.
+  texteTronque   Boolean     @default(false)
 
   /// Clé d'un envoi, émise par le formulaire. Deux envois du même geste — double
   /// clic, reprise réseau — portent la même et ne créent qu'un dépôt.
@@ -59,18 +76,18 @@ model Atom {
   /// Le même couple que sur `Input`, et pour la même raison. Un concept anonyme
   /// est invisible de toute requête de compte : elles filtrent toutes sur
   /// `userId`, et il vaut nul tant que personne ne l'a réclamé.
-  userId  String?
-  user    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   anonymousSessionId String?
   anonymousSession   AnonymousSession? @relation(fields: [anonymousSessionId], references: [id], onDelete: Cascade)
 
-  concept String   @db.Text
-  tags    String[]
+  concept   String   @db.Text
+  tags      String[]
   /// Extrait tel qu'il a été déposé alors qu'il paraît factuellement douteux.
   /// Aucune question n'est écrite dessus : river une erreur serait pire que
   /// l'ignorer. Il attend que l'utilisateur confirme, corrige ou supprime.
-  uncertain Boolean @default(false)
+  uncertain Boolean  @default(false)
 
   state          AtomState @default(LEARNING)
   archivedAt     DateTime?
@@ -141,10 +158,10 @@ model Variant {
   lastSessionAt DateTime?
   /// Passages en entraînement libre. Il ne pilote rien, il use : additionné au
   /// premier, il dit quand les formulations ont fait leur temps.
-  trainingCount  Int       @default(0)
-  lastTrainedAt  DateTime?
+  trainingCount Int       @default(0)
+  lastTrainedAt DateTime?
   /// Un Variant retiré n'est plus proposé mais reste lié à ses Reviews passées.
-  retiredAt  DateTime?
+  retiredAt     DateTime?
 
   /// Sous quel réglage cette question a été écrite.
   ///
@@ -159,8 +176,8 @@ model Variant {
 
   createdAt DateTime @default(now())
 
-  reviews  Review[]
-  reports  Signalement[]
+  reviews Review[]
+  reports Signalement[]
 
   @@index([atomId, retiredAt])
 }

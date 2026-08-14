@@ -120,9 +120,9 @@ model Signalement {
 /// Les gens qui veulent plus que le plafond du jour. Une table et un bouton :
 /// un signal de demande gratuit, bien avant d'avoir quoi que ce soit à vendre.
 model WaitlistEntry {
-  userId String   @id
-  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  motif  String?
+  userId  String   @id
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  motif   String?
   askedAt DateTime @default(now())
 }
 
@@ -170,6 +170,28 @@ model AiUserQuota {
   @@id([userId, day])
 }
 
+/// La part du trafic **sans compte** dans les appels du jour.
+///
+/// Le trafic anonyme n'avait pas de part : n'appartenant à personne, il ne
+/// passait que le plafond global. Les deux populations partageaient donc une
+/// ressource sans qu'aucune ne soit protégée de l'autre — la landing pouvait
+/// fermer la journée aux comptes connectés, et l'inverse était vrai aussi. Ce
+/// n'est pas un problème d'argent, le plafond global s'en charge ; c'est un déni
+/// de service croisé.
+///
+/// Une seule ligne par jour, comme `AiCallQuota` : les visiteurs ne sont pas
+/// identifiés, et ce qu'on veut borner est le pool entier, pas chacun d'eux —
+/// c'est `VISITES_PAR_ADRESSE` qui répartit à l'intérieur du pool.
+model AiAnonymousQuota {
+  /// Minuit UTC du jour concerné.
+  day DateTime @id @db.Date
+
+  reserved Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 /// Une ligne par appel réel au modèle, succès comme échec. C'est le registre
 /// qui sert la comptabilité et l'observation ; l'autorisation, elle, passe par
 /// `AiCallQuota`.
@@ -183,8 +205,8 @@ model AiCall {
   jobId  String?
   job    GenerationJob? @relation(fields: [jobId], references: [id], onDelete: SetNull)
 
-  purpose String
-  model   String
+  purpose             String
+  model               String
   /// Entrée facturée plein tarif : ce que le cache n'a pas couvert.
   inputTokens         Int
   /// Entrée écrite dans le cache, facturée un quart plus cher.
@@ -193,9 +215,9 @@ model AiCall {
   cacheReadTokens     Int     @default(0)
   outputTokens        Int
   costUsd             Decimal @db.Decimal(12, 8)
-  latencyMs    Int
-  success      Boolean
-  errorCode    String?
+  latencyMs           Int
+  success             Boolean
+  errorCode           String?
 
   createdAt DateTime @default(now())
 
@@ -215,8 +237,8 @@ model AiCall {
 /// et par compte, et la clé primaire fait que prendre sa place est une seule
 /// instruction qui incrémente et refuse dans le même mouvement.
 model MonthlyUsage {
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// Premier jour de la période, dans le calendrier de l'utilisateur.
   periodStart DateTime @db.Date
 
@@ -348,6 +370,7 @@ model Reglages {
   mockAi           Boolean?
   dailyCallCap     Int?
   userDailyCallCap Int?
+  anonymousDailyCallCap Int?
   model            String?
   maxTokens        Int?
 
@@ -366,8 +389,8 @@ model ReglageJournal {
   /// Le nom du réglage, tel qu'il apparaît dans `Reglages`.
   reglage String
   /// Les valeurs sont écrites en clair : nul veut dire « rendu au défaut ».
-  avant String?
-  apres String?
+  avant   String?
+  apres   String?
 
   /// L'adresse de qui a changé, recopiée. Le compte peut disparaître, la trace
   /// doit rester lisible.

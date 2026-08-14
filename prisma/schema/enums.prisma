@@ -4,6 +4,22 @@ enum InputSourceType {
   IMAGE
 }
 
+/// Ce qu'un dépôt prétend être, tel que l'extraction l'a lu.
+///
+/// Il ne classe pas le sujet, il dit à quoi ses affirmations doivent répondre.
+/// `FACTUEL` : vrai du monde, donc le doute a un sens et un concept douteux
+/// n'obtient pas de questions. `FICTION` : les règles d'un jeu, la chronologie
+/// d'un univers — l'énoncé n'a pas à être vrai, seulement fidèle au dépôt.
+/// `PERSONNEL` : vrai mais invérifiable de l'extérieur, une procédure interne,
+/// le fonctionnement d'une équipe.
+///
+/// Nul sur les dépôts d'avant ce champ, et sur ceux dont l'extraction a échoué.
+enum InputNature {
+  FACTUEL
+  FICTION
+  PERSONNEL
+}
+
 /// Avancement du découpage d'un Input en Atoms.
 ///
 /// `REJECTED` et `FAILED` sont deux fins distinctes, et les confondre était un

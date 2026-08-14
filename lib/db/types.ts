@@ -10,6 +10,7 @@ export {
   BatchStatus,
   FsrsState,
   GenerationKind,
+  InputNature,
   InputSourceType,
   InputStatus,
   JobStatus,
