@@ -28,6 +28,49 @@ import type { AiImagePart } from "@/lib/ai/message";
  * saisie — autour d'une réponse à retenir. C'est ce qui met à l'épreuve la
  * consigne « jette l'habillage ». Une capture réelle la remplace en la
  * déposant à sa place.
+ *
+ * `12` à `23` couvrent ce que les onze premiers laissaient dans l'ombre, et
+ * sont tous hors du registre technique :
+ *
+ * - `12-borne-basse` : le texte le plus court qu'on accepte, un concept
+ * - `13-rejet-opinion`, `14-rejet-trop-vague` : les deux familles de rejet que
+ *   `06` ne couvrait pas. Le piège des deux est le faux positif — un modèle
+ *   serviable fabrique un concept qui n'est nulle part dans le texte
+ * - `15-redondance-interne` : la même idée dite trois fois avec trois
+ *   vocabulaires. C'est le dépôt qui dit si le modèle compte des idées ou des
+ *   formulations, et donc le premier à regarder quand le plafond de concepts
+ *   monte
+ * - `16-concepts-imbriques` : une idée et quatre précisions sans existence
+ *   propre, pour la règle « un détail d'un concept voisin y est rattaché »
+ * - `17-faux-grand-public` : `uncertain` hors du technique, deux erreurs nettes
+ *   et une simplification acceptable qu'il faut laisser tranquille
+ * - `18-anglais` : le seul dépôt non francophone, pour « écris dans la langue
+ *   du dépôt »
+ * - `19-chiffres-et-dates` : de quoi trouer un chiffre utile plutôt qu'un mot
+ *   de liaison
+ * - `20-narratif-historique` : des mécanismes noyés dans un récit, là où il
+ *   serait plus facile d'extraire la chronologie
+ * - `21-mixte-exploitable-et-organisation` : moitié savoir, moitié tâches.
+ *   Attendu : des concepts, et aucun rejet
+ * - `22-article-long` (3 644 signes) et `23-pave-maximal` (6 815 signes) : les
+ *   seuls dépôts assez denses pour que le plafond de concepts soit observable.
+ *   Sans eux, on modifierait une borne que l'instrument ne sait pas mesurer.
+ *   `23` est aussi le seul à éprouver `AI_MAX_TOKENS` sur une sortie pleine
+ *
+ * `26-pave-double` existe pour une seule chose : dépasser le plafond de vingt
+ * concepts pour de bon. `23` a rendu dix-neuf au passage du 14/08, donc la
+ * troncature n'a jamais eu à couper et n'est prouvée que par un test unitaire.
+ * Il colle `22` aux dix premiers paragraphes de `23` — et pas les deux fichiers
+ * entiers, qui feraient 10 782 signes quand un dépôt en accepte 8 000
+ * (`CARACTERES_MAXIMUM`) : un banc qui mesure ce que le produit ne peut pas
+ * recevoir ne mesure rien.
+ *
+ * `24-fiction` et `25-notes-personnelles` éprouvent la nature du dépôt. Leurs
+ * énoncés n'ont pas à être vrais du monde — les règles d'un jeu inventé, le
+ * fonctionnement interne d'une équipe — et un modèle qui les marquerait
+ * douteux les priverait de toute question. Ce qu'on regarde sur ces deux-là
+ * n'est donc pas le nombre de concepts mais `nature`, et le fait qu'aucun
+ * concept ne parte mis de côté.
  */
 
 export type Depot = {

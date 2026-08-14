@@ -1,0 +1,11 @@
+notes sur le fonctionnement de l'équipe, à relire avant la prochaine astreinte
+
+l'astreinte tourne sur trois semaines et pas sur deux. la troisième est celle où on ne prend aucun ticket neuf, on ferme ce qui traîne. c'est ce qui fait que personne ne sort d'astreinte avec une pile en cours.
+
+la règle du déploiement : rien ne part le vendredi, et rien ne part après seize heures les autres jours. la raison n'est pas la peur du bug, c'est que la personne qui déploie doit rester joignable deux heures après, et qu'après seize heures elle ne l'est plus.
+
+quand une alerte tombe la nuit, on ne corrige pas, on contient. la correction attend le matin et passe par une revue normale. la seule exception est une perte de données en cours : là on coupe le service sans demander l'avis de personne.
+
+le canal des incidents sert au fil de l'incident et à rien d'autre. les décisions sont réécrites dans le compte rendu du lendemain, parce que personne ne relit un canal de trois cents messages.
+
+la revue de code est bloquante mais pas hiérarchique : n'importe qui peut approuver, y compris quelqu'un d'une autre équipe. ce qui bloque vraiment, c'est la double approbation exigée sur tout ce qui touche à la facturation.

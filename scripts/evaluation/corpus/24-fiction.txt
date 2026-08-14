@@ -1,0 +1,11 @@
+Le Fil — règles de base
+
+Le Fil se joue à deux ou à quatre, avec un jeu de soixante cartes réparties en quatre veilles : l'Aube, le Midi, le Crépuscule et la Nuit.
+
+Chaque joueur commence avec sept cartes en main et une carte posée face visible devant lui, son ancre. L'ancre ne se joue jamais. Elle sert seulement à désigner qui ouvre le tour : c'est le joueur dont l'ancre appartient à la veille la plus basse qui commence.
+
+Poser une carte sur le Fil est gratuit. La reprendre coûte deux cartes de sa main, défaussées face cachée. C'est le mécanisme central du jeu : celui qui pose beaucoup prend l'avantage immédiat et s'appauvrit pour la suite, puisqu'il ne pourra plus rien récupérer sans se vider la main.
+
+Une carte de Nuit posée sur une carte d'Aube inverse le sens du tour et fait basculer la veille annoncée. C'est la seule combinaison qui produise cet effet ; toutes les autres se contentent de s'empiler.
+
+On ne gagne pas en vidant sa main. La partie s'arrête dès qu'un joueur pose trois cartes de la même veille d'affilée, et c'est alors celui qui tient le plus de cartes de Crépuscule qui l'emporte. Se débarrasser de ses cartes trop vite revient donc à se priver du seul décompte qui compte.
