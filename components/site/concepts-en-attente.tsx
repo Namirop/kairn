@@ -77,9 +77,9 @@ export function ConceptsEnAttente() {
 }
 
 /**
- * L'attente qu'on a cessé de surveiller.
+ * L'attente dont on avoue ne plus savoir combien de temps elle durera.
  *
- * Au bout d'une minute, l'écran arrêtait d'interroger sans rien changer à ce
+ * L'écran interrogeait soixante fois puis s'arrêtait sans rien changer à ce
  * qu'il montrait : les emplacements continuaient de battre, pour toujours, sur
  * la seule page qui convertit. Se taire indéfiniment est pire que dire qu'on ne
  * sait pas — le visiteur finit par croire à un produit cassé.
@@ -88,9 +88,15 @@ export function ConceptsEnAttente() {
  * d'appels est atteint reste en file et repartira, mais pas dans la minute :
  * côté serveur c'est un report légitime, et rien ne s'est cassé.
  *
- * Ce qu'on dit est donc vrai au mot près. Le texte est en base, le cookie de
- * visite dure sept jours, et revenir sur la page suffit à retrouver ses
- * concepts — c'est déjà comme ça que l'écran se recharge.
+ * L'interrogation continue derrière, au ralenti, jusqu'à quatre-vingt-dix
+ * secondes : si le résultat tombe, il remplace cet écran de lui-même. Le bouton
+ * ne fait donc qu'accélérer ce qui se passerait de toute façon — c'est une
+ * proposition, pas la seule issue.
+ *
+ * Ce qu'on dit est vrai au mot près. Le traitement tourne côté serveur, derrière
+ * la réponse, et fermer l'onglet ne l'arrête pas. Le texte est en base, le
+ * cookie de visite dure sept jours, et revenir sur la page suffit à retrouver
+ * ses concepts — c'est déjà comme ça que l'écran se recharge.
  */
 export function AttenteInterrompue({ onVerifier }: { onVerifier: () => void }) {
   return (

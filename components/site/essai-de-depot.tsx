@@ -20,10 +20,28 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
  * chaîne s'est arrêtée.
  */
 
-// Une seconde : le résultat apparaît au plus tard une seconde après être prêt.
-// L'appel est léger, et une demi-seconde de retard se voit sur cinq secondes.
-const RYTHME_MS = 1000;
-const ESSAIS_MAXIMUM = 60;
+/**
+ * Le rythme de l'interrogation, et les deux moments où il change.
+ *
+ * Une seconde d'abord : le résultat apparaît au plus tard une seconde après être
+ * prêt, l'appel est léger, et une demi-seconde de retard se voit sur cinq.
+ *
+ * **À quinze secondes, on le dit.** Une minute de tourniquet était une minute où
+ * plus personne ne regardait — quelqu'un qui attend cinq secondes d'habitude est
+ * parti bien avant. Mais on ne s'arrête pas pour autant : un pavé de quatre mille
+ * caractères peut mettre vingt secondes sans que rien n'aille mal, et couper à
+ * quinze condamnerait une extraction qui allait aboutir. On ralentit à cinq
+ * secondes, l'écran dit qu'il ne sait plus, et si le résultat tombe il s'affiche
+ * de lui-même — le bouton « Vérifier maintenant » ne fait qu'accélérer.
+ *
+ * **À quatre-vingt-dix secondes, on arrête vraiment.** Au-delà, ce n'est plus une
+ * extraction lente, c'est un job reporté ou perdu : le cron le reprendra, et
+ * l'écran n'a plus rien à apprendre en insistant.
+ */
+const RYTHME_VIF_MS = 1000;
+const RYTHME_LENT_MS = 5000;
+const AVEU_MS = 15_000;
+const ABANDON_MS = 90_000;
 
 /**
  * Au-delà, on montre le compteur : avant, il n'apprend rien à personne.
@@ -64,31 +82,33 @@ export function EssaiDeDepot({
     if (!aPoursuivre) return;
 
     let vivant = true;
-    let tours = 0;
+    let ecoule = RYTHME_VIF_MS;
+    let minuteur: ReturnType<typeof setTimeout>;
 
-    const battement = setInterval(async () => {
-      tours += 1;
-
+    // Un enchaînement de délais plutôt qu'un intervalle : le rythme change en
+    // cours de route, et un `setInterval` ne sait pas ralentir.
+    const tour = async () => {
       const suite = await avancementDeLEssaiAction();
 
       if (!vivant) return;
 
       setAvancement(suite);
 
-      if (!suite?.enCours) {
-        clearInterval(battement);
-        return;
-      }
+      if (!suite?.enCours) return;
+      if (ecoule >= AVEU_MS) setAttenteInterrompue(true);
+      if (ecoule >= ABANDON_MS) return;
 
-      if (tours >= ESSAIS_MAXIMUM) {
-        clearInterval(battement);
-        setAttenteInterrompue(true);
-      }
-    }, RYTHME_MS);
+      const pause = ecoule < AVEU_MS ? RYTHME_VIF_MS : RYTHME_LENT_MS;
+
+      ecoule += pause;
+      minuteur = setTimeout(tour, pause);
+    };
+
+    minuteur = setTimeout(tour, RYTHME_VIF_MS);
 
     return () => {
       vivant = false;
-      clearInterval(battement);
+      clearTimeout(minuteur);
     };
   }, [aPoursuivre, relance]);
 
