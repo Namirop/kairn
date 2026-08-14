@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db/client";
 import { finishJob } from "@/lib/db/generation-job";
 import type { GenerationJob } from "@/lib/db/types";
 import { ecrireQuestions } from "@/lib/db/variants";
+import { messageDuGroupe as construireLEnvoi } from "@/lib/domain/envoi-de-questions";
 
 /**
  * L'écriture des questions d'un job, quel que soit le chemin qui l'a apporté.
@@ -27,9 +28,16 @@ export async function conceptsDuJob(atomIds: string[]) {
   return atomIds.flatMap((id) => atomes.filter((atome) => atome.id === id));
 }
 
-/** Les concepts d'un envoi, numérotés : c'est ce rang que la sortie référence. */
-export function messageDuGroupe(concepts: { concept: string }[]): string {
-  return concepts.map((atome, rang) => `Concept ${rang + 1}.\n${atome.concept}`).join("\n\n");
+/**
+ * L'envoi d'un groupe, construit là où le banc construit le sien.
+ *
+ * La graine est l'id de l'Atom : c'est d'elle que dérive la cible du vrai ou
+ * faux, et elle doit être stable pour que deux régénérations du même concept ne
+ * changent pas de répartition. Le banc, lui, n'écrit rien en base et sème sur le
+ * texte du concept.
+ */
+export function messageDuGroupe(concepts: { id: string; concept: string }[]): string {
+  return construireLEnvoi(concepts.map(({ id, concept }) => ({ graine: id, concept })));
 }
 
 type LotRendu = { rang: number; variants: Parameters<typeof ecrireQuestions>[1] };

@@ -4,6 +4,20 @@
  * Texte fourni, recopié mot pour mot. Les formats et les facettes cités ici
  * sont ceux des enums `VariantFormat` et `VariantFacet` du schéma Prisma : le
  * prompt et la base nomment les mêmes valeurs.
+ *
+ * **L'ordre des options d'un QCM rendu ici n'est pas celui qui sera montré.**
+ * Le serveur les remet en ordre à l'écriture du Variant — le modèle plaçait la
+ * bonne réponse en première position 92 % du temps, et une consigne de prompt ne
+ * tient pas une propriété de distribution. N'ajoute donc pas ici de « varie la
+ * position de la bonne réponse » : ce serait un mieux invérifiable par-dessus
+ * une correction, elle, mesurée. Voir `lib/domain/ordre-des-options.ts`.
+ *
+ * **Même chose pour la part d'affirmations fausses.** Elle a été demandée en
+ * prose — « à peu près une fois sur deux » — et mesurée à 88 % de fausses sur
+ * 125 questions. La cible est maintenant tirée par le serveur, question par
+ * question, et transmise dans l'envoi. Ne réintroduis pas ici de consigne de
+ * proportion : elle ne tiendrait pas et masquerait la mesure. Voir
+ * `lib/domain/vrai-ou-faux.ts`.
  */
 export const GENERATE_VARIANTS_PROMPT = `On te donne un ou plusieurs concepts issus d'un même dépôt. Tu écris quatre questions
 pour chacun, indépendamment.
@@ -11,6 +25,15 @@ pour chacun, indépendamment.
 Chaque question ne se répond qu'avec son propre concept. Ne t'appuie jamais sur un
 concept voisin du même envoi, même s'il éclaire le sujet : au moment de la révision,
 ils seront servis à des semaines d'intervalle.
+
+LA LANGUE
+
+Tu écris chaque question, chaque réponse et chaque option dans la langue du concept
+qu'elle porte. Un concept en anglais donne des questions en anglais, jusqu'aux options
+de ses QCM. Personne ne veut réviser en français une note prise en anglais.
+
+Ce n'est pas la langue de cette consigne qui décide, c'est celle du concept qu'on te
+donne. Regarde-la avant d'écrire, pas après.
 
 LA RÈGLE QUI COMPTE
 
@@ -91,12 +114,22 @@ option manifestement absurde rend la question inutile. Les quatre options ont
 une longueur et une forme comparables : la bonne réponse ne doit pas se repérer
 à sa taille.
 
-TRUE_FALSE : l'affirmation est fausse à peu près une fois sur deux. Quand elle
-est fausse, elle l'est d'un cheveu — une condition inversée, un cas particulier
-étendu à tous — pas grossièrement.
+TRUE_FALSE : l'envoi te donne, concept par concept et facette par facette, si
+l'affirmation doit être vraie ou fausse. Tu suis cette valeur, et tu la recopies
+dans \`estVraie\`. Ce n'est pas une préférence à arbitrer : la répartition est
+décidée avant l'appel, et une affirmation rendue à l'envers de ce qui est demandé
+est un défaut.
+
+Quand elle doit être vraie, elle porte sur le point précis du concept où l'on
+peut se tromper, jamais sur son résumé : une évidence ne teste rien.
+
+Quand elle doit être fausse, elle l'est d'un cheveu — une condition inversée, un
+cas particulier étendu à tous, deux étapes permutées — jamais grossièrement. Elle
+reste crédible pour quelqu'un qui a mal compris le concept.
+
+Dans les deux cas, \`answerKey\` commence par « Vrai » ou « Faux », puis dit en une
+phrase ce qui le justifie.
 
 SHORT_ANSWER et EXPLAIN : la personne répond en texte libre et jugera elle-même.
 Écris \`answerKey\` pour qu'elle puisse se juger honnêtement : les points attendus,
-formulés simplement, et ce qui compte comme une réponse insuffisante.
-
-Écris dans la langue du concept.`;
+formulés simplement, et ce qui compte comme une réponse insuffisante.`;

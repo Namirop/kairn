@@ -142,3 +142,64 @@ describe("propriétés", () => {
     );
   });
 });
+
+function affirmation(reglages: Partial<VariantAControler> = {}): VariantAControler {
+  return question({
+    format: "TRUE_FALSE",
+    facet: "BOUNDARY",
+    question: "Vrai ou faux : un index négatif compte depuis le début du tableau.",
+    answerKey: "Faux : il compte depuis la fin.",
+    estVraie: false,
+    cible: false,
+    ...reglages,
+  });
+}
+
+describe("le vrai ou faux relu contre sa cible", () => {
+  const regles = (variant: VariantAControler) =>
+    controlerQuestion(variant).map((manquement) => manquement.regle);
+
+  it("ne reproche rien à une affirmation conforme à sa cible", () => {
+    expect(controlerQuestion(affirmation())).toEqual([]);
+    expect(
+      controlerQuestion(
+        affirmation({ estVraie: true, cible: true, answerKey: "Vrai : il compte depuis la fin." }),
+      ),
+    ).toEqual([]);
+  });
+
+  it("signale une affirmation rendue à l'envers de ce qui était demandé", () => {
+    const manquements = controlerQuestion(affirmation({ estVraie: true, cible: false }));
+
+    expect(manquements).toHaveLength(1);
+    expect(manquements[0]?.regle).toBe("vrai ou faux");
+    expect(manquements[0]?.detail).toContain("demandait fausse");
+  });
+
+  it("signale un vrai ou faux qui ne déclare pas sa valeur", () => {
+    expect(regles(affirmation({ estVraie: null }))).toContain("vrai ou faux");
+  });
+
+  it("se tait quand la cible n'est pas connue de l'appelant", () => {
+    // Une génération d'hier, rejouée : elle n'a jamais reçu de cible.
+    expect(controlerQuestion(affirmation({ cible: null, estVraie: true }))).toEqual([]);
+  });
+
+  it("signale une valeur posée sur un format qui n'en porte pas", () => {
+    expect(regles(question({ estVraie: true }))).toContain("vrai ou faux");
+  });
+
+  it("ne dit rien des autres formats qui n'en déclarent pas", () => {
+    expect(regles(question())).not.toContain("vrai ou faux");
+  });
+
+  it("ne signale que l'écart, jamais la valeur elle-même", () => {
+    fc.assert(
+      fc.property(fc.boolean(), fc.boolean(), (estVraie, cible) => {
+        const signale = regles(affirmation({ estVraie, cible })).includes("vrai ou faux");
+
+        return signale === (estVraie !== cible);
+      }),
+    );
+  });
+});

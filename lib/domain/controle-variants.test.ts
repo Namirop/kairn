@@ -27,6 +27,10 @@ function variante(reglages: Partial<VariantAControler> = {}, rang = 0): VariantA
             accepted: ["la fin"],
           }
         : null,
+    // Un vrai ou faux bien formé déclare sa valeur. Aucune cible n'est posée
+    // ici : ce fichier contrôle la composition d'un lot, pas l'obéissance d'une
+    // question à ce que l'envoi lui demandait.
+    estVraie: format === "TRUE_FALSE" ? false : null,
     ...reglages,
   };
 }

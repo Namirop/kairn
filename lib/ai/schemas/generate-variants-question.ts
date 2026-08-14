@@ -8,6 +8,16 @@ import { TROU } from "@/lib/domain/reponse-cloze";
  * C'est ce que le modèle voit : la grammaire du décodage contraint est compilée
  * depuis ces objets. Ce qui s'y trouve est imposé ; ce qui n'y est pas se
  * vérifie après coup, dans la validation du lot.
+ *
+ * **Sauf les bornes chiffrées, qui ne sont imposées par rien.** Longueurs,
+ * minimums, maximums partent en description (`lib/ai/output-schema.ts`) : le
+ * modèle les lit comme des indications. Elles vivent donc dans la forme, où
+ * elles cadrent la sortie, et pas dans la relecture, où elles ne feraient que
+ * jeter un appel déjà payé. Un appel de questions coûte plus cher qu'une
+ * extraction, et il en porte trois concepts à la fois.
+ *
+ * Ce qui reste une règle à la relecture : les énumérations, que la grammaire
+ * tient réellement, et `minItems` à 0 ou 1, seul mot-clé de comptage recopié.
  */
 
 /** Ce qu'un MCQ ajoute. Une clé facultative plutôt que deux champs à annuler. */
@@ -19,6 +29,19 @@ function mcq() {
       .describe("Les quatre options, de longueur comparable."),
     correctIndex: z.number().int().min(0).max(3).describe("L'index de la bonne option."),
   });
+}
+
+/** Le même MCQ, relu : le compte des options est rattrapé, pas exigé. */
+function mcqLu() {
+  return z.object({
+    options: z.array(z.string()),
+    correctIndex: z.number().int(),
+  });
+}
+
+/** Le même texte à trou, relu. `min(1)` tient : la grammaire le recopie. */
+function clozeLu() {
+  return z.object({ sentence: z.string(), accepted: z.array(z.string()).min(1) });
 }
 
 /**
@@ -95,6 +118,42 @@ export function question(formats: readonly [VariantFormat, ...VariantFormat[]], 
         .describe("La réponse attendue en clair. Pour SHORT_ANSWER et EXPLAIN, de quoi se juger."),
       mcq: mcq().nullish().describe("À renseigner si et seulement si format vaut MCQ."),
       cloze: cloze().nullish().describe("À renseigner si et seulement si format vaut CLOZE."),
+      estVraie: z
+        .boolean()
+        .nullish()
+        .describe(
+          "À renseigner si et seulement si format vaut TRUE_FALSE. Vrai si l'affirmation posée est vraie. L'envoi impose la valeur attendue pour cette facette.",
+        ),
     })
     .describe(facette);
+}
+
+/**
+ * La même question, relue.
+ *
+ * L'énumération des formats reste, et c'est délibéré : c'est elle qui rend la
+ * règle des facettes réellement intenable plutôt que recommandée, et la
+ * grammaire la fait respecter. Les longueurs, elles, sont parties — une question
+ * de neuf caractères ou de mille reste lisible, se voit au banc, et ne vaut pas
+ * de perdre trois lots.
+ *
+ * `z.enum()` est appelé ici aussi à chaque invocation, pour la même raison qu'au
+ * dessus : une instance partagée partirait en `$defs`.
+ *
+ * `estVraie` se relit sans aucune contrainte croisée, contrairement à `mcq` et
+ * `cloze` : un `TRUE_FALSE` qui ne l'aurait pas renseigné, ou qui aurait rendu
+ * l'inverse de la cible demandée, lève un **manquement** au contrôle et pas un
+ * refus. La question reste servable — elle est juste comptée du mauvais côté —,
+ * et jeter un appel qui porte trois concepts pour ça coûterait bien plus que le
+ * défaut mesuré.
+ */
+export function questionLue(formats: readonly [VariantFormat, ...VariantFormat[]]) {
+  return z.object({
+    format: z.enum(formats),
+    question: z.string(),
+    answerKey: z.string(),
+    mcq: mcqLu().nullish(),
+    cloze: clozeLu().nullish(),
+    estVraie: z.boolean().nullish(),
+  });
 }

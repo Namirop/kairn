@@ -17,6 +17,10 @@ export type VariantAControler = {
   options: string[] | null;
   correctIndex: number | null;
   cloze?: { sentence: string; accepted: string[] } | null;
+  /** Ce que le modèle déclare : l'affirmation posée est-elle vraie. */
+  estVraie?: boolean | null;
+  /** Ce que l'envoi lui demandait. Absente quand l'appelant ne la connaît pas. */
+  cible?: boolean | null;
 };
 
 /**
@@ -116,6 +120,42 @@ function controlerCloze(variant: VariantAControler): Manquement[] {
   return [];
 }
 
+/**
+ * Le vrai ou faux, relu contre la cible que l'envoi lui avait fixée.
+ *
+ * Le modèle ne décide plus de la proportion — il ne l'a jamais tenue, 88 % de
+ * fausses au passage du 14/08 — mais d'une valeur par question, imposée. Ce
+ * contrôle est la seule chose qui dise si la consigne locale prend là où la
+ * consigne de distribution n'a pas pris.
+ *
+ * L'écart est un manquement et jamais un refus : la question reste servable,
+ * elle est juste comptée du mauvais côté de la répartition.
+ */
+function controlerVraiOuFaux(variant: VariantAControler): Manquement[] {
+  const rendue = variant.estVraie ?? null;
+
+  if (variant.format !== "TRUE_FALSE") {
+    return rendue === null
+      ? []
+      : [{ regle: "vrai ou faux", detail: `format ${variant.format} avec estVraie` }];
+  }
+
+  if (rendue === null) {
+    return [{ regle: "vrai ou faux", detail: "l'affirmation ne dit pas si elle est vraie" }];
+  }
+
+  const cible = variant.cible ?? null;
+
+  if (cible === null || cible === rendue) return [];
+
+  return [
+    {
+      regle: "vrai ou faux",
+      detail: `affirmation ${rendue ? "vraie" : "fausse"} alors que l'envoi demandait ${cible ? "vraie" : "fausse"}`,
+    },
+  ];
+}
+
 /** La réponse attendue ne doit pas se lire dans l'énoncé. */
 function controlerReponseCachee(variant: VariantAControler): Manquement[] {
   const [premierePhrase = ""] = variant.answerKey.split(/[.\n]/);
@@ -131,5 +171,10 @@ function controlerReponseCachee(variant: VariantAControler): Manquement[] {
 
 /** Tout ce qu'on peut reprocher à une question sans regarder les autres. */
 export function controlerQuestion(variant: VariantAControler): Manquement[] {
-  return [...controlerMcq(variant), ...controlerCloze(variant), ...controlerReponseCachee(variant)];
+  return [
+    ...controlerMcq(variant),
+    ...controlerCloze(variant),
+    ...controlerVraiOuFaux(variant),
+    ...controlerReponseCachee(variant),
+  ];
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
+import { FACETTES_DU_VRAI_OU_FAUX } from "@/lib/domain/vrai-ou-faux";
 import { toOutputSchema } from "../output-schema";
 import { CONCEPTS_PAR_APPEL, GENERATE_VARIANTS, generateVariantsForme } from "./generate-variants";
 
@@ -146,8 +147,41 @@ describe("forme de sortie de generate_variants", () => {
     expect(sortie.lots[2]?.variants[3]?.correctIndex).toBe(2);
   });
 
-  it("refuse deux lots sur le même rang", () => {
-    expect(GENERATE_VARIANTS.validation.safeParse({ lots: [lot(1), lot(1)] }).success).toBe(false);
+  it("garde le premier de deux lots posés sur le même rang, au lieu de tout refuser", () => {
+    // C'était un refus. Refuser emportait les lots corrects du même envoi pour
+    // une incohérence qui se tranche toute seule, et l'appel était déjà payé.
+    // Les rangs restés sans réponse sont signalés par l'appelant.
+    const sortie = GENERATE_VARIANTS.validation.parse({ lots: [lot(1), lot(1), lot(2)] });
+
+    expect(sortie.lots.map((entree) => entree.rang)).toEqual([1, 2]);
+  });
+
+  it("ramène cinq options à quatre plutôt que de perdre l'envoi", () => {
+    const cinq = {
+      ...lot(1),
+      application: {
+        ...question("MCQ"),
+        mcq: { options: ["a", "b", "c", "d", "bonne"], correctIndex: 4 },
+      },
+    };
+    const servi = GENERATE_VARIANTS.validation.parse({ lots: [cinq] }).lots[0]?.variants[3];
+
+    expect(servi?.options).toHaveLength(4);
+    expect(servi?.options?.[servi.correctIndex ?? -1]).toBe("bonne");
+  });
+
+  it("refuse un QCM dont la bonne réponse ne désigne aucune option", () => {
+    // La seule exception assumée : sans savoir laquelle est la bonne, servir la
+    // question reviendrait à noter faux quelqu'un qui a raison.
+    const perdue = {
+      ...lot(1),
+      application: {
+        ...question("MCQ"),
+        mcq: { options: ["a", "b", "c", "d"], correctIndex: 9 },
+      },
+    };
+
+    expect(GENERATE_VARIANTS.validation.safeParse({ lots: [perdue] }).success).toBe(false);
   });
 
   it("refuse un mcq posé sur un format libre, et un MCQ sans options", () => {
@@ -183,5 +217,47 @@ describe("forme de sortie de generate_variants", () => {
 
     expect(sortie.lots[0]?.variants[2]?.cloze).toEqual(cloze);
     expect(sortie.lots[0]?.variants[0]?.cloze).toBeNull();
+  });
+
+  it("rend la valeur déclarée d'un vrai ou faux, et null partout ailleurs", () => {
+    const sortie = GENERATE_VARIANTS.validation.parse({
+      lots: [{ ...lot(1), boundary: { ...question("TRUE_FALSE"), estVraie: true } }],
+    });
+
+    expect(sortie.lots[0]?.variants[2]?.estVraie).toBe(true);
+    expect(sortie.lots[0]?.variants[0]?.estVraie).toBeNull();
+  });
+
+  it("laisse passer un vrai ou faux qui ne déclare pas sa valeur", () => {
+    // Le contrôle le signalera, mais un appel qui porte trois concepts ne se
+    // jette pas pour un champ manquant sur une question.
+    const sortie = GENERATE_VARIANTS.validation.parse({
+      lots: [{ ...lot(1), boundary: question("TRUE_FALSE") }],
+    });
+
+    expect(sortie.lots[0]?.variants[2]?.estVraie).toBeNull();
+  });
+});
+
+/**
+ * Le garde-fou de la table recopiée.
+ *
+ * `lib/domain/vrai-ou-faux.ts` doit nommer les facettes qui peuvent porter un
+ * `TRUE_FALSE`, et `lib/domain/` ne peut pas importer `lib/ai/` — le sens des
+ * dépendances l'interdit. La table est donc écrite deux fois, et c'est ce test
+ * qui empêche les deux de diverger : le jour où une facette s'ouvre ou se
+ * ferme, l'envoi annoncerait sinon une cible que la grammaire refuse, ou en
+ * tairait une qu'elle accepte.
+ */
+describe("les facettes qui peuvent porter un vrai ou faux", () => {
+  it("sont exactement celles que le domaine annonce", () => {
+    const acceptees = FACETTES.filter(
+      (facette) =>
+        GENERATE_VARIANTS.validation.safeParse({
+          lots: [{ ...lot(1), [facette]: { ...question("TRUE_FALSE"), estVraie: true } }],
+        }).success,
+    );
+
+    expect(acceptees).toEqual([...FACETTES_DU_VRAI_OU_FAUX]);
   });
 });
