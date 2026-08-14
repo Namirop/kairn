@@ -18,6 +18,12 @@
  * question, et transmise dans l'envoi. Ne réintroduis pas ici de consigne de
  * proportion : elle ne tiendrait pas et masquerait la mesure. Voir
  * `lib/domain/vrai-ou-faux.ts`.
+ *
+ * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
+ * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
+ * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
+ * trop long, et la première hypothèse à éprouver sera celle-là — avant d'ajouter
+ * encore des lignes pour se faire mieux comprendre.
  */
 export const GENERATE_VARIANTS_PROMPT = `On te donne un ou plusieurs concepts issus d'un même dépôt. Tu écris quatre questions
 pour chacun, indépendamment.
