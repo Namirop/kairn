@@ -1,7 +1,8 @@
 import { callAI } from "@/lib/ai/client";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
-import { enregistrerConcepts, lireDepot } from "@/lib/db/ingestion";
+import { enregistrerConcepts, enregistrerLExtraction, lireDepot } from "@/lib/db/ingestion";
+import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
 import { marquerPretSiPlusRienEnAttente, marquerRejet } from "@/lib/db/fin-de-depot";
 import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { compterConceptsRetenus } from "@/lib/db/quota-depots";
@@ -38,8 +39,25 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
     system: SYSTEM_PROMPTS.extract_atoms,
     jobId: job.id,
     userId: depot.userId ?? undefined,
+    // La visite, et non l'absence de compte : celle-ci couvre aussi les
+    // reprises par le cron et les outils internes, qui n'ont personne derrière
+    // et n'ont donc pas à puiser dans la part du public.
+    anonyme: depot.anonymousSessionId !== null,
     messages: [{ role: "user", content: texte }],
   });
+
+  await enregistrerLExtraction(depot.id, {
+    nature: extraction.nature,
+    conceptsTronques: extraction.tronque,
+  });
+
+  // Le compte rendu par le modèle, à chaque découpage : c'est la seule façon de
+  // savoir, sur des dépôts réels, si le plafond est posé au bon endroit. Des
+  // identifiants et des nombres, jamais le texte.
+  console.info(
+    `Découpage ${depot.id} : ${extraction.rendus} concept(s) rendus, ${extraction.derives} écarté(s)` +
+      ` comme dérivé(s), ${extraction.atoms.length} gardé(s).`,
+  );
 
   if (extraction.atoms.length === 0) {
     // La phrase du modèle, telle quelle. C'est elle qui dit ce qui manquait à
@@ -69,9 +87,9 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
     return;
   }
 
-  const aQuestionner = concepts
-    .filter((concept) => !concept.uncertain)
-    .map((concept) => concept.id);
+  const aQuestionner = conceptsAQuestionner(concepts, extraction.nature).map(
+    (concept) => concept.id,
+  );
 
   if (aQuestionner.length === 0) {
     await marquerPretSiPlusRienEnAttente(depot.id);

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import type { Input } from "@/lib/db/types";
+import type { Input, InputNature } from "@/lib/db/types";
 
 /**
  * Les écritures du pipeline d'ingestion, de la création du dépôt à son état
@@ -70,6 +70,19 @@ export async function lireDepot(inputId: string): Promise<Input | null> {
   return prisma.input.findUnique({ where: { id: inputId } });
 }
 
+/**
+ * Ce que l'extraction a lu du dépôt lui-même, avant ses concepts.
+ *
+ * Écrit même quand le dépôt ne donne rien : un rejet a une nature lui aussi, et
+ * c'est elle qui dira plus tard pourquoi un dépôt n'a rien rendu.
+ */
+export async function enregistrerLExtraction(
+  inputId: string,
+  lecture: { nature: InputNature; conceptsTronques: boolean },
+): Promise<void> {
+  await prisma.input.update({ where: { id: inputId }, data: lecture });
+}
+
 export async function marquerEnCours(inputId: string): Promise<void> {
   await prisma.input.update({ where: { id: inputId }, data: { status: "PROCESSING" } });
 }
@@ -78,10 +91,20 @@ export async function marquerEnCours(inputId: string): Promise<void> {
  * Range le texte lu et efface les octets de l'image dans la même écriture :
  * dès que le texte existe, l'image n'a plus de raison d'être.
  */
-export async function enregistrerTexteLu(inputId: string, texte: string): Promise<void> {
+export async function enregistrerTexteLu(
+  inputId: string,
+  texte: string,
+  tronque = false,
+): Promise<void> {
   await prisma.input.update({
     where: { id: inputId },
-    data: { extractedText: texte, imageData: null, imageMediaType: null, status: "PROCESSING" },
+    data: {
+      extractedText: texte,
+      texteTronque: tronque,
+      imageData: null,
+      imageMediaType: null,
+      status: "PROCESSING",
+    },
   });
 }
 

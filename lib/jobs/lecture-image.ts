@@ -62,6 +62,6 @@ export async function lireImage(job: GenerationJob): Promise<void> {
     return;
   }
 
-  await enregistrerTexteLu(depot.id, lu.extractedText);
+  await enregistrerTexteLu(depot.id, lu.extractedText, lu.tronque);
   await enqueueJob(depot.id, "ATOMS");
 }
