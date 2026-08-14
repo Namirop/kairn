@@ -5,9 +5,10 @@ import { prisma } from "@/lib/db/client";
  * Le visiteur qui dépose avant d'avoir un compte.
  *
  * C'est le seul endroit du produit qui dépense sans compte identifié. Il est
- * donc le plus serré des trois verrous du budget : **un dépôt par session**, une
- * poignée par empreinte d'adresse, et l'arrêt à l'extraction — les questions,
- * qui coûtent l'essentiel, n'arrivent qu'après la création du compte.
+ * donc le plus serré des verrous du budget : **deux essais dus et deux pannes
+ * tolérées par visite**, **deux visites par empreinte d'adresse**, et l'arrêt à
+ * l'extraction — les questions, qui coûtent l'essentiel, n'arrivent qu'après la
+ * création du compte. Le pire cas complet est écrit sous `VISITES_PAR_ADRESSE`.
  *
  * Rien ici ne conserve d'adresse IP. Ce qu'on veut compter est « combien de
  * dépôts viennent d'ici », et une empreinte y répond aussi bien sans garder de
@@ -16,21 +17,30 @@ import { prisma } from "@/lib/db/client";
  */
 
 /**
- * Sessions anonymes tolérées par empreinte d'adresse, sur la fenêtre.
+ * **Visites** tolérées par empreinte d'adresse, sur la fenêtre — pas dépôts.
  *
- * Deux, et pas une. Une seule par adresse serait le réglage évident si une
- * adresse désignait une personne — mais elle n'en désigne pas une. Un bureau, un
- * coworking, une école ou un opérateur mobile derrière son CGNAT sortent tous
- * par une seule IPv4 : à une visite par adresse, le premier arrivé grillerait
- * l'essai de tous les autres pour la journée, et précisément dans les endroits
- * où quelqu'un partage un outil à ses collègues.
+ * Le nom précédent, `DEPOTS_PAR_ADRESSE`, mentait sur ce qui est compté : la
+ * constante borne les appels à `ouvrirUneSession`, donc des visites, et chaque
+ * visite porte plusieurs dépôts. On lisait « deux dépôts par adresse » là où le
+ * vrai maximum est quatre fois plus haut.
+ *
+ * **Le pire cas par empreinte et par 24 h se lit ici, et nulle part ailleurs :**
+ *
+ *     2 visites × (2 essais dus + 2 pannes tolérées) = 8 extractions
+ *
+ * Deux visites, et pas une. Une seule par adresse serait le réglage évident si
+ * une adresse désignait une personne — mais elle n'en désigne pas une. Un
+ * bureau, un coworking, une école ou un opérateur mobile derrière son CGNAT
+ * sortent tous par une seule IPv4 : à une visite par adresse, le premier arrivé
+ * grillerait l'essai de tous les autres pour la journée, et précisément dans les
+ * endroits où quelqu'un partage un outil à ses collègues.
  *
  * Serrer davantage ne protégerait d'ailleurs de personne : basculer en 4G ou
  * ouvrir un VPN change d'adresse en cinq secondes. Ce verrou-ci freine le
- * passant qui recommence, pas l'abuseur — c'est `AI_DAILY_CALL_CAP` qui borne la
- * dépense, et lui ne se contourne pas.
+ * passant qui recommence, pas l'abuseur — c'est le plafond journalier d'appels
+ * qui borne la dépense, et lui ne se contourne pas.
  */
-export const DEPOTS_PAR_ADRESSE = 2;
+export const VISITES_PAR_ADRESSE = 2;
 
 /** La fenêtre de la limite par adresse. Un jour : on n'est pas à la minute. */
 export const FENETRE_ADRESSE_HEURES = 24;
@@ -71,7 +81,7 @@ export async function ouvrirUneSession(
       where: { ipHash, createdAt: { gte: depuis } },
     });
 
-    if (recentes >= DEPOTS_PAR_ADRESSE) return { ouverte: false, motif: "adresse" };
+    if (recentes >= VISITES_PAR_ADRESSE) return { ouverte: false, motif: "adresse" };
   }
 
   const session = await prisma.anonymousSession.create({
@@ -94,15 +104,19 @@ export async function ouvrirUneSession(
 export const ESSAIS_PAR_VISITE = 2;
 
 /**
- * Le plafond dur, celui que même nos propres pannes ne franchissent pas.
+ * Les pannes qu'une visite absorbe avant qu'on referme.
  *
- * Une panne ne consomme pas d'essai — voir plus bas — et sans cette borne, une
- * panne *systématique* rendrait la visite infinie : chaque reprise repart pour
- * une extraction, et la seule chose qui finirait par arrêter la page serait le
- * plafond journalier du produit entier. Quatre laisse deux reprises franches
- * par-dessus les deux essais dus, et referme après.
+ * Un compteur **à part**, et c'est tout l'objet de la règle. Un plafond total de
+ * quatre semblait suffire — deux essais dus, deux reprises franches — mais un
+ * total ne distingue pas qui l'a consommé : trois pannes d'affilée laissaient un
+ * seul essai imputable au lieu de deux, et la promesse « une panne ne te coûte
+ * rien » devenait fausse au moment précis où elle comptait.
+ *
+ * Deux compteurs indépendants la tiennent vraiment : quoi qu'il arrive de notre
+ * côté, les deux essais dus restent dus. Le maximum d'extractions par visite
+ * reste quatre, mais réparti et non partagé.
  */
-export const ESSAIS_MAXIMUM_PAR_VISITE = 4;
+export const PANNES_TOLEREES = 2;
 
 /**
  * Cette visite peut-elle encore déposer ?
@@ -118,6 +132,10 @@ export const ESSAIS_MAXIMUM_PAR_VISITE = 4;
  * La règle est la même que celle de `marquerEchec` pour un compte, qui rembourse
  * sa place à un dépôt en panne. Elle s'applique ici à la seule monnaie qu'ait un
  * visiteur : ses essais.
+ *
+ * Les deux compteurs sont indépendants, et c'est ce qui rend la promesse vraie :
+ * épuiser les pannes tolérées ne prend rien aux essais dus, et inversement. La
+ * visite se ferme dès que l'un des deux est plein.
  */
 export async function sessionDisponible(sessionId: string): Promise<boolean> {
   const session = await prisma.anonymousSession.findUnique({
@@ -130,14 +148,27 @@ export async function sessionDisponible(sessionId: string): Promise<boolean> {
   // Des concepts existent : l'essai a abouti, il n'y a plus rien à démontrer.
   if (session._count.atoms > 0) return false;
 
-  const [total, imputables] = await Promise.all([
-    prisma.input.count({ where: { anonymousSessionId: sessionId } }),
+  const { imputables, pannes } = await compterLesDepots(sessionId);
+
+  return imputables < ESSAIS_PAR_VISITE && pannes < PANNES_TOLEREES;
+}
+
+/**
+ * Ce qu'une visite a déjà dépensé, dans les deux monnaies.
+ *
+ * Un dépôt encore en cours compte comme imputable : on ne sait pas encore ce
+ * qu'il rendra, et le supposer réussi ouvrirait un essai de plus à qui a deux
+ * onglets. Il redeviendra une panne si c'en est une.
+ */
+export async function compterLesDepots(
+  sessionId: string,
+): Promise<{ imputables: number; pannes: number }> {
+  const [imputables, pannes] = await Promise.all([
     prisma.input.count({ where: { anonymousSessionId: sessionId, status: { not: "FAILED" } } }),
+    prisma.input.count({ where: { anonymousSessionId: sessionId, status: "FAILED" } }),
   ]);
 
-  if (total >= ESSAIS_MAXIMUM_PAR_VISITE) return false;
-
-  return imputables < ESSAIS_PAR_VISITE;
+  return { imputables, pannes };
 }
 
 /**

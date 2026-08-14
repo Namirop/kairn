@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { recordAiCall } from "@/lib/db/ai-call";
 import { type AiConfig } from "./config";
 import { lireLaConfigEffective } from "./reglages-effectifs";
-import { reserverLesDeuxPlaces } from "./reservation";
+import { provenanceDeLAppel, reserverLesDeuxPlaces } from "./reservation";
 import {
   AICallFailedError,
   AIDisabledError,
@@ -31,6 +31,14 @@ export type CallAIParams<T> = {
   maxTokens?: number;
   userId?: string;
   jobId?: string;
+  /**
+   * L'appel sert un visiteur sans compte.
+   *
+   * Déclaré et non déduit de l'absence d'`userId` : celle-ci couvre aussi les
+   * reprises par le cron et les outils internes, qui n'ont personne derrière et
+   * ne doivent pas puiser dans la part du public.
+   */
+  anonyme?: boolean;
 };
 
 let cachedClient: { key: string; sdk: Anthropic } | null = null;
@@ -162,7 +170,7 @@ export async function callAI<T>(params: CallAIParams<T>): Promise<T> {
 
   // Les places sont réservées avant d'émettre, chacune en une seule instruction :
   // deux appels simultanés ne peuvent pas obtenir la même.
-  await reserverLesDeuxPlaces(config, params.userId);
+  await reserverLesDeuxPlaces(config, provenanceDeLAppel(params));
 
   return emit(params, config);
 }

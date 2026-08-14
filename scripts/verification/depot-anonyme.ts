@@ -6,7 +6,14 @@ import {
   oublierLesVisitesAbandonnees,
   rattacherAuCompte,
 } from "@/lib/db/depot-de-visite";
-import { DEPOTS_PAR_ADRESSE } from "@/lib/db/session-anonyme";
+import { marquerEchec } from "@/lib/db/fin-de-depot";
+import {
+  compterLesDepots,
+  ESSAIS_PAR_VISITE,
+  PANNES_TOLEREES,
+  sessionDisponible,
+  VISITES_PAR_ADRESSE,
+} from "@/lib/db/session-anonyme";
 import { deposerSansCompte } from "@/lib/depots/deposer-sans-compte";
 import { executerToutLePipeline } from "./depot-simule";
 import { record } from "./journal";
@@ -74,6 +81,7 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
   );
 
   const repris = await rattacherAuCompte(essai.sessionId, userId);
+  const conceptsRepris = repris.reduce((total, depot) => total + depot.atomIds.length, 0);
   const aMoi = await prisma.atom.count({ where: { userId } });
   const orphelins = await prisma.atom.count({
     where: { anonymousSessionId: essai.sessionId },
@@ -81,21 +89,33 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
 
   record(
     "Reprise — dépôt et concepts passent au compte, sans reste",
-    repris.atomIds.length > 0 && aMoi === repris.atomIds.length && orphelins === 0,
+    conceptsRepris > 0 && aMoi === conceptsRepris && orphelins === 0,
     `${aMoi} concept(s) au compte, ${orphelins} resté(s) sur la visite`,
+  );
+
+  // Chaque concept repris doit rester sous le dépôt qui l'a produit : c'est ce
+  // qui décide sous quel dépôt les questions seront demandées.
+  const malRanges = await prisma.atom.count({
+    where: { userId, NOT: { inputId: { in: repris.map((depot) => depot.inputId) } } },
+  });
+
+  record(
+    "Reprise — les concepts restent groupés sous leur dépôt d'origine",
+    malRanges === 0 && repris.every((depot) => depot.inputId.length > 0),
+    `${repris.length} dépôt(s) repris, ${malRanges} concept(s) hors de leur dépôt`,
   );
 
   // Ce que l'essai a rendu doit entrer au compteur du mois. Sans ça, la limite
   // annoncée cesse d'être la limite réelle : un compte neuf démarrait avec ses
   // concepts d'essai en plus de ses trente.
   const avant = await lireUsageDeLaPeriode(userId, "UTC");
-  await compterLaVisiteReprise(userId, "UTC", repris.atomIds.length);
+  await compterLaVisiteReprise(userId, "UTC", conceptsRepris);
   const apres = await lireUsageDeLaPeriode(userId, "UTC");
 
   record(
     "Reprise — les concepts de l'essai entrent au plafond du mois",
-    apres.concepts === avant.concepts + repris.atomIds.length && apres.concepts > 0,
-    `${avant.concepts} → ${apres.concepts} concept(s) comptés pour ${repris.atomIds.length} repris`,
+    apres.concepts === avant.concepts + conceptsRepris && apres.concepts > 0,
+    `${avant.concepts} → ${apres.concepts} concept(s) comptés pour ${conceptsRepris} repris`,
   );
 
   record(
@@ -108,8 +128,8 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
 
   record(
     "Reprise — la même visite ne se réclame pas deux fois",
-    reprise.atomIds.length === 0,
-    `${reprise.atomIds.length} concept(s) repris au second appel`,
+    reprise.length === 0,
+    `${reprise.length} dépôt(s) repris au second appel`,
   );
 
   await prisma.input.deleteMany({ where: { userId } });
@@ -164,6 +184,179 @@ export async function casSecondeChance(): Promise<void> {
   await repartirDeZero(adresse);
 }
 
+/**
+ * Une panne ne se facture pas au visiteur.
+ *
+ * C'est la règle centrale du chemin anonyme, et celle qui coûte le plus cher à
+ * se tromper : le produit se casse, puis ferme la porte derrière lui, sur la
+ * seule page qui convertit. Elle passait la relecture — deux compteurs, une
+ * soustraction, ça a l'air juste — donc elle s'éprouve ici.
+ */
+export async function casPanneNeConsommePasDEssai(): Promise<void> {
+  const adresse = "203.0.113.71";
+  await repartirDeZero(adresse);
+
+  const essai = await deposerSansCompte(TEXTE, adresse, null);
+
+  if (!essai.ok) throw new Error(`L'essai a été refusé : ${essai.motif}`);
+
+  // `marquerEchec` et non une écriture directe : c'est le chemin que prend un
+  // appel qui lève, et c'est lui qu'on veut voir se comporter.
+  await marquerEchec(essai.inputId, "Panne simulée par la vérification.");
+
+  const apresPanne = await compterLesDepots(essai.sessionId);
+  const ouverte = await sessionDisponible(essai.sessionId);
+
+  record(
+    "Panne — un dépôt en panne ne consomme aucun essai",
+    ouverte && apresPanne.imputables === 0 && apresPanne.pannes === 1,
+    `${apresPanne.imputables} imputable(s), ${apresPanne.pannes} panne(s), visite ${
+      ouverte ? "ouverte" : "fermée"
+    }`,
+  );
+
+  // Les deux essais dus doivent rester entièrement dus : c'est ce qu'un plafond
+  // *total* ne tenait pas, puisque la panne y mordait sur la même réserve.
+  let accordes = 0;
+
+  for (let tour = 0; tour < ESSAIS_PAR_VISITE + 1; tour += 1) {
+    const suite = await deposerSansCompte(TEXTE, adresse, essai.sessionId);
+
+    if (!suite.ok) break;
+
+    accordes += 1;
+  }
+
+  record(
+    `Panne — après une panne, les ${ESSAIS_PAR_VISITE} essais dus restent dus`,
+    accordes === ESSAIS_PAR_VISITE,
+    `${accordes} essai(s) accordé(s) après la panne`,
+  );
+
+  await repartirDeZero(adresse);
+}
+
+/**
+ * Les pannes tolérées ont elles aussi une fin.
+ *
+ * Sans ce plafond, une panne systématique rendrait la visite infinie : chaque
+ * reprise repart pour une extraction, et seule la part journalière du public
+ * finirait par arrêter la page. On vérifie aussi **ce qui est dit** au moment de
+ * fermer : le message des concepts à garder, servi à quelqu'un qui n'en a aucun,
+ * était le vrai défaut de ce chemin.
+ */
+export async function casPlafondDesPannes(): Promise<void> {
+  const adresse = "203.0.113.72";
+  await repartirDeZero(adresse);
+
+  const premier = await deposerSansCompte(TEXTE, adresse, null);
+
+  if (!premier.ok) throw new Error(`L'essai a été refusé : ${premier.motif}`);
+
+  await marquerEchec(premier.inputId, "Panne simulée par la vérification.");
+
+  for (let tour = 1; tour < PANNES_TOLEREES; tour += 1) {
+    const suivant = await deposerSansCompte(TEXTE, adresse, premier.sessionId);
+
+    if (!suivant.ok) throw new Error(`La panne ${tour + 1} a été refusée : ${suivant.motif}`);
+
+    await marquerEchec(suivant.inputId, "Panne simulée par la vérification.");
+  }
+
+  const refuse = await deposerSansCompte(TEXTE, adresse, premier.sessionId);
+  const compte = await compterLesDepots(premier.sessionId);
+
+  record(
+    `Panne — ${PANNES_TOLEREES} pannes ferment la visite`,
+    !refuse.ok && compte.pannes === PANNES_TOLEREES,
+    refuse.ok ? "une panne de plus est passée" : `${compte.pannes} panne(s), puis « ${refuse.motif} »`,
+  );
+
+  // Ni « tes concepts » — il n'en a aucun —, ni « tes essais sont faits » — ils
+  // sont intacts, c'est toute la règle. Le refus doit désigner la panne.
+  record(
+    "Panne — le refus désigne la panne, pas des concepts ni des essais consommés",
+    !refuse.ok && !refuse.motif.includes("tes concepts") && !refuse.motif.includes("Tes essais"),
+    refuse.ok ? "accepté" : refuse.motif,
+  );
+
+  await repartirDeZero(adresse);
+}
+
+/**
+ * Le second essai s'affiche, et c'est le second qu'on voit.
+ *
+ * L'écran clé son interrogation sur l'identifiant du dépôt. Tant qu'il la clait
+ * sur la session — la même d'un essai à l'autre —, le second essai tournait,
+ * coûtait, et n'apparaissait jamais. Ce qui suit vérifie le contrat côté serveur :
+ * après un rejet puis un succès sur la même visite, c'est le dépôt **récent**
+ * qu'on lit.
+ */
+export async function casRepriseApresRejet(): Promise<void> {
+  const adresse = "203.0.113.73";
+  await repartirDeZero(adresse);
+
+  const rate = await deposerSansCompte(
+    "Lentilles corail, tomates pelées, pain de seigle, deux citrons et du persil plat.",
+    adresse,
+    null,
+  );
+
+  if (!rate.ok) throw new Error(`Le premier essai a été refusé : ${rate.motif}`);
+
+  await executerToutLePipeline(rate.inputId);
+
+  const retente = await deposerSansCompte(TEXTE, adresse, rate.sessionId);
+
+  if (!retente.ok) throw new Error(`La reprise a été refusée : ${retente.motif}`);
+
+  await executerToutLePipeline(retente.inputId);
+
+  const vu = await lireLeDepotAnonyme(rate.sessionId);
+
+  record(
+    "Reprise — c'est le second essai qui s'affiche, pas le premier",
+    vu?.inputId === retente.inputId && (vu?.concepts.length ?? 0) > 0,
+    `dépôt lu : ${vu?.inputId === retente.inputId ? "le second" : "le premier"}, ${
+      vu?.concepts.length ?? 0
+    } concept(s)`,
+  );
+
+  await repartirDeZero(adresse);
+}
+
+/**
+ * Deux onglets partent ensemble, et les deux passent.
+ *
+ * Le second onglet porte le même cookie, et `sessionDisponible` dit oui tant que
+ * le premier dépôt n'a rien produit : deux essais partent, deux imputables sont
+ * consommés d'un coup. C'est acceptable — la visite reste dans son budget — mais
+ * ça doit être **constaté** plutôt que découvert le jour où quelqu'un s'en sert.
+ */
+export async function casDeuxOngletsSimultanes(): Promise<void> {
+  const adresse = "203.0.113.74";
+  await repartirDeZero(adresse);
+
+  const premier = await deposerSansCompte(TEXTE, adresse, null);
+
+  if (!premier.ok) throw new Error(`L'essai a été refusé : ${premier.motif}`);
+
+  // Aucun pipeline entre les deux : c'est exactement la fenêtre du second onglet.
+  const second = await deposerSansCompte(TEXTE, adresse, premier.sessionId);
+  const compte = await compterLesDepots(premier.sessionId);
+  const troisieme = await deposerSansCompte(TEXTE, adresse, premier.sessionId);
+
+  record(
+    "Visite — deux onglets consomment les deux essais d'un coup, et pas plus",
+    second.ok && compte.imputables === ESSAIS_PAR_VISITE && !troisieme.ok,
+    `${compte.imputables} imputable(s) après deux envois simultanés, troisième ${
+      troisieme.ok ? "accepté" : "refusé"
+    }`,
+  );
+
+  await repartirDeZero(adresse);
+}
+
 export async function casLimiteParAdresse(): Promise<void> {
   const adresse = "203.0.113.42";
   await repartirDeZero(adresse);
@@ -173,7 +366,7 @@ export async function casLimiteParAdresse(): Promise<void> {
 
   // Chaque essai part sans cookie : c'est le cas de quelqu'un qui vide sa
   // session entre deux tentatives, et c'est exactement ce que l'adresse borne.
-  for (let tour = 0; tour < DEPOTS_PAR_ADRESSE + 2; tour += 1) {
+  for (let tour = 0; tour < VISITES_PAR_ADRESSE + 2; tour += 1) {
     const essai = await deposerSansCompte(TEXTE, adresse, null);
 
     if (essai.ok) {
@@ -186,8 +379,8 @@ export async function casLimiteParAdresse(): Promise<void> {
   }
 
   record(
-    `Essai — la même adresse n'ouvre que ${DEPOTS_PAR_ADRESSE} visites`,
-    acceptes === DEPOTS_PAR_ADRESSE,
+    `Essai — la même adresse n'ouvre que ${VISITES_PAR_ADRESSE} visites`,
+    acceptes === VISITES_PAR_ADRESSE,
     `${acceptes} visite(s) ouvertes, puis « ${refus} »`,
   );
 

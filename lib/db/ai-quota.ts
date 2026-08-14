@@ -126,6 +126,61 @@ export async function reserverPlaceDeCompte(
 }
 
 /**
+ * La part du trafic sans compte dans les appels du jour.
+ *
+ * Un seul seau pour tous les visiteurs, et pas un par empreinte : ce qu'on
+ * borne ici est ce que la landing peut prendre au produit, pas ce qu'un
+ * visiteur peut prendre aux autres — cette répartition-là est le travail de
+ * `VISITES_PAR_ADRESSE`, et elle se joue avant l'appel.
+ *
+ * Même instruction que les deux autres compteurs, même raison : incrémenter et
+ * refuser d'un seul mouvement, sinon deux essais simultanés lisent la même
+ * valeur et passent tous les deux.
+ */
+export async function reserverPlaceAnonyme(
+  plafond: number,
+  maintenant: Date = new Date(),
+): Promise<Reservation> {
+  const jour = jourUtc(maintenant);
+  const lignes = await prisma.$queryRaw<{ reserved: number }[]>`
+    INSERT INTO "AiAnonymousQuota" ("day", "reserved", "createdAt", "updatedAt")
+    VALUES (${jour}::date, 1, now(), now())
+    ON CONFLICT ("day") DO UPDATE
+      SET "reserved" = "AiAnonymousQuota"."reserved" + 1,
+          "updatedAt" = now()
+      WHERE "AiAnonymousQuota"."reserved" + 1 <= ${plafond}
+    RETURNING "reserved"
+  `;
+
+  const obtenue = lignes[0];
+
+  if (obtenue) return { obtenue: true, utilisees: obtenue.reserved };
+
+  return { obtenue: false, utilisees: await lirePlacesAnonymes(maintenant) };
+}
+
+/**
+ * Rend une place anonyme prise pour rien.
+ *
+ * Même cas unique que pour la part d'un compte : la place globale a été refusée
+ * juste après, donc rien n'a été émis et rien n'est dû.
+ */
+export async function rendrePlaceAnonyme(maintenant: Date = new Date()): Promise<void> {
+  await prisma.aiAnonymousQuota.updateMany({
+    where: { day: dayToUtcDate(jourUtc(maintenant)), reserved: { gte: 1 } },
+    data: { reserved: { decrement: 1 } },
+  });
+}
+
+export async function lirePlacesAnonymes(maintenant: Date = new Date()): Promise<number> {
+  const lignes = await prisma.$queryRaw<{ reserved: number }[]>`
+    SELECT "reserved" FROM "AiAnonymousQuota" WHERE "day" = ${jourUtc(maintenant)}::date
+  `;
+
+  return lignes[0]?.reserved ?? 0;
+}
+
+/**
  * Rend des places de compte prises pour rien.
  *
  * Le seul cas : la place globale a été refusée juste après. Contrairement à la

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { lireReservationsDuJour } from "@/lib/db/ai-quota";
 import { modifierConcept } from "@/lib/db/concepts";
 import { lireDepotDetaille } from "@/lib/db/depot-detaille";
 import { regenererSiUsees } from "@/lib/db/regeneration";
@@ -22,7 +23,16 @@ import { record } from "./journal";
  */
 
 const TENTATIVES = 20;
-const PLAFOND_LARGE = 200;
+
+/**
+ * Assez de places pour que le plafond global n'intervienne pas — posées
+ * au-dessus de ce que la journée a déjà pris. Le banc d'évaluation dépense
+ * réellement sur la même journée UTC, et un plafond posé en absolu rétrécissait
+ * donc à mesure qu'on s'en servait.
+ */
+async function plafondLarge(): Promise<number> {
+  return 200 + (await lireReservationsDuJour());
+}
 
 /** Un texte assez long pour que la fixture rende plusieurs concepts. */
 const TEXTE_LONG = `Une requête HTTP conditionnelle envoie \`If-None-Match\` avec l'étiquette reçue à la
@@ -58,7 +68,7 @@ export async function casModificationsEnBoucle(userId: string): Promise<void> {
 
   const demandes = await demandesPour(concept.atomId);
 
-  const { appels, places } = await enModeCompteur(PLAFOND_LARGE, async () => {
+  const { appels, places } = await enModeCompteur(await plafondLarge(), async () => {
     const jobs = await prisma.generationJob.findMany({
       where: { kind: "VARIANTS", status: "QUEUED", atomIds: { has: concept.atomId } },
       orderBy: { createdAt: "asc" },
@@ -207,7 +217,7 @@ export async function casModificationReportee(userId: string, maintenant: Date):
 
   // Le déclenchement direct est le chemin le plus court vers l'exécution : s'il
   // ignore la date, la garde ne vaut rien.
-  const { appels } = await enModeCompteur(PLAFOND_LARGE, async () => {
+  const { appels } = await enModeCompteur(await plafondLarge(), async () => {
     const enAttente = await prisma.generationJob.findMany({
       where: { kind: "VARIANTS", status: "QUEUED", atomIds: { has: concept.atomId } },
       select: { id: true },

@@ -12,7 +12,8 @@ import {
 } from "@/lib/db/concepts";
 import { inscrireEnListeDattente } from "@/lib/db/quota-depots";
 import { supprimerDepot } from "@/lib/db/reprise-depot";
-import { deposer, CARACTERES_MAXIMUM } from "@/lib/depots/deposer";
+import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
+import { deposer } from "@/lib/depots/deposer";
 import { redecouper, type ResultatRedecoupage } from "@/lib/depots/redecouper";
 import { declencher } from "@/lib/jobs/queue";
 

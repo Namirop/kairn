@@ -27,30 +27,31 @@ export async function reprendreLaVisite(userId: string): Promise<void> {
 
     await oublierLaVisite();
 
-    if (repris.inputIds.length === 0) return;
+    if (repris.length === 0) return;
+
+    const concepts = repris.reduce((total, depot) => total + depot.atomIds.length, 0);
 
     // Ce que l'essai a produit entre au compteur du mois. Avant, il n'y entrait
     // nulle part : le chemin anonyme ne passe par aucun quota, si bien qu'un
     // compte neuf démarrait avec ses concepts d'essai en plus des trente
     // annoncés. Compté ici parce que c'est le premier instant où ces concepts
     // ont un compte à qui appartenir.
-    await compterLaVisiteReprise(
-      userId,
-      await lireFuseauUtilisateur(userId),
-      repris.atomIds.length,
-    );
-
-    if (repris.atomIds.length === 0) return;
+    await compterLaVisiteReprise(userId, await lireFuseauUtilisateur(userId), concepts);
 
     // Le premier jeu de questions de ces concepts : groupé par trois, comme
     // pour un dépôt ordinaire, et lancé tout de suite. Quelqu'un qui vient de
     // créer un compte veut jouer, pas attendre le lendemain.
-    const inputId = repris.inputIds[0];
+    //
+    // Un jeu **par dépôt**, et aucun pour les dépôts qui n'ont rien produit :
+    // accrocher les concepts du second dépôt au premier — souvent celui qui a
+    // été rejeté — donnait des jobs à un dépôt en `REJECTED`, que rien ne peut
+    // plus refermer ensuite.
+    for (const depot of repris) {
+      if (depot.atomIds.length === 0) continue;
 
-    if (!inputId) return;
-
-    for (const job of await creerJobsDeQuestions(inputId, repris.atomIds)) {
-      declencher(job.id);
+      for (const job of await creerJobsDeQuestions(depot.inputId, depot.atomIds)) {
+        declencher(job.id);
+      }
     }
   } catch (erreur) {
     console.error(`La reprise de la visite a échoué pour le compte ${userId}.`, erreur);

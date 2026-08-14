@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AttenteInterrompue, ConceptsEnAttente } from "@/components/site/concepts-en-attente";
 import { PileDeConcepts } from "@/components/site/pile-de-concepts";
 import { Button } from "@/components/ui/button";
+import { CARACTERES_MAXIMUM, longueurEnClair } from "@/lib/depots/bornes-du-depot";
 import { ROUTES } from "@/lib/auth/routes";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
@@ -61,35 +62,69 @@ export function ResultatDeLEssai({
 }
 
 /**
- * L'essai n'a rien donné. Trois situations, et elles ne se confondent pas.
+ * L'essai n'a rien donné. **Quatre** situations, et elles ne se confondent pas.
  *
- * **Une panne.** Rien à demander à quelqu'un qui n'y est pour rien : on dit que
- * ça vient de nous, et on ne lui suggère surtout pas de changer son texte — il
- * n'y avait rien à y changer. Une panne ne consomme pas d'essai côté base, donc
- * le bouton est là quoi qu'il arrive.
+ * Deux causes qui ne s'imputent pas à la même personne, croisées avec le fait
+ * qu'il reste ou non de quoi retenter. La fonction n'en couvrait que trois, et
+ * la manquante était la plus contradictoire de toutes : « cet essai ne t'est pas
+ * compté » sous un bouton qui referme la visite. On annonçait la gratuité et on
+ * fermait la porte dans la même phrase.
  *
- * **Un rejet, avec un essai qui reste.** Le motif du modèle dit ce qui manquait ;
+ * **Panne, avec une reprise.** Rien à demander à quelqu'un qui n'y est pour
+ * rien : on dit que ça vient de nous, et surtout pas de changer son texte — il
+ * n'y avait rien à y changer.
+ *
+ * **Panne, et plus de reprise.** Les pannes tolérées sont épuisées. Ce n'est
+ * toujours pas sa faute, et le dire reste la première chose à faire ; ce qui
+ * change, c'est qu'on ne peut plus rien lui proposer ici. Le compte devient la
+ * seule suite honnête, et il est offert pour ce qu'il permettra vraiment —
+ * reprendre plus tard —, pas pour garder des concepts qui n'existent pas.
+ *
+ * **Rejet, avec un essai qui reste.** Le motif du modèle dit ce qui manquait ;
  * c'est la seule chose de valeur qu'un rejet produise, et c'est elle qui apprend
- * à mieux déposer. On invite à retenter.
+ * à mieux déposer.
  *
- * **Un rejet, et plus d'essai.** C'est le cas qu'on tenait mal : le bouton
- * s'affichait quand même, et le refus qui suivait parlait de « garder tes
- * concepts » à quelqu'un qui n'en avait aucun. On garde le motif à l'écran — il
- * reste la raison, et elle est valable — et on propose le compte pour ce qu'il
- * change vraiment, sans prétendre qu'il y a quoi que ce soit à récupérer.
+ * **Rejet, et plus d'essai.** On garde le motif à l'écran — il reste la raison,
+ * et elle est valable — et on propose le compte sans prétendre qu'il y a quoi
+ * que ce soit à récupérer.
  */
-function commentContinuer(panne: boolean, peutRedeposer: boolean): string {
+type Situation = { constat: string; explication: string };
+
+function situationDeLEchec(
+  panne: boolean,
+  peutRedeposer: boolean,
+  motifDechec: string | null,
+): Situation {
   if (panne && peutRedeposer) {
-    return "Cet essai ne t'est pas compté. Relance-le, ou reviens dans un moment.";
+    return {
+      constat: "Le découpage n'a pas abouti, et ça ne vient pas de ton texte.",
+      explication: "Cet essai ne t'est pas compté. Relance-le, ou reviens dans un moment.",
+    };
   }
 
-  if (panne) return "Cet essai ne t'est pas compté. Reviens dans un moment.";
+  if (panne) {
+    return {
+      constat: "Le découpage ne répond pas en ce moment.",
+      explication:
+        "Ça ne vient pas de ton texte, et rien ne t'a été compté. Avec un compte, tu pourras reprendre dès que ce sera rétabli.",
+    };
+  }
+
+  const constat = motifDechec ?? "Ce texte n'a rien donné à retenir.";
 
   if (peutRedeposer) {
-    return "Retente avec une explication, une règle, un mécanisme — quelque chose que tu voudrais savoir dans un mois.";
+    return {
+      constat,
+      explication:
+        "Retente avec une explication, une règle, un mécanisme — quelque chose que tu voudrais savoir dans un mois.",
+    };
   }
 
-  return "Un compte accepte des textes deux fois plus longs, garde ce qu'il en tire, et te le repose au bon moment.";
+  return {
+    constat,
+    explication:
+      `Un compte accepte ${longueurEnClair(CARACTERES_MAXIMUM)}, garde ce qu'il en tire, et te le repose au bon moment.`,
+  };
 }
 
 function EssaiSansConcept({
@@ -100,16 +135,13 @@ function EssaiSansConcept({
   setRecommence: (valeur: boolean) => void;
 }) {
   const { panne, peutRedeposer, motifDechec } = avancement;
+  const situation = situationDeLEchec(panne, peutRedeposer, motifDechec);
 
   return (
     <div className="gap-pas-3 flex flex-col" role="status">
-      <p className="text-corps text-stone-900">
-        {panne
-          ? "Le découpage n'a pas abouti, et ça ne vient pas de ton texte."
-          : (motifDechec ?? "Ce texte n'a rien donné à retenir.")}
-      </p>
+      <p className="text-corps text-stone-900">{situation.constat}</p>
 
-      <p className="text-petit max-w-md text-stone-500">{commentContinuer(panne, peutRedeposer)}</p>
+      <p className="text-petit max-w-md text-stone-500">{situation.explication}</p>
 
       <div className="mt-pas-1">
         {peutRedeposer ? (

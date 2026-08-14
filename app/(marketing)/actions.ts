@@ -22,7 +22,16 @@ import { lireLEssaiEnCours, type AvancementDeLEssai } from "@/lib/depots/essai-e
  * est entré, et l'action ne compte pas là-dessus pour autant.
  */
 
-export type EtatEssai = { erreur?: string; sessionId?: string };
+/**
+ * `inputId` est ce qui identifie un essai, et pas `sessionId`.
+ *
+ * Un second essai réutilise la même visite : la session est donc la même chaîne
+ * d'un essai à l'autre, et l'écran n'avait aucun moyen de savoir qu'il venait
+ * d'en partir un nouveau. L'identifiant du dépôt, lui, change à chaque fois —
+ * c'est celui que le serveur connaît, et c'est la seule identité qui ne mente
+ * pas.
+ */
+export type EtatEssai = { erreur?: string; sessionId?: string; inputId?: string };
 
 export async function essayerAction(_precedent: EtatEssai, donnees: FormData): Promise<EtatEssai> {
   if (await getCurrentUser()) redirect(`${ROUTES.depots}/nouveau`);
@@ -34,7 +43,7 @@ export async function essayerAction(_precedent: EtatEssai, donnees: FormData): P
 
   await poserLaVisite(resultat.sessionId);
 
-  return { sessionId: resultat.sessionId };
+  return { sessionId: resultat.sessionId, inputId: resultat.inputId };
 }
 
 /**

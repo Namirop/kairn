@@ -2,6 +2,8 @@ import { submitAIBatch } from "@/lib/ai/batch";
 import { EXTRACT_ATOMS, GENERATE_VARIANTS } from "@/lib/ai/schemas";
 import { callAI } from "@/lib/ai/client";
 import { prisma } from "@/lib/db/client";
+import { readAiConfig } from "@/lib/ai/config";
+import { reserverLesDeuxPlaces } from "@/lib/ai/reservation";
 import { lireReservationsDuJour, reserverAppelsModele } from "@/lib/db/ai-quota";
 import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
 import { expectFailure, record } from "./journal";
@@ -24,6 +26,142 @@ function requeteGroupee(reference: string) {
     system: "",
     messages: [{ role: "user" as const, content: "Concept 1.\nUn concept de vérification." }],
   };
+}
+
+/**
+ * Les deux populations ne s'affament pas l'une l'autre.
+ *
+ * Le trafic sans compte n'avait pas de part : il ne se confrontait qu'au plafond
+ * global, et la landing pouvait donc fermer la journée aux comptes connectés —
+ * l'inverse étant vrai aussi. Ce n'est pas un problème d'argent, le global s'en
+ * charge ; c'est un déni de service croisé, et il ne se voit pas à la relecture.
+ *
+ * Éprouvé sur `reserverLesDeuxPlaces` et non sur `callAI` : montrer qu'un appel
+ * **passe** demanderait de l'émettre, et cette vérification ne sort pas sur le
+ * réseau. C'est de toute façon la réservation qu'on met en cause.
+ */
+export async function verifierPartAnonyme(): Promise<void> {
+  const jour = dayToUtcDate(localDay(new Date(), "UTC"));
+  const avantGlobal = await prisma.aiCallQuota.findUnique({ where: { day: jour } });
+  const avantAnonyme = await prisma.aiAnonymousQuota.findUnique({ where: { day: jour } });
+  const compte = await prisma.user.findFirst({ select: { id: true } });
+
+  const config = {
+    ...readAiConfig(),
+    dailyCallCap: 1000,
+    userDailyCallCap: 2,
+    anonymousDailyCallCap: 2,
+  };
+
+  const avantCompte = compte
+    ? await prisma.aiUserQuota.findUnique({ where: { userId_day: { userId: compte.id, day: jour } } })
+    : null;
+
+  try {
+    await prisma.aiCallQuota.upsert({ where: { day: jour }, create: { day: jour }, update: { reserved: 0 } });
+    await prisma.aiAnonymousQuota.upsert({
+      where: { day: jour },
+      create: { day: jour, reserved: config.anonymousDailyCallCap },
+      update: { reserved: config.anonymousDailyCallCap },
+    });
+
+    await expectFailure(
+      "La part du trafic sans compte refuse quand elle est pleine",
+      "AI_ANONYMOUS_QUOTA",
+      () => reserverLesDeuxPlaces(config, { anonyme: true }),
+    );
+
+    // Le point entier de la partition : la landing est pleine, et le reste sert.
+    if (compte) {
+      await prisma.aiUserQuota.deleteMany({ where: { userId: compte.id, day: jour } });
+    }
+
+    const compteServi = compte ? await passe(() => reserverLesDeuxPlaces(config, { userId: compte.id })) : null;
+    const interneServi = await passe(() => reserverLesDeuxPlaces(config, { interne: true }));
+
+    record(
+      "La landing pleine ne ferme la journée à personne d'autre",
+      interneServi && compteServi !== false,
+      `appel interne ${interneServi ? "servi" : "refusé"}, compte ${
+        compteServi === null ? "non éprouvé (aucun en base)" : compteServi ? "servi" : "refusé"
+      }`,
+    );
+
+    // Et l'inverse : un compte qui sature sa part ne ferme pas la landing.
+    await prisma.aiAnonymousQuota.update({ where: { day: jour }, data: { reserved: 0 } });
+
+    if (compte) {
+      await prisma.aiUserQuota.upsert({
+        where: { userId_day: { userId: compte.id, day: jour } },
+        create: { userId: compte.id, day: jour, reserved: config.userDailyCallCap },
+        update: { reserved: config.userDailyCallCap },
+      });
+
+      await expectFailure("La part d'un compte plein refuse ce compte", "AI_USER_QUOTA", () =>
+        reserverLesDeuxPlaces(config, { userId: compte.id }),
+      );
+    }
+
+    const essaiServi = await passe(() => reserverLesDeuxPlaces(config, { anonyme: true }));
+
+    record(
+      "Un compte qui sature sa part ne ferme pas la landing",
+      essaiServi,
+      `essai sans compte ${essaiServi ? "servi" : "refusé"} alors que la part d'un compte est pleine`,
+    );
+  } finally {
+    await reposerGlobal(jour, avantGlobal?.reserved);
+    await reposerAnonyme(jour, avantAnonyme?.reserved);
+
+    if (compte) {
+      await prisma.aiUserQuota.deleteMany({ where: { userId: compte.id, day: jour } });
+
+      if (avantCompte) {
+        await prisma.aiUserQuota.create({
+          data: { userId: compte.id, day: jour, reserved: avantCompte.reserved },
+        });
+      }
+    }
+  }
+}
+
+/** La réservation est-elle passée ? Un refus lève, et c'est ce qu'on lit. */
+async function passe(reserver: () => Promise<void>): Promise<boolean> {
+  try {
+    await reserver();
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function reposerGlobal(jour: Date, reserved: number | undefined): Promise<void> {
+  if (reserved === undefined) {
+    await prisma.aiCallQuota.deleteMany({ where: { day: jour } });
+
+    return;
+  }
+
+  await prisma.aiCallQuota.upsert({
+    where: { day: jour },
+    create: { day: jour, reserved },
+    update: { reserved },
+  });
+}
+
+async function reposerAnonyme(jour: Date, reserved: number | undefined): Promise<void> {
+  if (reserved === undefined) {
+    await prisma.aiAnonymousQuota.deleteMany({ where: { day: jour } });
+
+    return;
+  }
+
+  await prisma.aiAnonymousQuota.upsert({
+    where: { day: jour },
+    create: { day: jour, reserved },
+    update: { reserved },
+  });
 }
 
 export async function verifierPlafond(): Promise<void> {

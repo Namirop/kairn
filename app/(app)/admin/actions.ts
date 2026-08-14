@@ -34,6 +34,7 @@ const schema = z.object({
   mock: booleen,
   dailyCallCap: entierPositif,
   userDailyCallCap: entierPositif,
+  anonymousDailyCallCap: entierPositif,
   model: optionnel(z.string().min(1)),
   maxTokens: entierPositif,
 });
@@ -54,6 +55,7 @@ export async function poserLesReglagesAction(
     mock: donnees.get("mock"),
     dailyCallCap: donnees.get("dailyCallCap"),
     userDailyCallCap: donnees.get("userDailyCallCap"),
+    anonymousDailyCallCap: donnees.get("anonymousDailyCallCap"),
     model: donnees.get("model"),
     maxTokens: donnees.get("maxTokens"),
   });

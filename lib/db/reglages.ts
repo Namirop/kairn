@@ -17,6 +17,7 @@ export type Surcharges = {
   mock?: boolean;
   dailyCallCap?: number;
   userDailyCallCap?: number;
+  anonymousDailyCallCap?: number;
   model?: string;
   maxTokens?: number;
 };
@@ -27,6 +28,7 @@ export type ReglagesPosés = {
   mock: boolean | null;
   dailyCallCap: number | null;
   userDailyCallCap: number | null;
+  anonymousDailyCallCap: number | null;
   model: string | null;
   maxTokens: number | null;
 };
@@ -38,6 +40,7 @@ const VIDE: ReglagesPosés = {
   mock: null,
   dailyCallCap: null,
   userDailyCallCap: null,
+  anonymousDailyCallCap: null,
   model: null,
   maxTokens: null,
 };
@@ -55,6 +58,7 @@ const CLES: (keyof ReglagesPosés)[] = [
   "mock",
   "dailyCallCap",
   "userDailyCallCap",
+  "anonymousDailyCallCap",
   "model",
   "maxTokens",
 ];
@@ -69,6 +73,7 @@ export async function lireLesReglagesPosés(): Promise<ReglagesPosés> {
     mock: ligne.mockAi,
     dailyCallCap: ligne.dailyCallCap,
     userDailyCallCap: ligne.userDailyCallCap,
+    anonymousDailyCallCap: ligne.anonymousDailyCallCap,
     model: ligne.model,
     maxTokens: ligne.maxTokens,
   };
@@ -89,6 +94,9 @@ export async function lireLesSurcharges(): Promise<Surcharges> {
   if (posés.mock !== null) surcharges.mock = posés.mock;
   if (posés.dailyCallCap !== null) surcharges.dailyCallCap = posés.dailyCallCap;
   if (posés.userDailyCallCap !== null) surcharges.userDailyCallCap = posés.userDailyCallCap;
+  if (posés.anonymousDailyCallCap !== null) {
+    surcharges.anonymousDailyCallCap = posés.anonymousDailyCallCap;
+  }
   if (posés.model !== null) surcharges.model = posés.model;
   if (posés.maxTokens !== null) surcharges.maxTokens = posés.maxTokens;
 
@@ -126,6 +134,7 @@ export async function poserLesReglages(
     mockAi: voulus.mock,
     dailyCallCap: voulus.dailyCallCap,
     userDailyCallCap: voulus.userDailyCallCap,
+    anonymousDailyCallCap: voulus.anonymousDailyCallCap,
     model: voulus.model,
     maxTokens: voulus.maxTokens,
   };

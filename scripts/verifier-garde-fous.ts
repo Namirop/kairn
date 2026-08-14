@@ -113,8 +113,11 @@ async function main(): Promise<void> {
     }),
   );
 
-  const { verifierPlafond } = await import("./verification/garde-fous-plafond");
+  const { verifierPlafond, verifierPartAnonyme } = await import(
+    "./verification/garde-fous-plafond"
+  );
   await verifierPlafond();
+  await verifierPartAnonyme();
 
   record(
     "Aucune requête n'est sortie vers l'API",

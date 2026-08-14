@@ -115,8 +115,20 @@ export async function casPartDuCompte(gourmand: string, voisin: string): Promise
 
   process.env.AI_DAILY_CALL_CAP_PAR_COMPTE = String(partDeCompte);
 
+  // Le compteur du jour n'est pas à zéro : le banc d'évaluation dépense pour de
+  // vrai sur la même journée UTC, et ce qu'il a pris compte dans le plafond
+  // global. Un plafond « large » posé en absolu devenait donc étroit — puis
+  // dépassé — au fil de la journée, et ce cas échouait pour une raison qui
+  // n'avait rien à voir avec ce qu'il éprouve. Il se pose au-dessus de ce qui
+  // est déjà pris. Celui de `casPlafondGlobal` reste absolu, lui : il veut
+  // précisément que la journée soit pleine.
+  const large = 50 + (await lireReservationsDuJour());
+
   try {
-    await enModeCompteur(50, async () => {
+    await enModeCompteur(large, async () => {
+      // La même raison : ce qui se vérifie ici est ce que ce bloc ajoute au
+      // compteur, pas la valeur qu'il affiche.
+      const avant = await lireReservationsDuJour();
       const refus: string[] = [];
 
       for (let tour = 0; tour < partDeCompte + 2; tour += 1) {
@@ -133,7 +145,7 @@ export async function casPartDuCompte(gourmand: string, voisin: string): Promise
       }
 
       const prisesParLeGourmand = await lirePlacesDeCompte(gourmand);
-      const globales = await lireReservationsDuJour();
+      const globales = (await lireReservationsDuJour()) - avant;
 
       record(
         `Part de compte — un seul compte ne prend que ses ${partDeCompte} places`,
@@ -145,7 +157,7 @@ export async function casPartDuCompte(gourmand: string, voisin: string): Promise
       record(
         "Part de compte — le plafond global reste ouvert pour les autres",
         globales === partDeCompte,
-        `${globales} place(s) globales prises sur 50`,
+        `${globales} place(s) globales ajoutées, sur ${large} ouvertes`,
       );
 
       let voisinServi = true;

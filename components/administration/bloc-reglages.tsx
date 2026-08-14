@@ -64,6 +64,12 @@ export function BlocReglages({
           environnement={environnement.AI_DAILY_CALL_CAP_PAR_COMPTE}
         />
         <Champ
+          nom="anonymousDailyCallCap"
+          intitule="Plafond des essais sans compte, par jour"
+          defaut={poses.anonymousDailyCallCap}
+          environnement={environnement.AI_DAILY_CALL_CAP_ANONYME}
+        />
+        <Champ
           nom="maxTokens"
           intitule="Tokens de sortie par appel"
           defaut={poses.maxTokens}

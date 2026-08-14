@@ -17,6 +17,12 @@ const configSchema = z.object({
    * protège le budget ; celui-ci protège les utilisateurs les uns des autres.
    */
   userDailyCallCap: z.coerce.number().int().positive(),
+  /**
+   * Ce que le trafic sans compte peut prendre dans la journée, tous visiteurs
+   * confondus. Le plafond par compte protège les comptes les uns des autres ;
+   * celui-ci protège les deux populations l'une de l'autre.
+   */
+  anonymousDailyCallCap: z.coerce.number().int().positive(),
   model: z.string().min(1),
   maxTokens: z.coerce.number().int().positive(),
   apiKey: z.string().min(1).optional(),
@@ -30,6 +36,7 @@ const VARIABLE: Record<string, string> = {
   mock: "MOCK_AI",
   dailyCallCap: "AI_DAILY_CALL_CAP",
   userDailyCallCap: "AI_DAILY_CALL_CAP_PAR_COMPTE",
+  anonymousDailyCallCap: "AI_DAILY_CALL_CAP_ANONYME",
   model: "AI_MODEL",
   maxTokens: "AI_MAX_TOKENS",
 };
@@ -93,6 +100,7 @@ export function readAiConfig(): AiConfig {
     mock: propre(process.env.MOCK_AI),
     dailyCallCap: propre(process.env.AI_DAILY_CALL_CAP),
     userDailyCallCap: propre(process.env.AI_DAILY_CALL_CAP_PAR_COMPTE),
+    anonymousDailyCallCap: propre(process.env.AI_DAILY_CALL_CAP_ANONYME),
     model: propre(process.env.AI_MODEL),
     maxTokens: propre(process.env.AI_MAX_TOKENS),
   };
@@ -123,6 +131,7 @@ const configEffectiveSchema = z.object({
   mock: z.boolean(),
   dailyCallCap: z.number().int().positive(),
   userDailyCallCap: z.number().int().positive(),
+  anonymousDailyCallCap: z.number().int().positive(),
   model: z.string().min(1),
   maxTokens: z.number().int().positive(),
   apiKey: z.string().min(1).optional(),

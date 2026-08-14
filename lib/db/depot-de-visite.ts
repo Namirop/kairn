@@ -59,25 +59,35 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
  * disant qu'elle est à lui. La session est marquée réclamée dans le même
  * mouvement, ce qui la met hors de portée du cron de nettoyage.
  *
- * Rend les identifiants des concepts repris : c'est à l'appelant de leur
- * demander des questions, parce que c'est **là** que la dépense reprend, et
- * qu'elle doit se voir dans le code qui décide.
+ * Rend les concepts **groupés par leur dépôt d'origine**, et non à plat. Une
+ * visite en porte jusqu'à quatre, et le cas courant est le pire : premier dépôt
+ * rejeté, second réussi. À plat, l'appelant prenait `inputIds[0]` — le dépôt
+ * **rejeté** — et lui accrochait les concepts du second. Les questions
+ * atterrissaient sur les bons concepts, mais sous un dépôt en `REJECTED` que
+ * `marquerPretSiPlusRienEnAttente` refuse de refermer : une incohérence qui
+ * dormait jusqu'à la première fonctionnalité lisant les jobs par dépôt.
+ *
+ * C'est à l'appelant de demander les questions, parce que c'est **là** que la
+ * dépense reprend, et qu'elle doit se voir dans le code qui décide.
  */
+export type DepotRepris = { inputId: string; atomIds: string[] };
+
 export async function rattacherAuCompte(
   sessionId: string,
   userId: string,
   maintenant: Date = new Date(),
-): Promise<{ inputIds: string[]; atomIds: string[] }> {
+): Promise<DepotRepris[]> {
   const session = await prisma.anonymousSession.findUnique({
     where: { id: sessionId },
     select: { claimedAt: true },
   });
 
   // Déjà réclamée : deux onglets, ou un rechargement. Le premier a gagné.
-  if (!session || session.claimedAt !== null) return { inputIds: [], atomIds: [] };
+  if (!session || session.claimedAt !== null) return [];
 
   const depots = await prisma.input.findMany({
     where: { anonymousSessionId: sessionId },
+    orderBy: { createdAt: "asc" },
     select: { id: true, atoms: { select: { id: true } } },
   });
 
@@ -87,7 +97,7 @@ export async function rattacherAuCompte(
       data: { claimedAt: maintenant },
     });
 
-    return { inputIds: [], atomIds: [] };
+    return [];
   }
 
   await prisma.$transaction([
@@ -105,10 +115,10 @@ export async function rattacherAuCompte(
     }),
   ]);
 
-  return {
-    inputIds: depots.map((depot) => depot.id),
-    atomIds: depots.flatMap((depot) => depot.atoms.map((atome) => atome.id)),
-  };
+  return depots.map((depot) => ({
+    inputId: depot.id,
+    atomIds: depot.atoms.map((atome) => atome.id),
+  }));
 }
 
 /**

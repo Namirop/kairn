@@ -7,7 +7,8 @@ import {
   lireUsageDeLaPeriode,
   periodeDuCompte,
 } from "@/lib/db/quota-depots";
-import { deposer, CARACTERES_MAXIMUM, type ResultatDepot } from "@/lib/depots/deposer";
+import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
+import { deposer, type ResultatDepot } from "@/lib/depots/deposer";
 import { MOTIFS_DE_REFUS } from "@/lib/depots/refus-de-quota";
 import { GESTES_PAR_FENETRE, prendreUnGeste } from "@/lib/db/limite-de-gestes";
 import { enregistrerEntrainement } from "@/lib/db/entrainement";

@@ -38,6 +38,7 @@ export default async function PagePilotage() {
     MOCK_AI: process.env.MOCK_AI,
     AI_DAILY_CALL_CAP: process.env.AI_DAILY_CALL_CAP,
     AI_DAILY_CALL_CAP_PAR_COMPTE: process.env.AI_DAILY_CALL_CAP_PAR_COMPTE,
+    AI_DAILY_CALL_CAP_ANONYME: process.env.AI_DAILY_CALL_CAP_ANONYME,
     AI_MAX_TOKENS: process.env.AI_MAX_TOKENS,
     AI_MODEL: process.env.AI_MODEL,
   };

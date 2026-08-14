@@ -57,6 +57,30 @@ export class AIUserQuotaError extends AiError {
 }
 
 /**
+ * Part du jour épuisée pour le trafic **sans compte**.
+ *
+ * Volontairement **pas** une sous-classe d'`AIQuotaError` : l'exécuteur traite
+ * cette dernière comme un report, ce qui laisse le dépôt annoncer un travail en
+ * cours. Ce serait le bon comportement pour un compte, qui reviendra demain ;
+ * pour un visiteur, ça veut dire une page d'attente sans fin sur la seule page
+ * qui convertit.
+ *
+ * Elle tombe donc dans le chemin ordinaire de l'échec, et le dépôt part en
+ * `FAILED` — c'est-à-dire en **panne**, qui ne consomme pas d'essai. La visite
+ * garde ce qui lui est dû, et l'écran dit que ça ne vient pas de son texte.
+ */
+export class AIAnonymousQuotaError extends AiError {
+  readonly code = "AI_ANONYMOUS_QUOTA";
+
+  constructor(
+    readonly used: number,
+    readonly cap: number,
+  ) {
+    super(`Part d'appels du jour atteinte pour les essais sans compte : ${used}/${cap}.`);
+  }
+}
+
+/**
  * La sortie du modèle ne respecte pas le schéma. Elle n'est pas réparée — mais
  * elle est conservée telle quelle dans `raw` : sans elle, on diagnostique une
  * anomalie de génération à l'aveugle.

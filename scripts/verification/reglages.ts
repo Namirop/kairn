@@ -23,6 +23,7 @@ const AUCUN = {
   mock: null,
   dailyCallCap: null,
   userDailyCallCap: null,
+  anonymousDailyCallCap: null,
   model: null,
   maxTokens: null,
 };

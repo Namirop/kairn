@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { avancementDeLEssaiAction, essayerAction, type EtatEssai } from "@/app/(marketing)/actions";
 import { ResultatDeLEssai } from "@/components/site/resultat-de-lessai";
 import { Button } from "@/components/ui/button";
-import { CARACTERES_MAXIMUM_ANONYME } from "@/lib/depots/bornes-de-lessai";
+import { CARACTERES_MAXIMUM_ANONYME } from "@/lib/depots/bornes-du-depot";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
 /**
@@ -72,11 +72,30 @@ export function EssaiDeDepot({
   // d'intervalle : c'est ce que l'écran doit dire, et il faut qu'il le sache.
   const [attenteInterrompue, setAttenteInterrompue] = useState(false);
   const [relance, setRelance] = useState(0);
+  const [dernierEssai, setDernierEssai] = useState<string | null>(null);
+
+  // Un essai vient de partir : l'écran repart de zéro.
+  //
+  // Ajusté pendant le rendu plutôt que dans un effet, parce qu'un effet aurait
+  // laissé une image afficher le verdict du **premier** essai — « ce texte n'a
+  // rien donné » sur un dépôt qui vient tout juste d'être envoyé. React
+  // recommence le rendu sans rien poser à l'écran entre les deux.
+  //
+  // `recommence` en particulier n'était jamais remis à faux nulle part : une
+  // fois « Réessayer » cliqué, le composant rendait le formulaire pour toujours
+  // et le second essai, qui avait bien tourné et bien coûté, ne s'affichait
+  // jamais.
+  if (etat.inputId && etat.inputId !== dernierEssai) {
+    setDernierEssai(etat.inputId);
+    setRecommence(false);
+    setAttenteInterrompue(false);
+    setAvancement(null);
+  }
 
   // On interroge aussi quand la page se charge sur un découpage déjà en route.
   // Sans ça, un rechargement pendant l'extraction figeait l'écran sur l'attente :
   // l'intervalle ne démarrait qu'au retour de l'action, et il n'y en avait pas.
-  const aPoursuivre = Boolean(etat.sessionId) || Boolean(essaiPrecedent?.enCours);
+  const aPoursuivre = Boolean(etat.inputId) || Boolean(essaiPrecedent?.enCours);
 
   useEffect(() => {
     if (!aPoursuivre) return;
@@ -110,7 +129,10 @@ export function EssaiDeDepot({
       vivant = false;
       clearTimeout(minuteur);
     };
-  }, [aPoursuivre, relance]);
+    // `etat.inputId` et non la session : deux essais d'une même visite portent
+    // la même session, la dépendance ne changeait donc pas de valeur et l'effet
+    // n'était jamais rejoué. L'écran restait sur l'avancement du premier.
+  }, [etat.inputId, aPoursuivre, relance]);
 
   // Reprend l'interrogation pour un tour complet. La minute est repartie de
   // zéro : c'est un geste volontaire, pas une reprise automatique.
@@ -121,13 +143,19 @@ export function EssaiDeDepot({
 
   // L'attente commence au clic et non au retour de l'action : entre les deux
   // il y a un aller-retour, et pendant cet aller-retour seul le libellé du
-  // bouton changeait — l'écran avait l'air de n'avoir rien reçu.
+  // bouton changeait — l'écran avait l'air de n'avoir rien reçu. `enCours` est
+  // donc en tête et hors du `!recommence` : un second essai part depuis le
+  // formulaire, et sans ça il n'aurait pas eu droit à cette attente-là.
+  //
   // Un essai déjà fait se remontre plutôt que de laisser un champ vide : sinon
   // le refus d'un second essai désigne des concepts que personne ne voit.
-  if (!recommence && (enCours || etat.sessionId || essaiPrecedent)) {
+  if (enCours || (!recommence && (etat.sessionId || essaiPrecedent))) {
     return (
       <ResultatDeLEssai
-        avancement={avancement}
+        // Un dépôt en vol efface le verdict du précédent. Sans ça, le temps de
+        // l'aller-retour, l'écran affiche « ce texte n'a rien donné » à propos
+        // d'un texte qu'on vient d'envoyer.
+        avancement={enCours ? null : avancement}
         setRecommence={setRecommence}
         attenteInterrompue={attenteInterrompue}
         onVerifier={verifierANouveau}
