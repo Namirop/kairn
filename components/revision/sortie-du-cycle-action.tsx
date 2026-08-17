@@ -38,8 +38,12 @@ export function SortieDuCycleAction({
       </Button>
 
       {/* Ce que le geste fait vraiment : il repousse, il ne supprime pas, et il
-          se défait. Annoncer « une seule fois » laissait croire l'inverse. */}
-      <p className="text-petit max-w-sm text-stone-500">
+          se défait. Annoncer « une seule fois » laissait croire l'inverse.
+
+          Sans mesure : la phrase tient sur une ligne dès qu'il y a la largeur, et
+          la colonne l'a. Bornée à trois cents pixels au milieu d'un écran vide,
+          elle se cassait en deux sans raison lisible. */}
+      <p className="text-petit text-stone-500">
         Le concept sort du cycle et revient dans trois mois pour vérifier. Ça se défait.
       </p>
     </div>

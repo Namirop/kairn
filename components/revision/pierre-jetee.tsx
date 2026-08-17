@@ -1,6 +1,7 @@
 "use client";
 
 import { BlocReponse } from "@/components/revision/bloc-reponse";
+import { useDelaiDeLecture } from "@/components/revision/use-delai-de-lecture";
 import { Button } from "@/components/ui/button";
 import { etalonLisible } from "@/lib/domain/etalon-lisible";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
@@ -14,6 +15,10 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  *
  * Il dit aussi ce que ça coûte. Un geste qui compte comme un échec et ne le dit
  * pas se découvre à la mauvaise échéance, des jours plus tard.
+ *
+ * Le bouton attend le temps de lire, comme après une réponse fausse : la réponse
+ * affichée ici est toute la contrepartie du renoncement, et on vient de la
+ * demander expressément.
  */
 export function PierreJetee({
   reponse,
@@ -29,6 +34,8 @@ export function PierreJetee({
   dernier: boolean;
   onSuite: () => void;
 }) {
+  const lu = useDelaiDeLecture(true);
+
   return (
     <div className="mt-pas-8">
       <BlocReponse>
@@ -46,10 +53,14 @@ export function PierreJetee({
           sous la carte. */}
       <p className="mt-pas-6 text-petit text-stone-500">Noté comme non retrouvé.</p>
 
-      <div className="mt-pas-3">
-        <Button type="button" disabled={enCours} onClick={onSuite}>
+      <div className="gap-pas-4 mt-pas-3 flex flex-wrap items-center">
+        <Button type="button" disabled={enCours || !lu} onClick={onSuite}>
           {dernier ? "Terminer" : "Continuer"}
         </Button>
+
+        <p className="text-petit min-h-5 text-stone-500" aria-hidden>
+          {lu ? "" : "Le temps de la lire."}
+        </p>
       </div>
     </div>
   );

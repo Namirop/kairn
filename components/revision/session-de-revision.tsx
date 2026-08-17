@@ -85,7 +85,7 @@ export function SessionDeRevision({
   if (termine || questions.length === 0) {
     return (
       <PileDePanneaux>
-        <Panneau surface="papier" mesure="texte" remplit className="md:py-pas-16">
+        <Panneau surface="papier" mesure="texte" remplit centre className="md:py-pas-16">
           <FinDeSession revus={revus} carte={carte} expliquerLEspacement={expliquerLEspacement} />
         </Panneau>
       </PileDePanneaux>
@@ -93,8 +93,13 @@ export function SessionDeRevision({
   }
 
   return (
+    // « Session » va en marge, la date reste dans l'en-tête. Le mot de marge est
+    // un objet graphique — il nomme le mode, et c'est vrai de la première
+    // question à la dernière ; la date est ce qui change, et ce qui change se lit
+    // là où l'on lit, pas dans une colonne de lettres couchées.
     <SceneDeSession
-      enTete={<EnTeteDeScene intitule={`Session du ${jour}`} />}
+      enTete={<EnTeteDeScene intitule="Session" precision={jour} intituleEnMarge />}
+      mention="Session"
       rail={
         <EtatDeSession faites={faites} total={questions.length} serie={serie} rappel={rappel} />
       }

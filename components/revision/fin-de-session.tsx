@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { compterDemainAction } from "@/app/(app)/reviser/actions";
+import { Palier } from "@/components/revision/palier";
 import { PrincipeDeLEspacement } from "@/components/revision/principe-de-lespacement";
-import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
@@ -13,6 +13,9 @@ import { ROUTES } from "@/lib/auth/routes";
  * Ce qui vient d'être revu, ce qui revient demain, et la carte de maîtrise si
  * elle s'est déclenchée. Pas de score, pas de série, pas de niveau : la
  * progression se lit dans l'espacement qui s'allonge, pas dans un compteur.
+ *
+ * C'est un palier, comme les écrans où il n'y avait rien à revoir : on vient de
+ * finir, et la seule différence avec « tu es à jour » est le chemin qui y mène.
  */
 
 function phraseDemain(nombre: number | null): string {
@@ -50,27 +53,42 @@ export function FinDeSession({
   }, []);
 
   return (
-    <section className="mx-auto flex w-full max-w-2xl flex-col">
-      <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">Session</p>
-
-      <h1 className="mt-pas-2 text-h1-app leading-tight font-bold text-stone-900">
-        {revus === 0
-          ? "Rien n'a été revu."
-          : `${revus} ${revus === 1 ? "concept revu" : "concepts revus"}.`}
-      </h1>
-
-      {/* L'espace est réservé : la phrase arrive après un aller-retour, elle ne
-          doit pas pousser le bouton vers le bas en apparaissant. */}
-      <p className="mt-pas-3 text-corps min-h-6 text-stone-500">{phraseDemain(demain)}</p>
-
+    // Déposer d'abord, s'entraîner ensuite. La boucle de croissance du produit,
+    // ce sont les dépôts : quelqu'un avec deux concepts n'a pas un problème de
+    // session, il a un problème de contenu.
+    <Palier
+      intitule="Session"
+      titre={
+        revus === 0
+          ? "Rien n'a été revu"
+          : `${revus} ${revus === 1 ? "concept revu" : "concepts revus"}`
+      }
+      // L'espace est réservé : la phrase arrive après un aller-retour, elle ne
+      // doit pas pousser le bouton vers le bas en apparaissant.
+      explication={<span className="block min-h-6">{phraseDemain(demain)}</span>}
+      action={{ libelle: "Déposer autre chose", href: `${ROUTES.depots}/nouveau` }}
+      secondaire={{ libelle: "S'entraîner", href: ROUTES.entrainement }}
+      note="L'entraînement repose d'autres questions sur les mêmes concepts. Il ne change pas ton planning."
+      pied={
+        <Link
+          href={ROUTES.aujourdhui}
+          className="text-petit text-stone-500 underline-offset-4 hover:underline focus-visible:underline"
+        >
+          Retour à aujourd&apos;hui
+        </Link>
+      }
+    >
       {expliquerLEspacement ? (
-        <div className="mt-pas-12">
+        <div className="mt-pas-12 w-full text-left">
           <PrincipeDeLEspacement />
         </div>
       ) : null}
 
+      {/* Le concept est cité, donc aligné à gauche : une phrase de contenu
+          centrée se lit moins bien, et c'est le seul texte de l'écran qui ne
+          vient pas du produit. */}
       {carte ? (
-        <div className="mt-pas-12 border-lichen pl-pas-4 border-l-2">
+        <div className="mt-pas-12 border-lichen pl-pas-4 max-w-lg border-l-2 text-left">
           <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
             Tu maîtrises ça
           </p>
@@ -80,32 +98,6 @@ export function FinDeSession({
           </p>
         </div>
       ) : null}
-
-      {/* Déposer d'abord, s'entraîner ensuite. La boucle de croissance du
-          produit, ce sont les dépôts : quelqu'un avec deux concepts n'a pas un
-          problème de session, il a un problème de contenu. */}
-      <div className="gap-pas-3 mt-pas-16 flex flex-col sm:flex-row">
-        <Button asChild>
-          <Link href={`${ROUTES.depots}/nouveau`}>Déposer autre chose</Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href={ROUTES.entrainement}>S&apos;entraîner</Link>
-        </Button>
-      </div>
-
-      <p className="mt-pas-4 text-petit text-stone-500">
-        L&apos;entraînement repose d&apos;autres questions sur les mêmes concepts. Il ne change pas
-        ton planning.
-      </p>
-
-      <div className="mt-pas-8">
-        <Link
-          href={ROUTES.aujourdhui}
-          className="text-petit text-stone-500 underline-offset-4 hover:underline focus-visible:underline"
-        >
-          Retour à aujourd&apos;hui
-        </Link>
-      </div>
-    </section>
+    </Palier>
   );
 }

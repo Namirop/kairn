@@ -29,10 +29,15 @@ function Trou({ comble, dansDuCode }: { comble: string | null; dansDuCode: boole
     // et un trait fin sous une ligne de texte se remarquait à peine. Dans un
     // jeton, l'encre diluée du fond mange le gris de l'ombre : il en faut un cran
     // de plus pour que le creux se voie.
+    //
+    // Sa hauteur est celle d'une capitale, sa largeur celle de trois lettres :
+    // c'est un mot manquant, et un mot est plus haut que long. Large et plat, il
+    // redevenait le trait qu'on voulait éviter — la forme disait « souligne ici »
+    // là où elle doit dire « il manque un terme ».
     return (
       <span
         aria-hidden
-        className={`rounded-champ mx-[0.12em] inline-block h-[0.62em] w-[3.4em] align-baseline ${
+        className={`rounded-champ mx-[0.14em] inline-block h-[0.96em] w-[2.9em] translate-y-[0.06em] align-baseline ${
           dansDuCode ? "bg-stone-300" : "bg-surface-ombre"
         }`}
       />

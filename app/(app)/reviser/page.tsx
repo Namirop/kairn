@@ -36,7 +36,7 @@ export default async function PageReviser() {
   if (session.questions.length === 0) {
     return (
       <PileDePanneaux>
-        <Panneau surface="papier" mesure="texte" remplit className="md:py-pas-16">
+        <Panneau surface="papier" mesure="texte" remplit centre className="md:py-pas-16">
           <RienAReviser
             totalConcepts={session.totalConcepts}
             conceptsEnAttenteDeQuestions={session.conceptsEnAttenteDeQuestions}

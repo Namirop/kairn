@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
+import { MotDeMarge } from "@/components/revision/mot-de-marge";
 
 /**
  * La scène d'un passage de questions : la colonne où l'on répond, et la bande
@@ -22,6 +23,12 @@ import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
  * extrait de code cité dedans se coupait en deux. Ce qui est vraiment du corps de
  * texte garde sa propre mesure là où il vit — la réponse, les consignes, le
  * champ de saisie.
+ *
+ * **Le contenu est centré dans la hauteur.** Posé en haut, il laissait sous lui
+ * un vide qui grandissait à chaque format court, et l'écran avait l'air d'avoir
+ * mal chargé. Un `m-auto` plutôt qu'un `justify-center` : quand une question
+ * dépasse la fenêtre, les marges automatiques tombent à zéro et rien ne devient
+ * inatteignable — un centrage par le conteneur, lui, aurait coupé le haut.
  */
 export function SceneDeSession({
   enTete,
@@ -34,10 +41,10 @@ export function SceneDeSession({
   /**
    * Le nom du passage, repris en grand dans la marge gauche.
    *
-   * Seulement quand il y a la place — au-delà de la colonne, les marges d'un
-   * écran large sont vides, et un mot posé debout y dit ce qu'on est en train de
-   * faire mieux qu'une étiquette de douze pixels. L'en-tête efface alors le sien
-   * pour ne pas le dire deux fois.
+   * Seulement quand la colonne est assez large pour l'accueillir sans se serrer.
+   * L'en-tête efface alors le sien pour ne pas le dire deux fois, et le reprend
+   * dès que la marge se referme — c'est la même requête de conteneur qui décide
+   * des deux, donc l'un des deux est toujours là, jamais les deux.
    */
   mention?: string;
   /**
@@ -59,18 +66,14 @@ export function SceneDeSession({
           </aside>
         ) : null}
 
-        <div className="px-pas-4 md:px-pas-8 py-pas-8 md:py-pas-12 grain relative flex-1 overflow-hidden lg:order-1">
-          <div className="relative z-10 mx-auto w-full max-w-6xl">
-            {/* Debout dans la marge, contre le bord de la colonne : c'est de la
-                composition, pas de la navigation. Elle n'apparaît que là où la
-                marge est assez large pour l'accueillir sans serrer la colonne. */}
-            {mention ? (
-              <p className="text-h1-app absolute top-0 -left-16 hidden font-mono leading-none tracking-[0.32em] text-stone-300 uppercase [writing-mode:vertical-rl] 2xl:block">
-                {mention}
-              </p>
-            ) : null}
+        <div className="px-pas-4 md:px-pas-8 py-pas-8 md:py-pas-12 grain @container relative flex flex-1 overflow-hidden lg:order-1">
+          <div className="relative z-10 m-auto w-full max-w-6xl">
+            {mention ? <MotDeMarge mot={mention} /> : null}
 
-            {enTete ? <div className="mb-pas-16">{enTete}</div> : null}
+            {/* L'en-tête tient de près ce qu'elle nomme : à quatre pas de la
+                première étiquette, elle flottait entre le bord de l'écran et la
+                question, sans se rattacher ni à l'un ni à l'autre. */}
+            {enTete ? <div className="mb-pas-8">{enTete}</div> : null}
             {children}
           </div>
         </div>

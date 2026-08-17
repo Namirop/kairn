@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useState, type ReactNode } from "react";
 import {
   principeVuAction,
@@ -12,6 +11,7 @@ import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { PrincipeDeLentrainement } from "@/components/entrainement/principe-de-lentrainement";
 import { DerouleQuestions, type PassageDonne } from "@/components/revision/deroule-questions";
 import { EnTeteDeScene } from "@/components/revision/en-tete-de-scene";
+import { Palier } from "@/components/revision/palier";
 import { SceneDeSession } from "@/components/revision/scene-de-session";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
@@ -29,11 +29,14 @@ import type { QuestionServie } from "@/lib/db/question-servie";
  *
  * Un panneau ordinaire, comme le reste de l'application. La scène à deux
  * colonnes n'a de sens que tant qu'il y a un chemin à montrer.
+ *
+ * La fin d'un tour est un palier et se centre ; le principe est un texte qu'on
+ * lit avant de commencer, et il se lit de haut en bas comme n'importe quel texte.
  */
-function Cadre({ children }: { children: ReactNode }) {
+function Cadre({ centre = false, children }: { centre?: boolean; children: ReactNode }) {
   return (
     <PileDePanneaux>
-      <Panneau surface="papier" mesure="texte" remplit className="md:py-pas-16">
+      <Panneau surface="papier" mesure="texte" remplit centre={centre} className="md:py-pas-16">
         <div className="flex w-full flex-col">{children}</div>
       </Panneau>
     </PileDePanneaux>
@@ -86,31 +89,28 @@ export function TourDentrainement({
   }
 
   if (tourFini || questions.length === 0) {
-    return (
-      <Cadre>
-        <h1 className="text-h1-app leading-tight font-bold text-stone-900">
-          {questions.length === 0 ? "Rien à travailler pour l'instant" : "Tour terminé"}
-        </h1>
-        <p className="mt-pas-3 text-corps max-w-lg leading-relaxed text-stone-500">
-          {questions.length === 0
-            ? "L'entraînement pioche dans les questions de tes concepts. Dépose quelque chose, et il aura de quoi te reposer."
-            : "Ton planning n'a pas bougé. Tu peux enchaîner, ou revenir plus tard."}
-        </p>
+    const vide = questions.length === 0;
 
-        <div className="gap-pas-3 mt-pas-8 flex flex-col sm:flex-row">
-          {questions.length > 0 ? (
-            <Button type="button" disabled={charge} onClick={() => void encore()}>
-              {charge ? "Un instant" : "Encore un tour"}
-            </Button>
-          ) : (
-            <Button asChild>
-              <Link href={`${ROUTES.depots}/nouveau`}>Déposer</Link>
-            </Button>
-          )}
-          <Button asChild variant="outline">
-            <Link href={ROUTES.aujourdhui}>Retour à aujourd&apos;hui</Link>
-          </Button>
-        </div>
+    return (
+      <Cadre centre>
+        <Palier
+          intitule="Entraînement"
+          titre={vide ? "Rien à travailler pour l'instant" : "Tour terminé"}
+          explication={
+            vide
+              ? "L'entraînement pioche dans les questions de tes concepts. Dépose quelque chose, et il aura de quoi te reposer."
+              : "Ton planning n'a pas bougé. Tu peux enchaîner, ou revenir plus tard."
+          }
+          bouton={
+            vide ? undefined : (
+              <Button type="button" disabled={charge} onClick={() => void encore()}>
+                {charge ? "Un instant" : "Encore un tour"}
+              </Button>
+            )
+          }
+          action={vide ? { libelle: "Déposer", href: `${ROUTES.depots}/nouveau` } : undefined}
+          secondaire={{ libelle: "Retour à aujourd'hui", href: ROUTES.aujourdhui }}
+        />
       </Cadre>
     );
   }
