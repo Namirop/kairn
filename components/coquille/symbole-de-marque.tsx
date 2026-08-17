@@ -1,5 +1,4 @@
-import { LARGEUR_VUE } from "@/lib/domain/cairn-stack";
-import { empilementDuLogo, nuanceDuRang } from "@/lib/design/marque";
+import { cadreDuSymbole, empilementDuLogo, nuanceDuRang } from "@/lib/design/marque";
 
 /**
  * L'empilement du logo.
@@ -34,14 +33,14 @@ export function SymboleDeMarque({
   className?: string;
 }) {
   const empilement = empilementDuLogo(pierres);
-  const { hauteur, ySol } = empilement;
+  const vue = cadreDuSymbole(pierres);
   const teintes = clair ? NUANCES_CLAIRES : NUANCES;
 
   return (
     <svg
-      viewBox={`0 ${-hauteur + ySol} ${LARGEUR_VUE} ${hauteur}`}
+      viewBox={`${vue.x} ${vue.y} ${vue.largeur} ${vue.hauteur}`}
       height={taille}
-      width={(taille * LARGEUR_VUE) / hauteur}
+      width={(taille * vue.largeur) / vue.hauteur}
       className={className}
       aria-hidden
     >

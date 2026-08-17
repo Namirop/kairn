@@ -71,6 +71,42 @@ export function empilementDuLogo(pierres: number): Empilement {
 }
 
 /**
+ * Le cadre serré sur les pierres, et non la vue d'`empiler()`.
+ *
+ * La vue du cairn fait cent unités de large parce qu'elle laisse aux pierres de
+ * quoi tomber quand on renverse l'empilement sur la page publique. Le logo ne
+ * tombe jamais : ces vingt unités de vide de chaque côté ne sont pas de la marge,
+ * c'est du blanc invisible qui décale tout ce qui touche le symbole — l'écart
+ * entre lui et le mot dans le verrouillage, son remplissage dans la pastille, sa
+ * place dans un en-tête. On le cadre donc sur ce qu'il dessine.
+ *
+ * Une unité de jeu de chaque côté absorbe l'inclinaison des pierres : à trois
+ * degrés et demi, un coin dépasse de sa demi-hauteur multipliée par le sinus, soit
+ * moins d'une unité.
+ */
+const JEU = 1;
+
+export type CadreDuSymbole = { x: number; y: number; largeur: number; hauteur: number };
+
+export function cadreDuSymbole(pierres: number): CadreDuSymbole {
+  const empilement = empilementDuLogo(pierres);
+  const bords = empilement.pierres.flatMap((pierre) => [
+    pierre.x - pierre.largeur / 2,
+    pierre.x + pierre.largeur / 2,
+  ]);
+
+  const gauche = Math.min(...bords) - JEU;
+  const droite = Math.max(...bords) + JEU;
+
+  return {
+    x: gauche,
+    y: -empilement.hauteur + empilement.ySol,
+    largeur: droite - gauche,
+    hauteur: empilement.hauteur,
+  };
+}
+
+/**
  * La nuance d'une pierre du logo, imposée par le rang.
  *
  * `empiler()` tire la nuance au hasard, ce qui est juste pour le cairn du tableau

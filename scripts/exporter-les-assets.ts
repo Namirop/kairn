@@ -19,21 +19,25 @@ import { symboleSeul, symboleSurPastille } from "@/lib/design/symbole-svg";
  */
 
 /**
- * La part du côté qu'occupe le symbole sur une pastille ordinaire.
+ * La part de la hauteur qu'occupe le symbole sur une pastille ordinaire.
  *
- * Une icône qui touche ses bords se fait rogner par le masque de la plateforme,
- * et paraît trop grosse à côté des autres dans une grille d'applications.
+ * En hauteur et non en largeur : l'empilement est plus haut que large, c'est donc
+ * sa hauteur qui décide. Une icône qui touche ses bords se fait rogner par le
+ * masque de la plateforme et paraît trop grosse dans une grille d'applications ;
+ * une icône trop petite ressemble à un espace réservé.
  */
-const PART_ORDINAIRE = 0.62;
+const PART_ORDINAIRE = 0.72;
 
 /**
  * La part d'une icône masquable.
  *
- * La spécification réserve vingt pour cent de marge de sécurité tout autour :
- * seul le disque central est garanti visible, le reste peut être rogné en losange,
- * en goutte ou en cercle selon le lanceur.
+ * La spécification ne garantit que le **disque central**, de quatre-vingts pour
+ * cent du côté : le reste peut être rogné en losange, en goutte ou en cercle selon
+ * le lanceur. Un empilement de rapport 0,78 tient dans ce disque jusqu'à
+ * soixante-trois pour cent de la hauteur — sa diagonale est ce qui limite, pas sa
+ * hauteur seule. On s'arrête un peu en dessous.
  */
-const PART_MASQUABLE = 0.46;
+const PART_MASQUABLE = 0.58;
 
 /** Les coins de la pastille. Nul là où la plateforme masque déjà elle-même. */
 const RAYON_PASTILLE = 0.22;

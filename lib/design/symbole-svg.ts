@@ -1,6 +1,5 @@
-import { LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 import { LICHEN, PIERRES_CLAIRES, PIERRES_SOMBRES, ROCHE } from "@/lib/design/couleurs-hors-css";
-import { empilementDuLogo, nuanceDuRang } from "@/lib/design/marque";
+import { cadreDuSymbole, empilementDuLogo, nuanceDuRang } from "@/lib/design/marque";
 
 /**
  * Le symbole en SVG littéral, pour ce qui sort de l'application.
@@ -31,12 +30,8 @@ function corps(pierres: number, clair: boolean): string {
     .join("");
 }
 
-/** Le cadrage exact de l'empilement, en unités de viewBox. */
-function cadre(pierres: number): { x: number; y: number; largeur: number; hauteur: number } {
-  const { hauteur, ySol } = empilementDuLogo(pierres);
-
-  return { x: 0, y: -hauteur + ySol, largeur: LARGEUR_VUE, hauteur };
-}
+/** Le cadrage serré, le même que celui du composant. */
+const cadre = cadreDuSymbole;
 
 /** Le symbole seul, sur fond transparent, à sa proportion naturelle. */
 export function symboleSeul({
