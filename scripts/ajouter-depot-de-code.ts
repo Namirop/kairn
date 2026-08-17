@@ -14,8 +14,10 @@ import { writeCorpus } from "@/prisma/seed/corpus-writer";
  *
  * Usage : `npm run depot:code -- moi@exemple.fr`
  *
- * Relancé, il remplace le dépôt qu'il avait écrit — reconnu à son contenu, sur ce
- * compte-là seulement — pour ne pas empiler les doublons.
+ * Relancé, il remplace le dépôt qu'il avait écrit — reconnu à sa première ligne,
+ * sur ce compte-là seulement — pour ne pas empiler les doublons. La première
+ * ligne et non le contenu entier : corriger une phrase du corpus ne doit pas
+ * laisser derrière lui la version d'avant.
  */
 async function main(): Promise<void> {
   const email = process.argv[2];
@@ -28,17 +30,30 @@ async function main(): Promise<void> {
 
   if (!compte) throw new Error(`Aucun compte pour ${email}.`);
 
-  const contenus = CORPUS_CODE.map((depot) => depot.rawContent);
-  const { count } = await prisma.input.deleteMany({
-    where: { userId: compte.id, rawContent: { in: contenus } },
+  // Le titre du corpus, qui ne bouge pas quand son corps est corrigé.
+  const entetes = CORPUS_CODE.map((depot) => depot.rawContent.split("\n")[0] ?? depot.rawContent);
+  const deja = await prisma.input.findMany({
+    where: {
+      userId: compte.id,
+      OR: entetes.map((entete) => ({ rawContent: { startsWith: entete } })),
+    },
+    select: { id: true },
   });
 
-  if (count > 0) console.info(`${count} dépôt de code déjà présent, remplacé.`);
+  if (deja.length > 0) {
+    await prisma.input.deleteMany({ where: { id: { in: deja.map((depot) => depot.id) } } });
+    console.info(`${deja.length} dépôt de code déjà présent, remplacé.`);
+  }
 
   const { reviewedAt } = await writeCorpus(compte.id, CORPUS_CODE, new Date());
 
   const [concepts, questions, dus] = await Promise.all([
-    prisma.atom.count({ where: { userId: compte.id, input: { rawContent: { in: contenus } } } }),
+    prisma.atom.count({
+      where: {
+        userId: compte.id,
+        OR: entetes.map((entete) => ({ input: { rawContent: { startsWith: entete } } })),
+      },
+    }),
     prisma.variant.count({ where: { atom: { userId: compte.id } } }),
     prisma.atom.count({
       where: { userId: compte.id, due: { lte: new Date() }, state: { not: "ARCHIVED" } },

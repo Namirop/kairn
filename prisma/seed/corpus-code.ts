@@ -11,6 +11,10 @@ import type { SeedInput } from "./corpus-types";
  *
  * Le premier concept n'a aucun passage : il est donc dû tout de suite, et c'est
  * lui qui sert à ouvrir une session quand on n'a plus rien à réviser.
+ *
+ * Le dépôt lui-même cite ses termes entre accents graves, comme le ferait
+ * n'importe quelle note collée depuis une doc : c'est ce qui permet de comparer
+ * le rendu du texte déposé à celui des concepts qu'on en a tirés.
  */
 export const CORPUS_CODE: SeedInput[] = [
   {
@@ -18,10 +22,10 @@ export const CORPUS_CODE: SeedInput[] = [
     createdDaysAgo: 16,
     rawContent: `Notes de relecture — JavaScript et TypeScript
 
-· Array.prototype.at() accepte un index négatif : valeurs.at(-1) rend le dernier élément, là où valeurs[-1] rend undefined parce que -1 est lu comme un nom de propriété.
-· "use client" marque une frontière de bundle : le fichier et tout ce qu'il importe partent chez le navigateur. Le placer en haut d'un fichier qui n'en avait pas besoin embarque ses dépendances avec lui.
-· Record<string, unknown> décrit un objet dont on ne connaît pas les clés. unknown force un contrôle avant usage, contrairement à any qui l'autorise sans rien vérifier.
-· Object.freeze() est superficiel : il gèle les propriétés du premier niveau, pas les objets qu'elles contiennent.`,
+· \`Array.prototype.at()\` accepte un index négatif : \`valeurs.at(-1)\` rend le dernier élément, là où \`valeurs[-1]\` rend \`undefined\` parce que \`-1\` est lu comme un nom de propriété.
+· \`"use client"\` marque une frontière de bundle : le fichier et tout ce qu'il importe partent chez le navigateur. Le placer en haut d'un fichier qui n'en avait pas besoin embarque ses dépendances avec lui.
+· \`Record<string, unknown>\` décrit un objet dont on ne connaît pas les clés. \`unknown\` force un contrôle avant usage, contrairement à \`any\` qui l'autorise sans rien vérifier.
+· \`Object.freeze()\` est superficiel : il gèle les propriétés du premier niveau, pas les objets qu'elles contiennent.`,
     atoms: [
       {
         concept:

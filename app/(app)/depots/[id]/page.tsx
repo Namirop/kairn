@@ -8,6 +8,7 @@ import { ConceptCorrigeable } from "@/components/depots/concept-corrigeable";
 import { GestesDuDepot } from "@/components/depots/gestes-du-depot";
 import { VideDuDepot } from "@/components/depots/vide-du-depot";
 import { Badge } from "@/components/ui/badge";
+import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireDepotDetaille } from "@/lib/db/depot-detaille";
@@ -74,8 +75,14 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
             <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
               Ce que tu as déposé
             </h2>
+            {/* Les termes de code du dépôt sont relevés comme ceux des concepts
+                qu'on en a tirés : c'est le même texte, à deux étapes de la même
+                chaîne, et les voir traités autrement laissait croire que le
+                produit avait ajouté quelque chose. La convention est celle de qui
+                colle une doc, pas une devinette — un terme sans accents graves
+                reste du texte, on ne cherche pas à reconnaître du code. */}
             <p className="mt-pas-3 p-pas-4 text-petit rounded-carte bg-surface-ombre whitespace-pre-wrap text-stone-700">
-              {texte}
+              <TexteTechnique>{texte}</TexteTechnique>
             </p>
             {depot.texteTronque ? (
               <p className="mt-pas-2 text-petit text-stone-500">

@@ -6,6 +6,7 @@ import type { DepotListe } from "@/lib/db/depots";
 import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";
 import { cn } from "@/lib/utils";
+import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { conceptsLisibles, libelleEtat } from "@/lib/domain/etat-depot";
 
 /**
@@ -105,7 +106,11 @@ export function ListeDepots({
                     pas plus petit que le cadre qui le montre. */}
                 <p className="text-corps line-clamp-2">
                   {depot.sourceType === "IMAGE" ? "Capture — " : null}
-                  {depot.apercu || "Capture en cours de lecture"}
+                  {/* Les termes de code sont relevés ici comme partout où ce texte
+                      se montre. L'aperçu étant coupé à sa longueur, un accent grave
+                      peut se retrouver seul : il reste alors littéral, ce qui est
+                      moins bruyant qu'une paire affichée. */}
+                  <TexteTechnique>{depot.apercu || "Capture en cours de lecture"}</TexteTechnique>
                 </p>
                 <p className="mt-pas-2 gap-pas-3 text-mono flex flex-wrap items-center text-stone-500">
                   <Avancement depot={depot} />
