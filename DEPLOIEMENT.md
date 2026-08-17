@@ -158,11 +158,31 @@ n'est jamais seedée.
 6. **Déployer.**
 7. **Vérifier la liste plus bas** avant d'envoyer l'adresse à qui que ce soit.
 
-Les migrations suivantes se rejouent avec la même commande. Elles ne sont
-volontairement **pas** câblées dans la commande de build : un build de
-prévisualisation pointant sur la base de production la migrerait sans qu'on l'ait
-demandé. Le prix de ce choix est qu'il faut y penser — une migration oubliée se
-voit à la première requête sur une colonne absente.
+Les migrations suivantes sont **appliquées par la commande de build**, avant que
+Next ne compile quoi que ce soit :
+
+```json
+"build": "prisma migrate deploy && next build --turbopack"
+```
+
+Ce n'était pas le cas au départ, et le motif d'alors était bon : un build de
+prévisualisation pointant sur la base de production la migrerait sans qu'on
+l'ait demandé. Le prix de ce choix s'est payé le 17 août — cinq migrations
+oubliées, découvertes quand plus personne ne pouvait entrer dans son compte, la
+connexion échouant à la première requête sur une colonne absente. Un schéma qui
+ne suit pas le code n'est pas un oubli rattrapable : c'est une panne totale, et
+elle se déclare au pire moment.
+
+Le motif d'origine reste valable, il change simplement de forme : **un
+environnement de prévisualisation ne doit jamais porter les connexions de
+production.** Soit il n'a pas de variables du tout — et son build échoue, ce qui
+est déjà le cas —, soit on lui donne une branche Neon à lui, et il migre alors sa
+propre copie, ce qui est exactement le comportement voulu. La règle à tenir n'est
+donc pas « ne pas migrer au build », c'est « ne jamais faire pointer une
+prévisualisation sur la base de production ».
+
+Une migration qui échoue arrête le déploiement. C'est voulu : mieux vaut ne pas
+déployer que servir un code incapable de lire sa propre base.
 
 ## Les passages planifiés
 
