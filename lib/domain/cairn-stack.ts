@@ -70,8 +70,13 @@ function arrondi(valeur: number): number {
  * plutôt qu'un rectangle arrondi : les flancs se pincent vers le haut, les deux
  * arêtes penchent d'un côté ou de l'autre, et les quatre coins sont mordus de
  * façon inégale avant d'être adoucis.
+ *
+ * Exporté pour la marque, et pour elle seule : la pierre qui remplace le point du
+ * i n'est pas dans un empilement, elle a ses propres proportions. Un rectangle
+ * arrondi à sa place jurerait avec les cinq autres — c'est précisément ce que
+ * cette fonction évite.
  */
-function tailler(largeur: number, hauteur: number, tirage: () => number): string {
+export function tailler(largeur: number, hauteur: number, tirage: () => number): string {
   const bas = largeur / 2;
   const haut = (largeur * (1 - tirage() * 0.16)) / 2;
   const demiH = hauteur / 2;
