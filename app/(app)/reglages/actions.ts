@@ -1,11 +1,14 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { supprimerLeCompte } from "@/lib/db/compte";
+import { enregistrerLesReglages, optOutOfEmails, reprendreLesEmails } from "@/lib/db/user-settings";
 import { confirmationValide, MOT_DE_CONFIRMATION } from "@/lib/domain/confirmation-de-suppression";
+import { lireHeureDeRappel } from "@/lib/domain/heure-de-rappel";
 
 /**
  * Les gestes irréversibles d'un compte.
@@ -55,4 +58,67 @@ export async function supprimerMonCompteAction(
   // la connexion. Appeler une déconnexion ici donnerait l'illusion d'un ménage
   // qui a déjà eu lieu.
   redirect(ROUTES.accueil);
+}
+
+/**
+ * Ce que le formulaire de notifications rend à l'écran : un mot, jamais les deux.
+ *
+ * `heure` porte la saisie refusée. React remet un formulaire à ses valeurs par
+ * défaut quand l'action rend la main, donc sans elle une heure mal écrite
+ * disparaissait au moment où l'on demandait de la corriger.
+ */
+export type EtatDesReglages = { message?: string; erreur?: string; heure?: string };
+
+/**
+ * Enregistre les réglages de notification.
+ *
+ * L'ordre des écritures compte. Couper les emails coupe aussi les deux réglages
+ * de contenu — c'est ce que fait le lien de désinscription, et un compte coupé
+ * depuis l'écran doit finir dans le même état que coupé depuis un email. Les
+ * rendre lève le refus sans rien rallumer : ce qu'on veut recevoir se rechoisit,
+ * ça ne se devine pas.
+ *
+ * L'identifiant vient de la session, jamais du formulaire, et l'écriture porte
+ * sa propre clause de propriété.
+ */
+export async function enregistrerLesReglagesAction(
+  _precedent: EtatDesReglages,
+  donnees: FormData,
+): Promise<EtatDesReglages> {
+  const utilisateur = await getCurrentUser();
+
+  if (!utilisateur) redirect(ROUTES.connexion);
+
+  const emailsActifs = donnees.get("emails") !== null;
+
+  if (!emailsActifs) {
+    await optOutOfEmails(utilisateur.id);
+    revalidatePath(ROUTES.reglages);
+
+    return { message: "Emails coupés." };
+  }
+
+  const saisie = (donnees.get("heure") ?? "").toString();
+  const heure = lireHeureDeRappel(saisie);
+
+  if (heure === null) {
+    return {
+      erreur: "L'heure du rappel est une heure pile, de 0 à 23. Par exemple 19 h.",
+      heure: saisie,
+    };
+  }
+
+  await reprendreLesEmails(utilisateur.id);
+
+  const ecrit = await enregistrerLesReglages(utilisateur.id, {
+    dailyReminderEnabled: donnees.get("rappel") !== null,
+    dailyReminderHour: heure,
+    streakAlertEnabled: donnees.get("alerte") !== null,
+  });
+
+  if (!ecrit) return { erreur: "Ces réglages n'ont pas pu être enregistrés. Réessaie." };
+
+  revalidatePath(ROUTES.reglages);
+
+  return { message: "Enregistré." };
 }

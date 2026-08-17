@@ -75,6 +75,52 @@ export async function marquerPrincipeVu(userId: string, at: Date = new Date()): 
 }
 
 /**
+ * Ce qu'un compte peut changer de ses notifications.
+ *
+ * Trois réglages et rien d'autre : le fuseau se détecte, l'adresse est
+ * l'identité du compte. Tout est écrit d'un coup — un formulaire qui enregistre
+ * champ par champ laisse un état à moitié appliqué si un envoi échoue.
+ */
+export type ReglagesModifiables = {
+  dailyReminderEnabled: boolean;
+  /** Heure locale, 0 à 23. Le passage horaire la compare à l'heure de chacun. */
+  dailyReminderHour: number;
+  streakAlertEnabled: boolean;
+};
+
+/**
+ * Enregistre les réglages de notification d'un compte.
+ *
+ * `updateMany` et non `update` : la clause porte l'`userId`, donc une ligne qui
+ * n'appartient pas à l'appelant ne peut pas être touchée même si l'identifiant
+ * était forgé. Rend `false` quand rien n'a été écrit.
+ */
+export async function enregistrerLesReglages(
+  userId: string,
+  reglages: ReglagesModifiables,
+): Promise<boolean> {
+  const { count } = await prisma.userSettings.updateMany({ where: { userId }, data: reglages });
+
+  return count > 0;
+}
+
+/**
+ * Rend les emails à quelqu'un qui les avait coupés.
+ *
+ * Le refus global partait en même temps que les deux réglages de contenu — c'est
+ * ce que fait `optOutOfEmails`. Les remettre ici serait décider à sa place : on
+ * lève le refus, et il choisit ensuite ce qu'il veut recevoir.
+ */
+export async function reprendreLesEmails(userId: string): Promise<boolean> {
+  const { count } = await prisma.userSettings.updateMany({
+    where: { userId },
+    data: { emailOptOutAt: null },
+  });
+
+  return count > 0;
+}
+
+/**
  * Coupe les emails. Appelé par le lien de désinscription, qui ne demande pas de
  * session : le jeton signé du lien fait foi.
  */

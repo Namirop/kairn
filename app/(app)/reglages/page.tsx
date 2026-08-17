@@ -6,6 +6,7 @@ import { MesDonnees } from "@/components/compte/mes-donnees";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
+import { FormulaireDeNotifications } from "@/components/reglages/formulaire-de-notifications";
 import { estAdministrateur } from "@/lib/auth/admin";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -14,17 +15,27 @@ import { lireReglages } from "@/lib/db/user-settings";
 export const metadata: Metadata = { title: "Réglages" };
 
 /**
- * Une ligne de réglage : ce que c'est, et sa valeur.
- *
- * Chaque ligne est posée sur sa propre surface plutôt que séparée de la
- * suivante par un filet — c'est la même correction que partout ailleurs, à
- * l'échelle d'une liste de définitions.
+ * La page est recalculée à chaque visite : les réglages viennent d'être écrits,
+ * et une version en cache montrerait l'état d'avant.
  */
-function Ligne({ intitule, valeur }: { intitule: string; valeur: string }) {
+export const dynamic = "force-dynamic";
+
+/**
+ * Une donnée du compte qu'on ne change pas ici, et pourquoi.
+ *
+ * Chaque ligne est posée sur sa propre surface plutôt que séparée de la suivante
+ * par un filet — c'est la même correction que partout ailleurs, à l'échelle d'une
+ * liste de définitions. La raison est écrite à côté : une valeur qu'on ne peut
+ * pas toucher sans qu'on dise pourquoi ressemble à une fonctionnalité oubliée.
+ */
+function Ligne({ intitule, valeur, raison }: { intitule: string; valeur: string; raison: string }) {
   return (
-    <div className="gap-pas-2 px-pas-4 py-pas-3 rounded-champ bg-surface-papier flex flex-wrap items-baseline justify-between">
-      <dt className="text-petit text-stone-500">{intitule}</dt>
-      <dd className="text-petit font-mono tabular-nums">{valeur}</dd>
+    <div className="px-pas-4 py-pas-3 rounded-champ bg-surface-papier">
+      <div className="gap-pas-4 flex flex-wrap items-baseline justify-between">
+        <dt className="text-corps text-stone-900">{intitule}</dt>
+        <dd className="text-petit font-mono text-stone-700 tabular-nums">{valeur}</dd>
+      </div>
+      <p className="mt-pas-1 text-petit max-w-md text-stone-500">{raison}</p>
     </div>
   );
 }
@@ -35,7 +46,6 @@ export default async function PageReglages() {
   if (!utilisateur) redirect(ROUTES.connexion);
 
   const reglages = await lireReglages(utilisateur.id);
-  const heure = `${String(reglages.dailyReminderHour).padStart(2, "0")} h 00`;
 
   /**
    * L'exploitant n'a pas les mêmes besoins que la personne qui apprend.
@@ -55,25 +65,31 @@ export default async function PageReglages() {
       <Panneau surface="papier" mesure="colonne">
         <h1 className="text-h1-app leading-tight font-bold">Réglages</h1>
         <p className="mt-pas-2 text-petit max-w-md text-stone-500">
-          Les réglages deviendront modifiables avec le moteur de révision.
+          Ce que Kairn t&apos;envoie, et quand.
         </p>
       </Panneau>
 
       <Strates de="papier" vers="ombre" graine="reglages-liste" />
 
       <Panneau surface="ombre" mesure="colonne" remplit className="md:pb-pas-16">
-        <dl className="gap-pas-2 flex flex-col">
-          <Ligne intitule="Adresse" valeur={utilisateur.email} />
-          <Ligne intitule="Fuseau horaire" valeur={reglages.timezone} />
+        <FormulaireDeNotifications
+          rappelActif={reglages.dailyReminderEnabled}
+          heureDuRappel={reglages.dailyReminderHour}
+          alerteActive={reglages.streakAlertEnabled}
+          emailsActifs={reglages.emailOptOutAt === null}
+        />
+
+        <dl className="gap-pas-2 mt-pas-12 flex flex-col">
           <Ligne
-            intitule="Rappel quotidien"
-            valeur={reglages.dailyReminderEnabled ? heure : "coupé"}
+            intitule="Adresse"
+            valeur={utilisateur.email}
+            raison="C'est l'identité du compte : elle sert à s'y connecter, puisqu'il n'y a pas de mot de passe. La changer demande de vérifier la nouvelle avant de basculer."
           />
           <Ligne
-            intitule="Alerte de streak"
-            valeur={reglages.streakAlertEnabled ? "active" : "coupée"}
+            intitule="Fuseau horaire"
+            valeur={reglages.timezone}
+            raison="Détecté depuis ton navigateur à chaque visite, et corrigé tout seul si tu changes de pays. Il décide quel jour il est pour toi, et à quelle heure part ton rappel."
           />
-          <Ligne intitule="Emails" valeur={reglages.emailOptOutAt ? "désinscrit" : "activés"} />
         </dl>
 
         {/* L'accès à l'administration a quitté cette page : il est dans le rail,
