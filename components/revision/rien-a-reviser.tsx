@@ -1,19 +1,27 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
+import { compte } from "@/lib/domain/accord";
 import { delaiAvantLeJour } from "@/lib/domain/echeance";
 
 /**
- * Les trois raisons de n'avoir rien à réviser.
+ * Les quatre raisons de n'avoir rien à réviser.
  *
  * Aucune n'est un vide à combler. Être à jour est l'état normal du produit :
  * une session ne se remplit jamais de concepts non échus pour faire nombre.
+ *
+ * La quatrième est la seule où quelque chose est encore dû : le plafond du jour
+ * est atteint. Elle ne dit donc pas « tu es à jour », qui serait faux, et elle
+ * n'ouvre pas sur un dépôt — déposer plus quand on vient d'atteindre son plafond
+ * est le contraire du conseil utile.
  */
 
 type Props = {
   totalConcepts: number;
   conceptsEnAttenteDeQuestions: number;
   prochainJourServi: string | null;
+  /** Ce qui est dû et que la journée ne servira plus. Zéro le reste du temps. */
+  reporteAuLendemain: number;
   fuseau: string;
   maintenant: Date;
 };
@@ -60,9 +68,24 @@ export function RienAReviser({
   totalConcepts,
   conceptsEnAttenteDeQuestions,
   prochainJourServi,
+  reporteAuLendemain,
   fuseau,
   maintenant,
 }: Props) {
+  // Le plafond du jour est atteint, et il reste des concepts dus. C'est le seul
+  // écran vide qui annonce du travail : il le dit, puis il ouvre la seule porte
+  // qui ne coûte rien à la mémoire.
+  if (reporteAuLendemain > 0) {
+    return (
+      <Ecran
+        titre="Tu as fait ta journée"
+        explication={`${compte(reporteAuLendemain, "concept", "concepts")} ${reporteAuLendemain === 1 ? "attend" : "attendent"} demain. Le plafond de ta session tient à ça : ce qui reste est encore dû, et il passera en tête.`}
+        action={{ libelle: "S'entraîner", href: ROUTES.entrainement }}
+        note="L'entraînement repose d'autres questions sur les mêmes concepts, autant que tu veux. Il ne change pas ton planning."
+      />
+    );
+  }
+
   if (totalConcepts === 0) {
     return (
       <Ecran

@@ -41,6 +41,7 @@ export default async function PageReviser() {
             totalConcepts={session.totalConcepts}
             conceptsEnAttenteDeQuestions={session.conceptsEnAttenteDeQuestions}
             prochainJourServi={session.prochainJourServi}
+            reporteAuLendemain={session.reporteAuLendemain}
             fuseau={session.fuseau}
             maintenant={maintenant}
           />

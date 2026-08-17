@@ -10,6 +10,7 @@ import {
   lirePlafondDeSession,
   PLAFOND_MAX,
   PLAFOND_MIN,
+  plafondRestant,
   type ConceptDu,
 } from "./selection-session";
 
@@ -395,6 +396,34 @@ describe("lirePlafondDeSession", () => {
         return plafond === null || (plafond >= PLAFOND_MIN && plafond <= PLAFOND_MAX);
       }),
       { numRuns: 500 },
+    );
+  });
+});
+
+describe("plafondRestant", () => {
+  it("retire ce qui a déjà été fait dans la journée", () => {
+    expect(plafondRestant(20, 0)).toBe(20);
+    expect(plafondRestant(20, 8)).toBe(12);
+  });
+
+  it("tombe à zéro quand la journée est faite, et n'y descend pas plus", () => {
+    expect(plafondRestant(20, 20)).toBe(0);
+    expect(plafondRestant(20, 31)).toBe(0);
+  });
+
+  it("borne des valeurs absurdes plutôt que de rendre un plafond négatif", () => {
+    expect(plafondRestant(-5, 0)).toBe(0);
+    expect(plafondRestant(20, -3)).toBe(20);
+  });
+
+  it("ne rend jamais plus que le plafond, ni moins que zéro", () => {
+    fc.assert(
+      fc.property(fc.integer({ min: -5, max: 60 }), fc.integer({ min: -5, max: 60 }), (p, f) => {
+        const reste = plafondRestant(p, f);
+
+        return reste >= 0 && reste <= Math.max(0, p);
+      }),
+      { numRuns: 400 },
     );
   });
 });

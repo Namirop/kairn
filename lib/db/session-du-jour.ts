@@ -8,6 +8,7 @@ import {
   composerSession,
   estServableAujourdhui,
   jourOuIlRevient,
+  plafondRestant,
 } from "@/lib/domain/selection-session";
 
 /**
@@ -32,11 +33,19 @@ const MARGE_MS = 36 * 60 * 60 * 1000;
 export type SessionDuJour = {
   fuseau: string;
   questions: QuestionServie[];
-  /** De quoi distinguer les trois écrans vides sans deviner. */
+  /** De quoi distinguer les écrans vides sans deviner. */
   totalConcepts: number;
   conceptsEnAttenteDeQuestions: number;
   /** Jour civil du prochain passage, au format AAAA-MM-JJ. */
   prochainJourServi: string | null;
+  /**
+   * Ce qui est dû et que la journée ne servira pas : le plafond est atteint.
+   *
+   * Zéro dans tous les autres cas, y compris quand rien n'est dû. C'est ce qui
+   * distingue « tu es à jour » de « tu as fait ta journée », deux écrans vides qui
+   * n'ont ni le même sens ni la même suite.
+   */
+  reporteAuLendemain: number;
 };
 
 export async function lireSessionDuJour(
@@ -45,7 +54,7 @@ export async function lireSessionDuJour(
 ): Promise<SessionDuJour> {
   const { fuseau, plafond } = await lireCadreDeSession(userId);
 
-  const [candidats, totalConcepts, enAttente, prochain] = await Promise.all([
+  const [candidats, totalConcepts, enAttente, prochain, faits] = await Promise.all([
     prisma.atom.findMany({
       where: {
         userId,
@@ -96,7 +105,11 @@ export async function lireSessionDuJour(
       // ramener un historique entier pour trouver un minimum.
       take: 50,
     }),
+    compterFaitsAujourdhui(userId, maintenant, fuseau),
   ]);
+
+  // Le plafond est journalier : ce qui a déjà été revu aujourd'hui en fait partie.
+  const reste = plafondRestant(plafond, faits);
 
   // La variante est choisie **avant** de composer, et c'est ce qui permet à
   // l'ordre de service de tenir compte du geste : il dépend du format servi, donc
@@ -115,7 +128,8 @@ export async function lireSessionDuJour(
     return variante ? [{ ...atome, variante }] : [];
   });
 
-  const retenus = composerSession(servables, maintenant, fuseau, plafond, (concept) =>
+  const dus = servables.filter((concept) => estServableAujourdhui(concept, maintenant, fuseau));
+  const retenus = composerSession(servables, maintenant, fuseau, reste, (concept) =>
     gesteDeReponse(concept.variante.format),
   );
 
@@ -129,7 +143,30 @@ export async function lireSessionDuJour(
     totalConcepts,
     conceptsEnAttenteDeQuestions: enAttente,
     prochainJourServi: prochainJourServi(prochain, maintenant, fuseau),
+    reporteAuLendemain: dus.length - questions.length,
   };
+}
+
+/**
+ * Combien de concepts la journée a déjà servis, chez l'utilisateur.
+ *
+ * `lastReview` est écrit par la session et par elle seule — l'entraînement libre
+ * ne le touche pas —, donc c'est exactement le compte qui doit entrer dans le
+ * plafond. La borne SQL est large et le jour se compare en mémoire, comme partout.
+ */
+export async function compterFaitsAujourdhui(
+  userId: string,
+  maintenant: Date,
+  fuseau: string,
+): Promise<number> {
+  const jour = localDay(maintenant, fuseau);
+  const passes = await prisma.atom.findMany({
+    where: { userId, lastReview: { gte: new Date(maintenant.getTime() - MARGE_MS) } },
+    select: { lastReview: true },
+  });
+
+  return passes.filter((atome) => atome.lastReview && localDay(atome.lastReview, fuseau) === jour)
+    .length;
 }
 
 /**
@@ -181,12 +218,16 @@ export async function compterDusAujourdhui(
  *
  * Lu après la session et non avant : les notes qu'on vient de donner ont
  * déplacé les échéances, et annoncer le chiffre d'avant serait annoncer faux.
+ *
+ * Ce qui est resté dû aujourd'hui en fait partie. Le plafond étant journalier, un
+ * concept que la journée n'a pas servi ne repassera pas avant demain : l'annoncer
+ * pour aujourd'hui serait promettre une session qui ne viendra pas.
  */
 export async function compterDusDemain(
   userId: string,
   maintenant: Date = new Date(),
 ): Promise<number> {
-  const fuseau = await lireFuseauUtilisateur(userId);
+  const { fuseau, plafond } = await lireCadreDeSession(userId);
   const demain = jourSuivant(localDay(maintenant, fuseau));
 
   const candidats = await prisma.atom.findMany({
@@ -203,5 +244,13 @@ export async function compterDusDemain(
     select: { due: true, lastReview: true },
   });
 
-  return candidats.filter((atome) => jourOuIlRevient(atome, maintenant, fuseau) === demain).length;
+  const reste = plafondRestant(plafond, await compterFaitsAujourdhui(userId, maintenant, fuseau));
+  const dusAujourdhui = candidats.filter((atome) =>
+    estServableAujourdhui(atome, maintenant, fuseau),
+  ).length;
+
+  return (
+    candidats.filter((atome) => jourOuIlRevient(atome, maintenant, fuseau) === demain).length +
+    Math.max(0, dusAujourdhui - reste)
+  );
 }

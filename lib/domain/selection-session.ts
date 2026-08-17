@@ -19,6 +19,12 @@ import { parUrgence } from "./urgence-de-revision";
  * reste n'est pas perdu : il est encore dû demain, et ce qui sera alors le plus
  * en train d'être oublié passera en tête — c'est `parUrgence` qui en décide, pas
  * l'ordre d'arrivée.
+ *
+ * Le plafond porte sur la **journée** et non sur une ouverture d'écran. Par
+ * session, il suffisait de recharger pour en obtenir vingt de plus : la promesse
+ * « vingt aujourd'hui, dix-huit en attente » était fausse, et le plafond ne
+ * protégeait de rien. Qui veut continuer a l'entraînement, qui est illimité et ne
+ * touche à rien de la mémoire — c'est exactement ce pour quoi il existe.
  */
 export const PLAFOND_SESSION = 20;
 
@@ -168,6 +174,16 @@ export function composerSession<T extends ConceptDu>(
  * dix-huit autres reviennent demain sans que personne n'ait rien perdu. Voir le
  * total est utile ; le voir sans le plafond ne l'est pas.
  */
+/**
+ * Ce qu'il reste du plafond après ce qui a déjà été fait dans la journée.
+ *
+ * Zéro est un état normal et une bonne nouvelle : la journée est faite. Ce qui
+ * reste dû n'est pas perdu, il attend demain.
+ */
+export function plafondRestant(plafond: number, faitsAujourdhui: number): number {
+  return Math.max(0, Math.max(0, plafond) - Math.max(0, faitsAujourdhui));
+}
+
 export type ChargeDuJour = { aujourdhui: number; enAttente: number };
 
 export function chargeDuJour(dus: number, plafond: number = PLAFOND_SESSION): ChargeDuJour {

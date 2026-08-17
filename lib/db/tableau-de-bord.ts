@@ -1,9 +1,9 @@
 import { suivreLArriere, type ArriereSuivi } from "@/lib/db/arriere-de-revision";
 import { prisma } from "@/lib/db/client";
 import { listerDepots } from "@/lib/db/depots";
-import { compterDusAujourdhui } from "@/lib/db/session-du-jour";
+import { compterDusAujourdhui, compterFaitsAujourdhui } from "@/lib/db/session-du-jour";
 import { lireCadreDeSession } from "@/lib/db/user-settings";
-import { chargeDuJour, type ChargeDuJour } from "@/lib/domain/selection-session";
+import { chargeDuJour, plafondRestant, type ChargeDuJour } from "@/lib/domain/selection-session";
 import type { UserStats } from "@/lib/db/types";
 import type { DepotListe } from "@/lib/db/depots";
 
@@ -51,7 +51,12 @@ export async function lireTableauDeBord(
       prisma.atom.count({ where: { userId, uncertain: false, variants: { none: {} } } }),
     ]);
 
-  const charge = chargeDuJour(dusAujourdhui, cadre.plafond);
+  // Le plafond est journalier : ce qui a déjà été revu aujourd'hui en fait partie,
+  // sans quoi l'écran promettrait une session que la journée ne servira plus.
+  const charge = chargeDuJour(
+    dusAujourdhui,
+    plafondRestant(cadre.plafond, await compterFaitsAujourdhui(userId, maintenant, cadre.fuseau)),
+  );
   const arriere = await suivreLArriere(userId, charge.enAttente > 0, cadre.fuseau, maintenant);
 
   return {
