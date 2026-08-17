@@ -169,25 +169,41 @@ describe("unRendezVousManque", () => {
     expect(unRendezVousManque(["2026-03-09"], "2026-03-07", "2026-03-10")).toBe(true);
   });
 
+  it("voit ce qui traînait déjà avant le trou : il attendait pendant", () => {
+    // Débordé du plafond le 7, personne le 8 ni le 9 : deux jours où ces concepts
+    // attendaient. C'est un rendez-vous manqué, même si l'échéance est antérieure.
+    expect(unRendezVousManque(["2026-03-07"], "2026-03-07", "2026-03-10")).toBe(true);
+    expect(unRendezVousManque(["2026-03-02"], "2026-03-07", "2026-03-10")).toBe(true);
+  });
+
   it("ne voit rien quand le trou était vide", () => {
     expect(unRendezVousManque(["2026-03-10", "2026-03-12"], "2026-03-07", "2026-03-10")).toBe(
       false,
     );
   });
 
-  it("ne compte pas le jour du dernier passage : on y était", () => {
-    // Ce qui a débordé du plafond hier porte l'échéance d'hier. La session a
-    // bien été tenue ; elle ne doit pas casser la série du lendemain.
+  it("ne manque jamais rien quand on revient le lendemain", () => {
+    // La session de la veille n'a pas été finie, ou son plafond a débordé : on
+    // est quand même venu, et revenir le lendemain ne manque aucun rendez-vous.
     expect(unRendezVousManque(["2026-03-09"], "2026-03-09", "2026-03-10")).toBe(false);
-    expect(unRendezVousManque(["2026-03-05"], "2026-03-09", "2026-03-10")).toBe(false);
+    expect(unRendezVousManque(["2026-03-01", "2026-03-09"], "2026-03-09", "2026-03-10")).toBe(
+      false,
+    );
   });
 
-  it("ne compte pas aujourd'hui : on y est", () => {
+  it("ne compte pas aujourd'hui : rien n'attendait hier", () => {
     expect(unRendezVousManque(["2026-03-10"], "2026-03-08", "2026-03-10")).toBe(false);
+    expect(unRendezVousManque(["2026-03-11"], "2026-03-08", "2026-03-10")).toBe(false);
   });
 
   it("ne voit rien dans une liste vide", () => {
     expect(unRendezVousManque([], "2026-03-08", "2026-03-10")).toBe(false);
+  });
+
+  it("enjambe les mois et les changements d'heure comme le reste", () => {
+    expect(unRendezVousManque(["2026-02-28"], "2026-02-28", "2026-03-01")).toBe(false);
+    expect(unRendezVousManque(["2026-02-28"], "2026-02-27", "2026-03-01")).toBe(true);
+    expect(unRendezVousManque(["2026-03-28"], "2026-03-28", "2026-03-29")).toBe(false);
   });
 
   it("est indifférent à l'ordre de la liste", () => {

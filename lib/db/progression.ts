@@ -121,8 +121,8 @@ export async function compterLePassage(
 }
 
 /**
- * Les jours d'échéance déjà atteints, du concept qu'on vient de revoir et de ce
- * qui reste en attente.
+ * Les jours d'échéance déjà atteints : celle du concept qu'on vient de revoir, et
+ * celles de ce qui reste en attente.
  *
  * Une borne large en SQL, le tri exact en mémoire : c'est le même partage que
  * partout ailleurs, parce que « quel jour est-ce chez lui » ne se compare pas
@@ -135,6 +135,10 @@ async function echeancesPassees(passage: PassageCompte, maintenant: Date): Promi
       userId: passage.userId,
       uncertain: false,
       state: { not: "ARCHIVED" },
+      // Les mêmes conditions que pour être servable : un concept dont toutes les
+      // questions ont été retirées ne pouvait pas être révisé, donc il n'a
+      // manqué aucun rendez-vous.
+      variants: { some: { retiredAt: null } },
       due: { lte: maintenant },
     },
     select: { due: true },

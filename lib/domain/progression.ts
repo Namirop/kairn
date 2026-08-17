@@ -1,3 +1,5 @@
+import { jourSuivant } from "./local-day";
+
 /**
  * Ce que la progression compte, et ce qu'elle refuse de compter.
  *
@@ -117,26 +119,30 @@ export function avancementDuNiveau(xp: number): AvancementDuNiveau {
  * Un jour où quelque chose attendait est-il passé sans personne ?
  *
  * C'est la question que la série pose vraiment. Elle ne compte pas les jours du
- * calendrier : elle compte les rendez-vous tenus. Un concept qui arrive à
- * échéance un jour où l'on ne vient pas est un rendez-vous manqué ; une journée
- * sans échéance n'en est pas un, et n'a rien à casser.
+ * calendrier : elle compte les rendez-vous tenus. Un jour sans personne alors que
+ * quelque chose attendait est un rendez-vous manqué ; une journée où rien
+ * n'attendait n'en est pas un, et n'a rien à casser.
+ *
+ * Deux conditions, et il faut les deux. **Un jour est passé sans personne** —
+ * revenir le lendemain ne manque jamais rien, quoi qu'on ait laissé derrière soi.
+ * C'est ce qui fait qu'une session trop chargée ne casse pas la série du
+ * lendemain : ce qui a débordé du plafond attendait, mais on est venu. **Et
+ * quelque chose attendait ce jour-là** : une échéance antérieure à aujourd'hui
+ * était en attente pendant tout le trou, qu'elle y soit tombée ou qu'elle traînait
+ * déjà. Une échéance d'aujourd'hui, elle, n'attendait pas hier.
  *
  * Les échéances données sont des jours civils de l'utilisateur, et la comparaison
  * est lexicographique — sur des étiquettes `AAAA-MM-JJ`, c'est l'ordre
  * chronologique, sans repasser par un fuseau.
- *
- * Les bornes sont exclues des deux côtés, et chacune pour sa raison. Le jour du
- * dernier passage : on y était. Aujourd'hui : on y est. Ce qui a débordé du
- * plafond de session hier porte une échéance d'hier ou d'avant, donc reste hors
- * de l'intervalle — sans quoi une session trop chargée casserait la série le
- * lendemain de l'avoir tenue.
  */
 export function unRendezVousManque(
   joursDEcheance: string[],
   dernierJour: string,
   jour: string,
 ): boolean {
-  return joursDEcheance.some((echeance) => echeance > dernierJour && echeance < jour);
+  if (jourSuivant(dernierJour) === jour) return false;
+
+  return joursDEcheance.some((echeance) => echeance < jour);
 }
 
 /**
@@ -150,10 +156,14 @@ export function unRendezVousManque(
  *
  * Ce que la série compte, ce sont les passages consécutifs sans en manquer un, et
  * non les jours consécutifs. Un trou dans le calendrier ne la casse que si
- * quelque chose y arrivait à échéance : quelqu'un qui est à jour et dont rien ne
- * revient pendant trois jours ne perd rien, parce qu'il n'y avait rien à perdre.
- * L'inverse punissait exactement le comportement que le produit demande — revenir
- * quand on est appelé, et pas plus.
+ * quelque chose attendait pendant ce trou : quelqu'un qui est à jour et dont rien
+ * ne revient pendant trois jours ne perd rien, parce qu'il n'y avait rien à
+ * perdre. L'inverse punissait exactement le comportement que le produit demande —
+ * revenir quand on est appelé, et pas plus.
+ *
+ * Revenir le lendemain suffit toujours, quoi qu'on ait laissé derrière soi : une
+ * session qu'on n'a pas finie, ou ce qui a débordé de son plafond, ne se retourne
+ * jamais contre celui qui revient.
  */
 export function serieApresPassage(
   dernierJour: string | null,
