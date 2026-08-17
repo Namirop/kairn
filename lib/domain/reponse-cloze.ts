@@ -6,10 +6,10 @@
  * c'est tout — instantané, gratuit, et rejouable à l'identique dans un test.
  *
  * Ce qu'on absorbe : la casse, les accents, les espaces en trop, la ponctuation
- * autour, et une faute de frappe sur un mot assez long pour qu'une lettre de
- * travers reste manifestement le même mot. Ce qu'on n'absorbe pas : un mot
- * court à une lettre près — « ver » et « vert » sont deux réponses différentes —
- * ni un nombre de mots qui ne colle pas.
+ * autour, un déterminant de tête en trop ou en moins, et une faute de frappe sur
+ * un mot assez long pour qu'une lettre de travers reste manifestement le même
+ * mot. Ce qu'on n'absorbe pas : un mot court à une lettre près — « ver » et
+ * « vert » sont deux réponses différentes — ni un mot de contenu qui manque.
  *
  * Quand la comparaison échoue, l'écran montre le terme attendu et laisse la
  * personne dire « je l'avais ». C'est le seul jugement qu'on lui demande sur ce
@@ -42,6 +42,42 @@ export function normaliserReponse(texte: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+}
+
+/**
+ * Les déterminants qu'on ôte en tête avant de comparer.
+ *
+ * « l'overtraining » et « overtraining » sont la même réponse : l'article vient
+ * de la phrase qui accueille le terme, pas de la connaissance qu'on vérifie. On
+ * n'en ôte qu'un, et seulement s'il reste un mot derrière — le terme attendu
+ * peut être un article, et « le » n'est alors pas un déterminant mais la
+ * réponse.
+ */
+const DETERMINANTS = new Set([
+  "le",
+  "la",
+  "les",
+  "l",
+  "un",
+  "une",
+  "des",
+  "du",
+  "de",
+  "d",
+  "au",
+  "aux",
+  "the",
+  "a",
+  "an",
+]);
+
+/** Les mots d'une réponse normalisée, son déterminant de tête ôté. */
+function motsUtiles(texte: string): string[] {
+  const mots = texte.split(" ").filter((mot) => mot !== "");
+
+  if (mots.length > 1 && DETERMINANTS.has(mots[0] ?? "")) return mots.slice(1);
+
+  return mots;
 }
 
 /** Le nombre de caractères de travers qu'on laisse passer sur ce mot. */
@@ -79,11 +115,10 @@ function distance(attendu: string, saisi: string): number {
 
 /** Deux textes normalisés, mot à mot, chacun dans sa propre tolérance. */
 function correspond(attendu: string, saisi: string): boolean {
-  if (attendu === "") return false;
+  const motsAttendus = motsUtiles(attendu);
+  const motsSaisis = motsUtiles(saisi);
 
-  const motsAttendus = attendu.split(" ");
-  const motsSaisis = saisi.split(" ");
-
+  if (motsAttendus.length === 0) return false;
   if (motsAttendus.length !== motsSaisis.length) return false;
 
   return motsAttendus.every(

@@ -54,12 +54,25 @@ describe("reponseAcceptee", () => {
     expect(reponseAcceptee("porte-greffe", ["porte greffe"])).toBe(true);
   });
 
-  it("refuse un nombre de mots qui ne colle pas", () => {
-    // Deux mots sur trois, ce n'est pas une faute de frappe : c'est une autre
-    // réponse. La forme courte est acceptée parce qu'elle est listée, pas
+  it("absorbe un déterminant de tête, en trop comme en moins", () => {
+    expect(reponseAcceptee("l'overtraining", ["overtraining"])).toBe(true);
+    expect(reponseAcceptee("Le surentraînement", ["surentraînement"])).toBe(true);
+    expect(reponseAcceptee("rayons ultraviolets", ["les rayons ultraviolets"])).toBe(true);
+    expect(reponseAcceptee("the overtraining", ["overtraining"])).toBe(true);
+  });
+
+  it("garde le déterminant quand c'est lui la réponse", () => {
+    expect(reponseAcceptee("le", ["le"])).toBe(true);
+    expect(reponseAcceptee("le", ["la"])).toBe(false);
+  });
+
+  it("refuse un mot de contenu en moins", () => {
+    // Un mot de contenu qui manque, ce n'est pas une faute de frappe : c'est une
+    // autre réponse. La forme courte est acceptée parce qu'elle est listée, pas
     // parce qu'on rogne la phrase.
-    expect(reponseAcceptee("rayons ultraviolets", ULTRAVIOLETS)).toBe(false);
-    expect(reponseAcceptee("les rayons ultraviolets", ULTRAVIOLETS)).toBe(true);
+    expect(reponseAcceptee("ultraviolets", ["les rayons ultraviolets"])).toBe(false);
+    expect(reponseAcceptee("ultraviolets", ULTRAVIOLETS)).toBe(true);
+    expect(reponseAcceptee("volume excessif", ["excès de volume"])).toBe(false);
   });
 
   it("ne laisse pas la ponctuation de fin faire échouer", () => {
@@ -96,6 +109,15 @@ describe("propriétés", () => {
         const bruitee = saisie.toUpperCase().replace(/e/gi, "é").replace(/a/gi, "à");
 
         return reponseAcceptee(saisie, formes) === reponseAcceptee(bruitee, formes);
+      }),
+      { numRuns: 300 },
+    );
+  });
+
+  it("un déterminant ajouté en tête ne change pas le verdict", () => {
+    fc.assert(
+      fc.property(mot, fc.array(mot, { minLength: 1, maxLength: 4 }), (saisie, formes) => {
+        return reponseAcceptee(saisie, formes) === reponseAcceptee(`l'${saisie}`, formes);
       }),
       { numRuns: 300 },
     );
