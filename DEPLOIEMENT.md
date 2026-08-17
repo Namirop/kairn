@@ -173,7 +173,7 @@ l'hébergeur** :
 | ------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `/api/cron/jobs`    | toutes les 10 min | Reprend les jobs en attente ou morts en route, ferme ceux qui ont épuisé leurs tentatives, efface les essais anonymes non réclamés |
 | `/api/cron/lots`    | toutes les 15 min | Relève les envois groupés terminés, soumet ceux qui attendent                                                                      |
-| `/api/cron/rappels` | toutes les heures | Sélectionne les comptes dont l'heure locale correspond à leur heure de rappel                                                      |
+| `/api/cron/rappels` | toutes les heures | Envoie le rappel quotidien à l'heure locale de chaque compte, et l'alerte de série à 21 h locales quand une série est en sursis    |
 
 Les trois sont des `GET` et exigent l'en-tête `Authorization: Bearer <CRON_SECRET>`,
 comparé en temps constant. C'est tout ce qu'ils demandent : ils ne connaissent
@@ -221,6 +221,19 @@ exécutions sous charge : pour les jobs et les lots, un retard de dix minutes es
 invisible ; pour un rappel quotidien, une heure de décalage le fait tomber dans
 la mauvaise journée locale.
 
+### Ce que le passage envoie vraiment
+
+Deux emails partent de cette route, et chacun a son réglage par compte. Le rappel
+quotidien ne part que s'il y a au moins un concept dû : à zéro il n'a rien à dire,
+et un message quotidien qui annonce régulièrement qu'il n'y a rien à faire est un
+message qu'on apprend à ne plus ouvrir. L'alerte de série ne part que si une série
+est en cours, que rien n'a été revu dans la journée locale et qu'il reste quelque
+chose à faire — la plupart des jours, elle ne part pas.
+
+Les deux sont idempotents par compte, par type et par jour local : `EmailDelivery`
+est consultée avant l'envoi et écrite après. Un passage rejoué à la même heure
+n'envoie donc rien deux fois.
+
 ### Le plafond de durée
 
 Les trois routes déclarent `maxDuration = 60`, le maximum du palier gratuit. La
@@ -229,6 +242,52 @@ pouvant porter un appel modèle de dix à trente secondes. Si la file prend du
 retard, ce sont ces deux valeurs qu'il faut relever **ensemble** — `BATCH_SIZE`
 dans `app/api/cron/jobs/route.ts` et le `maxDuration` de la même route. L'une
 sans l'autre ne sert à rien.
+
+## La remise des emails
+
+Trois choses décident qu'un email arrive dans la boîte de réception et non dans les
+indésirables : le domaine d'envoi, la forme du message, et le comportement de
+l'expéditeur. Les deux dernières sont dans le code et n'ont rien à configurer ; la
+première est dans le DNS du domaine d'envoi.
+
+### Ce qui doit exister dans le DNS
+
+| Enregistrement             | Attendu                            | Pourquoi                                                           |
+| -------------------------- | ---------------------------------- | ------------------------------------------------------------------ |
+| SPF sur le sous-domaine    | l'`include` du fournisseur d'envoi | C'est ce domaine qui porte l'enveloppe, donc celui que SPF vérifie |
+| DKIM (`resend._domainkey`) | la clé publique donnée par Resend  | Signe le message et l'aligne sur le domaine du `From`              |
+| DMARC (`_dmarc`)           | au minimum `v=DMARC1; p=none;`     | Exigé par Gmail et Yahoo depuis 2024 pour tout envoi périodique    |
+
+Le SPF du domaine racine n'entre pas en jeu : les envois du produit passent par le
+sous-domaine que le fournisseur utilise comme chemin de retour. Un `-all` à la
+racine pour la messagerie du domaine reste donc sans effet sur eux.
+
+Le DMARC gagne à ne pas rester nu. Ajouter `rua=mailto:…` fait remonter des
+rapports d'alignement, et une fois qu'ils sont propres, passer à `p=quarantine`
+puis `p=reject` protège le domaine contre l'usurpation — ce qui, à son tour,
+améliore la remise.
+
+### Ce que le code tient déjà
+
+- Une version texte à côté de chaque version HTML. Un email HTML seul est un signal
+  d'indésirable à lui tout seul.
+- Un préheader dans chaque message, pour que l'aperçu de la boîte ne montre pas le
+  début du gabarit.
+- `List-Unsubscribe` et `List-Unsubscribe-Post` sur les envois périodiques, et sur
+  eux seuls : un lien de connexion qui les porterait serait rangé avec les envois
+  de masse.
+- Aucun doublon : un envoi par compte, par type et par jour local.
+- Une adresse d'expédition réelle plutôt qu'un `no-reply@`.
+- Rien d'envoyé quand il n'y a rien à dire : l'engagement compte dans la réputation
+  d'un expéditeur, et un message qu'on n'ouvre jamais abîme la remise des suivants.
+
+### Ce qui reste hors de portée du code
+
+`BETTER_AUTH_URL` doit valoir le domaine de production : les liens de session et de
+désinscription en dérivent, et un lien vers `localhost` dans un email suffit à le
+faire classer. Et un premier envoi depuis un domaine neuf tombe souvent en
+indésirable quelle que soit la configuration — c'est de la réputation, elle se
+construit avec le volume et les ouvertures.
 
 ## La région d'exécution
 

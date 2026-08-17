@@ -12,16 +12,27 @@ export type ReminderCandidate = {
 };
 
 /**
- * Comptes qui acceptent encore le rappel quotidien.
+ * Comptes qui acceptent encore ce type d'envoi.
+ *
+ * Chaque type a son réglage, et c'est SQL qui l'applique : un compte qui a coupé
+ * l'alerte de série reste candidat au rappel quotidien, et l'inverse aussi.
  *
  * Le filtrage sur l'heure locale se fait en mémoire — il dépend du fuseau de
  * chacun, que SQL ne sait pas comparer ici. La borne évite qu'un passage du
  * cron parte pour un tour complet de la table quand la base grossira ; à ce
  * moment-là, il faudra découper par tranche d'heure plutôt que relever la borne.
  */
-export async function findReminderCandidates(limit = 500): Promise<ReminderCandidate[]> {
+export async function findReminderCandidates(
+  type: NotificationType = "DAILY_REMINDER",
+  limit = 500,
+): Promise<ReminderCandidate[]> {
   const rows = await prisma.userSettings.findMany({
-    where: { dailyReminderEnabled: true, emailOptOutAt: null },
+    where: {
+      emailOptOutAt: null,
+      ...(type === "DAILY_REMINDER"
+        ? { dailyReminderEnabled: true }
+        : { streakAlertEnabled: true }),
+    },
     select: {
       userId: true,
       timezone: true,

@@ -117,8 +117,13 @@ enum JobStatus {
 }
 
 /// Canal unique pour l'instant : l'email.
+///
+/// Le rappel annonce ce qui est dû, à l'heure choisie, tous les jours. L'alerte
+/// ne part que si une série est en train d'être perdue — elle est rare par
+/// construction, et c'est ce qui fait qu'on la lit.
 enum NotificationType {
   DAILY_REMINDER
+  STREAK_ALERT
 }
 
 /// Cycle de vie d'une soumission groupée.

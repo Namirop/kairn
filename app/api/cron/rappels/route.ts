@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import { isAuthorizedCron } from "@/lib/cron/authorization";
-import { findAlreadyNotified, findReminderCandidates } from "@/lib/db/reminder-audience";
-import { selectDueForReminder } from "@/lib/domain/reminder-selection";
+import { envoyerLesAlertesDeStreak, envoyerLesRappels } from "@/lib/jobs/rappels";
 
 /**
- * Rappel quotidien, passage horaire.
+ * Les envois du jour, passage horaire.
  *
- * En phase 0 la route calcule la sélection et la journalise — elle n'envoie
- * rien. Brancher l'envoi consistera à appeler `sendNotification()` sur chaque
- * ligne retenue, une fois que le nombre d'Atoms dus sera calculable.
+ * Deux envois dans le même passage, et la cadence horaire est ce qui les rend
+ * possibles tous les deux : chacun compare l'heure **locale** d'un compte à une
+ * heure de réglage, et une cadence plus lâche sauterait des fuseaux entiers.
+ *
+ * Le rappel part à l'heure choisie, quand il y a quelque chose à revoir.
+ * L'alerte de série part le soir, et seulement si une série est en train d'être
+ * perdue. Les deux sont idempotents par compte, par type et par jour local.
  *
  * Les journaux ne portent que des identifiants, jamais d'adresse ni de contenu.
  */
@@ -16,9 +19,10 @@ import { selectDueForReminder } from "@/lib/domain/reminder-selection";
 export const dynamic = "force-dynamic";
 
 /**
- * Le passage est court aujourd'hui — il sélectionne et journalise. Il enverra
- * un email par compte retenu le jour où l'envoi sera branché, et c'est cette
- * boucle-là qui a besoin de durer.
+ * Le passage écrit à des comptes, un par un, avec un appel réseau par envoi. La
+ * minute accordée par le palier gratuit tient largement à l'échelle actuelle ;
+ * c'est la valeur à relever quand la base grossira, en même temps que la borne
+ * de `findReminderCandidates`.
  */
 export const maxDuration = 60;
 
@@ -27,31 +31,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ erreur: "Non autorisé." }, { status: 401 });
   }
 
-  const now = new Date();
-  const candidats = await findReminderCandidates();
-  const alHeure = selectDueForReminder(candidats, now);
-
-  const dejaNotifies = await findAlreadyNotified(
-    "DAILY_REMINDER",
-    alHeure.map((entry) => ({ userId: entry.target.userId, day: entry.day })),
-  );
-
-  const aNotifier = alHeure.filter((entry) => !dejaNotifies.has(entry.target.userId));
-
-  console.info(
-    `Rappel quotidien — ${candidats.length} candidats, ${alHeure.length} à l'heure, ` +
-      `${dejaNotifies.size} déjà notifiés, ${aNotifier.length} à envoyer.`,
-  );
-
-  for (const entry of aNotifier) {
-    console.info(`  à envoyer : ${entry.target.userId} (${entry.day})`);
-  }
+  const maintenant = new Date();
 
   return NextResponse.json({
-    candidats: candidats.length,
-    alHeure: alHeure.length,
-    dejaNotifies: dejaNotifies.size,
-    aEnvoyer: aNotifier.length,
-    envoyes: 0,
+    rappels: await envoyerLesRappels(maintenant),
+    alertes: await envoyerLesAlertesDeStreak(maintenant),
   });
 }
