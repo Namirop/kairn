@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
@@ -20,6 +20,17 @@ export type RubriqueLegale = {
   titre: string;
   /** Ce qui est déjà vrai du produit et se dit sans attendre. */
   corps?: string[];
+  /**
+   * Des couples à mettre en regard : une finalité et sa base légale, une durée et
+   * ce qu'elle borne.
+   *
+   * Une liste de définitions et non des phrases : « la finalité X repose sur la
+   * base Y » répété huit fois est illisible, alors que c'est exactement le genre
+   * d'information qu'on vient chercher par balayage. Et pas un tableau — deux
+   * colonnes dont l'une fait une ligne et l'autre trois se lisent moins bien
+   * qu'un terme suivi de sa définition.
+   */
+  couples?: { terme: string; valeur: string }[];
   /** Ce que Romain doit renseigner. Rendu comme un trou, pas comme du texte. */
   aRemplir?: string[];
 };
@@ -53,6 +64,19 @@ export function PageLegale({
                 {paragraphe}
               </p>
             ))}
+
+            {rubrique.couples ? (
+              <dl className="mt-pas-4 gap-pas-4 grid max-w-prose sm:grid-cols-[1fr_auto]">
+                {rubrique.couples.map((couple) => (
+                  <Fragment key={couple.terme}>
+                    <dt className="text-corps leading-relaxed text-stone-800">{couple.terme}</dt>
+                    <dd className="text-mono border-t-0 font-mono text-stone-500 sm:text-right">
+                      {couple.valeur}
+                    </dd>
+                  </Fragment>
+                ))}
+              </dl>
+            ) : null}
 
             {rubrique.aRemplir ? (
               <ul className="border-ember/40 mt-pas-4 pl-pas-4 gap-pas-2 flex flex-col border-l-2">

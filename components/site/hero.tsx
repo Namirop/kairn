@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CairnRenversable } from "@/components/cairn/cairn-renversable";
 import { Panneau } from "@/components/coquille/panneau";
+import { Apparition, Temps } from "@/components/site/apparition";
 import { EssaiDeDepot } from "@/components/site/essai-de-depot";
 import { Button } from "@/components/ui/button";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
@@ -16,6 +17,21 @@ import { ROUTES } from "@/lib/auth/routes";
  * maintenant la composition quand on coupe l'empilement. C'est la taille du
  * cairn qui occupe la colonne désormais — il monte à toute la hauteur du
  * panneau plutôt que de flotter au milieu d'un rectangle.
+ *
+ * **L'ouverture fait exactement un pli.** Elle mesurait la même chose en pixels
+ * de sept cent soixante-huit à vingt-cinq cents de large, si bien qu'elle ouvrait
+ * juste sur un grand écran et débordait sur un mille quatre-vingts : le champ de
+ * dépôt et le lien de connexion passaient sous le pli, sur l'écran le plus
+ * répandu du monde. Le panneau prend donc la hauteur qui reste sous l'en-tête, et
+ * son contenu s'y centre ; ce qui l'occupe — le titre, le rythme du panneau, la
+ * hauteur du cairn — se mesure à la fenêtre. La jointure de roche tombe alors au
+ * pli quel que soit l'écran, et c'est elle qui invite à descendre.
+ *
+ * **Le titre arrive en deux temps, parce que c'est une phrase en deux temps.**
+ * « Tu lis beaucoup » est un constat, « Tu retiens peu » est son retournement :
+ * affichées ensemble, les deux lignes laissent l'œil choisir par où commencer et
+ * le retournement se perd. Ce sont donc deux blocs et non un saut de ligne — ce
+ * qui permet de les décaler d'un dixième de seconde, et c'est tout ce qu'il faut.
  */
 export function Hero({
   invite,
@@ -30,20 +46,28 @@ export function Hero({
     <Panneau
       surface="papier"
       aere
-      className="gap-pas-12 grid items-center md:grid-cols-[1.4fr_1fr]"
+      // La hauteur de l'en-tête, seul élément fixe au-dessus. `svh` et non `dvh` :
+      // sur un mobile, la barre d'adresse qui se replie ferait grandir le panneau
+      // pendant qu'on lit, et le contenu sauterait sous les yeux.
+      className="gap-pas-12 grid items-center md:min-h-[calc(100svh-4rem)] md:grid-cols-[1.4fr_1fr]"
     >
-      <div>
+      <Apparition>
         <h1 className="font-display text-h1-site leading-[0.95] font-bold tracking-[-0.03em] text-balance">
-          Tu lis beaucoup.
-          <br />
-          Tu retiens peu.
+          <Temps balise="span" className="block">
+            Tu lis beaucoup.
+          </Temps>
+          <Temps balise="span" className="block">
+            Tu retiens peu.
+          </Temps>
         </h1>
 
-        <p className="mt-pas-6 max-w-md text-stone-500">
-          {connecte
-            ? "Ce que tu as déposé t'attend, et revient quand il est sur le point de partir."
-            : "Un article, une réponse qu'on t'a donnée, une page de manuel, ce qu'un collègue vient de t'expliquer. Kairn le découpe en concepts et te les repose juste avant que tu les oublies."}
-        </p>
+        <Temps>
+          <p className="mt-pas-6 max-w-md text-stone-500">
+            {connecte
+              ? "Ce que tu as déposé t'attend, et revient quand il est sur le point de partir."
+              : "Un article, une réponse qu'on t'a donnée, une page de manuel, ce qu'un collègue vient de t'expliquer. Kairn le découpe en concepts et te les repose juste avant que tu les oublies."}
+          </p>
+        </Temps>
 
         {/* Pour un visiteur, le champ et pas un bouton vers une inscription :
             c'est le découpage qui convainc, et le montrer coûte une extraction.
@@ -54,30 +78,37 @@ export function Hero({
             sans qu'il ait rien fait de travers. Une seule action à la place,
             celle du même mot que la navigation. */}
         {connecte ? (
-          <Button asChild size="lg" className="mt-pas-8">
-            <Link href={ROUTES.aujourdhui}>Aujourd&apos;hui</Link>
-          </Button>
+          <Temps>
+            <Button asChild size="lg" className="mt-pas-8">
+              <Link href={ROUTES.aujourdhui}>Aujourd&apos;hui</Link>
+            </Button>
+          </Temps>
         ) : (
           <>
-            <div className="mt-pas-8">
+            <Temps className="mt-pas-8">
               <EssaiDeDepot invite={invite} essaiPrecedent={essaiPrecedent} />
-            </div>
+            </Temps>
 
-            <p className="mt-pas-6 text-petit text-stone-500">
-              Déjà un compte ?{" "}
-              <Link
-                href={ROUTES.connexion}
-                className="rounded-xs text-stone-900 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900"
-              >
-                Se connecter
-              </Link>
-            </p>
+            <Temps>
+              <p className="mt-pas-6 text-petit text-stone-500">
+                Déjà un compte ?{" "}
+                <Link
+                  href={ROUTES.connexion}
+                  className="rounded-xs text-stone-900 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900"
+                >
+                  Se connecter
+                </Link>
+              </p>
+            </Temps>
           </>
         )}
-      </div>
+      </Apparition>
 
       <div className="flex justify-center">
-        <div className="h-72 w-44 md:h-[30rem] md:w-full">
+        {/* Sa hauteur suit celle de la fenêtre, entre dix-huit et trente rem :
+            posé à trente sur un portable de six cent cinquante pixels utiles, il
+            poussait à lui seul le reste de la colonne sous le pli. */}
+        <div className="h-72 w-44 md:h-[clamp(18rem,42vh,30rem)] md:w-full">
           <CairnRenversable nombre={7} />
         </div>
       </div>

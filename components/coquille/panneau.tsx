@@ -51,7 +51,13 @@ export function Panneau({
 }: {
   surface?: Surface;
   mesure?: Mesure;
-  /** Le rythme d'un panneau de marketing, plus ample que celui d'un écran. */
+  /**
+   * Le rythme d'un panneau de marketing, plus ample que celui d'un écran.
+   *
+   * Ample **relativement à la fenêtre** : `--pas-campagne` suit sa hauteur, si
+   * bien qu'un même panneau ouvre de six pas sur un grand écran et de trois sur
+   * un portable, au lieu de déborder du pli sur le second.
+   */
   aere?: boolean;
   /**
    * Contenu centré dans toute la hauteur du panneau.
@@ -95,7 +101,7 @@ export function Panneau({
         className={cn(
           "px-pas-4 md:px-pas-8 relative z-10 mx-auto w-full",
           MESURES[mesure],
-          aere ? "py-pas-16 md:py-pas-24" : "py-pas-8 md:py-pas-12",
+          aere ? "py-pas-campagne" : "py-pas-8 md:py-pas-12",
           centre && "flex flex-col items-center text-center",
           className,
         )}

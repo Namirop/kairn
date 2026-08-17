@@ -118,6 +118,18 @@
   --pas-16: 4rem;
   --pas-24: 6rem;
 
+  /*
+    Le rythme d'un panneau de campagne, qui se mesure à la fenêtre.
+
+    Six pas de haut et de bas font une ouverture ample sur un écran de quatorze
+    cents pixels de haut, et une ouverture qui déborde sur un écran de neuf
+    cents. Or c'est le même panneau, et il doit respirer dans les deux : c'est la
+    hauteur disponible qui change, pas l'intention. Le pas de campagne suit donc
+    la fenêtre, borné des deux côtés — jamais serré à moins de deux pas et demi,
+    jamais plus ample que les six d'origine.
+  */
+  --pas-campagne: 4rem;
+
   /* Échelle typographique. Deux registres : marketing et interne. */
   --t-mono: 0.75rem;
   --t-petit: 0.875rem;
@@ -165,7 +177,29 @@
     --t-enonce: 2rem;
     --t-nombre: 5.75rem;
     --t-h2-site: 3.75rem;
-    --t-h1-site: 6.5rem;
+
+    /*
+      Le titre de campagne se mesure à la fenêtre, hauteur comprise.
+
+      Il était fixe de sept cent soixante-huit pixels de large jusqu'à
+      vingt-cinq cents : sur un écran de deux mille quatre cents de haut il
+      ouvrait juste, et sur un mille quatre-vingts — l'écran le plus répandu au
+      monde — l'ouverture ne tenait plus dans la fenêtre, le geste d'appel passé
+      sous le pli. Un titre de campagne n'a pas de taille absolue : il a une
+      **part de l'écran**, et l'écran a deux dimensions.
+
+      D'où le `min()` des deux axes : c'est la dimension la plus étroite qui
+      décide, comme pour n'importe quel objet qu'on veut voir en entier. Sur un
+      écran haut c'est la largeur qui limite, sur un écran bas c'est la hauteur,
+      et le résultat est borné par le corps d'origine — jamais plus gros
+      qu'avant, seulement plus petit là où il ne passait pas.
+
+      La borne basse est un peu au-dessus du corps mobile : entre les deux, la
+      typographie n'aurait plus rien d'une ouverture.
+    */
+    --t-h1-site: clamp(3.5rem, min(7.4vw, 9.6vh), 6.5rem);
+
+    --pas-campagne: clamp(2.5rem, 6vh, 6rem);
   }
 }
 
@@ -213,6 +247,7 @@
   --spacing-pas-12: var(--pas-12);
   --spacing-pas-16: var(--pas-16);
   --spacing-pas-24: var(--pas-24);
+  --spacing-pas-campagne: var(--pas-campagne);
 
   --color-data-mark: var(--data-mark);
   --color-data-mark-zero: var(--data-mark-zero);

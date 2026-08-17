@@ -4,7 +4,9 @@ import { useMemo } from "react";
 import { useReducedMotion } from "motion/react";
 import { Cairn } from "@/components/cairn/cairn";
 import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
+import { PoseDePierre } from "@/components/cairn/pose-de-pierre";
 import { SolDuCairn } from "@/components/cairn/sol-du-cairn";
+import { useAnimationPossible } from "@/components/cairn/use-animation-possible";
 import { useChuteDesPierres } from "@/components/cairn/use-chute-des-pierres";
 import { SANS_BORDS } from "@/lib/domain/cairn-physique";
 import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
@@ -26,6 +28,13 @@ import { cn } from "@/lib/utils";
  * Quand l'utilisateur refuse le mouvement, le composant rend le cairn ordinaire
  * et ne pose aucun gestionnaire : l'effet disparaît entièrement plutôt qu'à
  * moitié.
+ *
+ * **Il se pose en arrivant, comme celui du tableau de bord.** Il apparaissait
+ * empilé d'un coup, alors que c'est le seul objet de l'ouverture qui puisse
+ * raconter le produit sans une phrase : les pierres se posent l'une après l'autre,
+ * la dernière vient de plus haut. La pose et la chute ne se disputent rien — la
+ * physique déplace le groupe extérieur, qui porte la place de la pierre dans
+ * l'empilement, et la pose n'anime que son contenu.
  */
 export function CairnRenversable({
   nombre,
@@ -37,6 +46,7 @@ export function CairnRenversable({
   className?: string;
 }) {
   const immobile = useReducedMotion() ?? false;
+  const pose = useAnimationPossible(immobile);
   const { pierres, hauteur, ySol } = useMemo(() => empiler(nombre, graines), [nombre, graines]);
   const chute = useChuteDesPierres(pierres, !immobile, SANS_BORDS);
 
@@ -62,7 +72,9 @@ export function CairnRenversable({
           }}
           transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}
         >
-          <ArêtesDePierre pierre={pierre} derniere={rang === pierres.length - 1} />
+          <PoseDePierre rang={rang} derniere={rang === pierres.length - 1} anime={pose}>
+            <ArêtesDePierre pierre={pierre} derniere={rang === pierres.length - 1} />
+          </PoseDePierre>
         </g>
       ))}
     </svg>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SilhouetteDeCairn } from "@/components/cairn/silhouette-de-cairn";
 import { Panneau } from "@/components/coquille/panneau";
+import { Apparition, Temps } from "@/components/site/apparition";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
@@ -16,6 +17,11 @@ import { ROUTES } from "@/lib/auth/routes";
  * C'est aussi le seul endroit qui porte la silhouette du cairn en fond. Elle
  * déborde du panneau et sort du cadre : une forme entière, posée bien au
  * milieu, redeviendrait une illustration.
+ *
+ * Les deux paragraphes n'arrivent pas ensemble, et c'est la seule chose que
+ * l'animation fait ici : les négations d'abord, l'affirmation ensuite. « C'est une
+ * seule chose » est la conclusion des trois « ce n'est pas », et la lire en même
+ * temps qu'elles en fait un quatrième élément de liste.
  */
 export function PasCeci({ connecte }: { connecte: boolean }) {
   return (
@@ -27,34 +33,45 @@ export function PasCeci({ connecte }: { connecte: boolean }) {
         <SilhouetteDeCairn className="absolute -right-8 bottom-0 h-[130%] md:right-8 md:h-[150%]" />
       }
     >
-      <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
-        Ce que ce
-        <br />
-        n&apos;est pas.
-      </h2>
+      <Apparition>
+        <Temps>
+          <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
+            Ce que ce
+            <br />
+            n&apos;est pas.
+          </h2>
+        </Temps>
+      </Apparition>
 
-      <div className="text-stone-300">
-        <p>
-          Ce n&apos;est pas une application de fiches à écrire soi-même : personne ne tient un jeu
-          de cartes plus de trois semaines. Ce n&apos;est pas un outil de prise de notes — tu en as
-          déjà un, et ce n&apos;est pas là que le savoir se fixe. Ce n&apos;est pas un assistant à
-          qui parler.
-        </p>
-        <p className="mt-pas-4 text-stone-50">
-          C&apos;est une seule chose : ce que tu as lu revient au bon moment, jusqu&apos;à ce que ce
-          soit à toi.
-        </p>
+      <Apparition className="text-stone-300">
+        <Temps>
+          <p>
+            Ce n&apos;est pas une application de fiches à écrire soi-même : personne ne tient un jeu
+            de cartes plus de trois semaines. Ce n&apos;est pas un outil de prise de notes — tu en
+            as déjà un, et ce n&apos;est pas là que le savoir se fixe. Ce n&apos;est pas un
+            assistant à qui parler.
+          </p>
+        </Temps>
 
-        <Button
-          asChild
-          size="lg"
-          className="mt-pas-8 bg-stone-50 text-stone-900 hover:bg-stone-300"
-        >
-          <Link href={connecte ? ROUTES.aujourdhui : ROUTES.connexion}>
-            {connecte ? "Aujourd'hui" : "Créer mon compte"}
-          </Link>
-        </Button>
-      </div>
+        <Temps>
+          <p className="mt-pas-4 text-stone-50">
+            C&apos;est une seule chose : ce que tu as lu revient au bon moment, jusqu&apos;à ce que
+            ce soit à toi.
+          </p>
+        </Temps>
+
+        <Temps>
+          <Button
+            asChild
+            size="lg"
+            className="mt-pas-8 bg-stone-50 text-stone-900 hover:bg-stone-300"
+          >
+            <Link href={connecte ? ROUTES.aujourdhui : ROUTES.connexion}>
+              {connecte ? "Aujourd'hui" : "Créer mon compte"}
+            </Link>
+          </Button>
+        </Temps>
+      </Apparition>
     </Panneau>
   );
 }

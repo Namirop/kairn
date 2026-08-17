@@ -204,7 +204,12 @@ export function EssaiDeDepot({
 
             La taille passe au corps de texte. En `h2-app`, un pavé collé
             s'affichait plus gros que les concepts qui le remplacent à l'écran
-            juste après, et l'échange des deux se voyait comme un saut. */}
+            juste après, et l'échange des deux se voyait comme un saut.
+
+            Sa hauteur au repos suit celle de la fenêtre, entre cinq et huit rem :
+            c'est le plus gros bloc de l'ouverture, et sur un portable il poussait
+            à lui seul le lien de connexion sous le pli. Sur une fenêtre
+            ordinaire, la valeur tombe sur les huit rem d'avant. */}
         <textarea
           id="essai"
           name="texte"
@@ -212,7 +217,7 @@ export function EssaiDeDepot({
           value={texte}
           onChange={(evenement) => setTexte(evenement.target.value)}
           placeholder={invite}
-          className="pb-pas-4 text-corps field-sizing-content ascenseur-discret max-h-[14rem] min-h-32 w-full resize-none overflow-y-auto border-0 bg-transparent leading-relaxed text-stone-900 outline-none placeholder:text-stone-500 focus-visible:outline-none"
+          className="pb-pas-4 text-corps ascenseur-discret field-sizing-content max-h-[14rem] min-h-[clamp(5rem,14vh,8rem)] w-full resize-none overflow-y-auto border-0 bg-transparent leading-relaxed text-stone-900 outline-none placeholder:text-stone-500 focus-visible:outline-none"
         />
       </div>
 
@@ -248,4 +253,3 @@ export function EssaiDeDepot({
     </form>
   );
 }
-

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { PierrePosee } from "@/components/cairn/pierre-posee";
 import { SolDuCairn } from "@/components/cairn/sol-du-cairn";
+import { useAnimationPossible } from "@/components/cairn/use-animation-possible";
 import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 import { cn } from "@/lib/utils";
 
@@ -17,24 +17,9 @@ import { cn } from "@/lib/utils";
  * La pierre du sommet se pose en arrivant : c'est celle qu'on vient de gagner,
  * et son arête porte le lichen.
  *
- * L'animation est un supplément, jamais un préalable : l'empilement est rendu
- * posé, et ne s'anime que si la page est effectivement regardée. Un onglet
- * ouvert en arrière-plan suspend les rAF ; s'il fallait une animation pour
- * révéler les pierres, elles y resteraient invisibles.
+ * L'animation est un supplément, jamais un préalable : c'est ce que dit
+ * `useAnimationPossible`, et le geste de la pose vit dans `PoseDePierre`.
  */
-
-/** Vrai quand la page est regardée et que l'utilisateur accepte le mouvement. */
-function useAnimationPossible(immobile: boolean): boolean {
-  const [possible, setPossible] = useState(false);
-
-  useEffect(() => {
-    if (immobile || document.hidden) return;
-    setPossible(true);
-  }, [immobile]);
-
-  return possible;
-}
-
 export function Cairn({
   nombre,
   graines,
