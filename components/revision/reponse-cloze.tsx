@@ -3,56 +3,33 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { reponseAcceptee, TROU } from "@/lib/domain/reponse-cloze";
+import { reponseAcceptee } from "@/lib/domain/reponse-cloze";
 import type { ReviewRating } from "@/lib/db/types";
-import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
  * Le texte à trou.
  *
- * La vérification est locale et instantanée : les formes acceptées ont été
+ * La phrase est en titre — c'est l'énoncé, la carte s'en charge. Ici on ne pose
+ * que ce qu'il faut pour la combler : ce qu'on attend dans le trou, un champ, et
+ * la vérification.
+ *
+ * Cette vérification est locale et instantanée : les formes acceptées ont été
  * écrites en même temps que la question, il n'y a rien à demander à personne.
  * C'est le seul format qui fait produire une réponse sans faire attendre un
  * jugement.
  *
- * Quand la saisie ne correspond pas, on montre le terme attendu et on laisse
- * dire « je l'avais » — on écrit parfois un synonyme que la liste ne porte pas.
- * C'est le seul jugement demandé sur ce format, et seulement dans ce cas : une
- * bonne réponse, elle, n'est jamais soumise à discussion.
+ * Quand la saisie ne correspond pas, on montre le terme attendu à côté de ce qui
+ * a été écrit — les deux se comparent d'un regard — et on laisse dire « je
+ * l'avais » : on écrit parfois un synonyme que la liste ne porte pas. C'est le
+ * seul jugement demandé sur ce format, et seulement dans ce cas : une bonne
+ * réponse, elle, n'est jamais soumise à discussion.
  */
-
-/** La phrase, son trou vide, rempli de ce qu'on saisit, ou du terme attendu. */
-function PhraseTrouee({ phrase, comble }: { phrase: string; comble: string | null }) {
-  const [avant = "", ...suite] = phrase.split(TROU);
-
-  return (
-    <p className="text-corps leading-loose text-stone-900">
-      <TexteTechnique>{avant}</TexteTechnique>
-      {comble === null ? (
-        // Un emplacement, pas un soulignement : c'est le geste central de ce
-        // format, et un trait fin sous une ligne de texte se remarquait à peine.
-        <span
-          aria-hidden
-          className="rounded-champ bg-surface-ombre mx-1 inline-block h-6 w-28 align-middle"
-        />
-      ) : (
-        <span className="rounded-champ bg-surface-ombre border-lichen mx-1 border-b-2 px-2 font-medium">
-          {comble}
-        </span>
-      )}
-      <TexteTechnique>{suite.join(TROU)}</TexteTechnique>
-    </p>
-  );
-}
-
 export function ReponseCloze({
-  sentence,
   accepted,
   enCours,
   onValider,
   onJuger,
 }: {
-  sentence: string;
   accepted: string[];
   enCours: boolean;
   /** Fige le chronomètre à la validation, jamais au jugement qui la suit. */
@@ -82,12 +59,16 @@ export function ReponseCloze({
   if (rate) {
     return (
       <div className="mt-pas-12">
-        <PhraseTrouee phrase={sentence} comble={attendu} />
-
-        <p className="mt-pas-6 text-petit text-stone-500">
+        <p className="text-corps text-stone-900">
+          Le terme était <span className="font-mono font-medium">{attendu}</span>.
+        </p>
+        <p className="mt-pas-2 text-corps text-stone-500">
           Tu as écrit <span className="font-mono text-stone-900">{propre}</span>.
         </p>
 
+        {/* Deux issues nommées pareil que la graduation des formats ouverts :
+            c'est la même question posée en deux boutons. « Continuer » ne disait
+            pas ce qu'il enregistrait. */}
         <div className="gap-pas-2 mt-pas-8 flex flex-wrap">
           <Button
             type="button"
@@ -98,7 +79,7 @@ export function ReponseCloze({
             Je l&apos;avais
           </Button>
           <Button type="button" disabled={enCours} onClick={() => onJuger("AGAIN")}>
-            Continuer
+            Je ne l&apos;avais pas
           </Button>
         </div>
       </div>
@@ -106,35 +87,34 @@ export function ReponseCloze({
   }
 
   return (
-    <div className="mt-pas-12">
-      <PhraseTrouee phrase={sentence} comble={propre.length > 0 ? propre : null} />
+    <form
+      className="mt-pas-12"
+      onSubmit={(evenement) => {
+        evenement.preventDefault();
+        verifier();
+      }}
+    >
+      {/* La consigne est ce qu'on demande, pas une légende du champ : elle porte
+          le poids du corps, comme « Où en étais-tu ? » sur les autres formats. */}
+      <label htmlFor="trou" className="text-corps block text-stone-900">
+        Complète avec le terme qui manque
+      </label>
 
-      <form
-        className="gap-pas-3 mt-pas-6 flex flex-col sm:flex-row sm:items-end"
-        onSubmit={(evenement) => {
-          evenement.preventDefault();
-          verifier();
-        }}
-      >
-        <div className="flex-1">
-          <label htmlFor="trou" className="text-petit block text-stone-500">
-            Le terme qui manque
-          </label>
-          <Input
-            id="trou"
-            autoComplete="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            className="mt-pas-2"
-            value={saisie}
-            onChange={(evenement) => setSaisie(evenement.target.value)}
-          />
-        </div>
+      <div className="gap-pas-3 mt-pas-3 flex flex-col sm:flex-row sm:items-center">
+        <Input
+          id="trou"
+          autoComplete="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          className="flex-1"
+          value={saisie}
+          onChange={(evenement) => setSaisie(evenement.target.value)}
+        />
 
         <Button type="submit" disabled={enCours || propre.length === 0}>
           Vérifier
         </Button>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 }

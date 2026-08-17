@@ -2,6 +2,7 @@
 
 import { useCallback, useState, type ReactNode } from "react";
 import { CarteQuestion } from "@/components/revision/carte-question";
+import { enonceDeCarte } from "@/components/revision/enonce-de-carte";
 import { etalonUtile } from "@/components/revision/etalon-utile";
 import { JeterLaPierre } from "@/components/revision/jeter-la-pierre";
 import { PierreJetee } from "@/components/revision/pierre-jetee";
@@ -138,7 +139,7 @@ export function DerouleQuestions({
       total={questions.length}
       chiffree={chiffree}
       tags={question.tags}
-      question={question.question}
+      question={enonceDeCarte(question)}
       variantId={question.variantId}
       actions={actions?.({ question, enCours, valider: suivre })}
     >

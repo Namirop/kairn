@@ -68,7 +68,6 @@ export function ZoneDeReponse({
     return (
       <ReponseCloze
         key={question.variantId}
-        sentence={question.cloze.sentence}
         accepted={question.cloze.accepted}
         enCours={enCours}
         onValider={onEngager}
