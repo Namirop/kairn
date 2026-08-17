@@ -113,3 +113,100 @@ describe("alternerLesSujets", () => {
     );
   });
 });
+
+describe("le geste départage, sans défaire les sujets", () => {
+  /** Un concept réduit à ce qui compte ici : son sujet et son geste. */
+  const concept = (sujet: string, geste: string, id: string) => ({
+    tags: [sujet],
+    inputId: id,
+    geste,
+  });
+  const geste = (item: { geste: string }) => item.geste;
+
+  it("préfère le sujet qui change aussi de geste", () => {
+    // Trois sujets d'un concept chacun : l'alternance des sujets seule prendrait
+    // « deux » en second et répéterait le geste. Le départage prend « trois ».
+    const concepts = [
+      concept("un", "CHOISIR", "a"),
+      concept("deux", "CHOISIR", "b"),
+      concept("trois", "SAISIR", "c"),
+    ];
+
+    expect(alternerLesSujets(concepts, geste).map((item) => item.inputId)).toEqual(["a", "c", "b"]);
+    // Sans lui, le geste se répétait dès le deuxième.
+    expect(alternerLesSujets(concepts).map((item) => item.inputId)).toEqual(["a", "b", "c"]);
+  });
+
+  it("ne cherche pas plus loin que la tête de chaque sujet", () => {
+    // Deux sujets qui portent chacun les deux gestes : l'alternance parfaite
+    // demanderait de servir un concept moins urgent avant un plus urgent du même
+    // sujet. L'ordre d'urgence n'est pas une préférence d'affichage — il gagne, et
+    // un geste se répète.
+    const concepts = [
+      concept("un", "CHOISIR", "a"),
+      concept("un", "SAISIR", "b"),
+      concept("deux", "CHOISIR", "c"),
+      concept("deux", "SAISIR", "d"),
+    ];
+
+    expect(alternerLesSujets(concepts, geste).map((item) => item.inputId)).toEqual([
+      "a",
+      "c",
+      "b",
+      "d",
+    ]);
+  });
+
+  it("garde l'alternance des sujets quand les deux critères s'opposent", () => {
+    // Le seul concept d'un autre geste appartient au sujet qu'on vient de servir :
+    // c'est le sujet qui gagne, et le geste se répète.
+    const concepts = [
+      concept("un", "CHOISIR", "a"),
+      concept("un", "SAISIR", "b"),
+      concept("deux", "CHOISIR", "c"),
+    ];
+
+    const sujets = alternerLesSujets(concepts, geste).map((item) => item.tags[0]);
+
+    expect(sujets.every((sujet, rang) => rang === 0 || sujet !== sujets[rang - 1])).toBe(true);
+  });
+
+  it("sans accesseur de geste, l'ordre est celui des sujets seuls", () => {
+    const concepts = [
+      concept("un", "CHOISIR", "a"),
+      concept("un", "SAISIR", "b"),
+      concept("deux", "CHOISIR", "c"),
+      concept("deux", "SAISIR", "d"),
+    ];
+
+    expect(alternerLesSujets(concepts).map((item) => item.inputId)).toEqual(
+      alternerLesSujets(concepts).map((item) => item.inputId),
+    );
+  });
+
+  it("ne perd ni n'invente rien, quel que soit le geste", () => {
+    fc.assert(
+      fc.property(
+        fc.array(
+          fc.record({
+            sujet: fc.constantFrom("un", "deux", "trois"),
+            geste: fc.constantFrom("CHOISIR", "SAISIR", "FORMULER"),
+          }),
+          { maxLength: 25 },
+        ),
+        (tirage) => {
+          const concepts = tirage.map((entree, rang) =>
+            concept(entree.sujet, entree.geste, `c${rang}`),
+          );
+          const ordonnes = alternerLesSujets(concepts, geste);
+
+          return (
+            ordonnes.length === concepts.length &&
+            new Set(ordonnes.map((item) => item.inputId)).size === concepts.length
+          );
+        },
+      ),
+      { numRuns: 300 },
+    );
+  });
+});

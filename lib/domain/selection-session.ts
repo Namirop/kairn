@@ -141,18 +141,23 @@ export function jourOuIlRevient(
  * garde d'abord ce qui est le plus en train d'être oublié, puis on ordonne ce
  * qu'on a gardé. L'inverse laisserait un concept solide passer devant un
  * concept fragile pour une raison d'affichage.
+ *
+ * `gesteDe` est facultatif parce que le geste dépend de la variante servie, et que
+ * tout ce qui compte les concepts dus n'en choisit pas. Quand il est donné, il
+ * départage l'alternance des sujets sans jamais la défaire.
  */
 export function composerSession<T extends ConceptDu>(
   concepts: T[],
   maintenant: Date,
   fuseau: string,
   plafond: number = PLAFOND_SESSION,
+  gesteDe?: (concept: T) => string,
 ): T[] {
   const dus = concepts
     .filter((concept) => estServableAujourdhui(concept, maintenant, fuseau))
     .sort(parUrgence(maintenant));
 
-  return alternerLesSujets(dus.slice(0, Math.max(0, plafond)));
+  return alternerLesSujets(dus.slice(0, Math.max(0, plafond)), gesteDe);
 }
 
 /**

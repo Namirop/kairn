@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import { questionServie, type QuestionServie } from "@/lib/db/question-servie";
 import { lireCadreDeSession, lireFuseauUtilisateur } from "@/lib/db/user-settings";
-import { alternerLesGestes } from "@/lib/domain/alternance-des-gestes";
 import { gesteDeReponse } from "@/lib/domain/geste-de-reponse";
 import { jourSuivant, localDay } from "@/lib/domain/local-day";
 import { choisirVariante } from "@/lib/domain/rotation-variantes";
@@ -99,29 +98,34 @@ export async function lireSessionDuJour(
     }),
   ]);
 
-  const retenus = composerSession(candidats, maintenant, fuseau, plafond);
-  const questions: QuestionServie[] = [];
-
-  for (const atome of retenus) {
+  // La variante est choisie **avant** de composer, et c'est ce qui permet à
+  // l'ordre de service de tenir compte du geste : il dépend du format servi, donc
+  // il n'existe pas tant que la formulation n'est pas arrêtée. Le choix est une
+  // opération en mémoire, la faire sur tous les candidats plutôt que sur les
+  // retenus ne coûte rien.
+  const servables = candidats.flatMap((atome) => {
     const derniereFacette = atome.reviews[0]?.variant.facet ?? null;
     const servie = choisirVariante(atome.variants, derniereFacette);
 
     // Écarté par la requête en principe ; on ne pose pas une carte vide au cas où.
-    if (!servie) continue;
+    if (!servie) return [];
 
     const variante = atome.variants.find((candidate) => candidate.id === servie.id);
 
-    if (!variante) continue;
+    return variante ? [{ ...atome, variante }] : [];
+  });
 
-    questions.push(questionServie(atome, variante, { maintenant, fuseau }));
-  }
+  const retenus = composerSession(servables, maintenant, fuseau, plafond, (concept) =>
+    gesteDeReponse(concept.variante.format),
+  );
+
+  const questions = retenus.map((concept) =>
+    questionServie(concept, concept.variante, { maintenant, fuseau }),
+  );
 
   return {
     fuseau,
-    // L'ordre d'urgence et l'alternance des sujets sont posés ; reste le geste,
-    // qui ne se connaît qu'une fois la variante choisie. Cinq « choisis ta
-    // réponse » d'affilée se ressentent comme une seule question reposée.
-    questions: alternerLesGestes(questions, (servie) => gesteDeReponse(servie.format)),
+    questions,
     totalConcepts,
     conceptsEnAttenteDeQuestions: enAttente,
     prochainJourServi: prochainJourServi(prochain, maintenant, fuseau),
