@@ -61,8 +61,8 @@ Ce qui manque, et qui se voit :
 ## Installation
 
 ```bash
-git clone https://github.com/Namirop/cairn.git
-cd cairn
+git clone https://github.com/Namirop/kairn.git
+cd kairn
 npm install                 # `postinstall` génère le client Prisma
 cp .env.example .env        # puis renseigner au minimum DATABASE_URL, DIRECT_URL, BETTER_AUTH_SECRET
 npm run db:migrate          # applique les migrations
