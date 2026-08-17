@@ -1,6 +1,8 @@
 "use client";
 
+import { BlocReponse } from "@/components/revision/bloc-reponse";
 import { Button } from "@/components/ui/button";
+import { etalonLisible } from "@/lib/domain/etalon-lisible";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
@@ -29,17 +31,15 @@ export function PierreJetee({
 }) {
   return (
     <div className="mt-pas-8">
-      <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">La réponse</p>
+      <BlocReponse>
+        <TexteTechnique>{etalonLisible(reponse)}</TexteTechnique>
 
-      <p className="mt-pas-3 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed whitespace-pre-wrap text-stone-900">
-        <TexteTechnique>{reponse}</TexteTechnique>
-      </p>
-
-      {precision ? (
-        <p className="mt-pas-3 text-petit max-w-lg leading-relaxed text-stone-500">
-          <TexteTechnique>{precision}</TexteTechnique>
-        </p>
-      ) : null}
+        {precision ? (
+          <span className="mt-pas-3 text-petit block text-stone-300">
+            <TexteTechnique>{etalonLisible(precision)}</TexteTechnique>
+          </span>
+        ) : null}
+      </BlocReponse>
 
       {/* Ce qui est écrit, pas ce que ça déclenche : en entraînement rien ne se
           replanifie, et « compte » aurait dit le contraire de la ligne qui vit

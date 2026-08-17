@@ -1,8 +1,10 @@
 "use client";
 
 import { BarreDeNotation } from "@/components/revision/barre-de-notation";
+import { BlocReponse } from "@/components/revision/bloc-reponse";
 import { Button } from "@/components/ui/button";
 import type { ReviewRating } from "@/lib/db/types";
+import { etalonLisible } from "@/lib/domain/etalon-lisible";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
@@ -14,11 +16,15 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  * réponse ne dit rien du rappel.
  *
  * Ce qui s'affiche alors n'est pas une correction qui tombe. C'est un point de
- * comparaison, et c'est la personne qui compare — d'où la consigne, avant le
- * bouton : sans réponse formulée, il n'y a rien à comparer et l'écran ne sert
- * qu'à lire.
+ * comparaison, et c'est la personne qui compare — d'où la consigne : sans
+ * réponse formulée, il n'y a rien à comparer et l'écran ne sert qu'à lire.
+ *
+ * Cette consigne est la demande de l'écran, et elle se lit comme telle : au
+ * poids du corps, avec le bouton juste dessous. Empilée en trois morceaux — une
+ * ligne, une deuxième plus pâle, puis un bouton, puis un lien — elle n'était
+ * plus qu'un des quatre éléments d'une colonne molle. La raison de la consigne
+ * tient sur la même ligne que le bouton : elle explique, elle ne demande rien.
  */
-
 export function ReponseOuverte({
   answerKey,
   revelee,
@@ -35,29 +41,26 @@ export function ReponseOuverte({
   if (!revelee) {
     return (
       <div className="mt-pas-12">
-        {/* La consigne avant le bouton, et au poids du corps : c'est ce qu'il faut
-            avoir fait pour que le bouton serve à quelque chose. Posée dessous en
-            petit, elle se lisait après le clic — trop tard. */}
         <p className="text-corps text-stone-900">Formule ta réponse d&apos;abord, même de tête.</p>
-        <p className="mt-pas-2 text-petit max-w-prose text-stone-500">
-          C&apos;est l&apos;effort de la retrouver qui la fixe.
-        </p>
 
-        <Button type="button" onClick={onReveler} className="mt-pas-6 w-full sm:w-auto">
-          Voir la réponse
-        </Button>
+        <div className="gap-pas-4 mt-pas-3 flex flex-col sm:flex-row sm:items-center">
+          <Button type="button" onClick={onReveler} className="w-full shrink-0 sm:w-auto">
+            Voir la réponse
+          </Button>
+
+          <p className="text-petit max-w-xs text-stone-500">
+            C&apos;est l&apos;effort de la retrouver qui la fixe.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="mt-pas-12">
-      {/* L'intitulé colle à son contenu : ils sont une seule chose. Il reprend le
-          mot du bouton qui l'a fait venir, et celui de la pierre jetée. */}
-      <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">La réponse</p>
-      <p className="mt-pas-2 text-corps pl-pas-4 border-l-2 border-stone-300 leading-relaxed whitespace-pre-wrap text-stone-900">
-        <TexteTechnique>{answerKey}</TexteTechnique>
-      </p>
+      <BlocReponse>
+        <TexteTechnique>{etalonLisible(answerKey)}</TexteTechnique>
+      </BlocReponse>
 
       {/* Se juger est un autre geste que lire : l'écart le dit. */}
       <div className="mt-pas-12">

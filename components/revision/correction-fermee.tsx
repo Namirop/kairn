@@ -1,7 +1,9 @@
 "use client";
 
+import { BlocReponse } from "@/components/revision/bloc-reponse";
 import { etalonUtile } from "@/components/revision/etalon-utile";
 import { Button } from "@/components/ui/button";
+import { etalonLisible } from "@/lib/domain/etalon-lisible";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
@@ -43,9 +45,11 @@ export function CorrectionFermee({
       </p>
 
       {!juste && complete ? (
-        <p className="mb-pas-8 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed whitespace-pre-wrap text-stone-900">
-          <TexteTechnique>{answerKey}</TexteTechnique>
-        </p>
+        <div className="mb-pas-8">
+          <BlocReponse intitule="Pourquoi">
+            <TexteTechnique>{etalonLisible(answerKey)}</TexteTechnique>
+          </BlocReponse>
+        </div>
       ) : null}
 
       <div className="gap-pas-2 flex flex-wrap">
