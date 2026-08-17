@@ -22,6 +22,36 @@ import { parUrgence } from "./urgence-de-revision";
  */
 export const PLAFOND_SESSION = 20;
 
+/**
+ * Ce qu'un compte peut choisir comme plafond.
+ *
+ * En deçà de cinq, une session ne fait plus rien avancer et l'arriéré grossit
+ * mécaniquement. Au-delà de cinquante, c'est le contraire du plafond : personne
+ * ne tient cinquante rappels d'affilée, et la session redevient la corvée qu'on
+ * abandonne au milieu. Entre les deux, c'est une affaire de temps disponible et
+ * ça ne se décide pas d'ici.
+ */
+export const PLAFOND_MIN = 5;
+export const PLAFOND_MAX = 50;
+
+/**
+ * Le plafond lu depuis ce qu'on a écrit, ou `null` si ce n'en est pas un.
+ *
+ * `null` et non une exception : l'appelant est un formulaire, et il a un message
+ * à afficher plutôt qu'une panne à propager.
+ */
+export function lirePlafondDeSession(saisie: string): number | null {
+  const trouve = /^\s*(\d{1,3})\s*$/.exec(saisie);
+
+  if (!trouve) return null;
+
+  const plafond = Number.parseInt(trouve[1] ?? "", 10);
+
+  if (Number.isNaN(plafond) || plafond < PLAFOND_MIN || plafond > PLAFOND_MAX) return null;
+
+  return plafond;
+}
+
 export type ConceptDu = {
   id: string;
   due: Date;

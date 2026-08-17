@@ -7,6 +7,9 @@ import {
   estDu,
   estServableAujourdhui,
   jourOuIlRevient,
+  lirePlafondDeSession,
+  PLAFOND_MAX,
+  PLAFOND_MIN,
   type ConceptDu,
 } from "./selection-session";
 
@@ -354,6 +357,44 @@ describe("chargeDuJour", () => {
         },
       ),
       { numRuns: 300 },
+    );
+  });
+});
+
+describe("lirePlafondDeSession", () => {
+  it("lit un nombre écrit simplement", () => {
+    expect(lirePlafondDeSession("20")).toBe(20);
+    expect(lirePlafondDeSession(" 8 ")).toBe(8);
+    expect(lirePlafondDeSession("050")).toBe(50);
+  });
+
+  it("tient les deux bouts de la plage", () => {
+    expect(lirePlafondDeSession(String(PLAFOND_MIN))).toBe(PLAFOND_MIN);
+    expect(lirePlafondDeSession(String(PLAFOND_MAX))).toBe(PLAFOND_MAX);
+  });
+
+  it("refuse ce qui sort de la plage", () => {
+    expect(lirePlafondDeSession("4")).toBe(null);
+    expect(lirePlafondDeSession("51")).toBe(null);
+    expect(lirePlafondDeSession("0")).toBe(null);
+  });
+
+  it("refuse ce qui n'est pas un nombre de concepts", () => {
+    expect(lirePlafondDeSession("")).toBe(null);
+    expect(lirePlafondDeSession("vingt")).toBe(null);
+    expect(lirePlafondDeSession("20 concepts")).toBe(null);
+    expect(lirePlafondDeSession("-20")).toBe(null);
+    expect(lirePlafondDeSession("12,5")).toBe(null);
+  });
+
+  it("ne rend jamais un plafond hors de la plage", () => {
+    fc.assert(
+      fc.property(fc.string({ maxLength: 8 }), (saisie) => {
+        const plafond = lirePlafondDeSession(saisie);
+
+        return plafond === null || (plafond >= PLAFOND_MIN && plafond <= PLAFOND_MAX);
+      }),
+      { numRuns: 500 },
     );
   });
 });

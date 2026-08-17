@@ -6,7 +6,7 @@ import { MesDonnees } from "@/components/compte/mes-donnees";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
-import { FormulaireDeNotifications } from "@/components/reglages/formulaire-de-notifications";
+import { FormulaireDeReglages } from "@/components/reglages/formulaire-de-reglages";
 import { estAdministrateur } from "@/lib/auth/admin";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -65,14 +65,15 @@ export default async function PageReglages() {
       <Panneau surface="papier" mesure="colonne">
         <h1 className="text-h1-app leading-tight font-bold">Réglages</h1>
         <p className="mt-pas-2 text-petit max-w-md text-stone-500">
-          Ce que Kairn t&apos;envoie, et quand.
+          Ce que tu fais dans Kairn, et ce que Kairn fait sans toi.
         </p>
       </Panneau>
 
       <Strates de="papier" vers="ombre" graine="reglages-liste" />
 
       <Panneau surface="ombre" mesure="colonne" remplit className="md:pb-pas-16">
-        <FormulaireDeNotifications
+        <FormulaireDeReglages
+          plafond={reglages.sessionCap}
           rappelActif={reglages.dailyReminderEnabled}
           heureDuRappel={reglages.dailyReminderHour}
           alerteActive={reglages.streakAlertEnabled}

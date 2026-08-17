@@ -9,6 +9,7 @@ import { supprimerLeCompte } from "@/lib/db/compte";
 import { enregistrerLesReglages, optOutOfEmails, reprendreLesEmails } from "@/lib/db/user-settings";
 import { confirmationValide, MOT_DE_CONFIRMATION } from "@/lib/domain/confirmation-de-suppression";
 import { lireHeureDeRappel } from "@/lib/domain/heure-de-rappel";
+import { lirePlafondDeSession, PLAFOND_MAX, PLAFOND_MIN } from "@/lib/domain/selection-session";
 
 /**
  * Les gestes irréversibles d'un compte.
@@ -63,11 +64,16 @@ export async function supprimerMonCompteAction(
 /**
  * Ce que le formulaire de notifications rend à l'écran : un mot, jamais les deux.
  *
- * `heure` porte la saisie refusée. React remet un formulaire à ses valeurs par
- * défaut quand l'action rend la main, donc sans elle une heure mal écrite
- * disparaissait au moment où l'on demandait de la corriger.
+ * `heure` et `plafond` portent les saisies refusées. React remet un formulaire à
+ * ses valeurs par défaut quand l'action rend la main, donc sans elles une valeur
+ * mal écrite disparaissait au moment où l'on demandait de la corriger.
  */
-export type EtatDesReglages = { message?: string; erreur?: string; heure?: string };
+export type EtatDesReglages = {
+  message?: string;
+  erreur?: string;
+  heure?: string;
+  plafond?: string;
+};
 
 /**
  * Enregistre les réglages de notification.
@@ -89,36 +95,46 @@ export async function enregistrerLesReglagesAction(
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
-  const emailsActifs = donnees.get("emails") !== null;
+  // Les deux lectures d'abord : rien ne s'écrit tant qu'une saisie est illisible,
+  // sinon un plafond mal tapé aurait quand même coupé les emails.
+  const saisieDuPlafond = (donnees.get("plafond") ?? "").toString();
+  const plafond = lirePlafondDeSession(saisieDuPlafond);
 
-  if (!emailsActifs) {
-    await optOutOfEmails(utilisateur.id);
-    revalidatePath(ROUTES.reglages);
-
-    return { message: "Emails coupés." };
+  if (plafond === null) {
+    return {
+      erreur: `La session porte de ${PLAFOND_MIN} à ${PLAFOND_MAX} concepts. Ce qui déborde revient le lendemain.`,
+      plafond: saisieDuPlafond,
+    };
   }
 
-  const saisie = (donnees.get("heure") ?? "").toString();
-  const heure = lireHeureDeRappel(saisie);
+  const emailsActifs = donnees.get("emails") !== null;
+  const saisieDeLHeure = (donnees.get("heure") ?? "").toString();
+  const heure = lireHeureDeRappel(saisieDeLHeure);
 
   if (heure === null) {
     return {
       erreur: "L'heure du rappel est une heure pile, de 0 à 23. Par exemple 19 h.",
-      heure: saisie,
+      heure: saisieDeLHeure,
+      plafond: saisieDuPlafond,
     };
   }
 
-  await reprendreLesEmails(utilisateur.id);
+  if (!emailsActifs) await optOutOfEmails(utilisateur.id);
+  else await reprendreLesEmails(utilisateur.id);
 
   const ecrit = await enregistrerLesReglages(utilisateur.id, {
-    dailyReminderEnabled: donnees.get("rappel") !== null,
+    sessionCap: plafond,
+    // Emails coupés, les deux réglages de contenu le sont aussi : c'est ce que
+    // fait le lien de désinscription, et les deux chemins doivent laisser le
+    // compte dans le même état.
+    dailyReminderEnabled: emailsActifs && donnees.get("rappel") !== null,
     dailyReminderHour: heure,
-    streakAlertEnabled: donnees.get("alerte") !== null,
+    streakAlertEnabled: emailsActifs && donnees.get("alerte") !== null,
   });
 
   if (!ecrit) return { erreur: "Ces réglages n'ont pas pu être enregistrés. Réessaie." };
 
   revalidatePath(ROUTES.reglages);
 
-  return { message: "Enregistré." };
+  return { message: emailsActifs ? "Enregistré." : "Enregistré. Emails coupés." };
 }

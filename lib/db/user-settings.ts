@@ -48,6 +48,27 @@ export async function lireFuseauUtilisateur(userId: string): Promise<string> {
   return reglages.timezone;
 }
 
+/**
+ * Ce qu'il faut savoir d'un compte pour composer sa session : quel jour il est
+ * chez lui, et combien de concepts il accepte d'un coup.
+ *
+ * Les deux en une lecture : ils sont demandés ensemble à chaque ouverture de la
+ * session comme du tableau de bord, et deux requêtes pour deux colonnes de la
+ * même ligne n'ont aucune raison d'exister.
+ */
+export type CadreDeSession = { fuseau: string; plafond: number };
+
+export async function lireCadreDeSession(userId: string): Promise<CadreDeSession> {
+  const reglages = await prisma.userSettings.findUnique({
+    where: { userId },
+    select: { timezone: true, sessionCap: true },
+  });
+
+  if (!reglages) throw new ReglagesIntrouvablesError(userId);
+
+  return { fuseau: reglages.timezone, plafond: reglages.sessionCap };
+}
+
 export async function findUserStats(userId: string): Promise<UserStats | null> {
   return prisma.userStats.findUnique({ where: { userId } });
 }
@@ -82,6 +103,8 @@ export async function marquerPrincipeVu(userId: string, at: Date = new Date()): 
  * champ par champ laisse un état à moitié appliqué si un envoi échoue.
  */
 export type ReglagesModifiables = {
+  /** Concepts au plus dans une session. Ce qui déborde revient le lendemain. */
+  sessionCap: number;
   dailyReminderEnabled: boolean;
   /** Heure locale, 0 à 23. Le passage horaire la compare à l'heure de chacun. */
   dailyReminderHour: number;

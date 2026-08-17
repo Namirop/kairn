@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import { questionServie, type QuestionServie } from "@/lib/db/question-servie";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireCadreDeSession, lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { alternerLesGestes } from "@/lib/domain/alternance-des-gestes";
 import { gesteDeReponse } from "@/lib/domain/geste-de-reponse";
 import { jourSuivant, localDay } from "@/lib/domain/local-day";
@@ -44,7 +44,7 @@ export async function lireSessionDuJour(
   userId: string,
   maintenant: Date = new Date(),
 ): Promise<SessionDuJour> {
-  const fuseau = await lireFuseauUtilisateur(userId);
+  const { fuseau, plafond } = await lireCadreDeSession(userId);
 
   const [candidats, totalConcepts, enAttente, prochain] = await Promise.all([
     prisma.atom.findMany({
@@ -99,7 +99,7 @@ export async function lireSessionDuJour(
     }),
   ]);
 
-  const retenus = composerSession(candidats, maintenant, fuseau);
+  const retenus = composerSession(candidats, maintenant, fuseau, plafond);
   const questions: QuestionServie[] = [];
 
   for (const atome of retenus) {

@@ -2,7 +2,7 @@ import { suivreLArriere, type ArriereSuivi } from "@/lib/db/arriere-de-revision"
 import { prisma } from "@/lib/db/client";
 import { listerDepots } from "@/lib/db/depots";
 import { compterDusAujourdhui } from "@/lib/db/session-du-jour";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireCadreDeSession } from "@/lib/db/user-settings";
 import { chargeDuJour, type ChargeDuJour } from "@/lib/domain/selection-session";
 import type { UserStats } from "@/lib/db/types";
 import type { DepotListe } from "@/lib/db/depots";
@@ -33,13 +33,13 @@ export async function lireTableauDeBord(
   userId: string,
   maintenant: Date = new Date(),
 ): Promise<TableauDeBord> {
-  const [dusAujourdhui, fuseau, stats, consolides, depots, totalAtoms, sansQuestions] =
+  const [dusAujourdhui, cadre, stats, consolides, depots, totalAtoms, sansQuestions] =
     await Promise.all([
       // Le même compte que celui de la session, et pas un compte parallèle : les
       // deux avaient divergé, l'accueil promettant cinq concepts là où la session
       // répondait « tu es à jour ». « Est dû » n'a qu'un seul endroit où vivre.
       compterDusAujourdhui(userId, maintenant),
-      lireFuseauUtilisateur(userId),
+      lireCadreDeSession(userId),
       prisma.userStats.findUnique({ where: { userId } }),
       prisma.atom.findMany({
         where: { userId, state: "CONSOLIDATED" },
@@ -51,12 +51,12 @@ export async function lireTableauDeBord(
       prisma.atom.count({ where: { userId, uncertain: false, variants: { none: {} } } }),
     ]);
 
-  const charge = chargeDuJour(dusAujourdhui);
-  const arriere = await suivreLArriere(userId, charge.enAttente > 0, fuseau, maintenant);
+  const charge = chargeDuJour(dusAujourdhui, cadre.plafond);
+  const arriere = await suivreLArriere(userId, charge.enAttente > 0, cadre.fuseau, maintenant);
 
   return {
     charge,
-    fuseau,
+    fuseau: cadre.fuseau,
     stats,
     grainesDuCairn: consolides.map((atom) => atom.id),
     totalAtoms,
