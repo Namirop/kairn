@@ -46,11 +46,12 @@ function Serie({ streak }: { streak: number }) {
         <p className={ETIQUETTE}>Série</p>
         <p className={`${CHIFFRE} text-ember-clair`}>{streak}</p>
         <p className="text-mono text-ember-clair mt-pas-2 font-mono tracking-[0.14em] uppercase">
-          {streak === 1 ? "jour d'affilée" : "jours d'affilée"}
+          {streak === 1 ? "session" : "sessions d'affilée"}
         </p>
       </TooltipTrigger>
       <TooltipContent>
-        Nombre de jours consécutifs avec au moins un passage, dans ton fuseau horaire.
+        Le nombre de sessions consécutives, sans en manquer une. Une journée où rien n&apos;arrive à
+        échéance ne compte pas, et ne casse rien.
       </TooltipContent>
     </Tooltip>
   );

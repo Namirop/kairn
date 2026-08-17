@@ -100,7 +100,13 @@ async function compteRempli(userId: string, fuseau: string): Promise<void> {
     tempsMs: 3000,
     maitrise: false,
   });
-  await compterLePassage({ userId, ratePrecedemment: false, reussiMaintenant: true, fuseau });
+  await compterLePassage({
+    userId,
+    ratePrecedemment: false,
+    reussiMaintenant: true,
+    fuseau,
+    echeanceAvant: new Date(),
+  });
   await signalerUneQuestion({
     userId,
     variantId: concept.variantIds[1] ?? "",

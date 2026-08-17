@@ -4,6 +4,7 @@ import {
   avancementDuNiveau,
   progressionPourXp,
   serieApresPassage,
+  unRendezVousManque,
   xpDuNiveau,
   xpDuPassage,
   XP_DU_PREMIER_PALIER,
@@ -106,8 +107,20 @@ describe("serieApresPassage", () => {
     expect(serieApresPassage("2026-03-10", "2026-03-10", 4)).toBe(4);
   });
 
-  it("repart à un après un jour sauté", () => {
-    expect(serieApresPassage("2026-03-08", "2026-03-10", 9)).toBe(1);
+  it("repart à un quand un rendez-vous a été manqué", () => {
+    expect(serieApresPassage("2026-03-08", "2026-03-10", 9, true)).toBe(1);
+  });
+
+  it("tient à travers un trou où rien n'arrivait à échéance", () => {
+    // Trois jours sans rien à revoir : le compteur avance d'un cran au retour,
+    // il ne compte pas les jours vides et ne se casse pas dessus.
+    expect(serieApresPassage("2026-03-07", "2026-03-10", 9)).toBe(10);
+  });
+
+  it("refuse un jour antérieur au dernier passage", () => {
+    // Ne devrait pas arriver ; si ça arrive, la série repart plutôt que de
+    // s'allonger sur une horloge qui recule.
+    expect(serieApresPassage("2026-03-10", "2026-03-08", 9)).toBe(1);
   });
 
   it("enjambe un changement de mois et une année bissextile", () => {
@@ -130,7 +143,65 @@ describe("serieApresPassage", () => {
       fc.property(
         fc.option(fc.constantFrom("2026-03-08", "2026-03-09", "2026-03-10"), { nil: null }),
         fc.integer({ min: -5, max: 500 }),
-        (dernier, serie) => serieApresPassage(dernier, "2026-03-10", serie) >= 1,
+        fc.boolean(),
+        (dernier, serie, manque) => serieApresPassage(dernier, "2026-03-10", serie, manque) >= 1,
+      ),
+      { numRuns: 300 },
+    );
+  });
+
+  it("n'avance jamais de plus d'un cran par jour nouveau", () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom("2026-03-01", "2026-03-08", "2026-03-09"),
+        fc.integer({ min: 1, max: 500 }),
+        fc.boolean(),
+        (dernier, serie, manque) =>
+          serieApresPassage(dernier, "2026-03-10", serie, manque) <= serie + 1,
+      ),
+      { numRuns: 300 },
+    );
+  });
+});
+
+describe("unRendezVousManque", () => {
+  it("voit une échéance tombée dans le trou", () => {
+    expect(unRendezVousManque(["2026-03-09"], "2026-03-07", "2026-03-10")).toBe(true);
+  });
+
+  it("ne voit rien quand le trou était vide", () => {
+    expect(unRendezVousManque(["2026-03-10", "2026-03-12"], "2026-03-07", "2026-03-10")).toBe(
+      false,
+    );
+  });
+
+  it("ne compte pas le jour du dernier passage : on y était", () => {
+    // Ce qui a débordé du plafond hier porte l'échéance d'hier. La session a
+    // bien été tenue ; elle ne doit pas casser la série du lendemain.
+    expect(unRendezVousManque(["2026-03-09"], "2026-03-09", "2026-03-10")).toBe(false);
+    expect(unRendezVousManque(["2026-03-05"], "2026-03-09", "2026-03-10")).toBe(false);
+  });
+
+  it("ne compte pas aujourd'hui : on y est", () => {
+    expect(unRendezVousManque(["2026-03-10"], "2026-03-08", "2026-03-10")).toBe(false);
+  });
+
+  it("ne voit rien dans une liste vide", () => {
+    expect(unRendezVousManque([], "2026-03-08", "2026-03-10")).toBe(false);
+  });
+
+  it("est indifférent à l'ordre de la liste", () => {
+    fc.assert(
+      fc.property(
+        fc.array(fc.constantFrom("2026-03-07", "2026-03-08", "2026-03-09", "2026-03-10"), {
+          maxLength: 8,
+        }),
+        (echeances) => {
+          const endroit = unRendezVousManque(echeances, "2026-03-07", "2026-03-10");
+          const envers = unRendezVousManque([...echeances].reverse(), "2026-03-07", "2026-03-10");
+
+          return endroit === envers;
+        },
       ),
       { numRuns: 200 },
     );

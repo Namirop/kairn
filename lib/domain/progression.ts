@@ -1,5 +1,3 @@
-import { jourSuivant } from "./local-day";
-
 /**
  * Ce que la progression compte, et ce qu'elle refuse de compter.
  *
@@ -116,6 +114,32 @@ export function avancementDuNiveau(xp: number): AvancementDuNiveau {
 }
 
 /**
+ * Un jour où quelque chose attendait est-il passé sans personne ?
+ *
+ * C'est la question que la série pose vraiment. Elle ne compte pas les jours du
+ * calendrier : elle compte les rendez-vous tenus. Un concept qui arrive à
+ * échéance un jour où l'on ne vient pas est un rendez-vous manqué ; une journée
+ * sans échéance n'en est pas un, et n'a rien à casser.
+ *
+ * Les échéances données sont des jours civils de l'utilisateur, et la comparaison
+ * est lexicographique — sur des étiquettes `AAAA-MM-JJ`, c'est l'ordre
+ * chronologique, sans repasser par un fuseau.
+ *
+ * Les bornes sont exclues des deux côtés, et chacune pour sa raison. Le jour du
+ * dernier passage : on y était. Aujourd'hui : on y est. Ce qui a débordé du
+ * plafond de session hier porte une échéance d'hier ou d'avant, donc reste hors
+ * de l'intervalle — sans quoi une session trop chargée casserait la série le
+ * lendemain de l'avoir tenue.
+ */
+export function unRendezVousManque(
+  joursDEcheance: string[],
+  dernierJour: string,
+  jour: string,
+): boolean {
+  return joursDEcheance.some((echeance) => echeance > dernierJour && echeance < jour);
+}
+
+/**
  * La série après un passage, dans le calendrier de l'utilisateur.
  *
  * Les jours sont comparés comme des étiquettes `AAAA-MM-JJ` et jamais comme des
@@ -123,16 +147,22 @@ export function avancementDuNiveau(xp: number): AvancementDuNiveau {
  * comptent deux jours, et ce qui rend le calcul insensible aux changements
  * d'heure. Une seule révision suffit à tenir la série — le but est de revenir,
  * pas de tout finir.
+ *
+ * Ce que la série compte, ce sont les passages consécutifs sans en manquer un, et
+ * non les jours consécutifs. Un trou dans le calendrier ne la casse que si
+ * quelque chose y arrivait à échéance : quelqu'un qui est à jour et dont rien ne
+ * revient pendant trois jours ne perd rien, parce qu'il n'y avait rien à perdre.
+ * L'inverse punissait exactement le comportement que le produit demande — revenir
+ * quand on est appelé, et pas plus.
  */
 export function serieApresPassage(
   dernierJour: string | null,
   jour: string,
   serieActuelle: number,
+  rendezVousManque = false,
 ): number {
   if (dernierJour === jour) return Math.max(1, serieActuelle);
-  if (dernierJour !== null && jourSuivant(dernierJour) === jour) {
-    return Math.max(1, serieActuelle) + 1;
-  }
+  if (dernierJour === null || dernierJour > jour) return 1;
 
-  return 1;
+  return rendezVousManque ? 1 : Math.max(1, serieActuelle) + 1;
 }

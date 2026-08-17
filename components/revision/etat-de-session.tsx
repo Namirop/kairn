@@ -46,8 +46,8 @@ export function EtatDeSession({
 
         {serie > 0 ? (
           <p className="text-mono border-ember-clair/40 text-ember-clair rounded-galet px-pas-2 lg:mt-pas-3 inline-block border py-0.5 font-mono tracking-[0.12em] uppercase">
-            <span className="tabular-nums">{serie}</span> {serie === 1 ? "jour" : "jours"}{" "}
-            d&apos;affilée
+            <span className="tabular-nums">{serie}</span>{" "}
+            {serie === 1 ? "session" : "sessions d'affilée"}
           </p>
         ) : null}
       </div>

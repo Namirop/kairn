@@ -35,7 +35,7 @@ export function renderDailyReminder(
 
   const streak =
     currentStreak > 0
-      ? `<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.ember};">${currentStreak} jours d'affilée</p>`
+      ? `<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.ember};">${currentStreak} ${currentStreak === 1 ? "session" : "sessions d'affilée"}</p>`
       : "";
 
   const body = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.ink};">${dueCount}</p>

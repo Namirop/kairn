@@ -186,6 +186,9 @@ export async function enregistrerRevision(
       ratePrecedemment: passes.at(-1)?.rating === "AGAIN",
       reussiMaintenant: estReussite(revision.note),
       fuseau: await lireFuseauUtilisateur(revision.userId),
+      // Celle d'avant le passage : c'est elle qui dit si ce concept attendait
+      // depuis un jour où personne n'est venu.
+      echeanceAvant: atome.due,
     },
     maintenant,
   );

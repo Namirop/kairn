@@ -12,11 +12,11 @@ import type { RenderedEmail } from "./daily-reminder";
  *
  * Ce qu'elle ne dit pas : « ne casse pas ta série », « plus que quelques
  * heures », ni rien qui presse. Le fait suffit ; qui tient une série de douze
- * jours sait déjà ce qu'il en coûte de sauter un soir.
+ * sessions sait déjà ce qu'il en coûte de sauter un soir.
  */
 
 export type AlerteDeStreakPayload = {
-  /** Jours d'affilée en cours. Toujours au moins un, sinon rien n'est en jeu. */
+  /** Sessions d'affilée en cours. Toujours au moins une, sinon rien n'est en jeu. */
   currentStreak: number;
   /** Concepts dus aujourd'hui. Toujours au moins un, sinon rien n'est jouable. */
   dueCount: number;
@@ -31,19 +31,19 @@ export function renderAlerteDeStreak(
   links: { sessionUrl: string; unsubscribeUrl: string },
 ): RenderedEmail {
   const subject = "Ta série se joue aujourd'hui";
-  const jours = currentStreak === 1 ? "jour d'affilée" : "jours d'affilée";
+  const unite = currentStreak === 1 ? "session" : "sessions d'affilée";
 
   const body = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.ember};">${currentStreak}</p>
-<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.ember};">${jours}</p>
+<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.ember};">${unite}</p>
 <p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">Rien n'a été revu aujourd'hui, et ${concepts(dueCount)} attendent. Une seule question suffit à tenir la série.</p>
 <a href="${links.sessionUrl}" style="display:inline-block;background:${S.lichen};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Commencer</a>`;
 
-  const text = `${currentStreak} ${jours}.\n\nRien n'a été revu aujourd'hui, et ${concepts(dueCount)} attendent. Une seule question suffit à tenir la série.\n\n${links.sessionUrl}\n\nNe plus recevoir cette alerte : ${links.unsubscribeUrl}`;
+  const text = `${currentStreak} ${unite}.\n\nRien n'a été revu aujourd'hui, et ${concepts(dueCount)} attendent. Une seule question suffit à tenir la série.\n\n${links.sessionUrl}\n\nNe plus recevoir cette alerte : ${links.unsubscribeUrl}`;
 
   return {
     subject,
     html: renderShell({
-      preheader: `${currentStreak} ${jours}, et rien aujourd'hui.`,
+      preheader: `${currentStreak} ${unite}, et rien aujourd'hui.`,
       body,
       unsubscribeUrl: links.unsubscribeUrl,
       raisonDeLEnvoi:

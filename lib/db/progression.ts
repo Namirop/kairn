@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/db/client";
 import { localDay } from "@/lib/domain/local-day";
-import { progressionPourXp, serieApresPassage, xpDuPassage } from "@/lib/domain/progression";
+import {
+  progressionPourXp,
+  serieApresPassage,
+  unRendezVousManque,
+  xpDuPassage,
+} from "@/lib/domain/progression";
 
 /**
  * L'écriture de la progression, après un passage en session du jour.
@@ -23,6 +28,15 @@ export type PassageCompte = {
   ratePrecedemment: boolean;
   reussiMaintenant: boolean;
   fuseau: string;
+  /**
+   * L'échéance que portait le concept **avant** ce passage.
+   *
+   * Elle est passée par l'appelant parce qu'elle n'existe plus au moment où on
+   * compte : la replanification l'a déjà déplacée dans le futur. Sans elle, un
+   * concept en retard depuis trois jours et revu maintenant ferait tenir la série
+   * qu'il vient précisément de casser.
+   */
+  echeanceAvant: Date;
 };
 
 export type ProgressionEcrite = {
@@ -51,9 +65,10 @@ export async function compterLePassage(
   const jour = localDay(maintenant, passage.fuseau);
   const gain = xpDuPassage(passage.ratePrecedemment, passage.reussiMaintenant);
 
-  const consolides = await prisma.atom.count({
-    where: { userId: passage.userId, state: "CONSOLIDATED" },
-  });
+  const [consolides, echeances] = await Promise.all([
+    prisma.atom.count({ where: { userId: passage.userId, state: "CONSOLIDATED" } }),
+    echeancesPassees(passage, maintenant),
+  ]);
 
   return prisma.$transaction(async (tx) => {
     const avant = await tx.userStats.findUnique({
@@ -65,7 +80,12 @@ export async function compterLePassage(
       ? avant.lastReviewedOn.toISOString().slice(0, 10)
       : null;
     const xp = (avant?.xp ?? 0) + gain;
-    const serie = serieApresPassage(dernierJour, jour, avant?.currentStreak ?? 0);
+    const serie = serieApresPassage(
+      dernierJour,
+      jour,
+      avant?.currentStreak ?? 0,
+      dernierJour === null ? false : unRendezVousManque(echeances, dernierJour, jour),
+    );
     const niveau = progressionPourXp(xp).niveau;
 
     await tx.userStats.upsert({
@@ -98,4 +118,32 @@ export async function compterLePassage(
       consolides,
     };
   });
+}
+
+/**
+ * Les jours d'échéance déjà atteints, du concept qu'on vient de revoir et de ce
+ * qui reste en attente.
+ *
+ * Une borne large en SQL, le tri exact en mémoire : c'est le même partage que
+ * partout ailleurs, parce que « quel jour est-ce chez lui » ne se compare pas
+ * dans une requête. La borne haute est l'instant courant — une échéance dans le
+ * futur n'a par définition manqué aucun rendez-vous.
+ */
+async function echeancesPassees(passage: PassageCompte, maintenant: Date): Promise<string[]> {
+  const enAttente = await prisma.atom.findMany({
+    where: {
+      userId: passage.userId,
+      uncertain: false,
+      state: { not: "ARCHIVED" },
+      due: { lte: maintenant },
+    },
+    select: { due: true },
+    // De quoi couvrir tout arriéré réel : le produit plafonne les dépôts à trente
+    // concepts par mois, et seule l'existence d'une échéance dans le trou compte.
+    take: 500,
+  });
+
+  return [passage.echeanceAvant, ...enAttente.map((atome) => atome.due)].map((echeance) =>
+    localDay(echeance, passage.fuseau),
+  );
 }
