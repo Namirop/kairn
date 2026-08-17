@@ -37,7 +37,7 @@ export function PierreJetee({
   const lu = useDelaiDeLecture(true);
 
   return (
-    <div className="mt-pas-8">
+    <div className="mt-pas-scene">
       <BlocReponse>
         <TexteTechnique>{etalonLisible(reponse)}</TexteTechnique>
 

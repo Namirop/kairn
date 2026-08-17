@@ -47,6 +47,10 @@ export default async function PageConnexion({
         </div>
       ) : null}
 
+      {/* Le rappel quotidien est actif dès la création du compte, et sa base
+          légale est le contrat : reposer au bon moment est le service même. Encore
+          faut-il le dire **au moment où l'on s'engage** — un réglage qu'on
+          découvre en recevant le premier email n'a rien annoncé. */}
       <p className="text-petit text-stone-500">
         En continuant, tu acceptes la{" "}
         <Link
@@ -55,7 +59,8 @@ export default async function PageConnexion({
         >
           politique de confidentialité
         </Link>
-        .
+        . Kairn t&apos;écrit les jours où quelque chose est à revoir, et se coupe d&apos;un clic
+        depuis les réglages comme depuis chaque email.
       </p>
     </div>
   );

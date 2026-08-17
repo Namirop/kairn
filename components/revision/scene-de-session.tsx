@@ -66,7 +66,7 @@ export function SceneDeSession({
           </aside>
         ) : null}
 
-        <div className="px-pas-4 md:px-pas-8 py-pas-8 md:py-pas-12 grain @container relative flex flex-1 overflow-hidden lg:order-1">
+        <div className="px-pas-4 md:px-pas-8 py-pas-scene grain @container relative flex flex-1 overflow-hidden lg:order-1">
           <div className="relative z-10 m-auto w-full max-w-6xl">
             {mention ? <MotDeMarge mot={mention} /> : null}
 

@@ -46,10 +46,16 @@ export function Hero({
     <Panneau
       surface="papier"
       aere
-      // La hauteur de l'en-tête, seul élément fixe au-dessus. `svh` et non `dvh` :
-      // sur un mobile, la barre d'adresse qui se replie ferait grandir le panneau
-      // pendant qu'on lit, et le contenu sauterait sous les yeux.
-      className="gap-pas-12 grid items-center md:min-h-[calc(100svh-4rem)] md:grid-cols-[1.4fr_1fr]"
+      // La hauteur de l'en-tête, seul élément fixe au-dessus, **moins deux pas** :
+      // c'est ce qui laisse la coupe de roche entamer le bas de l'écran. Un pli
+      // net donnait une ouverture qui avait l'air d'être toute la page ; une
+      // jointure à moitié visible dit qu'il y a autre chose dessous, et le dit
+      // mieux qu'une flèche.
+      //
+      // `svh` et non `dvh` : sur un mobile, la barre d'adresse qui se replie
+      // ferait grandir le panneau pendant qu'on lit, et le contenu sauterait sous
+      // les yeux.
+      className="gap-pas-12 grid items-center md:min-h-[calc(100svh-4rem-2rem)] md:grid-cols-[1.4fr_1fr]"
     >
       <Apparition>
         <h1 className="font-display text-h1-site leading-[0.95] font-bold tracking-[-0.03em] text-balance">

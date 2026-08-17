@@ -45,7 +45,7 @@ export function ReponseCloze({
 
   if (trou.verdict === "JUSTE") {
     return (
-      <div className="mt-pas-12">
+      <div className="mt-pas-scene">
         {/* Un constat, pas un compliment : la récompense est l'espacement qui
             s'allonge, et le terme qui vient de se poser dans la phrase. */}
         <p className="text-corps text-stone-900">C&apos;est le terme attendu.</p>
@@ -61,7 +61,7 @@ export function ReponseCloze({
 
   if (trou.verdict === "RATE") {
     return (
-      <div className="mt-pas-12">
+      <div className="mt-pas-scene">
         <p className="text-corps text-stone-500">
           Tu as écrit <span className="font-mono text-stone-900">{propre}</span>.
         </p>
@@ -88,7 +88,7 @@ export function ReponseCloze({
 
   return (
     <form
-      className="mt-pas-12"
+      className="mt-pas-scene"
       onSubmit={(evenement) => {
         evenement.preventDefault();
         onVerifier();

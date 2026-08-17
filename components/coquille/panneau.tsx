@@ -101,7 +101,10 @@ export function Panneau({
         className={cn(
           "px-pas-4 md:px-pas-8 relative z-10 mx-auto w-full",
           MESURES[mesure],
-          aere ? "py-pas-campagne" : "py-pas-8 md:py-pas-12",
+          // Les deux rythmes suivent la fenêtre : sur un écran de mille
+          // quatre-vingts, six pas de marge sur deux panneaux empilés font cent
+          // pixels qui passent sous le pli sans rien porter.
+          aere ? "py-pas-campagne" : "py-pas-dedans",
           centre && "flex flex-col items-center text-center",
           className,
         )}

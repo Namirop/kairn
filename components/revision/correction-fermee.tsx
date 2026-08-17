@@ -45,7 +45,7 @@ export function CorrectionFermee({
   const lu = useDelaiDeLecture(!juste);
 
   return (
-    <div className="mt-pas-8">
+    <div className="mt-pas-scene">
       <p className="sr-only" role="status">
         {juste ? "Réponse juste." : "Réponse fausse."}
       </p>

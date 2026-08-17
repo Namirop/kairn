@@ -17,26 +17,23 @@ import { symboleSeul } from "@/lib/design/symbole-svg";
  * police, donc le moteur de rendu de Next : la fonte est lue dans le dépôt et
  * embarquée, et le rendu est le même partout.
  *
- * **Une approximation, et une seule.** Dans le composant, la pierre du i est posée
- * au milieu de la boîte du `ı`, ce que la mise en page en ligne du navigateur
- * calcule exactement. Ce moteur-ci ne fait pas de mise en page en ligne : le mot y
- * est un seul bloc de texte — pour que le crénage reste juste — et la pierre est
- * placée à une fraction de sa largeur, relevée sur les avances des glyphes. C'est
- * l'écart d'un cheveu sur une image de référence ; **le composant reste la
- * version qui fait foi**, et il ne dépend pas de ce chiffre.
- */
-
-/**
- * Où tombe le centre du `ı` dans « Kaırn », en fraction de la largeur du mot.
+ * **La pierre du i n'est pas placée à l'estime.** Un premier jet la posait à une
+ * fraction de la largeur du mot, relevée sur les avances des glyphes : elle
+ * tombait à côté du fût, et la corriger à l'œil aurait donné un nombre juste pour
+ * une taille et faux pour les autres.
  *
- * Relevé sur les avances de Bricolage Grotesque en 600 : K 0,72 em, a 0,55, ı 0,26,
- * r 0,36, n 0,55. Le centre du `ı` tombe donc à 1,40 em sur 2,44.
+ * Elle est donc **mesurée par le moteur lui-même**. Le mot visible reste un seul
+ * bloc de texte, pour que le crénage soit celui de la police ; par-dessus, une
+ * copie invisible de « Ka » et du « ı » sert de gabarit, et la pierre se centre
+ * dans la boîte du second. Ce sont les mêmes glyphes dans la même fonte : la
+ * largeur du gabarit est exactement celle du mot en dessous, et le placement est
+ * le même que celui du composant — au milieu de la boîte du `ı` — sans aucun
+ * nombre à régler.
  */
-const CENTRE_DU_I = 0.52;
 
 /** Les mêmes mesures que le composant, en parts de corps. */
 const LARGEUR_DE_LA_PIERRE_EM = 0.14;
-const BASE_DE_LA_PIERRE_EM = 0.63;
+const BASE_DE_LA_PIERRE_EM = 0.66;
 
 const DOSSIER = "public/marque";
 
@@ -69,17 +66,21 @@ function symboleEnImage(clair: boolean, hauteur: number): React.ReactElement {
 
 function pierreEnImage(corps: number): React.ReactElement {
   const cote = COTE_DU_POINT;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-cote / 2} ${-cote / 2} ${cote} ${cote}"><path d="${pierreDuPoint()}" fill="${LICHEN}"/></svg>`;
-  const largeur = corps * LARGEUR_DE_LA_PIERRE_EM;
+  const largeur = Math.round(corps * LARGEUR_DE_LA_PIERRE_EM);
+  // Les dimensions sont écrites dans le SVG **et** sur l'image : ce moteur ne
+  // déduit pas de proportion intrinsèque d'une `viewBox`, et sans elles la pierre
+  // s'étirait en une écharde verticale.
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${largeur}" height="${largeur}" viewBox="${-cote / 2} ${-cote / 2} ${cote} ${cote}"><path d="${pierreDuPoint()}" fill="${LICHEN}"/></svg>`;
 
   return (
     // eslint-disable-next-line @next/next/no-img-element -- idem.
     <img
       src={`data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`}
       width={largeur}
+      height={largeur}
       style={{
         position: "absolute",
-        left: `${CENTRE_DU_I * 100}%`,
+        left: "50%",
         bottom: corps * BASE_DE_LA_PIERRE_EM,
         transform: `translateX(${-largeur / 2}px)`,
       }}
@@ -88,20 +89,35 @@ function pierreEnImage(corps: number): React.ReactElement {
   );
 }
 
+/** La typographie du mot, la même pour le texte visible et pour le gabarit. */
+function corpsDuMot(couleur: string): React.CSSProperties {
+  return {
+    fontSize: CORPS,
+    lineHeight: 1,
+    color: couleur,
+    letterSpacing: `${-0.02 * CORPS}px`,
+  };
+}
+
 function mot(ton: Ton, avecPierre: boolean): React.ReactElement {
+  if (!avecPierre) {
+    return <div style={corpsDuMot(ton.encre)}>Kairn</div>;
+  }
+
   return (
     <div style={{ display: "flex", position: "relative" }}>
-      <div
-        style={{
-          fontSize: CORPS,
-          lineHeight: 1,
-          color: ton.encre,
-          letterSpacing: `${-0.02 * CORPS}px`,
-        }}
-      >
-        {avecPierre ? "Kaırn" : "Kairn"}
+      <div style={corpsDuMot(ton.encre)}>Kaırn</div>
+
+      {/* Le gabarit : les mêmes glyphes, transparents, superposés au mot. Sa
+          largeur est donc celle du mot, et la boîte du `ı` tombe pile sur le fût
+          qu'on voit dessous. */}
+      <div style={{ position: "absolute", left: 0, top: 0, display: "flex" }}>
+        <div style={{ ...corpsDuMot("transparent"), display: "flex" }}>Ka</div>
+        <div style={{ position: "relative", display: "flex" }}>
+          <div style={corpsDuMot("transparent")}>ı</div>
+          {pierreEnImage(CORPS)}
+        </div>
       </div>
-      {avecPierre ? pierreEnImage(CORPS) : null}
     </div>
   );
 }

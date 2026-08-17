@@ -40,7 +40,7 @@ export function ReponseOuverte({
 }) {
   if (!revelee) {
     return (
-      <div className="mt-pas-12">
+      <div className="mt-pas-scene">
         <p className="text-corps text-stone-900">Formule ta réponse d&apos;abord, même de tête.</p>
 
         <div className="gap-pas-4 mt-pas-3 flex flex-col sm:flex-row sm:items-center">
@@ -57,13 +57,13 @@ export function ReponseOuverte({
   }
 
   return (
-    <div className="mt-pas-12">
+    <div className="mt-pas-scene">
       <BlocReponse>
         <TexteTechnique>{etalonLisible(answerKey)}</TexteTechnique>
       </BlocReponse>
 
       {/* Se juger est un autre geste que lire : l'écart le dit. */}
-      <div className="mt-pas-12">
+      <div className="mt-pas-scene">
         <BarreDeNotation enCours={enCours} onNoter={onSeJuger} />
       </div>
     </div>

@@ -30,13 +30,22 @@ export const EDITEUR = {
   siren: "941 599 383",
 
   /**
+   * Exigé par la loi pour un service de communication au public en ligne édité à
+   * titre professionnel, au même titre que l'adresse. Écrit avec des espaces
+   * insécables : un numéro coupé en fin de ligne ne se recompose pas de tête.
+   */
+  telephone: "06 40 53 38 45",
+
+  /**
    * En franchise en base, on n'affiche pas de numéro de TVA : l'obligation ne
    * vise que les assujettis, et publier un numéro qu'on n'utilise pas sème le
    * doute chez qui lit une facture. C'est la mention de l'article 293 B qui est
    * attendue à la place.
    *
-   * À revoir si le chiffre d'affaires de l'activité dépasse les seuils de la
-   * franchise, qui ont bougé récemment et restent mouvants.
+   * Confirmé par Romain le 17 août 2026 : l'activité est sous les seuils. À
+   * revoir si elle les dépasse — trente-sept mille cinq cents euros de
+   * prestations de services, quarante et un mille deux cent cinquante en seuil
+   * majoré.
    */
   tva: "TVA non applicable, article 293 B du Code général des impôts.",
 

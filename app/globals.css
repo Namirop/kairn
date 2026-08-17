@@ -130,6 +130,24 @@
   */
   --pas-campagne: 4rem;
 
+  /*
+    Les deux rythmes de l'application, qui se mesurent à la fenêtre comme celui de
+    la campagne, et pour la même raison.
+
+    `dedans` est ce qui sépare un contenu du bord de ce qui le porte : la marge
+    haute et basse d'un panneau, le dedans de la carte d'une question. `scene` est
+    l'écart entre deux temps d'un écran qui occupe toute la hauteur — la question,
+    puis la réponse, puis les gestes qui portent sur elle.
+
+    Deux pas et non un, parce que les deux échelles ne se confondent pas, et parce
+    que c'est la seconde qui décide si une session déborde du pli. Une correction
+    qui s'ouvre ou une réponse de référence qui s'affiche font grandir le contenu
+    d'un coup : ce qui dépasse passe sous le pli, et il faut défiler au milieu d'un
+    geste qui demandait déjà de la concentration.
+  */
+  --pas-dedans: 1.5rem;
+  --pas-scene: 3rem;
+
   /* Échelle typographique. Deux registres : marketing et interne. */
   --t-mono: 0.75rem;
   --t-petit: 0.875rem;
@@ -173,9 +191,29 @@
     --t-petit: 0.9375rem;
     --t-corps: 1.125rem;
     --t-h2-app: 1.5rem;
-    --t-h1-app: 2.5rem;
-    --t-enonce: 2rem;
-    --t-nombre: 5.75rem;
+
+    /*
+      Les trois registres qui portent une composition suivent la fenêtre, hauteur
+      comprise, et par le même `min()` des deux axes que le titre de campagne.
+
+      Ce ne sont pas des tailles de lecture — le corps, le petit et le mono ne
+      bougent pas d'un pixel, parce que la mesure d'un texte n'a rien à voir avec
+      la hauteur d'une fenêtre. Ce sont les trois tailles qui **occupent** :
+      l'énoncé d'une question, un titre d'écran, un grand nombre. Fixées sur un
+      écran de quatorze cents pixels de haut, elles étaient les mêmes sur un
+      mille quatre-vingts — où l'écran de question débordait dès qu'une réponse
+      s'affichait, et où le tableau de bord coupait sa série en deux.
+
+      La borne haute est la valeur d'avant : jamais plus gros, seulement plus
+      petit là où ça ne tenait pas.
+    */
+    --t-h1-app: clamp(1.75rem, min(3vw, 4.4vh), 2.5rem);
+    --t-enonce: clamp(1.375rem, min(2.6vw, 3.2vh), 2rem);
+    --t-nombre: clamp(3.5rem, min(6vw, 9vh), 5.75rem);
+
+    --pas-dedans: clamp(1.25rem, 3.6vh, 3rem);
+    --pas-scene: clamp(2rem, 5vh, 4rem);
+
     --t-h2-site: 3.75rem;
 
     /*
@@ -248,6 +286,8 @@
   --spacing-pas-16: var(--pas-16);
   --spacing-pas-24: var(--pas-24);
   --spacing-pas-campagne: var(--pas-campagne);
+  --spacing-pas-dedans: var(--pas-dedans);
+  --spacing-pas-scene: var(--pas-scene);
 
   --color-data-mark: var(--data-mark);
   --color-data-mark-zero: var(--data-mark-zero);

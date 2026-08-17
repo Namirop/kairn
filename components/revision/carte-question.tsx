@@ -79,7 +79,7 @@ export function CarteQuestion({
         ) : null}
       </div>
 
-      <div className="rounded-carte bg-surface-papier mt-pas-3 p-pas-6 md:p-pas-12">
+      <div className="rounded-carte bg-surface-papier mt-pas-3 p-pas-dedans">
         {/* Les lignes se touchent presque : un titre est une unité, et l'écart du
             corps de texte le faisait lire comme un paragraphe en gras. `text-enonce`
             est un cran sous le titre de page — assez pour dominer l'écran, pas
@@ -96,7 +96,7 @@ export function CarteQuestion({
 
       {children}
 
-      <div className="mt-pas-16 pt-pas-6 border-t border-stone-300">
+      <div className="mt-pas-scene pt-pas-6 border-t border-stone-300">
         {actions}
 
         {/* Le signalement est le plus léger des gestes de cette rangée, et il le

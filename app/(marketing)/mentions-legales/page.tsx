@@ -13,8 +13,7 @@ export const metadata: Metadata = { title: "Mentions légales" };
  * fois sur trois, et dans des mentions légales une information fausse a l'air d'un
  * engagement.
  *
- * Reste un trou, et un seul : le numéro de téléphone de l'éditeur, que la loi
- * exige et que personne ne peut inventer à sa place.
+ * Il n'y reste plus de trou.
  */
 const RUBRIQUES: RubriqueLegale[] = [
   {
@@ -25,10 +24,7 @@ const RUBRIQUES: RubriqueLegale[] = [
       `Siège : ${EDITEUR.adresse}.`,
       `SIREN : ${EDITEUR.siren}.`,
       `${EDITEUR.tva}`,
-      `Contact : ${CONTACT.email}.`,
-    ],
-    aRemplir: [
-      "numéro de téléphone de l'éditeur, exigé pour un service de communication au public en ligne édité à titre professionnel",
+      `Contact : ${CONTACT.email} — ${EDITEUR.telephone}.`,
     ],
   },
   {
