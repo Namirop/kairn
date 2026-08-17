@@ -25,7 +25,8 @@
     "verify:ingestion": "tsx scripts/verifier-ingestion.ts",
     "verify:session": "tsx scripts/verifier-session.ts",
     "verify:abus": "tsx scripts/verifier-abus.ts",
-    "verify:contrastes": "tsx scripts/verifier-contrastes.ts"
+    "verify:contrastes": "tsx scripts/verifier-contrastes.ts",
+    "depot:code": "tsx scripts/ajouter-depot-de-code.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",
