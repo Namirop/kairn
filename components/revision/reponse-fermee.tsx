@@ -17,6 +17,19 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
 /** Les touches servent d'étiquettes : ce ne sont pas des numéros décoratifs. */
 const TOUCHES = ["1", "2", "3", "4", "5", "6"];
 
+/**
+ * Ce qu'un lecteur d'écran entend d'une option, une fois le choix fait.
+ *
+ * À l'écran, la couleur suffit et l'écrit ferait doublon. Sans elle, il ne
+ * resterait rien : le sort de chaque option se lit dans sa bordure et son fond.
+ */
+function marqueLue(estBonne: boolean, estChoisie: boolean): string {
+  if (estBonne) return "Bonne réponse.";
+  if (estChoisie) return "Ton choix, faux.";
+
+  return "";
+}
+
 export function ReponseFermee({
   options,
   correctIndex,
@@ -73,6 +86,7 @@ export function ReponseFermee({
               <span className="text-corps">
                 <TexteTechnique>{option}</TexteTechnique>
               </span>
+              {repondu ? <span className="sr-only">{marqueLue(estBonne, estChoisie)}</span> : null}
             </Button>
           </li>
         );

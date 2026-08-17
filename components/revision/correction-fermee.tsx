@@ -11,8 +11,13 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  * action. Ce bouton ne note plus rien, il enchaîne.
  *
  * Une bonne réponse n'est pas félicitée : l'écran dit ce qui est, et la
- * récompense est l'espacement qui s'allonge. Une mauvaise réponse donne
- * l'étalon — sans lui, l'échec n'apprend rien.
+ * récompense est l'espacement qui s'allonge. Une mauvaise réponse donne la
+ * réponse attendue — sans elle, l'échec n'apprend rien.
+ *
+ * Le verdict n'est pas écrit. Les options le portent déjà : la bonne est
+ * surlignée, la sienne marquée quand elle est fausse. Le redire en toutes lettres
+ * juste au-dessus du bouton faisait une ligne qui n'ajoutait rien à qui voit
+ * l'écran. Elle reste, muette, pour qui l'entend.
  */
 export function CorrectionFermee({
   juste,
@@ -32,22 +37,18 @@ export function CorrectionFermee({
   const complete = etalonUtile(answerKey, bonneOption);
 
   return (
-    <div className="mt-pas-12">
-      <p className="text-mono font-mono tracking-[0.12em] uppercase">
-        {juste ? (
-          <span className="text-lichen-deep">Réponse juste</span>
-        ) : (
-          <span className="text-alerte">Réponse fausse</span>
-        )}
+    <div className="mt-pas-8">
+      <p className="sr-only" role="status">
+        {juste ? "Réponse juste." : "Réponse fausse."}
       </p>
 
       {!juste && complete ? (
-        <p className="mt-pas-3 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed whitespace-pre-wrap text-stone-900">
+        <p className="mb-pas-8 text-corps border-l-2 border-stone-300 pl-4 leading-relaxed whitespace-pre-wrap text-stone-900">
           <TexteTechnique>{answerKey}</TexteTechnique>
         </p>
       ) : null}
 
-      <div className="gap-pas-2 mt-pas-8 flex flex-wrap">
+      <div className="gap-pas-2 flex flex-wrap">
         <Button type="button" disabled={enCours} onClick={onSuite}>
           {dernier ? "Terminer" : "Continuer"}
         </Button>
