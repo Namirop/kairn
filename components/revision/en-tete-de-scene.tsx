@@ -10,10 +10,23 @@ import { ROUTES } from "@/lib/auth/routes";
  * quitte une session en cliquant une icône de navigation — ce qui, quand on ne
  * sait pas si le travail est enregistré, ressemble à un abandon.
  */
-export function EnTeteDeScene({ intitule }: { intitule?: string }) {
+export function EnTeteDeScene({
+  intitule,
+  precision,
+}: {
+  intitule?: string;
+  /** Ce que ce passage-là n'engage pas. L'entraînement s'en sert. */
+  precision?: string;
+}) {
   return (
     <div className="gap-pas-4 flex items-baseline justify-between">
-      <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">{intitule}</p>
+      <p className="gap-pas-3 flex flex-wrap items-baseline">
+        <span className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
+          {intitule}
+        </span>
+
+        {precision ? <span className="text-petit text-stone-500">{precision}</span> : null}
+      </p>
 
       <Link
         href={ROUTES.aujourdhui}

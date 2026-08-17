@@ -1,5 +1,4 @@
 import { PileDeSession } from "@/components/revision/pile-de-session";
-import { ETIQUETTE_RAIL, RailDeScene } from "@/components/revision/rail-de-scene";
 import type { ProchainRappel } from "@/lib/domain/prochain-rappel";
 
 /**
@@ -13,7 +12,15 @@ import type { ProchainRappel } from "@/lib/domain/prochain-rappel";
  * du produit : cet accent ne sert qu'à elle. Le rappel n'apparaît que s'il est
  * réglé — annoncer une heure à quelqu'un qui a coupé ses emails serait un
  * mensonge poli.
+ *
+ * En colonne, les trois blocs se répartissent sur la hauteur et la pile se
+ * retrouve au milieu ; en bande, ils s'alignent et le dernier passe à la ligne.
+ * C'est la seule différence entre les deux formats.
  */
+
+/** L'intitulé d'un bloc : mono, très petit, espacé, sur la roche. */
+const ETIQUETTE = "text-mono font-mono tracking-[0.14em] text-stone-400 uppercase";
+
 /** L'heure du rappel, dans le calendrier de la personne et non en UTC. */
 function quandLeRappelTombe({ jour, heure }: ProchainRappel): string {
   return `${jour === "aujourdhui" ? "aujourd'hui" : "demain"}, ${heure} h`;
@@ -33,9 +40,9 @@ export function EtatDeSession({
   rappel: ProchainRappel | null;
 }) {
   return (
-    <RailDeScene>
+    <div className="px-pas-4 py-pas-4 md:px-pas-8 lg:px-pas-6 lg:py-pas-8 gap-pas-3 lg:gap-pas-6 flex h-full flex-wrap items-center justify-between lg:flex-col lg:flex-nowrap lg:justify-between lg:text-center">
       <div className="order-2 lg:order-1">
-        <p className={`${ETIQUETTE_RAIL} hidden lg:block`}>Aujourd&apos;hui</p>
+        <p className={`${ETIQUETTE} hidden lg:block`}>Aujourd&apos;hui</p>
 
         {serie > 0 ? (
           <p className="text-mono border-ember-clair/40 text-ember-clair rounded-galet px-pas-2 lg:mt-pas-3 inline-block border py-0.5 font-mono tracking-[0.12em] uppercase">
@@ -54,7 +61,7 @@ export function EtatDeSession({
           <PileDeSession rang={faites} total={total} clair />
         </div>
 
-        <p className={`${ETIQUETTE_RAIL} leading-tight`}>
+        <p className={`${ETIQUETTE} leading-tight`}>
           <span className="text-petit text-stone-50 tabular-nums">
             {faites} / {total}
           </span>
@@ -64,12 +71,12 @@ export function EtatDeSession({
 
       {rappel ? (
         <p className="order-3 w-full lg:w-auto">
-          <span className={ETIQUETTE_RAIL}>Prochain rappel</span>{" "}
+          <span className={ETIQUETTE}>Prochain rappel</span>{" "}
           <span className="text-mono lg:mt-pas-1 font-mono text-stone-300 lg:block">
             {quandLeRappelTombe(rappel)}
           </span>
         </p>
       ) : null}
-    </RailDeScene>
+    </div>
   );
 }

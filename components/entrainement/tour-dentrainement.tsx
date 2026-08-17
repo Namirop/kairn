@@ -9,7 +9,6 @@ import {
 } from "@/app/(app)/entrainement/actions";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
-import { EtatDentrainement } from "@/components/entrainement/etat-dentrainement";
 import { PrincipeDeLentrainement } from "@/components/entrainement/principe-de-lentrainement";
 import { DerouleQuestions, type PassageDonne } from "@/components/revision/deroule-questions";
 import { EnTeteDeScene } from "@/components/revision/en-tete-de-scene";
@@ -50,7 +49,6 @@ export function TourDentrainement({
   const [explique, setExplique] = useState(principeVu);
   const [questions, setQuestions] = useState(premierTour);
   const [tourFini, setTourFini] = useState(false);
-  const [faites, setFaites] = useState(0);
   const [charge, setCharge] = useState(false);
 
   const repondre = useCallback(
@@ -71,7 +69,6 @@ export function TourDentrainement({
 
     setQuestions(suivant);
     setTourFini(false);
-    setFaites(0);
     setCharge(false);
   }, []);
 
@@ -119,12 +116,13 @@ export function TourDentrainement({
   }
 
   return (
+    // Pas de rail, et donc pas de pile : un tour ne se finit pas, il s'arrête
+    // quand on veut. Une pile à monter aurait promis une fin, et le cairn
+    // appartient à ce qui balise vraiment le chemin — la session du jour.
     <SceneDeSession
-      enTete={<EnTeteDeScene />}
-      // Sans compte à l'écran : un tour n'a pas de longueur à tenir. Le rail dit
-      // le cadre — la pile pour l'avancée, une ligne pour rappeler qu'ici rien ne
-      // se replanifie. Cette ligne flottait sous la carte, sans propriétaire.
-      rail={<EtatDentrainement faites={faites} total={questions.length} />}
+      enTete={
+        <EnTeteDeScene intitule="Entraînement" precision="ça ne change pas ton planning" />
+      }
     >
       <DerouleQuestions
         key={questions.map((question) => question.variantId).join()}
@@ -132,7 +130,6 @@ export function TourDentrainement({
         chiffree={false}
         onRepondre={repondre}
         onFini={() => setTourFini(true)}
-        onAvance={setFaites}
       />
     </SceneDeSession>
   );
