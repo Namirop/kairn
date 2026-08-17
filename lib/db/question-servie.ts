@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { VariantFacet, VariantFormat } from "@/lib/db/types";
 import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
+import { joursEntre, localDay } from "@/lib/domain/local-day";
 
 /**
  * Une question telle qu'un écran la reçoit, quel que soit le mode.
@@ -48,7 +49,36 @@ export type QuestionServie = {
   options: string[] | null;
   correctIndex: number | null;
   cloze: { sentence: string; accepted: string[] } | null;
+  /**
+   * Depuis combien de jours civils ce concept n'avait pas été reposé.
+   *
+   * Nul quand on le pose pour la première fois, et nul en entraînement : là, le
+   * planning ne bouge pas, et rappeler l'écart d'un cycle auquel on ne touche
+   * pas dirait l'inverse de ce que fait l'écran.
+   */
+  vuIlYaJours: number | null;
 };
+
+/**
+ * L'écart entre le dernier passage et maintenant, dans le calendrier de
+ * l'utilisateur.
+ *
+ * Un écart de dix heures qui traverse minuit fait bien un jour : c'est ce que la
+ * personne a vécu, et c'est ce que la planification a compté.
+ */
+function ecartDepuis(
+  lastReview: Date | null | undefined,
+  repere: { maintenant: Date; fuseau: string } | undefined,
+): number | null {
+  if (!lastReview || !repere) return null;
+
+  const jours = joursEntre(
+    localDay(lastReview, repere.fuseau),
+    localDay(repere.maintenant, repere.fuseau),
+  );
+
+  return jours >= 0 ? jours : null;
+}
 
 /**
  * Les choix à proposer, ou `null` si la question doit repartir en format ouvert.
@@ -95,8 +125,10 @@ function lireTrou(format: VariantFormat, payload: unknown): QuestionServie["cloz
 }
 
 export function questionServie(
-  concept: { id: string; concept: string; tags: string[] },
+  concept: { id: string; concept: string; tags: string[]; lastReview?: Date | null },
   variante: VarianteEnBase,
+  /** L'instant et le fuseau, quand l'écran dit depuis quand le concept dormait. */
+  repere?: { maintenant: Date; fuseau: string },
 ): QuestionServie {
   const choix = lireChoix(variante.format, variante.payload, variante.answerKey);
 
@@ -112,5 +144,6 @@ export function questionServie(
     options: choix?.options ?? null,
     correctIndex: choix?.correctIndex ?? null,
     cloze: lireTrou(variante.format, variante.payload),
+    vuIlYaJours: ecartDepuis(concept.lastReview, repere),
   };
 }

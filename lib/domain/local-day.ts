@@ -57,3 +57,18 @@ export function jourSuivant(day: string): string {
 
   return lendemain.toISOString().slice(0, 10);
 }
+
+/**
+ * Combien de jours civils séparent deux jours locaux. Négatif si le second
+ * précède le premier.
+ *
+ * Le calcul passe par les minuits UTC des deux étiquettes, et pas par l'écart
+ * entre deux instants : « il y a un jour » est une affaire de calendrier, pas de
+ * vingt-quatre heures. Un passage hier à 22 h et une lecture ce matin à 8 h font
+ * dix heures d'écart et pourtant bien un jour.
+ */
+export function joursEntre(depuis: string, jusqua: string): number {
+  const ecart = dayToUtcDate(jusqua).getTime() - dayToUtcDate(depuis).getTime();
+
+  return Math.round(ecart / (24 * 60 * 60 * 1000));
+}

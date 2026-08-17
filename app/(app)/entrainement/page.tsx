@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Panneau } from "@/components/coquille/panneau";
-import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { TourDentrainement } from "@/components/entrainement/tour-dentrainement";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -29,11 +27,9 @@ export default async function PageEntrainement() {
     lireReglages(utilisateur.id),
   ]);
 
+  // Le tour porte sa propre scène — colonne de questions et rail d'état —, et
+  // ce qui l'encadre reste une pile de panneaux comme le reste de l'application.
   return (
-    <PileDePanneaux>
-      <Panneau surface="papier" mesure="texte" remplit className="md:py-pas-16">
-        <TourDentrainement premierTour={tour} principeVu={reglages.trainingIntroSeenAt !== null} />
-      </Panneau>
-    </PileDePanneaux>
+    <TourDentrainement premierTour={tour} principeVu={reglages.trainingIntroSeenAt !== null} />
   );
 }

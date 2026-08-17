@@ -1,6 +1,13 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { dayToUtcDate, isSupportedTimeZone, jourSuivant, localDay, localHour } from "./local-day";
+import {
+  dayToUtcDate,
+  isSupportedTimeZone,
+  jourSuivant,
+  joursEntre,
+  localDay,
+  localHour,
+} from "./local-day";
 
 /** Repères horaires, écrits en UTC pour que l'intention soit lisible. */
 const utc = (iso: string) => new Date(`${iso}Z`);
@@ -166,6 +173,43 @@ describe("jourSuivant", () => {
         expect(suivant > jour).toBe(true);
       }),
       { numRuns: 500 },
+    );
+  });
+});
+
+describe("joursEntre", () => {
+  it("compte les jours civils, pas les tranches de vingt-quatre heures", () => {
+    expect(joursEntre("2026-08-16", "2026-08-17")).toBe(1);
+    expect(joursEntre("2026-08-10", "2026-08-16")).toBe(6);
+    expect(joursEntre("2026-08-16", "2026-08-16")).toBe(0);
+  });
+
+  it("rend un écart négatif quand le second jour précède", () => {
+    expect(joursEntre("2026-08-17", "2026-08-16")).toBe(-1);
+  });
+
+  it("traverse les mois, les années et les bissextiles", () => {
+    expect(joursEntre("2026-12-28", "2027-01-04")).toBe(7);
+    expect(joursEntre("2028-02-28", "2028-03-01")).toBe(2);
+  });
+
+  it("ne compte pas une heure de plus ou de moins au changement d'heure", () => {
+    // Journées locales de 23 h et de 25 h en Europe : l'écart de calendrier ne
+    // s'en aperçoit pas, c'est tout l'intérêt de passer par les étiquettes.
+    expect(joursEntre("2026-03-28", "2026-03-30")).toBe(2);
+    expect(joursEntre("2026-10-24", "2026-10-26")).toBe(2);
+  });
+
+  it("est l'inverse de jourSuivant, et antisymétrique", () => {
+    fc.assert(
+      fc.property(unInstant, unInstant, unFuseau, (a, b, fuseau) => {
+        const premier = localDay(a, fuseau);
+        const second = localDay(b, fuseau);
+
+        expect(joursEntre(premier, jourSuivant(premier))).toBe(1);
+        expect(joursEntre(premier, second) + joursEntre(second, premier)).toBe(0);
+      }),
+      { numRuns: 300 },
     );
   });
 });

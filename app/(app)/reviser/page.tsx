@@ -7,7 +7,8 @@ import { SessionDeRevision } from "@/components/revision/session-de-revision";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
-import { lireReglages } from "@/lib/db/user-settings";
+import { findUserStats, lireReglages } from "@/lib/db/user-settings";
+import { prochainRappel } from "@/lib/domain/prochain-rappel";
 
 export const metadata: Metadata = { title: "Réviser" };
 
@@ -26,9 +27,10 @@ export default async function PageReviser() {
   if (!utilisateur) redirect(ROUTES.connexion);
 
   const maintenant = new Date();
-  const [session, reglages] = await Promise.all([
+  const [session, reglages, compteurs] = await Promise.all([
     lireSessionDuJour(utilisateur.id, maintenant),
     lireReglages(utilisateur.id),
+    findUserStats(utilisateur.id),
   ]);
 
   if (session.questions.length === 0) {
@@ -47,14 +49,33 @@ export default async function PageReviser() {
     );
   }
 
+  // Un rappel coupé n'a pas d'heure à annoncer, et l'annoncer quand même serait
+  // promettre un email qui ne partira pas.
+  const rappelActif = reglages.dailyReminderEnabled && reglages.emailOptOutAt === null;
+
   return (
-    <PileDePanneaux>
-      <Panneau surface="papier" mesure="texte" remplit className="md:py-pas-16">
-        <SessionDeRevision
-          questions={session.questions}
-          expliquerLEspacement={reglages.spacingIntroSeenAt === null}
-        />
-      </Panneau>
-    </PileDePanneaux>
+    <SessionDeRevision
+      questions={session.questions}
+      jour={jourDeLaSession(maintenant, session.fuseau)}
+      serie={compteurs?.currentStreak ?? 0}
+      rappel={
+        rappelActif ? prochainRappel(maintenant, reglages.dailyReminderHour, session.fuseau) : null
+      }
+      expliquerLEspacement={reglages.spacingIntroSeenAt === null}
+    />
   );
+}
+
+/**
+ * Le jour de la session, chez l'utilisateur.
+ *
+ * Le fuseau est passé explicitement : sans lui, le serveur écrirait sa propre
+ * date, et quelqu'un qui révise à 00 h 30 à Sydney verrait la veille.
+ */
+function jourDeLaSession(maintenant: Date, fuseau: string): string {
+  return new Intl.DateTimeFormat("fr-BE", {
+    day: "numeric",
+    month: "long",
+    timeZone: fuseau,
+  }).format(maintenant);
 }

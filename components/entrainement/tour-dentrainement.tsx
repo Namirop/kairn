@@ -1,14 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import {
   principeVuAction,
   sentrainerAction,
   tourSuivantAction,
 } from "@/app/(app)/entrainement/actions";
+import { Panneau } from "@/components/coquille/panneau";
+import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
+import { EtatDentrainement } from "@/components/entrainement/etat-dentrainement";
 import { PrincipeDeLentrainement } from "@/components/entrainement/principe-de-lentrainement";
 import { DerouleQuestions, type PassageDonne } from "@/components/revision/deroule-questions";
+import { EnTeteDeScene } from "@/components/revision/en-tete-de-scene";
+import { SceneDeSession } from "@/components/revision/scene-de-session";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 import type { QuestionServie } from "@/lib/db/question-servie";
@@ -19,6 +24,22 @@ import type { QuestionServie } from "@/lib/db/question-servie";
  * Aucun compte de fin, aucun score : ce qu'on fait ici ne se cumule nulle part.
  * L'écran dit simplement que le tour est fini et laisse le choix de continuer.
  */
+
+/**
+ * Ce qui encadre les écrans hors tour : le principe, et la fin.
+ *
+ * Un panneau ordinaire, comme le reste de l'application. La scène à deux
+ * colonnes n'a de sens que tant qu'il y a un chemin à montrer.
+ */
+function Cadre({ children }: { children: ReactNode }) {
+  return (
+    <PileDePanneaux>
+      <Panneau surface="papier" mesure="texte" remplit className="md:py-pas-16">
+        <div className="flex w-full flex-col">{children}</div>
+      </Panneau>
+    </PileDePanneaux>
+  );
+}
 export function TourDentrainement({
   premierTour,
   principeVu,
@@ -29,6 +50,7 @@ export function TourDentrainement({
   const [explique, setExplique] = useState(principeVu);
   const [questions, setQuestions] = useState(premierTour);
   const [tourFini, setTourFini] = useState(false);
+  const [faites, setFaites] = useState(0);
   const [charge, setCharge] = useState(false);
 
   const repondre = useCallback(
@@ -49,23 +71,26 @@ export function TourDentrainement({
 
     setQuestions(suivant);
     setTourFini(false);
+    setFaites(0);
     setCharge(false);
   }, []);
 
   if (!explique) {
     return (
-      <PrincipeDeLentrainement
-        onCommencer={() => {
-          setExplique(true);
-          void principeVuAction();
-        }}
-      />
+      <Cadre>
+        <PrincipeDeLentrainement
+          onCommencer={() => {
+            setExplique(true);
+            void principeVuAction();
+          }}
+        />
+      </Cadre>
     );
   }
 
   if (tourFini || questions.length === 0) {
     return (
-      <section className="mx-auto flex w-full max-w-2xl flex-col">
+      <Cadre>
         <h1 className="text-h1-app leading-tight font-bold text-stone-900">
           {questions.length === 0 ? "Rien à travailler pour l'instant" : "Tour terminé"}
         </h1>
@@ -89,28 +114,26 @@ export function TourDentrainement({
             <Link href={ROUTES.aujourdhui}>Retour à aujourd&apos;hui</Link>
           </Button>
         </div>
-      </section>
+      </Cadre>
     );
   }
 
   return (
-    <div className="flex flex-col">
-      {/* Sans compte : un tour d'entraînement n'a pas de longueur à tenir. « 3 /
-          12 » y transformait en devoir ce qu'on fait justement parce qu'on peut
-          s'arrêter quand on veut. La pile suffit à dire qu'on avance. */}
+    <SceneDeSession
+      enTete={<EnTeteDeScene />}
+      // Sans compte à l'écran : un tour n'a pas de longueur à tenir. Le rail dit
+      // le cadre — la pile pour l'avancée, une ligne pour rappeler qu'ici rien ne
+      // se replanifie. Cette ligne flottait sous la carte, sans propriétaire.
+      rail={<EtatDentrainement faites={faites} total={questions.length} />}
+    >
       <DerouleQuestions
         key={questions.map((question) => question.variantId).join()}
         questions={questions}
         chiffree={false}
         onRepondre={repondre}
         onFini={() => setTourFini(true)}
+        onAvance={setFaites}
       />
-
-      {/* La ligne permanente, discrète : le principe se rappelle sans barrer la
-          route. Elle vit sous la carte, hors du chemin de la réponse. */}
-      <p className="mt-pas-8 text-petit mx-auto w-full max-w-2xl text-stone-500">
-        Entraînement — ça ne change pas ton planning.
-      </p>
-    </div>
+    </SceneDeSession>
   );
 }

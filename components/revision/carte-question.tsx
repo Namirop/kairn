@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { PileDeSession } from "@/components/revision/pile-de-session";
 import { SignalerLaQuestion } from "@/components/revision/signaler-la-question";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
@@ -17,34 +16,50 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  * à l'effort de rappel — et l'annoncer met une étiquette de système en tête d'un
  * écran qui doit porter une question.
  *
- * L'avancement est là parce qu'une session se finit mieux quand on en voit le
- * bout. Ce n'est ni un score ni une série : il disparaît avec la session.
+ * La question est **dans une carte**, et rien d'autre n'y entre : c'est le seul
+ * objet posé sur la surface de l'écran, et il tient exactement ce qu'on doit
+ * lire avant de répondre. Ce qu'on fait ensuite — choisir, saisir, comparer,
+ * renoncer — vit dessous, sur la surface. L'écran dit donc « voilà la question »
+ * puis « voilà ce que tu peux en faire », au lieu de couler les deux ensemble.
  *
- * Le rythme vertical dit la structure : le sujet et la question sont une unité,
- * donc ils se touchent presque ; répondre est une autre affaire, donc l'écart
- * double ; ce qui vient après la réponse s'en détache plus encore. Les mêmes
- * trente-deux pixels partout aplatissaient les trois en une seule coulée.
- *
- * Ce qui vit sous le trait dépend du mode. La session du jour y met « Je
- * maîtrise ça », qui sort le concept du cycle ; l'entraînement libre n'y met
- * rien, puisqu'il ne décide de rien.
+ * Ce qui vit sous le trait ne sert plus à répondre : ce sont les gestes qui
+ * portent sur le concept ou sur la question elle-même. Ils sont séparés du reste
+ * par le trait, et hiérarchisés entre eux — une action qui déplace une échéance
+ * de trois mois ne peut pas se présenter comme un signalement.
  */
+
+/**
+ * Depuis quand le concept dormait, dit du point de vue de la personne.
+ *
+ * C'est l'intervalle qu'elle vient de tenir, et il explique l'effort qu'on lui
+ * demande : sept jours sans y penser, c'est normal de chercher.
+ */
+function dernierPassage(jours: number): string {
+  if (jours === 0) return "Tu l'as vu aujourd'hui.";
+  if (jours === 1) return "Tu l'as vu hier.";
+
+  return `Tu l'as vu il y a ${jours} jours.`;
+}
+
 export function CarteQuestion({
   rang,
   total,
   chiffree,
   tags,
   question,
+  vuIlYaJours = null,
   variantId,
   actions,
   children,
 }: {
   rang: number;
   total: number;
-  /** Le compte exact à côté de la pile. L'entraînement ne le porte pas. */
+  /** Le compte de la session. L'entraînement ne tient pas de longueur. */
   chiffree?: boolean;
   tags: string[];
   question: string;
+  /** L'intervalle tenu depuis le dernier passage, quand il y en a eu un. */
+  vuIlYaJours?: number | null;
   /** La question qu'on peut signaler. Absent, l'action ne s'affiche pas. */
   variantId?: string;
   actions?: ReactNode;
@@ -52,30 +67,43 @@ export function CarteQuestion({
 }) {
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col">
-      <div className="gap-pas-4 flex items-end justify-between">
+      <div className="gap-pas-4 flex items-baseline justify-between">
         <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
           {tags.join(" · ")}
         </p>
 
-        <PileDeSession rang={rang} total={total} chiffree={chiffree} />
+        {chiffree ? (
+          <p className="text-mono shrink-0 font-mono text-stone-500 tabular-nums">
+            {rang + 1} / {total}
+          </p>
+        ) : null}
       </div>
 
-      <h1 className="mt-pas-6 text-h1-app leading-snug font-bold text-pretty text-stone-900">
-        <TexteTechnique>{question}</TexteTechnique>
-      </h1>
+      <div className="rounded-carte bg-surface-papier mt-pas-3 p-pas-6 md:p-pas-12">
+        <h1 className="text-h1-app leading-snug font-bold text-pretty text-stone-900">
+          <TexteTechnique>{question}</TexteTechnique>
+        </h1>
+
+        {vuIlYaJours === null ? null : (
+          <p className="mt-pas-6 text-petit text-stone-500">{dernierPassage(vuIlYaJours)}</p>
+        )}
+      </div>
 
       {children}
 
-      {actions ? <div className="mt-pas-16">{actions}</div> : null}
+      <div className="mt-pas-16 pt-pas-6 border-t border-stone-300">
+        {actions}
 
-      {/* Sous tout le reste, et volontairement en retrait : c'est un défaut à
-          remonter, pas une note à donner. Elle doit être trouvable quand on la
-          cherche et invisible quand on révise. */}
-      {variantId ? (
-        <div className={actions ? "mt-pas-6" : "mt-pas-16"}>
-          <SignalerLaQuestion key={variantId} variantId={variantId} />
-        </div>
-      ) : null}
+        {/* Le signalement est le plus léger des gestes de cette rangée, et il le
+            dit : c'est un défaut à remonter, pas une décision sur la mémoire. Il
+            doit être trouvable quand on le cherche et invisible quand on
+            révise. */}
+        {variantId ? (
+          <div className={actions ? "mt-pas-6" : undefined}>
+            <SignalerLaQuestion key={variantId} variantId={variantId} />
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }

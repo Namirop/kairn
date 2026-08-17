@@ -3,9 +3,9 @@
 import { useCallback, useState, type ReactNode } from "react";
 import { CarteQuestion } from "@/components/revision/carte-question";
 import { enonceDeCarte } from "@/components/revision/enonce-de-carte";
-import { etalonUtile } from "@/components/revision/etalon-utile";
 import { JeterLaPierre } from "@/components/revision/jeter-la-pierre";
 import { PierreJetee } from "@/components/revision/pierre-jetee";
+import { reponseDeSecours } from "@/components/revision/reponse-de-secours";
 import { useChronometre } from "@/components/revision/use-chronometre";
 import { ZoneDeReponse } from "@/components/revision/zone-de-reponse";
 import type { QuestionServie } from "@/lib/db/question-servie";
@@ -37,14 +37,17 @@ export function DerouleQuestions({
   chiffree,
   onRepondre,
   onFini,
+  onAvance,
   actions,
 }: {
   questions: QuestionServie[];
-  /** Le compte exact à côté de la pile. L'entraînement ne le porte pas. */
+  /** Le compte de la session. L'entraînement ne tient pas de longueur. */
   chiffree?: boolean;
   /** Rend `true` si le passage a bien été écrit ; l'écran avance alors. */
   onRepondre: (passage: PassageDonne) => Promise<boolean>;
   onFini: (revus: number) => void;
+  /** Combien de questions sont passées, pour ce que le mode montre à côté. */
+  onAvance?: (faites: number) => void;
   /** Ce que ce mode-là autorise sous la question. Rien, par défaut. */
   actions?: (contexte: {
     question: QuestionServie;
@@ -98,6 +101,8 @@ export function DerouleQuestions({
 
   const avancer = useCallback(
     (comptes: number) => {
+      onAvance?.(rang + 1);
+
       if (rang + 1 >= questions.length) {
         onFini(comptes);
         return;
@@ -110,16 +115,12 @@ export function DerouleQuestions({
       setEcrit(false);
       setRang(rang + 1);
     },
-    [onFini, questions.length, rang],
+    [onAvance, onFini, questions.length, rang],
   );
 
   if (!question) return null;
 
   const dernier = rang + 1 >= questions.length;
-  const bonneOption =
-    question.options && question.correctIndex !== null
-      ? (question.options[question.correctIndex] ?? null)
-      : null;
 
   const suivre: Valider = async (note, maitrise = false) => {
     // Sur un format fermé, le passage est parti au clic sur l'option ; s'il a
@@ -140,17 +141,13 @@ export function DerouleQuestions({
       chiffree={chiffree}
       tags={question.tags}
       question={enonceDeCarte(question)}
+      vuIlYaJours={question.vuIlYaJours}
       variantId={question.variantId}
       actions={actions?.({ question, enCours, valider: suivre })}
     >
       {jetee ? (
         <PierreJetee
-          reponse={bonneOption ?? question.answerKey}
-          precision={
-            bonneOption && etalonUtile(question.answerKey, bonneOption)
-              ? question.answerKey
-              : undefined
-          }
+          {...reponseDeSecours(question)}
           enCours={enCours}
           dernier={dernier}
           onSuite={() => void suivre("AGAIN")}

@@ -111,7 +111,7 @@ export async function lireSessionDuJour(
 
     if (!variante) continue;
 
-    questions.push(questionServie(atome, variante));
+    questions.push(questionServie(atome, variante, { maintenant, fuseau }));
   }
 
   return {
