@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db/client";
 import { questionServie, type QuestionServie } from "@/lib/db/question-servie";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { alternerLesGestes } from "@/lib/domain/alternance-des-gestes";
+import { gesteDeReponse } from "@/lib/domain/geste-de-reponse";
 import { jourSuivant, localDay } from "@/lib/domain/local-day";
 import { choisirVariante } from "@/lib/domain/rotation-variantes";
 import {
@@ -116,7 +118,10 @@ export async function lireSessionDuJour(
 
   return {
     fuseau,
-    questions,
+    // L'ordre d'urgence et l'alternance des sujets sont posés ; reste le geste,
+    // qui ne se connaît qu'une fois la variante choisie. Cinq « choisis ta
+    // réponse » d'affilée se ressentent comme une seule question reposée.
+    questions: alternerLesGestes(questions, (servie) => gesteDeReponse(servie.format)),
     totalConcepts,
     conceptsEnAttenteDeQuestions: enAttente,
     prochainJourServi: prochainJourServi(prochain, maintenant, fuseau),

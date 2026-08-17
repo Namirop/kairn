@@ -4,26 +4,48 @@ import {
   composerEntrainement,
   QUESTIONS_PAR_TOUR,
   type ConceptEntrainable,
+  type VarianteEntrainable,
 } from "./selection-entrainement";
-import type { VarianteServable } from "./rotation-variantes";
+import { gesteDeReponse } from "./geste-de-reponse";
 
 const FACETTES = ["RECOGNITION", "MECHANISM", "BOUNDARY", "APPLICATION"] as const;
+
+/** Un format par facette, comme la génération les répartit sur un concept. */
+const FORMATS = ["MCQ", "CLOZE", "TRUE_FALSE", "EXPLAIN"] as const;
 
 function variante(
   id: string,
   facet: string,
-  reglages: Partial<VarianteServable> = {},
-): VarianteServable {
-  return { id, facet, sessionCount: 0, trainingCount: 0, lastSessionAt: null, ...reglages };
+  format: string,
+  reglages: Partial<VarianteEntrainable> = {},
+): VarianteEntrainable {
+  return {
+    id,
+    facet,
+    format,
+    sessionCount: 0,
+    trainingCount: 0,
+    lastSessionAt: null,
+    ...reglages,
+  };
 }
 
-function concept(id: string, reglages: Partial<VarianteServable>[] = []): ConceptEntrainable {
+function concept(id: string, reglages: Partial<VarianteEntrainable>[] = []): ConceptEntrainable {
   return {
     id,
     variants: FACETTES.map((facet, rang) =>
-      variante(`${id}-${facet}`, facet, reglages[rang] ?? {}),
+      variante(`${id}-${facet}`, facet, FORMATS[rang] ?? "EXPLAIN", reglages[rang] ?? {}),
     ),
   };
+}
+
+/** Le format d'une question tirée, retrouvé depuis son identifiant de variante. */
+function formatDe(concepts: ConceptEntrainable[], variantId: string): string {
+  const trouvee = concepts
+    .flatMap((concept) => concept.variants)
+    .find((variante) => variante.id === variantId);
+
+  return trouvee?.format ?? "";
 }
 
 describe("composerEntrainement", () => {
@@ -94,11 +116,13 @@ describe("composerEntrainement", () => {
   });
 
   it("tient compte du dernier passage d'entraînement, pas seulement de la session", () => {
+    // Un seul format sur les quatre variantes : l'ordre ne dépend alors que de
+    // l'usure, sans que l'alternance des gestes ait son mot à dire.
     const seul = concept("seul", [
-      { trainingCount: 1 },
-      { trainingCount: 1 },
-      { trainingCount: 1 },
-      { trainingCount: 1 },
+      { trainingCount: 1, format: "EXPLAIN" },
+      { trainingCount: 1, format: "EXPLAIN" },
+      { trainingCount: 1, format: "EXPLAIN" },
+      { trainingCount: 1, format: "EXPLAIN" },
     ]);
     const derniers = new Map([["seul-MECHANISM", new Date("2026-05-01T10:00:00Z")]]);
 
@@ -126,6 +150,7 @@ describe("propriétés", () => {
     variants: fc.array(
       fc.record({
         facet: fc.constantFrom(...FACETTES),
+        format: fc.constantFrom(...FORMATS),
         sessionCount: fc.nat({ max: 9 }),
         trainingCount: fc.nat({ max: 9 }),
       }),
@@ -139,6 +164,7 @@ describe("propriétés", () => {
       variants: entree.variants.map((variante, position) => ({
         id: `c${rang}-v${position}`,
         facet: variante.facet,
+        format: variante.format,
         sessionCount: variante.sessionCount,
         trainingCount: variante.trainingCount,
         lastSessionAt: null,
@@ -196,5 +222,72 @@ describe("propriétés", () => {
       }),
       { numRuns: 300 },
     );
+  });
+});
+
+describe("alternance des gestes", () => {
+  /** Le geste servi par chaque question du tour, dans l'ordre. */
+  function gestes(concepts: ConceptEntrainable[], taille?: number): string[] {
+    return composerEntrainement(concepts, new Map(), taille).map((question) =>
+      gesteDeReponse(formatDe(concepts, question.variantId)),
+    );
+  }
+
+  it("alterne un geste sur l'autre quand le corpus le permet", () => {
+    const deuxFormats = (id: string): ConceptEntrainable => ({
+      id,
+      variants: [
+        variante(`${id}-choix`, "RECOGNITION", "MCQ"),
+        variante(`${id}-trou`, "MECHANISM", "CLOZE"),
+      ],
+    });
+
+    const suite = gestes(["un", "deux", "trois", "quatre"].map(deuxFormats));
+
+    expect(suite).toHaveLength(8);
+    expect(suite.every((geste, rang) => rang === 0 || geste !== suite[rang - 1])).toBe(true);
+  });
+
+  it("passe une question du même concept devant pour changer de geste", () => {
+    // Deux QCM et un texte à trou : le trou vient en deuxième, alors que l'ordre
+    // d'usure le mettait en dernier.
+    const concepts = [
+      {
+        id: "seul",
+        variants: [
+          variante("seul-a", "RECOGNITION", "MCQ"),
+          variante("seul-b", "BOUNDARY", "TRUE_FALSE"),
+          variante("seul-c", "MECHANISM", "CLOZE"),
+        ],
+      },
+    ];
+
+    expect(composerEntrainement(concepts).map((question) => question.variantId)).toEqual([
+      "seul-a",
+      "seul-c",
+      "seul-b",
+    ]);
+  });
+
+  it("ne sert jamais trois fois le même geste d'affilée sur un corpus ordinaire", () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 1, max: 8 }), (nombre) => {
+        const concepts = Array.from({ length: nombre }, (_, rang) => concept(`c${rang}`));
+        const suite = gestes(concepts);
+
+        return suite.every(
+          (geste, rang) => rang < 2 || geste !== suite[rang - 1] || geste !== suite[rang - 2],
+        );
+      }),
+      { numRuns: 50 },
+    );
+  });
+
+  it("réordonne sans rien perdre : le tour garde son compte et ses questions", () => {
+    const concepts = [concept("un"), concept("deux")];
+    const tirees = composerEntrainement(concepts);
+
+    expect(tirees).toHaveLength(8);
+    expect(new Set(tirees.map((question) => question.variantId)).size).toBe(8);
   });
 });

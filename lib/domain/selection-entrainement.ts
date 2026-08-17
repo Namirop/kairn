@@ -1,3 +1,4 @@
+import { gesteDeReponse, type GesteDeReponse } from "./geste-de-reponse";
 import type { VarianteServable } from "./rotation-variantes";
 
 /**
@@ -26,9 +27,12 @@ import type { VarianteServable } from "./rotation-variantes";
  */
 export const QUESTIONS_PAR_TOUR = 12;
 
+/** Le format s'ajoute à ce que la rotation lit : c'est lui qui donne le geste. */
+export type VarianteEntrainable = VarianteServable & { format: string };
+
 export type ConceptEntrainable = {
   id: string;
-  variants: VarianteServable[];
+  variants: VarianteEntrainable[];
 };
 
 export type QuestionTiree = { atomId: string; variantId: string };
@@ -59,7 +63,7 @@ function usage(variante: VarianteServable): number {
 function fileDunConcept(
   concept: ConceptEntrainable,
   derniersEntrainements: Map<string, Date | null>,
-): VarianteServable[] {
+): VarianteEntrainable[] {
   return [...concept.variants].sort(
     (une, deux) =>
       usage(une) - usage(deux) ||
@@ -70,7 +74,12 @@ function fileDunConcept(
 
 /**
  * Un tour d'entraînement : des questions tirées des concepts existants, sans
- * jamais deux fois le même concept d'affilée tant qu'un autre est disponible.
+ * jamais deux fois le même concept d'affilée tant qu'un autre est disponible, et
+ * sans deux fois le même geste de réponse tant qu'un autre est disponible.
+ *
+ * Le geste passe après le concept, dans cet ordre et pas l'inverse : revoir le
+ * même concept coûte plus cher que refaire le même geste. Quand les deux sont
+ * possibles, on prend les deux.
  *
  * `derniersEntrainements` porte la date du dernier passage d'entraînement par
  * variante. Elle ne vit pas sur le Variant au moment du tirage — elle est lue
@@ -82,7 +91,7 @@ export function composerEntrainement(
   derniersEntrainements: Map<string, Date | null> = new Map(),
   taille: number = QUESTIONS_PAR_TOUR,
 ): QuestionTiree[] {
-  const files = new Map<string, { atomId: string; file: VarianteServable[] }>();
+  const files = new Map<string, { atomId: string; file: VarianteEntrainable[] }>();
 
   for (const concept of concepts) {
     const file = fileDunConcept(concept, derniersEntrainements);
@@ -92,6 +101,7 @@ export function composerEntrainement(
 
   const tirees: QuestionTiree[] = [];
   let precedent: string | null = null;
+  let gestePrecedent: GesteDeReponse | null = null;
 
   while (tirees.length < Math.max(0, taille)) {
     const restants = [...files.values()].filter((entree) => entree.file.length > 0);
@@ -99,17 +109,42 @@ export function composerEntrainement(
     if (restants.length === 0) break;
 
     // Répéter un concept vaut mieux que raccourcir le tour : quand il ne reste
-    // que lui, il repasse — c'est le cas du compte à un seul concept.
+    // que lui, il repasse — c'est le cas du compte à un seul concept. Et répéter
+    // un geste vaut mieux que répéter un concept, d'où l'ordre des deux filtres.
     const autres = restants.filter((entree) => entree.atomId !== precedent);
     const tirage = autres.length > 0 ? autres : restants;
-    const choisi = tirage.reduce((une, deux) => (deux.file.length > une.file.length ? deux : une));
-    const variante = choisi.file.shift();
+    const varies = tirage.filter((entree) => rangDuGesteAutre(entree.file, gestePrecedent) >= 0);
+    const retenus = varies.length > 0 ? varies : tirage;
+    const choisi = retenus.reduce((une, deux) => (deux.file.length > une.file.length ? deux : une));
+    // Le geste peut faire passer une question devant une autre du même concept :
+    // l'ordre d'usure est une préférence, ne pas refaire le même geste deux fois
+    // de suite est une contrainte. Les deux questions seront servies de toute
+    // façon, la seule chose qui change est laquelle vient d'abord.
+    const rang = Math.max(rangDuGesteAutre(choisi.file, gestePrecedent), 0);
+    const [variante] = choisi.file.splice(rang, 1);
 
     if (!variante) break;
 
     tirees.push({ atomId: choisi.atomId, variantId: variante.id });
     precedent = choisi.atomId;
+    gestePrecedent = gesteDeReponse(variante.format);
   }
 
   return tirees;
+}
+
+/**
+ * Où se trouve, dans cette file, la première question d'un autre geste que
+ * celui qu'on vient de servir. `-1` si la file n'en porte aucune.
+ *
+ * Chercher au-delà de la tête est ce qui fait vraiment alterner : les concepts
+ * portent souvent les mêmes formats dans le même ordre, si bien qu'à ne regarder
+ * que les têtes, tous les candidats proposaient « choisis ta réponse » et le tour
+ * enchaînait cinq QCM.
+ */
+function rangDuGesteAutre(
+  file: VarianteEntrainable[],
+  gestePrecedent: GesteDeReponse | null,
+): number {
+  return file.findIndex((variante) => gesteDeReponse(variante.format) !== gestePrecedent);
 }
