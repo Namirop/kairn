@@ -81,8 +81,13 @@ export function CarteQuestion({
 
       <div className="rounded-carte bg-surface-papier mt-pas-3 p-pas-6 md:p-pas-12">
         {/* Les lignes se touchent presque : un titre est une unité, et l'écart du
-            corps de texte le faisait lire comme un paragraphe en gras. */}
-        <h1 className="text-h1-app leading-tight font-bold text-pretty text-stone-900">{enonce}</h1>
+            corps de texte le faisait lire comme un paragraphe en gras. `text-enonce`
+            est un cran sous le titre de page — assez pour dominer l'écran, pas
+            assez pour l'occuper — et `break-words` retient les saisies absurdes
+            à l'intérieur de la carte. */}
+        <h1 className="text-enonce leading-tight font-bold text-pretty break-words text-stone-900">
+          {enonce}
+        </h1>
 
         {vuIlYaJours === null ? null : (
           <p className="mt-pas-6 text-petit text-stone-500">{dernierPassage(vuIlYaJours)}</p>

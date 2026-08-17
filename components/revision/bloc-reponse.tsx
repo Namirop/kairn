@@ -26,7 +26,9 @@ export function BlocReponse({
 }) {
   return (
     <div className="rounded-carte bg-surface-roche grain grain-clair p-pas-6 md:p-pas-8 relative max-w-3xl overflow-hidden">
-      <div className="relative z-10">
+      {/* Les jetons de code s'inversent ici, et seulement ici : de l'encre diluée
+          sur la roche est plus sombre que la roche, donc invisible. */}
+      <div className="[&_code]:bg-jeton-clair [&_code]:border-jeton-bord-clair relative z-10">
         <p className="text-mono font-mono tracking-[0.12em] text-stone-400 uppercase">{intitule}</p>
 
         <div className="mt-pas-3 text-corps max-w-prose leading-relaxed whitespace-pre-wrap text-stone-50">

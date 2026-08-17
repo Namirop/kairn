@@ -13,15 +13,22 @@ import { ROUTES } from "@/lib/auth/routes";
 export function EnTeteDeScene({
   intitule,
   precision,
+  intituleEnMarge = false,
 }: {
   intitule?: string;
   /** Ce que ce passage-là n'engage pas. L'entraînement s'en sert. */
   precision?: string;
+  /** L'intitulé est repris en marge sur grand écran : il s'efface ici. */
+  intituleEnMarge?: boolean;
 }) {
   return (
     <div className="gap-pas-4 flex items-baseline justify-between">
       <p className="gap-pas-3 flex flex-wrap items-baseline">
-        <span className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
+        <span
+          className={`text-mono font-mono tracking-[0.14em] text-stone-500 uppercase ${
+            intituleEnMarge ? "2xl:hidden" : ""
+          }`}
+        >
           {intitule}
         </span>
 

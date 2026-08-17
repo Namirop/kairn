@@ -16,19 +16,30 @@ import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
  * passe à droite dès qu'il y a la largeur d'une colonne, et redevient une bande
  * en tête d'écran quand il n'y en a pas.
  *
- * La colonne fait quatre-vingt-dix caractères et non soixante-cinq, contre la
- * mesure de lecture du reste de l'application. Une question est un titre, pas un
- * paragraphe : serrée à la mesure du texte, elle tombait sur six lignes de trois
- * mots, et six lignes de trois mots se lisent moins bien que trois lignes
- * pleines. Ce qui est du corps de texte garde sa propre mesure là où il vit.
+ * La colonne est large — bien plus que la mesure de lecture du reste de
+ * l'application. Une question est un titre, pas un paragraphe : serrée à
+ * soixante-cinq caractères, elle tombait sur six lignes de trois mots, et un
+ * extrait de code cité dedans se coupait en deux. Ce qui est vraiment du corps de
+ * texte garde sa propre mesure là où il vit — la réponse, les consignes, le
+ * champ de saisie.
  */
 export function SceneDeSession({
   enTete,
+  mention,
   rail,
   children,
 }: {
   /** Ce qui nomme le passage en cours et permet de s'en aller. Facultatif. */
   enTete?: ReactNode;
+  /**
+   * Le nom du passage, repris en grand dans la marge gauche.
+   *
+   * Seulement quand il y a la place — au-delà de la colonne, les marges d'un
+   * écran large sont vides, et un mot posé debout y dit ce qu'on est en train de
+   * faire mieux qu'une étiquette de douze pixels. L'en-tête efface alors le sien
+   * pour ne pas le dire deux fois.
+   */
+  mention?: string;
   /**
    * L'état à montrer à côté des questions. Absent, la scène n'a qu'une colonne.
    *
@@ -49,7 +60,16 @@ export function SceneDeSession({
         ) : null}
 
         <div className="px-pas-4 md:px-pas-8 py-pas-8 md:py-pas-12 grain relative flex-1 overflow-hidden lg:order-1">
-          <div className="relative z-10 mx-auto w-full max-w-4xl">
+          <div className="relative z-10 mx-auto w-full max-w-6xl">
+            {/* Debout dans la marge, contre le bord de la colonne : c'est de la
+                composition, pas de la navigation. Elle n'apparaît que là où la
+                marge est assez large pour l'accueillir sans serrer la colonne. */}
+            {mention ? (
+              <p className="text-h1-app absolute top-0 -left-16 hidden font-mono leading-none tracking-[0.32em] text-stone-300 uppercase [writing-mode:vertical-rl] 2xl:block">
+                {mention}
+              </p>
+            ) : null}
+
             {enTete ? <div className="mb-pas-16">{enTete}</div> : null}
             {children}
           </div>

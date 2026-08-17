@@ -87,6 +87,14 @@
   */
   --jeton: color-mix(in oklab, var(--stone-900) 7%, transparent);
   --jeton-bord: color-mix(in oklab, var(--stone-900) 14%, transparent);
+  /*
+    Le même jeton sur la roche. De l'encre diluée y est plus sombre que le fond :
+    les termes de code du bloc de réponse s'y effaçaient, alors que ce sont eux
+    qu'on vient lire. C'est donc du clair très dilué, et un peu plus dense — sur
+    un fond sombre, il faut plus de matière pour la même présence.
+  */
+  --jeton-clair: color-mix(in oklab, var(--stone-50) 12%, transparent);
+  --jeton-bord-clair: color-mix(in oklab, var(--stone-50) 22%, transparent);
 
   /*
     Trois formes, trois sens. Le panneau est le sol, la carte est un objet posé
@@ -116,6 +124,16 @@
   --t-corps: 1rem;
   --t-h2-app: 1.125rem;
   --t-h1-app: 1.625rem;
+  /*
+    L'énoncé d'une question, et lui seul.
+
+    Il lui faut être le plus gros de l'écran sans en prendre la place : à la
+    taille d'un titre de page, une question de quinze mots tenait sur cinq
+    lignes, et un extrait de code cité dedans se coupait en deux. Un cran sous
+    `h1-app`, avec la mesure élargie, la même question tient sur deux lignes et
+    l'extrait passe entier.
+  */
+  --t-enonce: 1.5rem;
   --t-nombre: 3.5rem;
   --t-h2-site: 2.5rem;
   --t-h1-site: 4rem;
@@ -144,6 +162,7 @@
     --t-corps: 1.125rem;
     --t-h2-app: 1.5rem;
     --t-h1-app: 2.5rem;
+    --t-enonce: 2rem;
     --t-nombre: 5.75rem;
     --t-h2-site: 3.75rem;
     --t-h1-site: 6.5rem;
@@ -168,6 +187,8 @@
   --color-alerte-surface: var(--alerte-surface);
   --color-jeton: var(--jeton);
   --color-jeton-bord: var(--jeton-bord);
+  --color-jeton-clair: var(--jeton-clair);
+  --color-jeton-bord-clair: var(--jeton-bord-clair);
 
   --font-display: var(--police-display);
   --font-sans: var(--police-texte);
@@ -178,6 +199,7 @@
   --text-corps: var(--t-corps);
   --text-h2-app: var(--t-h2-app);
   --text-h1-app: var(--t-h1-app);
+  --text-enonce: var(--t-enonce);
   --text-nombre: var(--t-nombre);
   --text-h2-site: var(--t-h2-site);
   --text-h1-site: var(--t-h1-site);

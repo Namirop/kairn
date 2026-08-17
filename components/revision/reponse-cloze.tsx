@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { TexteATrou } from "@/components/revision/use-suite-de-questions";
 import type { ReviewRating } from "@/lib/db/types";
+import { LONGUEUR_MAX_SAISIE } from "@/lib/domain/reponse-cloze";
 
 /**
  * Le texte à trou.
@@ -105,6 +106,7 @@ export function ReponseCloze({
           autoComplete="off"
           autoCapitalize="off"
           spellCheck={false}
+          maxLength={LONGUEUR_MAX_SAISIE}
           className="flex-1"
           value={trou.saisie}
           onChange={(evenement) => trou.saisir(evenement.target.value)}

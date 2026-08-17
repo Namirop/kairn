@@ -121,8 +121,13 @@ export function TourDentrainement({
     // appartient à ce qui balise vraiment le chemin — la session du jour.
     <SceneDeSession
       enTete={
-        <EnTeteDeScene intitule="Entraînement" precision="ça ne change pas ton planning" />
+        <EnTeteDeScene
+          intitule="Entraînement"
+          precision="Ça ne change pas ton planning"
+          intituleEnMarge
+        />
       }
+      mention="Entraînement"
     >
       <DerouleQuestions
         key={questions.map((question) => question.variantId).join()}

@@ -20,6 +20,17 @@
 export const TROU = "___";
 
 /**
+ * Longueur maximale d'une saisie.
+ *
+ * Un trou masque un à trois mots ; la forme acceptée la plus longue du corpus en
+ * fait vingt-trois signes. Le plafond n'est donc pas là pour arbitrer une
+ * réponse, il est là pour que la phrase reste une phrase : la saisie se recopie
+ * dans le trou de l'énoncé, et rien n'empêchait d'y coller un paragraphe qui
+ * poussait la carte hors de l'écran.
+ */
+export const LONGUEUR_MAX_SAISIE = 64;
+
+/**
  * Longueurs à partir desquelles une faute de frappe est tolérée.
  *
  * En deçà de six lettres, aucun écart : sur des mots courts, une lettre change

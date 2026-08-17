@@ -17,9 +17,15 @@ import { segmentsDeCode } from "@/lib/domain/texte-code";
  *
  * Le poids est fixé plutôt qu'hérité : dans un titre en gras, un jeton en gras
  * se lit comme un pâté.
+ *
+ * `box-decoration-break: clone` est là pour le jour où un long extrait passe la
+ * fin d'une ligne : sans lui, le fond et la bordure se fendent en deux moitiés
+ * ouvertes, et le jeton a l'air cassé. Avec, chaque morceau est un jeton entier.
+ * `break-words` couvre le cas pire — un identifiant plus large que sa colonne
+ * débordait la carte au lieu de se couper.
  */
 export const JETON =
-  "rounded-champ bg-jeton border border-jeton-bord font-mono text-[0.86em] font-medium px-[0.36em] py-[0.1em]";
+  "rounded-champ bg-jeton border border-jeton-bord font-mono text-[0.86em] font-medium px-[0.36em] py-[0.1em] [box-decoration-break:clone] break-words";
 
 export function TexteTechnique({ children }: { children: string }) {
   return (
