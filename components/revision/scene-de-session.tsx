@@ -15,27 +15,42 @@ import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
  * un lecteur d'écran gagne à l'entendre avant la question plutôt qu'après. Elle
  * passe à droite dès qu'il y a la largeur d'une colonne, et redevient une bande
  * en tête d'écran quand il n'y en a pas.
+ *
+ * La colonne fait quatre-vingt-dix caractères et non soixante-cinq, contre la
+ * mesure de lecture du reste de l'application. Une question est un titre, pas un
+ * paragraphe : serrée à la mesure du texte, elle tombait sur six lignes de trois
+ * mots, et six lignes de trois mots se lisent moins bien que trois lignes
+ * pleines. Ce qui est du corps de texte garde sa propre mesure là où il vit.
  */
 export function SceneDeSession({
   enTete,
   rail,
   children,
 }: {
-  /** Ce qui nomme la séance et permet de s'en aller. Facultatif. */
+  /** Ce qui nomme le passage en cours et permet de s'en aller. Facultatif. */
   enTete?: ReactNode;
-  rail: ReactNode;
+  /**
+   * L'état à montrer à côté des questions. Absent, la scène n'a qu'une colonne.
+   *
+   * L'entraînement n'en a pas : il n'y a rien à finir, donc rien à situer. Une
+   * colonne de roche vide, ou pire une pile à monter, aurait promis une fin qui
+   * n'existe pas.
+   */
+  rail?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <PileDePanneaux sol="ombre">
       <div className="flex flex-1 flex-col lg:flex-row">
-        <aside className="bg-surface-roche grain grain-clair relative overflow-hidden text-stone-50 lg:order-2 lg:w-80 lg:shrink-0">
-          <div className="relative z-10 h-full">{rail}</div>
-        </aside>
+        {rail ? (
+          <aside className="bg-surface-roche grain grain-clair relative overflow-hidden text-stone-50 lg:order-2 lg:w-80 lg:shrink-0">
+            <div className="relative z-10 h-full">{rail}</div>
+          </aside>
+        ) : null}
 
         <div className="px-pas-4 md:px-pas-8 py-pas-8 md:py-pas-12 grain relative flex-1 overflow-hidden lg:order-1">
-          <div className="relative z-10">
-            {enTete ? <div className="mb-pas-16 mx-auto w-full max-w-2xl">{enTete}</div> : null}
+          <div className="relative z-10 mx-auto w-full max-w-4xl">
+            {enTete ? <div className="mb-pas-16">{enTete}</div> : null}
             {children}
           </div>
         </div>

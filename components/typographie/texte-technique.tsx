@@ -18,7 +18,7 @@ import { segmentsDeCode } from "@/lib/domain/texte-code";
  * Le poids est fixé plutôt qu'hérité : dans un titre en gras, un jeton en gras
  * se lit comme un pâté.
  */
-const JETON =
+export const JETON =
   "rounded-champ bg-jeton border border-jeton-bord font-mono text-[0.86em] font-medium px-[0.36em] py-[0.1em]";
 
 export function TexteTechnique({ children }: { children: string }) {

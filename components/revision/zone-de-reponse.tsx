@@ -4,6 +4,7 @@ import { CorrectionFermee } from "@/components/revision/correction-fermee";
 import { ReponseCloze } from "@/components/revision/reponse-cloze";
 import { ReponseFermee } from "@/components/revision/reponse-fermee";
 import { ReponseOuverte } from "@/components/revision/reponse-ouverte";
+import type { TexteATrou } from "@/components/revision/use-suite-de-questions";
 import type { QuestionServie } from "@/lib/db/question-servie";
 import type { ReviewRating } from "@/lib/db/types";
 
@@ -21,22 +22,24 @@ export function ZoneDeReponse({
   question,
   choisi,
   revelee,
+  trou,
   enCours,
   dernier,
   onChoisir,
-  onEngager,
   onReveler,
+  onVerifier,
   onNoter,
 }: {
   question: QuestionServie;
   choisi: number | null;
   revelee: boolean;
+  /** L'état du texte à trou, partagé avec l'énoncé qui porte la phrase. */
+  trou: TexteATrou;
   enCours: boolean;
   dernier: boolean;
   onChoisir: (index: number) => void;
-  /** La personne a produit sa réponse : le chronomètre se fige ici. */
-  onEngager: () => void;
   onReveler: () => void;
+  onVerifier: () => void;
   onNoter: (note: ReviewRating) => void;
 }) {
   if (question.options && question.correctIndex !== null) {
@@ -67,10 +70,10 @@ export function ZoneDeReponse({
   if (question.cloze) {
     return (
       <ReponseCloze
-        key={question.variantId}
-        accepted={question.cloze.accepted}
+        trou={trou}
         enCours={enCours}
-        onValider={onEngager}
+        dernier={dernier}
+        onVerifier={onVerifier}
         onJuger={onNoter}
       />
     );

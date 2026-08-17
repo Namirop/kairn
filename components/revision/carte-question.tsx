@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { SignalerLaQuestion } from "@/components/revision/signaler-la-question";
-import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
  * La carte de révision.
@@ -46,7 +45,7 @@ export function CarteQuestion({
   total,
   chiffree,
   tags,
-  question,
+  enonce,
   vuIlYaJours = null,
   variantId,
   actions,
@@ -57,7 +56,8 @@ export function CarteQuestion({
   /** Le compte de la session. L'entraînement ne tient pas de longueur. */
   chiffree?: boolean;
   tags: string[];
-  question: string;
+  /** L'énoncé, composé par le format : un texte, ou une phrase à trou. */
+  enonce: ReactNode;
   /** L'intervalle tenu depuis le dernier passage, quand il y en a eu un. */
   vuIlYaJours?: number | null;
   /** La question qu'on peut signaler. Absent, l'action ne s'affiche pas. */
@@ -66,7 +66,7 @@ export function CarteQuestion({
   children: ReactNode;
 }) {
   return (
-    <section className="mx-auto flex w-full max-w-2xl flex-col">
+    <section className="flex w-full flex-col">
       <div className="gap-pas-4 flex items-baseline justify-between">
         <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
           {tags.join(" · ")}
@@ -80,9 +80,9 @@ export function CarteQuestion({
       </div>
 
       <div className="rounded-carte bg-surface-papier mt-pas-3 p-pas-6 md:p-pas-12">
-        <h1 className="text-h1-app leading-snug font-bold text-pretty text-stone-900">
-          <TexteTechnique>{question}</TexteTechnique>
-        </h1>
+        {/* Les lignes se touchent presque : un titre est une unité, et l'écart du
+            corps de texte le faisait lire comme un paragraphe en gras. */}
+        <h1 className="text-h1-app leading-tight font-bold text-pretty text-stone-900">{enonce}</h1>
 
         {vuIlYaJours === null ? null : (
           <p className="mt-pas-6 text-petit text-stone-500">{dernierPassage(vuIlYaJours)}</p>

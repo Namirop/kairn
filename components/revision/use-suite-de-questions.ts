@@ -1,0 +1,199 @@
+"use client";
+
+import { useCallback, useState } from "react";
+import { useChronometre } from "@/components/revision/use-chronometre";
+import type { QuestionServie } from "@/lib/db/question-servie";
+import type { ReviewRating } from "@/lib/db/types";
+import { reponseAcceptee } from "@/lib/domain/reponse-cloze";
+
+/**
+ * La mécanique d'une suite de questions : ce qui est écrit, ce qui avance, et où
+ * en est le geste de réponse de la question courante.
+ *
+ * Elle vivait dans le composant qui dessine la carte, et les deux ensemble
+ * dépassaient la taille où un fichier reste lisible. Ce sont bien deux choses :
+ * ici on décide quand un passage part et quand on passe à la suivante ; là on
+ * décide de ce que ça donne à voir.
+ *
+ * Elle ne sait rien de ce qu'on écrit derrière : la session du jour replanifie,
+ * l'entraînement libre ne touche à rien, et ça se décide dans `onRepondre`. Elle
+ * connaît en revanche la justesse — un choix se compare à son index, une saisie
+ * à ses formes acceptées —, parce que c'est elle qui décide quelle note part.
+ */
+
+export type PassageDonne = {
+  question: QuestionServie;
+  note: ReviewRating;
+  tempsMs: number;
+  /** La personne a déclaré maîtriser le concept. Session du jour seulement. */
+  maitrise: boolean;
+};
+
+/** Écrit le passage et enchaîne. Ce qu'un mode ajoute sous la carte s'en sert. */
+export type Valider = (note: ReviewRating, maitrise?: boolean) => Promise<void>;
+
+/** Ce qu'une saisie de texte à trou a donné. Rien encore, juste, ou à côté. */
+export type VerdictDuTrou = null | "JUSTE" | "RATE";
+
+/**
+ * L'état d'un texte à trou, partagé par l'énoncé et le champ.
+ *
+ * Le trou de la phrase se remplit à la frappe, et la phrase est en titre, donc
+ * au-dessus du champ : l'état ne peut pas vivre dans le champ. C'est aussi ce
+ * qui permet, une fois vérifié, de montrer le terme attendu **dans** la phrase
+ * plutôt que de la redire en dessous.
+ */
+export type TexteATrou = {
+  saisie: string;
+  saisir: (valeur: string) => void;
+  verdict: VerdictDuTrou;
+  /** Le terme attendu, tel que la génération l'a écrit en premier. */
+  attendu: string;
+  /** Ce qui comble le trou : la saisie en cours, puis le terme attendu. */
+  comble: string | null;
+};
+
+export function useSuiteDeQuestions({
+  questions,
+  onRepondre,
+  onFini,
+  onAvance,
+}: {
+  questions: QuestionServie[];
+  onRepondre: (passage: PassageDonne) => Promise<boolean>;
+  onFini: (revus: number) => void;
+  onAvance?: (faites: number) => void;
+}) {
+  const [rang, setRang] = useState(0);
+  const [choisi, setChoisi] = useState<number | null>(null);
+  const [revelee, setRevelee] = useState(false);
+  const [saisie, setSaisie] = useState("");
+  const [verdict, setVerdict] = useState<VerdictDuTrou>(null);
+  // Une réponse a été produite : le geste de renoncement n'a plus de sens.
+  const [engage, setEngage] = useState(false);
+  const [jetee, setJetee] = useState(false);
+  const [enCours, setEnCours] = useState(false);
+  const [ecrit, setEcrit] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [revus, setRevus] = useState(0);
+
+  const question = questions[rang];
+  const chronometre = useChronometre(rang);
+  const attendu = question?.cloze?.accepted[0] ?? "";
+
+  const arreter = useCallback(() => {
+    chronometre.arreter();
+    setEngage(true);
+  }, [chronometre]);
+
+  const enregistrer = useCallback(
+    async (note: ReviewRating, maitrise = false): Promise<boolean> => {
+      if (!question || enCours) return false;
+
+      arreter();
+      setEnCours(true);
+      setErreur(null);
+
+      const ok = await onRepondre({ question, note, tempsMs: chronometre.mesure(), maitrise });
+
+      setEnCours(false);
+
+      if (!ok) {
+        setErreur("Ce passage n'a pas pu être enregistré. Réessaie.");
+        return false;
+      }
+
+      setRevus((compte) => compte + 1);
+      setEcrit(true);
+
+      return true;
+    },
+    [arreter, chronometre, enCours, onRepondre, question],
+  );
+
+  const avancer = useCallback(
+    (comptes: number) => {
+      onAvance?.(rang + 1);
+
+      if (rang + 1 >= questions.length) {
+        onFini(comptes);
+        return;
+      }
+
+      setChoisi(null);
+      setRevelee(false);
+      setSaisie("");
+      setVerdict(null);
+      setEngage(false);
+      setJetee(false);
+      setEcrit(false);
+      setRang(rang + 1);
+    },
+    [onAvance, onFini, questions.length, rang],
+  );
+
+  const suivre: Valider = async (note, maitrise = false) => {
+    // Sur un format dont la justesse est connue, le passage est parti au moment
+    // de la réponse ; s'il a échoué, on retente avant d'avancer plutôt que de
+    // laisser filer une réponse donnée.
+    if (ecrit && !maitrise) {
+      avancer(revus);
+      return;
+    }
+
+    if (await enregistrer(note, maitrise)) avancer(revus + 1);
+  };
+
+  return {
+    question,
+    rang,
+    total: questions.length,
+    dernier: rang + 1 >= questions.length,
+    enCours,
+    erreur,
+    choisi,
+    revelee,
+    jetee,
+    engage,
+    trou: {
+      saisie,
+      saisir: setSaisie,
+      verdict,
+      attendu,
+      comble: verdict === null ? saisie.trim() || null : attendu,
+    } satisfies TexteATrou,
+    arreter,
+    suivre,
+    choisir: (index: number) => {
+      if (choisi !== null || !question) return;
+
+      arreter();
+      setChoisi(index);
+      void enregistrer(index === question.correctIndex ? "GOOD" : "AGAIN");
+    },
+    reveler: () => {
+      arreter();
+      setRevelee(true);
+    },
+    // Juste, le passage part tout de suite : le temps de lire une confirmation
+    // n'a pas à s'ajouter à celui de la réponse, et rien ne se perd si on ferme
+    // l'onglet avant de l'avoir lue.
+    verifier: () => {
+      if (!question?.cloze || saisie.trim().length === 0) return;
+
+      arreter();
+
+      if (!reponseAcceptee(saisie, question.cloze.accepted)) {
+        setVerdict("RATE");
+        return;
+      }
+
+      setVerdict("JUSTE");
+      void enregistrer("GOOD");
+    },
+    jeter: () => {
+      setJetee(true);
+      void enregistrer("AGAIN");
+    },
+  };
+}

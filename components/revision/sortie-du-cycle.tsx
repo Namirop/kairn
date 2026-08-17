@@ -31,10 +31,7 @@ export function SortiDuCycle({
   }
 
   return (
-    <div
-      role="status"
-      className="mb-pas-8 pl-pas-4 border-lichen mx-auto w-full max-w-2xl border-l-2"
-    >
+    <div role="status" className="mb-pas-8 pl-pas-4 border-lichen w-full border-l-2">
       <div className="gap-pas-3 flex flex-wrap items-baseline justify-between">
         <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
           Sorti du cycle
