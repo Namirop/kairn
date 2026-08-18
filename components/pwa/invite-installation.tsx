@@ -41,7 +41,7 @@ export function InviteInstallation() {
       <button
         type="button"
         onClick={ecarter}
-        aria-label="Ne plus proposer l'installation"
+        aria-label="Écarter cette proposition"
         className="top-pas-3 right-pas-3 p-pas-1 rounded-galet hover:bg-surface-papier absolute text-stone-500 transition-colors hover:text-stone-900"
       >
         <X className="size-4" />

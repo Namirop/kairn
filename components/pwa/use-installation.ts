@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { inviteEnSommeil } from "@/lib/domain/report-de-linvite";
 import { applicationDejaPosee, gesteManuel, type GesteManuel } from "./environnement-dinstallation";
+import { enregistrerRefus, lireRefus } from "./refus-dinstallation";
 
 /**
  * Ce que l'appareil permet de faire de l'installation, et rien d'autre.
@@ -22,33 +24,8 @@ type PromptInstallation = Event & { prompt: () => Promise<void> };
 
 export type ModeDInstallation = "aucune" | "automatique" | GesteManuel;
 
-const CLE_ECARTEE = "cairn:invite-installation-ecartee";
-
 function estPromptInstallation(evenement: Event): evenement is PromptInstallation {
   return "prompt" in evenement && typeof Reflect.get(evenement, "prompt") === "function";
-}
-
-/**
- * Le refus est définitif sur cet appareil, et il survit à un navigateur en
- * navigation privée qui refuse d'écrire. Une invite qui revient à chaque visite
- * après un refus n'est plus une proposition.
- */
-function estEcartee(): boolean {
-  try {
-    return window.localStorage.getItem(CLE_ECARTEE) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function ecarterPourDeBon(): void {
-  try {
-    window.localStorage.setItem(CLE_ECARTEE, "1");
-  } catch {
-    // Stockage refusé : l'invite repartira à la prochaine visite. C'est le
-    // moindre mal, et la seule alternative serait un aller-retour serveur pour
-    // un réglage qui ne concerne que cet appareil.
-  }
 }
 
 export function useInstallation(): {
@@ -60,7 +37,10 @@ export function useInstallation(): {
   const invite = useRef<PromptInstallation | null>(null);
 
   useEffect(() => {
-    if (estEcartee()) return;
+    // Un refus met l'invite en sommeil un mois, le second l'éteint. La règle vit
+    // dans le domaine, avec ses tests : c'est du calendrier, et le calendrier
+    // est l'endroit où les bugs de ce projet seront silencieux.
+    if (inviteEnSommeil(lireRefus(), new Date())) return;
 
     let vivant = true;
 
@@ -121,7 +101,7 @@ export function useInstallation(): {
   }, []);
 
   const ecarter = useCallback(() => {
-    ecarterPourDeBon();
+    enregistrerRefus(new Date());
     setMode("aucune");
   }, []);
 
