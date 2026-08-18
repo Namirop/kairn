@@ -8,6 +8,7 @@
 export {
   AtomState,
   BatchStatus,
+  CompteurDeQuota,
   FsrsState,
   GenerationKind,
   InputNature,

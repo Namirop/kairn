@@ -366,13 +366,13 @@ model Reglages {
   /// Une seule ligne, et la clé fixe l'y contraint.
   id String @id @default("reglages")
 
-  aiEnabled        Boolean?
-  mockAi           Boolean?
-  dailyCallCap     Int?
-  userDailyCallCap Int?
+  aiEnabled             Boolean?
+  mockAi                Boolean?
+  dailyCallCap          Int?
+  userDailyCallCap      Int?
   anonymousDailyCallCap Int?
-  model            String?
-  maxTokens        Int?
+  model                 String?
+  maxTokens             Int?
 
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
@@ -399,4 +399,37 @@ model ReglageJournal {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+}
+
+/// Une alerte de plafond déjà partie, pour ne pas la renvoyer.
+///
+/// C'est un verrou, pas un journal, et la nuance décide de sa forme. Sans lui,
+/// un plafond de cinquante franchi au trente-cinquième appel enverrait un email
+/// à chaque appel suivant — quinze emails identiques dans l'heure, et plus
+/// personne ne lit le seizième.
+///
+/// **L'insertion elle-même sert de verrou.** On tente d'écrire la ligne et on
+/// n'envoie que si l'écriture a réussi : un conflit de clé primaire signifie que
+/// l'alerte est déjà partie. Pas de lecture préalable, donc pas de fenêtre entre
+/// la lecture et l'écriture où deux appels simultanés décideraient tous les deux
+/// d'envoyer.
+///
+/// `cible` porte le compte concerné pour le compteur par compte, et la chaîne
+/// vide pour les deux autres : une clé primaire de Postgres n'accepte pas de
+/// valeur nulle, et sans cette colonne le premier compte à franchir un seuil
+/// aurait consommé l'alerte de tous les autres pour la journée.
+///
+/// Aucune relation vers `User` : c'est une trace d'exploitation, elle doit
+/// survivre à la suppression du compte qui l'a déclenchée.
+model AlerteQuota {
+  /// Minuit UTC du jour concerné, la même clé que les compteurs qu'elle surveille.
+  day      DateTime        @db.Date
+  compteur CompteurDeQuota
+  cible    String
+  /// 70, 90 ou 100. Voir `lib/domain/seuil-de-plafond.ts`.
+  seuil    Int
+
+  envoyeeA DateTime @default(now())
+
+  @@id([day, compteur, cible, seuil])
 }

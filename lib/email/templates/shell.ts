@@ -17,6 +17,8 @@ const PALETTE = {
   ink: "#16191A",
   lichen: "#7A8B4F",
   ember: "#B4552F",
+  /// Sémantique, et pas la couleur du produit : un échec n'est pas un accent.
+  alerte: "#9A3B2C",
 } as const;
 
 const SANS = "ui-sans-serif, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif";

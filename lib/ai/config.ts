@@ -42,16 +42,33 @@ export type AiConfig = z.infer<typeof configSchema>;
 /** Ce qu'une surcharge peut porter. Une clé absente laisse l'environnement. */
 export type SurchargesDeConfig = Partial<Omit<AiConfig, "apiKey">>;
 
+/**
+ * Les trois variables qui portent un plafond, à part des autres.
+ *
+ * À part parce qu'elles sortent d'ici : une alerte de plafond nomme la variable
+ * à changer, et une seconde table de correspondance ailleurs finirait par
+ * désigner un nom qui n'existe plus. Les clés sont littérales, donc un champ
+ * inventé ne compile pas.
+ */
+const VARIABLE_DE_PLAFOND = {
+  dailyCallCap: "AI_DAILY_CALL_CAP",
+  userDailyCallCap: "AI_DAILY_CALL_CAP_PAR_COMPTE",
+  anonymousDailyCallCap: "AI_DAILY_CALL_CAP_ANONYME",
+} as const;
+
 /** La variable derrière chaque champ. Sans elle, l'erreur ne dit pas quoi corriger. */
 const VARIABLE: Record<string, string> = {
   enabled: "AI_ENABLED",
   mock: "MOCK_AI",
-  dailyCallCap: "AI_DAILY_CALL_CAP",
-  userDailyCallCap: "AI_DAILY_CALL_CAP_PAR_COMPTE",
-  anonymousDailyCallCap: "AI_DAILY_CALL_CAP_ANONYME",
+  ...VARIABLE_DE_PLAFOND,
   model: "AI_MODEL",
   maxTokens: "AI_MAX_TOKENS",
 };
+
+/** Le nom de la variable derrière un plafond, pour qui doit le changer. */
+export function variableDuPlafond(champ: keyof typeof VARIABLE_DE_PLAFOND): string {
+  return VARIABLE_DE_PLAFOND[champ];
+}
 
 /**
  * Une valeur d'environnement débarrassée de ce qu'une recopie y ajoute.

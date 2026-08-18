@@ -5,6 +5,7 @@ import {
   reserverPlaceAnonyme,
   reserverPlaceDeCompte,
 } from "@/lib/db/ai-quota";
+import { signalerLEtatDuCompteur } from "./signalement-de-plafond";
 import type { AiConfig } from "./config";
 import { AIAnonymousQuotaError, AIQuotaError, AIUserQuotaError } from "./errors";
 
@@ -21,10 +22,7 @@ import { AIAnonymousQuotaError, AIQuotaError, AIUserQuotaError } from "./errors"
 /** D'où vient l'appel, pour savoir à quel seau le facturer. */
 export type Provenance = { userId: string } | { anonyme: true } | { interne: true };
 
-export function provenanceDeLAppel(params: {
-  userId?: string;
-  anonyme?: boolean;
-}): Provenance {
+export function provenanceDeLAppel(params: { userId?: string; anonyme?: boolean }): Provenance {
   if (params.userId) return { userId: params.userId };
   if (params.anonyme) return { anonyme: true };
 
@@ -33,6 +31,12 @@ export function provenanceDeLAppel(params: {
 
 /**
  * Les deux places d'un appel : la part de qui le demande, puis celle du produit.
+ *
+ * **Chaque compteur est regardé après son incrément, refus compris.** Le refus
+ * surtout : c'est le seul moment où l'on sait qu'un plafond est atteint, et
+ * jusqu'ici personne n'était prévenu — on l'apprenait si un utilisateur
+ * écrivait. Le signalement ne bloque rien, ne lève jamais, et rend la main
+ * avant de faire quoi que ce soit : voir `alerte-de-plafond.ts`.
  *
  * L'ordre n'est pas indifférent. La part se prend d'abord parce qu'elle se rend :
  * tant que rien n'a été émis, elle ne doit rien. La place globale, elle, ne se
@@ -54,6 +58,13 @@ export async function reserverLesDeuxPlaces(
   if ("userId" in provenance) {
     const part = await reserverPlaceDeCompte(provenance.userId, config.userDailyCallCap);
 
+    signalerLEtatDuCompteur({
+      compteur: "COMPTE",
+      cible: provenance.userId,
+      utilisees: part.utilisees,
+      plafond: config.userDailyCallCap,
+    });
+
     if (!part.obtenue) {
       throw new AIUserQuotaError(part.utilisees, config.userDailyCallCap);
     }
@@ -62,12 +73,26 @@ export async function reserverLesDeuxPlaces(
   if ("anonyme" in provenance) {
     const part = await reserverPlaceAnonyme(config.anonymousDailyCallCap);
 
+    signalerLEtatDuCompteur({
+      compteur: "ANONYME",
+      cible: null,
+      utilisees: part.utilisees,
+      plafond: config.anonymousDailyCallCap,
+    });
+
     if (!part.obtenue) {
       throw new AIAnonymousQuotaError(part.utilisees, config.anonymousDailyCallCap);
     }
   }
 
   const reservation = await reserverAppelModele(config.dailyCallCap);
+
+  signalerLEtatDuCompteur({
+    compteur: "GLOBAL",
+    cible: null,
+    utilisees: reservation.utilisees,
+    plafond: config.dailyCallCap,
+  });
 
   if (reservation.obtenue) return;
 

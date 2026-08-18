@@ -31,7 +31,7 @@ export type ConsommationFenetre = {
   costUsd: string;
 };
 
-function startOfUtcDay(instant: Date): Date {
+export function startOfUtcDay(instant: Date): Date {
   return new Date(Date.UTC(instant.getUTCFullYear(), instant.getUTCMonth(), instant.getUTCDate()));
 }
 

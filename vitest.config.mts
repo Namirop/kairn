@@ -9,13 +9,21 @@ import { defineConfig } from "vitest/config";
  * dérivation du schéma d'outil est ce qui décide si le modèle voit un tableau
  * ou rien, et une dérivation muette ne se remarque qu'à la facture.
  *
+ * La seconde exception suit la même logique. Les garde-fous de `lib/ai/` ont ceci
+ * de commun qu'ils échouent **sans bruit** : une alerte de plafond qui part
+ * quinze fois arrive dans une boîte mail que personne ne regarde, et une alerte
+ * qui casse le dépôt qu'elle surveille ressemble à une panne d'extraction. Les
+ * fichiers concernés reçoivent leurs collaborateurs en paramètre, précisément
+ * pour rester vérifiables ici : le périmètre s'élargit, la règle ne bouge pas —
+ * ni base, ni réseau, ni horloge.
+ *
  * Le fuseau et l'horloge du processus sont fixés : un test qui passerait à Paris
  * et échouerait à Auckland ne prouve rien. Les fonctions reçoivent de toute
  * façon leurs instants en paramètre — ce réglage est une ceinture de sécurité.
  */
 export default defineConfig({
   test: {
-    include: ["lib/domain/**/*.test.ts", "lib/ai/schemas/**/*.test.ts"],
+    include: ["lib/domain/**/*.test.ts", "lib/ai/*.test.ts", "lib/ai/schemas/**/*.test.ts"],
     environment: "node",
   },
   resolve: {

@@ -145,3 +145,16 @@ enum MotifDeSignalement {
   HORS_SUJET
   TROP_FACILE
 }
+
+/// Lequel des trois compteurs journaliers d'appels modèle est concerné.
+///
+/// Ils protègent trois choses différentes et un même pourcentage n'y dit pas la
+/// même chose : `GLOBAL` remplit le budget du produit, `COMPTE` désigne un
+/// compte qui prend toute sa part, `ANONYME` dit que le trafic public monte. Un
+/// seul identifiant pour les trois rendrait les alertes indistinguables au
+/// moment où il faut décider laquelle est grave.
+enum CompteurDeQuota {
+  GLOBAL
+  COMPTE
+  ANONYME
+}

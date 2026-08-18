@@ -38,7 +38,7 @@ model Input {
   /// Ce que l'extraction a lu de la nature du dépôt. Elle décide si le doute
   /// écarte un concept de la génération de questions — sans elle, on ne peut
   /// plus reconstruire pourquoi un dépôt n'a rien produit.
-  nature         InputNature?
+  nature InputNature?
 
   /// L'extraction a rendu plus de concepts que le plafond du produit, et on a
   /// gardé les plus importants. Le compte réellement rendu ne vit pas ici : il
@@ -50,7 +50,7 @@ model Input {
   /// lecture a été coupée. Distinct du précédent : ce n'est ni la même perte,
   /// ni le même message. Toujours faux sur un dépôt texte, dont la longueur est
   /// refusée avant l'envoi.
-  texteTronque   Boolean     @default(false)
+  texteTronque Boolean @default(false)
 
   /// Clé d'un envoi, émise par le formulaire. Deux envois du même geste — double
   /// clic, reprise réseau — portent la même et ne créent qu'un dépôt.
