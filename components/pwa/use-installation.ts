@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { inviteEnSommeil } from "@/lib/domain/report-de-linvite";
 import { applicationDejaPosee, gesteManuel, type GesteManuel } from "./environnement-dinstallation";
-import { enregistrerRefus, lireRefus } from "./refus-dinstallation";
+import { confirmerInstallation, enregistrerRefus, lireRefus } from "./memoire-dinstallation";
 
 /**
  * Ce que l'appareil permet de faire de l'installation, et rien d'autre.
@@ -32,6 +32,7 @@ export function useInstallation(): {
   mode: ModeDInstallation;
   installer: () => void;
   ecarter: () => void;
+  confirmer: () => void;
 } {
   const [mode, setMode] = useState<ModeDInstallation>("aucune");
   const invite = useRef<PromptInstallation | null>(null);
@@ -105,5 +106,20 @@ export function useInstallation(): {
     setMode("aucune");
   }, []);
 
-  return { mode, installer, ecarter };
+  /**
+   * L'utilisateur déclare avoir installé, là où l'appareil ne sait pas le dire.
+   *
+   * Sur un iPhone, l'application posée sur l'écran d'accueil a son propre bac à
+   * sable : rien de ce qu'elle écrit n'est visible depuis Safari, et Safari
+   * n'expose pas `getInstalledRelatedApps`. Aucun signal technique ne traverse,
+   * donc la seule source d'information est la personne devant l'écran. On lui
+   * donne un bouton plutôt que de continuer à lui proposer ce qu'elle vient de
+   * faire.
+   */
+  const confirmer = useCallback(() => {
+    confirmerInstallation(new Date());
+    setMode("aucune");
+  }, []);
+
+  return { mode, installer, ecarter, confirmer };
 }

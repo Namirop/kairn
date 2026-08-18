@@ -1,7 +1,7 @@
 import { REFUS_AVANT_SILENCE, type RefusDInstallation } from "@/lib/domain/report-de-linvite";
 
 /**
- * Les refus d'installation, gardés sur l'appareil.
+ * Ce qu'on retient de l'installation, sur l'appareil.
  *
  * Sur l'appareil et non en base : cette invite ne parle que du téléphone qu'on a
  * en main. Quelqu'un qui a installé Kairn sur son mobile a toutes les raisons de
@@ -36,16 +36,36 @@ export function lireRefus(): RefusDInstallation | null {
   return analyser(brut);
 }
 
+/**
+ * L'utilisateur dit avoir installé l'application. On ne lui repropose plus.
+ *
+ * **C'est le seul moyen de le savoir sur un appareil d'Apple.** Une application
+ * posée sur l'écran d'accueil d'un iPhone y a son propre bac à sable : ni les
+ * cookies, ni le stockage local, ni les registres du navigateur ne traversent la
+ * frontière, et Safari n'expose pas `getInstalledRelatedApps`. Depuis un onglet,
+ * il n'existe donc **aucun** signal technique qui dise que Kairn est déjà
+ * installée — la seule source d'information disponible est la personne devant
+ * l'écran, et il faut lui donner un moyen de le dire.
+ *
+ * C'est écrit comme un refus définitif parce que la conséquence attendue est
+ * exactement celle d'un refus définitif : ne plus rien proposer sur cet
+ * appareil. Un second champ pour la même conséquence ferait deux vérités à tenir
+ * d'accord, et un jour elles ne le seraient plus.
+ */
+export function confirmerInstallation(maintenant: Date): void {
+  ecrire({ compte: REFUS_AVANT_SILENCE, dernier: maintenant.toISOString() });
+}
+
 /** Ajoute un refus à ceux déjà comptés, et l'horodate. */
 export function enregistrerRefus(maintenant: Date): void {
   const precedents = lireRefus();
-  const refus = {
-    compte: (precedents?.compte ?? 0) + 1,
-    dernier: maintenant.toISOString(),
-  };
 
+  ecrire({ compte: (precedents?.compte ?? 0) + 1, dernier: maintenant.toISOString() });
+}
+
+function ecrire(memoire: { compte: number; dernier: string }): void {
   try {
-    window.localStorage.setItem(CLE, JSON.stringify(refus));
+    window.localStorage.setItem(CLE, JSON.stringify(memoire));
   } catch {
     // Stockage refusé. L'invite reparaîtra, et c'est tout ce qui se passe.
   }

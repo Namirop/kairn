@@ -7,7 +7,7 @@
  * et une croix cliquée en trois dixièmes de seconde décidait pour toujours.
  *
  * D'où un report, et un compteur qui l'arrête. Le premier refus met l'invite en
- * sommeil un mois ; le second l'éteint pour de bon. Deux refus, c'est une
+ * sommeil une semaine ; le second l'éteint pour de bon. Deux refus, c'est une
  * réponse — au troisième, insister ne dit plus rien de nouveau et devient du
  * harcèlement poli.
  *
@@ -28,8 +28,16 @@ export type RefusDInstallation = {
  */
 export const REFUS_AVANT_SILENCE = 2;
 
-/** La durée du sommeil, en jours. Un mois : assez pour que la question change. */
-export const SOMMEIL_JOURS = 30;
+/**
+ * La durée du sommeil, en jours.
+ *
+ * Une semaine, et non un mois. Le plafond de deux refus est ce qui protège de
+ * l'insistance — il borne à trois propositions, quoi qu'il arrive. Une fois cette
+ * borne posée, espacer davantage ne protège plus personne : ça ne fait que
+ * laisser passer des semaines où quelqu'un aurait installé l'application s'il
+ * avait su qu'il pouvait.
+ */
+export const SOMMEIL_JOURS = 7;
 
 const MS_PAR_JOUR = 24 * 60 * 60 * 1000;
 

@@ -27,7 +27,7 @@ import { useInstallation } from "./use-installation";
  * deux qui se disputent.
  */
 export function InviteInstallation() {
-  const { mode, installer, ecarter } = useInstallation();
+  const { mode, installer, ecarter, confirmer } = useInstallation();
 
   if (mode === "aucune") return null;
 
@@ -69,7 +69,29 @@ export function InviteInstallation() {
           Installer
         </Button>
       ) : (
-        <GesteManuel geste={mode} />
+        <>
+          <GesteManuel geste={mode} />
+
+          {/* Le seul moyen de savoir, là où l'appareil ne le dit pas.
+              Un navigateur qui déclenche l'installation lui-même annonce
+              `appinstalled` juste après, et l'invite disparaît sans qu'on
+              demande rien. Ces deux chemins-ci n'annoncent rien : sur un iPhone,
+              l'application posée sur l'écran d'accueil a son propre bac à sable,
+              et rien de ce qu'elle écrit n'est visible depuis Safari. On
+              continuait donc à proposer l'installation à quelqu'un qui venait de
+              la faire — exactement ce que l'invite prétend éviter.
+
+              C'est écrit comme un constat et non comme une action : « C'est
+              fait » répond aux deux lignes juste au-dessus. Un bouton
+              « Terminer » aurait laissé croire qu'il finit l'installation. */}
+          <button
+            type="button"
+            onClick={confirmer}
+            className="mt-pas-4 text-petit rounded-xs text-stone-900 underline decoration-stone-300 underline-offset-4 transition-colors hover:decoration-stone-900"
+          >
+            C&apos;est fait, ne plus me le proposer
+          </button>
+        </>
       )}
     </aside>
   );
