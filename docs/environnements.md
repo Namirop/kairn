@@ -154,9 +154,14 @@ d'être vérifiée deux fois.
 En développement, la règle du projet est `true` par défaut. On la bascule
 volontairement, le temps d'éprouver la vraie génération, puis on la remet.
 
-**Les deux doivent être posées sur l'hébergeur.** `readAiConfig()` les valide par
-un schéma Zod : absentes, la validation échoue et tout appel au modèle lève. Ce ne
-sont pas des variables facultatives.
+**Les deux doivent être posées sur l'hébergeur.** La configuration est validée
+par un schéma Zod à chaque appel : absentes, la validation échoue et tout appel au
+modèle lève. Ce ne sont pas des variables facultatives.
+
+Un réglage posé depuis l'écran d'administration peut les remplacer, et c'est un
+recours d'incident, pas un mode de fonctionnement : il vit dans une table, il ne
+suit pas le dépôt, et personne ne le retrouve six mois plus tard en lisant la
+configuration de l'hébergeur.
 
 ### `AI_ENABLED` — l'interrupteur d'arrêt
 
