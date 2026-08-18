@@ -21,6 +21,7 @@
     "eval:generation": "tsx scripts/evaluer-generation.ts",
     "eval:rejeu": "tsx scripts/evaluer-generation.ts --rejeu",
     "eval:mesures": "tsx scripts/mesurer-le-corpus.ts",
+    "eval:ablation": "tsx scripts/eprouver-la-mesure.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "verify:ingestion": "tsx scripts/verifier-ingestion.ts",

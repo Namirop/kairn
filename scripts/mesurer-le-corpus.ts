@@ -15,9 +15,15 @@ import { basename, join } from "node:path";
  * Le coût tient dans une fraction de centime, et tombe à zéro au second
  * passage : les vecteurs sont déterministes et restent en cache.
  *
- *   npm run eval:mesures                     # le dernier figé
+ *   npm run eval:mesures                     # le dernier figé, planchers appliqués
+ *   npm run eval:mesures -- --calibrer       # sans plancher : les listes triées
  *   npm run eval:mesures -- --fige <chemin>  # un figé précis
  *   npm run eval:mesures -- --depot 15,23    # restreint à des dépôts
+ *
+ * `--calibrer` existe pour le jour où le modèle d'embedding change. Les
+ * planchers de `seuils.ts` sont posés dans un espace donné et n'en sortent pas :
+ * il faut alors relire les listes et les reposer à la main, comme la première
+ * fois. C'est la seule raison de ce mode, et elle n'est pas hypothétique.
  */
 
 const RAPPORTS = join(import.meta.dirname, "evaluation", "rapports");
@@ -39,6 +45,7 @@ async function main(): Promise<void> {
   const { plonger } = await import("./evaluation/mesures/embeddings");
   const { mesurerLeDepot, textesDuDepot } = await import("./evaluation/mesures/signaux");
   const { rendreLaCalibration } = await import("./evaluation/mesures/rapport-de-calibration");
+  const { rendreLesMesures } = await import("./evaluation/mesures/rapport-de-mesures");
 
   const chemin = argument("--fige") ?? dernierFige();
 
@@ -74,20 +81,24 @@ async function main(): Promise<void> {
   );
 
   const emisA = new Date();
+  const calibrer = process.argv.includes("--calibrer");
   const mesures = depots.map((depot) => mesurerLeDepot(depot, passe.vecteur));
-  const rapport = rendreLaCalibration(mesures, {
+  const entete = {
     emisA,
     source,
     dimension: passe.dimension,
     calcules: passe.calcules,
     enCache: passe.enCache,
     tokens: passe.tokens,
-  });
+  };
+  const rapport = calibrer
+    ? rendreLaCalibration(mesures, entete)
+    : rendreLesMesures(mesures, entete);
 
   mkdirSync(RAPPORTS, { recursive: true });
   const sortie = join(
     RAPPORTS,
-    `mesures-${emisA.toISOString().slice(0, 16).replace("T", "-").replace(":", "h")}.md`,
+    `${calibrer ? "calibration" : "mesures"}-${emisA.toISOString().slice(0, 16).replace("T", "-").replace(":", "h")}.md`,
   );
   writeFileSync(sortie, rapport, "utf8");
 
