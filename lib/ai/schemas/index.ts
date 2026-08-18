@@ -4,7 +4,15 @@
  * raison de cette séparation.
  */
 
-export { AI_PURPOSES, type AiContract, type AiPurpose } from "./contract";
+export {
+  AI_PURPOSES,
+  AI_PURPOSES_BANC,
+  estUneIntentionDeBanc,
+  type AiContract,
+  type AiPurpose,
+  type AiPurposeBanc,
+  type AiPurposeProduit,
+} from "./contract";
 export { EXTRACT_ATOMS, extractAtomsForme, type ExtractAtomsOutput } from "./extract-atoms";
 export {
   CONCEPTS_PAR_APPEL,

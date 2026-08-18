@@ -1,6 +1,6 @@
 import { apercuBrut, decrireIssues } from "./diagnostic";
 import { AIFixtureMissingError, AIInvalidOutputError } from "./errors";
-import type { AiContract, AiPurpose } from "./schemas";
+import { estUneIntentionDeBanc, type AiContract, type AiPurposeProduit } from "./schemas";
 import extractAtoms from "./fixtures/extract-atoms.json";
 import generateVariants from "./fixtures/generate-variants.json";
 import ocrExtract from "./fixtures/ocr-extract.json";
@@ -29,7 +29,15 @@ type FixtureCase = {
 
 type FixtureFile = { cases: FixtureCase[] };
 
-const FIXTURES: Record<AiPurpose, FixtureFile> = {
+/**
+ * Les fixtures, une par intention **du produit**.
+ *
+ * Le banc n'en a pas, et n'en aura pas : il refuse de démarrer en mode mock,
+ * parce que juger des fixtures ne mesurerait rien. Un juge appelé sous
+ * `MOCK_AI=true` doit donc échouer bruyamment plutôt que rendre un verdict
+ * fabriqué — c'est ce que fait `loadFixture` ci-dessous.
+ */
+const FIXTURES: Record<AiPurposeProduit, FixtureFile> = {
   extract_atoms: extractAtoms,
   generate_variants: generateVariants,
   ocr_extract: ocrExtract,
@@ -51,6 +59,12 @@ function selectCase(file: FixtureFile, input: string): FixtureCase | undefined {
 }
 
 export function loadFixture<T>(contract: AiContract<T>, input: string): T {
+  if (estUneIntentionDeBanc(contract.purpose)) {
+    throw new AIFixtureMissingError(
+      `${contract.purpose} — le banc ne tourne pas en mode mock, il exige MOCK_AI=false`,
+    );
+  }
+
   const selected = selectCase(FIXTURES[contract.purpose], input);
 
   if (!selected) {

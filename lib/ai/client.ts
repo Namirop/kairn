@@ -29,6 +29,19 @@ export type CallAIParams<T> = {
   system: string;
   messages: AiMessage[];
   maxTokens?: number;
+  /**
+   * Le modèle, quand il ne doit pas être celui de la configuration.
+   *
+   * Ajouté pour les juges du banc, qui sont des décisions locales et binaires :
+   * les faire tourner sur le modèle d'extraction coûterait dix fois plus pour
+   * la même réponse. Le modèle retenu part au registre `AiCall` et au rapport —
+   * un verdict ne veut rien dire si l'on ignore qui l'a rendu.
+   *
+   * N'en fais pas un réglage de confort. Le produit garde `AI_MODEL` : deux
+   * chemins d'ingestion sur deux modèles différents rendraient les mesures
+   * incomparables, ce qui est exactement ce que ce banc existe pour éviter.
+   */
+  model?: string;
   userId?: string;
   jobId?: string;
   /**
@@ -157,7 +170,10 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
  * comme échec. Aucun retry.
  */
 export async function callAI<T>(params: CallAIParams<T>): Promise<T> {
-  const config = await lireLaConfigEffective();
+  const effective = await lireLaConfigEffective();
+  // La surcharge est appliquée ici, avant tout le reste : le registre, le calcul
+  // de coût et la réservation doivent tous voir le modèle réellement appelé.
+  const config = params.model ? { ...effective, model: params.model } : effective;
 
   if (!config.enabled) {
     throw new AIDisabledError();

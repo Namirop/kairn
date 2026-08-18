@@ -34,7 +34,15 @@ export const PLANCHER_SOUTIEN = 0.75;
  * Doublon : au-dessus de ce plancher, deux concepts sont candidats à la redite.
  *
  * Le rappel prime, parce que ce plancher n'est plus une ligne de verdict — le
- * juge du doublon tranche derrière lui, voir `signaux.ts`.
+ * juge du doublon tranche derrière lui.
+ *
+ * **0,63 et non 0,70**, descendu à l'arrêt 2 du 18 août. Le filet à 0,70 laissait
+ * passer la paire concept-instance de `11`, à 0,637, qu'aucun autre détecteur ne
+ * voit — l'ablation ne la rattrape pas non plus, voir plus bas. Descendre coûte
+ * presque rien : le juge est appelé par dépôt avec ses candidats groupés, donc
+ * passer de 57 à 151 paires ajoute cinq appels, pas quatre-vingt-quatorze. Le
+ * rapport rend le rendement par bande, 0,63–0,70 contre au-dessus de 0,70 :
+ * c'est lui qui dira plus tard s'il faut resserrer le filet ou sonder dessous.
  *
  * **Limite connue, et elle n'est pas rattrapable par un seuil.** La paire
  * concept-instance de `11` — « le pH du sol détermine la couleur de
@@ -46,7 +54,10 @@ export const PLANCHER_SOUTIEN = 0.75;
  * concepts n'implique pas substituable au niveau de la phrase. Ce cas reste
  * ouvert ; voir le rapport d'ablation.
  */
-export const PLANCHER_DOUBLON = 0.7;
+export const PLANCHER_DOUBLON = 0.63;
+
+/** La frontière des deux bandes de rendement du juge du doublon. */
+export const BANDE_DU_DOUBLON = 0.7;
 
 /**
  * Le radotage n'a pas encore de plancher, et il ne peut pas en avoir.
