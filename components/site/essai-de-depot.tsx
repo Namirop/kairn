@@ -242,8 +242,26 @@ export function EssaiDeDepot({
         </div>
       </div>
 
-      <div className="gap-pas-4 flex flex-wrap items-center">
-        <Button type="submit" size="lg" disabled={enCours || trop}>
+      {/* Le bouton et sa mention sur une seule ligne, et ils y restent.
+          C'était un `flex-wrap` : la mention passait dessous dès qu'elle ne
+          tenait pas — c'est-à-dire sur tous les téléphones —, et elle y prenait
+          la place d'un bloc à elle seule alors qu'elle n'est qu'une note en marge
+          du bouton. Sans le retour à la ligne, c'est **la mention** qui se plie
+          sur deux lignes étroites quand la largeur manque, à droite du bouton :
+          le groupe se déforme au lieu de se casser.
+
+          Le bouton garde ses quarante-quatre pixels de haut — c'est la cible
+          tactile, elle ne se négocie pas — et ne rend que du rembourrage
+          horizontal et un cran de corps sur mobile. Sur un écran de trois cent
+          quatre-vingt-dix, c'est ce qui laisse à la mention les cent cinquante
+          pixels d'une ligne. */}
+      <div className="gap-pas-3 md:gap-pas-4 flex items-center">
+        <Button
+          type="submit"
+          size="lg"
+          className="px-pas-4 text-petit md:px-pas-8 md:text-corps"
+          disabled={enCours || trop}
+        >
           {enCours ? "Découpage en cours…" : "Voir ce que ça donne"}
         </Button>
 
@@ -257,18 +275,22 @@ export function EssaiDeDepot({
             annonce un refus. */}
         {texte.length > SEUIL_COMPTEUR ? (
           <span
-            className={`text-mono font-mono tabular-nums ${trop ? "text-alerte" : "text-stone-500"}`}
+            className={`text-mono min-w-0 font-mono tabular-nums ${trop ? "text-alerte" : "text-stone-500"}`}
           >
             {texte.length.toLocaleString("fr-FR")} /{" "}
             {CARACTERES_MAXIMUM_ANONYME.toLocaleString("fr-FR")}
           </span>
         ) : (
-          <span className="text-petit text-stone-500">Sans compte, sans email.</span>
+          <span className="text-petit min-w-0 text-stone-500">Sans compte, sans email.</span>
         )}
       </div>
 
-      {/* L'espace du message est réservé : l'erreur ne décale pas le bouton. */}
-      <p className="text-petit min-h-5" role="status" aria-live="polite">
+      {/* L'espace du message est réservé : l'erreur ne décale pas le bouton. Il
+          se range à un demi-pas sous lui et non à l'écart du formulaire : réservé
+          au rythme du formulaire, il ouvrait un pas entier de vide permanent
+          entre le bouton et ce qui suit, pour une ligne qui n'est là qu'un jour
+          sur cent. */}
+      <p className="text-petit -mt-pas-2 min-h-5" role="status" aria-live="polite">
         {etat.erreur ? <span className="text-alerte">{etat.erreur}</span> : null}
       </p>
     </form>

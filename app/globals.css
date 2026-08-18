@@ -167,19 +167,33 @@
   --t-nombre: 3.5rem;
   --t-h2-site: 2.5rem;
   /*
-    Le titre de campagne suit la fenêtre sur mobile aussi.
+    Le titre de campagne, calé sur ce qu'il a à écrire.
 
-    Il y était fixe à quatre rem, quelle que soit la largeur. Sur un téléphone
-    ordinaire, « Tu lis beaucoup. » ne tenait plus sur sa ligne : le titre se
-    cassait en quatre morceaux dont un mot seul, et l'interligne serré de
-    l'ouverture faisait cogner les jambages d'une ligne sur la suivante. Un
-    titre qui ouvre doit occuper, pas déborder.
+    Il était fixe à quatre rem, puis proportionnel à la fenêtre — neuf virgule
+    cinq pour cent — et les deux réglages ratent la même chose : ils ignorent la
+    phrase. Un pourcentage de fenêtre casse le titre en quatre morceaux sur un
+    téléphone étroit, et le laisse trop petit sur un large. Or la contrainte
+    n'est pas « une fraction de l'écran », elle est « deux lignes, jamais
+    trois » — et ça, ça se calcule.
 
-    La borne haute reste sous la valeur d'avant : au-delà, on retombe dans la
-    casse qu'on vient de corriger. Le relais est pris à quarante-huit rem par le
-    clamp de grand écran, qui repart plus haut.
+    **Sept et quatre dixièmes est la mesure de la ligne la plus longue.** « Tu
+    lis beaucoup. » occupe 7,35 fois sa taille de police dans le display du
+    produit, resserré de trois centièmes d'em. Diviser la largeur disponible par
+    ce nombre donne donc la plus grande taille où la ligne tient encore entière,
+    et le titre grandit exactement jusque-là. Les quatre rem retranchés sont les
+    deux du rembourrage du panneau, plus deux de garde — pour la barre de
+    défilement d'une fenêtre étroite de bureau, et pour la police de secours qui
+    n'a pas tout à fait les mêmes chasses.
+
+    Le prix de la précision est un couplage : ce diviseur vaut pour cette
+    phrase-là. Un titre d'ouverture plus long se remesure, sinon il passera à la
+    ligne. C'est un prix assumé — la contrainte demandée porte sur le nombre de
+    lignes, et le nombre de lignes dépend du texte.
+
+    Le relais est pris à quarante-huit rem par le clamp de grand écran, qui
+    repart plus haut.
   */
-  --t-h1-site: clamp(2.25rem, 9.5vw, 3.5rem);
+  --t-h1-site: clamp(2.25rem, calc((100vw - 4rem) / 7.4), 3.75rem);
 }
 
 /*
