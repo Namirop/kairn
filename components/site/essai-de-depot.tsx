@@ -255,44 +255,62 @@ export function EssaiDeDepot({
           horizontal et un cran de corps sur mobile. Sur un écran de trois cent
           quatre-vingt-dix, c'est ce qui laisse à la mention les cent cinquante
           pixels d'une ligne. */}
-      <div className="gap-pas-3 md:gap-pas-4 flex items-center">
-        <Button
-          type="submit"
-          size="lg"
-          className="px-pas-4 text-petit md:px-pas-8 md:text-corps"
-          disabled={enCours || trop}
-        >
-          {enCours ? "Découpage en cours…" : "Voir ce que ça donne"}
-        </Button>
-
-        {/* Le compteur ne paraît qu'à l'approche de la borne. Avant, il n'apprend
-            rien et compte à voix haute pendant qu'on écrit ; après, il est la
-            seule chose qui dise pourquoi le bouton refuse. Le même seuil que
-            dans le formulaire du produit — trois quarts du maximum.
-
-            Il remplace le libellé rassurant plutôt que de s'ajouter à côté :
-            « sans compte, sans email » n'a plus rien à faire là au moment où on
-            annonce un refus. */}
-        {texte.length > SEUIL_COMPTEUR ? (
-          <span
-            className={`text-mono min-w-0 font-mono tabular-nums ${trop ? "text-alerte" : "text-stone-500"}`}
+      {/* Le bouton et son message ne forment qu'un bloc dans le rythme du
+          formulaire. Séparés, l'écart entre eux était celui qui sépare le champ
+          du bouton — un pas entier de vide permanent, pour une ligne qui n'est
+          là qu'un jour sur cent, et c'est ce vide qui repoussait le rappel de
+          connexion vers le cairn. */}
+      <div>
+        <div className="gap-pas-3 md:gap-pas-4 flex items-center">
+          <Button
+            type="submit"
+            size="lg"
+            className="px-pas-4 text-petit md:px-pas-8 md:text-corps"
+            disabled={enCours || trop}
           >
-            {texte.length.toLocaleString("fr-FR")} /{" "}
-            {CARACTERES_MAXIMUM_ANONYME.toLocaleString("fr-FR")}
-          </span>
-        ) : (
-          <span className="text-petit min-w-0 text-stone-500">Sans compte, sans email.</span>
-        )}
-      </div>
+            {enCours ? "Découpage en cours…" : "Voir ce que ça donne"}
+          </Button>
 
-      {/* L'espace du message est réservé : l'erreur ne décale pas le bouton. Il
-          se range à un demi-pas sous lui et non à l'écart du formulaire : réservé
-          au rythme du formulaire, il ouvrait un pas entier de vide permanent
-          entre le bouton et ce qui suit, pour une ligne qui n'est là qu'un jour
-          sur cent. */}
-      <p className="text-petit -mt-pas-2 min-h-5" role="status" aria-live="polite">
-        {etat.erreur ? <span className="text-alerte">{etat.erreur}</span> : null}
-      </p>
+          {/* Le compteur ne paraît qu'à l'approche de la borne. Avant, il
+              n'apprend rien et compte à voix haute pendant qu'on écrit ; après,
+              il est la seule chose qui dise pourquoi le bouton refuse. Le même
+              seuil que dans le formulaire du produit — trois quarts du maximum.
+
+              Il remplace le libellé rassurant plutôt que de s'ajouter à côté :
+              « sans compte, sans email » n'a plus rien à faire là au moment où
+              on annonce un refus. */}
+          {texte.length > SEUIL_COMPTEUR ? (
+            <span
+              className={`text-mono min-w-0 font-mono tabular-nums ${trop ? "text-alerte" : "text-stone-500"}`}
+            >
+              {texte.length.toLocaleString("fr-FR")} /{" "}
+              {CARACTERES_MAXIMUM_ANONYME.toLocaleString("fr-FR")}
+            </span>
+          ) : (
+            <span className="text-petit min-w-0 text-stone-500">Sans compte, sans email.</span>
+          )}
+        </div>
+
+        {/* Le message n'occupe plus rien tant qu'il n'a rien à dire.
+          Sa place était réservée en permanence — une ligne de vingt pixels, plus
+          le rythme du formulaire autour — pour une phrase qui paraît un jour sur
+          cent. Ce vide-là séparait le bouton du rappel de connexion qui le suit,
+          au point de rattacher ce rappel au cairn plutôt qu'à ce dont il est la
+          porte de sortie.
+
+          La réserve ne protégeait d'ailleurs pas ce qu'elle prétendait : le
+          message est **sous** le bouton, il ne peut pas le décaler. Il ne
+          décalait que ce qui vient après, et le faire à l'instant où quelqu'un
+          lit une erreur est exactement le moment où un déplacement se comprend
+          tout seul.
+
+          `empty:` fait le travail sans condition dans le rendu : la balise reste
+          en place pour que le lecteur d'écran ait quelque chose à annoncer, et
+          c'est sa marge qui disparaît avec son contenu. */}
+        <p className="text-petit mt-pas-2 empty:mt-0" role="status" aria-live="polite">
+          {etat.erreur ? <span className="text-alerte">{etat.erreur}</span> : null}
+        </p>
+      </div>
     </form>
   );
 }

@@ -55,7 +55,11 @@ export function Hero({
       // `svh` et non `dvh` : sur un mobile, la barre d'adresse qui se replie
       // ferait grandir le panneau pendant qu'on lit, et le contenu sauterait sous
       // les yeux.
-      className="gap-pas-3 md:gap-pas-12 grid items-center md:min-h-[calc(100svh-4rem-2rem)] md:grid-cols-[1.4fr_1fr]"
+      // L'écart de la grille reprend sur mobile ce que le rappel de connexion
+      // vient de rendre. Le cairn reste où il était — ce qu'on cherchait n'était
+      // pas de le remonter, mais de mettre le vide du bon côté du rappel : loin
+      // au-dessus et collé dessous, il se lisait comme le titre du cairn.
+      className="gap-pas-8 md:gap-pas-12 grid items-center md:min-h-[calc(100svh-4rem-2rem)] md:grid-cols-[1.4fr_1fr]"
     >
       <Apparition>
         {/* Un seul interligne, serré, sur toutes les largeurs. Il s'ouvrait d'un
@@ -108,14 +112,13 @@ export function Hero({
                 blanc — puis un autre blanc le séparait du cairn. Trois blocs
                 séparés par des vides identiques ne se hiérarchisent plus.
 
-                Un demi-pas sur mobile, et non plus un pas entier : il vient se
-                ranger sous le bouton et sa mention rassurante, comme la
-                troisième ligne d'un même groupe. Au-dessus, la ligne d'erreur du
-                formulaire réserve déjà sa place — c'est elle qui compose
-                l'essentiel de l'écart, et elle ne peut pas être reprise sans que
-                le bouton saute à la première erreur. */}
+                Trois quarts de pas sur mobile, et rien d'autre entre les deux :
+                il se range sous le bouton et sa mention rassurante comme la
+                troisième ligne d'un même groupe. C'est là qu'il appartient — il
+                est la sortie de l'essai, pas l'introduction du cairn — et le
+                vide qu'il avait au-dessus le rattachait au mauvais voisin. */}
             <Temps>
-              <p className="mt-pas-2 md:mt-pas-6 text-petit text-stone-500">
+              <p className="mt-pas-3 md:mt-pas-6 text-petit text-stone-500">
                 Déjà un compte ?{" "}
                 <Link
                   href={ROUTES.connexion}
@@ -148,7 +151,7 @@ export function Hero({
             pixels de vide en haut comme en bas, que rien ne signalait sinon
             l'impression que le cairn commençait trop loin du texte. Le rapport
             est celui de la vue du dessin, cent sur quatre-vingt-treize. */}
-        <div className="aspect-[100/93] w-[min(76vw,22rem)] md:aspect-auto md:h-[clamp(18rem,42vh,30rem)] md:w-full">
+        <div className="aspect-[100/93] w-[min(84vw,24rem)] md:aspect-auto md:h-[clamp(18rem,42vh,30rem)] md:w-full">
           <CairnRenversable nombre={7} />
         </div>
       </div>
