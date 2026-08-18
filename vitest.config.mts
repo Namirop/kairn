@@ -17,13 +17,26 @@ import { defineConfig } from "vitest/config";
  * pour rester vérifiables ici : le périmètre s'élargit, la règle ne bouge pas —
  * ni base, ni réseau, ni horloge.
  *
+ * La troisième exception est la géométrie du banc, `scripts/evaluation/mesures/`.
+ * Elle échoue elle aussi sans bruit, et d'une façon particulièrement coûteuse :
+ * une segmentation qui dérive d'un passage à l'autre fait apparaître des manques
+ * qui n'existent pas, et deux rapports cessent de se comparer sans que rien ne
+ * le signale. Ces modules sont purs — du texte et des nombres, aucun appel — et
+ * ce sont eux qui portent les seuils calibrés à la main. Le client d'embeddings
+ * et son cache, qui touchent au réseau et au disque, restent hors périmètre.
+ *
  * Le fuseau et l'horloge du processus sont fixés : un test qui passerait à Paris
  * et échouerait à Auckland ne prouve rien. Les fonctions reçoivent de toute
  * façon leurs instants en paramètre — ce réglage est une ceinture de sécurité.
  */
 export default defineConfig({
   test: {
-    include: ["lib/domain/**/*.test.ts", "lib/ai/*.test.ts", "lib/ai/schemas/**/*.test.ts"],
+    include: [
+      "lib/domain/**/*.test.ts",
+      "lib/ai/*.test.ts",
+      "lib/ai/schemas/**/*.test.ts",
+      "scripts/evaluation/mesures/**/*.test.ts",
+    ],
     environment: "node",
   },
   resolve: {

@@ -20,6 +20,7 @@
     "verify:ai": "tsx scripts/verifier-garde-fous.ts && tsx scripts/verifier-plafond-concurrent.ts",
     "eval:generation": "tsx scripts/evaluer-generation.ts",
     "eval:rejeu": "tsx scripts/evaluer-generation.ts --rejeu",
+    "eval:mesures": "tsx scripts/mesurer-le-corpus.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "verify:ingestion": "tsx scripts/verifier-ingestion.ts",

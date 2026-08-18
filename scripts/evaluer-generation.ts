@@ -153,15 +153,19 @@ async function main(): Promise<void> {
   console.info(`\n${total.calls} appels, ${Number(total.costUsd).toFixed(4)} $.`);
   console.info(`Rapport écrit dans ${chemin}`);
 
-  if (!rejeu) {
-    const fige = ecrireFige(
-      passages.map((passage) => passage.evaluation),
-      modele,
-      debut,
-      corpusEntier.map((depot) => depot.nom),
-    );
-    console.info(`Concepts figés dans ${fige}`);
-  }
+  // Le rejeu fige lui aussi, désormais. Il ne change pas les concepts — c'est
+  // son objet — mais il rend des questions neuves, et les questions font partie
+  // du figé depuis qu'elles servent aux mesures : le radotage compare celles
+  // d'un même dépôt, le juge de fidélité lit un concept avec les siennes. Sans
+  // ça, il fallait repayer une extraction complète pour recalculer un seuil qui
+  // ne portait que sur des questions déjà écrites.
+  const figeEcrit = ecrireFige(
+    passages.map((passage) => passage.evaluation),
+    modele,
+    debut,
+    corpusEntier.map((depot) => depot.nom),
+  );
+  console.info(`${rejeu ? "Concepts et questions figés" : "Concepts figés"} dans ${figeEcrit}`);
 }
 
 main()

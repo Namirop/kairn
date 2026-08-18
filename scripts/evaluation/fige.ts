@@ -38,6 +38,35 @@ const figeSchema = z.object({
           concept: z.string(),
           tags: z.array(z.string()),
           uncertain: z.boolean(),
+          /**
+           * Les questions telles qu'elles ont été servies.
+           *
+           * Facultatives, comme `nature` avant elles : les figés écrits avant ce
+           * champ n'en portent pas, et les rendre invalides ferait taire toute
+           * la référence d'un coup.
+           *
+           * Elles ne servent pas au rejeu — qui les regénère, c'est son objet —
+           * mais aux mesures : le radotage compare les questions d'un même dépôt
+           * entre elles, et le juge de fidélité lit un concept avec les siennes.
+           * Sans ce champ, ces deux-là exigeaient un passage de génération à
+           * chaque fois qu'on voulait recalculer un seuil.
+           *
+           * Un sous-ensemble des champs d'un Variant, et pas la sortie entière :
+           * ce qu'il faut pour juger une question, sans lier le format du figé à
+           * chaque évolution du contrat de génération.
+           */
+          variants: z
+            .array(
+              z.object({
+                facet: z.string(),
+                format: z.string(),
+                question: z.string(),
+                answerKey: z.string(),
+                options: z.array(z.string()).nullable(),
+                correctIndex: z.number().int().nullable(),
+              }),
+            )
+            .optional(),
         }),
       ),
     }),
@@ -46,6 +75,20 @@ const figeSchema = z.object({
 
 export type CorpusFige = z.infer<typeof figeSchema>;
 export type DepotFige = CorpusFige["depots"][number];
+export type ConceptFige = DepotFige["concepts"][number];
+export type VariantFige = NonNullable<ConceptFige["variants"]>[number];
+
+/** Ce qu'on garde d'une question rendue : de quoi la juger, rien de plus. */
+function retenirVariant(variant: DepotEvalue["concepts"][number]["variants"][number]): VariantFige {
+  return {
+    facet: variant.facet,
+    format: variant.format,
+    question: variant.question,
+    answerKey: variant.answerKey,
+    options: variant.options ?? null,
+    correctIndex: variant.correctIndex ?? null,
+  };
+}
 
 /**
  * Le figé précédent, quand il est lisible et qu'il ne vient pas du mode mock.
@@ -109,7 +152,13 @@ export function ecrireFige(
         nature: evaluation.nature,
         langue: evaluation.langue,
         rejet: evaluation.rejet,
-        concepts: evaluation.concepts.map((evalue) => evalue.concept),
+        concepts: evaluation.concepts.map((evalue) => ({
+          ...evalue.concept,
+          // Un concept mis de côté n'a pas de questions : le champ reste absent
+          // plutôt que de porter un tableau vide, qui se lirait « zéro question
+          // rendue » au lieu de « aucune demandée ».
+          variants: evalue.variants.length === 0 ? undefined : evalue.variants.map(retenirVariant),
+        })),
       })),
       corpus,
     ),
