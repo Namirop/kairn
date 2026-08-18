@@ -164,12 +164,32 @@ export function EssaiDeDepot({
   }
 
   return (
-    <form action={action} noValidate className="gap-pas-6 flex flex-col">
-      <label htmlFor="essai" className="sr-only">
-        Ce que tu veux retenir
-      </label>
+    <form action={action} noValidate className="gap-pas-4 md:gap-pas-6 flex flex-col">
+      {/* L'intitulé se voit, et c'est ce qui manquait.
+          Sans bordure ni fond, le champ n'était plus signalé que par un trait
+          sous une phrase grise, et cette phrase — l'invite tournante — se lit
+          comme du texte de page : on arrivait sur un paragraphe, un blanc, un
+          trait, un bouton, sans jamais comprendre qu'il y avait quelque chose à
+          écrire. Le trait dit « on écrit sur cette ligne » à qui a déjà compris ;
+          il ne dit rien à qui découvre.
 
-      {/* Un sol, pas une boîte.
+          L'intitulé le dit, dans le registre des libellés techniques du
+          produit — le même que « Ce que tu as déposé » ou « Ton cairn ». C'est
+          la solution qui coûte le moins au parti pris d'origine : aucune boîte
+          ne revient, rien n'est encadré, on nomme simplement le champ au lieu de
+          compter sur son trait.
+
+          Il est collé à sa ligne et détaché du reste : la proximité fait le
+          groupe, et c'est elle qui dit où commence et où finit la zone. */}
+      <div>
+        <label
+          htmlFor="essai"
+          className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase"
+        >
+          Ce que tu veux retenir
+        </label>
+
+        {/* Un sol, pas une boîte.
           Le rectangle bordé à coins arrondis était le seul objet posé de la
           page : partout ailleurs, ce qui sépare est une surface ou une coupe de
           roche, et ce qui soutient est un trait — celui sous le cairn, dont le
@@ -188,8 +208,8 @@ export function EssaiDeDepot({
           champ ici, et à ce titre il lui faut trois pour un contre le papier.
           Le gris du cairn n'en donnait que 1,63 — assez pour une décoration,
           pas pour une limite de composant. */}
-      <div className="focus-within:border-lichen-deep border-b-2 border-stone-500 transition-colors">
-        {/* Le champ grandit avec ce qu'on y met, jusqu'à une borne.
+        <div className="mt-pas-2 focus-within:border-lichen-deep border-b-2 border-stone-500 transition-colors">
+          {/* Le champ grandit avec ce qu'on y met, jusqu'à une borne.
             Sans elle, un article collé poussait le bouton hors de l'écran : le
             geste suivant disparaissait au moment où on venait de le préparer.
             Au-delà, c'est le champ qui défile, pas la page.
@@ -210,15 +230,16 @@ export function EssaiDeDepot({
             c'est le plus gros bloc de l'ouverture, et sur un portable il poussait
             à lui seul le lien de connexion sous le pli. Sur une fenêtre
             ordinaire, la valeur tombe sur les huit rem d'avant. */}
-        <textarea
-          id="essai"
-          name="texte"
-          rows={4}
-          value={texte}
-          onChange={(evenement) => setTexte(evenement.target.value)}
-          placeholder={invite}
-          className="pb-pas-4 text-corps ascenseur-discret field-sizing-content max-h-[14rem] min-h-[clamp(5rem,14vh,8rem)] w-full resize-none overflow-y-auto border-0 bg-transparent leading-relaxed text-stone-900 outline-none placeholder:text-stone-500 focus-visible:outline-none"
-        />
+          <textarea
+            id="essai"
+            name="texte"
+            rows={4}
+            value={texte}
+            onChange={(evenement) => setTexte(evenement.target.value)}
+            placeholder={invite}
+            className="pb-pas-4 text-corps ascenseur-discret field-sizing-content max-h-[14rem] min-h-[clamp(5rem,14vh,8rem)] w-full resize-none overflow-y-auto border-0 bg-transparent leading-relaxed text-stone-900 outline-none placeholder:text-stone-500 focus-visible:outline-none"
+          />
+        </div>
       </div>
 
       <div className="gap-pas-4 flex flex-wrap items-center">

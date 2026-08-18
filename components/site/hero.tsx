@@ -55,10 +55,15 @@ export function Hero({
       // `svh` et non `dvh` : sur un mobile, la barre d'adresse qui se replie
       // ferait grandir le panneau pendant qu'on lit, et le contenu sauterait sous
       // les yeux.
-      className="gap-pas-12 grid items-center md:min-h-[calc(100svh-4rem-2rem)] md:grid-cols-[1.4fr_1fr]"
+      className="gap-pas-6 md:gap-pas-12 grid items-center md:min-h-[calc(100svh-4rem-2rem)] md:grid-cols-[1.4fr_1fr]"
     >
       <Apparition>
-        <h1 className="font-display text-h1-site leading-[0.95] font-bold tracking-[-0.03em] text-balance">
+        {/* L'interligne s'ouvre d'un cheveu sous le point de bascule. À 0,95 sur
+            un titre qui tient désormais sur trois ou quatre lignes étroites, le
+            jambage du « p » de « peu » venait toucher la ligne suivante — un
+            resserrement qui pose une composition sur deux lignes larges devient
+            une collision dès qu'il y en a quatre. */}
+        <h1 className="font-display text-h1-site leading-[1.02] font-bold tracking-[-0.03em] text-balance md:leading-[0.95]">
           <Temps balise="span" className="block">
             Tu lis beaucoup.
           </Temps>
@@ -68,7 +73,7 @@ export function Hero({
         </h1>
 
         <Temps>
-          <p className="mt-pas-6 max-w-md text-stone-500">
+          <p className="mt-pas-4 md:mt-pas-6 max-w-md text-stone-500">
             {connecte
               ? "Ce que tu as déposé t'attend, et revient quand il est sur le point de partir."
               : "Un article, une réponse qu'on t'a donnée, une page de manuel, ce qu'un collègue vient de t'expliquer. Kairn le découpe en concepts et te les repose juste avant que tu les oublies."}
@@ -91,12 +96,17 @@ export function Hero({
           </Temps>
         ) : (
           <>
-            <Temps className="mt-pas-8">
+            <Temps className="mt-pas-6 md:mt-pas-8">
               <EssaiDeDepot invite={invite} essaiPrecedent={essaiPrecedent} />
             </Temps>
 
+            {/* Le rappel de connexion se serre contre l'essai sur une colonne.
+                Il en est la porte de sortie, pas un sujet à lui seul, et un pas
+                de campagne entre les deux le faisait flotter au milieu d'un
+                blanc — puis un autre blanc le séparait du cairn. Trois blocs
+                séparés par des vides identiques ne se hiérarchisent plus. */}
             <Temps>
-              <p className="mt-pas-6 text-petit text-stone-500">
+              <p className="mt-pas-4 md:mt-pas-6 text-petit text-stone-500">
                 Déjà un compte ?{" "}
                 <Link
                   href={ROUTES.connexion}
@@ -113,8 +123,17 @@ export function Hero({
       <div className="flex justify-center">
         {/* Sa hauteur suit celle de la fenêtre, entre dix-huit et trente rem :
             posé à trente sur un portable de six cent cinquante pixels utiles, il
-            poussait à lui seul le reste de la colonne sous le pli. */}
-        <div className="h-72 w-44 md:h-[clamp(18rem,42vh,30rem)] md:w-full">
+            poussait à lui seul le reste de la colonne sous le pli.
+
+            Sur une colonne, c'est **la largeur** qui commande, et la boîte prend
+            la proportion du dessin. Elle était deux fois plus haute que large :
+            l'empilement, qui rentre en entier dans ce qu'on lui donne, se réglait
+            donc sur les cent soixante-seize pixels de largeur et laissait le
+            reste en air. Il paraissait minuscule au milieu d'un vide qu'il avait
+            lui-même réservé — alors que c'est le seul objet de la page qui
+            raconte le produit sans une phrase, et le seul avec quoi on puisse
+            jouer. */}
+        <div className="aspect-square w-[min(76vw,22rem)] md:aspect-auto md:h-[clamp(18rem,42vh,30rem)] md:w-full">
           <CairnRenversable nombre={7} />
         </div>
       </div>

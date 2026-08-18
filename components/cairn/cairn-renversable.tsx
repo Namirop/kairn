@@ -56,12 +56,23 @@ export function CairnRenversable({
     <svg
       ref={chute.refSvg}
       viewBox={`0 ${-hauteur + ySol} ${LARGEUR_VUE} ${hauteur}`}
-      className={cn("h-full w-full cursor-crosshair overflow-visible", className)}
+      /* `touch-pan-y` partage le geste entre la page et le cairn : la verticale
+         reste au défilement, l'horizontale vient ici. Sans lui, un glissé au
+         doigt serait happé par le défilement avant d'avoir touché une pierre —
+         et tout bloquer aurait fait du cairn un trou dans la page, à l'endroit
+         précis où il est le plus grand. */
+      className={cn("h-full w-full cursor-crosshair touch-pan-y overflow-visible", className)}
       onPointerMove={chute.surDeplacement}
       onPointerDown={chute.surAppui}
       onPointerLeave={chute.surSortie}
+      /* La fin d'un geste tactile efface le dernier point. Sans ça, le premier
+         déplacement du geste suivant se mesurerait depuis là où le précédent
+         s'est arrêté : une distance parcourue en zéro seconde, donc une vitesse
+         absurde et une pierre expédiée hors de l'écran. */
+      onPointerUp={chute.surSortie}
+      onPointerCancel={chute.surSortie}
       role="img"
-      aria-label={`Empilement de ${nombre} pierres. Passe la souris au travers pour le faire tomber.`}
+      aria-label={`Empilement de ${nombre} pierres. Passe la souris ou le doigt au travers pour le faire tomber.`}
     >
       <SolDuCairn />
       {pierres.map((pierre, rang) => (

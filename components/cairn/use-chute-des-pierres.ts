@@ -134,9 +134,23 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cad
     [pierres, relancer],
   );
 
+  /**
+   * Le passage d'un pointeur au travers de l'empilement.
+   *
+   * À la souris, le survol suffit — il n'y a rien d'autre qu'un survol puisse
+   * vouloir dire ici. Au doigt, il faut appuyer : sans ça, le moindre défilement
+   * de la page aurait fauché le cairn en passant.
+   *
+   * Le doigt était exclu tout court, et le tapotement tenait lieu de geste. Il
+   * fait tomber, mais il ne fait que ça : on ne peut ni balayer la pile, ni
+   * choisir la pierre qu'on vise, ni doser. Le glissé rend au tactile ce que la
+   * souris avait — c'est le `touch-action` de l'élément qui garde le défilement
+   * vertical à la page, et laisse l'horizontale au cairn.
+   */
   const surDeplacement = useCallback(
     (evenement: React.PointerEvent<SVGSVGElement>) => {
-      if (!actif || evenement.pointerType !== "mouse") return;
+      if (!actif) return;
+      if (evenement.pointerType !== "mouse" && evenement.buttons === 0) return;
 
       const point = enCoordonneesLocales(evenement.clientX, evenement.clientY);
       if (!point) return;
@@ -157,7 +171,13 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cad
     [actif, enCoordonneesLocales, frapper],
   );
 
-  /** Au doigt, le geste sert à faire défiler : c'est l'appui qui fait tomber. */
+  /**
+   * L'appui simple, au doigt.
+   *
+   * Il reste, à côté du glissé : un tapotement est ce qu'on essaie en premier,
+   * et il n'a pas de vitesse à donner. La secousse est donc fixe, et de quoi
+   * déséquilibrer sans faucher.
+   */
   const surAppui = useCallback(
     (evenement: React.PointerEvent<SVGSVGElement>) => {
       if (!actif || evenement.pointerType === "mouse") return;
