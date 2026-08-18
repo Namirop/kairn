@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Hors ligne · Kairn</title>
+    <meta name="theme-color" content="#f2f2ef" />
+    <link rel="icon" href="/icones/icone-192.png" />
+
+    <!--
+      Le seul écran du produit qui ne peut pas s'appuyer sur la feuille de style :
+      il s'affiche quand le réseau est absent, donc avant que quoi que ce soit
+      d'autre ait pu être téléchargé. Les valeurs sont recopiées de `globals.css`
+      — surface papier, encre granit, gris lichen, accent lichen — et c'est le
+      seul endroit du dépôt où cette recopie est acceptée. Si la palette bouge,
+      ce fichier bouge avec elle.
+
+      Les polices du produit sont servies sous des noms hachés par le build : les
+      nommer ici les rendrait fausses au premier déploiement. La pile système
+      prend le relais, ce qui est le bon compromis pour un écran qu'on espère ne
+      jamais montrer.
+    -->
+    <style>
+      :root {
+        --papier: #f2f2ef;
+        --encre: #16191a;
+        --second: #5e635f;
+        --lichen: #7a8b4f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100svh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background: var(--papier);
+        color: var(--encre);
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      main {
+        max-width: 26rem;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.75rem, 7vw, 2.25rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+
+      .filet {
+        display: block;
+        width: 2.5rem;
+        height: 2px;
+        margin-top: 1rem;
+        background: var(--lichen);
+      }
+
+      p {
+        margin: 1rem 0 0;
+        color: var(--second);
+      }
+
+      a {
+        display: inline-flex;
+        align-items: center;
+        height: 2.75rem;
+        margin-top: 2rem;
+        padding: 0 2rem;
+        border-radius: 999px;
+        background: var(--encre);
+        color: var(--papier);
+        font-weight: 500;
+        text-decoration: none;
+      }
+
+      a:focus-visible {
+        outline: 2px solid var(--lichen);
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <h1>Pas de réseau</h1>
+      <span class="filet" aria-hidden="true"></span>
+
+      <p>
+        Kairn a besoin de la connexion pour aller chercher ta session. Rien n’est perdu : ce qui
+        arrive à échéance attend, et revient dès que le réseau est là.
+      </p>
+
+      <a href="/aujourdhui">Réessayer</a>
+    </main>
+  </body>
+</html>

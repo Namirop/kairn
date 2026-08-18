@@ -1,25 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { RegistreServiceWorker } from "@/components/pwa/registre-service-worker";
 import { PAPIER } from "@/lib/design/couleurs-hors-css";
+import { ORIGINE_DU_SITE } from "@/lib/site/origine";
 import { classesPolices } from "./fonts";
 import "./globals.css";
-
-/**
- * L'origine des URL absolues des métadonnées.
- *
- * Sans elle, l'image de partage est annoncée en chemin relatif — ce qu'aucune
- * messagerie ne sait résoudre : le lien s'affiche nu. En préproduction, l'origine
- * du déploiement courant, pour que l'aperçu d'une branche montre la branche.
- */
-const ORIGINE =
-  process.env.VERCEL_ENV === "production" || !process.env.VERCEL_URL
-    ? "https://kairn.me"
-    : `https://${process.env.VERCEL_URL}`;
 
 const DESCRIPTION =
   "Dépose ce que tu apprends. Kairn le découpe en concepts et te les repose au bon moment.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(ORIGINE),
+  metadataBase: new URL(ORIGINE_DU_SITE),
   title: { default: "Kairn", template: "%s · Kairn" },
   description: DESCRIPTION,
   applicationName: "Kairn",
@@ -59,7 +49,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body className={classesPolices}>{children}</body>
+      <body className={classesPolices}>
+        {children}
+        <RegistreServiceWorker />
+      </body>
     </html>
   );
 }
