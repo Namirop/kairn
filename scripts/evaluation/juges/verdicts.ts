@@ -1,3 +1,8 @@
+import {
+  attendusDuDepot,
+  jugerLesAttendusEnDoute,
+  type CouvertureAttendu,
+} from "../attendus";
 import type { DepotFige } from "../fige";
 import { BANDE_DU_DOUBLON } from "../mesures/seuils";
 import type { SignalementsDuDepot } from "../mesures/signalements";
@@ -35,13 +40,22 @@ export type VerdictsDuDepot = {
    * `depot.concepts`. Vide tant qu'aucun figé ne porte de questions.
    */
   fidelite: { concept: string; questions: VerdictFidelite[] }[];
+  /**
+   * La couverture des attendus, avec verdict du juge pour ceux passés au
+   * repli. Vide pour les dépôts sans attendus — la plupart.
+   */
+  attendus: CouvertureAttendu[];
 };
 
 export async function jugerLesSignalements(
   signalements: SignalementsDuDepot[],
   depots: DepotFige[],
+  couverturesInitiales: { nom: string; couvertures: CouvertureAttendu[] }[],
 ): Promise<VerdictsDuDepot[]> {
   const parNom = new Map(depots.map((depot) => [depot.nom, depot]));
+  const couverturesParNom = new Map(
+    couverturesInitiales.map((c) => [c.nom, c.couvertures]),
+  );
   const verdicts: VerdictsDuDepot[] = [];
 
   for (const signalement of signalements) {
@@ -67,12 +81,16 @@ export async function jugerLesSignalements(
       fidelite.push({ concept: concept.concept, questions });
     }
 
+    const couverturesBrutes = couverturesParNom.get(depot.nom) ?? [];
+    const attendus = await jugerLesAttendusEnDoute(depot, couverturesBrutes);
+
     verdicts.push({
       nom: depot.nom,
       doublons,
       manques: residu.manques,
       inventions: residu.inventions,
       fidelite,
+      attendus,
     });
   }
 
@@ -100,11 +118,16 @@ export type RendementParBande = {
 export function compterLesAppelsDesJuges(
   signalements: SignalementsDuDepot[],
   depots: DepotFige[],
-): { doublon: number; residu: number; fidelite: number } {
+  couverturesInitiales: { nom: string; couvertures: CouvertureAttendu[] }[] = [],
+): { doublon: number; residu: number; fidelite: number; attendus: number } {
   const parNom = new Map(depots.map((depot) => [depot.nom, depot]));
+  const couverturesParNom = new Map(
+    couverturesInitiales.map((c) => [c.nom, c.couvertures]),
+  );
   let doublon = 0;
   let residu = 0;
   let fidelite = 0;
+  let attendus = 0;
 
   for (const signalement of signalements) {
     doublon += appelsPour(signalement.doublons.length);
@@ -116,9 +139,13 @@ export function compterLesAppelsDesJuges(
     for (const concept of depot.concepts) {
       if (concept.variants && concept.variants.length > 0) fidelite += 1;
     }
+
+    if (attendusDuDepot(depot.nom).length === 0) continue;
+    const couvertures = couverturesParNom.get(depot.nom) ?? [];
+    if (couvertures.some((c) => !c.couvertParProximite)) attendus += 1;
   }
 
-  return { doublon, residu, fidelite };
+  return { doublon, residu, fidelite, attendus };
 }
 
 export function rendementDuDoublon(

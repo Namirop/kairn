@@ -1,6 +1,7 @@
 import { MODELE_DES_JUGES } from "../juges/modele";
 import { rendementDuDoublon, type VerdictsDuDepot } from "../juges/verdicts";
 import { MODELE_EMBEDDING } from "./espace";
+import { rendreLesAttendus } from "./rendu-des-attendus";
 import { rendreLeDepot } from "./rendu-des-signalements";
 import { BANDE_DU_DOUBLON, PLANCHER_COUVERTURE, PLANCHER_DOUBLON, PLANCHER_SOUTIEN } from "./seuils";
 import type { MesuresDuDepot } from "./signaux";
@@ -160,6 +161,7 @@ export function rendreLesMesures(
     ...rendreLesDeciles(mesures),
     ...rendreLeTableau(signalements, verdicts),
     ...rendreLeRendementDuDoublon(signalements, verdicts),
+    ...rendreLesAttendus(verdicts),
     "## Les signalements, en entier",
     "",
     ...signalements.flatMap((signalement) =>

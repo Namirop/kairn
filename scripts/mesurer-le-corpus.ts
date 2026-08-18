@@ -48,6 +48,9 @@ function argument(drapeau: string): string | undefined {
 }
 
 async function main(): Promise<void> {
+  const { attendusDuDepot, couvertureDesAttendus, tousLesAttendus } = await import(
+    "./evaluation/attendus"
+  );
   const { dernierFige, lireFige } = await import("./evaluation/fige");
   const { plonger } = await import("./evaluation/mesures/embeddings");
   const { mesurerLeDepot, textesDuDepot } = await import("./evaluation/mesures/signaux");
@@ -84,7 +87,10 @@ async function main(): Promise<void> {
 
   // Un seul appel de plongée pour tout le corpus : les doublons de texte n'y
   // sont plongés qu'une fois, et le cache absorbe ce qui a déjà été calculé.
-  const textes = depots.flatMap(textesDuDepot);
+  // Les attendus des fichiers témoins entrent dans la même passe : ce sont des
+  // vecteurs à comparer aux concepts, et les stocker au cache leur évite d'être
+  // recalculés à chaque rejeu.
+  const textes = [...depots.flatMap(textesDuDepot), ...tousLesAttendus()];
   console.info(`${textes.length} textes à plonger, doublons compris.`);
 
   const passe = await plonger(textes);
@@ -110,12 +116,19 @@ async function main(): Promise<void> {
   }
 
   const signalements = mesures.map(signaler);
-  const appels = compterLesAppelsDesJuges(signalements, depots);
+  const couvertures = depots
+    .filter((depot) => attendusDuDepot(depot.nom).length > 0)
+    .map((depot) => ({
+      nom: depot.nom,
+      couvertures: couvertureDesAttendus(depot.nom, depot.concepts, passe.vecteur),
+    }));
+  const appels = compterLesAppelsDesJuges(signalements, depots, couvertures);
+  const total = appels.doublon + appels.residu + appels.fidelite + appels.attendus;
   console.info(
-    `Juges : ${appels.doublon} appel(s) doublon · ${appels.residu} appel(s) résidu · ${appels.fidelite} appel(s) fidélité — ${appels.doublon + appels.residu + appels.fidelite} au total.`,
+    `Juges : ${appels.doublon} doublon · ${appels.residu} résidu · ${appels.fidelite} fidélité · ${appels.attendus} attendus — ${total} au total.`,
   );
 
-  if (appels.doublon + appels.residu + appels.fidelite > 0 && !emettre) {
+  if (total > 0 && !emettre) {
     console.info("\nRien n'a été émis aux juges. Relance avec --emettre pour dépenser.");
     const rapport = rendreLesMesures(mesures, [], {
       emisA,
@@ -130,13 +143,11 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (appels.doublon + appels.residu + appels.fidelite > 0) {
-    exigerLesGardeFous();
-  }
+  if (total > 0) exigerLesGardeFous();
 
   const { sumAiCalls } = await import("@/lib/db/ai-call");
   const debutJuges = new Date();
-  const verdicts = await jugerLesSignalements(signalements, depots);
+  const verdicts = await jugerLesSignalements(signalements, depots, couvertures);
   const consommation = await sumAiCalls(debutJuges);
   console.info(`Juges : ${consommation.calls} appels, ${Number(consommation.costUsd).toFixed(4)} $.`);
 
