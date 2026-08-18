@@ -1,25 +1,26 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { applicationDejaPosee, gesteManuel, type GesteManuel } from "./environnement-dinstallation";
 
 /**
- * Ce que le navigateur permet de faire de l'installation, et rien d'autre.
+ * Ce que l'appareil permet de faire de l'installation, et rien d'autre.
  *
- * Deux mondes, et un seul était traité. Chrome et ses dérivés annoncent
+ * Trois mondes, et un seul était traité. Chrome et ses dérivés annoncent
  * `beforeinstallprompt`, qu'on retient pour le déclencher au moment choisi.
- * **Safari n'émet rien** : sur iPhone, l'installation existe mais elle est un
- * geste manuel — Partager, puis « Sur l'écran d'accueil ». Attendre un événement
- * qui ne viendra jamais revenait à ne rien proposer du tout à la moitié des
- * téléphones, en silence et sans erreur nulle part.
+ * **Safari n'émet rien** : sur iPhone comme sur Mac, l'installation existe mais
+ * elle est un geste manuel, et les deux gestes ne sont pas le même. Attendre un
+ * événement qui ne viendra jamais revenait à ne rien proposer du tout à la
+ * moitié des téléphones, en silence et sans erreur nulle part.
  *
- * D'où deux modes plutôt qu'un booléen : celui qui déclenche, et celui qui
- * explique. Ils n'appellent pas la même interface, et faire passer le second
+ * D'où des modes plutôt qu'un booléen : celui qui déclenche, et ceux qui
+ * expliquent. Ils n'appellent pas la même interface, et faire passer les seconds
  * pour le premier donnerait un bouton « Installer » qui ne ferait rien.
  */
 
 type PromptInstallation = Event & { prompt: () => Promise<void> };
 
-export type ModeDInstallation = "aucune" | "automatique" | "manuelle";
+export type ModeDInstallation = "aucune" | "automatique" | GesteManuel;
 
 const CLE_ECARTEE = "cairn:invite-installation-ecartee";
 
@@ -28,33 +29,26 @@ function estPromptInstallation(evenement: Event): evenement is PromptInstallatio
 }
 
 /**
- * L'application tourne-t-elle déjà depuis l'écran d'accueil ?
- *
- * Deux façons de le savoir parce qu'il y a deux implémentations : la requête de
- * média est la norme, `navigator.standalone` est ce que Safari a fait avant
- * qu'elle existe et continue de servir. Proposer d'installer à quelqu'un qui a
- * déjà installé est le genre de détail qui fait douter du reste.
+ * Le refus est définitif sur cet appareil, et il survit à un navigateur en
+ * navigation privée qui refuse d'écrire. Une invite qui revient à chaque visite
+ * après un refus n'est plus une proposition.
  */
-function dejaInstallee(): boolean {
-  if (window.matchMedia("(display-mode: standalone)").matches) return true;
-
-  return Reflect.get(window.navigator, "standalone") === true;
+function estEcartee(): boolean {
+  try {
+    return window.localStorage.getItem(CLE_ECARTEE) === "1";
+  } catch {
+    return false;
+  }
 }
 
-/**
- * Un appareil d'Apple, y compris l'iPad qui se fait passer pour un Mac.
- *
- * Depuis iPadOS 13, Safari annonce « Macintosh » dans sa chaîne d'agent : sans
- * le second test, tous les iPads tombaient du côté qui attend un événement que
- * leur navigateur n'émet pas. Le nombre de points de contact est ce qui les
- * distingue d'un vrai Mac, dont l'écran ne se touche pas.
- */
-function estAppareilApple(): boolean {
-  const agent = window.navigator.userAgent;
-
-  if (/iPhone|iPad|iPod/.test(agent)) return true;
-
-  return /Macintosh/.test(agent) && window.navigator.maxTouchPoints > 1;
+function ecarterPourDeBon(): void {
+  try {
+    window.localStorage.setItem(CLE_ECARTEE, "1");
+  } catch {
+    // Stockage refusé : l'invite repartira à la prochaine visite. C'est le
+    // moindre mal, et la seule alternative serait un aller-retour serveur pour
+    // un réglage qui ne concerne que cet appareil.
+  }
 }
 
 export function useInstallation(): {
@@ -66,18 +60,14 @@ export function useInstallation(): {
   const invite = useRef<PromptInstallation | null>(null);
 
   useEffect(() => {
-    if (window.localStorage.getItem(CLE_ECARTEE) === "1") return;
-    if (dejaInstallee()) return;
+    if (estEcartee()) return;
+
+    let vivant = true;
 
     // L'installation vient de se faire pendant la visite : l'invite disparaît
     // sans attendre un rechargement.
     const surInstallation = () => setMode("aucune");
     window.addEventListener("appinstalled", surInstallation);
-
-    if (estAppareilApple()) {
-      setMode("manuelle");
-      return () => window.removeEventListener("appinstalled", surInstallation);
-    }
 
     const surInvite = (evenement: Event) => {
       // Le navigateur poserait sa propre barre. On garde la main pour la
@@ -90,9 +80,35 @@ export function useInstallation(): {
       setMode("automatique");
     };
 
+    // L'écoute démarre avant la vérification, et pas après : l'événement part
+    // tôt dans le chargement de la page, et un `await` posé devant l'écouteur le
+    // laisserait passer. Ce qui suit ne fait que décider s'il y a lieu d'en
+    // tenir compte.
     window.addEventListener("beforeinstallprompt", surInvite);
 
+    void applicationDejaPosee().then((posee) => {
+      if (!vivant) return;
+
+      // Déjà installée : on retire l'écoute plutôt que d'ignorer l'événement,
+      // faute de quoi un `beforeinstallprompt` tardif rallumerait l'invite.
+      if (posee) {
+        invite.current = null;
+        window.removeEventListener("beforeinstallprompt", surInvite);
+        setMode("aucune");
+        return;
+      }
+
+      const geste = gesteManuel();
+
+      // Un appareil qui a un geste manuel n'émettra jamais l'événement. Les
+      // autres, on les laisse parler : tant qu'ils n'ont rien dit, il n'y a rien
+      // à proposer, et une consigne inventée pour un navigateur qu'on ne
+      // reconnaît pas serait un chemin qui ne mène nulle part.
+      if (geste) setMode(geste);
+    });
+
     return () => {
+      vivant = false;
       window.removeEventListener("beforeinstallprompt", surInvite);
       window.removeEventListener("appinstalled", surInstallation);
     };
@@ -104,10 +120,8 @@ export function useInstallation(): {
     setMode("aucune");
   }, []);
 
-  // Écarter est définitif, sur cet appareil. Une invite qui revient à chaque
-  // visite après un refus n'est plus une proposition.
   const ecarter = useCallback(() => {
-    window.localStorage.setItem(CLE_ECARTEE, "1");
+    ecarterPourDeBon();
     setMode("aucune");
   }, []);
 

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
+import { InviteInstallation } from "@/components/pwa/invite-installation";
 import { ColonneCairn } from "@/components/tableau/colonne-cairn";
 import { CompteurDu } from "@/components/tableau/compteur-du";
 import { ListeDepots } from "@/components/tableau/liste-depots";
@@ -51,6 +52,17 @@ export default async function PageAujourdhui() {
               <SignalDeDette enAttente={tableau.charge.enAttente} jours={tableau.arriere.jours} />
             </div>
           ) : null}
+
+          {/* Sous le compteur, pas au-dessus. Ce qu'il y a à revoir aujourd'hui
+              reste la première chose lue — c'est la raison d'ouvrir
+              l'application, et une invite posée devant elle ferait passer
+              l'accessoire avant le sujet. Juste après, en revanche, elle est
+              dans le premier écran d'un téléphone et personne ne peut la rater.
+
+              Ici et nulle part ailleurs : c'est le seul écran par lequel on
+              entre, et le seul où proposer d'installer ne coupe pas quelque
+              chose en cours. */}
+          <InviteInstallation />
         </div>
 
         <ListeDepots depots={tableau.depots} maintenant={maintenant} fuseau={tableau.fuseau} />

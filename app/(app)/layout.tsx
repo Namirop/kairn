@@ -3,7 +3,6 @@ import { AccordFuseau } from "@/components/compte/accord-fuseau";
 import { BarreBasse } from "@/components/coquille/barre-basse";
 import { EnTete } from "@/components/coquille/en-tete";
 import { Rail } from "@/components/coquille/rail";
-import { InviteInstallation } from "@/components/pwa/invite-installation";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { estAdministrateur } from "@/lib/auth/admin";
 import { ROUTES } from "@/lib/auth/routes";
@@ -44,7 +43,6 @@ export default async function CoquilleApplication({ children }: { children: Reac
           <main>{children}</main>
         </div>
         <BarreBasse administrateur={administrateur} />
-        <InviteInstallation />
         <AccordFuseau enregistre={fuseau} />
       </div>
     </TooltipProvider>
