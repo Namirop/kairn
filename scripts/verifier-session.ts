@@ -180,6 +180,7 @@ async function main(): Promise<void> {
     // salirait pas un test, il ferait dépenser un poste de développement.
     await reglages.casSurchargeEtRetour();
     await reglages.casValeurAbsurdeRefusee();
+    await reglages.casSurchargeRattrapeLEnvironnement();
     await reglages.casJournalTrace();
     await reglages.casAucunResteEnBase();
 

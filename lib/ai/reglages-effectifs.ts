@@ -1,5 +1,5 @@
 import { lireLesSurcharges } from "@/lib/db/reglages";
-import { appliquerLesSurcharges, readAiConfig, type AiConfig } from "./config";
+import { assemblerLaConfig, type AiConfig } from "./config";
 
 /**
  * La configuration réellement en vigueur : l'environnement, surchargé par ce que
@@ -16,7 +16,5 @@ import { appliquerLesSurcharges, readAiConfig, type AiConfig } from "./config";
  * déjà pour réserver sa place.
  */
 export async function lireLaConfigEffective(): Promise<AiConfig> {
-  const environnement = readAiConfig();
-
-  return appliquerLesSurcharges(environnement, await lireLesSurcharges());
+  return assemblerLaConfig(await lireLesSurcharges());
 }

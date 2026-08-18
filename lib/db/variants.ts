@@ -1,4 +1,3 @@
-import { readAiConfig } from "@/lib/ai/config";
 import { PROMPT_VERSIONS } from "@/lib/ai/prompts";
 import { prisma } from "@/lib/db/client";
 import type { VariantFacet, VariantFormat } from "@/lib/db/types";
@@ -40,7 +39,11 @@ function payloadDe(question: QuestionAEcrire, atomId: string) {
   if (question.cloze) return question.cloze;
 
   if (question.options && question.correctIndex !== null) {
-    return ordonnerLesOptions(question.options, question.correctIndex, `${atomId}:${question.facet}`);
+    return ordonnerLesOptions(
+      question.options,
+      question.correctIndex,
+      `${atomId}:${question.facet}`,
+    );
   }
 
   return undefined;
@@ -49,6 +52,16 @@ function payloadDe(question: QuestionAEcrire, atomId: string) {
 export async function ecrireQuestions(
   atomId: string,
   questions: QuestionAEcrire[],
+  /**
+   * Le modèle qui a écrit ces questions, nommé par l'appelant.
+   *
+   * Ce module le lisait lui-même dans l'environnement, ce qui était faux de deux
+   * façons : il inscrivait le modèle par défaut là où une surcharge en avait
+   * imposé un autre, et il levait sur un environnement incomplet alors que
+   * l'appel venait précisément de réussir grâce à la surcharge qui le complétait.
+   * L'appelant, lui, sait sous quelle configuration il a émis.
+   */
+  model: string,
 ): Promise<number> {
   // Rien à écrire : on ne retire surtout pas ce qui existe, sans quoi une
   // régénération qui ne rend rien laisserait le concept sans aucune question.
@@ -74,7 +87,7 @@ export async function ecrireQuestions(
         // Le réglage sous lequel cette question a été écrite. Posé ici, à la
         // création, parce qu'il n'y a pas d'autre moment où on le connaisse.
         promptVersion: PROMPT_VERSIONS.generate_variants,
-        model: readAiConfig().model,
+        model,
       })),
     }),
   ]);

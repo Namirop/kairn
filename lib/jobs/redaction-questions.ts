@@ -1,5 +1,6 @@
 import { callAI } from "@/lib/ai/client";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
+import { lireLaConfigEffective } from "@/lib/ai/reglages-effectifs";
 import { contratDeGeneration } from "@/lib/ai/schemas";
 import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
 import { prisma } from "@/lib/db/client";
@@ -59,8 +60,14 @@ type LotRendu = { rang: number; variants: Parameters<typeof ecrireQuestions>[1] 
  *
  * Rend les rangs restés sans réponse. Un lot manquant n'emporte pas les
  * autres : ce qui a été écrit est écrit.
+ *
+ * Le modèle est lu ici, une fois, et descendu jusqu'à l'écriture. La couche
+ * données ne peut pas aller le chercher elle-même : la configuration effective
+ * se lit en base, et `lib/db/` qui appellerait `lib/ai/` refermerait un cycle
+ * sur `lib/db/reglages`.
  */
 async function rangerLesLots(atomIds: string[], lots: LotRendu[]): Promise<number[]> {
+  const { model } = await lireLaConfigEffective();
   const manquants: number[] = [];
 
   for (const [rang, atomId] of atomIds.entries()) {
@@ -71,7 +78,7 @@ async function rangerLesLots(atomIds: string[], lots: LotRendu[]): Promise<numbe
       continue;
     }
 
-    await ecrireQuestions(atomId, lot.variants);
+    await ecrireQuestions(atomId, lot.variants, model);
   }
 
   return manquants;

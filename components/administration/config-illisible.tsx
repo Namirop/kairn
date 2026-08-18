@@ -28,16 +28,18 @@ export function ConfigIllisible({ motif }: { motif: string }) {
 
       <p className="mt-pas-3 text-petit max-w-prose text-stone-800">
         Tant qu&apos;elle est dans cet état, tout appel au modèle échoue, l&apos;ingestion comprise.
-        Elle se corrige dans les variables d&apos;environnement de l&apos;hébergeur, puis au
-        redéploiement — un réglage posé ne la rattrape pas, l&apos;environnement est validé avant
-        lui.
+        Poser la valeur rattrape le prochain appel, sans redéploiement. La variable
+        d&apos;environnement reste à corriger chez l&apos;hébergeur, pour que le défaut redevienne
+        juste une fois le réglage retiré.
       </p>
 
       <p className="mt-pas-2 text-petit">
         <Link href={ROUTES.adminPilotage} className="text-stone-900 underline underline-offset-4">
-          Pilotage
+          Poser la valeur dans Pilotage
         </Link>{" "}
-        <span className="text-stone-500">montre ce que le serveur reçoit aujourd&apos;hui.</span>
+        <span className="text-stone-500">
+          — l&apos;écran montre aussi ce que le serveur reçoit aujourd&apos;hui.
+        </span>
       </p>
     </section>
   );

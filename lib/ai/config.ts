@@ -6,11 +6,20 @@ import { AIConfigError } from "./errors";
  * module : couper les appels doit prendre effet tout de suite, sans redémarrage.
  */
 
-const booleanFromEnv = z.enum(["true", "false"]).transform((value) => value === "true");
+/**
+ * Un booléen tel qu'il arrive : « true » quand il vient de l'environnement,
+ * `true` quand il vient de la base. On le normalise avant de valider plutôt que
+ * d'accepter une union, pour qu'un refus continue de nommer les deux valeurs
+ * attendues au lieu de rendre « Invalid input ».
+ */
+const booleen = z.preprocess(
+  (valeur) => (typeof valeur === "boolean" ? String(valeur) : valeur),
+  z.enum(["true", "false"]).transform((value) => value === "true"),
+);
 
 const configSchema = z.object({
-  enabled: booleanFromEnv,
-  mock: booleanFromEnv,
+  enabled: booleen,
+  mock: booleen,
   dailyCallCap: z.coerce.number().int().positive(),
   /**
    * Ce qu'un seul compte peut prendre dans la journée. Le plafond global
@@ -29,6 +38,9 @@ const configSchema = z.object({
 });
 
 export type AiConfig = z.infer<typeof configSchema>;
+
+/** Ce qu'une surcharge peut porter. Une clé absente laisse l'environnement. */
+export type SurchargesDeConfig = Partial<Omit<AiConfig, "apiKey">>;
 
 /** La variable derrière chaque champ. Sans elle, l'erreur ne dit pas quoi corriger. */
 const VARIABLE: Record<string, string> = {
@@ -64,22 +76,32 @@ function propre(valeur: string | undefined): string | undefined {
 }
 
 /** Assez pour reconnaître la valeur, pas assez pour noyer le journal. */
-function extrait(valeur: string): string {
-  return valeur.length > 60 ? `${valeur.slice(0, 60)}…` : valeur;
+function extrait(valeur: unknown): string {
+  const texte = String(valeur);
+
+  return texte.length > 60 ? `${texte.slice(0, 60)}…` : texte;
 }
 
 /**
- * Ce qui a été refusé, et ce qui avait été reçu.
+ * Ce qui a été refusé, ce qui avait été reçu, et d'où ça venait.
  *
  * Le message dit la variable et la valeur, parce que « expected one of
  * "true"|"false" » sans la valeur laisse chercher : on lit la bonne valeur dans
  * l'interface de l'hébergeur, on la croit juste, et on ne voit pas l'espace ou
  * le commentaire qui la suit. La montrer transforme une soirée en dix secondes.
  *
+ * La provenance compte autant depuis qu'une surcharge peut remplacer
+ * l'environnement : « reçu rien » envoie chez l'hébergeur, « posé à 0 » envoie
+ * dans l'écran de pilotage. Se tromper de destination coûte la même soirée.
+ *
  * `ANTHROPIC_API_KEY` n'est pas dans la table et n'a donc jamais de valeur
  * montrée — un message d'erreur part dans des journaux qu'on partage.
  */
-function diagnostic(erreur: z.ZodError, brut: Record<string, string | undefined>): string {
+function diagnostic(
+  erreur: z.ZodError,
+  brut: Record<string, unknown>,
+  posés: ReadonlySet<string>,
+): string {
   return erreur.issues
     .map((issue) => {
       const champ = String(issue.path[0] ?? "");
@@ -88,14 +110,20 @@ function diagnostic(erreur: z.ZodError, brut: Record<string, string | undefined>
       if (!nom) return `${champ} : ${issue.message}`;
 
       const recu = brut[champ];
+      const provenance = posés.has(champ)
+        ? `posé à « ${extrait(recu)} »`
+        : recu === undefined
+          ? "reçu rien"
+          : `reçu « ${extrait(recu)} »`;
 
-      return `${nom} : ${issue.message} — reçu ${recu === undefined ? "rien" : `« ${extrait(recu)} »`}`;
+      return `${nom} : ${issue.message} — ${provenance}`;
     })
     .join(" ; ");
 }
 
-export function readAiConfig(): AiConfig {
-  const brut: Record<string, string | undefined> = {
+/** Ce que l'environnement propose, tel quel : des chaînes, ou rien. */
+function environnementBrut(): Record<string, string | undefined> {
+  return {
     enabled: propre(process.env.AI_ENABLED),
     mock: propre(process.env.MOCK_AI),
     dailyCallCap: propre(process.env.AI_DAILY_CALL_CAP),
@@ -104,6 +132,33 @@ export function readAiConfig(): AiConfig {
     model: propre(process.env.AI_MODEL),
     maxTokens: propre(process.env.AI_MAX_TOKENS),
   };
+}
+
+/**
+ * L'environnement, ce que la base pose par-dessus, et le tout validé d'un seul
+ * tenant.
+ *
+ * L'ordre est le sens de la règle : l'environnement est la valeur par défaut, la
+ * base est l'exception qu'on assume. Retirer une surcharge suffit donc à revenir
+ * au défaut, sans avoir à se souvenir de ce qu'il valait.
+ *
+ * Ce qui est validé, c'est le résultat de l'empilement et lui seul. La version
+ * précédente validait l'environnement d'abord, puis lui appliquait les
+ * surcharges : une variable manquante levait donc avant que la surcharge censée
+ * la remplacer ait eu la parole. L'échappatoire prévue pour les incidents ne
+ * fonctionnait pas dans l'incident — poser la valeur depuis l'écran ne
+ * rattrapait rien, il fallait passer par l'hébergeur et redéployer.
+ */
+export function assemblerLaConfig(surcharges: SurchargesDeConfig = {}): AiConfig {
+  const brut: Record<string, unknown> = environnementBrut();
+  const posés = new Set<string>();
+
+  for (const [champ, valeur] of Object.entries(surcharges)) {
+    if (valeur === undefined) continue;
+
+    brut[champ] = valeur;
+    posés.add(champ);
+  }
 
   const parsed = configSchema.safeParse({
     ...brut,
@@ -111,49 +166,19 @@ export function readAiConfig(): AiConfig {
   });
 
   if (!parsed.success) {
-    throw new AIConfigError(`Configuration IA invalide — ${diagnostic(parsed.error, brut)}`);
+    throw new AIConfigError(`Configuration IA invalide — ${diagnostic(parsed.error, brut, posés)}`);
   }
 
   return parsed.data;
 }
 
 /**
- * La même configuration, mais déjà typée — celle qu'on obtient après avoir posé
- * des surcharges par-dessus l'environnement.
+ * La configuration que l'environnement donne à lui seul.
  *
- * Elle est revalidée et non pas seulement fusionnée : une valeur venue de la base
- * n'a pas traversé le schéma de l'environnement, et un plafond à zéro ou un
- * modèle vide couperait toute l'ingestion sans rien dire. Mieux vaut lever ici,
- * avec un message, que servir une configuration absurde.
+ * Sert à comparer — l'écran de pilotage montre ce défaut à côté de ce qui est
+ * posé — jamais à décider d'un appel. Ce qui décide, c'est la configuration
+ * effective, surcharges comprises.
  */
-const configEffectiveSchema = z.object({
-  enabled: z.boolean(),
-  mock: z.boolean(),
-  dailyCallCap: z.number().int().positive(),
-  userDailyCallCap: z.number().int().positive(),
-  anonymousDailyCallCap: z.number().int().positive(),
-  model: z.string().min(1),
-  maxTokens: z.number().int().positive(),
-  apiKey: z.string().min(1).optional(),
-});
-
-/** Ce qu'une surcharge peut porter. Une clé absente laisse l'environnement. */
-export type SurchargesDeConfig = Partial<Omit<AiConfig, "apiKey">>;
-
-/**
- * L'environnement, puis ce que la base pose par-dessus.
- *
- * L'ordre est le sens de la règle : l'environnement est la valeur par défaut, la
- * base est l'exception qu'on assume. Retirer une surcharge suffit donc à revenir
- * au défaut, sans avoir à se souvenir de ce qu'il valait.
- */
-export function appliquerLesSurcharges(base: AiConfig, surcharges: SurchargesDeConfig): AiConfig {
-  const parsed = configEffectiveSchema.safeParse({ ...base, ...surcharges });
-
-  if (!parsed.success) {
-    const issues = parsed.error.issues.map((issue) => `${issue.path.join(".")} : ${issue.message}`);
-    throw new AIConfigError(`Réglage posé invalide — ${issues.join(" ; ")}`);
-  }
-
-  return parsed.data;
+export function readAiConfig(): AiConfig {
+  return assemblerLaConfig();
 }

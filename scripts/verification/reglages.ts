@@ -88,6 +88,54 @@ export async function casValeurAbsurdeRefusee(): Promise<void> {
   await poserLesReglages(AUCUN, OPERATEUR);
 }
 
+/**
+ * Une valeur posée rattrape une variable d'environnement absente.
+ *
+ * C'est l'incident pour lequel cet écran existe, et il ne fonctionnait pas :
+ * l'environnement était validé avant que la surcharge ait la parole, donc une
+ * variable oubliée en ligne levait quoi qu'on pose. Le seul recours était
+ * l'hébergeur puis un redéploiement — c'est-à-dire tout ce que « s'applique sans
+ * redéploiement » promettait d'éviter.
+ *
+ * Le cas garde les deux moitiés de la règle : sans surcharge, l'absence reste
+ * une erreur ; avec, elle est rattrapée. La seconde sans la première laisserait
+ * passer une configuration qui accepte n'importe quoi.
+ */
+export async function casSurchargeRattrapeLEnvironnement(): Promise<void> {
+  const origine = process.env.AI_DAILY_CALL_CAP_ANONYME;
+  delete process.env.AI_DAILY_CALL_CAP_ANONYME;
+
+  try {
+    let leve = false;
+
+    try {
+      readAiConfig();
+    } catch {
+      leve = true;
+    }
+
+    record(
+      "Réglages — une variable absente reste une erreur tant que rien ne la remplace",
+      leve,
+      leve ? "refusé" : "accepté, ce qui est un trou",
+    );
+
+    await poserLesReglages({ ...AUCUN, anonymousDailyCallCap: 7 }, OPERATEUR);
+    const effective = await lireLaConfigEffective();
+
+    record(
+      "Réglages — une valeur posée rattrape une variable d'environnement absente",
+      effective.anonymousDailyCallCap === 7,
+      `plafond anonyme ${effective.anonymousDailyCallCap}`,
+    );
+  } finally {
+    await poserLesReglages(AUCUN, OPERATEUR);
+
+    if (origine === undefined) delete process.env.AI_DAILY_CALL_CAP_ANONYME;
+    else process.env.AI_DAILY_CALL_CAP_ANONYME = origine;
+  }
+}
+
 /** Rien ne change sans trace, et rien n'est tracé sans changement. */
 export async function casJournalTrace(): Promise<void> {
   const avant = await lireLeJournal(50);
