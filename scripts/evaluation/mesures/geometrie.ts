@@ -66,6 +66,26 @@ export function plusProche(vecteur: Vecteur, candidats: Vecteur[]): PlusProche |
   return meilleur;
 }
 
+/**
+ * Les `k` candidats les plus proches d'un vecteur, du plus proche au moins
+ * proche. Rend une liste plus courte quand l'ensemble n'en contient pas assez.
+ *
+ * Sert au juge d'attendus : la proximité désigne une poignée de concepts, et
+ * le juge tranche si l'un d'eux couvre vraiment l'idée — chiffres, seuils et
+ * conditions compris.
+ */
+export function plusProches(vecteur: Vecteur, candidats: Vecteur[], k: number): PlusProche[] {
+  const toutes: PlusProche[] = [];
+
+  candidats.forEach((candidat, rang) => {
+    const proximite = cosinus(vecteur, candidat);
+
+    if (!Number.isNaN(proximite)) toutes.push({ rang, proximite });
+  });
+
+  return toutes.sort((un, deux) => deux.proximite - un.proximite).slice(0, Math.max(0, k));
+}
+
 export type PaireProche = { un: number; deux: number; proximite: number };
 
 /**

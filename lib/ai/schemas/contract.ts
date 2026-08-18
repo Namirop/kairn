@@ -41,7 +41,12 @@ export type AiPurposeProduit = (typeof AI_PURPOSES)[number];
  * par laquelle on relit la dépense, et une intention inconnue du registre
  * arriverait dans les comptes sous une chaîne libre.
  */
-export const AI_PURPOSES_BANC = ["juge_residu", "juge_fidelite", "juge_doublon"] as const;
+export const AI_PURPOSES_BANC = [
+  "juge_residu",
+  "juge_fidelite",
+  "juge_doublon",
+  "juge_attendus",
+] as const;
 
 export type AiPurposeBanc = (typeof AI_PURPOSES_BANC)[number];
 

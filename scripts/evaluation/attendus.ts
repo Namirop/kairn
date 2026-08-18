@@ -1,9 +1,7 @@
-import type { ConceptFige, DepotFige } from "./fige";
-import { jugerLeResidu } from "./juges/residu";
+import type { ConceptFige } from "./fige";
 import type { Vecteur } from "./mesures/espace";
-import { plusProche } from "./mesures/geometrie";
+import { plusProches } from "./mesures/geometrie";
 import { PLANCHER_COUVERTURE } from "./mesures/seuils";
-import type { Rapproche } from "./mesures/signaux";
 
 /**
  * Les idées qu'on attend d'un dépôt.
@@ -15,15 +13,12 @@ import type { Rapproche } from "./mesures/signaux";
  *
  * `27-idee-enfouie.txt` est le cas d'école du manque : l'idée principale
  * (l'irréversibilité de la perte d'arôme sous 12 °C) est glissée en
- * subordonnée, au milieu d'une phrase dont le sujet apparent est ailleurs. Un
- * extracteur pressé produira « les tomates ne vont pas au réfrigérateur » et
- * perdra le fait qui rend la règle importante.
+ * subordonnée, au milieu d'une phrase dont le sujet apparent est ailleurs.
  *
  * `22-article-long.md` porte six mécanismes énumérables sur les feux de forêt.
- * Le juge de résidu vient d'en confirmer cinq manques dessus au 18 août :
- * c'est le comportement voulu, les attendus existent pour **garder ce trou
- * visible d'un passage à l'autre**, pas pour être satisfaits. Ne pas les
- * adoucir pour les faire passer.
+ * Les attendus existent pour **garder les trous visibles d'un passage à
+ * l'autre**, pas pour être satisfaits. Ne pas les adoucir pour les faire
+ * passer.
  */
 
 export const ATTENDUS: Readonly<Record<string, readonly string[]>> = {
@@ -44,6 +39,9 @@ export const ATTENDUS: Readonly<Record<string, readonly string[]>> = {
   ],
 } as const;
 
+/** Le nombre de concepts candidats soumis au juge par attendu. */
+export const CANDIDATS_PAR_ATTENDU = 2;
+
 /** Les attendus d'un dépôt. Vide s'il n'y en a pas — la plupart des dépôts. */
 export function attendusDuDepot(nom: string): readonly string[] {
   return ATTENDUS[nom] ?? [];
@@ -56,26 +54,24 @@ export function tousLesAttendus(): string[] {
 
 export type CouvertureAttendu = {
   attendu: string;
-  /** Le concept le plus proche, ou `null` si le dépôt n'en porte aucun. */
-  voisin: string | null;
-  /** Proximité vers le voisin. `null` sans concept. */
-  proximite: number | null;
-  /** Vrai si `proximite ≥ PLANCHER_COUVERTURE`, ce qui vaut « couvert par proximité ». */
-  couvertParProximite: boolean;
+  /** Les concepts candidats retenus par proximité — jusqu'à `CANDIDATS_PAR_ATTENDU`. */
+  candidats: { concept: string; proximite: number }[];
   /**
-   * Verdict du juge de résidu quand l'attendu est passé au repli. Absent quand
-   * la proximité seule tranchait, ou quand aucun juge n'a tourné.
+   * Vrai si le plus proche candidat passe le plancher couverture. Reste au
+   * rapport à titre indicatif — le verdict est ce qui compte.
    */
-  verdict?: { manqueReel: boolean; motif: string };
+  couvertParProximite: boolean;
+  /** Verdict du juge d'attendus. Absent quand aucun juge n'a tourné. */
+  verdict?: { couvert: boolean; motif: string };
 };
 
 /**
- * La couverture des attendus d'un dépôt par ses concepts.
+ * La couverture des attendus d'un dépôt par ses concepts, avant tout juge.
  *
- * Même géométrie que la couverture des phrases (§3 de la fiche) et **même
- * plancher** : on regarde si l'attendu s'approche d'un concept au-dessus du
- * seuil calibré pour la couverture phrase→concept. Sous ce seuil, le repli
- * juge tranche.
+ * On désigne les {@link CANDIDATS_PAR_ATTENDU} concepts les plus proches par
+ * proximité — la géométrie sélectionne. Le verdict de couverture, lui, viendra
+ * du juge (voir `juges/attendus.ts`) : le cosinus mesure le même sujet, pas
+ * la même affirmation.
  *
  * Un dépôt sans attendu rend un tableau vide sans plonger quoi que ce soit —
  * la plupart des dépôts.
@@ -92,65 +88,19 @@ export function couvertureDesAttendus(
   const vecteursConcepts = textesConcepts.map(vecteur);
 
   return attendus.map((attendu) => {
-    const trouve = plusProche(vecteur(attendu), vecteursConcepts);
-
-    if (trouve === null) {
-      return { attendu, voisin: null, proximite: null, couvertParProximite: false };
-    }
-
-    const proximite = trouve.proximite;
+    const proches = plusProches(vecteur(attendu), vecteursConcepts, CANDIDATS_PAR_ATTENDU);
+    const candidats = proches
+      .map((proche) => ({
+        concept: textesConcepts[proche.rang] ?? "",
+        proximite: proche.proximite,
+      }))
+      .filter((c) => c.concept !== "");
+    const meilleur = candidats[0];
 
     return {
       attendu,
-      voisin: textesConcepts[trouve.rang] ?? null,
-      proximite,
-      couvertParProximite: proximite >= PLANCHER_COUVERTURE,
-    };
-  });
-}
-
-/**
- * Le repli juge : les attendus sous plancher passent au juge de résidu.
- *
- * On reformule chaque attendu comme un candidat au manque — même question au
- * fond : « cette idée est-elle portée par les concepts du dépôt ? ». Un
- * attendu est par construction une idée qui mérite d'être retenue, donc le
- * verdict `retenir` du juge se lit ici comme `manqueReel` : oui, cette idée
- * n'est couverte par aucun concept.
- *
- * Un dépôt sans attendu en doute ne fait pas d'appel : `jugerLeResidu` le
- * saute lui-même quand ses listes sont vides. Un dépôt dont tous les attendus
- * sont couverts par proximité passe directement.
- */
-export async function jugerLesAttendusEnDoute(
-  depot: DepotFige,
-  couvertures: CouvertureAttendu[],
-): Promise<CouvertureAttendu[]> {
-  const enDoute = couvertures.filter((c) => !c.couvertParProximite);
-  if (enDoute.length === 0) return couvertures;
-
-  const manques: Rapproche[] = enDoute.map((c) => ({
-    texte: c.attendu,
-    voisin: c.voisin ?? "",
-    proximite: c.proximite ?? 0,
-  }));
-
-  const sortie = await jugerLeResidu(depot.nom, depot.texte, manques, []);
-  const verdictParAttendu = new Map(
-    enDoute.map((c, rang) => {
-      const verdict = sortie.manques[rang];
-      if (!verdict) throw new Error(`Verdict manquant pour l'attendu #${rang + 1} de ${depot.nom}.`);
-      return [c.attendu, verdict];
-    }),
-  );
-
-  return couvertures.map((c) => {
-    const verdict = verdictParAttendu.get(c.attendu);
-    if (!verdict) return c;
-
-    return {
-      ...c,
-      verdict: { manqueReel: verdict.retenir, motif: verdict.motif },
+      candidats,
+      couvertParProximite: meilleur !== undefined && meilleur.proximite >= PLANCHER_COUVERTURE,
     };
   });
 }

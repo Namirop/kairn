@@ -122,7 +122,7 @@ async function main(): Promise<void> {
       nom: depot.nom,
       couvertures: couvertureDesAttendus(depot.nom, depot.concepts, passe.vecteur),
     }));
-  const appels = compterLesAppelsDesJuges(signalements, depots, couvertures);
+  const appels = compterLesAppelsDesJuges(signalements, depots);
   const total = appels.doublon + appels.residu + appels.fidelite + appels.attendus;
   console.info(
     `Juges : ${appels.doublon} doublon · ${appels.residu} résidu · ${appels.fidelite} fidélité · ${appels.attendus} attendus — ${total} au total.`,

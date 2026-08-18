@@ -1,11 +1,8 @@
-import {
-  attendusDuDepot,
-  jugerLesAttendusEnDoute,
-  type CouvertureAttendu,
-} from "../attendus";
+import { attendusDuDepot, type CouvertureAttendu } from "../attendus";
 import type { DepotFige } from "../fige";
 import { BANDE_DU_DOUBLON } from "../mesures/seuils";
 import type { SignalementsDuDepot } from "../mesures/signalements";
+import { jugerLesAttendus } from "./attendus";
 import { appelsPour, jugerLesDoublons, type VerdictDoublon } from "./doublon";
 import { jugerLaFidelite, type VerdictFidelite } from "./fidelite";
 import { jugerLeResidu, type VerdictInvention, type VerdictManque } from "./residu";
@@ -47,6 +44,30 @@ export type VerdictsDuDepot = {
   attendus: CouvertureAttendu[];
 };
 
+/**
+ * Envoie chaque attendu au juge — géométrie sélectionne, juge tranche. Un
+ * appel par dépôt tant qu'il y a au moins un attendu ; le dépôt sans attendu
+ * n'appelle rien.
+ */
+async function juger(
+  nom: string,
+  couvertures: CouvertureAttendu[],
+): Promise<CouvertureAttendu[]> {
+  if (couvertures.length === 0) return [];
+
+  const soumis = couvertures.map((c) => ({
+    attendu: c.attendu,
+    candidats: c.candidats.map((k) => k.concept),
+  }));
+  const verdicts = await jugerLesAttendus(nom, soumis);
+
+  return couvertures.map((c, rang) => {
+    const verdict = verdicts[rang];
+    if (!verdict) throw new Error(`Verdict d'attendu manquant #${rang + 1} sur ${nom}.`);
+    return { ...c, verdict };
+  });
+}
+
 export async function jugerLesSignalements(
   signalements: SignalementsDuDepot[],
   depots: DepotFige[],
@@ -82,7 +103,7 @@ export async function jugerLesSignalements(
     }
 
     const couverturesBrutes = couverturesParNom.get(depot.nom) ?? [];
-    const attendus = await jugerLesAttendusEnDoute(depot, couverturesBrutes);
+    const attendus = await juger(depot.nom, couverturesBrutes);
 
     verdicts.push({
       nom: depot.nom,
@@ -118,12 +139,8 @@ export type RendementParBande = {
 export function compterLesAppelsDesJuges(
   signalements: SignalementsDuDepot[],
   depots: DepotFige[],
-  couverturesInitiales: { nom: string; couvertures: CouvertureAttendu[] }[] = [],
 ): { doublon: number; residu: number; fidelite: number; attendus: number } {
   const parNom = new Map(depots.map((depot) => [depot.nom, depot]));
-  const couverturesParNom = new Map(
-    couverturesInitiales.map((c) => [c.nom, c.couvertures]),
-  );
   let doublon = 0;
   let residu = 0;
   let fidelite = 0;
@@ -140,9 +157,7 @@ export function compterLesAppelsDesJuges(
       if (concept.variants && concept.variants.length > 0) fidelite += 1;
     }
 
-    if (attendusDuDepot(depot.nom).length === 0) continue;
-    const couvertures = couverturesParNom.get(depot.nom) ?? [];
-    if (couvertures.some((c) => !c.couvertParProximite)) attendus += 1;
+    if (attendusDuDepot(depot.nom).length > 0) attendus += 1;
   }
 
   return { doublon, residu, fidelite, attendus };

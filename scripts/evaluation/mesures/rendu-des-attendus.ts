@@ -1,19 +1,18 @@
 import type { CouvertureAttendu } from "../attendus";
 import type { VerdictsDuDepot } from "../juges/verdicts";
-import { PLANCHER_COUVERTURE } from "./seuils";
 
 /**
  * La section « Attendus par dépôt » du rapport.
  *
  * Deux dépôts seulement portent des attendus — les seuls où une référence
- * écrite à la main est légitime (fiche instrument §8). Chaque idée est
- * confrontée aux concepts par proximité d'embedding ; celles qui passent sous
- * le plancher passent au juge de résidu, dont le verdict apparaît sous
- * l'attendu.
+ * écrite à la main est légitime (fiche instrument §8). Chaque attendu passe
+ * au juge d'attendus, systématiquement : la géométrie sélectionne les
+ * concepts candidats, le juge tranche s'ils couvrent l'idée — chiffres,
+ * seuils et conditions inclus.
  *
- * L'attendu assumé : `22` doit échouer sur plusieurs des siennes tant que le
- * découpage n'est pas repris. Le rapport rend ces trous visibles d'un passage
- * à l'autre — ne pas les adoucir pour les faire passer.
+ * `couvertParProximite` reste indiqué à titre informatif, mais le verdict
+ * est ce qui compte. Les attendus qui sortent non couverts restent visibles
+ * d'un passage à l'autre par construction — ne pas les adoucir.
  */
 
 const EXTRAIT = 300;
@@ -24,27 +23,33 @@ function extrait(texte: string): string {
   return plat.length > EXTRAIT ? `${plat.slice(0, EXTRAIT)}…` : plat;
 }
 
-function proximite(valeur: number | null): string {
-  return valeur === null ? "—" : valeur.toFixed(3);
+function proximite(valeur: number): string {
+  return valeur.toFixed(3);
 }
 
-/** Le tag final : couvert par proximité, ou verdict du juge, ou « en doute » si le juge n'a pas tourné. */
-function verdictAttendu(couverture: CouvertureAttendu): string {
-  if (couverture.couvertParProximite) return "✓ couvert par proximité";
-  if (!couverture.verdict) return "· sous plancher, juge non passé";
+function verdictLigne(couverture: CouvertureAttendu): string {
+  if (!couverture.verdict) return "· juge non passé";
+  const indicateur = couverture.couvertParProximite ? "proximité ≥ plancher" : "proximité < plancher";
 
-  return couverture.verdict.manqueReel
-    ? `✗ **manque confirmé** — ${couverture.verdict.motif}`
-    : `✓ couvert (juge) — ${couverture.verdict.motif}`;
+  return couverture.verdict.couvert
+    ? `→ ✓ **couvert** (${indicateur}) — ${couverture.verdict.motif}`
+    : `→ ✗ **non couvert** (${indicateur}) — ${couverture.verdict.motif}`;
 }
 
 function compter(couvertures: CouvertureAttendu[]): { couverts: number; total: number } {
   const total = couvertures.length;
-  const couverts = couvertures.filter(
-    (c) => c.couvertParProximite || (c.verdict && !c.verdict.manqueReel),
-  ).length;
+  const couverts = couvertures.filter((c) => c.verdict?.couvert === true).length;
 
   return { couverts, total };
+}
+
+function rendreLesCandidats(couverture: CouvertureAttendu): string[] {
+  if (couverture.candidats.length === 0) return ["  ↳ aucun concept dans le dépôt"];
+
+  return couverture.candidats.map(
+    (candidat, rang) =>
+      `  ↳ candidat #${rang + 1} (${proximite(candidat.proximite)}) : ${extrait(candidat.concept)}`,
+  );
 }
 
 function rendreUnDepot(nom: string, couvertures: CouvertureAttendu[]): string[] {
@@ -56,8 +61,8 @@ function rendreUnDepot(nom: string, couvertures: CouvertureAttendu[]): string[] 
   for (const couverture of couvertures) {
     lignes.push(
       `- ${extrait(couverture.attendu)}`,
-      `  ↳ concept le plus proche (${proximite(couverture.proximite)}) : ${extrait(couverture.voisin ?? "—")}`,
-      `  → ${verdictAttendu(couverture)}`,
+      ...rendreLesCandidats(couverture),
+      `  ${verdictLigne(couverture)}`,
       "",
     );
   }
@@ -80,7 +85,7 @@ export function rendreLesAttendus(verdicts: VerdictsDuDepot[]): string[] {
   return [
     "## Attendus par dépôt",
     "",
-    `${totaux.couverts} / ${totaux.total} attendus couverts sur ${avecAttendus.length} dépôts témoins. Un attendu est couvert par proximité si un concept s'en approche au-dessus de ${PLANCHER_COUVERTURE} ; sinon, le juge de résidu tranche. Ces trous restent visibles d'un passage à l'autre par construction — pas d'adoucissement.`,
+    `${totaux.couverts} / ${totaux.total} attendus couverts sur ${avecAttendus.length} dépôts témoins. La géométrie désigne les concepts candidats les plus proches, le juge tranche si l'un d'eux couvre l'attendu — chiffres, seuils et conditions inclus. Ces trous restent visibles d'un passage à l'autre par construction : pas d'adoucissement.`,
     "",
     ...avecAttendus.flatMap((v) => rendreUnDepot(v.nom, v.attendus)),
   ];
