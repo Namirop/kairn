@@ -74,6 +74,11 @@ const COMBINAISONS: Combinaison[] = [
   { texte: "ember-clair", fond: "surface-roche", role: "série sur roche", seuil: AA_TEXTE },
   { texte: "alerte", fond: "surface-papier", role: "erreur sur papier", seuil: AA_TEXTE },
   { texte: "alerte", fond: "surface-ombre", role: "erreur sur ombre", seuil: AA_TEXTE },
+  // L'aplat d'alerte porte son propre texte : le badge, le bouton destructif et
+  // l'énoncé d'une configuration refusée. Il était posé partout sans jamais
+  // avoir été mesuré.
+  { texte: "alerte", fond: "alerte-surface", role: "erreur sur aplat d'alerte", seuil: AA_TEXTE },
+  { texte: "stone-800", fond: "alerte-surface", role: "texte sur aplat d'alerte", seuil: AA_TEXTE },
   { texte: "lichen", fond: "surface-papier", role: "accent sur papier", seuil: AA_LARGE },
   { texte: "ember", fond: "surface-papier", role: "série sur papier", seuil: AA_LARGE },
 ];

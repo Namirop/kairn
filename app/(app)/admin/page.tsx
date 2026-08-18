@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Bandeau } from "@/components/administration/bandeau";
+import { ConfigIllisible } from "@/components/administration/config-illisible";
 import { Carte, GraphiqueBarres } from "@/components/administration/graphique-barres";
 import { dollars, nombre } from "@/components/administration/formats";
 import { PageAdmin } from "@/components/administration/page-admin";
-import { lireLaConfigEffective } from "@/lib/ai/reglages-effectifs";
+import { diagnostiquerLaConfig } from "@/lib/ai/config-diagnostiquee";
 import { exigerUnAdministrateur } from "@/lib/auth/garde-admin";
 import { JOURS_MONTRES, lireLAdministration } from "@/lib/db/administration";
 import { lireLaDepenseParJour } from "@/lib/db/administration-depense";
@@ -22,6 +23,11 @@ export const metadata: Metadata = { title: "Administration" };
  * Les deux séries partagent la même fenêtre de jours. Deux longueurs
  * différentes posées côte à côte se comparent à l'œil sans qu'on remarque
  * qu'elles ne recouvrent pas la même chose.
+ *
+ * S'y ajoute, et seulement dans ce cas, l'énoncé d'une configuration refusée.
+ * Cet écran la lisait pour un seul chiffre, le plafond, et une variable
+ * manquante le faisait donc tomber en entier : l'écran où l'on vient chercher
+ * ce qui ne va pas était le premier à disparaître, et il ne disait pas pourquoi.
  */
 export const dynamic = "force-dynamic";
 
@@ -31,7 +37,7 @@ export default async function PageSynthese() {
   const [chiffres, serie, config] = await Promise.all([
     lireLAdministration(),
     lireLaDepenseParJour(new Date(), JOURS_MONTRES),
-    lireLaConfigEffective(),
+    diagnostiquerLaConfig(),
   ]);
 
   // Les lectures rendent le plus récent d'abord, ce qui est l'ordre d'un
@@ -48,11 +54,17 @@ export default async function PageSynthese() {
       titre="Administration"
       contexte="Les fenêtres et les journées sont en UTC, comme les compteurs qu'elles résument. Le détail de chaque mesure est dans son onglet."
     >
+      {config.lisible ? null : (
+        <div className="mb-pas-6">
+          <ConfigIllisible motif={config.motif} />
+        </div>
+      )}
+
       <Bandeau
         comptes={chiffres.comptes}
         depense={chiffres.depense}
         signalements={chiffres.signalements}
-        plafond={config.dailyCallCap}
+        plafond={config.lisible ? config.config.dailyCallCap : null}
       />
 
       <div className="gap-pas-6 mt-pas-12 grid lg:grid-cols-2">
@@ -60,7 +72,11 @@ export default async function PageSynthese() {
           titre="Dépense par jour"
           contexte={`${JOURS_MONTRES} derniers jours, au tarif réellement facturé. La dernière barre est la journée en cours.`}
         >
-          <GraphiqueBarres points={depense} format={dollars} intitule="Dépense par jour, en dollars" />
+          <GraphiqueBarres
+            points={depense}
+            format={dollars}
+            intitule="Dépense par jour, en dollars"
+          />
         </Carte>
 
         <Carte

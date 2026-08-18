@@ -22,6 +22,11 @@ import { cn } from "@/lib/utils";
  * non un compte. C'est voulu : « 38 appels » ne se juge pas, « 38 sur 150 » se
  * juge tout de suite, et c'est le seul chiffre de la page sur lequel on ait un
  * geste à faire — celui qui vit dans les réglages, plus bas.
+ *
+ * Quand la configuration ne se lit pas, ce dénominateur n'existe pas. La tuile
+ * retombe alors sur le compte seul et le dit dans sa ligne de contexte : un
+ * plafond deviné, ou un tiret qui ressemble à un plafond, se jugerait quand
+ * même — et de travers.
  */
 
 type Tuile = {
@@ -39,9 +44,14 @@ export function Bandeau({
   comptes: BlocComptes;
   depense: BlocDepense;
   signalements: BlocSignalements;
-  /** Le plafond d'appels réellement en vigueur, surcharges comprises. */
-  plafond: number;
+  /**
+   * Le plafond d'appels réellement en vigueur, surcharges comprises, ou `null`
+   * si la configuration a été refusée.
+   */
+  plafond: number | null;
 }) {
+  const echecs = depense.echecs === 0 ? "aucun échec" : `dont ${nombre(depense.echecs)} en échec`;
+
   const tuiles: Tuile[] = [
     {
       intitule: "Dépense du jour",
@@ -53,8 +63,11 @@ export function Bandeau({
     },
     {
       intitule: "Appels du jour",
-      valeur: `${nombre(depense.appels)} / ${nombre(plafond)}`,
-      contexte: depense.echecs === 0 ? "aucun échec" : `dont ${nombre(depense.echecs)} en échec`,
+      valeur:
+        plafond === null
+          ? nombre(depense.appels)
+          : `${nombre(depense.appels)} / ${nombre(plafond)}`,
+      contexte: plafond === null ? `${echecs}, plafond illisible` : echecs,
     },
     {
       intitule: "Actifs sur 7 jours",
