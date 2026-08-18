@@ -17,6 +17,18 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
+
+    /**
+     * Quand la plateforme capture un lien vers Kairn, elle réutilise la fenêtre
+     * de l'application au lieu d'en ouvrir une seconde.
+     *
+     * Ça ne force personne à capturer quoi que ce soit — c'est le navigateur et
+     * l'utilisateur qui en décident, et sur iOS une application posée sur
+     * l'écran d'accueil ne le peut pas du tout. D'où le code à six chiffres
+     * plutôt qu'un lien pour entrer : la session se crée dans la fenêtre qui l'a
+     * demandée, et cette ligne-ci n'est qu'un confort là où elle s'applique.
+     */
+    launch_handler: { client_mode: "navigate-existing" },
     background_color: PAPIER,
     theme_color: PAPIER,
     categories: ["education", "productivity"],
