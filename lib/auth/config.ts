@@ -1,12 +1,13 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
-import { magicLink } from "better-auth/plugins";
+import { emailOTP } from "better-auth/plugins";
 import { TIMEZONE_HEADER } from "@/lib/auth/en-tetes";
 import { reprendreLaVisite } from "@/lib/auth/reprise-de-visite";
 import { provisionAccount } from "@/lib/db/account-provisioning";
 import { prisma } from "@/lib/db/client";
-import { envoyerLeLienDeConnexion, MINUTES_DE_VALIDITE } from "@/lib/email/connexion";
+import { envoyerLeCodeDeConnexion, MINUTES_DE_VALIDITE } from "@/lib/email/connexion";
+import { LONGUEUR_DU_CODE } from "@/lib/domain/code-de-connexion";
 import { isSupportedTimeZone } from "@/lib/domain/local-day";
 
 /**
@@ -53,8 +54,8 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   trustedOrigins: trustedOrigins(),
   // Plus de mot de passe, nulle part. Kairn écrit tous les jours : l'adresse
-  // doit être valide et vérifiée dès le premier jour, et un lien par email le
-  // garantit par construction là où un mot de passe demande une étape de
+  // doit être valide et vérifiée dès le premier jour, et un code reçu par email
+  // le garantit par construction là où un mot de passe demande une étape de
   // vérification séparée qu'on repousse toujours. Ça supprime au passage tout le
   // code de réinitialisation, et la surface d'attaque qui va avec.
   emailAndPassword: { enabled: false },
@@ -65,7 +66,7 @@ export const auth = betterAuth({
    * Quelqu'un qui vient tous les jours ne doit jamais se reconnecter : chaque
    * visite repousse l'échéance, et seul un mois complet d'absence la fait
    * expirer. C'est ce qui rend un produit quotidien supportable — redemander un
-   * lien par email toutes les semaines ferait abandonner.
+   * code par email toutes les semaines ferait abandonner.
    */
   session: {
     expiresIn: 60 * 60 * 24 * 30,
@@ -96,10 +97,40 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    magicLink({
+    /**
+     * Un code à six chiffres, et non le lien qu'il remplace.
+     *
+     * Un lien s'ouvre depuis le client mail, donc dans le navigateur par défaut,
+     * jamais dans l'application installée. Sur iOS c'est sans recours — une
+     * application posée sur l'écran d'accueil ne peut pas intercepter un lien,
+     * et son stockage est séparé de celui de Safari : la session créée par le
+     * lien ne l'atteint pas, et on reste dehors dans la fenêtre où l'on voulait
+     * entrer. Un code se retape là où on l'a demandé, et la session s'y crée.
+     *
+     * `disableSignUp` reste faux : sans mot de passe, entrer et s'inscrire sont
+     * le même geste, et le code crée le compte s'il n'existe pas. C'est aussi ce
+     * qui garde l'écran muet sur l'existence d'une adresse — le code part dans
+     * les deux cas, et la réponse est la même.
+     *
+     * Six chiffres se devinent, contrairement à un jeton signé. Deux garde-fous
+     * plutôt qu'un : trois tentatives par code, et dix minutes de validité. Le
+     * code est stocké haché, pour qu'une lecture de la table `Verification` ne
+     * suffise pas à entrer.
+     */
+    emailOTP({
+      otpLength: LONGUEUR_DU_CODE,
       expiresIn: MINUTES_DE_VALIDITE * 60,
-      sendMagicLink: async ({ email, url }) => {
-        await envoyerLeLienDeConnexion(email, url);
+      allowedAttempts: 3,
+      storeOTP: "hashed",
+      sendVerificationOTP: async ({ email, otp, type }) => {
+        // Un seul type nous concerne : il n'y a ni mot de passe à réinitialiser
+        // ni changement d'adresse. Lever plutôt qu'envoyer un email dont le texte
+        // parlerait d'autre chose que ce qui a été demandé.
+        if (type !== "sign-in") {
+          throw new Error(`Type de code non pris en charge : ${type}.`);
+        }
+
+        await envoyerLeCodeDeConnexion(email, otp);
       },
     }),
     // En dernier : il pose les cookies de session sur la réponse, et doit voir

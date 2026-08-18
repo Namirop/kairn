@@ -114,7 +114,7 @@ const RUBRIQUES: RubriqueLegale[] = [
     corps: [
       "Tu peux emporter tes données à tout moment depuis les réglages : un fichier contenant tes dépôts, tes concepts, leurs questions, tes passages et ta progression.",
       "Tu peux supprimer ton compte depuis le même écran, sans avoir à écrire à qui que ce soit.",
-      "Tu peux couper les emails d'un clic, depuis les réglages comme depuis le lien présent dans chacun d'eux. Coupés, plus rien ne part sauf le lien de connexion — sans lui, personne ne pourrait plus entrer dans son compte.",
+      "Tu peux couper les emails d'un clic, depuis les réglages comme depuis le lien présent dans chacun d'eux. Coupés, plus rien ne part sauf le code de connexion — sans lui, personne ne pourrait plus entrer dans son compte.",
       "Tu disposes également d'un droit de rectification, d'opposition et de limitation. Pour ceux-là, écris à " +
         `${CONTACT.email}, ou par courrier à ${EDITEUR.nom}, ${EDITEUR.adresse}. La voie postale est celle à prendre s'il faut joindre une pièce d'identité.`,
     ],

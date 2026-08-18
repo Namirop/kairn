@@ -17,7 +17,7 @@ Quatre choses ne s'obtiennent pas depuis le code et bloquent tout le reste :
 2. **Des identifiants OAuth Google de production.** Ceux de développement portent
    une URI de redirection en `localhost` et ne fonctionneront pas.
 3. **Un domaine vérifié chez Resend.** Sans lui, aucun email ne part — donc
-   personne ne peut se connecter, puisque le lien de connexion est la seule
+   personne ne peut se connecter, puisque le code de connexion est la seule
    porte d'entrée avec Google.
 4. **Un plafond de dépense dans la Console Anthropic**, avec une alerte à un
    seuil bas. C'est le seul garde-fou de budget qui ne dépend pas du code.
@@ -294,7 +294,7 @@ améliore la remise.
 - Un préheader dans chaque message, pour que l'aperçu de la boîte ne montre pas le
   début du gabarit.
 - `List-Unsubscribe` et `List-Unsubscribe-Post` sur les envois périodiques, et sur
-  eux seuls : un lien de connexion qui les porterait serait rangé avec les envois
+  eux seuls : un code de connexion qui les porterait serait rangé avec les envois
   de masse.
 - Aucun doublon : un envoi par compte, par type et par jour local.
 - Une adresse d'expédition réelle plutôt qu'un `no-reply@`.
@@ -321,7 +321,9 @@ base — et les écrans de ce produit en font plusieurs.
 - [ ] Un second dépôt depuis la même visite est refusé
 - [ ] La création de compte récupère les concepts de l'essai, et les décompte du
       plafond du mois
-- [ ] Le lien de connexion arrive, et il ouvre bien une session
+- [ ] Le code de connexion arrive, et il ouvre bien une session
+- [ ] Le code saisi depuis l'application installée y ouvre la session, sans passer
+      par le navigateur
 - [ ] La connexion Google fonctionne sur le domaine de production
 - [ ] La session survit à une fermeture du navigateur
 - [ ] `/admin` rend 404 depuis un compte qui n'est pas dans `ADMIN_EMAILS`, et

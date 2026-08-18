@@ -24,9 +24,9 @@ garde-fous de budget sont posés et vérifiés à l'exécution : plafond global,
 d'ingestion, limites de débit.
 
 L'entrée est ouverte : on dépose depuis la page publique, sans compte, et le découpage s'affiche
-avant qu'on demande quoi que ce soit (voir « Le dépôt avant compte »). La connexion se fait par lien
-envoyé à l'adresse, sans mot de passe nulle part. Un compte peut exporter ses données et se
-supprimer lui-même.
+avant qu'on demande quoi que ce soit (voir « Le dépôt avant compte »). La connexion se fait par code
+à six chiffres envoyé à l'adresse, sans mot de passe nulle part. Un compte peut exporter ses données
+et se supprimer lui-même.
 
 Ce qui manque, et qui se voit :
 
@@ -43,7 +43,7 @@ Ce qui manque, et qui se voit :
 | ------------------ | --------------------------------------------------------------------- |
 | Framework          | Next.js 15 (App Router, Turbopack), React 19, TypeScript strict       |
 | Base de données    | PostgreSQL, Prisma 7 avec le driver adapter `@prisma/adapter-pg`      |
-| Authentification   | better-auth : lien par email, Google si configuré, aucun mot de passe |
+| Authentification   | better-auth : code à six chiffres par email, Google si configuré, aucun mot de passe |
 | Répétition espacée | `ts-fsrs`                                                             |
 | Modèle             | SDK Anthropic, sorties structurées contraintes, validation Zod        |
 | Interface          | Tailwind v4, primitives shadcn/ui retokenisées, Motion                |
@@ -71,12 +71,13 @@ npm run dev
 ```
 
 L'adresse du compte de démonstration est définie dans `prisma/seed/account.ts` et surchargeable
-par `SEED_USER_EMAIL`. Il n'a pas de mot de passe : on y entre en demandant un lien depuis l'écran
+par `SEED_USER_EMAIL`. Il n'a pas de mot de passe : on y entre en demandant un code depuis l'écran
 de connexion, comme sur n'importe quel compte.
 
-**Se connecter en local demande donc un fournisseur d'email.** Sans `RESEND_API_KEY`, `sendEmail()`
-journalise l'objet du message et jamais son contenu — le lien n'apparaît nulle part, et il n'y a pas
-d'autre porte que Google. Renseigne l'une des deux avant de vouloir entrer dans un compte.
+**Sans `RESEND_API_KEY`, le code se lit dans les journaux du serveur.** `sendEmail()` journalise
+l'objet du message et jamais son contenu, et l'objet du code de connexion porte le code — c'est ce
+qui permet d'entrer en local sans compte fournisseur. Ce chemin lève en production : une variable
+oubliée s'y voit comme une panne au lieu de fermer la porte en silence.
 
 ## Variables d'environnement
 

@@ -24,7 +24,7 @@ export default async function PageConnexion({
   const suite = destination(Array.isArray(brut) ? brut[0] : brut);
 
   // Demander son adresse à quelqu'un qui est déjà entré lui ferait croire qu'il
-  // ne l'est pas, et le renverrait chercher un lien dans sa boîte pour une
+  // ne l'est pas, et le renverrait chercher un code dans sa boîte pour une
   // session qu'il a déjà. On le mène là où il allait.
   if (await getCurrentUser()) redirect(suite);
 
@@ -32,9 +32,13 @@ export default async function PageConnexion({
     <div className="gap-pas-8 flex flex-col">
       <div>
         <h1 className="text-h1-app leading-tight font-bold">Entrer dans Kairn</h1>
+        {/* Le même titre porte les deux temps du formulaire — l'adresse, puis le
+            code. Cette phrase doit donc rester vraie aux deux : « on t'envoie un
+            code » se contredisait avec le « Envoyé à … » affiché juste dessous
+            une fois le code parti. Ce que le code crée un compte est dit sous le
+            champ d'adresse, là où la question se pose. */}
         <p className="mt-pas-2 text-petit text-stone-500">
-          Ton adresse suffit. On t&apos;envoie un lien, il ouvre ta session — et il crée ton compte
-          si tu n&apos;en as pas encore.
+          Ton adresse suffit : un code reçu par email ouvre ta session.
         </p>
       </div>
 

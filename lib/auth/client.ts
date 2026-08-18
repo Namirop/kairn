@@ -1,7 +1,7 @@
 "use client";
 
 import { createAuthClient } from "better-auth/react";
-import { magicLinkClient } from "better-auth/client/plugins";
+import { emailOTPClient } from "better-auth/client/plugins";
 
 /**
  * Le client d'authentification, utilisé par les formulaires de connexion.
@@ -11,6 +11,6 @@ import { magicLinkClient } from "better-auth/client/plugins";
  * développement, et fausse sur chaque preview, qui porte son propre domaine.
  * L'origine, elle, est juste partout.
  */
-export const authClient = createAuthClient({ plugins: [magicLinkClient()] });
+export const authClient = createAuthClient({ plugins: [emailOTPClient()] });
 
-export const { signIn, signOut, useSession } = authClient;
+export const { signIn, signOut, useSession, emailOtp } = authClient;

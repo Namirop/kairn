@@ -2,59 +2,61 @@
 
 import { useState } from "react";
 import { Champ } from "@/components/compte/champ";
+import { SaisieDuCode } from "@/components/compte/saisie-du-code";
 import { Button } from "@/components/ui/button";
-import { signIn } from "@/lib/auth/client";
+import { emailOtp } from "@/lib/auth/client";
 
 /**
- * Une adresse, un lien, et c'est tout.
+ * Une adresse, un code, et c'est tout.
  *
  * Il n'y a plus de mot de passe, donc plus de distinction entre s'inscrire et se
- * connecter : dans les deux cas on donne son adresse et on reçoit un lien. Deux
+ * connecter : dans les deux cas on donne son adresse et on reçoit un code. Deux
  * écrans pour un seul geste auraient obligé quelqu'un à savoir s'il a déjà un
  * compte, ce qu'il ne sait pas toujours.
  *
  * L'écran ne dit jamais si l'adresse existe déjà. Le message est le même dans
  * les deux cas — sans quoi ce formulaire dirait à n'importe qui si telle
  * personne a un compte ici.
+ *
+ * Un code plutôt qu'un lien, parce qu'un lien s'ouvre depuis le client mail,
+ * donc dans le navigateur par défaut, et jamais dans l'application installée.
+ * Voir `lib/domain/code-de-connexion.ts`.
  */
 export function FormulaireConnexion({ suite }: { suite: string }) {
   const [adresse, setAdresse] = useState("");
-  const [envoye, setEnvoye] = useState(false);
+  const [envoyeA, setEnvoyeA] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
-  async function demanderLeLien(evenement: React.FormEvent) {
+  async function demanderLeCode(evenement: React.FormEvent) {
     evenement.preventDefault();
     setErreur(null);
     setEnCours(true);
 
-    // Aucun fuseau n'accompagne cette requête, et ce serait inutile : le compte
-    // n'est pas créé ici mais au clic sur le lien, depuis le client mail, dans
-    // une requête qui ne porte aucun de nos en-têtes. C'est `AccordFuseau` qui
-    // réconcilie au premier affichage — le même chemin que l'entrée par Google.
-    const { error } = await signIn.magicLink({ email: adresse.trim(), callbackURL: suite });
+    const destinataire = adresse.trim();
+    const { error } = await emailOtp.sendVerificationOtp({
+      email: destinataire,
+      type: "sign-in",
+    });
 
     setEnCours(false);
 
     if (error) {
-      setErreur("Le lien n'a pas pu partir. Réessaie dans un instant.");
+      setErreur("Le code n'a pas pu partir. Réessaie dans un instant.");
       return;
     }
 
-    setEnvoye(true);
+    setEnvoyeA(destinataire);
   }
 
-  if (envoye) {
+  if (envoyeA) {
     return (
-      <div className="gap-pas-3 flex flex-col" role="status">
-        <p className="text-corps text-stone-900">Regarde tes emails.</p>
-        <p className="text-petit max-w-prose text-stone-500">
-          Un lien vient de partir vers {adresse.trim()}. Il fonctionne une seule fois et expire dans
-          un quart d&apos;heure. Pense au dossier des indésirables.
-        </p>
+      <div className="gap-pas-4 flex flex-col">
+        <SaisieDuCode adresse={envoyeA} suite={suite} />
+
         <button
           type="button"
-          onClick={() => setEnvoye(false)}
+          onClick={() => setEnvoyeA(null)}
           className="rounded-galet text-petit self-start text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
         >
           Changer d&apos;adresse
@@ -64,7 +66,7 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
   }
 
   return (
-    <form onSubmit={demanderLeLien} noValidate className="gap-pas-4 flex flex-col">
+    <form onSubmit={demanderLeCode} noValidate className="gap-pas-4 flex flex-col">
       <Champ
         id="email"
         name="email"
@@ -82,11 +84,11 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
       </p>
 
       <Button type="submit" disabled={enCours || adresse.trim().length === 0}>
-        {enCours ? "Envoi…" : "Recevoir mon lien"}
+        {enCours ? "Envoi…" : "Recevoir mon code"}
       </Button>
 
       <p className="text-petit text-stone-500">
-        Pas de mot de passe à retenir. Si tu n&apos;as pas encore de compte, le lien en crée un.
+        Pas de mot de passe à retenir. Si tu n&apos;as pas encore de compte, le code en crée un.
       </p>
     </form>
   );

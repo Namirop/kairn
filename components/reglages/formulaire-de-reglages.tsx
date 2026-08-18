@@ -160,7 +160,7 @@ export function FormulaireDeReglages({
         <Reglage
           nom="emails"
           intitule="Emails"
-          explication="Coupé, plus rien ne part sauf le lien de connexion — sans lui, personne ne pourrait plus entrer dans son compte."
+          explication="Coupé, plus rien ne part sauf le code de connexion — sans lui, personne ne pourrait plus entrer dans son compte."
           controle={
             <Switch id="emails" name="emails" checked={emails} onCheckedChange={setEmails} />
           }

@@ -8,11 +8,15 @@ import { Resend } from "resend";
  * développer toute la chaîne de notification sans compte fournisseur.
  *
  * **Mais seulement en développement.** Une fois déployé, ce silence est un
- * piège : le lien de connexion est la seule porte d'entrée du produit, l'écran
- * annonce « lien envoyé » puisque rien n'a échoué, et personne ne peut entrer
+ * piège : le code de connexion est la seule porte d'entrée du produit, l'écran
+ * annonce « code envoyé » puisque rien n'a échoué, et personne ne peut entrer
  * sans que rien ne le signale nulle part. Une variable oubliée doit se voir
  * comme une panne, pas se déguiser en succès — c'est la règle du projet sur les
  * erreurs, appliquée à la seule qui rendrait le produit inaccessible.
+ *
+ * L'objet est journalisé, et celui du code de connexion **porte le code** : sans
+ * compte Resend, c'est là qu'on le lit pour se connecter en local. Le chemin
+ * lève en production, donc ce code ne peut pas s'y retrouver dans un journal.
  */
 
 export type OutgoingEmail = {

@@ -5,7 +5,7 @@ import { ROUTES } from "@/lib/auth/routes";
  * L'inscription n'existe plus comme écran séparé.
  *
  * Sans mot de passe, s'inscrire et se connecter sont le même geste : on donne
- * son adresse, on reçoit un lien, et le lien crée le compte s'il n'existe pas.
+ * son adresse, on reçoit un code, et le code crée le compte s'il n'existe pas.
  * Deux écrans auraient obligé quelqu'un à savoir s'il a déjà un compte, ce
  * qu'on ne sait pas toujours — et à revenir en arrière quand on s'est trompé.
  *
