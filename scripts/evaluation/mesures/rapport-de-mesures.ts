@@ -1,16 +1,16 @@
+import { MODELE_DES_JUGES } from "../juges/modele";
+import { rendementDuDoublon, type VerdictsDuDepot } from "../juges/verdicts";
 import { MODELE_EMBEDDING } from "./espace";
-import { PLANCHER_COUVERTURE, PLANCHER_DOUBLON, PLANCHER_SOUTIEN } from "./seuils";
-import type { MesuresDuDepot, Paire, Rapproche } from "./signaux";
+import { rendreLeDepot } from "./rendu-des-signalements";
+import { BANDE_DU_DOUBLON, PLANCHER_COUVERTURE, PLANCHER_DOUBLON, PLANCHER_SOUTIEN } from "./seuils";
+import type { MesuresDuDepot } from "./signaux";
 import { signaler, totaliser, type SignalementsDuDepot } from "./signalements";
 import { rendreLesDeciles } from "./tableaux-de-calibration";
 
 /**
- * La section « Mesures » du rapport, planchers appliqués.
- *
- * Elle est faite pour être lue **sans ouvrir un autre fichier** : chaque
- * signalement porte ses deux textes en entier, pas une référence à une ligne.
- * C'est la contrainte qui gouverne la mise en forme — un rapport qui oblige à
- * retrouver la phrase ailleurs ne se lit pas, il se survole.
+ * L'agrégation du rapport « Mesures » : en-tête, tableau par dépôt, rendement
+ * du juge du doublon par bande. Le détail par signalement est dans
+ * `rendu-des-signalements.ts`.
  *
  * Les déciles restent en tête alors que les planchers sont posés, et c'est
  * volontaire : ce sont eux qui diront, d'un passage au suivant, si la
@@ -19,33 +19,63 @@ import { rendreLesDeciles } from "./tableaux-de-calibration";
  * tout le corpus a glissé.
  */
 
-const EXTRAIT = 300;
-
-function extrait(texte: string): string {
-  const plat = texte.replace(/\s+/g, " ").trim();
-
-  return plat.length > EXTRAIT ? `${plat.slice(0, EXTRAIT)}…` : plat;
-}
-
-function proximite(valeur: number): string {
-  return valeur.toFixed(3);
-}
-
 function nombre(valeur: number): string {
   return valeur.toLocaleString("fr-FR");
 }
 
-function rendreLeTableau(signalements: SignalementsDuDepot[]): string[] {
+function trouverVerdicts(verdicts: VerdictsDuDepot[], nom: string): VerdictsDuDepot | undefined {
+  return verdicts.find((v) => v.nom === nom);
+}
+
+function comptes(
+  signalements: SignalementsDuDepot[],
+  verdicts: VerdictsDuDepot[],
+): { manquesReels: number; inventionsReelles: number; doublonsConfirmes: number } {
+  let manquesReels = 0;
+  let inventionsReelles = 0;
+  let doublonsConfirmes = 0;
+
+  for (const signalement of signalements) {
+    const verdict = trouverVerdicts(verdicts, signalement.nom);
+    if (!verdict) continue;
+
+    manquesReels += verdict.manques.filter((v) => v.retenir).length;
+    inventionsReelles += verdict.inventions.filter((v) => !v.soutenu).length;
+    doublonsConfirmes += verdict.doublons.filter((v) => !v.independants).length;
+  }
+
+  return { manquesReels, inventionsReelles, doublonsConfirmes };
+}
+
+function rendreLeTableau(
+  signalements: SignalementsDuDepot[],
+  verdicts: VerdictsDuDepot[],
+): string[] {
   const lignes = signalements.map((s) => {
+    const verdict = trouverVerdicts(verdicts, s.nom);
+    const rendu = (candidats: number, confirmes: number | null): string =>
+      confirmes === null ? nombre(candidats) : `${nombre(confirmes)} / ${nombre(candidats)}`;
+    const manques = rendu(
+      s.manques.length,
+      verdict ? verdict.manques.filter((v) => v.retenir).length : null,
+    );
+    const inventions = rendu(
+      s.inventions.length,
+      verdict ? verdict.inventions.filter((v) => !v.soutenu).length : null,
+    );
+    const doublons = rendu(
+      s.doublons.length,
+      verdict ? verdict.doublons.filter((v) => !v.independants).length : null,
+    );
     const radotage = s.radotage === null ? "—" : nombre(s.radotage.interConcepts.length);
 
-    return `| \`${s.nom}\` | ${nombre(s.manques.length)} / ${nombre(s.segments)} | ${nombre(s.inventions.length)} / ${nombre(s.concepts)} | ${nombre(s.doublons.length)} | ${radotage} |`;
+    return `| \`${s.nom}\` | ${manques} / ${nombre(s.segments)} | ${inventions} / ${nombre(s.concepts)} | ${doublons} | ${radotage} |`;
   });
 
   return [
     "## Signalements par dépôt",
     "",
-    "C'est ce tableau qui dira, d'un passage à l'autre, si une modification de prompt améliore ou dégrade. Un tiret n'est pas un zéro : c'est « non mesuré ».",
+    "Format « retenus / candidats » quand le juge est passé, « candidats » seuls sinon. Un tiret n'est pas un zéro : c'est « non mesuré ».",
     "",
     "| Dépôt | Manques / phrases | Inventions / concepts | Doublons | Radotage |",
     "| --- | ---: | ---: | ---: | ---: |",
@@ -54,56 +84,28 @@ function rendreLeTableau(signalements: SignalementsDuDepot[]): string[] {
   ];
 }
 
-function rendreLesRapproches(entrees: Rapproche[], voisinage: string): string[] {
-  return entrees.flatMap((entree) => [
-    `- **${proximite(entree.proximite)}** ${extrait(entree.texte)}`,
-    `  ↳ ${voisinage} ${extrait(entree.voisin)}`,
+function rendreLeRendementDuDoublon(
+  signalements: SignalementsDuDepot[],
+  verdicts: VerdictsDuDepot[],
+): string[] {
+  const rendement = rendementDuDoublon(signalements, verdicts);
+
+  if (rendement.basse.candidats + rendement.haute.candidats === 0) return [];
+
+  const taux = (bande: { candidats: number; confirmes: number }): string =>
+    bande.candidats === 0 ? "—" : `${((bande.confirmes / bande.candidats) * 100).toFixed(0)} %`;
+
+  return [
+    "## Rendement du juge du doublon par bande",
     "",
-  ]);
-}
-
-function rendreLesPaires(paires: Paire[]): string[] {
-  return paires.flatMap((paire) => [
-    `- **${proximite(paire.proximite)}**`,
-    `  - ${extrait(paire.un)}`,
-    `  - ${extrait(paire.deux)}`,
+    `C'est ce qui dira si le plancher à ${PLANCHER_DOUBLON} ramasse ce qu'il fallait. Si la bande basse rend peu, on resserre ; si elle rend autant que la haute, on ouvrirait dessous.`,
     "",
-  ]);
-}
-
-function rendreLeDepot(signalement: SignalementsDuDepot): string[] {
-  const total =
-    signalement.manques.length + signalement.inventions.length + signalement.doublons.length;
-
-  if (total === 0) return [];
-
-  const lignes = [`### ${signalement.nom}`, ""];
-
-  if (signalement.manques.length > 0) {
-    lignes.push(
-      `**Manque — ${signalement.manques.length} phrase(s) qu'aucun concept ne couvre au-dessus de ${PLANCHER_COUVERTURE}.**`,
-      "",
-      ...rendreLesRapproches(signalement.manques, "concept le plus proche :"),
-    );
-  }
-
-  if (signalement.inventions.length > 0) {
-    lignes.push(
-      `**Invention — ${signalement.inventions.length} concept(s) qu'aucune phrase ne soutient au-dessus de ${PLANCHER_SOUTIEN}.**`,
-      "",
-      ...rendreLesRapproches(signalement.inventions, "phrase la plus proche :"),
-    );
-  }
-
-  if (signalement.doublons.length > 0) {
-    lignes.push(
-      `**Doublon — ${signalement.doublons.length} paire(s) au-dessus de ${PLANCHER_DOUBLON}.**`,
-      "",
-      ...rendreLesPaires(signalement.doublons),
-    );
-  }
-
-  return lignes;
+    "| Bande | Candidats | Confirmés | Rendement |",
+    "| --- | ---: | ---: | ---: |",
+    `| ${PLANCHER_DOUBLON} – ${BANDE_DU_DOUBLON} | ${nombre(rendement.basse.candidats)} | ${nombre(rendement.basse.confirmes)} | ${taux(rendement.basse)} |`,
+    `| au-dessus de ${BANDE_DU_DOUBLON} | ${nombre(rendement.haute.candidats)} | ${nombre(rendement.haute.confirmes)} | ${taux(rendement.haute)} |`,
+    "",
+  ];
 }
 
 export type EnTeteDeMesures = {
@@ -113,11 +115,18 @@ export type EnTeteDeMesures = {
   calcules: number;
   enCache: number;
   tokens: number;
+  /** Coût des juges pour ce passage, en dollars. Zéro si aucun juge n'a tourné. */
+  coutDesJuges: number;
 };
 
-export function rendreLesMesures(mesures: MesuresDuDepot[], entete: EnTeteDeMesures): string {
+export function rendreLesMesures(
+  mesures: MesuresDuDepot[],
+  verdicts: VerdictsDuDepot[],
+  entete: EnTeteDeMesures,
+): string {
   const signalements = mesures.map(signaler);
   const total = totaliser(signalements);
+  const confirmes = comptes(signalements, verdicts);
   const segments = mesures.reduce((cumul, mesure) => cumul + mesure.segments, 0);
   const concepts = mesures.reduce((cumul, mesure) => cumul + mesure.concepts, 0);
   const avecQuestions = mesures.filter((mesure) => mesure.radotage !== null).length;
@@ -125,7 +134,9 @@ export function rendreLesMesures(mesures: MesuresDuDepot[], entete: EnTeteDeMesu
   return [
     `# Mesures du corpus — ${entete.emisA.toISOString().slice(0, 16).replace("T", " ")} UTC`,
     "",
-    `\`${MODELE_EMBEDDING}\` · ${entete.dimension} dimensions · ${entete.source}`,
+    `Embeddings \`${MODELE_EMBEDDING}\` · ${entete.dimension} dimensions · juges \`${MODELE_DES_JUGES}\``,
+    "",
+    entete.source,
     "",
     [
       `${nombre(mesures.length)} dépôts`,
@@ -137,20 +148,22 @@ export function rendreLesMesures(mesures: MesuresDuDepot[], entete: EnTeteDeMesu
     `Planchers : couverture ${PLANCHER_COUVERTURE} · soutien ${PLANCHER_SOUTIEN} · doublon ${PLANCHER_DOUBLON} · radotage non calibré`,
     "",
     [
-      `**${nombre(total.manques)} manques**`,
-      `**${nombre(total.inventions)} inventions**`,
-      `**${nombre(total.doublons)} doublons**`,
-      `sur ${nombre(total.depotsTouches)} dépôts`,
+      `**${nombre(confirmes.manquesReels)} manques** (sur ${nombre(total.manques)} candidats)`,
+      `**${nombre(confirmes.inventionsReelles)} inventions** (sur ${nombre(total.inventions)} candidats)`,
+      `**${nombre(confirmes.doublonsConfirmes)} doublons** (sur ${nombre(total.doublons)} candidats)`,
     ].join(" · "),
     "",
-    `Vecteurs : ${nombre(entete.calcules)} calculés, ${nombre(entete.enCache)} lus au cache · ${nombre(entete.tokens)} tokens facturés`,
+    `Vecteurs : ${nombre(entete.calcules)} calculés, ${nombre(entete.enCache)} lus au cache · ${nombre(entete.tokens)} tokens facturés · juges ${entete.coutDesJuges.toFixed(4)} $`,
     "",
-    "Chaque signalement est un **candidat**, pas un verdict : les juges tranchent, et rien n'est écarté d'ici.",
+    "Chaque signalement est un **candidat** ; le verdict du juge suit sous le rapproché.",
     "",
     ...rendreLesDeciles(mesures),
-    ...rendreLeTableau(signalements),
+    ...rendreLeTableau(signalements, verdicts),
+    ...rendreLeRendementDuDoublon(signalements, verdicts),
     "## Les signalements, en entier",
     "",
-    ...signalements.flatMap(rendreLeDepot),
+    ...signalements.flatMap((signalement) =>
+      rendreLeDepot(signalement, trouverVerdicts(verdicts, signalement.nom)),
+    ),
   ].join("\n");
 }
