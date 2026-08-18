@@ -316,22 +316,22 @@ ni ne se régénèrent, elles **disparaissent**.
 
 ## Récapitulatif pour Kairn
 
-| Variable                                            | Production                                                                                                                                       |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `DATABASE_URL`, `DIRECT_URL`                        | Adresses — celles du projet Neon de production                                                                                                   |
-| `BETTER_AUTH_SECRET`                                | Secret — **neuf**                                                                                                                                |
-| `CRON_SECRET`                                       | Secret — **neuf**                                                                                                                                |
-| `ANTHROPIC_API_KEY`, `RESEND_API_KEY`               | Secrets — clés distinctes de celles de développement                                                                                             |
-| `BETTER_AUTH_URL`                                   | Adresse — le domaine public, sans slash final                                                                                                    |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`          | Réutilisables si l'URI de redirection de production est déclarée côté Google, et si l'écran de consentement est **publié** et non en « Testing » |
-| `MOCK_AI`                                           | Interrupteur — **`false`**                                                                                                                       |
-| `AI_ENABLED`                                        | Interrupteur — `true`                                                                                                                            |
-| `AI_DAILY_CALL_CAP`, `AI_DAILY_CALL_CAP_PAR_COMPTE`, `AI_DAILY_CALL_CAP_ANONYME` | Réglages — à choisir pour la charge réelle, pas à hériter du développement                                    |
-| `AI_MODEL`, `AI_MAX_TOKENS`                         | Réglages — identiques                                                                                                                            |
-| `EMAIL_FROM`                                        | Réglage — sur le domaine vérifié chez le fournisseur d'emails                                                                                    |
-| `ADMIN_EMAILS`                                      | Réglage — identique                                                                                                                              |
-| `ESSAI_ANONYME_SANS_LIMITE`                         | **Absente**, sauf le temps d'une vérification en ligne                                                                                           |
-| `SEED_USER_EMAIL`, `SEED_USER_TIMEZONE`             | **Absentes**                                                                                                                                     |
+| Variable                                                                         | Production                                                                                                                                       |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DATABASE_URL`, `DIRECT_URL`                                                     | Adresses — celles du projet Neon de production                                                                                                   |
+| `BETTER_AUTH_SECRET`                                                             | Secret — **neuf**                                                                                                                                |
+| `CRON_SECRET`                                                                    | Secret — **neuf**                                                                                                                                |
+| `ANTHROPIC_API_KEY`, `RESEND_API_KEY`                                            | Secrets — clés distinctes de celles de développement                                                                                             |
+| `BETTER_AUTH_URL`                                                                | Adresse — le domaine public, sans slash final                                                                                                    |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                                       | Réutilisables si l'URI de redirection de production est déclarée côté Google, et si l'écran de consentement est **publié** et non en « Testing » |
+| `MOCK_AI`                                                                        | Interrupteur — **`false`**                                                                                                                       |
+| `AI_ENABLED`                                                                     | Interrupteur — `true`                                                                                                                            |
+| `AI_DAILY_CALL_CAP`, `AI_DAILY_CALL_CAP_PAR_COMPTE`, `AI_DAILY_CALL_CAP_ANONYME` | Réglages — à choisir pour la charge réelle, pas à hériter du développement                                                                       |
+| `AI_MODEL`, `AI_MAX_TOKENS`                                                      | Réglages — identiques                                                                                                                            |
+| `EMAIL_FROM`                                                                     | Réglage — sur le domaine vérifié chez le fournisseur d'emails                                                                                    |
+| `ADMIN_EMAILS`                                                                   | Réglage — identique                                                                                                                              |
+| `ESSAI_ANONYME_SANS_LIMITE`                                                      | **Absente**, sauf le temps d'une vérification en ligne                                                                                           |
+| `SEED_USER_EMAIL`, `SEED_USER_TIMEZONE`                                          | **Absentes**                                                                                                                                     |
 
 ## Comment le code arrive en production
 
@@ -343,41 +343,42 @@ arrive part en ligne, sans confirmation. Une branche de travail, elle, ne
 déclenche qu'un déploiement de prévisualisation — une URL à part, jetable, qui ne
 touche pas au site public.
 
-Ce découpage donne la règle : **on ne commite jamais sur `main`, on l'avance.**
-Avancer `main` n'est pas un geste de version, c'est le geste de mise en ligne — le
-seul moment où on décide que ce qui marchait chez soi devient ce que voient les
-autres.
+Ce découpage donne la règle : **pousser `main` est le geste de mise en ligne.**
+Ce n'est pas un geste de version — c'est le seul moment où on décide que ce qui
+marchait chez soi devient ce que voient les autres.
 
 ### Le cycle
 
 ```bash
-# 1. Travailler sur la branche de travail, autant de commits qu'on veut
+# 1. Travailler, autant de commits qu'on veut, tant qu'on ne pousse pas
 git add -A
 git commit -m "…"
-git push origin phase-5-production        # la production ne bouge pas
 
 # 2. Vérifier : tests, build, et l'écran dans un navigateur
 
 # 3. Mettre en ligne
-git switch main
-git merge --ff-only phase-5-production
 git push origin main                      # le déploiement part
-git switch phase-5-production             # et on retourne travailler
 ```
 
-`--ff-only` est ce qui rend l'étape 3 sûre : la fusion **échoue** si `main` a
-divergé au lieu de fabriquer un commit de fusion en silence. Un refus à cet
-endroit veut dire que quelque chose est arrivé sur `main` qu'on n'a pas — et
-c'est exactement le moment où l'on veut être arrêté.
+Le travail se fait directement sur `main`, et la conséquence est la contrainte :
+**chaque commit doit pouvoir partir en ligne seul** — build vert, aucun écran
+laissé à moitié. Une branche reste possible pour un chantier qui ne se découpe
+pas en morceaux déployables, mais c'est l'exception à justifier. Tant que les
+phases se relisaient d'un bloc avant d'exister pour quelqu'un, la branche par
+phase protégeait ; depuis l'ouverture au public, une branche qui vieillit à côté
+de la production crée le risque qu'elle prétendait écarter.
 
-### Les migrations passent avant le code
+### Les migrations partent avec le code
 
-Un commit qui ajoute une migration Prisma ne l'applique pas. Si on pousse `main`
-sans avoir migré, le code déployé interroge une colonne qui n'existe pas encore,
-et l'erreur ne ressemble pas à un oubli de migration — elle ressemble à une panne.
+Elles ne se posent plus à la main : la commande de build applique les migrations
+en attente avant de compiler, et une migration qui échoue arrête le déploiement.
+Le code déployé ne peut donc pas interroger une colonne qui n'existe pas encore.
 
-L'ordre est donc toujours le même : **migrer la base de production, puis pousser
-`main`**. Voir `DEPLOIEMENT.md` pour la commande.
+C'est un changement du 18 août, et il a un prix : une prévisualisation branchée
+sur la base de production la migrerait sans qu'on l'ait demandé. La règle à tenir
+n'est pas « ne pas migrer au build », c'est **ne jamais faire pointer une
+prévisualisation sur la base de production**. Le raisonnement complet est dans
+`DEPLOIEMENT.md`.
 
 ### Revenir en arrière
 
