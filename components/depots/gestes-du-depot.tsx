@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { redecouperAction, supprimerDepotAction } from "@/app/(app)/depots/actions";
+import { SuppressionEnDeuxTemps } from "@/components/depots/suppression-en-deux-temps";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -25,7 +26,6 @@ export function GestesDuDepot({
   redecoupable: boolean;
   concepts: number;
 }) {
-  const [confirme, setConfirme] = useState(false);
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
@@ -41,50 +41,34 @@ export function GestesDuDepot({
 
   return (
     <div className="mt-pas-8">
-      <div className="gap-pas-2 flex flex-wrap">
-        {redecoupable ? (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={enCours}
-            onClick={() => void relancer()}
-          >
-            {enCours ? "Un instant" : "Redécouper"}
-          </Button>
-        ) : null}
-
-        {confirme ? (
-          <>
-            <form action={supprimerDepotAction}>
-              <input type="hidden" name="inputId" value={inputId} />
-              <Button type="submit" variant="destructive">
-                {concepts > 0
-                  ? `Tout supprimer, ${concepts === 1 ? "le concept compris" : "les concepts compris"}`
-                  : "Tout supprimer"}
-              </Button>
-            </form>
-            <Button type="button" variant="ghost" onClick={() => setConfirme(false)}>
-              Annuler
+      <SuppressionEnDeuxTemps
+        action={supprimerDepotAction}
+        champs={{ inputId }}
+        declencheur="Supprimer ce dépôt"
+        confirmation={
+          concepts > 0
+            ? `Tout supprimer, ${concepts === 1 ? "le concept compris" : "les concepts compris"}`
+            : "Tout supprimer"
+        }
+        consequence="Le texte, les concepts, leurs questions et leurs passages partent avec. Ça ne se défait pas."
+        avant={
+          redecoupable ? (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={enCours}
+              onClick={() => void relancer()}
+            >
+              {enCours ? "Un instant" : "Redécouper"}
             </Button>
-          </>
-        ) : (
-          <Button type="button" variant="ghost" onClick={() => setConfirme(true)}>
-            Supprimer ce dépôt
-          </Button>
-        )}
-      </div>
+          ) : null
+        }
+      />
 
       {redecoupable ? (
         <p className="mt-pas-3 text-petit max-w-lg text-stone-500">
           Redécouper relance une extraction sur le même texte, et prend une place de la journée
           comme un dépôt.
-        </p>
-      ) : null}
-
-      {confirme ? (
-        <p className="mt-pas-3 text-petit max-w-lg text-stone-500">
-          Le texte, les concepts, leurs questions et leurs passages partent avec. Ça ne se défait
-          pas.
         </p>
       ) : null}
 

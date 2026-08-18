@@ -7,6 +7,7 @@ import {
   modifierConceptAction,
   supprimerConceptAction,
 } from "@/app/(app)/depots/actions";
+import { SuppressionEnDeuxTemps } from "@/components/depots/suppression-en-deux-temps";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -108,28 +109,37 @@ export function ConceptCorrigeable({ concept, inputId }: { concept: ConceptLu; i
             </div>
           ) : null}
 
-          <div className="mt-pas-4 gap-pas-2 flex flex-wrap">
-            {concept.uncertain ? (
-              <form action={confirmerConceptAction}>
-                <input type="hidden" name="atomId" value={concept.id} />
-                <input type="hidden" name="inputId" value={inputId} />
-                <Button type="submit" size="sm" variant="outline">
-                  Le garder tel quel
-                </Button>
-              </form>
-            ) : null}
+          {/* La suppression passe par la même confirmation que celle d'un dépôt.
+              Elle partait ici d'un seul clic, alors qu'elle emporte autant : les
+              questions écrites sur ce concept et tous les passages qui les
+              citent. Un doigt sur un téléphone n'a aucun moyen de revenir en
+              arrière. */}
+          <div className="mt-pas-4">
+            <SuppressionEnDeuxTemps
+              action={supprimerConceptAction}
+              champs={{ atomId: concept.id, inputId }}
+              declencheur="Supprimer"
+              confirmation="Supprimer ce concept"
+              consequence="Ses questions et les passages que tu as faits dessus partent avec. Ça ne se défait pas."
+              taille="sm"
+              avant={
+                <>
+                  {concept.uncertain ? (
+                    <form action={confirmerConceptAction}>
+                      <input type="hidden" name="atomId" value={concept.id} />
+                      <input type="hidden" name="inputId" value={inputId} />
+                      <Button type="submit" size="sm" variant="outline">
+                        Le garder tel quel
+                      </Button>
+                    </form>
+                  ) : null}
 
-            <Button type="button" size="sm" variant="ghost" onClick={() => setEdition(true)}>
-              Modifier
-            </Button>
-
-            <form action={supprimerConceptAction}>
-              <input type="hidden" name="atomId" value={concept.id} />
-              <input type="hidden" name="inputId" value={inputId} />
-              <Button type="submit" size="sm" variant="ghost">
-                Supprimer
-              </Button>
-            </form>
+                  <Button type="button" size="sm" variant="ghost" onClick={() => setEdition(true)}>
+                    Modifier
+                  </Button>
+                </>
+              }
+            />
           </div>
         </>
       )}
