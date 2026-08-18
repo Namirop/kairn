@@ -15,10 +15,15 @@ import { cn } from "@/lib/utils";
  *
  * L'administration en compte sept, et sept parts égales sur trois cent
  * soixante-quinze pixels ne laissent pas la place d'écrire « Signalements ». Ses
- * onglets gardent donc une largeur fixe et la barre défile, plutôt que d'abréger
- * des mots qui sont le vocabulaire du produit. Le défilement est acceptable là
- * où il ne l'est pas dans le produit : cet écran a un seul lecteur, qui connaît
- * ses sections.
+ * onglets défilent donc, plutôt que d'abréger des mots qui sont le vocabulaire
+ * du produit. Le défilement est acceptable là où il ne l'est pas dans le
+ * produit : cet écran a un seul lecteur, qui connaît ses sections.
+ *
+ * Leur largeur est un **plancher**, pas une mesure. Fixée, elle donnait la même
+ * boîte à « Contenu » et à « Signalements » : le second débordait de sa pastille
+ * des deux côtés, et l'état actif — qui est justement cette pastille — cessait
+ * de désigner l'onglet qu'il colorait. Un onglet qui défile n'a aucune raison
+ * d'être plus étroit que son mot.
  */
 export function BarreBasse({ administrateur }: { administrateur: boolean }) {
   const chemin = usePathname();
@@ -35,17 +40,19 @@ export function BarreBasse({ administrateur }: { administrateur: boolean }) {
           const actif = estActive(destination, chemin);
 
           return (
-            <li key={href} className={cn(interne ? "w-20 shrink-0" : "flex-1")}>
+            <li key={href} className={cn(interne ? "min-w-20 shrink-0" : "min-w-0 flex-1")}>
               <Link
                 href={href}
                 aria-current={actif ? "page" : undefined}
                 className={cn(
-                  "gap-pas-1 rounded-carte flex h-14 flex-col items-center justify-center transition-colors",
+                  "gap-pas-1 px-pas-2 rounded-carte flex h-14 flex-col items-center justify-center transition-colors",
                   actif ? "bg-surface-papier text-stone-900" : "text-stone-500",
                 )}
               >
                 <Icone className="size-5" strokeWidth={1.75} aria-hidden />
-                <span className="text-mono font-mono tracking-normal">{libelle}</span>
+                <span className="text-mono font-mono tracking-normal whitespace-nowrap">
+                  {libelle}
+                </span>
               </Link>
             </li>
           );

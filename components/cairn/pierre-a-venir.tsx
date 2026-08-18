@@ -23,6 +23,17 @@ import { cn } from "@/lib/utils";
 
 const GRAINE = "premiere-pierre";
 
+/**
+ * L'air réservé au-dessus de l'emplacement, en unités de vue.
+ *
+ * Sans lui, la vue s'arrête six unités au-dessus de la pierre à venir : le
+ * contour et son sol se posaient alors au milieu de leur boîte, à la hauteur où
+ * un empilement de douze aurait eu son sommet. Un cairn ne commence pas en
+ * l'air. La place se marque en bas, et ce qui est réservé au-dessus est
+ * exactement ce dans quoi l'empilement montera.
+ */
+const AIR_AU_DESSUS = 10;
+
 export function PierreAVenir({
   className,
   clair = false,
@@ -37,7 +48,7 @@ export function PierreAVenir({
 
   return (
     <svg
-      viewBox={`0 ${-hauteur + ySol} ${LARGEUR_VUE} ${hauteur}`}
+      viewBox={`0 ${-hauteur + ySol - AIR_AU_DESSUS} ${LARGEUR_VUE} ${hauteur + AIR_AU_DESSUS}`}
       className={cn("h-full w-full", className)}
       role="img"
       aria-label="Aucune pierre posée. La place de la première est marquée."

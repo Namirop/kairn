@@ -49,26 +49,32 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
   return (
     <PileDePanneaux sol="ombre">
       <Panneau surface="papier" mesure="colonne">
-        <Link
-          href={ROUTES.depots}
-          className="text-petit rounded-galet text-stone-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900"
-        >
-          Retour aux dépôts
-        </Link>
+        {/* Le chapeau se centre sur une colonne, comme celui des deux autres
+            écrans du produit. En dessous, le texte déposé et les concepts sont
+            de la lecture au long : eux restent au fer à gauche, sur tous les
+            écrans, et c'est ce qui distingue une ouverture d'un contenu. */}
+        <div className="text-center md:text-left">
+          <Link
+            href={ROUTES.depots}
+            className="text-petit rounded-galet text-stone-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900"
+          >
+            Retour aux dépôts
+          </Link>
 
-        <h1 className="mt-pas-3 text-h1-app leading-tight font-bold">
-          {compte(depot.concepts.length, "concept", "concepts")}
-        </h1>
+          <h1 className="mt-pas-3 text-h1-app leading-tight font-bold">
+            {compte(depot.concepts.length, "concept", "concepts")}
+          </h1>
 
-        <p className="mt-pas-2 gap-pas-3 text-mono flex flex-wrap items-center text-stone-500">
-          {etat === "pret" ? null : (
-            // Une panne est la seule chose qui mérite la couleur d'alerte. Un
-            // dépôt sans matière n'a rien cassé, et le peindre en rouge
-            // annonçait une avarie du produit à qui avait collé une URL nue.
-            <Badge variant={etat === "echec" ? "alerte" : "pose"}>{libelleEtat(etat)}</Badge>
-          )}
-          <span>Déposé {anciennete(depot.createdAt, new Date(), fuseau)}</span>
-        </p>
+          <p className="mt-pas-2 gap-pas-3 text-mono flex flex-wrap items-center justify-center text-stone-500 md:justify-start">
+            {etat === "pret" ? null : (
+              // Une panne est la seule chose qui mérite la couleur d'alerte. Un
+              // dépôt sans matière n'a rien cassé, et le peindre en rouge
+              // annonçait une avarie du produit à qui avait collé une URL nue.
+              <Badge variant={etat === "echec" ? "alerte" : "pose"}>{libelleEtat(etat)}</Badge>
+            )}
+            <span>Déposé {anciennete(depot.createdAt, new Date(), fuseau)}</span>
+          </p>
+        </div>
 
         {texte ? (
           <section className="mt-pas-8">

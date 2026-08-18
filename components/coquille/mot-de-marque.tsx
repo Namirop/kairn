@@ -72,7 +72,21 @@ export function MotDeMarque({
 
   return (
     <span
-      className={`font-display leading-none font-semibold tracking-[-0.02em] ${
+      /*
+        La correction optique du mot.
+
+        « Kairn » n'a aucun jambage descendant : à interligne nul, son encre
+        occupe le haut de sa boîte et laisse vide le quart du bas, celui que le
+        jambage aurait pris. Tout ce qui centre cette boîte — le verrouillage
+        avec son symbole, l'en-tête avec son lien — centre donc du vide autant
+        que des lettres, et le mot monte de deux ou trois pixels. Ça ne se nomme
+        pas au premier regard, ça se voit au second.
+
+        Le décalage vaut l'écart mesuré entre le milieu de l'encre et le milieu
+        de la boîte, et il est en `em` : il suit le corps sans jamais se
+        dérégler, du logotype d'un en-tête à celui d'une page légale.
+      */
+      className={`font-display translate-y-[0.06em] leading-none font-semibold tracking-[-0.02em] ${
         clair ? "text-stone-50" : "text-stone-900"
       }`}
       style={{ fontSize: `${taille}px` }}

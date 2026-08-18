@@ -30,8 +30,12 @@ const CHIFFRE = "font-display text-nombre mt-pas-2 leading-none font-medium tabu
 
 function Serie({ streak }: { streak: number }) {
   if (streak === 0) {
+    // Centré comme les deux autres mesures. Au fer à gauche, cette phrase
+    // partait au bord de l'écran pendant que le niveau se tenait au milieu du
+    // sien : deux mesures qui se lisent ensemble s'éloignaient l'une de l'autre
+    // au moment où l'une n'a pas encore de chiffre à opposer.
     return (
-      <div>
+      <div className="text-center">
         <p className={ETIQUETTE}>Série</p>
         <p className="mt-pas-3 text-corps text-stone-300">
           Une session aujourd&apos;hui ouvre ta série.
@@ -96,10 +100,14 @@ function Niveau({ xp }: { xp: number }) {
  * La bande est centrée et bornée : étalée sur toute la largeur du panneau, les
  * deux mesures se seraient retrouvées aux extrémités de l'écran, sans rapport
  * l'une avec l'autre. Elles se lisent ensemble, donc elles tiennent ensemble.
+ *
+ * Sur un téléphone, la borne ne borne plus rien — la fenêtre est déjà plus
+ * étroite qu'elle — et c'est la gouttière qui écarte. Elle se resserre donc,
+ * puis reprend son ampleur quand la largeur revient.
  */
 export function ProgressionDuCairn({ streak, xp }: { streak: number; xp: number }) {
   return (
-    <div className="pt-pas-8 gap-pas-8 md:gap-pas-16 mx-auto grid w-full max-w-2xl grid-cols-2 items-start border-t border-stone-700">
+    <div className="pt-pas-8 gap-pas-4 md:gap-pas-16 mx-auto grid w-full max-w-2xl grid-cols-2 items-start border-t border-stone-700">
       <Serie streak={streak} />
       <Niveau xp={xp} />
     </div>

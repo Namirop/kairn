@@ -29,7 +29,11 @@ export function CompteurDu({
   const { aujourdhui, enAttente } = charge;
 
   return (
-    <section aria-labelledby="titre-aujourdhui">
+    // Sur une colonne, tout se centre. En deux colonnes, tout revient au fer à
+    // gauche : le bloc n'est plus seul dans la largeur, il ouvre une rangée, et
+    // un texte centré à côté d'une liste alignée à gauche donne deux axes de
+    // lecture pour un seul écran. Le point de bascule est celui de la grille.
+    <section aria-labelledby="titre-aujourdhui" className="text-center md:text-left">
       <h1
         id="titre-aujourdhui"
         className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase"
@@ -40,9 +44,9 @@ export function CompteurDu({
       <p className="mt-pas-4 font-display text-nombre leading-none font-medium tabular-nums">
         {aujourdhui}
       </p>
-      <span aria-hidden className="mt-pas-3 bg-lichen block h-0.5 w-10" />
+      <span aria-hidden className="mt-pas-3 bg-lichen mx-auto block h-0.5 w-10 md:mx-0" />
 
-      <p className="mt-pas-3 max-w-sm text-stone-500">
+      <p className="mt-pas-3 mx-auto max-w-sm text-stone-500 md:mx-0">
         {aujourdhui === 0
           ? aDesAtoms
             ? questionsEnRoute
@@ -53,14 +57,14 @@ export function CompteurDu({
       </p>
 
       {enAttente > 0 ? (
-        <p className="mt-pas-2 text-petit max-w-sm text-stone-500">
+        <p className="mt-pas-2 text-petit mx-auto max-w-sm text-stone-500 md:mx-0">
           {enAttente} de plus attendent leur tour. Une session s&apos;arrête à vingt : le reste
           revient demain, en commençant par ce qui risque le plus.
         </p>
       ) : null}
 
       {aujourdhui > 0 ? (
-        <Button asChild size="lg" className="mt-pas-6 w-full sm:w-auto">
+        <Button asChild size="lg" className="mt-pas-6 w-full md:w-auto">
           <Link href={ROUTES.reviser}>Commencer</Link>
         </Button>
       ) : aDesAtoms && !questionsEnRoute ? (
@@ -68,8 +72,8 @@ export function CompteurDu({
         // session n'a rien à donner. Tant qu'il y a quelque chose à revoir,
         // c'est la session qui compte, et deux boutons côte à côte laisseraient
         // croire qu'ils se valent.
-        <div className="mt-pas-6 flex flex-col">
-          <Button asChild size="lg" variant="outline" className="w-full sm:w-fit">
+        <div className="mt-pas-6 flex flex-col items-center md:items-start">
+          <Button asChild size="lg" variant="outline" className="w-full md:w-fit">
             <Link href={ROUTES.entrainement}>S&apos;entraîner</Link>
           </Button>
           <span className="mt-pas-2 text-petit max-w-sm text-stone-500">
@@ -78,7 +82,7 @@ export function CompteurDu({
         </div>
       ) : aDesAtoms ? null : (
         // Rien déposé : le geste qui manque est le dépôt, pas la révision.
-        <Button asChild size="lg" className="mt-pas-6 w-full sm:w-auto">
+        <Button asChild size="lg" className="mt-pas-6 w-full md:w-auto">
           <Link href={`${ROUTES.depots}/nouveau`}>Déposer quelque chose</Link>
         </Button>
       )}
