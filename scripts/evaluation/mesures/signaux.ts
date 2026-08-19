@@ -19,10 +19,25 @@ import { segmenter } from "./segmentation";
 export type Rapproche = { texte: string; voisin: string; proximite: number };
 export type Paire = { un: string; deux: string; proximite: number };
 
+/**
+ * L'état de l'extraction pour ce dépôt.
+ *
+ * Deux silences très différents à distinguer dans le rapport : un dépôt sans
+ * concept parce que le produit l'a rejeté (comportement voulu, motif rendu par
+ * l'extraction) vs. un dépôt sans concept parce que l'appel a planté (panne
+ * réseau, sortie invalide — reprise consommée sans résultat). Aujourd'hui les
+ * deux se lisaient pareil dans la colonne « concepts / candidats ».
+ */
+export type EtatDuDepot =
+  | { statut: "extrait" }
+  | { statut: "rejete"; motif: string }
+  | { statut: "en-echec"; motif: string };
+
 export type MesuresDuDepot = {
   nom: string;
   segments: number;
   concepts: number;
+  etat: EtatDuDepot;
   /** Chaque phrase et son concept le plus proche, la moins couverte en tête. */
   couverture: Rapproche[];
   /** Chaque concept et sa phrase la plus proche, le moins soutenu en tête. */
@@ -41,6 +56,19 @@ export type MesuresDuDepot = {
   /** Médianes du dépôt, pour la ligne de tableau. `null` si rien à mesurer. */
   medianes: { couverture: number | null; soutien: number | null };
 };
+
+function etatDuDepot(depot: DepotFige): EtatDuDepot {
+  if (depot.echec) return { statut: "en-echec", motif: depot.echec.motif };
+  if (depot.rejet !== null) return { statut: "rejete", motif: depot.rejet };
+  // Filet : un dépôt sans concept, sans rejet et sans échec est un trou
+  // silencieux — les figés d'avant la persistance d'`echec` en portent (le
+  // 18/08 sur 27 : appel raté sans échec écrit). Il vaut mieux l'annoncer
+  // pour ce qu'il est plutôt que de le lire comme un dépôt extrait.
+  if (depot.concepts.length === 0) {
+    return { statut: "en-echec", motif: "extraction en échec silencieux (aucun concept, aucun motif)" };
+  }
+  return { statut: "extrait" };
+}
 
 /** Les questions d'un concept, avec le rang du concept dont elles viennent. */
 type QuestionSituee = { texte: string; concept: number };
@@ -133,6 +161,7 @@ export function mesurerLeDepot(
     nom: depot.nom,
     segments: segments.length,
     concepts: concepts.length,
+    etat: etatDuDepot(depot),
     couverture,
     soutien,
     doublons: apparier(concepts, vecteur),

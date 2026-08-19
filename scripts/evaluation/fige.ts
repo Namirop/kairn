@@ -33,6 +33,13 @@ const figeSchema = z.object({
       nature: z.enum(NATURES_DE_DEPOT).optional(),
       langue: z.string().optional(),
       rejet: z.string().nullable(),
+      // Persisté depuis la reprise automatique du banc. Un dépôt sans `echec`
+      // et sans concepts est un rejet du produit (motif dans `rejet`) ; un
+      // dépôt avec `echec` est une panne technique — les deux se lisent
+      // désormais différemment dans le rapport de mesures.
+      echec: z.object({ motif: z.string() }).optional(),
+      /** Nombre d'essais supplémentaires consommés sur ce dépôt. Zéro le plus souvent. */
+      reprises: z.number().int().nonnegative().optional(),
       concepts: z.array(
         z.object({
           concept: z.string(),
@@ -79,7 +86,9 @@ export type ConceptFige = DepotFige["concepts"][number];
 export type VariantFige = NonNullable<ConceptFige["variants"]>[number];
 
 /** Ce qu'on garde d'une question rendue : de quoi la juger, rien de plus. */
-function retenirVariant(variant: DepotEvalue["concepts"][number]["variants"][number]): VariantFige {
+export function retenirVariant(
+  variant: DepotEvalue["concepts"][number]["variants"][number],
+): VariantFige {
   return {
     facet: variant.facet,
     format: variant.format,
@@ -152,6 +161,8 @@ export function ecrireFige(
         nature: evaluation.nature,
         langue: evaluation.langue,
         rejet: evaluation.rejet,
+        echec: evaluation.echec ? { motif: evaluation.echec.motif } : undefined,
+        reprises: evaluation.reprises > 0 ? evaluation.reprises : undefined,
         concepts: evaluation.concepts.map((evalue) => ({
           ...evalue.concept,
           // Un concept mis de côté n'a pas de questions : le champ reste absent

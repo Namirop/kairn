@@ -35,6 +35,7 @@ export function compter(passages: Passage[]) {
     misDeCote: misDeCote.length,
     generations: enEchec.length,
     extractions: passages.filter((passage) => passage.evaluation.echec).length,
+    reprises: passages.reduce((total, passage) => total + passage.evaluation.reprises, 0),
     manquements: aboutis.reduce(
       (total, concept) => total + concept.manquements.length + concept.manquementsVariants.length,
       0,

@@ -87,6 +87,13 @@ function rendreDepot({ evaluation, consommation }: Passage): string[] {
     lignes.push("Le plafond de concepts a coupé la queue de la liste.", "");
   }
 
+  if (evaluation.reprises > 0) {
+    lignes.push(
+      `**${accorder(evaluation.reprises, "reprise")}** consommée(s) sur ce dépôt — un appel a été rejoué une fois après un échec technique.`,
+      "",
+    );
+  }
+
   if (evaluation.lecture) {
     const { langue, exploitable } = evaluation.lecture;
     lignes.push(
@@ -141,7 +148,8 @@ export function rendreRapport(
   entete: { modele: string; emisA: Date; total: ConsommationFenetre; source: string },
 ): string {
   const horodatage = entete.emisA.toISOString().slice(0, 16).replace("T", " ");
-  const { concepts, aboutis, misDeCote, generations, extractions, manquements } = compter(passages);
+  const { concepts, aboutis, misDeCote, generations, extractions, reprises, manquements } =
+    compter(passages);
 
   return [
     `# Banc de génération — ${horodatage} UTC`,
@@ -154,6 +162,7 @@ export function rendreRapport(
       `${misDeCote} mis de côté`,
       accorder(generations, "génération en échec", "générations en échec"),
       accorder(extractions, "extraction en échec", "extractions en échec"),
+      accorder(reprises, "reprise consommée", "reprises consommées"),
       accorder(manquements, "manquement"),
     ].join(" · "),
     "",

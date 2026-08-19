@@ -20,6 +20,7 @@
     "verify:ai": "tsx scripts/verifier-garde-fous.ts && tsx scripts/verifier-plafond-concurrent.ts",
     "eval:generation": "tsx scripts/evaluer-generation.ts",
     "eval:rejeu": "tsx scripts/evaluer-generation.ts --rejeu",
+    "eval:completer": "tsx scripts/completer-le-fige.ts",
     "eval:mesures": "tsx scripts/mesurer-le-corpus.ts",
     "eval:ablation": "tsx scripts/eprouver-la-mesure.ts",
     "test": "vitest run",

@@ -4,7 +4,7 @@ import { MODELE_EMBEDDING } from "./espace";
 import { rendreLesAttendus } from "./rendu-des-attendus";
 import { rendreLeDepot } from "./rendu-des-signalements";
 import { BANDE_DU_DOUBLON, PLANCHER_COUVERTURE, PLANCHER_DOUBLON, PLANCHER_SOUTIEN } from "./seuils";
-import type { MesuresDuDepot } from "./signaux";
+import type { EtatDuDepot, MesuresDuDepot } from "./signaux";
 import { signaler, totaliser, type SignalementsDuDepot } from "./signalements";
 import { rendreLesDeciles } from "./tableaux-de-calibration";
 
@@ -66,11 +66,20 @@ function comptes(
   return c;
 }
 
+function noteEtat(etat: EtatDuDepot): string {
+  if (etat.statut === "rejete") return " · *rejet du produit*";
+  if (etat.statut === "en-echec") return " · **extraction en échec**";
+  return "";
+}
+
 function rendreLeTableau(
+  mesures: MesuresDuDepot[],
   signalements: SignalementsDuDepot[],
   verdicts: VerdictsDuDepot[],
 ): string[] {
+  const etatParNom = new Map(mesures.map((m) => [m.nom, m.etat]));
   const lignes = signalements.map((s) => {
+    const etat = etatParNom.get(s.nom) ?? { statut: "extrait" as const };
     const verdict = trouverVerdicts(verdicts, s.nom);
     const rendu = (candidats: number, confirmes: number | null): string =>
       confirmes === null ? nombre(candidats) : `${nombre(confirmes)} / ${nombre(candidats)}`;
@@ -88,13 +97,13 @@ function rendreLeTableau(
     );
     const radotage = s.radotage === null ? "—" : nombre(s.radotage.interConcepts.length);
 
-    return `| \`${s.nom}\` | ${manques} / ${nombre(s.segments)} | ${inventions} / ${nombre(s.concepts)} | ${doublons} | ${radotage} |`;
+    return `| \`${s.nom}\`${noteEtat(etat)} | ${manques} / ${nombre(s.segments)} | ${inventions} / ${nombre(s.concepts)} | ${doublons} | ${radotage} |`;
   });
 
   return [
     "## Signalements par dépôt",
     "",
-    "Format « retenus / candidats » quand le juge est passé, « candidats » seuls sinon. Un tiret n'est pas un zéro : c'est « non mesuré ».",
+    "Format « retenus / candidats » quand le juge est passé, « candidats » seuls sinon. Un tiret n'est pas un zéro : c'est « non mesuré ». Un dépôt annoté *rejet* n'a pas produit de concepts parce que le produit l'a refusé ; un dépôt annoté **extraction en échec** est un trou technique (panne, sortie invalide) à corriger.",
     "",
     "| Dépôt | Manques / phrases | Inventions / concepts | Doublons | Radotage |",
     "| --- | ---: | ---: | ---: | ---: |",
@@ -149,6 +158,15 @@ export function rendreLesMesures(
   const segments = mesures.reduce((cumul, mesure) => cumul + mesure.segments, 0);
   const concepts = mesures.reduce((cumul, mesure) => cumul + mesure.concepts, 0);
   const avecQuestions = mesures.filter((mesure) => mesure.radotage !== null).length;
+  const rejetes = mesures.filter((m) => m.etat.statut === "rejete").length;
+  const enEchec = mesures.filter((m) => m.etat.statut === "en-echec").length;
+
+  const compteEtats = [
+    rejetes > 0 ? `${nombre(rejetes)} rejets du produit` : "",
+    enEchec > 0
+      ? `**${nombre(enEchec)} extractions en échec** — trous techniques à corriger avant lecture`
+      : "",
+  ].filter(Boolean);
 
   return [
     `# Mesures du corpus — ${entete.emisA.toISOString().slice(0, 16).replace("T", " ")} UTC`,
@@ -164,6 +182,7 @@ export function rendreLesMesures(
       `${nombre(avecQuestions)} dépôts avec questions`,
     ].join(" · "),
     "",
+    ...(compteEtats.length > 0 ? [compteEtats.join(" · "), ""] : []),
     `Planchers : couverture ${PLANCHER_COUVERTURE} · soutien ${PLANCHER_SOUTIEN} · doublon ${PLANCHER_DOUBLON} · radotage non calibré`,
     "",
     [
@@ -180,7 +199,7 @@ export function rendreLesMesures(
     "Chaque signalement est un **candidat** ; le verdict du juge suit sous le rapproché.",
     "",
     ...rendreLesDeciles(mesures),
-    ...rendreLeTableau(signalements, verdicts),
+    ...rendreLeTableau(mesures, signalements, verdicts),
     ...rendreLeRendementDuDoublon(signalements, verdicts),
     ...rendreLesAttendus(verdicts),
     "## Les signalements, en entier",
