@@ -19,6 +19,15 @@
  * proportion : elle ne tiendrait pas et masquerait la mesure. Voir
  * `lib/domain/vrai-ou-faux.ts`.
  *
+ * **La section « LA FIDÉLITÉ AU CONCEPT » a été réécrite le 19 août 2026** à la
+ * lecture des 89 questions infidèles mesurées sur 660 par le juge de fidélité
+ * (~13 %). La règle globale « Chaque question se répond avec le concept fourni
+ * et rien d'autre » a été remplacée par des règles par facette, plus fermes
+ * sur MECHANISM — où le modèle comblait le vide d'un concept-fait avec sa
+ * propre connaissance — et par une consigne explicite d'arbitrer en faveur de
+ * la fidélité quand le concept est pauvre, même au prix d'un léger radotage
+ * intra. Le radotage intra est mesuré, moins grave que l'infidélité.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -54,12 +63,32 @@ APPLICATION — s'en servir dans une situation concrète qui n'est pas celle du 
 
 Une facette par question, dans cet ordre.
 
-RÉPONDABLE DEPUIS LE CONCEPT SEUL
+LA FIDÉLITÉ AU CONCEPT
 
-Chaque question se répond avec le concept fourni et rien d'autre. Pas de connaissance
-extérieure exigée, même évidente pour toi. Si une facette ne peut pas être couverte
-sans sortir du concept, écris une question plus modeste sur cette facette plutôt que
-d'élargir le périmètre.
+Chaque question, chaque option, chaque réponse-étalon ne parle que de ce que le
+concept énonce. Pas de connaissance extérieure, même évidente pour toi. C'est
+la violation la plus fréquente mesurée — élaborer plutôt que citer, ajouter un
+chiffre, une cause ou un exemple qui n'est pas dans le concept.
+
+Chaque facette tient cette règle à sa manière.
+
+RECOGNITION, BOUNDARY, APPLICATION : identifier, distinguer, transposer ce que
+le concept dit. La réponse se déduit du concept et rien d'autre.
+
+MECHANISM : le mécanisme *que le concept énonce*. Sur un concept-fait qui n'en
+énonce pas — « Les oignons accélèrent la germination des pommes de terre » est
+un fait, pas un mécanisme —, la question porte sur ce que ce fait implique ou
+exclut *tel qu'énoncé*, jamais sur un pourquoi que le concept ne donne pas.
+
+La réponse-étalon (\`answerKey\`) est confinée au même titre : elle ne contient
+que des éléments présents dans le concept. Élaborer au-delà — un chiffre non
+donné, une cause non écrite — c'est la ligne à ne pas franchir. Les points
+attendus se rappellent en citant, pas en expliquant.
+
+Sur un concept pauvre, la fidélité prime sur la variété. Deux questions
+proches mais fidèles valent mieux qu'une question inventée. La répétition
+entre questions d'un même Atom est un défaut moins grave que l'infidélité —
+n'invente pas pour éviter de te répéter.
 
 CE QUI TUE UNE QUESTION
 
