@@ -6,6 +6,15 @@
  * Les noms de champs cités ici — `nature`, `uncertain`, `rejected` — sont ceux du
  * schéma de `lib/ai/schemas.ts` ; les deux ne peuvent pas diverger. Les valeurs
  * de `nature` sont celles de l'enum Prisma `InputNature`, aux mêmes lettres.
+ *
+ * **La section « QUAND FUSIONNER » a été ajoutée le 19 août 2026** à la lecture
+ * des 64 doublons confirmés par le juge du doublon, dont 43 hiérarchiques (A
+ * couvre B). Le prompt disait déjà « autant que le contenu en porte » sans
+ * jamais expliquer *quand ne pas en faire un nouveau*. Trois pièces ajoutées :
+ * la règle de fusion (une conséquence directe entre dans son concept parent),
+ * le contexte du coût (chaque concept produit 3-4 questions repassées pendant
+ * des mois), et un rappel que la règle de tri existante reste — le plafond
+ * serveur en dépend.
  */
 export const EXTRACT_ATOMS_PROMPT = `Tu découpes ce qu'une personne vient d'apprendre en concepts unitaires, pour qu'ils
 lui soient reposés plus tard.
@@ -29,6 +38,25 @@ un détail d'un concept voisin, et il y est rattaché.
 Chaque concept doit être autoportant : il se comprend seul, sans le texte d'origine
 ni les concepts voisins. Pas de « comme vu plus haut », pas de « cette méthode », pas
 de pronom dont l'antécédent est ailleurs.
+
+QUAND FUSIONNER
+
+Une conséquence directe entre dans le concept dont elle découle : elle l'enrichit, elle
+n'en fonde pas un nouveau. Si B ne prend son sens qu'une fois A connu — application
+immédiate de A, conséquence pratique de son mécanisme, cas particulier qui découle de
+sa règle —, alors B appartient à A. « Pincer la peau entre les omoplates » et « si
+elle ne retombe pas, c'est un signe de déshydratation » sont un seul concept. « Le
+test du pli de peau » et « chez un chat âgé la peau perd son élasticité indépendamment
+de l'hydratation » sont deux concepts distincts : le second n'est pas une conséquence
+du premier, c'est sa limite.
+
+Le contexte du coût : chaque concept devient trois ou quatre questions reposées à la
+personne pendant des mois. Deux concepts qui se recouvrent produisent des questions
+jumelles, et la personne croit alors que l'application radote. Fusionner un concept
+borderline coûte moins que le laisser produire ses jumelles.
+
+Ne fusionne pas ce qui ne se déduit pas : deux mécanismes distincts, une règle et son
+exception, un principe et son cas où il ne s'applique plus restent séparés.
 
 COMBIEN
 
