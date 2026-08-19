@@ -19,6 +19,19 @@ import { segmenter } from "./segmentation";
 export type Rapproche = { texte: string; voisin: string; proximite: number };
 export type Paire = { un: string; deux: string; proximite: number };
 
+/** Contexte porté par chaque question dans les paires du radotage. */
+export type ContexteDeQuestion = {
+  concept: string;
+  facet: string;
+  format: string;
+};
+export type PaireDeQuestions = Paire & {
+  un: string;
+  deux: string;
+  contexteUn: ContexteDeQuestion;
+  contexteDeux: ContexteDeQuestion;
+};
+
 /**
  * L'état de l'extraction pour ce dépôt.
  *
@@ -52,7 +65,7 @@ export type MesuresDuDepot = {
    * gel des questions. Ce n'est pas « zéro radotage », c'est « pas mesuré », et
    * le rapport doit pouvoir dire lequel des deux.
    */
-  radotage: { intraLot: Paire[]; interConcepts: Paire[] } | null;
+  radotage: { intraLot: PaireDeQuestions[]; interConcepts: PaireDeQuestions[] } | null;
   /** Médianes du dépôt, pour la ligne de tableau. `null` si rien à mesurer. */
   medianes: { couverture: number | null; soutien: number | null };
 };
@@ -71,11 +84,15 @@ function etatDuDepot(depot: DepotFige): EtatDuDepot {
 }
 
 /** Les questions d'un concept, avec le rang du concept dont elles viennent. */
-type QuestionSituee = { texte: string; concept: number };
+type QuestionSituee = { texte: string; concept: number; contexte: ContexteDeQuestion };
 
 function questionsDuDepot(concepts: ConceptFige[]): QuestionSituee[] {
   return concepts.flatMap((concept, rang) =>
-    (concept.variants ?? []).map((variant) => ({ texte: variant.question, concept: rang })),
+    (concept.variants ?? []).map((variant) => ({
+      texte: variant.question,
+      concept: rang,
+      contexte: { concept: concept.concept, facet: variant.facet, format: variant.format },
+    })),
   );
 }
 
@@ -116,9 +133,9 @@ function apparier(textes: string[], vecteur: (texte: string) => Vecteur): Paire[
 function apparierLesQuestions(
   questions: QuestionSituee[],
   vecteur: (texte: string) => Vecteur,
-): { intraLot: Paire[]; interConcepts: Paire[] } {
-  const intraLot: Paire[] = [];
-  const interConcepts: Paire[] = [];
+): { intraLot: PaireDeQuestions[]; interConcepts: PaireDeQuestions[] } {
+  const intraLot: PaireDeQuestions[] = [];
+  const interConcepts: PaireDeQuestions[] = [];
 
   for (const paire of pairesTriees(questions.map((question) => vecteur(question.texte)))) {
     const un = questions[paire.un];
@@ -126,7 +143,13 @@ function apparierLesQuestions(
 
     if (!un || !deux) continue;
 
-    const rendue = { un: un.texte, deux: deux.texte, proximite: paire.proximite };
+    const rendue: PaireDeQuestions = {
+      un: un.texte,
+      deux: deux.texte,
+      proximite: paire.proximite,
+      contexteUn: un.contexte,
+      contexteDeux: deux.contexte,
+    };
 
     if (un.concept === deux.concept) intraLot.push(rendue);
     else interConcepts.push(rendue);
