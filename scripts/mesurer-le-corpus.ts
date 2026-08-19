@@ -151,15 +151,20 @@ async function main(): Promise<void> {
   const consommation = await sumAiCalls(debutJuges);
   console.info(`Juges : ${consommation.calls} appels, ${Number(consommation.costUsd).toFixed(4)} $.`);
 
-  const rapport = rendreLesMesures(mesures, verdicts, {
-    emisA,
-    source,
-    dimension: passe.dimension,
-    calcules: passe.calcules,
-    enCache: passe.enCache,
-    tokens: passe.tokens,
-    coutDesJuges: Number(consommation.costUsd),
-  });
+  const rapport = rendreLesMesures(
+    mesures,
+    verdicts,
+    {
+      emisA,
+      source,
+      dimension: passe.dimension,
+      calcules: passe.calcules,
+      enCache: passe.enCache,
+      tokens: passe.tokens,
+      coutDesJuges: Number(consommation.costUsd),
+    },
+    depots,
+  );
   ecrireRapport(emisA, "mesures", rapport);
 }
 

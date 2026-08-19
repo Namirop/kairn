@@ -1,3 +1,4 @@
+import type { DepotFige } from "../fige";
 import { MODELE_DES_JUGES } from "../juges/modele";
 import { rendementDuDoublon, type VerdictsDuDepot } from "../juges/verdicts";
 import { MODELE_EMBEDDING } from "./espace";
@@ -32,6 +33,8 @@ type Comptes = {
   manquesReels: number;
   inventionsReelles: number;
   doublonsConfirmes: number;
+  questionsInfideles: number;
+  questionsJugees: number;
   abstentions: number;
 };
 
@@ -43,6 +46,8 @@ function comptes(
     manquesReels: 0,
     inventionsReelles: 0,
     doublonsConfirmes: 0,
+    questionsInfideles: 0,
+    questionsJugees: 0,
     abstentions: 0,
   };
 
@@ -59,11 +64,28 @@ function comptes(
     c.abstentions += verdict.doublons.filter((v) => v.independants === null).length;
     c.abstentions += verdict.attendus.filter((v) => v.verdict?.couvert === null).length;
     for (const concept of verdict.fidelite) {
+      c.questionsJugees += concept.questions.length;
+      c.questionsInfideles += concept.questions.filter((v) => v.juste === false).length;
       c.abstentions += concept.questions.filter((v) => v.juste === null).length;
     }
   }
 
   return c;
+}
+
+/** Le compte de fidélité d'un dépôt : (infidèles, jugées) pour la colonne du tableau. */
+function fideliteDuDepot(verdict: VerdictsDuDepot | undefined): {
+  infideles: number;
+  jugees: number;
+} {
+  if (!verdict) return { infideles: 0, jugees: 0 };
+  let infideles = 0;
+  let jugees = 0;
+  for (const concept of verdict.fidelite) {
+    jugees += concept.questions.length;
+    infideles += concept.questions.filter((v) => v.juste === false).length;
+  }
+  return { infideles, jugees };
 }
 
 function noteEtat(etat: EtatDuDepot): string {
@@ -96,17 +118,19 @@ function rendreLeTableau(
       verdict ? verdict.doublons.filter((v) => v.independants === false).length : null,
     );
     const radotage = s.radotage === null ? "—" : nombre(s.radotage.interConcepts.length);
+    const { infideles, jugees } = fideliteDuDepot(verdict);
+    const fidelite = jugees === 0 ? "—" : `${nombre(infideles)} / ${nombre(jugees)}`;
 
-    return `| \`${s.nom}\`${noteEtat(etat)} | ${manques} / ${nombre(s.segments)} | ${inventions} / ${nombre(s.concepts)} | ${doublons} | ${radotage} |`;
+    return `| \`${s.nom}\`${noteEtat(etat)} | ${manques} / ${nombre(s.segments)} | ${inventions} / ${nombre(s.concepts)} | ${doublons} | ${fidelite} | ${radotage} |`;
   });
 
   return [
     "## Signalements par dépôt",
     "",
-    "Format « retenus / candidats » quand le juge est passé, « candidats » seuls sinon. Un tiret n'est pas un zéro : c'est « non mesuré ». Un dépôt annoté *rejet* n'a pas produit de concepts parce que le produit l'a refusé ; un dépôt annoté **extraction en échec** est un trou technique (panne, sortie invalide) à corriger.",
+    "Format « retenus / candidats » quand le juge est passé, « candidats » seuls sinon. Un tiret n'est pas un zéro : c'est « non mesuré ». La colonne **Fidélité** compte les questions que le juge de fidélité rend non soutenues (celles dont la réponse-étalon ne se déduit pas du concept seul) sur le total de questions jugées. Un dépôt annoté *rejet* n'a pas produit de concepts parce que le produit l'a refusé ; un dépôt annoté **extraction en échec** est un trou technique (panne, sortie invalide) à corriger.",
     "",
-    "| Dépôt | Manques / phrases | Inventions / concepts | Doublons | Radotage |",
-    "| --- | ---: | ---: | ---: | ---: |",
+    "| Dépôt | Manques / phrases | Inventions / concepts | Doublons | Fidélité | Radotage |",
+    "| --- | ---: | ---: | ---: | ---: | ---: |",
     ...lignes,
     "",
   ];
@@ -151,7 +175,9 @@ export function rendreLesMesures(
   mesures: MesuresDuDepot[],
   verdicts: VerdictsDuDepot[],
   entete: EnTeteDeMesures,
+  depots: DepotFige[] = [],
 ): string {
+  const depotParNom = new Map(depots.map((d) => [d.nom, d]));
   const signalements = mesures.map(signaler);
   const total = totaliser(signalements);
   const confirmes = comptes(signalements, verdicts);
@@ -189,6 +215,9 @@ export function rendreLesMesures(
       `**${nombre(confirmes.manquesReels)} manques** (sur ${nombre(total.manques)} candidats)`,
       `**${nombre(confirmes.inventionsReelles)} inventions** (sur ${nombre(total.inventions)} candidats)`,
       `**${nombre(confirmes.doublonsConfirmes)} doublons** (sur ${nombre(total.doublons)} candidats)`,
+      confirmes.questionsJugees === 0
+        ? "fidélité non mesurée"
+        : `**${nombre(confirmes.questionsInfideles)} questions infidèles** (sur ${nombre(confirmes.questionsJugees)} jugées)`,
       confirmes.abstentions === 0
         ? "**0 abstention**"
         : `**${nombre(confirmes.abstentions)} abstentions** — items non rendus par un juge, à lire dans les sections détaillées`,
@@ -205,7 +234,11 @@ export function rendreLesMesures(
     "## Les signalements, en entier",
     "",
     ...signalements.flatMap((signalement) =>
-      rendreLeDepot(signalement, trouverVerdicts(verdicts, signalement.nom)),
+      rendreLeDepot(
+        signalement,
+        trouverVerdicts(verdicts, signalement.nom),
+        depotParNom.get(signalement.nom),
+      ),
     ),
   ].join("\n");
 }
