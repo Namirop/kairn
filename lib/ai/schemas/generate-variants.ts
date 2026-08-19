@@ -206,11 +206,20 @@ const generateVariantsValidation = sortieLue.transform((sortie) => {
       rang: entree.rang,
       variants: FACETTES.map(([cle, facet]) => {
         const { cloze, chargeIgnoree } = chargesDe(entree[cle]);
+        // Le champ `question` d'un CLOZE ne sert à rien : l'écran de révision
+        // affiche `cloze.sentence`, jamais la question. Le modèle y écrit donc
+        // au mieux une consigne générique (« Complète la phrase du concept. »),
+        // au pire un vrai « placeholder » — visible dans le figé du 18/08,
+        // 71 CLOZE sur 192 en portaient une coquille. On dérive le champ à la
+        // source pour que rien de pourri ne file en base, dans le figé, ou dans
+        // la mesure du radotage.
+        const questionDerivee =
+          entree[cle].format === "CLOZE" && cloze ? cloze.sentence : entree[cle].question;
 
         return {
           format: entree[cle].format,
           facet,
-          question: entree[cle].question,
+          question: questionDerivee,
           answerKey: entree[cle].answerKey,
           estVraie: entree[cle].estVraie ?? null,
           chargeIgnoree,

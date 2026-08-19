@@ -159,14 +159,25 @@ async function main(): Promise<void> {
     const partiel: DepotFige = { ...depot, concepts: manquants };
     const rendu = await rejouerDepot(partiel);
     const nouveaux = new Map<string, ConceptFige["variants"]>();
+    const echecs = new Map<string, string>();
     for (const evalue of rendu.concepts) {
       if (evalue.variants.length > 0) {
         nouveaux.set(evalue.concept.concept, evalue.variants.map(retenirVariant));
+      } else if (evalue.echec) {
+        echecs.set(evalue.concept.concept, evalue.echec.motif);
       }
     }
-    const conceptsFusionnes = depot.concepts.map((c) =>
-      nouveaux.has(c.concept) ? { ...c, variants: nouveaux.get(c.concept) } : c,
-    );
+    const conceptsFusionnes = depot.concepts.map((c) => {
+      if (nouveaux.has(c.concept)) {
+        // Une régénération réussie efface un ancien échec sur ce concept.
+        const { echec: _, ...reste } = c;
+        return { ...reste, variants: nouveaux.get(c.concept) };
+      }
+      if (echecs.has(c.concept)) {
+        return { ...c, echec: { motif: echecs.get(c.concept)! } };
+      }
+      return c;
+    });
     const combles = nouveaux.size;
     parNomDuFige.set(depot.nom, {
       ...depot,
@@ -177,6 +188,9 @@ async function main(): Promise<void> {
       `- **${depot.nom}** : ${combles}/${manquants.length} lot(s) comblé(s)` +
         (rendu.reprises > 0 ? ` — ${rendu.reprises} reprise(s)` : ""),
     );
+    for (const [concept, motif] of echecs) {
+      journal.push(`  - échec sur « ${concept.slice(0, 80)} » : ${motif}`);
+    }
   }
 
   const total = await sumAiCalls(debut);

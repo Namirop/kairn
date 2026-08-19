@@ -86,10 +86,28 @@ function etatDuDepot(depot: DepotFige): EtatDuDepot {
 /** Les questions d'un concept, avec le rang du concept dont elles viennent. */
 type QuestionSituee = { texte: string; concept: number; contexte: ContexteDeQuestion };
 
+/**
+ * Le texte à mesurer pour le radotage.
+ *
+ * Pour un CLOZE, c'est la **phrase à trou** (`cloze.sentence`), pas le champ
+ * `question` — celui-ci porte au mieux une consigne générique (« Complète la
+ * phrase du concept. »), au pire un « placeholder » littéral. La preuve : sur
+ * le figé du 18/08, les paires inter-concepts à 1,000 étaient toutes des
+ * coquilles de ce champ. La charge, elle, est la vraie question.
+ *
+ * `cloze` est optionnel dans le schéma (les figés d'avant sa persistance n'en
+ * portent pas). Sans lui, on retombe sur `question` — la mesure sera bruitée
+ * comme avant, mais le rapport le signale par les manquements du banc.
+ */
+function texteARadoter(variant: NonNullable<ConceptFige["variants"]>[number]): string {
+  if (variant.format === "CLOZE" && variant.cloze) return variant.cloze.sentence;
+  return variant.question;
+}
+
 function questionsDuDepot(concepts: ConceptFige[]): QuestionSituee[] {
   return concepts.flatMap((concept, rang) =>
     (concept.variants ?? []).map((variant) => ({
-      texte: variant.question,
+      texte: texteARadoter(variant),
       concept: rang,
       contexte: { concept: concept.concept, facet: variant.facet, format: variant.format },
     })),

@@ -187,6 +187,47 @@ function controlerCharge(variant: VariantAControler): Manquement[] {
   ];
 }
 
+/**
+ * Un texte de question qui est une coquille — mot littéral « placeholder »,
+ * ou consigne générique qui ne redit rien de la question réelle.
+ *
+ * Le figé du 18/08 en portait 71 sur 192 CLOZE : « placeholder », « Complète
+ * la phrase du concept. », « Complète la phrase décrivant l'effet du X. ».
+ * L'écran de révision d'un CLOZE affiche `cloze.sentence`, jamais ce champ,
+ * donc l'utilisateur ne voit rien — mais la mesure du radotage, elle,
+ * comparait ces coquilles entre elles et produisait des paires à 1,000.
+ *
+ * La dérivation dans `generate-variants.ts` couvre le cas CLOZE côté source ;
+ * ce contrôle attrape le reste — coquille sur un autre format, ou régression
+ * du fix. Signalé, pas refusé : la question part quand même en base, un
+ * manquement au banc suffit à ne pas laisser le silence s'installer.
+ */
+const COQUILLES = [
+  /^placeholder\d*$/i,
+  /^Complète la phrase\b/i,
+  /^Complete the (?:sentence|key claim|statement)\b/i,
+  /^Complète l'affirmation\b/i,
+];
+
+function controlerCoquille(variant: VariantAControler): Manquement[] {
+  // Pour un CLOZE avec charge, le champ `question` n'est pas ce qui s'affiche
+  // (c'est `cloze.sentence`) : une consigne y est sans conséquence sur ce que
+  // voit l'utilisateur, et la dérivation dans `generate-variants.ts` remplace
+  // désormais ce champ à la source. On ne se met donc pas à râler sur des
+  // fixtures qui ne représentent plus la production.
+  if (variant.format === "CLOZE" && variant.cloze) return [];
+
+  const question = variant.question.trim();
+  if (!COQUILLES.some((r) => r.test(question))) return [];
+
+  return [
+    {
+      regle: "question coquille",
+      detail: `texte de question qui ne porte pas la question réelle : « ${question.slice(0, 80)} »`,
+    },
+  ];
+}
+
 /** Tout ce qu'on peut reprocher à une question sans regarder les autres. */
 export function controlerQuestion(variant: VariantAControler): Manquement[] {
   return [
@@ -194,6 +235,7 @@ export function controlerQuestion(variant: VariantAControler): Manquement[] {
     ...controlerCloze(variant),
     ...controlerVraiOuFaux(variant),
     ...controlerCharge(variant),
+    ...controlerCoquille(variant),
     ...controlerReponseCachee(variant),
   ];
 }

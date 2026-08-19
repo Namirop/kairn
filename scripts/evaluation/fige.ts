@@ -46,6 +46,14 @@ const figeSchema = z.object({
           tags: z.array(z.string()),
           uncertain: z.boolean(),
           /**
+           * L'échec du lot qui portait ce concept, quand la génération n'a rien
+           * rendu de servable — silence du modèle sur ce rang, ou lot écarté à
+           * la relecture. Absent le plus souvent. Sans lui, un concept sans
+           * variants se lisait comme un rejet volontaire, et un motif capturé
+           * par le banc partait dans le vide.
+           */
+          echec: z.object({ motif: z.string() }).optional(),
+          /**
            * Les questions telles qu'elles ont été servies.
            *
            * Facultatives, comme `nature` avant elles : les figés écrits avant ce
@@ -71,6 +79,16 @@ const figeSchema = z.object({
                 answerKey: z.string(),
                 options: z.array(z.string()).nullable(),
                 correctIndex: z.number().int().nullable(),
+                /**
+                 * La charge d'un texte à trou : la phrase avec le trou, et les
+                 * formes acceptées. Persistée depuis que la mesure du radotage
+                 * s'appuie dessus — le champ `question` d'un CLOZE porte au
+                 * mieux une consigne, jamais la vraie phrase à comparer.
+                 */
+                cloze: z
+                  .object({ sentence: z.string(), accepted: z.array(z.string()) })
+                  .nullable()
+                  .optional(),
               }),
             )
             .optional(),
@@ -96,6 +114,7 @@ export function retenirVariant(
     answerKey: variant.answerKey,
     options: variant.options ?? null,
     correctIndex: variant.correctIndex ?? null,
+    cloze: variant.cloze ?? null,
   };
 }
 
@@ -165,6 +184,7 @@ export function ecrireFige(
         reprises: evaluation.reprises > 0 ? evaluation.reprises : undefined,
         concepts: evaluation.concepts.map((evalue) => ({
           ...evalue.concept,
+          echec: evalue.echec ? { motif: evalue.echec.motif } : undefined,
           // Un concept mis de côté n'a pas de questions : le champ reste absent
           // plutôt que de porter un tableau vide, qui se lirait « zéro question
           // rendue » au lieu de « aucune demandée ».
