@@ -50,6 +50,11 @@ test du pli de peau » et « chez un chat âgé la peau perd son élasticité in
 de l'hydratation » sont deux concepts distincts : le second n'est pas une conséquence
 du premier, c'est sa limite.
 
+Deux formulations d'une même affirmation sont un seul concept : si le texte se répète,
+le concept ne se répète pas. Test : si la question qui vérifierait A et celle qui
+vérifierait B sont la même question, A et B sont le même concept — garde la
+formulation la plus complète.
+
 Le contexte du coût : chaque concept devient trois ou quatre questions reposées à la
 personne pendant des mois. Deux concepts qui se recouvrent produisent des questions
 jumelles, et la personne croit alors que l'application radote. Fusionner un concept
