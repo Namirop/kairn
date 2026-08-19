@@ -209,21 +209,32 @@ const COQUILLES = [
   /^Complète l'affirmation\b/i,
 ];
 
-function controlerCoquille(variant: VariantAControler): Manquement[] {
-  // Pour un CLOZE avec charge, le champ `question` n'est pas ce qui s'affiche
-  // (c'est `cloze.sentence`) : une consigne y est sans conséquence sur ce que
-  // voit l'utilisateur, et la dérivation dans `generate-variants.ts` remplace
-  // désormais ce champ à la source. On ne se met donc pas à râler sur des
-  // fixtures qui ne représentent plus la production.
-  if (variant.format === "CLOZE" && variant.cloze) return [];
+function estCoquille(texte: string): boolean {
+  return COQUILLES.some((r) => r.test(texte.trim()));
+}
 
-  const question = variant.question.trim();
-  if (!COQUILLES.some((r) => r.test(question))) return [];
+function controlerCoquille(variant: VariantAControler): Manquement[] {
+  // Pour un CLOZE, ce qui s'affiche c'est `cloze.sentence` (l'écran de
+  // révision ignore `question`). On regarde donc la charge quand elle est
+  // là — c'est elle qui doit porter la vraie question. Un cloze absent est
+  // déjà signalé par `controlerCloze`.
+  if (variant.format === "CLOZE") {
+    if (!variant.cloze) return [];
+    if (!estCoquille(variant.cloze.sentence)) return [];
+    return [
+      {
+        regle: "question coquille",
+        detail: `charge d'un CLOZE qui ne porte pas la phrase à trou : « ${variant.cloze.sentence.slice(0, 80)} »`,
+      },
+    ];
+  }
+
+  if (!estCoquille(variant.question)) return [];
 
   return [
     {
       regle: "question coquille",
-      detail: `texte de question qui ne porte pas la question réelle : « ${question.slice(0, 80)} »`,
+      detail: `texte de question qui ne porte pas la question réelle : « ${variant.question.slice(0, 80)} »`,
     },
   ];
 }
