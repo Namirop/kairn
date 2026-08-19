@@ -17,6 +17,11 @@ import type { Vecteur } from "./espace";
 
 /** Deux vecteurs identiques rendent 1, deux vecteurs opposés −1. */
 export function cosinus(un: Vecteur, deux: Vecteur): number {
+  // Un vecteur vide représente un texte que la passe a refusé de plonger
+  // (chaîne vide, refusée par Voyage). Sa similarité n'existe pas ; NaN se
+  // propage sans lever, et les filtres en aval le traitent comme un rejet.
+  if (un.length === 0 || deux.length === 0) return Number.NaN;
+
   if (un.length !== deux.length) {
     throw new Error(`Vecteurs de dimensions différentes : ${un.length} et ${deux.length}.`);
   }

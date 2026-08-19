@@ -124,7 +124,15 @@ export async function plonger(textes: string[]): Promise<Passe> {
   const parEmpreinte = new Map<string, Vecteur>();
   const aCalculer: string[] = [];
 
+  // Voyage refuse les chaînes vides. Un variant peut arriver avec `question`
+  // vide quand la sortie contrainte a hoqueté à la génération — c'est un vrai
+  // bug du figé, mais il n'a pas à faire tomber toute la mesure. On les
+  // enregistre comme vecteur vide, propagé en NaN par `cosinus`.
+  parEmpreinte.set(empreinte(""), []);
+
   for (const texte of new Set(textes)) {
+    if (texte === "") continue;
+
     const trace = empreinte(texte);
     const connu = cache.get(trace);
 
