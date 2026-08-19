@@ -28,24 +28,42 @@ function trouverVerdicts(verdicts: VerdictsDuDepot[], nom: string): VerdictsDuDe
   return verdicts.find((v) => v.nom === nom);
 }
 
+type Comptes = {
+  manquesReels: number;
+  inventionsReelles: number;
+  doublonsConfirmes: number;
+  abstentions: number;
+};
+
 function comptes(
   signalements: SignalementsDuDepot[],
   verdicts: VerdictsDuDepot[],
-): { manquesReels: number; inventionsReelles: number; doublonsConfirmes: number } {
-  let manquesReels = 0;
-  let inventionsReelles = 0;
-  let doublonsConfirmes = 0;
+): Comptes {
+  const c: Comptes = {
+    manquesReels: 0,
+    inventionsReelles: 0,
+    doublonsConfirmes: 0,
+    abstentions: 0,
+  };
 
   for (const signalement of signalements) {
     const verdict = trouverVerdicts(verdicts, signalement.nom);
     if (!verdict) continue;
 
-    manquesReels += verdict.manques.filter((v) => v.retenir).length;
-    inventionsReelles += verdict.inventions.filter((v) => !v.soutenu).length;
-    doublonsConfirmes += verdict.doublons.filter((v) => !v.independants).length;
+    c.manquesReels += verdict.manques.filter((v) => v.retenir === true).length;
+    c.inventionsReelles += verdict.inventions.filter((v) => v.soutenu === false).length;
+    c.doublonsConfirmes += verdict.doublons.filter((v) => v.independants === false).length;
+
+    c.abstentions += verdict.manques.filter((v) => v.retenir === null).length;
+    c.abstentions += verdict.inventions.filter((v) => v.soutenu === null).length;
+    c.abstentions += verdict.doublons.filter((v) => v.independants === null).length;
+    c.abstentions += verdict.attendus.filter((v) => v.verdict?.couvert === null).length;
+    for (const concept of verdict.fidelite) {
+      c.abstentions += concept.questions.filter((v) => v.juste === null).length;
+    }
   }
 
-  return { manquesReels, inventionsReelles, doublonsConfirmes };
+  return c;
 }
 
 function rendreLeTableau(
@@ -58,15 +76,15 @@ function rendreLeTableau(
       confirmes === null ? nombre(candidats) : `${nombre(confirmes)} / ${nombre(candidats)}`;
     const manques = rendu(
       s.manques.length,
-      verdict ? verdict.manques.filter((v) => v.retenir).length : null,
+      verdict ? verdict.manques.filter((v) => v.retenir === true).length : null,
     );
     const inventions = rendu(
       s.inventions.length,
-      verdict ? verdict.inventions.filter((v) => !v.soutenu).length : null,
+      verdict ? verdict.inventions.filter((v) => v.soutenu === false).length : null,
     );
     const doublons = rendu(
       s.doublons.length,
-      verdict ? verdict.doublons.filter((v) => !v.independants).length : null,
+      verdict ? verdict.doublons.filter((v) => v.independants === false).length : null,
     );
     const radotage = s.radotage === null ? "—" : nombre(s.radotage.interConcepts.length);
 
@@ -152,6 +170,9 @@ export function rendreLesMesures(
       `**${nombre(confirmes.manquesReels)} manques** (sur ${nombre(total.manques)} candidats)`,
       `**${nombre(confirmes.inventionsReelles)} inventions** (sur ${nombre(total.inventions)} candidats)`,
       `**${nombre(confirmes.doublonsConfirmes)} doublons** (sur ${nombre(total.doublons)} candidats)`,
+      confirmes.abstentions === 0
+        ? "**0 abstention**"
+        : `**${nombre(confirmes.abstentions)} abstentions** — items non rendus par un juge, à lire dans les sections détaillées`,
     ].join(" · "),
     "",
     `Vecteurs : ${nombre(entete.calcules)} calculés, ${nombre(entete.enCache)} lus au cache · ${nombre(entete.tokens)} tokens facturés · juges ${entete.coutDesJuges.toFixed(4)} $`,

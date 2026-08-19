@@ -10,9 +10,10 @@ import type { VerdictsDuDepot } from "../juges/verdicts";
  * concepts candidats, le juge tranche s'ils couvrent l'idée — chiffres,
  * seuils et conditions inclus.
  *
- * `couvertParProximite` reste indiqué à titre informatif, mais le verdict
- * est ce qui compte. Les attendus qui sortent non couverts restent visibles
- * d'un passage à l'autre par construction — ne pas les adoucir.
+ * Le libellé nomme qui a tranché — le juge, toujours. La proximité de chaque
+ * candidat reste visible sur ses lignes ↳ mais ne décide de rien. Les attendus
+ * qui sortent non couverts restent visibles d'un passage à l'autre par
+ * construction — ne pas les adoucir.
  */
 
 const EXTRAIT = 300;
@@ -29,11 +30,14 @@ function proximite(valeur: number): string {
 
 function verdictLigne(couverture: CouvertureAttendu): string {
   if (!couverture.verdict) return "· juge non passé";
-  const indicateur = couverture.couvertParProximite ? "proximité ≥ plancher" : "proximité < plancher";
+
+  if (couverture.verdict.couvert === null) {
+    return `→ *abstention* — ${couverture.verdict.motif}`;
+  }
 
   return couverture.verdict.couvert
-    ? `→ ✓ **couvert** (${indicateur}) — ${couverture.verdict.motif}`
-    : `→ ✗ **non couvert** (${indicateur}) — ${couverture.verdict.motif}`;
+    ? `→ ✓ **couvert** — verdict du juge : ${couverture.verdict.motif}`
+    : `→ ✗ **non couvert** — verdict du juge : ${couverture.verdict.motif}`;
 }
 
 function compter(couvertures: CouvertureAttendu[]): { couverts: number; total: number } {

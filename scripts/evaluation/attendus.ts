@@ -57,12 +57,16 @@ export type CouvertureAttendu = {
   /** Les concepts candidats retenus par proximité — jusqu'à `CANDIDATS_PAR_ATTENDU`. */
   candidats: { concept: string; proximite: number }[];
   /**
-   * Vrai si le plus proche candidat passe le plancher couverture. Reste au
-   * rapport à titre indicatif — le verdict est ce qui compte.
+   * Vrai si le plus proche candidat passe le plancher couverture. Utilisé en
+   * interne comme signal ; le rapport n'en fait plus mention — c'est le juge
+   * qui tranche, la proximité ne fait que sélectionner les candidats.
    */
   couvertParProximite: boolean;
-  /** Verdict du juge d'attendus. Absent quand aucun juge n'a tourné. */
-  verdict?: { couvert: boolean; motif: string };
+  /**
+   * Verdict du juge d'attendus. Absent quand aucun juge n'a tourné.
+   * `couvert: null` = abstention (item non rendu par le juge).
+   */
+  verdict?: { couvert: boolean | null; motif: string };
 };
 
 /**

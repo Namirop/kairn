@@ -54,7 +54,8 @@ const attendusForme = sortieLue.extend({
 
 const attendusValidation = sortieLue;
 
-export type VerdictAttendu = { couvert: boolean; motif: string };
+/** `couvert: null` = abstention (item non rendu par le juge). Voir `residu.ts`. */
+export type VerdictAttendu = { couvert: boolean | null; motif: string };
 
 const CONTRAT: AiContract<z.infer<typeof attendusValidation>> = {
   purpose: "juge_attendus",
@@ -141,13 +142,9 @@ export async function jugerLesAttendus(
   const parNumero = new Map(sortie.attendus.map((v) => [v.numero, v]));
 
   return soumis.map((_, rang) => {
-    const numero = rang + 1;
-    const verdict = parNumero.get(numero);
-
-    if (!verdict) {
-      throw new Error(`Le juge d'attendus n'a pas rendu de verdict #${numero} sur ${nom}.`);
-    }
-
-    return { couvert: verdict.couvert, motif: verdict.motif.trim() };
+    const verdict = parNumero.get(rang + 1);
+    return verdict
+      ? { couvert: verdict.couvert, motif: verdict.motif.trim() }
+      : { couvert: null, motif: "non rendu par le juge" };
   });
 }

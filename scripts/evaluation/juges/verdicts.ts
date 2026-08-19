@@ -179,7 +179,7 @@ export function rendementDuDoublon(
     signalement.doublons.forEach((paire, rang) => {
       const bande = paire.proximite < BANDE_DU_DOUBLON ? rendement.basse : rendement.haute;
       bande.candidats += 1;
-      if (verdict.doublons[rang] && !verdict.doublons[rang].independants) {
+      if (verdict.doublons[rang]?.independants === false) {
         bande.confirmes += 1;
       }
     });

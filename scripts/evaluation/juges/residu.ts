@@ -74,9 +74,19 @@ const residuForme = sortieLue.extend({
 /** Les verdicts arrivent bruts, avec leur `numero`. L'appariement se fait à l'usage. */
 const residuValidation = sortieLue;
 
-export type VerdictManque = { retenir: boolean; motif: string };
-export type VerdictInvention = { soutenu: boolean; motif: string };
+/**
+ * Le champ décisionnel est nullable pour porter l'**abstention** — le cas où
+ * le juge a rendu un lot partiel et omis cet item. Une abstention n'est pas
+ * un verdict, elle est comptée séparément dans le rapport et signalée dans
+ * le motif. C'est la réponse structurelle à un modèle stochastique qui saute
+ * parfois un item d'un lot ; la règle « pas de retry » reste entière, on
+ * n'invente rien, on rend visible le trou.
+ */
+export type VerdictManque = { retenir: boolean | null; motif: string };
+export type VerdictInvention = { soutenu: boolean | null; motif: string };
 export type SortieResidu = { manques: VerdictManque[]; inventions: VerdictInvention[] };
+
+const MOTIF_ABSTENTION = "non rendu par le juge";
 
 const CONTRAT: AiContract<z.infer<typeof residuValidation>> = {
   purpose: "juge_residu",
@@ -116,20 +126,13 @@ function apparier<V extends { numero: number }, T>(
   candidats: unknown[],
   rendus: V[],
   garder: (verdict: V) => T,
-  quoi: string,
-  nom: string,
+  abstention: T,
 ): T[] {
   const parNumero = new Map(rendus.map((verdict) => [verdict.numero, verdict]));
 
   return candidats.map((_, rang) => {
-    const numero = rang + 1;
-    const verdict = parNumero.get(numero);
-
-    if (!verdict) {
-      throw new Error(`Le juge du résidu n'a pas rendu de verdict de ${quoi} #${numero} sur ${nom}.`);
-    }
-
-    return garder(verdict);
+    const verdict = parNumero.get(rang + 1);
+    return verdict ? garder(verdict) : abstention;
   });
 }
 
@@ -175,19 +178,17 @@ export async function jugerLeResidu(
   });
 
   return {
-    manques: apparier(
+    manques: apparier<(typeof sortie.manques)[number], VerdictManque>(
       manques,
       sortie.manques,
       (v) => ({ retenir: v.retenir, motif: v.motif.trim() }),
-      "manque",
-      nom,
+      { retenir: null, motif: MOTIF_ABSTENTION },
     ),
-    inventions: apparier(
+    inventions: apparier<(typeof sortie.inventions)[number], VerdictInvention>(
       inventions,
       sortie.inventions,
       (v) => ({ soutenu: v.soutenu, motif: v.motif.trim() }),
-      "invention",
-      nom,
+      { soutenu: null, motif: MOTIF_ABSTENTION },
     ),
   };
 }

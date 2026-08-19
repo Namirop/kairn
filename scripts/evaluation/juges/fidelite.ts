@@ -26,6 +26,10 @@ import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
  */
 
 const verdictQuestion = z.object({
+  numero: z
+    .number()
+    .int()
+    .describe("Le numéro de la question jugée, tel que présenté (### Question N)."),
   juste: z
     .boolean()
     .describe(
@@ -41,7 +45,7 @@ const verdictQuestion = z.object({
 const sortieLue = z.object({
   questions: z
     .array(verdictQuestion)
-    .describe("Un verdict par question soumise, dans l'ordre reçu."),
+    .describe("Un verdict par question soumise. L'appariement se fait par numéro."),
 });
 
 const fideliteForme = sortieLue.extend({
@@ -50,14 +54,10 @@ const fideliteForme = sortieLue.extend({
   ),
 });
 
-const fideliteValidation = sortieLue.transform((sortie) => ({
-  questions: sortie.questions.map((verdict) => ({
-    juste: verdict.juste,
-    motif: verdict.motif.trim(),
-  })),
-}));
+const fideliteValidation = sortieLue;
 
-export type VerdictFidelite = z.infer<typeof fideliteValidation>["questions"][number];
+/** `juste: null` = abstention (question non rendue par le juge). Voir `residu.ts`. */
+export type VerdictFidelite = { juste: boolean | null; motif: string };
 
 const CONTRAT: AiContract<z.infer<typeof fideliteValidation>> = {
   purpose: "juge_fidelite",
@@ -80,6 +80,9 @@ sont admis tant qu'ils portent sur ce que le concept dit.
 
 Pour un QCM, les options font partie de la question — juge la réponse correcte
 en fonction du concept. La plausibilité des distracteurs est hors sujet ici.
+
+Chaque question porte un numéro (### Question N). **Reporte ce numéro dans le
+verdict.** Un verdict par question, jamais deux, jamais zéro.
 
 Le motif est court : nomme ce qui manque au concept pour justifier la réponse,
 ou confirme que la réponse s'y déduit. Pas d'introduction, pas de conclusion.`;
@@ -130,11 +133,12 @@ export async function jugerLaFidelite(
     maxTokens: TOKENS_DES_JUGES,
   });
 
-  if (sortie.questions.length !== variants.length) {
-    throw new Error(
-      `Le juge de fidélité a rendu ${sortie.questions.length} verdicts pour ${variants.length} questions.`,
-    );
-  }
+  const parNumero = new Map(sortie.questions.map((v) => [v.numero, v]));
 
-  return sortie.questions;
+  return variants.map((_, rang) => {
+    const verdict = parNumero.get(rang + 1);
+    return verdict
+      ? { juste: verdict.juste, motif: verdict.motif.trim() }
+      : { juste: null, motif: "non rendu par le juge" };
+  });
 }

@@ -28,6 +28,10 @@ import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
 const SENS = ["A_couvre_B", "B_couvre_A", "equivalents"] as const;
 
 const paireLue = z.object({
+  numero: z
+    .number()
+    .int()
+    .describe("Le numéro de la paire jugée, tel que présenté (### Paire N)."),
   independants: z
     .boolean()
     .describe(
@@ -47,22 +51,21 @@ const paireLue = z.object({
 const sortieLue = z.object({
   paires: z
     .array(paireLue)
-    .describe("Un verdict par paire soumise, dans l'ordre reçu."),
+    .describe("Un verdict par paire soumise. L'appariement se fait par numéro."),
 });
 
 const doublonForme = sortieLue.extend({
   paires: z.array(paireLue.extend({ motif: paireLue.shape.motif.min(1).max(MOTIF_MAXIMUM) })),
 });
 
-const doublonValidation = sortieLue.transform((sortie) => ({
-  paires: sortie.paires.map((paire) => ({
-    independants: paire.independants,
-    sens: paire.independants ? null : (paire.sens ?? "equivalents"),
-    motif: paire.motif.trim(),
-  })),
-}));
+const doublonValidation = sortieLue;
 
-export type VerdictDoublon = z.infer<typeof doublonValidation>["paires"][number];
+/** `independants: null` = abstention (paire non rendue par le juge). Voir `residu.ts`. */
+export type VerdictDoublon = {
+  independants: boolean | null;
+  sens: (typeof SENS)[number] | null;
+  motif: string;
+};
 
 const CONTRAT: AiContract<z.infer<typeof doublonValidation>> = {
   purpose: "juge_doublon",
@@ -87,6 +90,9 @@ qu'un verrou existe ne dit rien de ce que fait ce verrou. Deux affirmations
 distinctes sur un même mécanisme aussi : l'une n'entraîne pas l'autre. En
 revanche, une règle et son instance directe ne le sont pas, ni une reformulation
 en synonymes.
+
+Chaque paire porte un numéro (### Paire N). **Reporte ce numéro dans le
+verdict.** Un verdict par paire, jamais deux, jamais zéro.
 
 Le motif est court : il nomme la question qui reste, ou l'absorption qu'on
 constate. Pas d'introduction, pas de conclusion.`;
@@ -116,11 +122,7 @@ export function appelsPour(paires: number): number {
   return Math.ceil(paires / PAIRES_PAR_APPEL);
 }
 
-async function jugerUnLot(
-  nom: string,
-  paires: Paire[],
-  offset: number,
-): Promise<VerdictDoublon[]> {
+async function jugerUnLot(nom: string, paires: Paire[]): Promise<VerdictDoublon[]> {
   const messages = [
     {
       role: "user" as const,
@@ -130,9 +132,9 @@ async function jugerUnLot(
           text: [
             `Dépôt : ${nom}`,
             "",
-            `${paires.length} paire(s) à juger.`,
+            `${paires.length} paire(s) à juger — verdicts #1 à #${paires.length}.`,
             "",
-            paires.map((paire, rang) => decrirePaire(paire, offset + rang)).join("\n\n"),
+            paires.map((paire, rang) => decrirePaire(paire, rang)).join("\n\n"),
           ].join("\n"),
         },
       ],
@@ -147,13 +149,17 @@ async function jugerUnLot(
     maxTokens: TOKENS_DES_JUGES,
   });
 
-  if (sortie.paires.length !== paires.length) {
-    throw new Error(
-      `Le juge du doublon a rendu ${sortie.paires.length} verdicts pour ${paires.length} paires sur ${nom}.`,
-    );
-  }
+  const parNumero = new Map(sortie.paires.map((v) => [v.numero, v]));
 
-  return sortie.paires;
+  return paires.map((_, rang) => {
+    const verdict = parNumero.get(rang + 1);
+    if (!verdict) return { independants: null, sens: null, motif: "non rendu par le juge" };
+    return {
+      independants: verdict.independants,
+      sens: verdict.independants ? null : (verdict.sens ?? "equivalents"),
+      motif: verdict.motif.trim(),
+    };
+  });
 }
 
 /**
@@ -168,7 +174,7 @@ export async function jugerLesDoublons(nom: string, paires: Paire[]): Promise<Ve
 
   for (let offset = 0; offset < paires.length; offset += PAIRES_PAR_APPEL) {
     const lot = paires.slice(offset, offset + PAIRES_PAR_APPEL);
-    const rendus = await jugerUnLot(nom, lot, offset);
+    const rendus = await jugerUnLot(nom, lot);
     verdicts.push(...rendus);
   }
 

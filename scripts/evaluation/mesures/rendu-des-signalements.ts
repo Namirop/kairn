@@ -28,29 +28,32 @@ function proximite(valeur: number): string {
   return valeur.toFixed(3);
 }
 
-function verdictDeManque(verdict: { retenir: boolean; motif: string } | undefined): string {
+function verdictDeManque(verdict: { retenir: boolean | null; motif: string } | undefined): string {
   if (!verdict) return "";
+  if (verdict.retenir === null) return `  → *abstention* — ${verdict.motif}`;
   const decision = verdict.retenir ? "**à retenir**" : "bruit";
   return `  → ${decision} — ${verdict.motif}`;
 }
 
-function verdictDInvention(verdict: { soutenu: boolean; motif: string } | undefined): string {
+function verdictDInvention(verdict: { soutenu: boolean | null; motif: string } | undefined): string {
   if (!verdict) return "";
+  if (verdict.soutenu === null) return `  → *abstention* — ${verdict.motif}`;
   const decision = verdict.soutenu ? "soutenu" : "**invention**";
   return `  → ${decision} — ${verdict.motif}`;
 }
 
 function verdictDeDoublon(
-  verdict: { independants: boolean; sens: string | null; motif: string } | undefined,
+  verdict: { independants: boolean | null; sens: string | null; motif: string } | undefined,
 ): string {
   if (!verdict) return "";
+  if (verdict.independants === null) return `  → *abstention* — ${verdict.motif}`;
   if (verdict.independants) return `  → indépendants — ${verdict.motif}`;
   return `  → **non indépendants** (${verdict.sens ?? "?"}) — ${verdict.motif}`;
 }
 
 function rendreLesRapprochesDeManque(
   entrees: Rapproche[],
-  verdicts: { retenir: boolean; motif: string }[],
+  verdicts: { retenir: boolean | null; motif: string }[],
 ): string[] {
   return entrees.flatMap((entree, rang) =>
     [
@@ -64,7 +67,7 @@ function rendreLesRapprochesDeManque(
 
 function rendreLesRapprochesDInvention(
   entrees: Rapproche[],
-  verdicts: { soutenu: boolean; motif: string }[],
+  verdicts: { soutenu: boolean | null; motif: string }[],
 ): string[] {
   return entrees.flatMap((entree, rang) =>
     [
@@ -78,7 +81,7 @@ function rendreLesRapprochesDInvention(
 
 function rendreLesPaires(
   paires: Paire[],
-  verdicts: { independants: boolean; sens: string | null; motif: string }[],
+  verdicts: { independants: boolean | null; sens: string | null; motif: string }[],
 ): string[] {
   return paires.flatMap((paire, rang) =>
     [
