@@ -60,12 +60,40 @@ export const PLANCHER_DOUBLON = 0.63;
 export const BANDE_DU_DOUBLON = 0.7;
 
 /**
- * Le radotage n'a pas encore de plancher, et il ne peut pas en avoir.
+ * Le radotage a deux planchers, pas un — les deux distributions ne se
+ * ressemblent pas.
  *
- * Aucun figé ne portait ses questions au moment de la calibration : la
- * distribution est vide, et poser un seuil dessus reviendrait à l'inventer. Il
- * se calibrera sur le premier passage de génération qui aura gelé ses
- * questions, comme les trois autres se sont calibrés ici — par lecture des
- * listes triées, jamais par analogie avec un autre signal.
+ * Posés le 19 août 2026 sur le figé `2026-08-19-14h30.json` (claude-sonnet-5,
+ * 27 dépôts, 176 concepts, 660 questions), à la lecture des listes des 50
+ * paires les plus proches sur chaque axe. Le passage précédent — figé du
+ * 18/08 — polluait la distribution inter avec 71 CLOZE porteuses d'une
+ * consigne générique dans `question` ; la mesure comparait ces coquilles
+ * entre elles. La dérivation de `question` à partir de `cloze.sentence`
+ * dans `generate-variants.ts` a nettoyé la distribution, et c'est celle-ci
+ * qui a servi à poser les seuils.
+ *
+ * **Pourquoi plus serrés que les filets des juges** : le radotage n'a pas
+ * de juge derrière lui, les paires signalées se lisent directement. Ici la
+ * précision prime sur le rappel — un filet large sans juge produit une
+ * liste qu'on cesse de lire.
+ *
+ * **INTRA — questions d'un même Atom** : 0,87. Les Variants d'un même
+ * concept tournent exprès pour ne pas laisser mémoriser une formulation ;
+ * un seuil haut n'y signalera qu'un vrai clone. Décile d9 à 0,831,
+ * queue supérieure entre 0,87 et 1,000 sur ce figé. Signalés attendus :
+ * les deux paires de `12-borne-basse` (vinaigre/calcaire, un concept d'une
+ * phrase où trois formats convergent — c'est la démonstration chiffrée du
+ * « facettes optionnelles »), la paire du test du pli de peau de `21`
+ * (MCQ et TRUE_FALSE qui posent la même question), les paires
+ * intra-concept de `27` sur les tomates. Non signalé : la paire du méridien
+ * de `19` (RECOGNITION vs BOUNDARY, la rotation de facettes fonctionne).
+ *
+ * **INTER — questions de concepts différents** : 0,80. Distribution plus
+ * étalée (d9 à 0,638), un plancher trop haut raterait des idées vraiment
+ * redondantes portées par deux concepts distincts. Signalés attendus :
+ * les paires cross-concepts de `07-capture-assistant` autour du domaine
+ * public Railway, la paire de `08` sur la symbiose du lichen, quelques
+ * paires du corpus culinaire (`21` chat/eau, `16` casserole/inertie).
  */
-export const PLANCHER_RADOTAGE: number | null = null;
+export const PLANCHER_RADOTAGE_INTRA = 0.87;
+export const PLANCHER_RADOTAGE_INTER = 0.8;

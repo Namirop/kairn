@@ -5,7 +5,14 @@ import { MODELE_EMBEDDING } from "./espace";
 import { rendreLesAttendus } from "./rendu-des-attendus";
 import { rendreLesListesDuRadotage } from "./rendu-du-radotage";
 import { rendreLeDepot } from "./rendu-des-signalements";
-import { BANDE_DU_DOUBLON, PLANCHER_COUVERTURE, PLANCHER_DOUBLON, PLANCHER_SOUTIEN } from "./seuils";
+import {
+  BANDE_DU_DOUBLON,
+  PLANCHER_COUVERTURE,
+  PLANCHER_DOUBLON,
+  PLANCHER_RADOTAGE_INTER,
+  PLANCHER_RADOTAGE_INTRA,
+  PLANCHER_SOUTIEN,
+} from "./seuils";
 import type { EtatDuDepot, MesuresDuDepot } from "./signaux";
 import { signaler, totaliser, type SignalementsDuDepot } from "./signalements";
 import { rendreLesDeciles } from "./tableaux-de-calibration";
@@ -118,7 +125,10 @@ function rendreLeTableau(
       s.doublons.length,
       verdict ? verdict.doublons.filter((v) => v.independants === false).length : null,
     );
-    const radotage = s.radotage === null ? "—" : nombre(s.radotage.interConcepts.length);
+    const radotage =
+      s.radotage === null
+        ? "—"
+        : `${nombre(s.radotage.intraLot.length)} / ${nombre(s.radotage.interConcepts.length)}`;
     const { infideles, jugees } = fideliteDuDepot(verdict);
     const fidelite = jugees === 0 ? "—" : `${nombre(infideles)} / ${nombre(jugees)}`;
 
@@ -128,7 +138,7 @@ function rendreLeTableau(
   return [
     "## Signalements par dépôt",
     "",
-    "Format « retenus / candidats » quand le juge est passé, « candidats » seuls sinon. Un tiret n'est pas un zéro : c'est « non mesuré ». La colonne **Fidélité** compte les questions que le juge de fidélité rend non soutenues (celles dont la réponse-étalon ne se déduit pas du concept seul) sur le total de questions jugées. Un dépôt annoté *rejet* n'a pas produit de concepts parce que le produit l'a refusé ; un dépôt annoté **extraction en échec** est un trou technique (panne, sortie invalide) à corriger.",
+    "Format « retenus / candidats » quand le juge est passé, « candidats » seuls sinon. Un tiret n'est pas un zéro : c'est « non mesuré ». La colonne **Fidélité** compte les questions que le juge de fidélité rend non soutenues (celles dont la réponse-étalon ne se déduit pas du concept seul) sur le total de questions jugées. La colonne **Radotage** compte les paires de questions signalées au format « intra / inter » (même concept / concepts différents) — les deux distributions ont des planchers différents. Un dépôt annoté *rejet* n'a pas produit de concepts parce que le produit l'a refusé ; un dépôt annoté **extraction en échec** est un trou technique (panne, sortie invalide) à corriger.",
     "",
     "| Dépôt | Manques / phrases | Inventions / concepts | Doublons | Fidélité | Radotage |",
     "| --- | ---: | ---: | ---: | ---: | ---: |",
@@ -210,7 +220,7 @@ export function rendreLesMesures(
     ].join(" · "),
     "",
     ...(compteEtats.length > 0 ? [compteEtats.join(" · "), ""] : []),
-    `Planchers : couverture ${PLANCHER_COUVERTURE} · soutien ${PLANCHER_SOUTIEN} · doublon ${PLANCHER_DOUBLON} · radotage non calibré`,
+    `Planchers : couverture ${PLANCHER_COUVERTURE} · soutien ${PLANCHER_SOUTIEN} · doublon ${PLANCHER_DOUBLON} · radotage intra ${PLANCHER_RADOTAGE_INTRA} · radotage inter ${PLANCHER_RADOTAGE_INTER}`,
     "",
     [
       `**${nombre(confirmes.manquesReels)} manques** (sur ${nombre(total.manques)} candidats)`,

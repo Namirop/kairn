@@ -1,10 +1,11 @@
 import {
   PLANCHER_COUVERTURE,
   PLANCHER_DOUBLON,
-  PLANCHER_RADOTAGE,
+  PLANCHER_RADOTAGE_INTER,
+  PLANCHER_RADOTAGE_INTRA,
   PLANCHER_SOUTIEN,
 } from "./seuils";
-import type { MesuresDuDepot, Paire, Rapproche } from "./signaux";
+import type { MesuresDuDepot, Paire, PaireDeQuestions, Rapproche } from "./signaux";
 
 /**
  * L'application des planchers aux signaux bruts.
@@ -32,28 +33,28 @@ export type SignalementsDuDepot = {
   /** Paires de concepts au-dessus du plancher : candidates à la redite. */
   doublons: Paire[];
   /**
-   * Paires de questions, `null` quand le figé n'en porte pas — et quand le
-   * plancher n'est pas encore posé, ce qui est le cas tant qu'aucun passage de
-   * génération n'a gelé ses questions. Les deux se lisent « non mesuré », et le
-   * rapport ne doit jamais les afficher comme « zéro ».
+   * Paires de questions, `null` quand le figé n'en porte pas — les figés
+   * antérieurs au gel des questions. Sinon, les paires filtrées par les deux
+   * planchers du radotage : intra-concept et inter-concepts n'ont pas la même
+   * distribution, donc pas le même seuil.
    */
-  radotage: { intraLot: Paire[]; interConcepts: Paire[] } | null;
+  radotage: { intraLot: PaireDeQuestions[]; interConcepts: PaireDeQuestions[] } | null;
 };
 
 function sousLePlancher(entrees: Rapproche[], plancher: number): Rapproche[] {
   return entrees.filter((entree) => entree.proximite < plancher);
 }
 
-/** Deux façons de n'avoir rien à signaler : pas de questions, ou pas de plancher. */
 function signalerLeRadotage(
   radotage: MesuresDuDepot["radotage"],
-  plancher: number | null,
 ): SignalementsDuDepot["radotage"] {
-  if (radotage === null || plancher === null) return null;
+  if (radotage === null) return null;
 
   return {
-    intraLot: radotage.intraLot.filter((paire) => paire.proximite >= plancher),
-    interConcepts: radotage.interConcepts.filter((paire) => paire.proximite >= plancher),
+    intraLot: radotage.intraLot.filter((paire) => paire.proximite >= PLANCHER_RADOTAGE_INTRA),
+    interConcepts: radotage.interConcepts.filter(
+      (paire) => paire.proximite >= PLANCHER_RADOTAGE_INTER,
+    ),
   };
 }
 
@@ -65,7 +66,7 @@ export function signaler(mesure: MesuresDuDepot): SignalementsDuDepot {
     manques: sousLePlancher(mesure.couverture, PLANCHER_COUVERTURE),
     inventions: sousLePlancher(mesure.soutien, PLANCHER_SOUTIEN),
     doublons: mesure.doublons.filter((paire) => paire.proximite >= PLANCHER_DOUBLON),
-    radotage: signalerLeRadotage(mesure.radotage, PLANCHER_RADOTAGE),
+    radotage: signalerLeRadotage(mesure.radotage),
   };
 }
 
