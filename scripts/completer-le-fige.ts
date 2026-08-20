@@ -1,7 +1,10 @@
 import "dotenv/config";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
+import { appliquerCapDuBanc } from "./evaluation/cap-du-banc";
 import type { ConceptFige, DepotFige } from "./evaluation/fige";
+
+appliquerCapDuBanc();
 
 /**
  * Combler les trous d'un figé sans réémettre ce qui a déjà réussi.

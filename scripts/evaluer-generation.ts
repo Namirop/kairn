@@ -1,6 +1,9 @@
 import "dotenv/config";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
+import { appliquerCapDuBanc } from "./evaluation/cap-du-banc";
+
+appliquerCapDuBanc();
 
 /**
  * Le banc d'évaluation de la génération.
