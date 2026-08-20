@@ -209,6 +209,10 @@ export function rendreLesMesures(
   return [
     `# Mesures du corpus — ${entete.emisA.toISOString().slice(0, 16).replace("T", " ")} UTC`,
     "",
+    `> **Biais résiduel du juge du doublon** — il sur-signale les paires *définition ↔ propriété dérivée* (témoins 09 courbes/équidistance et 05 CREATE INDEX/verrou).`,
+    `> Le sens du biais est constant : il rend \`null\` sur la définition et écrit la question sur la propriété.`,
+    `> Les comptes de doublons confirmés sont donc à lire comme une **borne haute** — le vrai chiffre est inférieur.`,
+    "",
     `Embeddings \`${MODELE_EMBEDDING}\` · ${entete.dimension} dimensions · juges \`${MODELE_DES_JUGES}\``,
     "",
     entete.source,
