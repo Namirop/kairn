@@ -1,6 +1,7 @@
 import type { DepotFige } from "../fige";
 import { MODELE_DES_JUGES } from "../juges/modele";
-import { rendementDuDoublon, type VerdictsDuDepot } from "../juges/verdicts";
+import { rendementDuDoublon } from "../juges/rendement";
+import type { VerdictsDuDepot } from "../juges/verdicts";
 import { MODELE_EMBEDDING } from "./espace";
 import { rendreLesAttendus } from "./rendu-des-attendus";
 import { rendreLesListesDuRadotage } from "./rendu-du-radotage";

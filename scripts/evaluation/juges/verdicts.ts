@@ -1,8 +1,8 @@
 import { attendusDuDepot, type CouvertureAttendu } from "../attendus";
 import type { DepotFige } from "../fige";
-import { BANDE_DU_DOUBLON } from "../mesures/seuils";
 import type { SignalementsDuDepot } from "../mesures/signalements";
 import { jugerLesAttendus } from "./attendus";
+import { cacheDuDepot, chargerCache, sauverCache } from "./cache";
 import { appelsPour, jugerLesDoublons, type VerdictDoublon } from "./doublon";
 import { jugerLaFidelite, type VerdictFidelite } from "./fidelite";
 import { jugerLeResidu, type VerdictInvention, type VerdictManque } from "./residu";
@@ -72,11 +72,13 @@ export async function jugerLesSignalements(
   signalements: SignalementsDuDepot[],
   depots: DepotFige[],
   couverturesInitiales: { nom: string; couvertures: CouvertureAttendu[] }[],
+  cheminFige: string,
 ): Promise<VerdictsDuDepot[]> {
   const parNom = new Map(depots.map((depot) => [depot.nom, depot]));
   const couverturesParNom = new Map(
     couverturesInitiales.map((c) => [c.nom, c.couvertures]),
   );
+  const cache = chargerCache(cheminFige);
   const verdicts: VerdictsDuDepot[] = [];
 
   for (const signalement of signalements) {
@@ -86,47 +88,56 @@ export async function jugerLesSignalements(
       throw new Error(`Le juge n'a pas trouvé le dépôt « ${signalement.nom} » dans le figé.`);
     }
 
-    const doublons = await jugerLesDoublons(depot.nom, signalement.doublons);
-    const residu = await jugerLeResidu(
-      depot.nom,
-      depot.texte,
-      signalement.manques,
-      signalement.inventions,
-    );
+    const cacheDepot = cacheDuDepot(cache, depot.nom);
 
+    if (cacheDepot.doublons === undefined) {
+      cacheDepot.doublons = await jugerLesDoublons(depot.nom, signalement.doublons);
+      sauverCache(cache, cheminFige);
+    }
+
+    if (cacheDepot.residu === undefined) {
+      const rendu = await jugerLeResidu(
+        depot.nom,
+        depot.texte,
+        signalement.manques,
+        signalement.inventions,
+      );
+      cacheDepot.residu = { manques: rendu.manques, inventions: rendu.inventions };
+      sauverCache(cache, cheminFige);
+    }
+
+    cacheDepot.fidelite ??= {};
     const fidelite: VerdictsDuDepot["fidelite"] = [];
     for (const concept of depot.concepts) {
       if (!concept.variants || concept.variants.length === 0) continue;
 
-      const questions = await jugerLaFidelite(concept.concept, concept.variants);
+      let questions = cacheDepot.fidelite[concept.concept];
+      if (questions === undefined) {
+        questions = await jugerLaFidelite(concept.concept, concept.variants);
+        cacheDepot.fidelite[concept.concept] = questions;
+        sauverCache(cache, cheminFige);
+      }
       fidelite.push({ concept: concept.concept, questions });
     }
 
-    const couverturesBrutes = couverturesParNom.get(depot.nom) ?? [];
-    const attendus = await juger(depot.nom, couverturesBrutes);
+    if (cacheDepot.attendus === undefined) {
+      const couverturesBrutes = couverturesParNom.get(depot.nom) ?? [];
+      cacheDepot.attendus = await juger(depot.nom, couverturesBrutes);
+      sauverCache(cache, cheminFige);
+    }
 
     verdicts.push({
       nom: depot.nom,
-      doublons,
-      manques: residu.manques,
-      inventions: residu.inventions,
+      doublons: cacheDepot.doublons,
+      manques: cacheDepot.residu.manques,
+      inventions: cacheDepot.residu.inventions,
       fidelite,
-      attendus,
+      attendus: cacheDepot.attendus,
     });
   }
 
   return verdicts;
 }
-
-/**
- * Le rendement du juge du doublon par bande : le compte des non-indépendants
- * dans la bande basse contre la bande haute, pour dire si le plancher à 0,63
- * ramasse ce qu'il fallait ou si on descendait pour rien.
- */
-export type RendementParBande = {
-  basse: { candidats: number; confirmes: number };
-  haute: { candidats: number; confirmes: number };
-};
 
 /**
  * Combien d'appels chaque juge fera sur ce corpus.
@@ -163,27 +174,3 @@ export function compterLesAppelsDesJuges(
   return { doublon, residu, fidelite, attendus };
 }
 
-export function rendementDuDoublon(
-  signalements: SignalementsDuDepot[],
-  verdicts: VerdictsDuDepot[],
-): RendementParBande {
-  const rendement: RendementParBande = {
-    basse: { candidats: 0, confirmes: 0 },
-    haute: { candidats: 0, confirmes: 0 },
-  };
-
-  for (const signalement of signalements) {
-    const verdict = verdicts.find((v) => v.nom === signalement.nom);
-    if (!verdict) continue;
-
-    signalement.doublons.forEach((paire, rang) => {
-      const bande = paire.proximite < BANDE_DU_DOUBLON ? rendement.basse : rendement.haute;
-      bande.candidats += 1;
-      if (verdict.doublons[rang]?.independants === false) {
-        bande.confirmes += 1;
-      }
-    });
-  }
-
-  return rendement;
-}

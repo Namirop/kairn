@@ -58,6 +58,7 @@ next-env.d.ts
 # Rapports du banc d’évaluation : produits localement, jamais commités.
 /scripts/evaluation/rapports/
 /scripts/evaluation/concepts/
+/scripts/evaluation/verdicts/
 
 # Cache de vecteurs du banc. Déterministe et regagné pour une fraction de
 # centime : quelques mégaoctets d'opaque par passage coûteraient plus cher à

@@ -131,6 +131,16 @@ async function main(): Promise<void> {
     `Juges : ${appels.doublon} doublon · ${appels.residu} résidu · ${appels.fidelite} fidélité · ${appels.attendus} attendus — ${total} au total.`,
   );
 
+  const { chargerCache, compterEnCache } = await import("./evaluation/juges/cache");
+  const dejaEnCache = compterEnCache(chargerCache(chemin));
+  const totalEnCache =
+    dejaEnCache.doublon + dejaEnCache.residu + dejaEnCache.fidelite + dejaEnCache.attendus;
+  if (totalEnCache > 0) {
+    console.info(
+      `En cache : ${dejaEnCache.doublon} doublon · ${dejaEnCache.residu} résidu · ${dejaEnCache.fidelite} fidélité · ${dejaEnCache.attendus} attendus — ${totalEnCache} déjà rendus, la relance reprend là où c'était.`,
+    );
+  }
+
   if (total > 0 && !emettre) {
     console.info("\nRien n'a été émis aux juges. Relance avec --emettre pour dépenser.");
     const rapport = rendreLesMesures(mesures, [], {
@@ -150,7 +160,7 @@ async function main(): Promise<void> {
 
   const { sumAiCalls } = await import("@/lib/db/ai-call");
   const debutJuges = new Date();
-  const verdicts = await jugerLesSignalements(signalements, depots, couvertures);
+  const verdicts = await jugerLesSignalements(signalements, depots, couvertures, chemin);
   const consommation = await sumAiCalls(debutJuges);
   console.info(`Juges : ${consommation.calls} appels, ${Number(consommation.costUsd).toFixed(4)} $.`);
 
