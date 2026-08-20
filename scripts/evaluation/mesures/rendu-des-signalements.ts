@@ -45,12 +45,23 @@ function verdictDInvention(verdict: { soutenu: boolean | null; motif: string } |
 }
 
 function verdictDeDoublon(
-  verdict: { independants: boolean | null; sens: string | null; motif: string } | undefined,
+  verdict:
+    | {
+        independants: boolean | null;
+        sens: string | null;
+        questionSurA: string | null;
+        questionSurB: string | null;
+      }
+    | undefined,
 ): string {
   if (!verdict) return "";
-  if (verdict.independants === null) return `  → *abstention* — ${verdict.motif}`;
-  if (verdict.independants) return `  → indépendants — ${verdict.motif}`;
-  return `  → **non indépendants** (${verdict.sens ?? "?"}) — ${verdict.motif}`;
+  if (verdict.independants === null) return `  → *abstention* — non rendu par le juge`;
+  const questions: string[] = [];
+  if (verdict.questionSurB) questions.push(`sur B — ${verdict.questionSurB}`);
+  if (verdict.questionSurA) questions.push(`sur A — ${verdict.questionSurA}`);
+  const suite = questions.length > 0 ? questions.join(" · ") : "aucune question restante";
+  if (verdict.independants) return `  → indépendants — ${suite}`;
+  return `  → **non indépendants** (${verdict.sens ?? "?"}) — ${suite}`;
 }
 
 function rendreLesRapprochesDeManque(
@@ -83,7 +94,12 @@ function rendreLesRapprochesDInvention(
 
 function rendreLesPaires(
   paires: Paire[],
-  verdicts: { independants: boolean | null; sens: string | null; motif: string }[],
+  verdicts: {
+    independants: boolean | null;
+    sens: string | null;
+    questionSurA: string | null;
+    questionSurB: string | null;
+  }[],
 ): string[] {
   return paires.flatMap((paire, rang) =>
     [

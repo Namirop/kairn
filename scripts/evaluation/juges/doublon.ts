@@ -27,25 +27,32 @@ import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
 
 const SENS = ["A_couvre_B", "B_couvre_A", "equivalents"] as const;
 
+/**
+ * La restructuration du 20 août : le juge n'écrit plus « independants oui/non »
+ * ni son motif, il écrit les **deux questions concrètes** qui subsistent. Le
+ * serveur en déduit l'indépendance et le sens. La leçon des mesures précédentes :
+ * demander un verdict qualifié laisse le juge argumenter pour son biais (« B est
+ * une instance de A », « connaître A entraîne B »). Lui demander la question
+ * concrète l'oblige à la formuler — s'il ne la trouve pas, c'est qu'elle
+ * n'existe pas ; s'il la trouve, il ne peut plus la nier.
+ */
 const paireLue = z.object({
   numero: z
     .number()
     .int()
     .describe("Le numéro de la paire jugée, tel que présenté (### Paire N)."),
-  independants: z
-    .boolean()
-    .describe(
-      "true si dans les deux sens il reste une question sur laquelle celui qui ne connaît pas l'autre concept pourrait se tromper. false dès qu'un sens n'a plus de question à poser.",
-    ),
-  sens: z
-    .enum(SENS)
+  questionSurB: z
+    .string()
     .nullable()
     .describe(
-      "null si independants=true. Sinon : A_couvre_B si connaître A rend B superflu, B_couvre_A dans l'autre sens, equivalents si les deux couvrent l'autre.",
+      "La question qu'on poserait sur B à quelqu'un qui connaît A mais ignore B, et sur laquelle il pourrait se tromper. null si aucune question de ce type n'existe — connaître A rend alors B superflu.",
     ),
-  motif: z
+  questionSurA: z
     .string()
-    .describe("Une phrase courte qui nomme la question restante ou l'absorption constatée."),
+    .nullable()
+    .describe(
+      "La question qu'on poserait sur A à quelqu'un qui connaît B mais ignore A, et sur laquelle il pourrait se tromper. null si aucune question de ce type n'existe — connaître B rend alors A superflu.",
+    ),
 });
 
 const sortieLue = z.object({
@@ -55,16 +62,28 @@ const sortieLue = z.object({
 });
 
 const doublonForme = sortieLue.extend({
-  paires: z.array(paireLue.extend({ motif: paireLue.shape.motif.min(1).max(MOTIF_MAXIMUM) })),
+  paires: z.array(
+    paireLue.extend({
+      questionSurA: z.string().min(1).max(MOTIF_MAXIMUM).nullable(),
+      questionSurB: z.string().min(1).max(MOTIF_MAXIMUM).nullable(),
+    }),
+  ),
 });
 
 const doublonValidation = sortieLue;
 
-/** `independants: null` = abstention (paire non rendue par le juge). Voir `residu.ts`. */
+/**
+ * `independants: null` = abstention (paire non rendue par le juge). Voir `residu.ts`.
+ *
+ * `questionSurA` et `questionSurB` sont ce que le juge a rendu tel quel. Les
+ * champs `independants` et `sens` sont dérivés : le serveur les calcule à partir
+ * des questions, il ne les demande plus.
+ */
 export type VerdictDoublon = {
   independants: boolean | null;
   sens: (typeof SENS)[number] | null;
-  motif: string;
+  questionSurA: string | null;
+  questionSurB: string | null;
 };
 
 const CONTRAT: AiContract<z.infer<typeof doublonValidation>> = {
@@ -73,29 +92,49 @@ const CONTRAT: AiContract<z.infer<typeof doublonValidation>> = {
   validation: doublonValidation,
 };
 
-const SYSTEM = `Tu tranches si deux concepts d'un même dépôt sont indépendants.
+const SYSTEM = `Tu compares deux concepts A et B d'un même dépôt, et tu rends
+pour chacun d'eux **la question concrète** qui subsiste.
 
-Pour chaque paire, applique **dans les deux sens** le test suivant :
+Pour chaque paire, produis deux champs :
 
-  Quelqu'un qui connaît A mais ignore B : reste-t-il une question à lui poser
-  sur B, sur laquelle il pourrait se tromper ?
+- **questionSurB** : la question qu'on poserait sur B à quelqu'un qui connaît A
+  mais ignore B, et sur laquelle il pourrait se tromper. Une vraie question,
+  formulée, comme dans un quiz. Si aucune question de ce type n'existe —
+  connaître A donne déjà la réponse à toute question sur B —, rends **null**.
+- **questionSurA** : la même chose dans l'autre sens.
 
-- Si les deux sens rendent oui, la paire est **indépendante**.
-- Sinon, elle ne l'est pas. Précise alors le sens de l'absorption : A_couvre_B
-  quand connaître A rend B superflu, B_couvre_A dans l'autre sens, equivalents
-  si chacun couvre l'autre.
+Ne rends **pas** de verdict d'indépendance ni de motif : c'est la présence ou
+l'absence des questions qui tranche. Deux questions rendues = paire indépendante.
+Une seule = un concept couvre l'autre. Zéro = les deux disent la même chose.
 
-Deux affirmations contraires sur le même sujet restent indépendantes : savoir
-qu'un verrou existe ne dit rien de ce que fait ce verrou. Deux affirmations
-distinctes sur un même mécanisme aussi : l'une n'entraîne pas l'autre. En
-revanche, une règle et son instance directe ne le sont pas, ni une reformulation
-en synonymes.
+Écris la question comme une vraie question, pas comme une description. « Quel est
+l'écart entre deux courbes voisines sur une carte, et est-il constant ? » plutôt
+que « la constance de l'écart entre courbes ». Si tu ne peux pas l'écrire, c'est
+que null est la bonne réponse.
+
+Cas courants qui rendent **deux** questions (paire indépendante) :
+
+- Deux affirmations contraires ou opposées sur le même sujet : les questions
+  portent chacune sur ce que fait vraiment chacune, l'existence de l'un ne
+  répond pas à ce que fait l'autre.
+- Une catégorie et les propriétés d'un de ses membres : la catégorie n'énonce
+  pas la propriété du membre — « où les UVC sont-ils arrêtés ? » subsiste même
+  quand on sait qu'il existe trois bandes UV qui diffèrent par leur énergie.
+- Une définition et une propriété dérivée : la définition n'énonce pas la
+  propriété — « l'écart entre courbes voisines est-il constant ? » subsiste
+  même quand on sait que les courbes relient les points de même altitude.
+
+Cas courants qui rendent **null** d'un côté :
+
+- Une reformulation en synonymes ou une paraphrase directe.
+- Une règle générale et son unique instance présentée dans le texte : « les
+  calories liquides ne rassasient pas » vs « la compensation incomplète du
+  liquide au repas suivant » — c'est la même affirmation vue sous deux angles,
+  aucune question ne subsiste dans un sens.
 
 Chaque paire porte un numéro (### Paire N). **Reporte ce numéro dans le
-verdict.** Un verdict par paire, jamais deux, jamais zéro.
-
-Le motif est court : il nomme la question qui reste, ou l'absorption qu'on
-constate. Pas d'introduction, pas de conclusion.`;
+verdict.** Un verdict par paire, jamais deux, jamais zéro. Pas d'introduction,
+pas de conclusion.`;
 
 /** Ce qu'on présente au juge pour une paire. `A` et `B` restent stables pour la lecture du motif. */
 function decrirePaire(paire: Paire, rang: number): string {
@@ -153,12 +192,19 @@ async function jugerUnLot(nom: string, paires: Paire[]): Promise<VerdictDoublon[
 
   return paires.map((_, rang) => {
     const verdict = parNumero.get(rang + 1);
-    if (!verdict) return { independants: null, sens: null, motif: "non rendu par le juge" };
-    return {
-      independants: verdict.independants,
-      sens: verdict.independants ? null : (verdict.sens ?? "equivalents"),
-      motif: verdict.motif.trim(),
-    };
+    if (!verdict) {
+      return { independants: null, sens: null, questionSurA: null, questionSurB: null };
+    }
+    const questionSurA = verdict.questionSurA?.trim() || null;
+    const questionSurB = verdict.questionSurB?.trim() || null;
+    const independants = questionSurA !== null && questionSurB !== null;
+    let sens: (typeof SENS)[number] | null = null;
+    if (!independants) {
+      if (questionSurA === null && questionSurB === null) sens = "equivalents";
+      else if (questionSurB === null) sens = "A_couvre_B";
+      else sens = "B_couvre_A";
+    }
+    return { independants, sens, questionSurA, questionSurB };
   });
 }
 
