@@ -60,6 +60,9 @@ next-env.d.ts
 /scripts/evaluation/concepts/
 /scripts/evaluation/verdicts/
 
+# Sortie du helper `--lister` d'OpenRouter : reproductible en une commande.
+/catalogue-openrouter.txt
+
 # Cache de vecteurs du banc. Déterministe et regagné pour une fraction de
 # centime : quelques mégaoctets d'opaque par passage coûteraient plus cher à
 # relire dans l'historique qu'à recalculer. Les figés, eux, restent suivis.
