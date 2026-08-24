@@ -26,6 +26,12 @@ export type AiCallRecord = {
   errorCode?: string | null;
   userId?: string | null;
   jobId?: string | null;
+  /**
+   * Marque la ligne du succès de repli quand l'appel initial (Luna) a échoué
+   * et que Sonnet Anthropic natif a servi à sa place. Comptée par
+   * `compterBasculesDuJour` pour l'alerte d'exploitation.
+   */
+  basculee?: boolean;
 };
 
 /** Ce qu'une fenêtre de temps a consommé. */
@@ -96,6 +102,20 @@ export async function recordAiCall(record: AiCallRecord): Promise<void> {
       errorCode: record.errorCode ?? null,
       userId: record.userId ?? null,
       jobId: record.jobId ?? null,
+      basculee: record.basculee ?? false,
     },
+  });
+}
+
+/**
+ * Combien de fois on a basculé sur Sonnet aujourd'hui.
+ *
+ * Filtre partiel sur l'index `AiCall_basculee_createdAt_idx` : la lecture
+ * reste bornée, même si le registre grossit. Sert à l'alerte d'exploitation
+ * — au-delà de cinq dans la journée, un email part.
+ */
+export async function compterBasculesDuJour(now: Date = new Date()): Promise<number> {
+  return prisma.aiCall.count({
+    where: { basculee: true, createdAt: { gte: startOfUtcDay(now) } },
   });
 }

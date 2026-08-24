@@ -224,11 +224,16 @@ model AiCall {
   latencyMs           Int
   success             Boolean
   errorCode           String?
+  /// Vrai sur la ligne du succès de repli — l'appel initial (Luna) a échoué,
+  /// et Sonnet Anthropic natif a servi à sa place. Comptée séparément dans
+  /// l'alerte : au-delà de cinq bascules dans la journée, un email part.
+  basculee            Boolean @default(false)
 
   createdAt DateTime @default(now())
 
   @@index([createdAt])
   @@index([userId, createdAt])
+  @@index([basculee, createdAt], map: "AiCall_basculee_createdAt_idx")
 }
 
 /// Le budget d'un compte sur sa période, et ce qu'il en a consommé.

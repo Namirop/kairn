@@ -1,6 +1,6 @@
 import { recordAiCall } from "@/lib/db/ai-call";
 import { type AiConfig } from "./config";
-import { choisirFournisseur, sdkFor } from "./fournisseurs";
+import { choisirFournisseur, sdkFor, type PontFournisseur } from "./fournisseurs";
 import { lireLaConfigEffective } from "./reglages-effectifs";
 import { provenanceDeLAppel, reserverLesDeuxPlaces } from "./reservation";
 import {
@@ -16,6 +16,7 @@ import { flattenText, type AiMessage } from "./message";
 import { toOutputSchema } from "./output-schema";
 import { computeCostUsd } from "./pricing";
 import type { AiContract } from "./schemas";
+import { signalerUneBascule } from "./signalement-de-bascule";
 
 /**
  * Le seul point d'entrée vers le modèle. C'est lui qui protège le budget.
@@ -24,9 +25,21 @@ import type { AiContract } from "./schemas";
  * une interface commune. Ici, on résout le pont depuis la config, on garde les
  * garde-fous (interrupteur, mode mock, réservation), et on écrit au registre —
  * succès comme échec. Aucun retry.
+ *
+ * **Repli automatique.** Quand le pont primaire est OpenRouter et qu'il tombe
+ * (réseau, 5xx, sortie invalide ou tronquée), Sonnet Anthropic natif prend le
+ * relais — mêmes prompts, même schéma, deux campagnes ont validé qu'ils
+ * tiennent le même contrat. La bascule est marquée dans `AiCall.basculee`, et
+ * au-delà de cinq bascules par jour, une alerte part par email.
  */
 
 const MOCK_LATENCY_MS = 300;
+
+/** Le modèle du repli — Sonnet natif, la ligne de fond éprouvée. */
+const MODELE_DE_REPLI = "claude-sonnet-5";
+
+/** Codes d'erreur qui déclenchent un repli. Le reste (quota, config, disabled) remonte. */
+const CODES_DE_REPLI = new Set(["AI_CALL_FAILED", "AI_NO_OUTPUT", "AI_INVALID_OUTPUT", "AI_TRUNCATED"]);
 
 export type CallAIParams<T> = {
   contract: AiContract<T>;
@@ -44,6 +57,10 @@ export type CallAIParams<T> = {
    * N'en fais pas un réglage de confort. Le produit garde `AI_MODEL` : deux
    * chemins d'ingestion sur deux modèles différents rendraient les mesures
    * incomparables, ce qui est exactement ce que ce banc existe pour éviter.
+   *
+   * **Coupe aussi le repli automatique** : une surcharge de modèle par
+   * l'appelant est une décision locale, on ne veut pas la voir remise en
+   * silence sur Sonnet.
    */
   model?: string;
   userId?: string;
@@ -61,7 +78,18 @@ export type CallAIParams<T> = {
 /** Ré-export : `batch.ts` en a besoin sans importer le paquet. */
 export { sdkFor };
 
-async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
+/**
+ * Émet une seule fois via le pont donné et journalise dans `AiCall`.
+ *
+ * `basculee` marque la ligne quand ce pont sert de repli — l'appel initial a
+ * échoué, celui-ci est la seconde tentative sur Sonnet. Utilisé par `emit`.
+ */
+async function emettreEtJournaliser<T>(
+  pont: PontFournisseur,
+  params: CallAIParams<T>,
+  config: AiConfig,
+  basculee: boolean,
+): Promise<T> {
   const { contract } = params;
   const maxTokens = params.maxTokens ?? config.maxTokens;
   const ledger = {
@@ -70,14 +98,11 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
     fournisseur: config.fournisseur,
     userId: params.userId ?? null,
     jobId: params.jobId ?? null,
+    basculee,
   };
   // Dérivé avant d'ouvrir le registre : une forme intraduisible est une erreur
   // de développement, pas un appel raté.
   const format = toOutputSchema(contract.forme);
-  const pont = choisirFournisseur(config.fournisseur, {
-    anthropicApiKey: config.apiKey,
-    openrouterApiKey: config.openrouterApiKey,
-  });
 
   const startedAt = Date.now();
   let sortie;
@@ -138,12 +163,54 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
   }
 }
 
+/** Décide si l'échec du pont primaire doit basculer sur Sonnet. */
+function doitBasculer<T>(erreur: unknown, config: AiConfig, params: CallAIParams<T>): boolean {
+  // Rien à quoi basculer si le pont primaire est déjà Anthropic natif.
+  if (config.fournisseur !== "openrouter") return false;
+  // Une surcharge de modèle vient d'un appelant qui cible un modèle précis
+  // (les juges du banc). Le remettre en silence sur Sonnet fausserait la
+  // mesure et casserait le contrat de `CallAIParams.model`.
+  if (params.model !== undefined) return false;
+  if (!(erreur instanceof AiError)) return false;
+  return CODES_DE_REPLI.has(erreur.code);
+}
+
+function motifDeBascule(erreur: unknown): string {
+  if (!(erreur instanceof Error)) return String(erreur);
+  const cause = erreur.cause instanceof Error ? ` — cause : ${erreur.cause.message}` : "";
+  return `${erreur.message}${cause}`;
+}
+
+async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
+  const cles = { anthropicApiKey: config.apiKey, openrouterApiKey: config.openrouterApiKey };
+  const pontPrimaire = choisirFournisseur(config.fournisseur, cles);
+
+  try {
+    return await emettreEtJournaliser(pontPrimaire, params, config, false);
+  } catch (erreur) {
+    if (!doitBasculer(erreur, config, params)) throw erreur;
+    // Bascule : Sonnet Anthropic natif reprend, mêmes prompts, même schéma.
+    // Pas de retry du côté du repli — si Anthropic échoue aussi, l'erreur
+    // remonte à l'appelant.
+    const pontRepli = choisirFournisseur("anthropic", cles);
+    const configRepli: AiConfig = {
+      ...config,
+      fournisseur: "anthropic",
+      model: MODELE_DE_REPLI,
+    };
+    const resultat = await emettreEtJournaliser(pontRepli, params, configRepli, true);
+    signalerUneBascule(motifDeBascule(erreur));
+    return resultat;
+  }
+}
+
 /**
  * Appelle le modèle et rend une valeur déjà validée. Dans l'ordre :
  * interrupteur, mode mock, part du compte, plafond journalier, émission avec
  * `max_tokens` explicite et sortie contrainte par grammaire, refus d'une
  * réponse tronquée, validation stricte, puis écriture au registre — succès
- * comme échec. Aucun retry.
+ * comme échec. Aucun retry sur le même pont ; bascule automatique de Luna
+ * vers Sonnet quand Luna tombe (voir `emit`).
  */
 export async function callAI<T>(params: CallAIParams<T>): Promise<T> {
   const effective = await lireLaConfigEffective();
