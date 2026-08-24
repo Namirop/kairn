@@ -27,6 +27,13 @@ export const CATALOGUE: Record<string, Tarif> = {
   "claude-opus-5": { entreePerMillion: 5, sortiePerMillion: 25 },
   "claude-sonnet-5": { entreePerMillion: 3, sortiePerMillion: 15 },
   "claude-haiku-4-5": { entreePerMillion: 1, sortiePerMillion: 5 },
+  // Retenu à la campagne 1+2 comme finaliste des deux tâches (extraction et
+  // génération) — l'identifiant OpenRouter est `openai/gpt-5.6-luna`, mais le
+  // catalogue indexe le modèle sur son slug court, tel qu'`AI_MODEL` le porte
+  // (côté OpenRouter, on passe l'identifiant complet). Les deux clés
+  // renvoient au même tarif ; garder les deux évite de deviner qui appelle.
+  "gpt-5.6-luna": { entreePerMillion: 0.2, sortiePerMillion: 1.2 },
+  "openai/gpt-5.6-luna": { entreePerMillion: 0.2, sortiePerMillion: 1.2 },
 };
 
 /** Retenu pour un modèle inconnu : le plus cher de la table. */

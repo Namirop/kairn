@@ -1,6 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { recordAiCall } from "@/lib/db/ai-call";
 import { type AiConfig } from "./config";
+import { choisirFournisseur, sdkFor } from "./fournisseurs";
 import { lireLaConfigEffective } from "./reglages-effectifs";
 import { provenanceDeLAppel, reserverLesDeuxPlaces } from "./reservation";
 import {
@@ -12,14 +12,18 @@ import {
 } from "./errors";
 import { loadFixture } from "./fixtures";
 import { lireSortieStructuree } from "./lecture";
-import { flattenText, toSdkMessage, type AiMessage } from "./message";
+import { flattenText, type AiMessage } from "./message";
 import { toOutputSchema } from "./output-schema";
 import { computeCostUsd } from "./pricing";
 import type { AiContract } from "./schemas";
 
 /**
- * Le seul point d'entrée vers le modèle, et le seul fichier qui importe le SDK
- * Anthropic. C'est lui qui protège le budget.
+ * Le seul point d'entrée vers le modèle. C'est lui qui protège le budget.
+ *
+ * Les appels réseau vivent dans `fournisseurs/` — un pont par lignée, derrière
+ * une interface commune. Ici, on résout le pont depuis la config, on garde les
+ * garde-fous (interrupteur, mode mock, réservation), et on écrit au registre —
+ * succès comme échec. Aucun retry.
  */
 
 const MOCK_LATENCY_MS = 300;
@@ -54,34 +58,8 @@ export type CallAIParams<T> = {
   anonyme?: boolean;
 };
 
-let cachedClient: { key: string; sdk: Anthropic } | null = null;
-
-/**
- * Le SDK, prêt à servir. Exporté pour `batch.ts`, qui a besoin du même client
- * sans importer le paquet : ce fichier reste le seul à le connaître.
- */
-export function sdkFor(config: AiConfig): Anthropic {
-  const key = config.apiKey ?? "";
-  if (cachedClient?.key !== key) {
-    // Clé absente : on laisse le SDK résoudre lui-même ses identifiants et
-    // lever son propre message, plus parlant qu'une chaîne vide.
-    cachedClient = { key, sdk: new Anthropic({ apiKey: config.apiKey }) };
-  }
-  return cachedClient.sdk;
-}
-
-/** La sortie structurée arrive dans un bloc de texte, plus dans un bloc d'outil. */
-function readStructuredOutput<T>(contract: AiContract<T>, response: Anthropic.Message): T {
-  const block = response.content.find(
-    (candidate): candidate is Anthropic.TextBlock => candidate.type === "text",
-  );
-
-  if (!block) {
-    throw new AIMissingOutputError(contract.purpose);
-  }
-
-  return lireSortieStructuree(contract, block.text);
-}
+/** Ré-export : `batch.ts` en a besoin sans importer le paquet. */
+export { sdkFor };
 
 async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
   const { contract } = params;
@@ -89,35 +67,30 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
   const ledger = {
     purpose: contract.purpose,
     model: config.model,
+    fournisseur: config.fournisseur,
     userId: params.userId ?? null,
     jobId: params.jobId ?? null,
   };
   // Dérivé avant d'ouvrir le registre : une forme intraduisible est une erreur
   // de développement, pas un appel raté.
   const format = toOutputSchema(contract.forme);
-  const startedAt = Date.now();
-  let response: Anthropic.Message;
+  const pont = choisirFournisseur(config.fournisseur, {
+    anthropicApiKey: config.apiKey,
+    openrouterApiKey: config.openrouterApiKey,
+  });
 
+  const startedAt = Date.now();
+  let sortie;
   try {
-    response = await sdkFor(config).messages.create({
+    sortie = await pont.emettre({
       model: config.model,
-      max_tokens: maxTokens,
-      // Le prompt système est identique d'un appel à l'autre. Depuis que
-      // l'outil a disparu du préfixe, il est seul devant le point de cache :
-      // sous le minimum de mise en cache du modèle, rien ne sera mis en cache
-      // — le registre le dira.
-      system: [{ type: "text", text: params.system, cache_control: { type: "ephemeral" } }],
-      // Coupé, et ce n'est plus le forçage d'outil qui l'impose : ces trois
-      // intentions n'ont rien montré qui demande du raisonnement. Le rouvrir
-      // est une décision à prendre sur une mesure, pas un réglage à laisser
-      // glisser.
-      thinking: { type: "disabled" },
-      messages: params.messages.map(toSdkMessage),
-      // La forme est compilée en grammaire et contraint la génération. Un
-      // tableau rendu en chaîne n'est plus improbable, il est impossible.
-      output_config: { format },
+      maxTokens,
+      system: params.system,
+      messages: params.messages,
+      formatSchema: format,
+      purpose: contract.purpose,
     });
-  } catch (error) {
+  } catch (erreur) {
     await recordAiCall({
       ...ledger,
       inputTokens: 0,
@@ -125,36 +98,39 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
       costUsd: "0",
       latencyMs: Date.now() - startedAt,
       success: false,
-      errorCode: "AI_CALL_FAILED",
+      errorCode: erreur instanceof AiError ? erreur.code : "AI_CALL_FAILED",
     });
-    throw new AICallFailedError(contract.purpose, error);
+    if (erreur instanceof AICallFailedError) throw erreur;
+    throw new AICallFailedError(contract.purpose, erreur);
   }
 
-  const latencyMs = Date.now() - startedAt;
-  const consommation = {
-    inputTokens: response.usage.input_tokens,
-    outputTokens: response.usage.output_tokens,
-    cacheCreationTokens: response.usage.cache_creation_input_tokens ?? 0,
-    cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
-  };
-  const costUsd = computeCostUsd(config.model, consommation);
+  const costUsd = computeCostUsd(config.model, sortie.consommation);
 
   try {
     // Une réponse coupée porte une sortie incomplète mais parfois valide :
     // huit concepts demandés, cinq rendus, aucune erreur. C'est un échec.
-    if (response.stop_reason === "max_tokens") {
+    if (sortie.finishReason === "length") {
       throw new AITruncatedOutputError(contract.purpose, maxTokens);
     }
+    if (sortie.responseText.length === 0) {
+      throw new AIMissingOutputError(contract.purpose);
+    }
 
-    const value = readStructuredOutput(contract, response);
-    await recordAiCall({ ...ledger, ...consommation, costUsd, latencyMs, success: true });
+    const value = lireSortieStructuree(contract, sortie.responseText);
+    await recordAiCall({
+      ...ledger,
+      ...sortie.consommation,
+      costUsd,
+      latencyMs: sortie.latencyMs,
+      success: true,
+    });
     return value;
   } catch (error) {
     await recordAiCall({
       ...ledger,
-      ...consommation,
+      ...sortie.consommation,
       costUsd,
-      latencyMs,
+      latencyMs: sortie.latencyMs,
       success: false,
       errorCode: error instanceof AiError ? error.code : "AI_UNKNOWN",
     });

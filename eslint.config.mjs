@@ -56,7 +56,10 @@ const eslintConfig = [
     },
   },
   {
-    files: ["lib/ai/client.ts"],
+    // Le pont Anthropic est le détail d'implémentation qui parle au SDK.
+    // `client.ts` reste le point d'entrée métier (celui qui expose `callAI`),
+    // les autres appelants ne changent pas.
+    files: ["lib/ai/client.ts", "lib/ai/fournisseurs/anthropic.ts"],
     rules: restrict(prismaClient, resend),
   },
   {

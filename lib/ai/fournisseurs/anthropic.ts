@@ -1,0 +1,83 @@
+import Anthropic from "@anthropic-ai/sdk";
+import { AICallFailedError, AIMissingOutputError } from "../errors";
+import { toSdkMessage } from "../message";
+import type { EmissionParams, EmissionResult, PontFournisseur } from "./interface";
+
+/**
+ * Le pont Anthropic — chemin historique du produit, extrait de `client.ts`
+ * sans changement de comportement. C'est **le seul endroit du projet qui
+ * importe le SDK Anthropic** ; la règle du point d'entrée unique tient
+ * toujours (client.ts est l'entrée métier, ce fichier est l'entrée réseau).
+ *
+ * Le prompt système reste avec `cache_control: ephemeral` — il est identique
+ * d'un appel à l'autre, seul devant le point de cache depuis que l'outil a
+ * disparu du préfixe. Sous le minimum de mise en cache du modèle, rien ne
+ * sera mis en cache — le registre le dira.
+ *
+ * `thinking: disabled` : les trois intentions du produit n'ont rien montré
+ * qui demande du raisonnement. Le rouvrir est une décision à prendre sur une
+ * mesure, pas un réglage à laisser glisser.
+ */
+
+let cachedClient: { key: string; sdk: Anthropic } | null = null;
+
+/**
+ * Le SDK, prêt à servir. Exporté parce que `batch.ts` en a besoin sans
+ * importer le paquet — c'est le seul autre consommateur légitime.
+ */
+export function sdkFor(apiKey: string | undefined): Anthropic {
+  const key = apiKey ?? "";
+  if (cachedClient?.key !== key) {
+    cachedClient = { key, sdk: new Anthropic({ apiKey }) };
+  }
+  return cachedClient.sdk;
+}
+
+export function pontAnthropic(apiKey: string | undefined): PontFournisseur {
+  return {
+    nom: "anthropic",
+    async emettre(params: EmissionParams): Promise<EmissionResult> {
+      const sdk = sdkFor(apiKey);
+      const debut = Date.now();
+
+      let response: Anthropic.Message;
+      try {
+        response = await sdk.messages.create({
+          model: params.model,
+          max_tokens: params.maxTokens,
+          system: [{ type: "text", text: params.system, cache_control: { type: "ephemeral" } }],
+          thinking: { type: "disabled" },
+          messages: params.messages.map(toSdkMessage),
+          output_config: { format: params.formatSchema },
+        });
+      } catch (erreur) {
+        throw new AICallFailedError(params.purpose, erreur);
+      }
+
+      const latencyMs = Date.now() - debut;
+      const block = response.content.find(
+        (candidat): candidat is Anthropic.TextBlock => candidat.type === "text",
+      );
+
+      if (!block) throw new AIMissingOutputError(params.purpose);
+
+      return {
+        responseText: block.text,
+        consommation: {
+          inputTokens: response.usage.input_tokens,
+          outputTokens: response.usage.output_tokens,
+          cacheCreationTokens: response.usage.cache_creation_input_tokens ?? 0,
+          cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
+        },
+        latencyMs,
+        modeleServi: response.model,
+        finishReason:
+          response.stop_reason === "max_tokens"
+            ? "length"
+            : response.stop_reason === "end_turn"
+              ? "stop"
+              : "other",
+      };
+    },
+  };
+}

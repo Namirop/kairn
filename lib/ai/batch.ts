@@ -82,7 +82,7 @@ export async function submitAIBatch<T>(
     throw new AIQuotaError(reservation.utilisees, config.dailyCallCap);
   }
 
-  const lot = await sdkFor(config).messages.batches.create({
+  const lot = await sdkFor(config.apiKey).messages.batches.create({
     requests: requetes.map((requete) => ({
       custom_id: requete.reference,
       params: {
@@ -105,7 +105,7 @@ export async function batchTermine(providerId: string): Promise<boolean> {
 
   if (config.mock) return lotSimulePresent(providerId);
 
-  const lot = await sdkFor(config).messages.batches.retrieve(providerId);
+  const lot = await sdkFor(config.apiKey).messages.batches.retrieve(providerId);
 
   return lot.processing_status === "ended";
 }
@@ -144,11 +144,12 @@ export async function readAIBatch<T>(
 
   const resultats: ResultatGroupe<T>[] = [];
 
-  for await (const entree of await sdkFor(config).messages.batches.results(providerId)) {
+  for await (const entree of await sdkFor(config.apiKey).messages.batches.results(providerId)) {
     const reference = entree.custom_id;
     const ledger = {
       purpose: contract.purpose,
       model: config.model,
+      fournisseur: config.fournisseur,
       jobId: jobIdParReference.get(reference) ?? null,
     };
 

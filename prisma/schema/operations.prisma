@@ -206,6 +206,12 @@ model AiCall {
   job    GenerationJob? @relation(fields: [jobId], references: [id], onDelete: SetNull)
 
   purpose             String
+  /// La lignée qui a servi l'appel : `anthropic` (SDK natif) ou `openrouter`
+  /// (pont porté du banc). Nul et non pas absent : un coût ne veut rien dire
+  /// si l'on ignore qui l'a facturé, et les multiplicateurs de cache diffèrent
+  /// (voir `lib/ai/pricing.ts`). Défaut `anthropic` pour les lignes écrites
+  /// avant le portage — c'était la seule lignée.
+  provider            String  @default("anthropic")
   model               String
   /// Entrée facturée plein tarif : ce que le cache n'a pas couvert.
   inputTokens         Int

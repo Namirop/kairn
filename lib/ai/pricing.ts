@@ -15,11 +15,38 @@ import { tarifCatalogue, type Tarif } from "@/lib/domain/tarifs";
 export type ModelPricing = Tarif;
 
 /**
- * Écrire dans le cache coûte un quart de plus qu'une entrée normale, y lire
- * coûte un dixième. Ces deux multiplicateurs ne dépendent pas du modèle.
+ * Les multiplicateurs de cache **dépendent du modèle**, pas du pont.
+ *
+ * Anthropic — écriture au cache un quart plus cher qu'une entrée normale,
+ * lecture au dixième. C'est le tarif public.
+ *
+ * OpenAI — cache automatique de préfixe, **pas d'écriture facturée** (le
+ * fournisseur cache tout seul), lecture à moitié prix. Les multiplicateurs
+ * Anthropic appliqués à un modèle OpenAI feraient croire à une facture
+ * qu'on ne paie pas.
+ *
+ * La lignée se lit sur le préfixe du modèle : `claude-` / `anthropic/*` →
+ * Anthropic ; `gpt-` / `openai/*` → OpenAI. Ce n'est pas le pont qui
+ * décide — un jour on pourrait router Sonnet via OpenRouter (le pont
+ * changerait), le cache resterait la lignée Anthropic. Le pont dit
+ * *où* l'appel part, le préfixe dit *qui facture*.
+ *
+ * Défaut prudent en `anthropic` pour un modèle non préfixé : ça surestime
+ * plutôt que sous-estimer, cohérent avec le principe du registre.
+ *
+ * Voir la fiche `portage-luna.md`, §3.
  */
-const ECRITURE_CACHE = 1.25;
-const LECTURE_CACHE = 0.1;
+type LigneeCache = "anthropic" | "openai";
+
+const MULTIPLICATEURS_CACHE: Record<LigneeCache, { ecriture: number; lecture: number }> = {
+  anthropic: { ecriture: 1.25, lecture: 0.1 },
+  openai: { ecriture: 0, lecture: 0.5 },
+};
+
+function ligneeDuCache(model: string): LigneeCache {
+  if (model.startsWith("openai/") || model.startsWith("gpt-")) return "openai";
+  return "anthropic";
+}
 
 /** Un envoi groupé est facturé moitié prix, entrée comme sortie. */
 const REMISE_GROUPEE = 0.5;
@@ -44,13 +71,18 @@ export function pricingFor(model: string): ModelPricing {
  *
  * `inputTokens` ne compte que l'entrée non mise en cache — l'API sépare les
  * trois. Les additionner au même tarif ferait mentir le chiffre.
+ *
+ * La lignée de cache se déduit du préfixe du modèle (voir `ligneeDuCache`) —
+ * pas du pont. Anthropic facture l'écriture 1,25× et la lecture 0,1× ;
+ * OpenAI ne facture pas l'écriture et lit à 0,5×.
  */
 export function computeCostUsd(model: string, consommation: Consommation): string {
   const { entreePerMillion, sortiePerMillion } = pricingFor(model);
+  const multiplicateurs = MULTIPLICATEURS_CACHE[ligneeDuCache(model)];
   const entree =
     consommation.inputTokens +
-    (consommation.cacheCreationTokens ?? 0) * ECRITURE_CACHE +
-    (consommation.cacheReadTokens ?? 0) * LECTURE_CACHE;
+    (consommation.cacheCreationTokens ?? 0) * multiplicateurs.ecriture +
+    (consommation.cacheReadTokens ?? 0) * multiplicateurs.lecture;
   const remise = consommation.groupe ? REMISE_GROUPEE : 1;
   const dollars =
     ((entree * entreePerMillion + consommation.outputTokens * sortiePerMillion) * remise) / 1e6;

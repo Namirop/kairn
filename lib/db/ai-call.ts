@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import type { Fournisseur } from "@/lib/ai/fournisseurs";
 
 /**
  * Le registre des appels modèle. C'est ce que `callAI()` lit avant d'émettre et
@@ -8,6 +9,12 @@ import { prisma } from "@/lib/db/client";
 export type AiCallRecord = {
   purpose: string;
   model: string;
+  /**
+   * La lignée qui a servi l'appel. Persistée en `AiCall.provider` — nommée
+   * `fournisseur` côté TS pour rester alignée avec le reste du code AI, mais
+   * la colonne base est en anglais comme le reste du schéma.
+   */
+  fournisseur: Fournisseur;
   inputTokens: number;
   outputTokens: number;
   cacheCreationTokens?: number;
@@ -77,6 +84,7 @@ export async function recordAiCall(record: AiCallRecord): Promise<void> {
   await prisma.aiCall.create({
     data: {
       purpose: record.purpose,
+      provider: record.fournisseur,
       model: record.model,
       inputTokens: record.inputTokens,
       cacheCreationTokens: record.cacheCreationTokens ?? 0,

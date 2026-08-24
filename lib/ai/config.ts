@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AIConfigError } from "./errors";
+import type { Fournisseur } from "./fournisseurs";
 
 /**
  * Les garde-fous, lus et validés à chaque appel plutôt qu'au chargement du
@@ -35,6 +36,14 @@ const configSchema = z.object({
   model: z.string().min(1),
   maxTokens: z.coerce.number().int().positive(),
   apiKey: z.string().min(1).optional(),
+  /**
+   * La lignée qui sert les appels. `anthropic` reste le défaut : un déploiement
+   * qui ne pose pas la variable garde le comportement historique. `openrouter`
+   * active le pont porté du banc (voir `fournisseurs/openrouter.ts`) et exige
+   * `OPENROUTER_API_KEY`, distincte de la clé du banc.
+   */
+  fournisseur: z.enum(["anthropic", "openrouter"] as const satisfies readonly Fournisseur[]).default("anthropic"),
+  openrouterApiKey: z.string().min(1).optional(),
 });
 
 export type AiConfig = z.infer<typeof configSchema>;
@@ -63,6 +72,7 @@ const VARIABLE: Record<string, string> = {
   ...VARIABLE_DE_PLAFOND,
   model: "AI_MODEL",
   maxTokens: "AI_MAX_TOKENS",
+  fournisseur: "AI_FOURNISSEUR",
 };
 
 /** Le nom de la variable derrière un plafond, pour qui doit le changer. */
@@ -148,6 +158,7 @@ function environnementBrut(): Record<string, string | undefined> {
     anonymousDailyCallCap: propre(process.env.AI_DAILY_CALL_CAP_ANONYME),
     model: propre(process.env.AI_MODEL),
     maxTokens: propre(process.env.AI_MAX_TOKENS),
+    fournisseur: propre(process.env.AI_FOURNISSEUR),
   };
 }
 
@@ -180,6 +191,7 @@ export function assemblerLaConfig(surcharges: SurchargesDeConfig = {}): AiConfig
   const parsed = configSchema.safeParse({
     ...brut,
     apiKey: propre(process.env.ANTHROPIC_API_KEY),
+    openrouterApiKey: propre(process.env.OPENROUTER_API_KEY),
   });
 
   if (!parsed.success) {
