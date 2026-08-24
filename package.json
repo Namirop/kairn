@@ -24,6 +24,8 @@
     "eval:mesures": "tsx scripts/mesurer-le-corpus.ts",
     "eval:ablation": "tsx scripts/eprouver-la-mesure.ts",
     "verifier:openrouter": "tsx scripts/verifier-openrouter.ts",
+    "valider:staging": "tsx scripts/valider-staging-luna.ts",
+    "valider:bascule": "tsx scripts/valider-bascule-luna.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "verify:ingestion": "tsx scripts/verifier-ingestion.ts",
