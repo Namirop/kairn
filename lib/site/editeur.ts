@@ -56,7 +56,7 @@ export const EDITEUR = {
    * vérification, et c'est exactement le genre de mention qu'on peut demander de
    * justifier. À refaire une fois par an.
    */
-  verifieLe: "17 août 2026",
+  verifieLe: "24 août 2026",
 } as const;
 
 /**

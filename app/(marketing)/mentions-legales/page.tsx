@@ -42,7 +42,8 @@ const RUBRIQUES: RubriqueLegale[] = [
   {
     titre: "Traitement du contenu déposé",
     corps: [
-      "Le texte et les images déposés sont transmis à Anthropic Ireland, Limited — 6th Floor, South Bank House, Barrow Street, Dublin 4, D04 TR29, Irlande — pour être découpés en concepts et transformés en questions. Ce traitement est le service lui-même : sans lui, l'application ne fait rien.",
+      "Le texte et les images déposés sont transmis à OpenRouter, Inc. — 169 Madison Avenue, New York, NY 10016, États-Unis — pour être découpés en concepts et transformés en questions. OpenRouter fait appel à OpenAI, L.L.C. — 1455 Third Street, San Francisco, CA 94158, États-Unis — comme sous-traitant ultérieur pour exécuter les modèles. Ce traitement est le service lui-même : sans lui, l'application ne fait rien.",
+      "En cas d'indisponibilité d'OpenRouter, le traitement bascule automatiquement sur Anthropic Ireland, Limited — 6th Floor, South Bank House, Barrow Street, Dublin 4, D04 TR29, Irlande —, avec les mêmes règles.",
     ],
   },
   {
@@ -50,7 +51,7 @@ const RUBRIQUES: RubriqueLegale[] = [
     corps: [
       `Le code source de Kairn, le nom « Kairn », le logo, l'identité visuelle et l'ensemble des éléments composant le service sont la propriété de ${EDITEUR.nom} et sont protégés par le droit d'auteur. Toute reproduction ou représentation, totale ou partielle, sans autorisation écrite préalable est interdite.`,
       "Le contenu que tu déposes reste le tien. Kairn n'acquiert aucun droit dessus, hormis celui strictement nécessaire à son traitement pour te fournir le service : le découper en concepts, en produire des questions et te les reposer.",
-      "Il n'est ni réutilisé à d'autres fins, ni cédé à des tiers, ni utilisé pour entraîner un modèle. Ce dernier point n'est pas une intention mais une clause : les conditions commerciales d'Anthropic interdisent l'entraînement sur le contenu de ses clients.",
+      "Il n'est ni réutilisé à d'autres fins, ni cédé à des tiers, ni utilisé pour entraîner un modèle. Ce dernier point n'est pas une intention mais une clause : le compte OpenRouter est réglé pour interdire l'entraînement sur nos données côté modèles routés, et les conditions commerciales d'Anthropic (sous-traitant de repli) interdisent l'entraînement sur le contenu de leurs clients.",
     ],
   },
   {

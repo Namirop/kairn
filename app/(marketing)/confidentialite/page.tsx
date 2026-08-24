@@ -60,7 +60,8 @@ const RUBRIQUES: RubriqueLegale[] = [
   {
     titre: "Sous-traitants",
     corps: [
-      "Anthropic Ireland, Limited (Dublin, Irlande), pour découper les dépôts en concepts et écrire les questions. Le contenu déposé lui est transmis pour ce traitement. Ses conditions commerciales interdisent l'entraînement de modèles sur le contenu de ses clients, et ses journaux d'appels sont supprimés sous trente jours.",
+      "OpenRouter, Inc. (New York, États-Unis) découpe les dépôts en concepts et écrit les questions. Le contenu déposé lui est transmis pour ce traitement, qui est le service lui-même. OpenRouter s'appuie sur un sous-traitant ultérieur, OpenAI, L.L.C. (San Francisco, États-Unis), qui exécute réellement les modèles. Le compte OpenRouter est réglé pour interdire l'entraînement sur nos données, et les données envoyées à OpenAI par ce canal ne sont pas conservées au-delà de trente jours.",
+      "Anthropic Ireland, Limited (Dublin, Irlande), pour le même traitement, en repli automatique quand OpenRouter est indisponible. Ses conditions commerciales interdisent l'entraînement de modèles sur le contenu de ses clients, et ses journaux d'appels sont supprimés sous trente jours.",
       "Neon, LLC — société du groupe Databricks, Inc. —, pour l'hébergement de la base de données, sur une infrastructure située à Francfort, en Allemagne.",
       "Vercel Inc., pour l'hébergement de l'application, avec une exécution en région européenne.",
       "Plus Five Five, Inc. (Resend), pour l'acheminement des emails.",
@@ -70,9 +71,9 @@ const RUBRIQUES: RubriqueLegale[] = [
   {
     titre: "Transferts hors Union européenne",
     corps: [
-      "Il y en a, et il vaut mieux le dire clairement. La base est à Francfort et l'exécution en Europe, mais les sociétés qui les opèrent sont américaines, et le contenu déposé est traité hors de l'Union.",
+      "Il y en a, et il vaut mieux le dire clairement. La base est à Francfort et l'exécution en Europe, mais les sociétés qui les opèrent sont américaines, et le contenu déposé est traité hors de l'Union — chez OpenRouter et son sous-traitant OpenAI, avec Anthropic en Irlande comme repli.",
       "Databricks (pour Neon), Vercel et Resend sont certifiés au titre du cadre de protection des données UE–États-Unis, et s'appuient en complément sur les clauses contractuelles types de la Commission européenne.",
-      "Anthropic n'est pas certifié à ce cadre : ses transferts reposent sur les seules clauses contractuelles types. C'est le sous-traitant qui reçoit ce que tu déposes, donc c'est le point à connaître si ce mécanisme ne te convient pas.",
+      "OpenRouter et Anthropic ne sont pas certifiés à ce cadre : leurs transferts reposent sur les seules clauses contractuelles types. OpenRouter est le sous-traitant qui reçoit ce que tu déposes (et l'achemine à OpenAI comme sous-traitant ultérieur), Anthropic le reçoit en repli — ce sont les deux points à connaître si le seul mécanisme des clauses contractuelles types ne te convient pas.",
     ],
   },
   {
