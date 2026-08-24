@@ -113,8 +113,14 @@ justifie après coup le choix qui arrange.
 
 1. **son prix catalogue est inférieur d'au moins 33 %** sur la tâche concernée
 2. **aucune mesure ne se dégrade de plus de 20 % en relatif** par rapport à la colonne de référence
-3. **aucun plancher absolu n'est franchi** : fidélité ≤ 10 % des questions, manques ≤ 8 sur le
-   corpus, aucun dépôt ne perd d'attendu déjà couvert par la référence
+3. **aucun plancher absolu n'est franchi** : fidélité ≤ 10 % des questions, manques ≤ à la
+   référence sur le corpus, aucun dépôt ne perd d'attendu déjà couvert par la référence
+
+*Amendement du 2026-08-24 (arrêt 2 de la campagne 1) : le plancher manques passe de « ≤ 8 » à
+« ≤ à la référence ». La borne fixée à 8 datait du passage 11h58 où la référence Sonnet avait 6
+manques ; poser un chiffre absolu figeait un état qui bougerait au prochain figé. La règle scale
+désormais avec la référence — on demande simplement de ne pas faire pire que Sonnet. S'applique
+aux deux campagnes, y compris rétroactivement à la lecture du rapport aveuglé de la campagne 1.*
 
 **En cas d'égalité sur les trois** : le moins cher gagne.
 
