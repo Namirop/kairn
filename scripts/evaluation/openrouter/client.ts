@@ -27,6 +27,15 @@ export type AppelOpenRouterParams<T> = {
   /** Identifiant OpenRouter du modèle, `<fournisseur>/<slug>`. */
   model: string;
   maxTokens: number;
+  /**
+   * Le contrôle du raisonnement interne. Par défaut `{ effort: "low" }` pour
+   * borner les modèles reasoning (GLM, o1, DeepSeek R1) — sans borne ils
+   * épuisent `maxTokens` en pensée avant la sortie. `false` désactive le
+   * paramètre entier, à utiliser pour les modèles servis par un fournisseur
+   * qui ne supporte pas `reasoning` (Kimi via Novita, Haiku direct) — avec
+   * `provider.require_parameters: true`, OpenRouter renvoie 404 sinon.
+   */
+  reasoning?: { effort: "low" | "medium" | "high" } | false;
 };
 
 export type ConsommationOpenRouter = {
@@ -105,6 +114,9 @@ function lireSortie<T>(contract: AiContract<T>, texte: string): T {
   }
   const parse = (contract.validation as ZodType<T>).safeParse(brut);
   if (!parse.success) {
+    if (process.env.OPENROUTER_DEBUG === "1") {
+      console.error(`[debug] Sortie brute rejetée pour « ${contract.purpose} » :\n${texte.slice(0, 2000)}`);
+    }
     throw new AICallFailedError(contract.purpose, parse.error);
   }
   return parse.data;
@@ -121,22 +133,51 @@ export async function appelerViaOpenRouter<T>(
   }
 
   const format = toOutputSchema(params.contract.forme);
-  const corps = {
+  // Certains fournisseurs — Alibaba pour Qwen — déclarent supporter
+  // `response_format: json_schema strict` mais ne l'honorent que partiellement :
+  // ils rendent du JSON, mais renomment les clés (`verdicts` au lieu de
+  // `paires`, `numéro` au lieu de `numero`). Le remède qui marche pour de vrai
+  // est de recopier le schéma dans le message système en toutes lettres, avec
+  // la consigne d'utiliser les clés exactes. Bénin pour Anthropic, OpenAI et
+  // Google qui respectent déjà le contrat.
+  const preambule = `Réponds au format JSON, conforme exactement à ce schéma. Utilise les clés telles qu'elles apparaissent, sans les renommer ni les traduire.
+
+${JSON.stringify(format.schema)}
+
+`;
+
+  const reasoning = params.reasoning ?? { effort: "low" as const };
+  const corps: Record<string, unknown> = {
     model: params.model,
     max_tokens: params.maxTokens,
     messages: [
-      { role: "system" as const, content: params.system },
+      { role: "system" as const, content: `${preambule}${params.system}` },
       ...params.messages.map(toOpenRouterMessage),
     ],
     response_format: {
       type: "json_schema" as const,
       json_schema: {
         name: params.contract.purpose,
-        strict: true,
+        // OpenAI exige que `required` liste **tous** les champs, même ceux
+        // déclarés `.nullish()` côté Zod (relevé campagne 1, 2026-08-24 :
+        // « In context=('properties', 'atoms', 'items'), 'required' is
+        // required to be supplied and to be an array including every key
+        // in properties. Missing 'deriveDe'. »). `toOutputSchema` produit
+        // un schéma optionnel-friendly qui satisfait Anthropic, Google,
+        // DeepSeek, Mistral — corriger toOutputSchema pour OpenAI casserait
+        // les autres. On désactive donc `strict` pour cette lignée seule ;
+        // la grammaire relâchée reste rattrapée par la validation Zod côté
+        // banc, qui refuserait une sortie non conforme.
+        strict: !params.model.startsWith("openai/"),
         schema: format.schema,
       },
     },
+    // Force OpenRouter à router uniquement vers un fournisseur qui déclare
+    // supporter `response_format` — évite le fallback silencieux vers un
+    // fournisseur qui rendrait du texte libre.
+    provider: { require_parameters: true },
   };
+  if (reasoning !== false) corps.reasoning = reasoning;
 
   const debut = Date.now();
   let reponse: Response;

@@ -59,13 +59,13 @@ const fideliteValidation = sortieLue;
 /** `juste: null` = abstention (question non rendue par le juge). Voir `residu.ts`. */
 export type VerdictFidelite = { juste: boolean | null; motif: string };
 
-const CONTRAT: AiContract<z.infer<typeof fideliteValidation>> = {
+export const CONTRAT_FIDELITE: AiContract<z.infer<typeof fideliteValidation>> = {
   purpose: "juge_fidelite",
   forme: fideliteForme,
   validation: fideliteValidation,
 };
 
-const SYSTEM = `Tu vérifies qu'une question se répond avec un concept — et ce
+export const SYSTEM_FIDELITE = `Tu vérifies qu'une question se répond avec un concept — et ce
 concept seul.
 
 Tu ne vois pas le texte d'origine. Tu vois le concept, la question et sa
@@ -87,7 +87,7 @@ verdict.** Un verdict par question, jamais deux, jamais zéro.
 Le motif est court : nomme ce qui manque au concept pour justifier la réponse,
 ou confirme que la réponse s'y déduit. Pas d'introduction, pas de conclusion.`;
 
-function decrireQuestion(variant: VariantFige, rang: number): string {
+export function decrireQuestion(variant: VariantFige, rang: number): string {
   const lignes = [
     `### Question ${rang + 1} (${variant.format})`,
     `Q. ${variant.question}`,
@@ -126,8 +126,8 @@ export async function jugerLaFidelite(
   ].join("\n");
 
   const sortie = await callAI({
-    contract: CONTRAT,
-    system: SYSTEM,
+    contract: CONTRAT_FIDELITE,
+    system: SYSTEM_FIDELITE,
     messages: [{ role: "user", content: [{ type: "text", text: contenu }] }],
     model: MODELE_DES_JUGES,
     maxTokens: TOKENS_DES_JUGES,

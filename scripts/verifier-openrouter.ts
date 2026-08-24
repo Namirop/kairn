@@ -41,8 +41,9 @@ async function verifier(): Promise<void> {
     console.info("Lance `npm run verifier:openrouter -- --lister` pour voir le catalogue.");
     return;
   }
+  const s = JUGES_CANDIDATS.length > 1 ? "s" : "";
   console.info(
-    `Vérification de ${tous.length} modèles sur OpenRouter — ${CHALLENGERS.length} challengers, ${JUGES_CANDIDATS.length} juges candidats.`,
+    `Vérification de ${tous.length} modèles sur OpenRouter — ${CHALLENGERS.length} challengers, ${JUGES_CANDIDATS.length} juge${s} candidat${s}.`,
   );
 
   const refus = await verifierLeListing(tous);

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { callAI } from "@/lib/ai/client";
 import type { AiContract } from "@/lib/ai/schemas";
 import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
+import { MOTIF_ABSTENTION_JUGE } from "./residu";
 
 /**
  * Le juge d'attendus — la géométrie sélectionne, le juge tranche.
@@ -57,13 +58,13 @@ const attendusValidation = sortieLue;
 /** `couvert: null` = abstention (item non rendu par le juge). Voir `residu.ts`. */
 export type VerdictAttendu = { couvert: boolean | null; motif: string };
 
-const CONTRAT: AiContract<z.infer<typeof attendusValidation>> = {
+export const CONTRAT_ATTENDUS: AiContract<z.infer<typeof attendusValidation>> = {
   purpose: "juge_attendus",
   forme: attendusForme,
   validation: attendusValidation,
 };
 
-const SYSTEM = `Tu vérifies qu'une idée attendue est vraiment couverte par les concepts d'un dépôt.
+export const SYSTEM_ATTENDUS = `Tu vérifies qu'une idée attendue est vraiment couverte par les concepts d'un dépôt.
 
 Pour chaque attendu, on te présente une ou deux concepts candidats — ceux que
 la géométrie a désignés comme les plus proches. Ton verdict est binaire :
@@ -102,7 +103,7 @@ export type AttenduSoumis = {
   candidats: string[];
 };
 
-function decrireAttendu(soumis: AttenduSoumis, rang: number): string {
+export function decrireAttendu(soumis: AttenduSoumis, rang: number): string {
   const lignes = [`### Attendu #${rang + 1}`, soumis.attendu, "", "Concepts candidats :"];
   soumis.candidats.forEach((concept, i) => {
     lignes.push(`${i + 1}. ${concept}`);
@@ -132,8 +133,8 @@ export async function jugerLesAttendus(
   ].join("\n");
 
   const sortie = await callAI({
-    contract: CONTRAT,
-    system: SYSTEM,
+    contract: CONTRAT_ATTENDUS,
+    system: SYSTEM_ATTENDUS,
     messages: [{ role: "user", content: [{ type: "text", text: contenu }] }],
     model: MODELE_DES_JUGES,
     maxTokens: TOKENS_DES_JUGES,
@@ -145,6 +146,6 @@ export async function jugerLesAttendus(
     const verdict = parNumero.get(rang + 1);
     return verdict
       ? { couvert: verdict.couvert, motif: verdict.motif.trim() }
-      : { couvert: null, motif: "non rendu par le juge" };
+      : { couvert: null, motif: MOTIF_ABSTENTION_JUGE };
   });
 }

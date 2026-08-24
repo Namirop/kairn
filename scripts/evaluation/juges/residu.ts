@@ -86,15 +86,13 @@ export type VerdictManque = { retenir: boolean | null; motif: string };
 export type VerdictInvention = { soutenu: boolean | null; motif: string };
 export type SortieResidu = { manques: VerdictManque[]; inventions: VerdictInvention[] };
 
-const MOTIF_ABSTENTION = "non rendu par le juge";
-
-const CONTRAT: AiContract<z.infer<typeof residuValidation>> = {
+export const CONTRAT_RESIDU: AiContract<z.infer<typeof residuValidation>> = {
   purpose: "juge_residu",
   forme: residuForme,
   validation: residuValidation,
 };
 
-const SYSTEM = `Tu tranches deux questions symétriques sur un dépôt et ses concepts.
+export const SYSTEM_RESIDU = `Tu tranches deux questions symétriques sur un dépôt et ses concepts.
 
 **Manque.** Pour chaque phrase signalée, décide si elle porte une idée qui
 mérite d'être retenue et qu'aucun des concepts du dépôt ne couvre. Une
@@ -114,13 +112,16 @@ numéro dans le verdict.** Un verdict par candidat, jamais deux, jamais zéro.
 Le motif est court : nomme l'idée manquante, l'élément ajouté, ou la nature du
 bruit. Pas d'introduction, pas de conclusion.`;
 
-function decrireManque(entree: Rapproche, rang: number): string {
+export function decrireManque(entree: Rapproche, rang: number): string {
   return `### Phrase #${rang + 1}\n${entree.texte}`;
 }
 
-function decrireInvention(entree: Rapproche, rang: number): string {
+export function decrireInvention(entree: Rapproche, rang: number): string {
   return `### Concept #${rang + 1}\n${entree.texte}`;
 }
+
+/** Un item non rendu par le juge — même chaîne pour résidu et attendus. */
+export const MOTIF_ABSTENTION_JUGE = "non rendu par le juge";
 
 function apparier<V extends { numero: number }, T>(
   candidats: unknown[],
@@ -170,8 +171,8 @@ export async function jugerLeResidu(
   ];
 
   const sortie = await callAI({
-    contract: CONTRAT,
-    system: SYSTEM,
+    contract: CONTRAT_RESIDU,
+    system: SYSTEM_RESIDU,
     messages: [{ role: "user", content: [{ type: "text", text: sections.join("\n") }] }],
     model: MODELE_DES_JUGES,
     maxTokens: TOKENS_DES_JUGES,
@@ -182,13 +183,13 @@ export async function jugerLeResidu(
       manques,
       sortie.manques,
       (v) => ({ retenir: v.retenir, motif: v.motif.trim() }),
-      { retenir: null, motif: MOTIF_ABSTENTION },
+      { retenir: null, motif: MOTIF_ABSTENTION_JUGE },
     ),
     inventions: apparier<(typeof sortie.inventions)[number], VerdictInvention>(
       inventions,
       sortie.inventions,
       (v) => ({ soutenu: v.soutenu, motif: v.motif.trim() }),
-      { soutenu: null, motif: MOTIF_ABSTENTION },
+      { soutenu: null, motif: MOTIF_ABSTENTION_JUGE },
     ),
   };
 }

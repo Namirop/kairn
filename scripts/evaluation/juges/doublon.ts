@@ -25,7 +25,7 @@ import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
  * sujet aussi, les jumeaux et la règle-plus-instance ne le sont pas.
  */
 
-const SENS = ["A_couvre_B", "B_couvre_A", "equivalents"] as const;
+export const SENS_DOUBLON = ["A_couvre_B", "B_couvre_A", "equivalents"] as const;
 
 /**
  * La restructuration du 20 août : le juge n'écrit plus « independants oui/non »
@@ -81,18 +81,18 @@ const doublonValidation = sortieLue;
  */
 export type VerdictDoublon = {
   independants: boolean | null;
-  sens: (typeof SENS)[number] | null;
+  sens: (typeof SENS_DOUBLON)[number] | null;
   questionSurA: string | null;
   questionSurB: string | null;
 };
 
-const CONTRAT: AiContract<z.infer<typeof doublonValidation>> = {
+export const CONTRAT_DOUBLON: AiContract<z.infer<typeof doublonValidation>> = {
   purpose: "juge_doublon",
   forme: doublonForme,
   validation: doublonValidation,
 };
 
-const SYSTEM = `Tu compares deux concepts A et B d'un même dépôt, et tu rends
+export const SYSTEM_DOUBLON = `Tu compares deux concepts A et B d'un même dépôt, et tu rends
 pour chacun d'eux **la question concrète** qui subsiste.
 
 Pour chaque paire, produis deux champs :
@@ -137,8 +137,31 @@ verdict.** Un verdict par paire, jamais deux, jamais zéro. Pas d'introduction,
 pas de conclusion.`;
 
 /** Ce qu'on présente au juge pour une paire. `A` et `B` restent stables pour la lecture du motif. */
-function decrirePaire(paire: Paire, rang: number): string {
+export function decrirePaire(paire: Paire, rang: number): string {
   return [`### Paire ${rang + 1}`, `A. ${paire.un}`, `B. ${paire.deux}`].join("\n");
+}
+
+/**
+ * Le calcul du verdict à partir des deux questions rendues par le juge, sorti
+ * de {@link jugerUnLot} pour être réutilisé par l'adaptateur OpenRouter du
+ * banc de comparaison des modèles (`scripts/evaluation/openrouter/juges.ts`).
+ * Un seul endroit qui décide comment lire les questions vaut mieux qu'un
+ * doublon qui pourrait diverger.
+ */
+export function deriverIndependance(
+  questionSurABrute: string | null,
+  questionSurBBrute: string | null,
+): VerdictDoublon {
+  const questionSurA = questionSurABrute?.trim() || null;
+  const questionSurB = questionSurBBrute?.trim() || null;
+  const independants = questionSurA !== null && questionSurB !== null;
+  let sens: (typeof SENS_DOUBLON)[number] | null = null;
+  if (!independants) {
+    if (questionSurA === null && questionSurB === null) sens = "equivalents";
+    else if (questionSurB === null) sens = "A_couvre_B";
+    else sens = "B_couvre_A";
+  }
+  return { independants, sens, questionSurA, questionSurB };
 }
 
 /**
@@ -181,8 +204,8 @@ async function jugerUnLot(nom: string, paires: Paire[]): Promise<VerdictDoublon[
   ];
 
   const sortie = await callAI({
-    contract: CONTRAT,
-    system: SYSTEM,
+    contract: CONTRAT_DOUBLON,
+    system: SYSTEM_DOUBLON,
     messages,
     model: MODELE_DES_JUGES,
     maxTokens: TOKENS_DES_JUGES,
@@ -195,16 +218,7 @@ async function jugerUnLot(nom: string, paires: Paire[]): Promise<VerdictDoublon[
     if (!verdict) {
       return { independants: null, sens: null, questionSurA: null, questionSurB: null };
     }
-    const questionSurA = verdict.questionSurA?.trim() || null;
-    const questionSurB = verdict.questionSurB?.trim() || null;
-    const independants = questionSurA !== null && questionSurB !== null;
-    let sens: (typeof SENS)[number] | null = null;
-    if (!independants) {
-      if (questionSurA === null && questionSurB === null) sens = "equivalents";
-      else if (questionSurB === null) sens = "A_couvre_B";
-      else sens = "B_couvre_A";
-    }
-    return { independants, sens, questionSurA, questionSurB };
+    return deriverIndependance(verdict.questionSurA, verdict.questionSurB);
   });
 }
 
