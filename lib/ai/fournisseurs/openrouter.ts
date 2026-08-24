@@ -102,6 +102,17 @@ ${JSON.stringify(params.formatSchema.schema)}
 
 `;
 
+      // Épingler le fournisseur pour les modèles OpenAI — sans ça, OpenRouter
+      // peut re-router vers Azure ou une passerelle alternative, qui a son
+      // propre cache (ou pas de cache du tout). Le cache OpenAI n'est efficace
+      // que si les requêtes atterrissent toujours chez OpenAI. Voir la fiche
+      // portage-luna, §4.
+      const provider: Record<string, unknown> = { require_parameters: true };
+      if (params.model.startsWith("openai/")) {
+        provider.order = ["OpenAI"];
+        provider.allow_fallbacks = false;
+      }
+
       const corps: Record<string, unknown> = {
         model: params.model,
         max_tokens: params.maxTokens,
@@ -117,7 +128,7 @@ ${JSON.stringify(params.formatSchema.schema)}
             schema: params.formatSchema.schema,
           },
         },
-        provider: { require_parameters: true },
+        provider,
       };
 
       const debut = Date.now();
