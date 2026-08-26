@@ -1,0 +1,670 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-26T10:33:04.440Z",
+  "title": "Design System: Kairn",
+  "extensions": {
+    "colorMeta": {
+      "papier": {
+        "role": "neutral",
+        "displayName": "Papier Minéral",
+        "purpose": "Surface de lecture par défaut.",
+        "canonical": "oklch(96.0% 0.004 106.5)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#252523",
+          "#424240",
+          "#61615f",
+          "#828280",
+          "#a5a5a2",
+          "#c9c9c6",
+          "#efefec"
+        ]
+      },
+      "ombre": {
+        "role": "neutral",
+        "displayName": "Ombre",
+        "purpose": "Panneau alterné, jamais deux d'affilée.",
+        "canonical": "oklch(91.7% 0.007 106.5)",
+        "tonalRamp": [
+          "#0b0b08",
+          "#252522",
+          "#42423e",
+          "#61615d",
+          "#83837e",
+          "#a5a5a1",
+          "#c9c9c5",
+          "#efefea"
+        ]
+      },
+      "lichen-surface": {
+        "role": "neutral",
+        "displayName": "Lichen Surface",
+        "purpose": "Un seul panneau dans toute l'application : celui où le produit tient sa promesse.",
+        "canonical": "oklch(93.2% 0.015 115.0)",
+        "tonalRamp": [
+          "#0b0c05",
+          "#25261e",
+          "#41433a",
+          "#616259",
+          "#82837a",
+          "#a4a69c",
+          "#c8cac0",
+          "#eef0e5"
+        ]
+      },
+      "roche": {
+        "role": "neutral",
+        "displayName": "Roche Sombre",
+        "purpose": "Deux panneaux maximum. Texte et pierres s'y inversent en gris clairs.",
+        "canonical": "oklch(29.6% 0.007 164.5)",
+        "tonalRamp": [
+          "#090c0a",
+          "#222624",
+          "#3f4341",
+          "#5e6260",
+          "#7f8481",
+          "#a1a6a4",
+          "#c5cac8",
+          "#ebf0ed"
+        ]
+      },
+      "stone-50": {
+        "role": "neutral",
+        "displayName": "Pierre 50",
+        "purpose": "Alias du papier. Encre sur surface sombre.",
+        "canonical": "oklch(96.0% 0.004 106.5)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#252523",
+          "#424240",
+          "#61615f",
+          "#828280",
+          "#a5a5a2",
+          "#c9c9c6",
+          "#efefec"
+        ]
+      },
+      "stone-100": {
+        "role": "neutral",
+        "displayName": "Pierre 100",
+        "purpose": "Alias de l'ombre.",
+        "canonical": "oklch(91.7% 0.007 106.5)",
+        "tonalRamp": [
+          "#0b0b08",
+          "#252522",
+          "#42423e",
+          "#61615d",
+          "#83837e",
+          "#a5a5a1",
+          "#c9c9c5",
+          "#efefea"
+        ]
+      },
+      "stone-300": {
+        "role": "neutral",
+        "displayName": "Gris Sol",
+        "purpose": "Traits légers, indicateurs de fond, ascenseur discret.",
+        "canonical": "oklch(80.5% 0.008 114.3)",
+        "tonalRamp": [
+          "#0b0c08",
+          "#252621",
+          "#42433e",
+          "#61625c",
+          "#82837d",
+          "#a5a6a0",
+          "#c9cac4",
+          "#eeefe9"
+        ]
+      },
+      "stone-400": {
+        "role": "neutral",
+        "displayName": "Gris Feuille",
+        "purpose": "Texte secondaire sur surface sombre (6,63 sur roche, 5,16 sur ombre).",
+        "canonical": "oklch(69.9% 0.010 150.6)",
+        "tonalRamp": [
+          "#080c09",
+          "#222623",
+          "#3e443f",
+          "#5d635e",
+          "#7e847f",
+          "#a1a7a2",
+          "#c5cbc6",
+          "#eaf0eb"
+        ]
+      },
+      "stone-500": {
+        "role": "neutral",
+        "displayName": "Gris Lichen",
+        "purpose": "Texte secondaire, traits porteurs d'information.",
+        "canonical": "oklch(49.4% 0.009 151.7)",
+        "tonalRamp": [
+          "#090c09",
+          "#222623",
+          "#3f4340",
+          "#5e635f",
+          "#7f8480",
+          "#a1a7a2",
+          "#c5cbc6",
+          "#eaf0eb"
+        ]
+      },
+      "stone-700": {
+        "role": "neutral",
+        "displayName": "Pierre 700",
+        "purpose": "Contour du titre creux, nuance haute des pierres.",
+        "canonical": "oklch(37.4% 0.007 170.0)",
+        "tonalRamp": [
+          "#080c0b",
+          "#222624",
+          "#3e4341",
+          "#5d6360",
+          "#7e8482",
+          "#a1a7a4",
+          "#c5cbc8",
+          "#eaf0ee"
+        ]
+      },
+      "stone-800": {
+        "role": "neutral",
+        "displayName": "Pierre 800",
+        "purpose": "Alias de la roche. Survol du bouton principal.",
+        "canonical": "oklch(29.6% 0.007 164.5)",
+        "tonalRamp": [
+          "#090c0a",
+          "#222624",
+          "#3f4341",
+          "#5e6260",
+          "#7f8481",
+          "#a1a6a4",
+          "#c5cac8",
+          "#ebf0ed"
+        ]
+      },
+      "stone-900": {
+        "role": "neutral",
+        "displayName": "Encre Granit",
+        "purpose": "Texte principal sur surfaces claires.",
+        "canonical": "oklch(21.1% 0.005 219.7)",
+        "tonalRamp": [
+          "#090c0d",
+          "#222627",
+          "#3f4344",
+          "#5e6263",
+          "#7f8384",
+          "#a2a6a7",
+          "#c6cacb",
+          "#ebeff1"
+        ]
+      },
+      "lichen": {
+        "role": "primary",
+        "displayName": "Vert Lichen Désaturé",
+        "purpose": "Accent unique. Sommet du cairn, et rien d'autre.",
+        "canonical": "oklch(60.8% 0.086 121.9)",
+        "tonalRamp": [
+          "#080e00",
+          "#202a00",
+          "#3b4908",
+          "#59692d",
+          "#7a8b4f",
+          "#9cae71",
+          "#c0d394",
+          "#e5f8b8"
+        ]
+      },
+      "lichen-deep": {
+        "role": "primary",
+        "displayName": "Lichen Approfondi",
+        "purpose": "Focus visible et data-mark. Tient 4,7:1 sur le papier.",
+        "canonical": "oklch(51.3% 0.076 122.5)",
+        "tonalRamp": [
+          "#080e00",
+          "#1f2a00",
+          "#3b4815",
+          "#596835",
+          "#7a8a56",
+          "#9cad78",
+          "#c0d29b",
+          "#e5f7bf"
+        ]
+      },
+      "ember": {
+        "role": "tertiary",
+        "displayName": "Braise Terracotta",
+        "purpose": "Réservé strictement à l'affichage du streak.",
+        "canonical": "oklch(56.1% 0.134 41.3)",
+        "tonalRamp": [
+          "#1d0200",
+          "#451200",
+          "#722500",
+          "#9d4018",
+          "#c4633d",
+          "#eb8660",
+          "#ffb599",
+          "#ffe9e1"
+        ]
+      },
+      "ember-deep": {
+        "role": "tertiary",
+        "displayName": "Braise Approfondie",
+        "purpose": "Version foncée du streak.",
+        "canonical": "oklch(50.2% 0.127 39.1)",
+        "tonalRamp": [
+          "#1e0100",
+          "#460f00",
+          "#752200",
+          "#9b4223",
+          "#c16445",
+          "#e88867",
+          "#ffb49c",
+          "#ffe9e2"
+        ]
+      },
+      "ember-clair": {
+        "role": "tertiary",
+        "displayName": "Braise Éclaircie",
+        "purpose": "Streak sur surface roche (6,54 là où l'ember tombait à 3,60).",
+        "canonical": "oklch(70.7% 0.111 46.7)",
+        "tonalRamp": [
+          "#1b0300",
+          "#411600",
+          "#6d2b00",
+          "#934a23",
+          "#b86c45",
+          "#de8f67",
+          "#ffb692",
+          "#ffe9df"
+        ]
+      },
+      "alerte": {
+        "role": "semantic",
+        "displayName": "Alerte",
+        "purpose": "Un échec n'est pas la couleur du produit.",
+        "canonical": "oklch(48.2% 0.131 31.3)",
+        "tonalRamp": [
+          "#210000",
+          "#4c0200",
+          "#781a0d",
+          "#9e3e2f",
+          "#c46150",
+          "#eb8471",
+          "#ffb3a5",
+          "#ffe9e4"
+        ]
+      },
+      "alerte-surface": {
+        "role": "semantic",
+        "displayName": "Alerte Surface",
+        "purpose": "Fond des messages d'alerte.",
+        "canonical": "oklch(93.4% 0.015 37.9)",
+        "tonalRamp": [
+          "#110907",
+          "#2c2320",
+          "#4a3f3c",
+          "#695e5b",
+          "#8b7f7c",
+          "#aea29e",
+          "#d3c6c2",
+          "#f8ebe7"
+        ]
+      },
+      "data-mark": {
+        "role": "data",
+        "displayName": "Data Mark",
+        "purpose": "Teinte unique des graphiques internes : une grandeur, pas une catégorie.",
+        "canonical": "oklch(51.3% 0.076 122.5)",
+        "tonalRamp": [
+          "#080e00",
+          "#1f2a00",
+          "#3b4815",
+          "#596835",
+          "#7a8a56",
+          "#9cad78",
+          "#c0d29b",
+          "#e5f7bf"
+        ]
+      },
+      "data-mark-zero": {
+        "role": "data",
+        "displayName": "Data Mark Zero",
+        "purpose": "Amorce grise : un jour sans donnée se lit comme un zéro, pas comme un trou.",
+        "canonical": "oklch(85.5% 0.008 114.2)",
+        "tonalRamp": [
+          "#0b0c08",
+          "#252621",
+          "#42433e",
+          "#61625d",
+          "#82837d",
+          "#a5a6a0",
+          "#c9cac4",
+          "#eeefe9"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "H1 Site",
+        "purpose": "Titres de campagne marketing, deux lignes maximum. Le diviseur 7,4 du clamp mobile est mesuré sur « Tu lis beaucoup. » — un titre plus long se remesure."
+      },
+      "h1-app": {
+        "displayName": "H1 App",
+        "purpose": "Titres des écrans internes."
+      },
+      "enonce": {
+        "displayName": "Énoncé",
+        "purpose": "L'énoncé d'une question, et lui seul. Un cran sous H1 app, avec la mesure élargie, pour qu'une question de quinze mots tienne sur deux lignes."
+      },
+      "body": {
+        "displayName": "Corps",
+        "purpose": "Texte principal, mesure 65-75 caractères."
+      },
+      "small": {
+        "displayName": "Petit",
+        "purpose": "Notes, seconds plans, aides contextuelles."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Libellés techniques en capitales, intervalles, compteurs, tags, et termes de code cités. Jamais du texte de lecture."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sol-du-cairn",
+        "value": "width: 56%; height: 5%; border-radius: var(--r-galet); background: var(--stone-900); opacity: 0.15; filter: blur(9px)",
+        "purpose": "La seule ombre autorisée de toute l'interface, et elle n'est pas une box-shadow : une pilule floutée posée au sol sous le cairn. Large et basse — une ombre resserrée sous un empilement le fait léviter au lieu de l'asseoir. Aucun bouton, aucune carte, aucun dialogue n'en porte."
+      }
+    ],
+    "motion": [
+      {
+        "name": "courbe-pose",
+        "value": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "La courbe unique du produit. Sortie douce, sans retour : ça se pose, ça ne rebondit pas. Partagée par l'apparition des blocs et la pose des pierres."
+      },
+      {
+        "name": "duree-apparition",
+        "value": "0.55s",
+        "purpose": "Le temps d'un bloc qui entre, monté de 14 px."
+      },
+      {
+        "name": "ecart-apparition",
+        "value": "0.09s",
+        "purpose": "L'écart entre deux blocs d'une même suite."
+      },
+      {
+        "name": "duree-pose",
+        "value": "0.3s",
+        "purpose": "La descente d'une pierre déjà dans l'empilement."
+      },
+      {
+        "name": "duree-pose-sommet",
+        "value": "0.42s",
+        "purpose": "La pierre du sommet vient de plus haut (-140 %), penchée de -7°, et met plus longtemps : c'est celle qu'on vient de gagner."
+      },
+      {
+        "name": "ecart-pose",
+        "value": "0.06s",
+        "purpose": "L'écart entre deux pierres. Assez pour compter, trop peu pour attendre."
+      },
+      {
+        "name": "ressort-sentier",
+        "value": "spring(stiffness 90, damping 24, restDelta 0.001)",
+        "purpose": "Le suivi du tracé du sentier au scroll."
+      },
+      {
+        "name": "derive-strates",
+        "value": "1.3 / 0.6 unités de viewBox par traversée",
+        "purpose": "Les deux veines d'une strate dérivent verticalement à vitesses différentes pendant qu'on la traverse. C'est la différence de vitesse qui fait la profondeur, pas l'amplitude. Rien ne bouge en tâche de fond."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation-duration: 0.01ms; transition-duration: 0.01ms; scroll-behavior: auto",
+        "purpose": "prefers-reduced-motion coupe tout, globalement. L'animation est un supplément, jamais un préalable."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "md",
+        "value": "48rem",
+        "purpose": "Le seul palier qui compte : toute l'échelle typographique bascule ici, et les trois registres qui occupent (h1-app, énoncé, nombre) passent en clamp sur les deux axes."
+      },
+      {
+        "name": "lg",
+        "value": "64rem"
+      },
+      {
+        "name": "xl",
+        "value": "80rem"
+      },
+      {
+        "name": "2xl",
+        "value": "96rem",
+        "purpose": "Les mesures à plusieurs colonnes gagnent un cran."
+      }
+    ],
+    "surfaces": [
+      {
+        "name": "papier",
+        "value": "#f2f2ef",
+        "purpose": "La surface de lecture, par défaut."
+      },
+      {
+        "name": "ombre",
+        "value": "#e4e4df",
+        "purpose": "Le panneau alterné, jamais deux d'affilée."
+      },
+      {
+        "name": "lichen",
+        "value": "#e8eadf",
+        "purpose": "Un seul panneau dans toute l'application : celui où le produit tient sa promesse. Il interdit tout autre usage du lichen sur cet écran, sauf le sommet du cairn."
+      },
+      {
+        "name": "roche",
+        "value": "#2a2e2c",
+        "purpose": "Deux panneaux, pas trois. Le texte et les pierres s'y inversent en gris clairs ; le sommet lichen reste lichen."
+      }
+    ],
+    "mesures": [
+      {
+        "name": "texte",
+        "value": "max-width: 42rem",
+        "purpose": "Lecture longue, ~65 signes."
+      },
+      {
+        "name": "colonne",
+        "value": "max-width: 48rem",
+        "purpose": "Contenu narratif."
+      },
+      {
+        "name": "page",
+        "value": "max-width: 72rem (84rem au-delà de 2xl)",
+        "purpose": "Mise en page standard."
+      },
+      {
+        "name": "large",
+        "value": "max-width: 80rem (96rem au-delà de 2xl)",
+        "purpose": "Tableau de bord dense."
+      }
+    ],
+    "grain": [
+      {
+        "name": "grain-clair",
+        "value": "opacity: 0.14; mix-blend-mode: multiply",
+        "purpose": "Le grain des surfaces claires, derrière le contenu de chaque panneau."
+      },
+      {
+        "name": "grain-roche",
+        "value": "opacity: 0.2; mix-blend-mode: overlay",
+        "purpose": "Sur la roche, le multiply n'a rien à assombrir : on éclaire à la place."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Bouton principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "L'action d'un écran. Une pilule pleine d'encre, 44 px de haut : dans l'échelle de formes, l'arrondi total est réservé au geste.",
+      "html": "<button class=\"ds-btn ds-btn-primary\" type=\"button\">Déposer</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--pas-2, 0.5rem); height: 2.75rem; padding: 0 var(--pas-8, 2rem); border: 1px solid transparent; border-radius: var(--r-galet, 999px); font-family: var(--police-texte), ui-sans-serif, system-ui, sans-serif; font-size: var(--t-corps, 1.125rem); font-weight: 500; white-space: nowrap; cursor: pointer; user-select: none; transition: background-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1); }\n.ds-btn:active { transform: translateY(1px); }\n.ds-btn:focus-visible { outline: 2px solid var(--lichen-deep, #5f6e3b); outline-offset: 2px; }\n.ds-btn-primary { background: var(--stone-900, #16191a); color: var(--stone-50, #f2f2ef); }\n.ds-btn-primary:hover { background: var(--stone-800, #2a2e2c); }"
+    },
+    {
+      "name": "Bouton contour",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "L'action secondaire. Le trait tient seul et le survol change de surface — jamais une ombre, jamais une variation d'opacité.",
+      "html": "<button class=\"ds-btn ds-btn-outline\" type=\"button\">Reprendre</button>",
+      "css": ".ds-btn-outline { background: transparent; border-color: var(--stone-300, #bfc0ba); color: var(--stone-900, #16191a); }\n.ds-btn-outline:hover { border-color: var(--stone-500, #5e635f); background: var(--surface-ombre, #e4e4df); }"
+    },
+    {
+      "name": "Champ de saisie",
+      "kind": "input",
+      "refersTo": "input-trait",
+      "description": "Le trait du bas est plus marqué que le contour : on lit une ligne à remplir, pas une boîte. 44 px de haut, 16 px de corps sur mobile pour que Safari ne zoome pas à la mise au point.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Colle ce que tu veux retenir\" />",
+      "css": ".ds-input { display: block; width: 100%; min-width: 0; height: 2.75rem; padding: 0 var(--pas-4, 1rem); border: 1px solid var(--stone-300, #bfc0ba); border-bottom-color: var(--stone-500, #5e635f); border-radius: var(--r-champ, 10px); background: var(--surface-papier, #f2f2ef); color: var(--stone-900, #16191a); font-family: var(--police-texte), ui-sans-serif, system-ui, sans-serif; font-size: var(--t-corps, 1.125rem); transition: border-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1); }\n.ds-input::placeholder { color: var(--stone-500, #5e635f); }\n.ds-input:hover { border-color: var(--stone-500, #5e635f); }\n.ds-input:focus-visible { outline: 2px solid var(--lichen-deep, #5f6e3b); outline-offset: 2px; }\n.ds-input[aria-invalid=\"true\"] { border-color: var(--alerte, #9a3b2c); }"
+    },
+    {
+      "name": "Étiquette mono",
+      "kind": "chip",
+      "refersTo": "mono",
+      "description": "Un libellé technique, pas une décoration : mono, très petit, capitales espacées. Il porte un statut — pas de pastel, pas d'emoji.",
+      "html": "<span class=\"ds-badge ds-badge-pose\">7 pierres</span> <span class=\"ds-badge ds-badge-du\">à réviser</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; gap: var(--pas-1, 0.25rem); border-radius: var(--r-galet, 999px); font-family: var(--police-donnees), ui-monospace, monospace; font-size: var(--t-mono, 0.8125rem); font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--stone-500, #5e635f); }\n.ds-badge-pose { background: var(--surface-ombre, #e4e4df); padding: 0.125rem var(--pas-2, 0.5rem); }\n.ds-badge-du { color: var(--lichen-deep, #5f6e3b); }"
+    },
+    {
+      "name": "Carte",
+      "kind": "card",
+      "refersTo": "carte",
+      "description": "Elle groupe de l'information liée, jamais une seule ligne. Elle se distingue par sa surface : posée sur le papier elle prend l'ombre, posée sur l'ombre elle prend le papier. Aucune bordure, aucune ombre.",
+      "html": "<div class=\"ds-carte\"><p class=\"ds-carte-titre\">Ce que tu as déposé</p><p class=\"ds-carte-corps\">Quatre concepts en attente de leur première question.</p></div>",
+      "css": ".ds-carte { border-radius: var(--r-carte, 20px); background: var(--surface-ombre, #e4e4df); color: var(--stone-900, #16191a); padding: var(--pas-6, 1.5rem); }\n.ds-carte-titre { margin: 0 0 var(--pas-2, 0.5rem); font-family: var(--police-display), ui-sans-serif, system-ui, sans-serif; font-size: var(--t-h2-app, 1.5rem); font-weight: 700; letter-spacing: -0.02em; }\n.ds-carte-corps { margin: 0; font-family: var(--police-texte), ui-sans-serif, system-ui, sans-serif; font-size: var(--t-corps, 1.125rem); line-height: 1.55; color: var(--stone-500, #5e635f); }"
+    },
+    {
+      "name": "Panneau",
+      "kind": "custom",
+      "refersTo": "panneau",
+      "description": "L'unité de composition de toutes les pages : une bande pleine largeur qui porte sa surface, à angle vif, contenu centré dans une mesure. Le grain vit derrière le contenu, pas par-dessus.",
+      "html": "<section class=\"ds-panneau\"><div class=\"ds-panneau-mesure\"><h2 class=\"ds-panneau-titre\">Retenir ce qu'on apprend</h2><p class=\"ds-panneau-corps\">Une pierre à la fois.</p></div></section>",
+      "css": ".ds-panneau { position: relative; width: 100%; overflow: hidden; border-radius: var(--r-plein, 0); background: var(--surface-papier, #f2f2ef); color: var(--stone-900, #16191a); padding: var(--pas-campagne, 4rem) var(--pas-4, 1rem); }\n.ds-panneau::after { content: \"\"; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.14; mix-blend-mode: multiply; background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)'/%3E%3C/svg%3E\"); }\n.ds-panneau-mesure { position: relative; z-index: 1; max-width: 42rem; margin: 0 auto; }\n.ds-panneau-titre { margin: 0 0 var(--pas-3, 0.75rem); font-family: var(--police-display), ui-sans-serif, system-ui, sans-serif; font-size: var(--t-h2-site, 2.5rem); font-weight: 700; line-height: 0.95; letter-spacing: -0.03em; }\n.ds-panneau-corps { margin: 0; font-family: var(--police-texte), ui-sans-serif, system-ui, sans-serif; font-size: var(--t-corps, 1.125rem); line-height: 1.55; color: var(--stone-500, #5e635f); }"
+    },
+    {
+      "name": "Cairn",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "L'élément identitaire du produit, et la seule audace visuelle autorisée. Pierres SVG aux formes et rotations irrégulières dérivées d'une graine déterministe ; le sommet porte l'arête lichen. L'ombre au sol est la seule ombre du système. Semé ici sur « kairn-ds-1 » à « kairn-ds-5 ».",
+      "html": "<div class=\"ds-cairn-scene\"><span class=\"ds-cairn-ombre\" aria-hidden=\"true\"></span><svg class=\"ds-cairn\" viewBox=\"0 -81.59 100 85.59\" role=\"img\" aria-label=\"Empilement de 5 pierres\"><line x1=\"12\" y1=\"0\" x2=\"88\" y2=\"0\" stroke=\"var(--stone-300, #bfc0ba)\" stroke-width=\"1\"/><g transform=\"translate(49.92 -9.11) rotate(0.01)\"><path d=\"M -20.42 -8.58 L 18.03 -9.64 Q 25.1 -9.64 25.1 -2.57 L 29.1 2.99 Q 29.1 9.49 22.6 9.49 L -24.99 8.73 Q -29.1 8.73 -29.1 4.62 L -25.1 -3.9 Q -25.1 -8.58 -20.42 -8.58 Z\" fill=\"var(--stone-700, #3d4240)\"/></g><g transform=\"translate(49.09 -23.84) rotate(-1.29)\"><path d=\"M -19.76 -6.67 L 22 -6.37 Q 25.12 -6.37 25.12 -3.25 L 26.05 1.33 Q 26.05 6.41 20.97 6.41 L -20.36 6.63 Q -26.05 6.63 -26.05 0.94 L -25.12 -1.31 Q -25.12 -6.67 -19.76 -6.67 Z\" fill=\"var(--stone-900, #16191a)\"/></g><g transform=\"translate(47.30 -37.95) rotate(1.27)\"><path d=\"M -20.17 -9.06 L 18.22 -7.94 Q 23.81 -7.94 23.81 -2.35 L 25.26 2.07 Q 25.26 8.18 19.15 8.18 L -20.02 8.82 Q -25.26 8.82 -25.26 3.58 L -23.81 -5.42 Q -23.81 -9.06 -20.17 -9.06 Z\" fill=\"var(--stone-900, #16191a)\"/></g><g transform=\"translate(48.33 -51.93) rotate(1.39)\"><path d=\"M -11.61 -7.15 L 12.16 -5.61 Q 15.08 -5.61 15.08 -2.69 L 17.37 3.48 Q 17.37 6.52 14.33 6.52 L -14.7 6.24 Q -17.37 6.24 -17.37 3.57 L -15.08 -3.68 Q -15.08 -7.15 -11.61 -7.15 Z\" fill=\"var(--stone-900, #16191a)\"/></g><g transform=\"translate(48.13 -66.50) rotate(-0.91)\"><path d=\"M -9.93 -9.37 L 9.78 -8.79 Q 14.94 -8.79 14.94 -3.63 L 15.78 5.08 Q 15.78 8.33 12.53 8.33 L -12.22 9.83 Q -15.78 9.83 -15.78 6.27 L -14.94 -4.36 Q -14.94 -9.37 -9.93 -9.37 Z\" fill=\"var(--stone-900, #16191a)\"/><path d=\"M -9.93 -9.37 L 9.78 -8.79 Q 14.94 -8.79 14.94 -3.63 L 15.78 5.08 Q 15.78 8.33 12.53 8.33 L -12.22 9.83 Q -15.78 9.83 -15.78 6.27 L -14.94 -4.36 Q -14.94 -9.37 -9.93 -9.37 Z\" fill=\"none\" stroke=\"var(--lichen, #7a8b4f)\" stroke-width=\"1.4\" stroke-linecap=\"round\" pathLength=\"1\" stroke-dasharray=\"0.34 0.66\" stroke-dashoffset=\"-0.04\"/></g></svg></div>",
+      "css": ".ds-cairn-scene { position: relative; width: 12rem; aspect-ratio: 100 / 93; }\n.ds-cairn { display: block; width: 100%; height: 100%; overflow: visible; }\n.ds-cairn-ombre { position: absolute; bottom: 1%; left: 50%; width: 56%; height: 5%; transform: translateX(-50%); border-radius: var(--r-galet, 999px); background: var(--stone-900, #16191a); opacity: 0.15; filter: blur(9px); }"
+    },
+    {
+      "name": "Strates",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "La jointure entre deux panneaux de surfaces différentes : une coupe de roche procédurale, jamais un filet ni un hr. En page, les deux veines dérivent au scroll à des vitesses différentes (1,3 et 0,6) ; ici figées. Semé sur « kairn-ds ».",
+      "html": "<div class=\"ds-strates\"><svg viewBox=\"0 0 100 10\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path d=\"M 0 4.79 C 6.67 4.79 10 2.9 16.67 2.9 C 23.33 2.9 26.66 2.24 33.33 2.24 C 40 2.24 43.33 2.38 50 2.38 C 56.67 2.38 60 1.42 66.67 1.42 C 73.33 1.42 76.66 0.58 83.33 0.58 C 90 0.58 93.33 3.37 100 3.37 L 100 10 L 0 10 Z\" fill=\"color-mix(in oklab, var(--surface-papier, #f2f2ef) 78%, var(--stone-500, #5e635f))\"/><path d=\"M 0 4.58 C 6.67 4.58 10 4.35 16.67 4.35 C 23.33 4.35 26.66 6.38 33.33 6.38 C 40 6.38 43.33 5.25 50 5.25 C 56.67 5.25 60 4.45 66.67 4.45 C 73.33 4.45 76.66 6.2 83.33 6.2 C 90 6.2 93.33 4.29 100 4.29 L 100 10 L 0 10 Z\" fill=\"color-mix(in oklab, var(--surface-ombre, #e4e4df) 62%, var(--stone-500, #5e635f))\"/><path d=\"M 0 7.46 C 6.67 7.46 10 6.64 16.67 6.64 C 23.33 6.64 26.66 7.42 33.33 7.42 C 40 7.42 43.33 7.23 50 7.23 C 56.67 7.23 60 8.05 66.67 8.05 C 73.33 8.05 76.66 8.92 83.33 8.92 C 90 8.92 93.33 8.43 100 8.43 L 100 10 L 0 10 Z\" fill=\"var(--surface-ombre, #e4e4df)\"/></svg></div>",
+      "css": ".ds-strates { position: relative; width: 100%; height: 2rem; background: var(--surface-papier, #f2f2ef); }\n.ds-strates svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }\n@media (min-width: 48rem) { .ds-strates { height: 3.5rem; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Le Sentier de Roche",
+    "overview": "Kairn est un sentier de montagne balisé de cairns. Chaque passant ajoute une pierre, la trace se construit collectivement, sans hâte. Le système visuel porte cette métaphore : chaque section est une paroi qu'on descend, chaque marque est délibérée, aucun ornement n'est gratuit. Ce n'est pas là pour te séduire, c'est là parce que tu en as besoin. La forme suit la fonction, mais elle a du grain.\n\nLe système est calme, minéral et délibéré. Quatre surfaces mates (papier / ombre / lichen / roche) suffisent à séparer les sujets — aucun trait fin, aucune bordure grise. Une seule audace visuelle est autorisée : le cairn lui-même, dessiné à la main, aux pierres légèrement irrégulières dérivées d'un seed déterministe. Toute autre exubérance est proscrite.",
+    "keyCharacteristics": [
+      "Palette minérale sur quatre surfaces mates (papier / ombre / lichen / roche).",
+      "Un seul accent chromatique (lichen), un seul accent chaud (ember), chacun réservé à un emploi unique.",
+      "Typographie serrée en trois rôles (Bricolage Grotesque display, Satoshi texte, Geist Mono données).",
+      "Grain overlay léger sur toutes les surfaces — se sent, ne se voit pas.",
+      "Élément signature : le cairn irrégulier dessiné main, aux pierres déterministes.",
+      "Trois radius, trois sens (panneau plein, carte arrondie, galet pilule)."
+    ],
+    "rejectedVisuals": [
+      "Le rendu shadcn par défaut (palette zinc, rounded-lg partout, cartes à bordure grise fine, ombres portées diffuses).",
+      "Inter comme police principale.",
+      "Les dégradés violet-bleu, les dégradés décoratifs en général.",
+      "Les emojis en icônes.",
+      "Le fond crème avec accent terracotta et display serif à fort contraste (le pattern « cabinet d'architecte »).",
+      "Les marqueurs numérotés 01 / 02 / 03 sur du contenu qui n'est pas une séquence.",
+      "Les hero avec grand titre centré + illustration abstraite décorative + trois cartes-features en dessous."
+    ],
+    "rules": [
+      {
+        "name": "The One Lichen Rule",
+        "body": "Le lichen apparaît uniquement sur le sommet du cairn, l'outline de focus, et le data-mark des graphiques internes. Nulle part ailleurs. Sa rareté est ce qui le rend signal — l'exception qui donne du sens.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Ember Rule",
+        "body": "L'ember n'apparaît que sur l'affichage du streak. Jamais ailleurs, même comme deuxième accent, même « juste pour cette fois ».",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Category-Color Rule",
+        "body": "Les graphiques mesurent des grandeurs, pas des catégories. Une seule teinte par graphique (--data-mark), amorce grise pour zéro (--data-mark-zero). Une palette catégorielle y peindrait des couleurs qui ne veulent rien dire.",
+        "section": "colors"
+      },
+      {
+        "name": "The Trois-Rôles Rule",
+        "body": "Trois familles typographiques, trois rôles : display pour titrer, texte pour lire, mono pour signaler du technique. Aucun quatrième rôle, aucun mélange.",
+        "section": "typography"
+      },
+      {
+        "name": "The Serrage Rule",
+        "body": "Les titres display sont serrés : leading 0.95, tracking négatif jusqu'à -0.045em. Le titre n'est pas une phrase qui respire, c'est un bloc qui frappe.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ratio-Pas-Immobilité Rule",
+        "body": "Sur grand écran, tout le bas de l'échelle monte, mais moins vite que le corps — la hiérarchie tient dans le *rapport*, pas dans l'immobilité des seconds plans. Treize, quinze, dix-huit sur grand écran ; douze, quatorze, seize sur mobile.",
+        "section": "typography"
+      },
+      {
+        "name": "The Surface-Sépare Rule",
+        "body": "Deux sujets ne sont jamais séparés par une ligne ni un <hr>. C'est le changement de surface qui sépare, via un composant <Strates> qui tire une graine différente à chaque coupe.",
+        "section": "layout"
+      },
+      {
+        "name": "The Pas-Pas-Pixels Rule",
+        "body": "Toute mesure d'espacement passe par un token pas-*. Pas de gap-4, pas de p-[13px]. Le vocabulaire commun tient parce que personne n'écrit à côté.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat-Sauf-Cairn Rule",
+        "body": "Aucun composant de l'interface n'a d'ombre — ni bouton, ni carte, ni dialogue, ni tooltip. La seule ombre autorisée est au sol des pierres du cairn. Une carte qui aurait « juste besoin d'un léger relief » est une carte qui devrait poser sur une autre surface.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Grain-Se-Sent-Sans-Se-Voir Rule",
+        "body": "Le grain vit derrière le contenu de chaque panneau, en mix-blend-mode: multiply (opacité 0.14) sur les surfaces claires, en overlay (opacité 0.20) sur la roche. Monté jusqu'à ce qu'il se sente sans jamais toucher la lisibilité du texte.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Trois-Formes-Trois-Sens Rule",
+        "body": "Trois radius, trois sens. Panneau = sol (angle vif). Carte = objet posé (r-carte). Pilule = geste (r-galet). Aucun autre radius n'est légitime.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do utiliser une des quatre surfaces (papier, ombre, lichen, roche) pour poser un panneau. Le fond va d'un bord à l'autre.",
+      "Do séparer deux sujets par un changement de surface via <Strates>, jamais par un <hr> ni un filet.",
+      "Do utiliser --lichen uniquement sur le sommet du cairn, l'outline de focus, ou le data-mark des graphiques.",
+      "Do utiliser --ember uniquement sur l'affichage du streak.",
+      "Do dessiner le cairn comme la seule audace visuelle du produit — chaque page importante peut en porter trace.",
+      "Do utiliser Bricolage Grotesque pour les titres avec parcimonie, Satoshi pour le texte, Geist Mono pour les libellés techniques.",
+      "Do monter le grain jusqu'à ce qu'il se sente sur les surfaces sans se voir sur le texte.",
+      "Do utiliser les tokens pas-* pour toute mesure d'espacement.",
+      "Do écrire les champs de saisie comme un trait sous le texte, sur le papier."
+    ],
+    "donts": [
+      "Don't utiliser Inter comme police principale (ni aucun système face générique).",
+      "Don't ajouter des dégradés violet-bleu, ni aucun dégradé décoratif.",
+      "Don't utiliser d'emojis en icônes. Les icônes se dessinent en SVG dans un style cohérent.",
+      "Don't utiliser le rendu shadcn par défaut (palette zinc, rounded-lg partout, cartes à bordure grise fine, ombres portées diffuses).",
+      "Don't utiliser le fond crème avec accent terracotta et display serif à fort contraste (pattern « cabinet d'architecte »).",
+      "Don't poser des marqueurs 01 / 02 / 03 sur du contenu qui n'est pas une séquence.",
+      "Don't construire un hero avec grand titre centré + illustration abstraite décorative + trois cartes-features en dessous.",
+      "Don't enrober un champ de saisie dans une boîte. Un trait sous le champ suffit.",
+      "Don't ajouter d'ombres à un composant. Seul le cairn en porte au sol.",
+      "Don't utiliser --lichen ou --ember en dehors de leurs emplois réservés — même « juste pour cette fois ».",
+      "Don't peindre des catégories dans un graphique. Les graphiques mesurent des grandeurs (--data-mark), pas des types.",
+      "Don't écrire de pixels arbitraires dans un composant. Passer par un token pas-*."
+    ]
+  }
+}
