@@ -23,6 +23,8 @@ export type DepotAnonyme = {
   statut: string;
   motifDechec: string | null;
   concepts: { id: string; concept: string; tags: string[] }[];
+  /** La question écrite sur le premier concept, quand elle est là. */
+  question: string | null;
 };
 
 /** Ce qu'une session a produit, pour l'afficher à qui vient de déposer. */
@@ -36,7 +38,16 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
       failureReason: true,
       atoms: {
         orderBy: { createdAt: "asc" },
-        select: { id: true, concept: true, tags: true },
+        select: {
+          id: true,
+          concept: true,
+          tags: true,
+          // Un visiteur n'en a qu'une, sur le premier concept questionnable.
+          // `take: 1` par sécurité plutôt que par attente : si la règle changeait
+          // un jour, l'écran n'en montrerait toujours qu'une au lieu de s'allonger
+          // sans que personne l'ait décidé.
+          variants: { orderBy: { createdAt: "asc" }, select: { question: true }, take: 1 },
+        },
       },
     },
   });
@@ -47,7 +58,8 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
     inputId: depot.id,
     statut: depot.status,
     motifDechec: depot.failureReason,
-    concepts: depot.atoms,
+    concepts: depot.atoms.map(({ id, concept, tags }) => ({ id, concept, tags })),
+    question: depot.atoms.flatMap((atome) => atome.variants)[0]?.question ?? null,
   };
 }
 

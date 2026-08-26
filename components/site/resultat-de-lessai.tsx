@@ -28,7 +28,17 @@ export function ResultatDeLEssai({
   attenteInterrompue: boolean;
   onVerifier: () => void;
 }) {
-  if (!avancement || avancement.enCours) {
+  /*
+    On montre ce qui existe dès qu'il existe.
+
+    L'essai se joue maintenant en deux temps — les concepts, puis la question
+    écrite sur le premier —, et attendre le second pour afficher le premier
+    ferait payer à tout le monde l'ajout de la question : on verrait le résultat
+    plus tard qu'avant, pour en avoir plus. C'est l'inverse de ce qu'on cherche.
+  */
+  const rienEncore = !avancement || avancement.concepts.length === 0;
+
+  if (rienEncore && (!avancement || avancement.enCours)) {
     return attenteInterrompue ? (
       <AttenteInterrompue onVerifier={onVerifier} />
     ) : (
@@ -36,8 +46,10 @@ export function ResultatDeLEssai({
     );
   }
 
-  if (avancement.concepts.length === 0) {
-    return <EssaiSansConcept avancement={avancement} setRecommence={setRecommence} />;
+  if (!avancement || avancement.concepts.length === 0) {
+    return avancement ? (
+      <EssaiSansConcept avancement={avancement} setRecommence={setRecommence} />
+    ) : null;
   }
 
   return (
@@ -48,6 +60,11 @@ export function ResultatDeLEssai({
       </p>
 
       <PileDeConcepts concepts={avancement.concepts} />
+
+      {/* L'échantillon, et il ferme l'arc : ton texte, tes concepts, une vraie
+          question sur l'un d'eux. Sans lui, la page promettait qu'on te repose
+          quelque chose sans jamais te montrer quoi. */}
+      <Echantillon question={avancement.question} enCours={avancement.enCours} />
 
       <div className="mt-pas-2 gap-pas-3 flex flex-wrap items-center">
         <Button asChild size="lg">
@@ -124,6 +141,31 @@ function situationDeLEchec(
     constat,
     explication: `Un compte accepte ${longueurEnClair(CARACTERES_MAXIMUM)}, garde ce qu'il en tire, et te le repose au bon moment.`,
   };
+}
+
+/**
+ * La question de l'essai, ou son attente.
+ *
+ * Elle arrive après les concepts, donc il y a un moment où la liste est là et
+ * pas elle. Ce moment se dit — une ligne, au même endroit que la question
+ * viendra prendre — plutôt que de laisser un blanc qui ressemble à une fin.
+ */
+function Echantillon({ question, enCours }: { question: string | null; enCours: boolean }) {
+  if (!question && !enCours) return null;
+
+  return (
+    <div className="mt-pas-2">
+      <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
+        Ce qu&apos;on te reposera
+      </p>
+
+      {question ? (
+        <p className="mt-pas-2 text-corps text-stone-900">{question}</p>
+      ) : (
+        <p className="mt-pas-2 text-petit text-stone-500">On l&apos;écrit, deux secondes.</p>
+      )}
+    </div>
+  );
 }
 
 function EssaiSansConcept({

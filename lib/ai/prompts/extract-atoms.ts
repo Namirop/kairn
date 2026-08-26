@@ -123,8 +123,8 @@ Rends une liste vide et renseigne \`rejected\` en une phrase quand le dépôt es
 - trop vague pour qu'on puisse en tirer une question précise
 - illisible ou tronqué au point qu'on devrait deviner
 
-Écris \`rejected\` à la deuxième personne, sans reproche, en disant ce qui manquerait
-pour que ce soit exploitable.
+Écris \`rejected\` en tutoyant — « tu », « te », « ton » ; jamais « vous » —, sans
+reproche, en disant ce qui manquerait pour que ce soit exploitable.
 
 LES ÉTIQUETTES
 

@@ -111,7 +111,7 @@ export async function ecrireLesQuestionsDuJob(
 export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
   const depot = await prisma.input.findUnique({
     where: { id: job.inputId },
-    select: { userId: true },
+    select: { userId: true, anonymousSessionId: true },
   });
   const concepts = await conceptsDuJob(job.atomIds);
 
@@ -124,6 +124,11 @@ export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
     system: SYSTEM_PROMPTS.generate_variants,
     jobId: job.id,
     userId: depot?.userId ?? undefined,
+    // La part du public, comme pour le découpage : depuis que l'essai montre
+    // une question, ce chemin part aussi pour un visiteur. Sans ce drapeau, sa
+    // question se facturerait sur le plafond global — celui que la part
+    // publique existe précisément pour protéger des comptes, et réciproquement.
+    anonyme: depot?.anonymousSessionId != null,
     messages: [{ role: "user", content: messageDuGroupe(concepts) }],
   });
 

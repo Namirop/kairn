@@ -77,17 +77,30 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
   // peut encore les confirmer.
   //
   // Un dépôt anonyme n'a pas de compteur : il est borné autrement, par une
-  // session à un seul dépôt et par une limite d'empreinte d'adresse. Il n'a pas
-  // non plus de questions — c'est là que s'arrête sa dépense.
+  // session à un seul dépôt et par une limite d'empreinte d'adresse.
   if (depot.userId) {
     const fuseau = await lireFuseauUtilisateur(depot.userId);
     await compterConceptsRetenus(depot.userId, fuseau, concepts.length);
-  } else {
-    await marquerPretSiPlusRienEnAttente(depot.id);
-    return;
   }
 
-  const aQuestionner = conceptsAQuestionner(concepts, extraction.nature).map(
+  const questionnables = conceptsAQuestionner(concepts, extraction.nature);
+
+  /*
+    Un visiteur en obtient **une**, et une seule.
+
+    L'essai s'arrêtait aux concepts, pour n'y dépenser qu'un appel. Il montrait
+    donc une moitié du produit : le positionnement tient en « l'extraction
+    automatique des Atoms, **plus la rotation des Variants** », et la landing
+    promet en toutes lettres qu'on te les repose — à quelqu'un qui ne voyait
+    jamais une question. On vendait un mécanisme sans le montrer.
+
+    Une seule suffit à fermer l'arc — ton texte, tes concepts, une vraie
+    question sur l'un d'eux. La deuxième ne prouve rien que la première n'ait
+    prouvé, et elle double la dépense : le prix n'est pas le dixième de centime,
+    c'est la part journalière des essais sans compte, qui sert deux fois moins
+    de visiteurs à chaque appel ajouté.
+  */
+  const aQuestionner = (depot.userId ? questionnables : questionnables.slice(0, 1)).map(
     (concept) => concept.id,
   );
 

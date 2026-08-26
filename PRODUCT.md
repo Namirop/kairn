@@ -115,11 +115,14 @@ que là où la session n'a rien à donner ce jour-là — sinon, il la remplacer
 
 ## Evidence on Hand
 
-Landing publique en production sur kairn.me, avec un essai anonyme sans compte
-(dépôt visible, extraction visible, session simulée). C'est la preuve unique
-montrée en amont de l'inscription. Aucun témoignage utilisateur, aucune étude
-de cas, aucun benchmark public à ce stade — le produit ne les fabrique pas
-pour combler l'absence.
+Landing publique en production sur kairn.me, avec un essai anonyme sans compte :
+on colle un texte, on voit les concepts qui en sortent, et on lit une vraie
+question écrite sur l'un d'eux. Pas de session — l'essai montre la matière que
+le produit fabrique, il ne rejoue pas le geste quotidien, qui suppose un
+historique. C'est la preuve unique montrée en amont de l'inscription.
+
+Aucun témoignage utilisateur, aucune étude de cas, aucun benchmark public à ce
+stade — le produit ne les fabrique pas pour combler l'absence.
 
 ## Product Principles
 

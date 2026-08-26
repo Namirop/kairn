@@ -28,6 +28,15 @@
  * la fidélité quand le concept est pauvre, même au prix d'un léger radotage
  * intra. Le radotage intra est mesuré, moins grave que l'infidélité.
  *
+ * **Une ligne a été ajoutée le 27 août 2026 sur le tutoiement**, à contre-courant
+ * de l'avertissement ci-dessous, et voici pourquoi. Ce n'est pas une propriété de
+ * distribution comme les deux précédentes : c'est une règle catégorique, du même
+ * genre que la langue, et le prompt d'extraction en tient une identique sans
+ * peine. Elle a été posée quand l'essai de la landing s'est mis à montrer une
+ * question : « Expliquez pourquoi… » sur la page qui convertit, alors que le
+ * tutoiement est un engagement de marque non négociable. Un relevé en base
+ * donnait 1,4 % de questions vouvoyantes — rare, mais servi à tout le monde.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -49,6 +58,9 @@ de ses QCM. Personne ne veut réviser en français une note prise en anglais.
 
 Ce n'est pas la langue de cette consigne qui décide, c'est celle du concept qu'on te
 donne. Regarde-la avant d'écrire, pas après.
+
+En français, une question qui s'adresse au lecteur le tutoie : « Explique », jamais
+« Expliquez ».
 
 LA RÈGLE QUI COMPTE
 

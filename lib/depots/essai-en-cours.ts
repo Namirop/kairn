@@ -16,6 +16,14 @@ export type AvancementDeLEssai = {
   /** L'extraction tourne encore : l'écran attend, et le dit. */
   enCours: boolean;
   concepts: { id: string; concept: string; tags: string[] }[];
+  /**
+   * La question écrite sur le premier concept — l'échantillon de l'essai.
+   *
+   * Elle arrive **après** les concepts : deux appels, deux temps. L'écran ne
+   * l'attend donc pas pour montrer ce qu'il a déjà, sans quoi l'ajout de la
+   * question allongerait l'attente de tout le reste au lieu de l'enrichir.
+   */
+  question: string | null;
   /** Renseigné quand la chaîne s'est arrêtée sans rien produire. */
   motifDechec: string | null;
   /**
@@ -56,6 +64,7 @@ export async function lireLEssaiEnCours(): Promise<AvancementDeLEssai | null> {
   return {
     enCours: !arrete,
     concepts: depot.concepts,
+    question: depot.question,
     motifDechec: vide && arrete ? depot.motifDechec : null,
     panne: vide && depot.statut === "FAILED",
     // Inutile de le demander tant que la chaîne tourne, et faux tant qu'elle
