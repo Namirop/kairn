@@ -15,6 +15,17 @@
  * le contexte du coût (chaque concept produit 3-4 questions repassées pendant
  * des mois), et un rappel que la règle de tri existante reste — le plafond
  * serveur en dépend.
+ *
+ * **Le critère d'altérité a été ajouté le 27 août 2026**, à la demande de
+ * Romain, après que E16 a été rejeté puis accepté sur deux tirages du même
+ * texte. Accepté, il donnait un texte à trous sur le souhait que la personne
+ * venait d'exprimer : « Tu veux améliorer ta communication au travail […] car
+ * tu penses que cela réduirait les ___ ». « Trop vague » ne suffisait pas à
+ * l'écarter — le texte n'est pas vague, il est invérifiable par un tiers. La
+ * règle nomme donc ce qui manque vraiment : quelqu'un d'autre que l'auteur
+ * peut-il se tromper dessus ? Le contre-exemple `PERSONNEL` est dans le prompt
+ * parce que la frontière est étroite : une procédure d'équipe s'apprend, une
+ * intention sur cette équipe non.
  */
 export const EXTRACT_ATOMS_PROMPT = `Tu découpes ce qu'une personne vient d'apprendre en concepts unitaires, pour qu'ils
 lui soient reposés plus tard.
@@ -120,8 +131,20 @@ CE QUI NE DONNE AUCUN CONCEPT
 Rends une liste vide et renseigne \`rejected\` en une phrase quand le dépôt est :
 - une tâche, une liste de courses, un rappel, une note d'organisation
 - une opinion ou un ressenti sans contenu factuel
+- fait uniquement des intentions, des projets ou des états de son auteur
 - trop vague pour qu'on puisse en tirer une question précise
 - illisible ou tronqué au point qu'on devrait deviner
+
+Le test qui tranche : quelqu'un d'autre que l'auteur pourrait-il se tromper là-dessus ?
+« Il faudrait que je sois plus clair en réunion », « je veux m'y remettre », « ce sujet
+me dépasse » sont vrais du seul fait d'avoir été écrits. Il n'y a rien à savoir, donc
+rien à reposer : la question ne pourrait que redemander à la personne ce qu'elle vient
+de dire.
+
+Ne confonds pas avec un dépôt PERSONNEL, qui décrit un fonctionnement que quelqu'un
+peut ignorer puis apprendre. « Les revues d'équipe se tiennent le lundi et durent une
+heure » s'oublie et se vérifie ; « il faudrait que je prépare mieux les revues » non.
+Le premier est un concept, le second est une intention.
 
 Écris \`rejected\` en tutoyant — « tu », « te », « ton » ; jamais « vous » —, sans
 reproche, en disant ce qui manquerait pour que ce soit exploitable.

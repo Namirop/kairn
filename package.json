@@ -36,7 +36,7 @@
     "test:watch": "vitest",
     "verify:ingestion": "tsx scripts/verifier-ingestion.ts",
     "verifier:depot-anonyme": "tsx scripts/verifier-le-depot-anonyme.ts",
-    "valider:tutoiement": "tsx scripts/valider-le-tutoiement.ts",
+    "valider:rejet": "tsx scripts/valider-le-rejet-et-le-ton.ts",
     "verify:session": "tsx scripts/verifier-session.ts",
     "verify:abus": "tsx scripts/verifier-abus.ts",
     "verify:contrastes": "tsx scripts/verifier-contrastes.ts",
