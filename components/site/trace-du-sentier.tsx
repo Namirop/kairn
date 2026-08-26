@@ -39,7 +39,7 @@ import type { MotionValue } from "motion/react";
 export type EtapeDuSentier = { titre: string; texte: string };
 
 /** La part de la traversée pendant laquelle le trait se dessine. */
-const FIN_DU_TRACE = 0.85;
+const FIN_DU_TRACE = 0.9;
 
 /** Amorti fort : le trait suit la molette, il ne la dépasse jamais. */
 const RESSORT = { stiffness: 90, damping: 24, restDelta: 0.001 };
@@ -56,11 +56,18 @@ export function TraceDuSentier({ etapes }: { etapes: EtapeDuSentier[] }) {
   const colonne = useRef<HTMLOListElement>(null);
   const immobile = useReducedMotion() ?? false;
 
-  // La traversée retenue : de la liste arrivant en bas de fenêtre à la liste en
-  // position de lecture, et non son entrée et sa sortie complètes.
+  // La traversée retenue : de la liste qui commence à paraître à la liste
+  // entièrement en vue — et non son entrée et sa sortie complètes.
+  //
+  // Elle était mesurée jusqu'à ce que la liste **sorte** par le haut, si bien
+  // que le trait n'était fini qu'une fois la section presque quittée : on
+  // arrivait à la suivante avec une animation encore en cours derrière soi.
+  // Elle se termine maintenant quand le bas de la liste atteint le bas de la
+  // fenêtre, c'est-à-dire au moment où l'on a tout sous les yeux — la seule
+  // définition de « lu » qui vaille pour ce trait-là.
   const { scrollYProgress } = useScroll({
     target: colonne,
-    offset: ["start 0.85", "end 0.55"],
+    offset: ["start 0.8", "end 0.9"],
   });
 
   const avance = useSpring(

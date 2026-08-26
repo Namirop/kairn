@@ -104,8 +104,8 @@ export function AttenteInterrompue({ onVerifier }: { onVerifier: () => void }) {
       <p className="text-corps text-stone-900">Le découpage prend plus de temps que prévu.</p>
 
       <p className="text-petit max-w-md text-stone-500">
-        Ton texte n&apos;est pas perdu. Reviens sur cette page dans un moment : tes concepts t&apos;y
-        attendront.
+        Ton texte n&apos;est pas perdu. Reviens sur cette page dans un moment : tes concepts
+        t&apos;y attendront.
       </p>
 
       <div className="mt-pas-1">

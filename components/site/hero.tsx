@@ -1,157 +1,103 @@
-import Link from "next/link";
 import { CairnRenversable } from "@/components/cairn/cairn-renversable";
+import { Button } from "@/components/ui/button";
 import { Panneau } from "@/components/coquille/panneau";
 import { Apparition, Temps } from "@/components/site/apparition";
-import { EssaiDeDepot } from "@/components/site/essai-de-depot";
-import { Button } from "@/components/ui/button";
-import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
-import { ROUTES } from "@/lib/auth/routes";
+import { PaysageDeCairns } from "@/components/site/paysage-de-cairns";
 
 /**
- * L'ouverture. Le titre porte la composition à lui seul : pas de dégradé, pas
- * de halo, pas d'illustration pour compenser. L'empilement de pierres à côté
- * est l'élément signature, et il est le même que celui du tableau de bord.
+ * L'ouverture. Titre à gauche, cairn à droite, un pli.
  *
- * Il n'a plus de cartouche. Le cadre d'ombre tenait la colonne de droite, mais
- * il enfermait aussi ce qui doit pouvoir en sortir : les pierres traversent
- * maintenant la composition quand on coupe l'empilement. C'est la taille du
- * cairn qui occupe la colonne désormais — il monte à toute la hauteur du
- * panneau plutôt que de flotter au milieu d'un rectangle.
+ * **Le titre arrive en deux temps.** « Tu lis beaucoup » est un constat, « Tu
+ * retiens peu » son retournement — décalage d'un dixième de seconde entre les
+ * deux blocs.
  *
- * **L'ouverture fait exactement un pli.** Elle mesurait la même chose en pixels
- * de sept cent soixante-huit à vingt-cinq cents de large, si bien qu'elle ouvrait
- * juste sur un grand écran et débordait sur un mille quatre-vingts : le champ de
- * dépôt et le lien de connexion passaient sous le pli, sur l'écran le plus
- * répandu du monde. Le panneau prend donc la hauteur qui reste sous l'en-tête, et
- * son contenu s'y centre ; ce qui l'occupe — le titre, le rythme du panneau, la
- * hauteur du cairn — se mesure à la fenêtre. La jointure de roche tombe alors au
- * pli quel que soit l'écran, et c'est elle qui invite à descendre.
+ * **Et il arrive en deux matières.** Le constat est plein, le retournement est
+ * creux : la ligne perd sa chair au moment où elle dit qu'on perd ce qu'on a
+ * lu. C'est la seule figure de style du site, elle porte la phrase qui porte le
+ * produit, et elle ne coûte rien à la lecture — le contour tient le contraste
+ * d'un texte, pas d'un ornement (voir `titre-creux` dans `globals.css`).
  *
- * **Le titre arrive en deux temps, parce que c'est une phrase en deux temps.**
- * « Tu lis beaucoup » est un constat, « Tu retiens peu » est son retournement :
- * affichées ensemble, les deux lignes laissent l'œil choisir par où commencer et
- * le retournement se perd. Ce sont donc deux blocs et non un saut de ligne — ce
- * qui permet de les décaler d'un dixième de seconde, et c'est tout ce qu'il faut.
+ * **Et la seconde ligne se vide sous les yeux.** Elle était creuse d'emblée,
+ * donc la phrase la plus importante de la page arrivait déjà oubliée, sans
+ * qu'on ait rien vu se perdre. Elle arrive maintenant pleine, et son encre s'en
+ * va — voir `ligne-oubli`. C'est le seul moment écrit de l'ouverture ; tout le
+ * reste du mouvement y était déjà et n'a pas bougé.
+ *
+ * **Le paysage se pose avant elle**, du plus proche au plus lointain : on
+ * arrive au sol, puis on lève les yeux, puis la phrase se vide.
+ *
+ * **Le titre a sa propre échelle, `--t-ouverture`, et elle se mesure à sa
+ * colonne**, pas à la fenêtre : il grandit jusqu'à la largeur disponible sans
+ * jamais passer à la ligne.
+ *
+ * **L'ouverture porte un geste, en contour**, et il ne s'adresse qu'aux
+ * visiteurs : quelqu'un de connecté voit un mot de reprise plus bas, pas
+ * l'essai.
+ *
+ * **Les deux colonnes se calent en bas.** Centrées, elles ne se déplaçaient que
+ * de la moitié de la marge qu'on leur donnait ; calées, elles se placent à la
+ * distance qu'on leur donne. Le rembourrage bas est le seul réglage à toucher,
+ * et il est posé sur les deux — n'en décaler qu'une ferait glisser le cairn par
+ * rapport au titre alors qu'ils tiennent la même ligne d'horizon.
+ *
+ * **Sur téléphone, le cairn est un emblème et non une image.** À sa taille de
+ * bureau il occupait plus de hauteur que le titre sur un écran de trois cent
+ * quatre-vingt-dix : la page disait « voici un dessin » avant de dire « tu
+ * retiens peu ». À la moitié il redevient une signature, la phrase reprend la
+ * main, et les blocs se serrent d'un pas — le vide qui les séparait n'avait
+ * plus lieu d'être une fois l'emblème réduit. Au-delà de `md`, rien de tout ça
+ * ne s'applique : la composition de bureau est intacte.
  */
-export function Hero({
-  invite,
-  essaiPrecedent,
-  connecte,
-}: {
-  invite: string;
-  essaiPrecedent: AvancementDeLEssai | null;
-  connecte: boolean;
-}) {
+export function Hero({ connecte }: { connecte: boolean }) {
   return (
     <Panneau
       surface="papier"
       aere
-      // La hauteur de l'en-tête, seul élément fixe au-dessus, **moins deux pas** :
-      // c'est ce qui laisse la coupe de roche entamer le bas de l'écran. Un pli
-      // net donnait une ouverture qui avait l'air d'être toute la page ; une
-      // jointure à moitié visible dit qu'il y a autre chose dessous, et le dit
-      // mieux qu'une flèche.
-      //
-      // `svh` et non `dvh` : sur un mobile, la barre d'adresse qui se replie
-      // ferait grandir le panneau pendant qu'on lit, et le contenu sauterait sous
-      // les yeux.
-      // L'écart de la grille reprend sur mobile ce que le rappel de connexion
-      // vient de rendre. Le cairn reste où il était — ce qu'on cherchait n'était
-      // pas de le remonter, mais de mettre le vide du bon côté du rappel : loin
-      // au-dessus et collé dessous, il se lisait comme le titre du cairn.
-      className="gap-pas-8 md:gap-pas-12 grid items-center md:min-h-[calc(100svh-4rem-2rem)] md:grid-cols-[1.4fr_1fr]"
+      mesure="large"
+      className="gap-pas-6 md:gap-pas-12 grid items-center md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
+      fond={<PaysageDeCairns />}
     >
-      <Apparition>
-        {/* Un seul interligne, serré, sur toutes les largeurs. Il s'ouvrait d'un
-            cheveu sous le point de bascule parce que le titre s'y cassait en
-            trois ou quatre lignes étroites, et qu'à 0,95 le jambage du « p » de
-            « peu » venait toucher la ligne suivante. La taille se calcule
-            désormais pour que chaque phrase tienne entière : il n'y a plus que
-            deux lignes à séparer, et c'est le serrage qui les soude en un seul
-            bloc — c'est de là que vient l'impact, autant que de la taille. */}
-        <h1 className="font-display text-h1-site leading-[0.95] font-bold tracking-[-0.03em] text-balance">
+      <Apparition className="md:pb-pas-24">
+        <h1 className="font-display text-ouverture leading-[0.95] font-bold tracking-[-0.03em] text-balance md:leading-[0.84] md:tracking-[-0.045em]">
           <Temps balise="span" className="block">
             Tu lis beaucoup.
           </Temps>
-          <Temps balise="span" className="block">
-            Tu retiens peu.
+
+          {/* Le creux occupe le flux, le plein se pose dessus et s'en va : la
+              hauteur du titre ne dépend donc jamais de l'animation. Les deux
+              copies sont masquées aux lecteurs d'écran, qui n'annoncent que la
+              troisième — sans quoi la phrase serait lue trois fois. */}
+          <Temps balise="span" className="ligne-oubli block">
+            <span aria-hidden className="titre-creux block">
+              Tu retiens peu.
+            </span>
+            <span aria-hidden className="oubli-plein">
+              Tu retiens peu.
+            </span>
+            <span className="sr-only">Tu retiens peu.</span>
           </Temps>
         </h1>
 
-        <Temps>
-          <p className="mt-pas-4 md:mt-pas-6 max-w-md text-stone-500">
-            {connecte
-              ? "Ce que tu as déposé t'attend, et revient quand il est sur le point de partir."
-              : "Un article, une réponse qu'on t'a donnée, une page de manuel, ce qu'un collègue vient de t'expliquer. Kairn le découpe en concepts et te les repose juste avant que tu les oublies."}
-          </p>
-        </Temps>
-
-        {/* Pour un visiteur, le champ et pas un bouton vers une inscription :
-            c'est le découpage qui convainc, et le montrer coûte une extraction.
-
-            Pour quelqu'un de connecté, surtout pas ce champ-là. Il ouvrirait une
-            visite anonyme et rattacherait son dépôt à un cookie plutôt qu'à son
-            compte — le texte serait effacé au bout de sept jours par le cron,
-            sans qu'il ait rien fait de travers. Une seule action à la place,
-            celle du même mot que la navigation. */}
-        {connecte ? (
+        {/* Le seul geste de l'ouverture, et il ne s'adresse qu'aux visiteurs.
+            Quelqu'un de connecté ne voit pas l'essai plus bas mais un mot de
+            reprise, qui porte déjà son propre bouton, et l'en-tête lui propose
+            « Aujourd'hui ». Lui poser ici un lien vers un panneau qui n'existe
+            pas pour lui serait une porte sur un mur. */}
+        {connecte ? null : (
           <Temps>
-            <Button asChild size="lg" className="mt-pas-8">
-              <Link href={ROUTES.aujourdhui}>Aujourd&apos;hui</Link>
+            <Button asChild variant="outline" size="lg" className="mt-pas-4 md:mt-pas-6">
+              <a href="#depot">Essayer sans compte</a>
             </Button>
           </Temps>
-        ) : (
-          <>
-            <Temps className="mt-pas-6 md:mt-pas-8">
-              <EssaiDeDepot invite={invite} essaiPrecedent={essaiPrecedent} />
-            </Temps>
-
-            {/* Le rappel de connexion se serre contre l'essai sur une colonne.
-                Il en est la porte de sortie, pas un sujet à lui seul, et un pas
-                de campagne entre les deux le faisait flotter au milieu d'un
-                blanc — puis un autre blanc le séparait du cairn. Trois blocs
-                séparés par des vides identiques ne se hiérarchisent plus.
-
-                Trois quarts de pas sur mobile, et rien d'autre entre les deux :
-                il se range sous le bouton et sa mention rassurante comme la
-                troisième ligne d'un même groupe. C'est là qu'il appartient — il
-                est la sortie de l'essai, pas l'introduction du cairn — et le
-                vide qu'il avait au-dessus le rattachait au mauvais voisin. */}
-            <Temps>
-              <p className="mt-pas-3 md:mt-pas-6 text-petit text-stone-500">
-                Déjà un compte ?{" "}
-                <Link
-                  href={ROUTES.connexion}
-                  className="rounded-xs text-stone-900 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900"
-                >
-                  Se connecter
-                </Link>
-              </p>
-            </Temps>
-          </>
         )}
       </Apparition>
 
-      <div className="flex justify-center">
-        {/* Sa hauteur suit celle de la fenêtre, entre dix-huit et trente rem :
-            posé à trente sur un portable de six cent cinquante pixels utiles, il
-            poussait à lui seul le reste de la colonne sous le pli.
-
-            Sur une colonne, c'est **la largeur** qui commande, et la boîte prend
-            la proportion du dessin. Elle était deux fois plus haute que large :
-            l'empilement, qui rentre en entier dans ce qu'on lui donne, se réglait
-            donc sur les cent soixante-seize pixels de largeur et laissait le
-            reste en air. Il paraissait minuscule au milieu d'un vide qu'il avait
-            lui-même réservé — alors que c'est le seul objet de la page qui
-            raconte le produit sans une phrase, et le seul avec quoi on puisse
-            jouer. */}
-        {/* La boîte prend **la proportion exacte du dessin**, et non plus un
-            carré. L'empilement rentre en entier dans ce qu'on lui donne : dans un
-            carré, il se réglait sur la largeur et laissait une vingtaine de
-            pixels de vide en haut comme en bas, que rien ne signalait sinon
-            l'impression que le cairn commençait trop loin du texte. Le rapport
-            est celui de la vue du dessin, cent sur quatre-vingt-treize. */}
-        <div className="aspect-[100/93] w-[min(84vw,24rem)] md:aspect-auto md:h-[clamp(18rem,42vh,30rem)] md:w-full">
+      <div className="md:pb-pas-24 flex justify-center">
+        <div className="relative aspect-[100/93] w-[min(42vw,12rem)] md:aspect-auto md:h-[clamp(18rem,42vh,30rem)] md:w-full">
+          <span
+            aria-hidden
+            className="rounded-galet absolute bottom-[1%] left-1/2 h-[5%] w-[56%] -translate-x-1/2 bg-stone-900 opacity-[0.15] blur-[9px]"
+          />
           <CairnRenversable nombre={7} />
         </div>
       </div>

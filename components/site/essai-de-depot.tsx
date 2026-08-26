@@ -189,26 +189,22 @@ export function EssaiDeDepot({
           Ce que tu veux retenir
         </label>
 
-        {/* Un sol, pas une boîte.
-          Le rectangle bordé à coins arrondis était le seul objet posé de la
-          page : partout ailleurs, ce qui sépare est une surface ou une coupe de
-          roche, et ce qui soutient est un trait — celui sous le cairn, dont le
-          composant dit déjà « le sol : un trait, pas une ombre portée ». Le
-          champ s'écrit donc à même le papier, sur ce trait-là.
+        {/* Plus de boîte du tout, pas même un trait.
+          Le champ a d'abord perdu son rectangle bordé, puis le trait qui l'avait
+          remplacé : ce qu'on écrit se pose à même le papier, au-dessus de la
+          ligne d'horizon que `SolDeLEssai` tire derrière le panneau. C'est le
+          bout du chemin qu'avait commencé « un sol, pas une boîte » — le sol
+          existe toujours, il est juste devenu celui du paysage plutôt que celui
+          du composant.
 
-          Le trait porte aussi le focus, et c'est pour ça qu'il fait deux pixels
-          au repos : un `:focus-visible` s'applique à un champ de texte même
-          cliqué à la souris, et l'anneau du thème aurait redessiné la boîte
-          qu'on vient d'enlever. Le passage au lichen le remplace — le lichen
-          signale, c'est son emploi. Épaissir au lieu de changer de teinte aurait
-          décalé le bouton d'un pixel à chaque entrée dans le champ.
-
-          Le trait est en `stone-500` et non dans le gris du sol sous le cairn :
-          sans bordure ni fond, il est devenu la seule chose qui dit qu'il y a un
-          champ ici, et à ce titre il lui faut trois pour un contre le papier.
-          Le gris du cairn n'en donnait que 1,63 — assez pour une décoration,
-          pas pour une limite de composant. */}
-        <div className="mt-pas-2 focus-within:border-lichen-deep border-b-2 border-stone-500 transition-colors">
+          **La bordure reste, en transparent, et c'est délibéré.** Sans elle, le
+          champ n'aurait plus aucun indicateur de focus : le `focus-visible` du
+          thème est neutralisé sur ce champ, précisément pour que son anneau ne
+          redessine pas la boîte qu'on vient d'enlever. Deux pixels transparents
+          au repos ne se voient pas, passent au lichen à l'entrée dans le champ,
+          et ne décalent rien — un changement d'épaisseur aurait bougé le bouton
+          d'un pixel à chaque fois. */}
+        <div className="mt-pas-2 focus-within:border-lichen-deep border-b-2 border-transparent transition-colors">
           {/* Le champ grandit avec ce qu'on y met, jusqu'à une borne.
             Sans elle, un article collé poussait le bouton hors de l'écran : le
             geste suivant disparaissait au moment où on venait de le préparer.
@@ -222,14 +218,17 @@ export function EssaiDeDepot({
             Retokenisé, faute de quoi le rail gris de Windows serait le seul
             objet de la page dessiné par quelqu'un d'autre.
 
-            La taille passe au corps de texte. En `h2-app`, un pavé collé
-            s'affichait plus gros que les concepts qui le remplacent à l'écran
-            juste après, et l'échange des deux se voyait comme un saut.
+            La taille est celle d'un titre d'écran, en display : le panneau
+            occupe un pli entier, et ce qu'on y écrit doit en être le plus gros
+            objet. C'est ce qui fait qu'on écrit au lieu de remplir.
 
-            Sa hauteur au repos suit celle de la fenêtre, entre cinq et huit rem :
-            c'est le plus gros bloc de l'ouverture, et sur un portable il poussait
-            à lui seul le lien de connexion sous le pli. Sur une fenêtre
-            ordinaire, la valeur tombe sur les huit rem d'avant. */}
+            **Sa hauteur est fixe, et c'est le champ qui défile.** Il grandissait
+            avec son contenu jusqu'à un plafond : à cette taille de corps, coller
+            un article faisait pousser un mur de lettres qui repoussait le bouton
+            hors de l'écran bien avant d'atteindre la borne, et la page entière
+            se réorganisait à chaque paragraphe collé. Une hauteur qui ne bouge
+            pas rend la mise en page prévisible — on voit toujours le geste
+            suivant — et l'ascenseur retokenisé dit qu'il reste du texte. */}
           <textarea
             id="essai"
             name="texte"
@@ -237,7 +236,7 @@ export function EssaiDeDepot({
             value={texte}
             onChange={(evenement) => setTexte(evenement.target.value)}
             placeholder={invite}
-            className="pb-pas-4 text-corps ascenseur-discret field-sizing-content max-h-[14rem] min-h-[clamp(5rem,14vh,8rem)] w-full resize-none overflow-y-auto border-0 bg-transparent leading-relaxed text-stone-900 outline-none placeholder:text-stone-500 focus-visible:outline-none"
+            className="pb-pas-6 font-display text-h1-app ascenseur-discret h-[clamp(7rem,22vh,13rem)] w-full resize-none overflow-y-auto border-0 bg-transparent leading-[1.12] font-bold tracking-[-0.02em] text-stone-900 outline-none placeholder:font-normal placeholder:tracking-normal placeholder:text-stone-400 focus-visible:outline-none"
           />
         </div>
       </div>
@@ -255,11 +254,6 @@ export function EssaiDeDepot({
           horizontal et un cran de corps sur mobile. Sur un écran de trois cent
           quatre-vingt-dix, c'est ce qui laisse à la mention les cent cinquante
           pixels d'une ligne. */}
-      {/* Le bouton et son message ne forment qu'un bloc dans le rythme du
-          formulaire. Séparés, l'écart entre eux était celui qui sépare le champ
-          du bouton — un pas entier de vide permanent, pour une ligne qui n'est
-          là qu'un jour sur cent, et c'est ce vide qui repoussait le rappel de
-          connexion vers le cairn. */}
       <div>
         <div className="gap-pas-3 md:gap-pas-4 flex items-center">
           <Button
@@ -292,11 +286,9 @@ export function EssaiDeDepot({
         </div>
 
         {/* Le message n'occupe plus rien tant qu'il n'a rien à dire.
-          Sa place était réservée en permanence — une ligne de vingt pixels, plus
-          le rythme du formulaire autour — pour une phrase qui paraît un jour sur
-          cent. Ce vide-là séparait le bouton du rappel de connexion qui le suit,
-          au point de rattacher ce rappel au cairn plutôt qu'à ce dont il est la
-          porte de sortie.
+          Sa place était réservée en permanence — une ligne, plus le rythme du
+          formulaire autour — pour une phrase qui paraît un jour sur cent, et ce
+          vide-là poussait le bas du panneau vers le sol qui le termine.
 
           La réserve ne protégeait d'ailleurs pas ce qu'elle prétendait : le
           message est **sous** le bouton, il ne peut pas le décaler. Il ne

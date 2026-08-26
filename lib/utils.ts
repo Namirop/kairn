@@ -22,7 +22,18 @@ import { extendTailwindMerge } from "tailwind-merge";
  * que tailwind-merge consulte pour tout ce qui espace, la déclarer une fois
  * couvre les rembourrages, les marges, les gouttières et les écarts.
  */
-const TAILLES = ["mono", "petit", "corps", "h2-app", "h1-app", "nombre", "h2-site", "h1-site"];
+const TAILLES = [
+  "mono",
+  "petit",
+  "corps",
+  "h2-app",
+  "h1-app",
+  "enonce",
+  "nombre",
+  "h2-site",
+  "h1-site",
+  "ouverture",
+];
 
 const PAS = [
   "pas-1",

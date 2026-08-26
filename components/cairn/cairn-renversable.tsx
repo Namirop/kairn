@@ -61,7 +61,7 @@ export function CairnRenversable({
          doigt serait happé par le défilement avant d'avoir touché une pierre —
          et tout bloquer aurait fait du cairn un trou dans la page, à l'endroit
          précis où il est le plus grand. */
-      className={cn("h-full w-full cursor-crosshair touch-pan-y overflow-visible", className)}
+      className={cn("curseur-pierre h-full w-full touch-pan-y overflow-visible", className)}
       onPointerMove={chute.surDeplacement}
       onPointerDown={chute.surAppui}
       onPointerLeave={chute.surSortie}

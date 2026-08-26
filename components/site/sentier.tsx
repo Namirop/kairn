@@ -24,6 +24,19 @@ const ETAPES: EtapeDuSentier[] = [
  * Le sentier : une séquence réelle, donc une liste verticale reliée par un
  * trait, pas trois cartes côte à côte. Les marqueurs sont des pierres.
  *
+ * **Les trois étapes s'écrivent de la même encre.** « Ça revient » a porté un
+ * temps le gris plein, pour la désigner comme la seule que l'essai ne peut pas
+ * montrer. L'intention était bonne, l'effet non : dans une liste de trois
+ * blocs identiques, un paragraphe d'une autre valeur ne se lit pas comme « ceci
+ * compte plus », il se lit comme une erreur — la première question qu'il
+ * soulève est « pourquoi celui-là est différent ? ». Une hiérarchie qui doit
+ * s'expliquer n'en est pas une.
+ *
+ * Le titre, lui, reste court. Une version plus explicative — « deux gestes se
+ * voient, le troisième non » — disait la même chose en trois lignes de display
+ * et perdait la frappe ; ce qu'un titre de campagne gagne en précision, il le
+ * paie en impact, et la précision est déjà dans la liste d'à côté.
+ *
  * Ce trait-là reste, et il est le seul du produit : il ne sépare pas deux
  * sujets, il relie trois étapes qui s'enchaînent. Il s'épaissit pour qu'on voie
  * qu'il est voulu, et non oublié d'une passe précédente. Et il se **trace** à

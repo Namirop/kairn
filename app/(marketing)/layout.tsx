@@ -25,14 +25,23 @@ export default async function CoquilleSite({ children }: { children: React.React
         {/* La même mesure que la mesure « page » d'un Panneau, aux mêmes
             gouttières : sur un grand écran, un en-tête plus étroit que ce qu'il
             coiffe posait la marque en retrait du titre qu'elle surplombe, et le
-            décalage se voyait avant qu'on sache le nommer. */}
-        <div className="px-pas-4 md:px-pas-8 mx-auto flex h-16 w-full max-w-6xl items-center justify-between 2xl:max-w-[84rem]">
+            décalage se voyait avant qu'on sache le nommer.
+
+            **Cinq rems de haut, et tout ce qu'il porte suit d'un quart.** Le
+            symbole passe de vingt-quatre à trente pixels — le mot s'aligne
+            dessus tout seul, c'est la même mesure qui les gouverne — et le lien
+            monte d'un cran sur l'échelle. Grandir la bande sans grandir son
+            contenu aurait donné un bandeau vide autour d'objets restés petits.
+
+            La hauteur est recopiée dans la hauteur d'ouverture du hero, qui se
+            mesure au pli moins l'en-tête. Les deux se changent ensemble. */}
+        <div className="px-pas-6 md:px-pas-8 mx-auto flex h-20 w-full max-w-6xl items-center justify-between 2xl:max-w-[84rem]">
           <Link href={ROUTES.accueil} className="rounded-galet">
-            <Marque />
+            <Marque taille={30} />
           </Link>
           <Link
             href={utilisateur ? ROUTES.aujourdhui : ROUTES.connexion}
-            className="text-corps rounded-galet px-pas-4 py-pas-2 hover:bg-surface-ombre text-stone-500 transition-colors hover:text-stone-900"
+            className="text-h2-app rounded-galet px-pas-6 py-pas-3 hover:bg-surface-ombre text-stone-500 transition-colors hover:text-stone-900"
           >
             {utilisateur ? "Aujourd'hui" : "Se connecter"}
           </Link>

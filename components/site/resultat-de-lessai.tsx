@@ -122,8 +122,7 @@ function situationDeLEchec(
 
   return {
     constat,
-    explication:
-      `Un compte accepte ${longueurEnClair(CARACTERES_MAXIMUM)}, garde ce qu'il en tire, et te le repose au bon moment.`,
+    explication: `Un compte accepte ${longueurEnClair(CARACTERES_MAXIMUM)}, garde ce qu'il en tire, et te le repose au bon moment.`,
   };
 }
 

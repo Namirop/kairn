@@ -40,6 +40,7 @@ const MESURES = {
 export type Mesure = keyof typeof MESURES;
 
 export function Panneau({
+  id,
   surface = "papier",
   mesure = "page",
   aere = false,
@@ -49,6 +50,8 @@ export function Panneau({
   className,
   children,
 }: {
+  /** Ancre du panneau, pour qu'un lien de la même page puisse y mener. */
+  id?: string;
   surface?: Surface;
   mesure?: Mesure;
   /**
@@ -86,8 +89,24 @@ export function Panneau({
 
   return (
     <section
+      id={id}
       className={cn(
         "relative w-full overflow-hidden",
+        /*
+          Un panneau ancré s'arrête bien au-dessus de son bord.
+
+          La marge appartient à la **section**, parce que c'est elle qui porte
+          l'ancre. Posée sur le bloc de contenu — là où arrive `className` —,
+          elle ne s'applique à rien : le navigateur cale l'élément visé, et
+          l'élément visé est la section. On peut alors augmenter la valeur autant
+          qu'on veut sans que le point d'arrivée bouge d'un pixel, ce qui est
+          exactement ce qui s'est passé deux fois de suite.
+
+          Ce qu'on gagne à s'arrêter plus haut : la coupe de roche qu'on vient de
+          traverser reste à l'écran, et le saut se lit comme une descente plutôt
+          que comme un changement de page.
+        */
+        id && "scroll-mt-pas-16 md:scroll-mt-[22svh]",
         remplit ? "flex-1" : "shrink-0",
         centre && "flex flex-col justify-center",
         fond,
@@ -99,7 +118,7 @@ export function Panneau({
 
       <div
         className={cn(
-          "px-pas-4 md:px-pas-8 relative z-10 mx-auto w-full",
+          "px-pas-6 md:px-pas-8 relative z-10 mx-auto w-full",
           MESURES[mesure],
           // Les deux rythmes suivent la fenêtre : sur un écran de mille
           // quatre-vingts, six pas de marge sur deux panneaux empilés font cent

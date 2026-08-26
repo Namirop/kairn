@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { Panneau } from "@/components/coquille/panneau";
 import { Strates } from "@/components/coquille/strates";
+import { Essai } from "@/components/site/essai";
 import { Hero } from "@/components/site/hero";
 import { PasCeci } from "@/components/site/pas-ceci";
+import { Reprendre } from "@/components/site/reprendre";
 import { Sentier } from "@/components/site/sentier";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -27,11 +29,24 @@ export default async function PageAccueil() {
 
   return (
     <>
-      <Hero
-        invite={inviteDeDepot(Math.random())}
-        essaiPrecedent={essaiPrecedent}
-        connecte={connecte}
-      />
+      {/* Le hero est identique quel que soit l'état. Ce qui change est le
+          panneau qui le suit : l'essai pour un visiteur, un mot de reprise pour
+          quelqu'un de connecté. Les deux vivent sur la même surface — le
+          visiteur descend d'un cran sans changer de paroi, il descend juste
+          plus près de l'action. */}
+      <Hero connecte={connecte} />
+
+      {/* Le hero se termine sur son sol d'ombre, et ce qui suit est du papier :
+          c'est exactement ce qu'une coupe de roche sait faire. Peinte dans le
+          panneau d'en dessous, la même transition venait couper le titre dès que
+          la fenêtre raccourcissait. */}
+      <Strates de="ombre" vers="papier" graine="accueil-essai" />
+
+      {connecte ? (
+        <Reprendre />
+      ) : (
+        <Essai invite={inviteDeDepot(Math.random())} essaiPrecedent={essaiPrecedent} />
+      )}
       <Strates de="papier" vers="ombre" graine="accueil-sentier" />
       <Sentier />
       <Strates de="ombre" vers="roche" graine="accueil-pas-ceci" />
