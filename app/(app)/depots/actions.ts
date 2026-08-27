@@ -10,12 +10,14 @@ import {
   modifierConcept,
   supprimerConcept,
 } from "@/lib/db/concepts";
+import { lireAvancementDuDepot } from "@/lib/db/depot-detaille";
 import { inscrireEnListeDattente } from "@/lib/db/quota-depots";
 import { supprimerDepot } from "@/lib/db/reprise-depot";
 import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 import { deposer } from "@/lib/depots/deposer";
 import { redecouper, type ResultatRedecoupage } from "@/lib/depots/redecouper";
 import { declencher } from "@/lib/jobs/queue";
+import { etatDuDepot, type EtatDepot as EtatDeLaChaine } from "@/lib/domain/etat-depot";
 
 /**
  * Les gestes de l'ingestion.
@@ -26,6 +28,9 @@ import { declencher } from "@/lib/jobs/queue";
  */
 
 export type EtatDepot = { erreur?: string; quota?: boolean };
+
+/** Ce que l'écran de détail relit à chaque tour : deux valeurs, pas une page. */
+export type EtatDepotSuivi = { etat: EtatDeLaChaine; concepts: number };
 
 async function utilisateurOuRefus(): Promise<string> {
   const utilisateur = await getCurrentUser();
@@ -158,4 +163,22 @@ export async function redecouperAction(inputId: string): Promise<ResultatRedecou
 export async function rejoindreListeDattenteAction(): Promise<void> {
   await inscrireEnListeDattente(await utilisateurOuRefus());
   revalidatePath(`${ROUTES.depots}/nouveau`);
+}
+
+/**
+ * Où en est le découpage d'un dépôt, pour l'écran qui l'attend.
+ *
+ * Ne rend pas la page : rend l'état, les travaux ouverts et le nombre de
+ * concepts. C'est l'écran qui décide de se recharger quand l'un des trois
+ * bouge. La propriété est vérifiée comme partout ailleurs — un dépôt qui n'est
+ * pas à lui n'est pas trouvé, et l'appelant reçoit `null` sans savoir s'il
+ * s'agit d'un dépôt inexistant ou d'un dépôt qui appartient à un autre.
+ */
+export async function avancementDuDepotAction(inputId: string): Promise<EtatDepotSuivi | null> {
+  const userId = await utilisateurOuRefus();
+  const avancement = await lireAvancementDuDepot(inputId, userId);
+
+  if (!avancement) return null;
+
+  return { etat: etatDuDepot(avancement), concepts: avancement.concepts };
 }

@@ -5,6 +5,7 @@ import { avancementDeLEssaiAction, essayerAction, type EtatEssai } from "@/app/(
 import { ResultatDeLEssai } from "@/components/site/resultat-de-lessai";
 import { Button } from "@/components/ui/button";
 import { CARACTERES_MAXIMUM_ANONYME } from "@/lib/depots/bornes-du-depot";
+import { ABANDON_MS, AVEU_MS, pauseApres, RYTHME_VIF_MS } from "@/lib/depots/rythme-de-lattente";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
 /**
@@ -19,29 +20,6 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
  * seul endroit du produit qui interroge en boucle, et il s'arrête dès que la
  * chaîne s'est arrêtée.
  */
-
-/**
- * Le rythme de l'interrogation, et les deux moments où il change.
- *
- * Une seconde d'abord : le résultat apparaît au plus tard une seconde après être
- * prêt, l'appel est léger, et une demi-seconde de retard se voit sur cinq.
- *
- * **À quinze secondes, on le dit.** Une minute de tourniquet était une minute où
- * plus personne ne regardait — quelqu'un qui attend cinq secondes d'habitude est
- * parti bien avant. Mais on ne s'arrête pas pour autant : un pavé de quatre mille
- * caractères peut mettre vingt secondes sans que rien n'aille mal, et couper à
- * quinze condamnerait une extraction qui allait aboutir. On ralentit à cinq
- * secondes, l'écran dit qu'il ne sait plus, et si le résultat tombe il s'affiche
- * de lui-même — le bouton « Vérifier maintenant » ne fait qu'accélérer.
- *
- * **À quatre-vingt-dix secondes, on arrête vraiment.** Au-delà, ce n'est plus une
- * extraction lente, c'est un job reporté ou perdu : le cron le reprendra, et
- * l'écran n'a plus rien à apprendre en insistant.
- */
-const RYTHME_VIF_MS = 1000;
-const RYTHME_LENT_MS = 5000;
-const AVEU_MS = 15_000;
-const ABANDON_MS = 90_000;
 
 /**
  * Au-delà, on montre le compteur : avant, il n'apprend rien à personne.
@@ -117,7 +95,7 @@ export function EssaiDeDepot({
       if (ecoule >= AVEU_MS) setAttenteInterrompue(true);
       if (ecoule >= ABANDON_MS) return;
 
-      const pause = ecoule < AVEU_MS ? RYTHME_VIF_MS : RYTHME_LENT_MS;
+      const pause = pauseApres(ecoule);
 
       ecoule += pause;
       minuteur = setTimeout(tour, pause);

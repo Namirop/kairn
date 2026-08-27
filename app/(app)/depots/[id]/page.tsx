@@ -6,6 +6,7 @@ import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
 import { ConceptCorrigeable } from "@/components/depots/concept-corrigeable";
 import { GestesDuDepot } from "@/components/depots/gestes-du-depot";
+import { SuivreLAvancement } from "@/components/depots/suivre-lavancement";
 import { VideDuDepot } from "@/components/depots/vide-du-depot";
 import { Badge } from "@/components/ui/badge";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
@@ -15,11 +16,20 @@ import { lireDepotDetaille } from "@/lib/db/depot-detaille";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";
-import { etatDuDepot, libelleEtat, redecoupable } from "@/lib/domain/etat-depot";
+import { etatDuDepot, libelleEtat, redecoupable, type EtatDepot } from "@/lib/domain/etat-depot";
 import { PLAFOND_CONCEPTS_PAR_DEPOT } from "@/lib/domain/plafond-de-concepts";
 import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 
 export const metadata: Metadata = { title: "Dépôt" };
+
+/**
+ * Les états où quelque chose est encore en route, et où l'écran a donc une
+ * raison de redemander.
+ *
+ * `questions-differees` n'en est pas : la demande attend sa date, parfois six
+ * jours. Interroger jusque-là serait un onglet ouvert pour rien.
+ */
+const ATTENDS = new Set<EtatDepot>(["lecture", "decoupage", "questions"]);
 
 /**
  * Un dépôt et ce qu'il a donné.
@@ -74,6 +84,14 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
             )}
             <span>Déposé {anciennete(depot.createdAt, new Date(), fuseau)}</span>
           </p>
+
+          {/* Tant qu'un travail tourne, l'écran se recharge tout seul quand il
+              aboutit. Monté seulement dans ce cas : sur un dépôt prêt, rejeté ou
+              en échec, il n'y a plus rien à attendre et l'interrogation serait
+              une boucle sans fin sur une page qui ne bougera plus. */}
+          {ATTENDS.has(etat) ? (
+            <SuivreLAvancement inputId={depot.id} etat={etat} concepts={depot.concepts.length} />
+          ) : null}
         </div>
 
         {texte ? (

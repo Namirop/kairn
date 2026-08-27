@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import type { AtomState, GenerationKind, InputStatus } from "@/lib/db/types";
+import type { AvancementDepot } from "@/lib/domain/etat-depot";
 
 /**
  * Un dépôt et ce qu'il a donné, tel que son écran le lit.
@@ -89,6 +90,46 @@ export async function lireDepotDetaille(
     ...reste,
     concepts: atoms.map(({ _count, ...atome }) => ({ ...atome, questions: _count.variants })),
     travauxEnCours: jobs.map(({ kind, notBefore }) => ({
+      kind,
+      differe: notBefore !== null && notBefore > maintenant,
+    })),
+  };
+}
+
+/**
+ * Juste de quoi savoir si l'écran a changé, et rien d'autre.
+ *
+ * L'écran de détail redemande son avancement tant qu'un travail tourne. La
+ * requête complète rapporterait le texte déposé, ses concepts et leurs
+ * comptes de questions à chaque tour, pour n'en lire que trois nombres. Celle-ci
+ * ne rapporte que ce qui décide : l'état, les travaux ouverts, et le nombre de
+ * concepts. Le reste de la page se recharge par `router.refresh()` le jour où
+ * l'un des trois bouge — c'est-à-dire une fois, à la fin.
+ */
+export async function lireAvancementDuDepot(
+  inputId: string,
+  userId: string,
+): Promise<AvancementDepot | null> {
+  const depot = await prisma.input.findFirst({
+    where: { id: inputId, userId },
+    select: {
+      status: true,
+      _count: { select: { atoms: true } },
+      jobs: {
+        where: { status: { in: ["QUEUED", "RUNNING"] } },
+        select: { kind: true, notBefore: true },
+      },
+    },
+  });
+
+  if (!depot) return null;
+
+  const maintenant = new Date();
+
+  return {
+    status: depot.status,
+    concepts: depot._count.atoms,
+    travaux: depot.jobs.map(({ kind, notBefore }) => ({
       kind,
       differe: notBefore !== null && notBefore > maintenant,
     })),
