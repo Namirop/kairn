@@ -103,11 +103,47 @@ export async function rattacherAuCompte(
   // Déjà réclamée : deux onglets, ou un rechargement. Le premier a gagné.
   if (!session || session.claimedAt !== null) return [];
 
-  const depots = await prisma.input.findMany({
+  const tous = await prisma.input.findMany({
     where: { anonymousSessionId: sessionId },
     orderBy: { createdAt: "asc" },
-    select: { id: true, atoms: { select: { id: true } } },
+    select: { id: true, status: true, atoms: { select: { id: true } } },
   });
+
+  /*
+    Un essai qui n'a rien donné ne suit pas au compte.
+
+    Le cas courant d'une visite est « premier dépôt rejeté, second réussi » :
+    on écrit n'importe quoi pour voir, la landing répond que rien n'est à
+    retenir, et on redépose pour de bon. Le premier a déjà rendu son verdict à
+    l'écran, sur place. Le porter au compte revient à ouvrir la liste de
+    quelqu'un sur son brouillon raté, avec « RIEN À RETENIR » pour seule
+    ligne — et rien ne pourra jamais le remplir, puisqu'un dépôt rejeté est
+    terminal.
+
+    **Terminal et vide**, les deux : un dépôt sans concept dont l'extraction
+    tourne encore est un dépôt qui n'a pas fini, pas un dépôt qui a échoué.
+    Le supprimer emporterait le job qui allait le remplir.
+
+    Suppression et non abandon sur place : la session est marquée réclamée
+    juste après, ce qui la met hors de portée du cron de nettoyage. Ce qu'on
+    n'emporte pas ici ne serait ramassé par personne.
+
+    Hors de la transaction qui suit, et c'est sans risque : elle est là pour
+    qu'un dépôt n'arrive jamais au compte sans ses concepts, or ceux-ci n'en
+    ont pas. Si le rattachement échouait derrière, on n'aurait perdu que des
+    lignes qui n'avaient rien à perdre.
+  */
+  const perdus = tous
+    .filter(
+      (depot) =>
+        depot.atoms.length === 0 && (depot.status === "REJECTED" || depot.status === "FAILED"),
+    )
+    .map((depot) => depot.id);
+  const depots = tous.filter((depot) => !perdus.includes(depot.id));
+
+  if (perdus.length > 0) {
+    await prisma.input.deleteMany({ where: { id: { in: perdus } } });
+  }
 
   if (depots.length === 0) {
     await prisma.anonymousSession.update({
@@ -120,7 +156,7 @@ export async function rattacherAuCompte(
 
   await prisma.$transaction([
     prisma.input.updateMany({
-      where: { anonymousSessionId: sessionId },
+      where: { id: { in: depots.map((depot) => depot.id) } },
       data: { userId, anonymousSessionId: null },
     }),
     prisma.atom.updateMany({
