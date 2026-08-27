@@ -4,7 +4,6 @@ import { Strates } from "@/components/coquille/strates";
 import { Essai } from "@/components/site/essai";
 import { Hero } from "@/components/site/hero";
 import { PasCeci } from "@/components/site/pas-ceci";
-import { Reprendre } from "@/components/site/reprendre";
 import { Sentier } from "@/components/site/sentier";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -29,25 +28,32 @@ export default async function PageAccueil() {
 
   return (
     <>
-      {/* Le hero est identique quel que soit l'état. Ce qui change est le
-          panneau qui le suit : l'essai pour un visiteur, un mot de reprise pour
-          quelqu'un de connecté. Les deux vivent sur la même surface — le
-          visiteur descend d'un cran sans changer de paroi, il descend juste
-          plus près de l'action. */}
+      {/* Le hero porte le même titre et le même cairn pour tout le monde ; son
+          geste mène à l'essai ou à la journée selon l'état. */}
       <Hero connecte={connecte} />
 
-      {/* Le hero se termine sur son sol d'ombre, et ce qui suit est du papier :
-          c'est exactement ce qu'une coupe de roche sait faire. Peinte dans le
-          panneau d'en dessous, la même transition venait couper le titre dès que
-          la fenêtre raccourcissait. */}
-      <Strates de="ombre" vers="papier" graine="accueil-essai" />
+      {/* L'essai n'existe que pour un visiteur, et sa jointure avec lui.
 
-      {connecte ? (
-        <Reprendre />
-      ) : (
-        <Essai invite={inviteDeDepot(Math.random())} essaiPrecedent={essaiPrecedent} />
+          Quelqu'un de connecté voyait ici un panneau « Reprends » : un titre,
+          une ligne, un bouton, dans la mesure d'une colonne et au milieu d'un
+          panneau aéré. C'était la place de l'essai — le moteur de la page —
+          occupée par trois éléments qui n'avaient pas de quoi la remplir, pour
+          proposer une journée que l'en-tête proposait déjà et que le hero
+          propose maintenant. Le panneau est parti ; le geste est remonté là où
+          on regarde en premier.
+
+          Le hero se termine sur son sol d'ombre, et l'essai est du papier :
+          c'est exactement ce qu'une coupe de roche sait faire. Sans essai, il
+          n'y a plus de changement de surface — le sentier est de l'ombre lui
+          aussi — donc plus de jointure à peindre. */}
+      {connecte ? null : (
+        <>
+          <Strates de="ombre" vers="papier" graine="accueil-essai" />
+          <Essai invite={inviteDeDepot(Math.random())} essaiPrecedent={essaiPrecedent} />
+          <Strates de="papier" vers="ombre" graine="accueil-sentier" />
+        </>
       )}
-      <Strates de="papier" vers="ombre" graine="accueil-sentier" />
+
       <Sentier />
       <Strates de="ombre" vers="roche" graine="accueil-pas-ceci" />
       <PasCeci connecte={connecte} />

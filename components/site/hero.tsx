@@ -1,5 +1,6 @@
 import { CairnRenversable } from "@/components/cairn/cairn-renversable";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { ROUTES } from "@/lib/auth/routes";
 import { Button } from "@/components/ui/button";
 import { Panneau } from "@/components/coquille/panneau";
 import { Apparition, Temps } from "@/components/site/apparition";
@@ -75,13 +76,12 @@ export function Hero({ connecte }: { connecte: boolean }) {
 
           Un rang de plus sur le titre suffit : le bloc du cairn reste au sien.
 
-          L'écart du bas dépend du geste, ou de son absence. Les deux colonnes se
-          calent en bas, si bien qu'un titre sans bouton commence plus bas qu'un
-          titre qui en porte un — soixante-huit pixels plus bas, la hauteur du
-          bouton et de sa marge. Quelqu'un de connecté voyait donc la même
-          ouverture, posée plus bas, sans qu'aucune raison de composition ne le
-          justifie. Le pas rendu la remet à sa place. */}
-      <Apparition className={cn("md:pb-pas-24 relative z-10", connecte && "md:mb-pas-16")}>
+          L'ouverture a la même hauteur pour tout le monde, parce qu'elle porte
+          un geste dans les deux cas. Elle n'en portait qu'un pour les visiteurs,
+          et le bloc commençait alors soixante-huit pixels plus bas chez les
+          autres — la hauteur du bouton absent, les deux colonnes se calant en
+          bas. On compensait ce trou ; il n'y en a plus. */}
+      <Apparition className="md:pb-pas-24 relative z-10">
         <h1 className="font-display text-ouverture leading-[0.95] font-bold tracking-[-0.03em] text-balance md:leading-[0.84] md:tracking-[-0.045em]">
           <Temps balise="span" className="block">
             Tu lis beaucoup.
@@ -102,18 +102,25 @@ export function Hero({ connecte }: { connecte: boolean }) {
           </Temps>
         </h1>
 
-        {/* Le seul geste de l'ouverture, et il ne s'adresse qu'aux visiteurs.
-            Quelqu'un de connecté ne voit pas l'essai plus bas mais un mot de
-            reprise, qui porte déjà son propre bouton, et l'en-tête lui propose
-            « Aujourd'hui ». Lui poser ici un lien vers un panneau qui n'existe
-            pas pour lui serait une porte sur un mur. */}
-        {connecte ? null : (
-          <Temps>
-            <Button asChild variant="outline" size="lg" className="mt-pas-4 md:mt-pas-6">
+        {/* Le geste de l'ouverture, et il s'adresse à tout le monde — seule sa
+            destination change.
+
+            Il n'existait que pour les visiteurs, parce qu'il pointait vers un
+            panneau d'essai que les autres n'ont pas : une porte sur un mur. Mais
+            quelqu'un de connecté vient ici pour une raison, et c'est la même à
+            un mot près — il ne veut pas essayer le produit, il veut retrouver
+            sa journée. Le lien mène donc là, plutôt que de laisser l'ouverture
+            sans issue et de reporter l'action dans un panneau plus bas que
+            personne n'a envie d'aller chercher. */}
+        <Temps>
+          <Button asChild variant="outline" size="lg" className="mt-pas-4 md:mt-pas-6">
+            {connecte ? (
+              <Link href={ROUTES.aujourdhui}>Aujourd&apos;hui</Link>
+            ) : (
               <a href="#depot">Essayer sans compte</a>
-            </Button>
-          </Temps>
-        )}
+            )}
+          </Button>
+        </Temps>
       </Apparition>
 
       {/* Sur téléphone, l'emblème descend sous le rythme bas du panneau.
