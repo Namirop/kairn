@@ -60,7 +60,8 @@ const RUBRIQUES: RubriqueLegale[] = [
   {
     titre: "Sous-traitants",
     corps: [
-      "OpenRouter, Inc. (New York, États-Unis) découpe les dépôts en concepts et écrit les questions. Le contenu déposé lui est transmis pour ce traitement, qui est le service lui-même. OpenRouter s'appuie sur un sous-traitant ultérieur, OpenAI, L.L.C. (San Francisco, États-Unis), qui exécute réellement les modèles. Le compte OpenRouter est réglé pour interdire l'entraînement sur nos données, et les données envoyées à OpenAI par ce canal ne sont pas conservées au-delà de trente jours.",
+      "OpenRouter, Inc. (New York, États-Unis) découpe les dépôts en concepts et écrit les questions. Le contenu déposé lui est transmis pour ce traitement, qui est le service lui-même. OpenRouter s'appuie sur un sous-traitant ultérieur, OpenAI, L.L.C. (San Francisco, États-Unis), qui exécute réellement les modèles.",
+      "Nous avons désactivé sur notre compte OpenRouter toute option autorisant l'entraînement sur les données transmises. OpenRouter ne conserve pas le contenu des requêtes, mais des métadonnées techniques (horodatage, modèle, volume de tokens). OpenAI, sous-traitant ultérieur, conserve les données jusqu'à 30 jours pour la surveillance des abus, puis les supprime.",
       "Anthropic Ireland, Limited (Dublin, Irlande), pour le même traitement, en repli automatique quand OpenRouter est indisponible. Ses conditions commerciales interdisent l'entraînement de modèles sur le contenu de ses clients, et ses journaux d'appels sont supprimés sous trente jours.",
       "Neon, LLC — société du groupe Databricks, Inc. —, pour l'hébergement de la base de données, sur une infrastructure située à Francfort, en Allemagne.",
       "Vercel Inc., pour l'hébergement de l'application, avec une exécution en région européenne.",
