@@ -73,10 +73,16 @@ export function SuppressionEnDeuxTemps({
 
       {/* La conséquence n'apparaît qu'une fois la question posée. Affichée en
           permanence, elle deviendrait le décor de l'écran et personne ne la
-          lirait le jour où elle compte. */}
-      {confirme ? (
-        <p className="mt-pas-3 text-petit max-w-lg text-stone-500">{consequence}</p>
-      ) : null}
+          lirait le jour où elle compte.
+
+          Elle court sur toute la largeur de sa carte. Elle était serrée à une
+          mesure de lecture, ce qui se défend pour un paragraphe et se retourne
+          contre une phrase : dans une carte deux fois plus large, la ligne
+          s'arrêtait au milieu et repartait à la ligne sans qu'aucun bord ne
+          l'explique — l'œil lit ça comme un défaut d'affichage, pas comme un
+          confort de lecture. Le texte au-dessus, celui du concept, occupe déjà
+          toute la carte : c'est lui qui donne la mesure de ce bloc. */}
+      {confirme ? <p className="mt-pas-3 text-petit text-stone-500">{consequence}</p> : null}
     </div>
   );
 }

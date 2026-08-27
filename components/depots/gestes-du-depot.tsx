@@ -66,7 +66,10 @@ export function GestesDuDepot({
       />
 
       {redecoupable ? (
-        <p className="mt-pas-3 text-petit max-w-lg text-stone-500">
+        /* Pleine largeur, comme la conséquence de la suppression juste
+           au-dessus : les deux lignes se suivent dans la même carte, et l'une
+           serrée à côté de l'autre étalée se lit comme un défaut. */
+        <p className="mt-pas-3 text-petit text-stone-500">
           Redécouper relance une extraction sur le même texte, et prend une place de la journée
           comme un dépôt.
         </p>
