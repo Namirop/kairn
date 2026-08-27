@@ -15,10 +15,15 @@ export const metadata: Metadata = {
   applicationName: "Kairn",
   manifest: "/manifest.webmanifest",
 
-  // La favicon vient d'`app/icon.png`, que Next détecte. La pastille iOS, elle,
-  // vit dans `public/` et n'était déclarée nulle part : le fichier existait
-  // depuis le début et aucun appareil n'allait le chercher.
-  icons: { apple: "/icones/apple-touch-icon.png" },
+  // Les deux icônes sont déclarées ici, et il faut les deux : dès qu'`icons`
+  // existe, il **remplace** la détection de fichier au lieu de s'y ajouter. Ne
+  // déclarer que la pastille iOS suffisait donc à retirer la favicon du HTML —
+  // `app/icon.png` restait servi, mais plus personne ne pointait dessus, et
+  // l'onglet retombait sur `/favicon.ico`, qui n'existe pas.
+  icons: {
+    icon: { url: "/icon.png", type: "image/png" },
+    apple: "/icones/apple-touch-icon.png",
+  },
   appleWebApp: { capable: true, title: "Kairn", statusBarStyle: "default" },
   formatDetection: { telephone: false },
 
