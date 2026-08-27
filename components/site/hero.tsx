@@ -1,4 +1,5 @@
 import { CairnRenversable } from "@/components/cairn/cairn-renversable";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Panneau } from "@/components/coquille/panneau";
 import { Apparition, Temps } from "@/components/site/apparition";
@@ -62,7 +63,25 @@ export function Hero({ connecte }: { connecte: boolean }) {
       className="gap-pas-12 grid items-center md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
       fond={<PaysageDeCairns />}
     >
-      <Apparition className="md:pb-pas-24">
+      {/* Le titre passe **devant** les pierres.
+
+          Les deux colonnes sont sœurs dans la même grille, et le cairn arrive
+          après dans le balisage : sans rien, c'est lui qui se peint par-dessus.
+          Ça ne se voyait pas tant qu'il tenait debout — il est à droite, le
+          titre à gauche — mais renversé, ses pierres traversent l'écran et
+          venaient recouvrir la phrase. Une pierre qui roule devant le texte
+          efface ce qu'on est venu lire ; derrière, elle passe, et la seconde
+          ligne étant évidée, on la voit même passer au travers des lettres.
+
+          Un rang de plus sur le titre suffit : le bloc du cairn reste au sien.
+
+          L'écart du bas dépend du geste, ou de son absence. Les deux colonnes se
+          calent en bas, si bien qu'un titre sans bouton commence plus bas qu'un
+          titre qui en porte un — soixante-huit pixels plus bas, la hauteur du
+          bouton et de sa marge. Quelqu'un de connecté voyait donc la même
+          ouverture, posée plus bas, sans qu'aucune raison de composition ne le
+          justifie. Le pas rendu la remet à sa place. */}
+      <Apparition className={cn("md:pb-pas-24 relative z-10", connecte && "md:mb-pas-16")}>
         <h1 className="font-display text-ouverture leading-[0.95] font-bold tracking-[-0.03em] text-balance md:leading-[0.84] md:tracking-[-0.045em]">
           <Temps balise="span" className="block">
             Tu lis beaucoup.
