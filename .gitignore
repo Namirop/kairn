@@ -51,9 +51,12 @@ next-env.d.ts
 /.agents
 /skills-lock.json
 /CLAUDE.md
-# Les consignes de phase : elles disent comment le produit a été construit,
-# pas ce qu'il fait. Rangées ensemble depuis la phase 4.
-/archive/
+# Ce qui a servi et ne sert plus : consignes de phase, fiches de chantier closes,
+# brouillons de documents remplacés. Ça dit comment le produit a été construit,
+# pas ce qu'il fait — donc ça reste sur la machine. Un seul dossier, et un seul
+# nom : il y en avait deux, `archive/` couvert par cette règle et `.archive/` qui
+# ne l'était pas, et une fiche rangée dans le second partait dans le dépôt.
+/.archive/
 
 # Rapports du banc d’évaluation : produits localement, jamais commités.
 /scripts/evaluation/rapports/
