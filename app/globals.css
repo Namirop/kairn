@@ -627,11 +627,29 @@
    La couleur pleine est déclarée avant la garde et non dedans : sans le
    contour, un `color: transparent` isolé effacerait la ligne au lieu de
    l'évider. */
+/*
+  La seconde ligne de l'ouverture : un contour, et un intérieur en papier.
+
+  L'intérieur était transparent, ce qui revient à ouvrir une fenêtre dans le
+  titre. Tant que rien ne passait derrière, la fenêtre donnait sur du papier et
+  personne ne la voyait — c'est d'ailleurs pour ça que le paysage de bureau tient
+  ses crêtes au-dessus de la ligne de titre. Mais le cairn de l'ouverture se
+  renverse, ses pierres traversent l'écran, et une pierre passée derrière la
+  phrase se voyait **à travers les lettres**. Le mot devenait illisible au moment
+  précis où il porte le produit.
+
+  L'intérieur prend donc la couleur de la surface qui le porte. Au repos, papier
+  sur papier : rien ne change à l'œil. En mouvement, la lettre est pleine, et ce
+  qui passe derrière passe vraiment derrière.
+
+  Le repli sans `-webkit-text-stroke` garde une lettre pleine en gris moyen : là
+  il n'y a pas de contour à tenir, donc pas de fenêtre à refermer.
+*/
 @utility titre-creux {
   color: var(--stone-500);
 
   @supports (-webkit-text-stroke: 1px currentColor) {
-    color: transparent;
+    color: var(--surface-papier);
     -webkit-text-stroke: max(1.6px, 0.021em) var(--stone-700);
   }
 }
