@@ -43,17 +43,24 @@ export default async function PageAccueil() {
           on regarde en premier.
 
           Le hero se termine sur son sol d'ombre, et l'essai est du papier :
-          c'est exactement ce qu'une coupe de roche sait faire. Sans essai, il
-          n'y a plus de changement de surface — le sentier est de l'ombre lui
-          aussi — donc plus de jointure à peindre. */}
+          c'est exactement ce qu'une coupe de roche sait faire.
+
+          Sans essai, les deux surfaces qui se touchent sont de l'ombre — et la
+          coupe reste, d'ombre vers ombre. On avait cru pouvoir s'en passer :
+          pas de changement de teinte, donc pas de jointure à peindre. Mais
+          l'ombre et le papier ne se séparent que de quelques centièmes de
+          luminance, et deux panneaux d'ombre bout à bout ne se séparaient de
+          rien du tout — le sentier avait l'air de continuer l'ouverture. Ce qui
+          fait la jointure ici n'est pas le contraste, c'est la matière : une
+          strate se voit même quand la roche est la même des deux côtés. */}
       {connecte ? null : (
         <>
           <Strates de="ombre" vers="papier" graine="accueil-essai" />
           <Essai invite={inviteDeDepot(Math.random())} essaiPrecedent={essaiPrecedent} />
-          <Strates de="papier" vers="ombre" graine="accueil-sentier" />
         </>
       )}
 
+      <Strates de={connecte ? "ombre" : "papier"} vers="ombre" graine="accueil-sentier" />
       <Sentier />
       <Strates de="ombre" vers="roche" graine="accueil-pas-ceci" />
       <PasCeci connecte={connecte} />
