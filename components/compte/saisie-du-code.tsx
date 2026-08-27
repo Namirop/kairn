@@ -13,8 +13,9 @@ import { LONGUEUR_DU_CODE } from "@/lib/domain/code-de-connexion";
  * Trois chemins mènent au champ rempli, et l'écran les sert tous les trois. Le
  * clavier mobile propose le code de lui-même — c'est `one-time-code` qui
  * l'autorise, et le mot « code » près des chiffres dans l'email qui le
- * déclenche. Le bouton coller sert le presse-papier, sur ordinateur surtout. Et
- * la frappe reste possible, sans rien installer ni autoriser.
+ * déclenche. Le bouton coller sert le presse-papier, sur ordinateur surtout, et
+ * il se tient dans le champ plutôt qu'au-dessus. Et la frappe reste possible,
+ * sans rien installer ni autoriser.
  *
  * Le champ est en Geist Mono, espacé, à chasse fixe : six chiffres sont une
  * donnée, et on les relit caractère par caractère pour les vérifier. C'est le
@@ -35,24 +36,31 @@ export function SaisieDuCode({ adresse, suite }: { adresse: string; suite: strin
       className="gap-pas-4 flex flex-col"
     >
       <div className="gap-pas-1 flex flex-col">
-        <div className="flex items-baseline justify-between">
-          <Label htmlFor="code">Code à {LONGUEUR_DU_CODE} chiffres</Label>
-          <BoutonColler onTexte={ecrireLeCode} />
-        </div>
+        <Label htmlFor="code">Code à {LONGUEUR_DU_CODE} chiffres</Label>
 
-        <Input
-          id="code"
-          name="code"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          autoFocus
-          required
-          value={code}
-          aria-invalid={erreur ? true : undefined}
-          aria-describedby="code-erreur"
-          onChange={(evenement) => ecrireLeCode(evenement.target.value)}
-          className="h-13 font-mono text-[1.375rem] tracking-[0.3em] tabular-nums"
-        />
+        <div className="relative">
+          <Input
+            id="code"
+            name="code"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            autoFocus
+            required
+            value={code}
+            aria-invalid={erreur ? true : undefined}
+            aria-describedby="code-erreur"
+            onChange={(evenement) => ecrireLeCode(evenement.target.value)}
+            // La réserve à droite est celle du bouton : sans elle, le sixième
+            // chiffre passait sous l'icône.
+            className="h-13 pr-14 font-mono text-[1.375rem] tracking-[0.3em] tabular-nums"
+          />
+
+          <BoutonColler
+            onTexte={ecrireLeCode}
+            intitule="Coller le code"
+            className="absolute top-1/2 right-1 -translate-y-1/2"
+          />
+        </div>
 
         {/* La place du message est réservée : l'erreur ne décale pas le bouton. */}
         <p id="code-erreur" className="text-mono text-alerte min-h-4" role="status">

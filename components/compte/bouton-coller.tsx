@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ClipboardPaste } from "lucide-react";
 
 /**
- * Colle le presse-papier dans le champ voisin, quand le navigateur le permet.
+ * Colle le presse-papier dans le champ qui le porte.
+ *
+ * Il vit **dans** le champ, au bout à droite, et pas au-dessus en toutes
+ * lettres : c'est un geste sur ce champ-là, et une action posée à côté de son
+ * étiquette se lit comme une seconde étiquette. À l'intérieur, sa place dit
+ * déjà sur quoi elle agit — c'est la convention de tous les champs qui portent
+ * une action, et elle n'a pas besoin d'un mot.
  *
  * `readText` n'existe pas partout — Firefox ne l'expose pas aux pages, et Chrome
  * peut demander une permission puis se voir refuser. Le bouton ne s'affiche donc
@@ -15,11 +22,22 @@ import { useEffect, useState } from "react";
  * ne sait rien du presse-papier, et afficher puis retirer le bouton ferait
  * sauter la mise en page.
  */
-export function BoutonColler({ onTexte }: { onTexte: (texte: string) => void }) {
+export function BoutonColler({
+  onTexte,
+  intitule,
+  className,
+}: {
+  onTexte: (texte: string) => void;
+  /** Ce qu'un lecteur d'écran entend : l'icône seule ne dit rien. */
+  intitule: string;
+  className?: string;
+}) {
   const [disponible, setDisponible] = useState(false);
 
   useEffect(() => {
-    setDisponible(typeof navigator !== "undefined" && typeof navigator.clipboard?.readText === "function");
+    setDisponible(
+      typeof navigator !== "undefined" && typeof navigator.clipboard?.readText === "function",
+    );
   }, []);
 
   if (!disponible) return null;
@@ -38,9 +56,11 @@ export function BoutonColler({ onTexte }: { onTexte: (texte: string) => void }) 
     <button
       type="button"
       onClick={() => void coller()}
-      className="rounded-galet text-mono text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
+      aria-label={intitule}
+      title={intitule}
+      className={`rounded-galet hover:bg-surface-ombre inline-flex size-11 items-center justify-center text-stone-500 transition-colors hover:text-stone-900 ${className ?? ""}`}
     >
-      Coller
+      <ClipboardPaste className="size-4" aria-hidden />
     </button>
   );
 }
