@@ -36,9 +36,18 @@ export default async function PageAujourdhui() {
 
   return (
     <PileDePanneaux sol="roche">
+      {/* `md:z-20` porte l'invite d'installation, et rien d'autre.
+
+          Elle flotte au-dessus de la fenêtre à partir de `md`, mais elle vit
+          dans ce panneau — parce que sur téléphone elle est dans le flux, juste
+          sous le compteur. Or le contenu d'un panneau est un contexte
+          d'empilement à lui seul : le `z-30` de l'invite ne vaut qu'à
+          l'intérieur de celui-ci, et le panneau de roche qui suit, à rang égal
+          mais plus loin dans le balisage, se peignait par-dessus elle. C'est le
+          panneau qu'il faut lever, pas l'invite. */}
       <Panneau
         surface="papier"
-        className="md:py-pas-16 gap-pas-12 md:gap-pas-16 grid md:grid-cols-[0.8fr_1.2fr]"
+        className="md:py-pas-16 gap-pas-12 md:gap-pas-16 grid md:z-20 md:grid-cols-[0.8fr_1.2fr]"
       >
         <div>
           <CompteurDu
