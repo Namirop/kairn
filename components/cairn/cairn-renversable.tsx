@@ -61,7 +61,12 @@ export function CairnRenversable({
          doigt serait happé par le défilement avant d'avoir touché une pierre —
          et tout bloquer aurait fait du cairn un trou dans la page, à l'endroit
          précis où il est le plus grand. */
-      className={cn("curseur-pierre h-full w-full touch-pan-y overflow-visible", className)}
+      /* La croix, et pas une pierre dessinée. Un curseur en forme de pierre
+         disait la matière mais pas le geste : posé sur un empilement de
+         pierres, il s'y confondait, et il fallait le voir bouger pour
+         comprendre qu'on tenait quelque chose. La croix vise, et c'est
+         exactement ce qu'on fait ici — on passe au travers. */
+      className={cn("h-full w-full cursor-crosshair touch-pan-y overflow-visible", className)}
       onPointerMove={chute.surDeplacement}
       onPointerDown={chute.surAppui}
       onPointerLeave={chute.surSortie}

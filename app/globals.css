@@ -595,24 +595,6 @@
   }
 }
 
-/* Le curseur, sur le seul objet qu'on peut manipuler.
-
-   Une pierre du produit, pas un dessin de plus : la forme sort d'`empiler()`
-   avec une graine fixe, comme celles de l'empilement, du logo et du sentier.
-   Elle est posée en `url()` et non suivie en JavaScript — un curseur qui
-   traîne derrière la souris est un effet de portfolio, et il coûte une boucle
-   d'animation permanente pour dire quelque chose que la forme dit déjà.
-
-   Le point chaud est au centre : on traverse l'empilement avec, on ne pointe
-   pas. Et le mot-clé de repli est obligatoire, sinon le navigateur ignore la
-   règle entière quand l'image ne charge pas. */
-@utility curseur-pierre {
-  cursor:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 -18.76 100 22.76'%3E%3Cg transform='translate(49.09 -6.38) rotate(-0.81)'%3E%3Cpath d='M -24.81 -6.65 L 23.69 -6.11 Q 28.94 -6.11 28.94 -0.86 L 31.9 0.78 Q 31.9 6.54 26.14 6.54 L -26.27 6.22 Q -31.9 6.22 -31.9 0.59 L -28.94 -2.52 Q -28.94 -6.65 -24.81 -6.65 Z' fill='%2316191a'/%3E%3C/g%3E%3C/svg%3E")
-      13 13,
-    crosshair;
-}
-
 /* Un titre dont on ne garde que le trait.
    « Tu retiens peu » n'est pas la seconde ligne d'un titre, c'est ce que la
    première a perdu. La lettre évidée le dit sans qu'on l'écrive, et c'est la
