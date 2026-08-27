@@ -144,11 +144,11 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cad
    * Le doigt était exclu tout court, et le tapotement tenait lieu de geste. Il
    * fait tomber, mais il ne fait que ça : on ne peut ni balayer la pile, ni
    * choisir la pierre qu'on vise, ni doser. Le glissé rend au tactile ce que la
-   * souris avait — c'est le `touch-action` de l'élément qui garde le défilement
-   * vertical à la page, et laisse l'horizontale au cairn.
+   * souris avait — c'est le `touch-action` du composant qui décide de ce que le
+   * navigateur garde pour lui et de ce qui arrive ici.
    */
   const surDeplacement = useCallback(
-    (evenement: React.PointerEvent<SVGSVGElement>) => {
+    (evenement: React.PointerEvent<Element>) => {
       if (!actif) return;
       if (evenement.pointerType !== "mouse" && evenement.buttons === 0) return;
 
@@ -179,7 +179,7 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cad
    * déséquilibrer sans faucher.
    */
   const surAppui = useCallback(
-    (evenement: React.PointerEvent<SVGSVGElement>) => {
+    (evenement: React.PointerEvent<Element>) => {
       if (!actif || evenement.pointerType === "mouse") return;
 
       const point = enCoordonneesLocales(evenement.clientX, evenement.clientY);

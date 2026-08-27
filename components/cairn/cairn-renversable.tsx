@@ -53,20 +53,17 @@ export function CairnRenversable({
   if (immobile) return <Cairn nombre={nombre} graines={graines} className={className} />;
 
   return (
-    <svg
-      ref={chute.refSvg}
-      viewBox={`0 ${-hauteur + ySol} ${LARGEUR_VUE} ${hauteur}`}
-      /* `touch-pan-y` partage le geste entre la page et le cairn : la verticale
-         reste au défilement, l'horizontale vient ici. Sans lui, un glissé au
-         doigt serait happé par le défilement avant d'avoir touché une pierre —
-         et tout bloquer aurait fait du cairn un trou dans la page, à l'endroit
-         précis où il est le plus grand. */
+    <div
       /* La croix, et pas une pierre dessinée. Un curseur en forme de pierre
          disait la matière mais pas le geste : posé sur un empilement de
          pierres, il s'y confondait, et il fallait le voir bouger pour
          comprendre qu'on tenait quelque chose. La croix vise, et c'est
-         exactement ce qu'on fait ici — on passe au travers. */
-      className={cn("h-full w-full cursor-crosshair touch-pan-y overflow-visible", className)}
+         exactement ce qu'on fait ici — on passe au travers.
+
+         Les gestes sont écoutés ici plutôt que sur le dessin : la zone de prise
+         posée au-dessus les fait remonter jusque-là, et le repère du viewBox se
+         calcule depuis le SVG quoi qu'il arrive. */
+      className={cn("relative h-full w-full cursor-crosshair touch-pan-y", className)}
       onPointerMove={chute.surDeplacement}
       onPointerDown={chute.surAppui}
       onPointerLeave={chute.surSortie}
@@ -76,23 +73,49 @@ export function CairnRenversable({
          absurde et une pierre expédiée hors de l'écran. */
       onPointerUp={chute.surSortie}
       onPointerCancel={chute.surSortie}
-      role="img"
-      aria-label={`Empilement de ${nombre} pierres. Passe la souris ou le doigt au travers pour le faire tomber.`}
     >
-      <SolDuCairn />
-      {pierres.map((pierre, rang) => (
-        <g
-          key={pierre.cle}
-          ref={(element) => {
-            chute.refsGroupes.current[rang] = element;
-          }}
-          transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}
-        >
-          <PoseDePierre rang={rang} derniere={rang === pierres.length - 1} anime={pose}>
-            <ArêtesDePierre pierre={pierre} derniere={rang === pierres.length - 1} />
-          </PoseDePierre>
-        </g>
-      ))}
-    </svg>
+      <svg
+        ref={chute.refSvg}
+        viewBox={`0 ${-hauteur + ySol} ${LARGEUR_VUE} ${hauteur}`}
+        className="h-full w-full overflow-visible"
+        role="img"
+        aria-label={`Empilement de ${nombre} pierres. Passe la souris ou le doigt au travers pour le faire tomber.`}
+      >
+        <SolDuCairn />
+        {pierres.map((pierre, rang) => (
+          <g
+            key={pierre.cle}
+            ref={(element) => {
+              chute.refsGroupes.current[rang] = element;
+            }}
+            transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}
+          >
+            <PoseDePierre rang={rang} derniere={rang === pierres.length - 1} anime={pose}>
+              <ArêtesDePierre pierre={pierre} derniere={rang === pierres.length - 1} />
+            </PoseDePierre>
+          </g>
+        ))}
+      </svg>
+
+      {/* La zone de prise, et c'est elle qui règle le partage du geste au doigt.
+
+          Le bloc entier gardait la verticale au défilement et ne prenait que
+          l'horizontale : un balayage oblique — le geste naturel pour faucher un
+          empilement — partait au défilement avant d'avoir touché une pierre, et
+          seul un mouvement strictement latéral marchait. Tout bloquer aurait
+          fait du cairn un trou dans la page, à l'endroit où il est le plus
+          grand.
+
+          Cette bande-ci ne bloque rien d'autre que la colonne où les pierres se
+          trouvent — la pierre de base fait soixante unités de viewBox sur cent,
+          les autres moins. Le doigt posé dessus appartient au cairn, quelle que
+          soit la direction qu'il prend ensuite ; posé de part et d'autre, il
+          appartient à la page, qui défile comme partout ailleurs.
+
+          Elle est transparente et n'intercepte rien : les gestes remontent au
+          bloc qui les écoute. Sa seule fonction est d'être ce que le doigt
+          touche, parce que `touch-action` se lit sur ce qu'on touche. */}
+      <span aria-hidden className="absolute inset-y-0 left-[16%] w-[68%] touch-none" />
+    </div>
   );
 }
