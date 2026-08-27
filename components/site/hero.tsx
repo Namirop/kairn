@@ -111,9 +111,19 @@ export function Hero({ connecte }: { connecte: boolean }) {
             un mot près — il ne veut pas essayer le produit, il veut retrouver
             sa journée. Le lien mène donc là, plutôt que de laisser l'ouverture
             sans issue et de reporter l'action dans un panneau plus bas que
-            personne n'a envie d'aller chercher. */}
+            personne n'a envie d'aller chercher.
+
+            Il porte sa surface, et pour la raison qui a rempli le titre creux :
+            un bouton en contour n'a pas de fond, donc une pierre renversée se
+            voyait au travers. Le papier du panneau referme la fenêtre, et le
+            survol continue de le foncer comme partout ailleurs. */}
         <Temps>
-          <Button asChild variant="outline" size="lg" className="mt-pas-4 md:mt-pas-6">
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="mt-pas-4 md:mt-pas-6 bg-surface-papier"
+          >
             {connecte ? (
               <Link href={ROUTES.aujourdhui}>Aujourd&apos;hui</Link>
             ) : (
