@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -16,10 +17,12 @@ import type { MotifDeSignalement } from "@/lib/db/types";
 /**
  * Dire qu'une question ne va pas.
  *
- * Un geste, pas un formulaire. Le motif se choisit en un clic et ferme la
- * fenêtre dans le même mouvement : demander de choisir puis de valider ferait
- * renoncer la moitié des gens, et un signalement qu'on n'envoie pas ne dit rien.
- * Le champ libre reste ouvert pour qui veut préciser, et il n'est jamais requis.
+ * Le motif se choisit, puis s'envoie. Il partait autrefois au clic, en un seul
+ * geste, pour ne pas décourager par un formulaire — sauf que la fenêtre
+ * proposait aussi de préciser, et se fermait avant qu'on ait pu écrire un mot.
+ * Le champ libre était donc offert et inatteignable, et un signalement mal visé
+ * ne se rattrapait pas. Choisir et envoyer sont maintenant deux gestes : le
+ * second est à un clic, et entre les deux on peut se relire.
  *
  * L'action est discrète et vit sous la carte. Elle doit être trouvable quand on
  * la cherche, et invisible quand on révise — ce n'est pas une note à donner,
@@ -51,21 +54,25 @@ const MOTIFS: { valeur: MotifDeSignalement; libelle: string; aide: string }[] = 
 
 export function SignalerLaQuestion({ variantId }: { variantId: string }) {
   const [ouvert, setOuvert] = useState(false);
+  const [motif, setMotif] = useState<MotifDeSignalement | null>(null);
   const [commentaire, setCommentaire] = useState("");
-  const [envoi, setEnvoi] = useState<MotifDeSignalement | null>(null);
+  const [envoi, setEnvoi] = useState(false);
   const [remercie, setRemercie] = useState(false);
 
-  async function signaler(motif: MotifDeSignalement) {
-    setEnvoi(motif);
+  async function signaler() {
+    if (motif === null) return;
+
+    setEnvoi(true);
 
     const parti = await signalerAction({ variantId, motif, commentaire });
 
-    setEnvoi(null);
+    setEnvoi(false);
 
     if (!parti) return;
 
     setOuvert(false);
     setRemercie(true);
+    setMotif(null);
     setCommentaire("");
   }
 
@@ -78,7 +85,15 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
   }
 
   return (
-    <Dialog open={ouvert} onOpenChange={setOuvert}>
+    <Dialog
+      open={ouvert}
+      onOpenChange={(etat) => {
+        setOuvert(etat);
+        // Refermer sans envoyer efface le choix : rouvrir plus tard doit poser
+        // la question à neuf, pas retrouver un motif à demi sélectionné.
+        if (!etat) setMotif(null);
+      }}
+    >
       {/* Ce que la personne pense au moment où elle clique, pas ce que le
           système fait de son clic. « Signaler » était tiède, et tiède veut dire
           qu'on ne clique pas. */}
@@ -95,23 +110,36 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
           </DialogDescription>
         </DialogHeader>
 
+        {/* Des boutons radio natifs, dessinés : la sélection se voit, les flèches
+            du clavier circulent, et le champ masqué garde le focus visible sur
+            l'étiquette qui l'accompagne. */}
         <ul className="gap-pas-2 mt-pas-4 flex flex-col">
-          {MOTIFS.map((motif) => (
-            <li key={motif.valeur}>
-              <button
-                type="button"
-                disabled={envoi !== null}
-                onClick={() => void signaler(motif.valeur)}
-                className="rounded-galet px-pas-3 py-pas-3 -mx-pas-3 block w-full text-left transition-colors hover:bg-stone-100 focus-visible:bg-stone-100 disabled:opacity-50"
+          {MOTIFS.map((choix) => (
+            <li key={choix.valeur}>
+              <label
+                className={`rounded-galet px-pas-3 py-pas-3 has-[:focus-visible]:border-lichen block cursor-pointer border transition-colors ${
+                  motif === choix.valeur
+                    ? "border-lichen bg-lichen/10"
+                    : "border-transparent hover:bg-stone-100"
+                }`}
               >
-                <span className="text-corps block text-stone-900">{motif.libelle}</span>
-                <span className="text-petit block text-stone-500">{motif.aide}</span>
-              </button>
+                <input
+                  type="radio"
+                  name="motif-de-signalement"
+                  value={choix.valeur}
+                  checked={motif === choix.valeur}
+                  onChange={() => setMotif(choix.valeur)}
+                  disabled={envoi}
+                  className="sr-only"
+                />
+                <span className="text-corps block text-stone-900">{choix.libelle}</span>
+                <span className="text-petit block text-stone-500">{choix.aide}</span>
+              </label>
             </li>
           ))}
         </ul>
 
-        <div className="mt-pas-6">
+        <div className="mt-pas-4">
           <label htmlFor="signalement-precision" className="text-petit block text-stone-500">
             Préciser, si tu veux
           </label>
@@ -121,15 +149,19 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
             onChange={(evenement) => setCommentaire(evenement.target.value)}
             rows={2}
             maxLength={500}
-            className="rounded-galet mt-pas-2 px-pas-3 py-pas-2 text-petit focus-visible:border-lichen w-full resize-none border border-stone-300 bg-transparent text-stone-900 outline-none"
+            disabled={envoi}
+            className="rounded-champ mt-pas-2 px-pas-3 py-pas-2 text-petit focus-visible:border-lichen w-full resize-none border border-stone-300 bg-transparent text-stone-900 outline-none disabled:opacity-45"
           />
         </div>
 
-        <div className="mt-pas-4 flex justify-end">
-          <Button type="button" variant="ghost" size="sm" onClick={() => setOuvert(false)}>
+        <DialogFooter className="mt-pas-2">
+          <Button type="button" variant="ghost" disabled={envoi} onClick={() => setOuvert(false)}>
             Annuler
           </Button>
-        </div>
+          <Button type="button" disabled={motif === null || envoi} onClick={() => void signaler()}>
+            {envoi ? "Envoi…" : "Envoyer"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
