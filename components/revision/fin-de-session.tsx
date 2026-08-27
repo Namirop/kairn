@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { compterDemainAction } from "@/app/(app)/reviser/actions";
 import { Palier } from "@/components/revision/palier";
+import { PileDeSession } from "@/components/revision/pile-de-session";
 import { PrincipeDeLEspacement } from "@/components/revision/principe-de-lespacement";
 import { ROUTES } from "@/lib/auth/routes";
 
@@ -16,6 +17,13 @@ import { ROUTES } from "@/lib/auth/routes";
  *
  * C'est un palier, comme les écrans où il n'y avait rien à revoir : on vient de
  * finir, et la seule différence avec « tu es à jour » est le chemin qui y mène.
+ *
+ * **La pile qu'on vient de monter ouvre l'écran.** Elle s'est remplie pierre à
+ * pierre dans la bande d'état pendant toute la session ; à la fin, elle est
+ * entière et vient au milieu. C'est le même objet, pas une illustration de lui,
+ * et c'est ce qui rend cette fin lisible d'un regard là où trois lignes de gris
+ * demandaient d'être lues. Le mot « SESSION » en petites capitales est parti
+ * avec elle : la pile et le compte le disent déjà deux fois.
  */
 
 function phraseDemain(nombre: number | null): string {
@@ -57,7 +65,9 @@ export function FinDeSession({
     // ce sont les dépôts : quelqu'un avec deux concepts n'a pas un problème de
     // session, il a un problème de contenu.
     <Palier
-      intitule="Session"
+      // Muette pour un lecteur d'écran : le titre juste dessous dit le même
+      // compte en toutes lettres, et l'entendre deux fois n'apprend rien.
+      embleme={revus > 0 ? <PileDeSession rang={revus} total={revus} /> : undefined}
       titre={
         revus === 0
           ? "Rien n'a été revu"
@@ -68,7 +78,7 @@ export function FinDeSession({
       explication={<span className="block min-h-6">{phraseDemain(demain)}</span>}
       action={{ libelle: "Déposer autre chose", href: `${ROUTES.depots}/nouveau` }}
       secondaire={{ libelle: "S'entraîner", href: ROUTES.entrainement }}
-      note="L'entraînement repose d'autres questions sur les mêmes concepts. Il ne change pas ton planning."
+      note="D'autres questions sur les mêmes concepts. Ton planning ne bouge pas."
       pied={
         <Link
           href={ROUTES.aujourdhui}

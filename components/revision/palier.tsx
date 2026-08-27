@@ -20,11 +20,18 @@ import { Button } from "@/components/ui/button";
  * Rien n'y est ajouté pour faire nombre. Un palier dit ce qui s'est passé, ce
  * qu'on peut faire ensuite, et s'arrête là — c'est une halte, pas une
  * récompense : on ne félicite pas quelqu'un d'être venu.
+ *
+ * L'emblème ne contredit pas cette règle, il la sert. Un palier peut poser
+ * au-dessus de son titre l'objet qui **est** ce qui vient de se passer — la pile
+ * qu'on a montée, pas une illustration de la montée. C'est de l'information
+ * dessinée : elle dit en un regard ce que le titre dit en un compte, et elle
+ * n'ajoute pas un mot. Un palier qui n'a rien de tel à montrer n'en met pas.
  */
 
 export type Lien = { libelle: string; href: string };
 
 export function Palier({
+  embleme,
   intitule,
   titre,
   explication,
@@ -35,6 +42,14 @@ export function Palier({
   pied,
   children,
 }: {
+  /**
+   * L'objet qui montre ce qui vient de se passer, posé au-dessus du titre.
+   *
+   * Réservé à ce qui informe : une pile qu'on a montée, pas un pictogramme de
+   * félicitation. Sans quoi c'est une illustration pour combler le vide, et le
+   * titre est là pour ça.
+   */
+  embleme?: ReactNode;
   /** Ce que ce palier clôt, en petites capitales. Facultatif. */
   intitule?: string;
   titre: string;
@@ -53,6 +68,8 @@ export function Palier({
 }) {
   return (
     <section className="flex w-full flex-col items-center text-center">
+      {embleme ? <div className="mb-pas-8">{embleme}</div> : null}
+
       {intitule ? (
         <p className="text-mono mb-pas-4 font-mono tracking-[0.14em] text-stone-500 uppercase">
           {intitule}

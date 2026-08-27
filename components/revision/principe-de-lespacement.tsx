@@ -8,8 +8,13 @@ import { espacementVuAction } from "@/app/(app)/reviser/actions";
  *
  * L'explication arrive ici et nulle part ailleurs : c'est à la fin de la
  * première session qu'on se pose la question, et une explication donnée avant
- * répond à une question que personne ne se pose encore. Deux phrases, dans le
- * flux, jamais revues ensuite.
+ * répond à une question que personne ne se pose encore. Un paragraphe, dans le
+ * flux, jamais revu ensuite.
+ *
+ * Il en faisait deux, dont un qui commençait par se défendre — « le reste n'est
+ * pas caché ». On ne se défend pas d'un reproche que personne n'a formulé : on
+ * dit ce qui se passe, et l'écart qui s'allonge le dit mieux que la promesse
+ * qu'on ne cache rien.
  *
  * Elle se marque comme vue à l'affichage, pas sur un clic d'accusé de réception.
  * Rien ne prouve qu'un bouton « j'ai compris » ait été lu, et une explication
@@ -23,12 +28,9 @@ export function PrincipeDeLEspacement() {
   return (
     <div className="border-lichen pl-pas-4 border-l-2">
       <p className="text-corps leading-relaxed text-stone-900">
-        Une session s&apos;arrête quand elle a servi ce qui était dû. Le reste n&apos;est pas caché
-        : il revient plus tard, à l&apos;instant où tu es sur le point de l&apos;oublier.
-      </p>
-      <p className="mt-pas-2 text-petit text-stone-500">
-        Chaque concept retrouvé s&apos;éloigne un peu : deux jours, puis une semaine, puis un mois.
-        C&apos;est l&apos;écart qui fait tenir, pas la répétition.
+        Une session s&apos;arrête quand elle a servi ce qui était dû. Chaque concept retrouvé
+        revient de plus loin — deux jours, puis une semaine, puis un mois. C&apos;est l&apos;écart
+        qui fait tenir, pas la répétition.
       </p>
     </div>
   );
