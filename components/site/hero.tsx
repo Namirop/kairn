@@ -40,13 +40,18 @@ import { PaysageDeCairns } from "@/components/site/paysage-de-cairns";
  * et il est posé sur les deux — n'en décaler qu'une ferait glisser le cairn par
  * rapport au titre alors qu'ils tiennent la même ligne d'horizon.
  *
- * **Sur téléphone, le cairn est un emblème et non une image.** À sa taille de
- * bureau il occupait plus de hauteur que le titre sur un écran de trois cent
- * quatre-vingt-dix : la page disait « voici un dessin » avant de dire « tu
- * retiens peu ». À la moitié il redevient une signature, la phrase reprend la
- * main, et les blocs se serrent d'un pas — le vide qui les séparait n'avait
- * plus lieu d'être une fois l'emblème réduit. Au-delà de `md`, rien de tout ça
- * ne s'applique : la composition de bureau est intacte.
+ * **Sur téléphone, le cairn était réduit de moitié, et il ne l'est plus.** Il
+ * avait été ramené à une signature pour une raison qui tenait alors : posé sur
+ * du papier vide, à sa taille de bureau, il occupait plus de hauteur que le
+ * titre et la page disait « voici un dessin » avant de dire « tu retiens peu ».
+ * Ce qui a changé n'est pas la taille, c'est ce qu'il y a autour — le paysage
+ * descend maintenant sous le titre, et le cairn y est planté au lieu de
+ * flotter. Un objet seul au milieu d'un blanc est une illustration ; le même
+ * objet debout dans un terrain est le sujet d'une scène, et une scène a le
+ * droit d'occuper la place. Il reprend donc l'ampleur qu'il avait perdue, et
+ * les deux blocs s'écartent d'autant — le pas qui les serrait n'avait de sens
+ * que face à un emblème réduit. Au-delà de `md`, rien de tout ça ne s'applique :
+ * la composition de bureau est intacte.
  */
 export function Hero({ connecte }: { connecte: boolean }) {
   return (
@@ -54,7 +59,7 @@ export function Hero({ connecte }: { connecte: boolean }) {
       surface="papier"
       aere
       mesure="large"
-      className="gap-pas-6 md:gap-pas-12 grid items-center md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
+      className="gap-pas-12 grid items-center md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
       fond={<PaysageDeCairns />}
     >
       <Apparition className="md:pb-pas-24">
@@ -92,8 +97,14 @@ export function Hero({ connecte }: { connecte: boolean }) {
         )}
       </Apparition>
 
-      <div className="md:pb-pas-24 flex justify-center">
-        <div className="relative aspect-[100/93] w-[min(42vw,12rem)] md:aspect-auto md:h-[clamp(18rem,42vh,30rem)] md:w-full">
+      {/* Sur téléphone, l'emblème descend sous le rythme bas du panneau.
+          Le rembourrage de campagne le calait à soixante-quatre pixels du bord,
+          soit exactement la hauteur de la crête proche : il se posait donc sur la
+          ligne d'horizon au lieu de se tenir dans la butte. Un pas de moins, et son
+          pied passe d'une trentaine de pixels sous la crête — c'est le terrain qui
+          le porte, plus la couture du panneau. */}
+      <div className="-mb-pas-8 md:pb-pas-24 flex justify-center md:mb-0">
+        <div className="relative aspect-[100/93] w-[min(62vw,17rem)] md:aspect-auto md:h-[clamp(20rem,52vh,36rem)] md:w-full">
           <span
             aria-hidden
             className="rounded-galet absolute bottom-[1%] left-1/2 h-[5%] w-[56%] -translate-x-1/2 bg-stone-900 opacity-[0.15] blur-[9px]"

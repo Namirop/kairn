@@ -217,8 +217,17 @@
     (1,7 sur 2,7) divisée par 7,5 — la largeur de « Tu lis beaucoup. » en
     multiples de son corps, avec un demi-cran de garde pour la police de secours.
     Un titre d'ouverture plus long se remesure, comme celui de la campagne.
+
+    Sous `md`, il reprend le diviseur de `--t-h1-site` — une colonne, et ce
+    diviseur est fait pour ce cas-là — mais pas sa garde. La formule partagée
+    retranche cinq rems de marge parce qu'elle sert tous les titres du site sans
+    savoir dans quel panneau ils tombent ; l'ouverture, elle, connaît le sien :
+    `px-pas-6`, trois rems en tout. Sur deux rems d'écart, on en reprend un et
+    on garde l'autre. C'est cinq pour cent de corps en plus, et un rem qui reste
+    entre la phrase et le bord — la ligne remplit sa colonne, elle ne la touche
+    pas.
   */
-  --t-ouverture: var(--t-h1-site);
+  --t-ouverture: clamp(2.25rem, calc((100vw - 4rem) / 7.4), 3.75rem);
 }
 
 /*

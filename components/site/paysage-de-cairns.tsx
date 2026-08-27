@@ -28,9 +28,17 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
  * totale d'`opacity` — le fond ne transparaît pas au travers, il a mangé la
  * matière.
  *
- * Le paysage ne paraît qu'à partir de la mise en page à deux colonnes, comme le
- * second cairn avant lui : sur un téléphone, ces plans viendraient se glisser
- * sous le titre au lieu de s'éloigner.
+ * **Sur téléphone, le même paysage descend sous le titre.** Il n'y paraissait
+ * pas du tout, et pour une raison qui tenait : posés à leur hauteur de bureau,
+ * ces plans se glissent sous le titre au lieu de s'éloigner — les crêtes
+ * traversent « Tu lis beaucoup. », et la seconde ligne étant évidée, la pierre
+ * passe *au travers* des lettres. Mais l'absence coûtait plus que le défaut :
+ * le cairn de l'ouverture se retrouvait posé sur du vide, sur le seul écran où
+ * il est la première chose qu'on voit.
+ *
+ * La réponse n'est pas de montrer le paysage de bureau en plus petit. Trois
+ * choses changent, et chacune répare un défaut que la mise à l'échelle aurait
+ * gardé — voir `PLANS_TELEPHONE`.
  */
 
 /** L'encre d'une pierre, diluée dans le papier à mesure qu'elle s'éloigne. */
@@ -175,6 +183,61 @@ const PLANS: Plan[] = [
 ];
 
 /**
+ * Les mêmes plans, redessinés pour un écran de trois cent quatre-vingt-dix.
+ *
+ * Trois choses changent, et aucune n'est une mise à l'échelle.
+ *
+ * **Un. Les crêtes descendent sous le titre.** Sur deux colonnes, le terrain
+ * peut occuper la bande haute parce que le titre a la sienne à gauche. Sur une
+ * colonne il n'y a plus de « à côté » : le titre prend le haut, et tout ce
+ * qu'on dessine derrière lui passe dedans. Le paysage se range donc sous la
+ * phrase, dans le tiers bas, là où la seule chose à traverser est le cairn de
+ * l'ouverture — et le traverser, ici, c'est le planter.
+ *
+ * **Deux. Les crêtes ondulent trois fois moins souvent.** La vue fait mille
+ * deux cents unités de large quelle que soit la fenêtre : sept appuis, c'est
+ * une ondulation tous les cent soixante-dix pixels sur un écran de bureau, et
+ * tous les cinquante-cinq sur un téléphone. La même courbe y devient une
+ * dentelure. Quatre appuis rendent au relief sa longueur d'onde, et l'amplitude
+ * monte un peu pour compenser ce que l'écrasement horizontal a rendu plus raide.
+ *
+ * **Trois. Six cairns au lieu de quatorze, et ils s'écartent du milieu.** De
+ * bureau, le paysage évite la colonne de droite parce que le cairn principal y
+ * est ; sur téléphone il est au centre, donc c'est le centre qui se libère. Ce
+ * qui reste tient en deux groupes qui l'encadrent — un sentier qui passe
+ * derrière lui, ce que quatorze silhouettes larges de six pixels n'auraient pas
+ * su dire.
+ */
+const PLANS_TELEPHONE: Plan[] = [
+  {
+    crete: 0.2,
+    appuis: [0, -30, 12, -22],
+    sol: 18,
+    pierre: 26,
+    arete: "var(--stone-300)",
+    arrivee: 340,
+    cairns: [
+      { gauche: "4%", haut: "4.5%", pierres: 3 },
+      { gauche: "17%", haut: "5.5%", pierres: 4 },
+      { gauche: "78%", haut: "5%", pierres: 3 },
+      { gauche: "91%", haut: "4.5%", pierres: 3 },
+    ],
+  },
+  {
+    crete: 0.115,
+    appuis: [14, -18, 26, -10],
+    sol: 100,
+    pierre: 46,
+    arete: "var(--stone-400)",
+    arrivee: 100,
+    cairns: [
+      { gauche: "6%", haut: "7.5%", pierres: 4 },
+      { gauche: "87%", haut: "7%", pierres: 5 },
+    ],
+  },
+];
+
+/**
  * Un cairn du paysage.
  *
  * `SilhouetteDeCairn` tire toujours les mêmes neuf pierres : posée treize fois
@@ -217,59 +280,89 @@ function CairnDuPaysage({
   );
 }
 
-export function PaysageDeCairns() {
+/**
+ * Un plan : ses cairns, puis sa terre par-dessus leurs pieds.
+ *
+ * L'ordre compte plus que le reste — c'est lui qui plante les pierres au lieu
+ * de les poser. Le composant ne connaît ni la fenêtre ni le nombre de plans, il
+ * dessine celui qu'on lui donne : c'est ce qui permet aux deux paysages, celui
+ * de bureau et celui du téléphone, d'être deux jeux de valeurs et non deux
+ * dessins à tenir en parallèle.
+ */
+function PlanDuPaysage({ plan, graine }: { plan: Plan; graine: string }) {
   return (
-    <div className="pointer-events-none absolute inset-0 hidden md:block">
-      {PLANS.map((plan, rang) => (
+    <div
+      className="montee-du-plan absolute inset-0"
+      style={{ animationDelay: `${plan.arrivee}ms` }}
+    >
+      {plan.cairns.map((cairn, index) => (
         <div
-          className="montee-du-plan absolute inset-0"
-          key={plan.crete}
-          style={{ animationDelay: `${plan.arrivee}ms` }}
+          className="absolute"
+          key={cairn.gauche}
+          /* Le pied passe sous la crête : deux points de la hauteur du
+             panneau suffisent à ce que la terre le recouvre. */
+          style={{
+            left: cairn.gauche,
+            bottom: `${(plan.crete * 100 - 2).toFixed(1)}%`,
+            height: cairn.haut,
+          }}
         >
-          {plan.cairns.map((cairn, index) => (
-            <div
-              className="absolute"
-              key={cairn.gauche}
-              /* Le pied passe sous la crête : deux points de la hauteur du
-                 panneau suffisent à ce que la terre le recouvre. */
-              style={{
-                left: cairn.gauche,
-                bottom: `${(plan.crete * 100 - 2).toFixed(1)}%`,
-                height: cairn.haut,
-              }}
-            >
-              <CairnDuPaysage
-                graine={`paysage-${rang}-${index}`}
-                pierres={cairn.pierres}
-                teintes={teintesDe(plan.pierre)}
-              />
-            </div>
-          ))}
-
-          <svg
-            className="absolute inset-0 h-full w-full"
-            viewBox="0 0 1200 1000"
-            preserveAspectRatio="none"
-            aria-hidden
-          >
-            <path d={crete(plan).masse} fill={terre(plan.sol)} />
-            {/* L'arête, sans quoi la butte n'existe pas.
-                Deux terres voisines ne se séparent que de quelques centièmes de
-                luminance : l'écart suffit à faire un plan, pas à faire une
-                ligne, et le relief se devinait sans jamais se voir. Le trait la
-                dessine. Il ne grossit pas avec la vue — elle est étirée en
-                hauteur —, donc il reste le même cheveu partout, et sa teinte
-                monte d'un cran quand le plan se rapproche. */}
-            <path
-              d={crete(plan).ligne}
-              fill="none"
-              stroke={plan.arete}
-              strokeWidth="1.5"
-              vectorEffect="non-scaling-stroke"
-            />
-          </svg>
+          <CairnDuPaysage
+            graine={`${graine}-${index}`}
+            pierres={cairn.pierres}
+            teintes={teintesDe(plan.pierre)}
+          />
         </div>
       ))}
+
+      <svg
+        className="absolute inset-0 h-full w-full"
+        viewBox="0 0 1200 1000"
+        preserveAspectRatio="none"
+        aria-hidden
+      >
+        <path d={crete(plan).masse} fill={terre(plan.sol)} />
+        {/* L'arête, sans quoi la butte n'existe pas.
+            Deux terres voisines ne se séparent que de quelques centièmes de
+            luminance : l'écart suffit à faire un plan, pas à faire une
+            ligne, et le relief se devinait sans jamais se voir. Le trait la
+            dessine. Il ne grossit pas avec la vue — elle est étirée en
+            hauteur —, donc il reste le même cheveu partout, et sa teinte
+            monte d'un cran quand le plan se rapproche. */}
+        <path
+          d={crete(plan).ligne}
+          fill="none"
+          stroke={plan.arete}
+          strokeWidth="1.5"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
     </div>
+  );
+}
+
+/**
+ * Le paysage, dans celle de ses deux versions que l'écran appelle.
+ *
+ * Les deux sont montées et l'affichage en choisit une. C'est du SVG inerte,
+ * sans image ni mesure au montage : le coût de celle qu'on ne voit pas est le
+ * balisage lui-même, et il achète de ne jamais avoir de paysage en retard d'une
+ * rotation d'écran.
+ */
+export function PaysageDeCairns() {
+  return (
+    <>
+      <div className="pointer-events-none absolute inset-0 md:hidden">
+        {PLANS_TELEPHONE.map((plan, rang) => (
+          <PlanDuPaysage key={plan.crete} plan={plan} graine={`paysage-tel-${rang}`} />
+        ))}
+      </div>
+
+      <div className="pointer-events-none absolute inset-0 hidden md:block">
+        {PLANS.map((plan, rang) => (
+          <PlanDuPaysage key={plan.crete} plan={plan} graine={`paysage-${rang}`} />
+        ))}
+      </div>
+    </>
   );
 }
