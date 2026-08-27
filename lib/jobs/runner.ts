@@ -40,9 +40,23 @@ export async function runJob(jobId: string): Promise<JobOutcome> {
 
   if (!job) return "SKIPPED";
 
+  /*
+    Une ligne par job abouti, et une seule.
+
+    C'est ce qui manquait pour lire une attente en ligne : `startedAt` et
+    `finishedAt` donnent déjà le total à qui interroge la base, mais pas à qui
+    lit les journaux de l'hébergeur pendant qu'il teste. Le total se recoupe
+    ensuite avec la latence des lignes `AiCall` du même job — leur différence
+    est tout ce qui n'est pas le modèle : les allers-retours vers la base, et
+    le réveil de la fonction. Des identifiants et des millisecondes, aucun
+    contenu déposé.
+  */
+  const debut = Date.now();
+
   try {
     await JOB_HANDLERS[job.kind](job);
     await finishJob(job.id, "DONE");
+    console.info(`[job] ${job.kind} ${job.id} abouti en ${Date.now() - debut} ms`);
     // Un job qui aboutit peut être le dernier du dépôt : c'est lui qui le
     // referme. Le découpage, lui, vient de mettre les questions en file — le
     // compte des jobs restants le voit, et le dépôt reste en cours.

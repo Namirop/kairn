@@ -154,8 +154,22 @@ ${JSON.stringify(params.formatSchema.schema)}
         );
       }
 
-      const latencyMs = Date.now() - debut;
+      /*
+        Le chronomètre s'arrête **après** la lecture du corps, et c'est tout le
+        sujet.
+
+        `fetch` rend la main dès l'arrivée des en-têtes ; le corps, lui, se
+        remplit au fil de la génération. Mesurer entre les deux ne chronométrait
+        donc pas l'appel mais la poignée de main — d'où des latences plates
+        autour de cinq cents millisecondes quelle que soit la longueur rendue,
+        quarante tokens comme mille deux cents, pendant que le job qui portait
+        l'appel en mettait dix fois plus. Le registre `AiCall` a sous-évalué
+        toutes les lignes OpenRouter depuis le portage. Le pont Anthropic n'a
+        jamais eu le défaut : son SDK ne rend la main qu'une fois le message
+        complet.
+      */
       const brut: unknown = await reponse.json();
+      const latencyMs = Date.now() - debut;
       const parseReponse = reponseSchema.safeParse(brut);
       if (!parseReponse.success) {
         throw new AICallFailedError(params.purpose, parseReponse.error);
