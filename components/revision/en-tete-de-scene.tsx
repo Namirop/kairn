@@ -1,19 +1,21 @@
-import Link from "next/link";
-import { ROUTES } from "@/lib/auth/routes";
+import { ArreterLa } from "@/components/revision/arreter-la";
 
 /**
  * Ce qui nomme le passage en cours, et la porte pour en sortir.
  *
- * La porte est nommée plutôt que devinée. Chaque passage est écrit dès qu'il est
- * donné : s'arrêter au troisième concept sur dix garde les trois, et il n'y a
- * donc rien à confirmer ni à avertir. Sans lien, il fallait comprendre qu'on
+ * La porte est nommée plutôt que devinée. Sans elle, il fallait comprendre qu'on
  * quitte une session en cliquant une icône de navigation — ce qui, quand on ne
  * sait pas si le travail est enregistré, ressemble à un abandon.
+ *
+ * Ce qu'elle demande avant de s'ouvrir, et ce qu'elle promet en s'ouvrant, sont
+ * écrits par l'écran qui la pose : une session laisse derrière elle des
+ * échéances déplacées, un tour d'entraînement ne laisse rien.
  */
 export function EnTeteDeScene({
   intitule,
   precision,
   intituleEnMarge = false,
+  sortie,
 }: {
   intitule?: string;
   /**
@@ -27,6 +29,8 @@ export function EnTeteDeScene({
    * alors ici, au même seuil, pour ne pas être dit deux fois.
    */
   intituleEnMarge?: boolean;
+  /** Ce que la sortie demande avant de s'ouvrir. */
+  sortie: { titre: string; consequence: string; rafraichirLeTableau?: boolean };
 }) {
   return (
     <div className="gap-pas-4 flex items-baseline justify-between">
@@ -42,12 +46,7 @@ export function EnTeteDeScene({
         {precision ? <span className="text-petit text-stone-500">{precision}</span> : null}
       </p>
 
-      <Link
-        href={ROUTES.aujourdhui}
-        className="text-petit rounded-galet shrink-0 text-stone-900 underline-offset-4 hover:underline focus-visible:underline"
-      >
-        Arrêter là
-      </Link>
+      <ArreterLa {...sortie} />
     </div>
   );
 }

@@ -1,6 +1,8 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { reclamerSignalDeMaitrise } from "@/lib/db/carte-de-maitrise";
 import { prendreUnGeste } from "@/lib/db/limite-de-gestes";
@@ -164,4 +166,20 @@ export async function espacementVuAction(): Promise<void> {
   if (!utilisateur) return;
 
   await marquerEspacementVu(utilisateur.id);
+}
+
+/**
+ * Quitter une session en cours.
+ *
+ * Elle n'écrit rien : tout a déjà été écrit, réponse par réponse. Elle marque
+ * seulement le tableau de bord comme à relire, sans quoi le client resservait
+ * la page qu'il avait chargée avant la session — avec le compte de concepts dus
+ * d'avant, et le travail qu'on venait de faire invisible jusqu'au rechargement.
+ */
+export async function quitterLaSessionAction(): Promise<void> {
+  const utilisateur = await getCurrentUser();
+
+  if (!utilisateur) return;
+
+  revalidatePath(ROUTES.aujourdhui);
 }

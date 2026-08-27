@@ -125,6 +125,10 @@ export function TourDentrainement({
           intitule="Entraînement"
           precision="Ça ne change pas ton planning"
           intituleEnMarge
+          sortie={{
+            titre: "Arrêter l'entraînement ?",
+            consequence: "Un tour ne compte pas : il n'y a rien à enregistrer, et rien à perdre.",
+          }}
         />
       }
       mention="Entraînement"

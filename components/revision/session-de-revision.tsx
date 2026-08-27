@@ -98,7 +98,19 @@ export function SessionDeRevision({
     // question à la dernière ; la date est ce qui change, et ce qui change se lit
     // là où l'on lit, pas dans une colonne de lettres couchées.
     <SceneDeSession
-      enTete={<EnTeteDeScene intitule="Session" precision={jour} intituleEnMarge />}
+      enTete={
+        <EnTeteDeScene
+          intitule="Session"
+          precision={jour}
+          intituleEnMarge
+          sortie={{
+            titre: "Arrêter la session ?",
+            consequence:
+              "Ce que tu viens de revoir est enregistré. Le reste revient plus tard, à son échéance.",
+            rafraichirLeTableau: true,
+          }}
+        />
+      }
       mention="Session"
       rail={
         <EtatDeSession faites={faites} total={questions.length} serie={serie} rappel={rappel} />
