@@ -1,4 +1,4 @@
-import { etalonUtile } from "@/components/revision/etalon-utile";
+import { etalonUtile } from "@/lib/domain/etalon-utile";
 import type { QuestionServie } from "@/lib/db/question-servie";
 
 /**

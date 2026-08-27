@@ -37,6 +37,18 @@
  * tutoiement est un engagement de marque non négociable. Un relevé en base
  * donnait 1,4 % de questions vouvoyantes — rare, mais servi à tout le monde.
  *
+ * **Le contrat de l'étalon a été étendu au QCM le 28 août 2026.** Il n'existait
+ * que pour le vrai ou faux — « commence par Vrai ou Faux, puis dit en une phrase
+ * ce qui le justifie » — et rien n'était demandé au QCM : le modèle y reformulait
+ * donc la bonne option, qui est déjà surlignée à l'écran quand la correction
+ * s'affiche. Sur trente-neuf questions à choix servies en production, quinze
+ * étalons ne disaient rien de plus que leur option.
+ *
+ * La consigne se referme sur la fidélité plutôt que de l'ouvrir : sans cause
+ * dans le concept, le modèle recopie l'option. C'est `etalonUtile` qui efface
+ * alors le bloc à l'affichage — un étalon qui radote coûte une ligne de bruit,
+ * un étalon inventé coûte une fausse certitude, et on préfère le premier.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -159,6 +171,12 @@ raison précise, une confusion que quelqu'un pourrait réellement avoir. Une
 option manifestement absurde rend la question inutile. Les quatre options ont
 une longueur et une forme comparables : la bonne réponse ne doit pas se repérer
 à sa taille.
+
+Son \`answerKey\` ne recopie pas la bonne option : elle est déjà surlignée au
+moment où la correction s'affiche. Il dit ce qui la rend juste — la condition,
+l'ordre, la cause, tels que le concept les énonce. Si le concept n'en donne
+aucune, recopie l'option plutôt que d'inventer : une redite est effacée à
+l'affichage, une invention est servie.
 
 TRUE_FALSE : l'envoi te donne, concept par concept et facette par facette, si
 l'affirmation doit être vraie ou fausse. Tu suis cette valeur, et tu la recopies

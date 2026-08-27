@@ -1,7 +1,7 @@
 "use client";
 
 import { BlocReponse } from "@/components/revision/bloc-reponse";
-import { etalonUtile } from "@/components/revision/etalon-utile";
+import { etalonUtile } from "@/lib/domain/etalon-utile";
 import { useDelaiDeLecture } from "@/components/revision/use-delai-de-lecture";
 import { Button } from "@/components/ui/button";
 import { etalonLisible } from "@/lib/domain/etalon-lisible";
