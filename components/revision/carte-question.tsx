@@ -84,19 +84,34 @@ export function CarteQuestion({
             corps de texte le faisait lire comme un paragraphe en gras. `text-enonce`
             est un cran sous le titre de page — assez pour dominer l'écran, pas
             assez pour l'occuper — et `break-words` retient les saisies absurdes
-            à l'intérieur de la carte. */}
-        <h1 className="text-enonce leading-tight font-bold text-pretty break-words text-stone-900">
+            à l'intérieur de la carte.
+
+            **Centré sur téléphone.** Une colonne étroite laisse une dernière
+            ligne courte flotter contre le bord gauche, avec le vide de trois
+            mots à sa droite : la carte avait alors un côté plein et un côté
+            creux, et l'écran penchait. Centré, l'énoncé occupe sa carte comme
+            un objet posé au milieu — il est ce qu'on regarde, pas un paragraphe
+            qu'on parcourt. Dès `md` la mesure est assez longue pour que le
+            drapeau à gauche redevienne le bon réglage. */}
+        <h1 className="text-enonce leading-tight font-bold text-pretty break-words text-stone-900 max-md:text-center">
           {enonce}
         </h1>
 
         {vuIlYaJours === null ? null : (
-          <p className="mt-pas-6 text-petit text-stone-500">{dernierPassage(vuIlYaJours)}</p>
+          <p className="mt-pas-6 text-petit text-stone-500 max-md:text-center">
+            {dernierPassage(vuIlYaJours)}
+          </p>
         )}
       </div>
 
       {children}
 
-      <div className="mt-pas-scene pt-pas-6 border-t border-stone-300">
+      {/* Le trait sépare deux natures de gestes, et il ne flotte pas entre
+          elles : sur téléphone, un pas de scène au-dessus creusait cent pixels
+          de vide entre la dernière réponse possible et lui, sans rien y mettre.
+          C'est le seul endroit de l'écran où l'écart doit se voir sans se
+          remarquer. */}
+      <div className="mt-pas-8 md:mt-pas-scene pt-pas-6 border-t border-stone-300">
         {actions}
 
         {/* Le signalement est le plus léger des gestes de cette rangée, et il le
@@ -104,7 +119,7 @@ export function CarteQuestion({
             doit être trouvable quand on le cherche et invisible quand on
             révise. */}
         {variantId ? (
-          <div className={actions ? "mt-pas-6" : undefined}>
+          <div className={actions ? "mt-pas-8" : undefined}>
             <SignalerLaQuestion key={variantId} variantId={variantId} />
           </div>
         ) : null}

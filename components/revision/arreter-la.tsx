@@ -64,7 +64,11 @@ export function ArreterLa({
 
   return (
     <Dialog open={ouvert} onOpenChange={setOuvert}>
-      <DialogTrigger className="text-petit rounded-galet shrink-0 text-stone-900 underline-offset-4 hover:underline focus-visible:underline">
+      {/* Le rembourrage lui donne la cible qu'une ligne de texte n'a pas : sur
+          téléphone, cette porte est seule en haut à droite d'un écran qui n'a
+          plus d'en-tête au-dessus, et il n'y a rien à côté d'elle à toucher par
+          erreur. La marge négative la ramène sur l'alignement de la colonne. */}
+      <DialogTrigger className="text-petit rounded-galet px-pas-2 py-pas-2 -mr-pas-2 -my-pas-2 shrink-0 text-stone-900 underline-offset-4 hover:underline focus-visible:underline">
         Arrêter là
       </DialogTrigger>
 

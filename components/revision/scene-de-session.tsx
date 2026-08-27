@@ -61,7 +61,17 @@ export function SceneDeSession({
     <PileDePanneaux sol="ombre">
       <div className="flex flex-1 flex-col lg:flex-row">
         {rail ? (
-          <aside className="bg-surface-roche grain grain-clair relative overflow-hidden text-stone-50 lg:order-2 lg:w-80 lg:shrink-0">
+          // En bande, elle suit le défilement. C'est la seule chose de l'écran
+          // qui dise où l'on en est, et elle sortait du champ dès la première
+          // question un peu longue : on répondait alors sans savoir s'il en
+          // restait deux ou onze. En colonne, elle occupe déjà toute la hauteur
+          // et n'a rien à suivre.
+          //
+          // Son ancrage suit l'en-tête, qui n'est pas là aux mêmes largeurs
+          // qu'elle : effacé sur téléphone, la bande se colle au bord ; présent
+          // entre les deux seuils, elle se pose dessous. Collée au bord dans les
+          // deux cas, elle serait passée par-dessus lui sur une tablette.
+          <aside className="bg-surface-roche grain grain-clair relative overflow-hidden text-stone-50 max-md:sticky max-md:top-0 max-md:z-20 md:max-lg:sticky md:max-lg:top-16 md:max-lg:z-20 lg:order-2 lg:w-80 lg:shrink-0">
             <div className="relative z-10 h-full">{rail}</div>
           </aside>
         ) : null}

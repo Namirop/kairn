@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { ROUTES } from "@/lib/auth/routes";
+import { usePathname } from "next/navigation";
+import { ROUTES, ROUTES_DE_PASSAGE } from "@/lib/auth/routes";
 import type { SessionUser } from "@/lib/auth/session";
 import { Marque } from "./marque";
 
@@ -22,10 +25,24 @@ function initiales(nom: string, email: string): string {
  *
  * La pastille des initiales échange sa surface au passage : posée en papier sur
  * du papier, elle aurait disparu.
+ *
+ * **Il s'efface sur téléphone pendant un passage de questions.** Voir
+ * `ROUTES_DE_PASSAGE` pour la raison. Il s'efface plutôt qu'il ne disparaît :
+ * la coquille reste la même d'un écran à l'autre, et la hauteur qu'il libère
+ * revient d'elle-même à la pile, qui la prend du flux.
  */
 export function EnTete({ utilisateur }: { utilisateur: SessionUser }) {
+  const chemin = usePathname();
+  const passage = ROUTES_DE_PASSAGE.some(
+    (route) => chemin === route || chemin.startsWith(`${route}/`),
+  );
+
   return (
-    <header className="px-pas-4 md:px-pas-8 bg-surface-papier/85 sticky top-0 z-20 flex h-14 items-center justify-between backdrop-blur-sm md:h-16">
+    <header
+      className={`px-pas-4 md:px-pas-8 bg-surface-papier/85 sticky top-0 z-20 flex h-14 items-center justify-between backdrop-blur-sm md:h-16 ${
+        passage ? "max-md:hidden" : ""
+      }`}
+    >
       <Link href={ROUTES.aujourdhui} className="rounded-galet">
         <Marque />
       </Link>

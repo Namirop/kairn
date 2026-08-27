@@ -107,12 +107,21 @@ export function ReponseCloze({
           autoCapitalize="off"
           spellCheck={false}
           maxLength={LONGUEUR_MAX_SAISIE}
-          className="flex-1"
+          /* `flex-1` seul écrasait le champ sur téléphone. La rangée passe en
+             colonne sous `sm`, et dans une colonne c'est la **hauteur** que
+             `flex-1` gouverne : le champ tombait à une vingtaine de pixels,
+             deux fois moins qu'un bouton, pour le geste central de ce format.
+             Il prend la largeur en colonne, la place restante en rangée.
+
+             Et il monte à quarante-huit pixels sur téléphone, comme le bouton
+             qui le suit : c'est le seul champ de l'écran, et la seule chose
+             qu'on ait à faire. */
+          className="w-full max-sm:h-12 sm:flex-1"
           value={trou.saisie}
           onChange={(evenement) => trou.saisir(evenement.target.value)}
         />
 
-        <Button type="submit" disabled={enCours || propre.length === 0}>
+        <Button type="submit" disabled={enCours || propre.length === 0} className="max-sm:h-12">
           Vérifier
         </Button>
       </div>

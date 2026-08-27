@@ -17,7 +17,17 @@ import { Button } from "@/components/ui/button";
 export function JeterLaPierre({ enCours, onJeter }: { enCours: boolean; onJeter: () => void }) {
   return (
     <div className="mt-pas-6">
-      <Button type="button" variant="ghost" size="sm" disabled={enCours} onClick={onJeter}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        disabled={enCours}
+        onClick={onJeter}
+        /* Une cible qu'on atteint au doigt. Discret ne veut pas dire petit :
+           trente-six pixels de haut se ratent, et rater ce bouton-là veut dire
+           taper à côté au moment où l'on renonce. */
+        className="max-sm:px-pas-4 max-sm:h-11"
+      >
         Je jette la pierre
       </Button>
     </div>

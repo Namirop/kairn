@@ -32,7 +32,10 @@ export function SortieDuCycleAction({
         size="sm"
         disabled={enCours}
         onClick={onSortir}
-        className="self-start sm:self-auto"
+        /* Le seul objet dessiné sous le trait, et la seule cible tactile de la
+           rangée : à trente-six pixels de haut, il se ratait au doigt comme les
+           liens qui l'entourent, et rien ne le distinguait d'eux. */
+        className="max-sm:px-pas-6 self-start max-sm:h-11 sm:self-auto"
       >
         Je maîtrise ça
       </Button>
@@ -40,11 +43,16 @@ export function SortieDuCycleAction({
       {/* Ce que le geste fait vraiment : il repousse, il ne supprime pas, et il
           se défait. Annoncer « une seule fois » laissait croire l'inverse.
 
+          « Sort du cycle » a été retiré : c'est du vocabulaire de système, et la
+          phrase suivante disait déjà la même chose en langue d'utilisateur. Sur
+          téléphone, elle prenait trois lignes de gris sous un bouton qu'on
+          clique une fois par mois.
+
           Sans mesure : la phrase tient sur une ligne dès qu'il y a la largeur, et
           la colonne l'a. Bornée à trois cents pixels au milieu d'un écran vide,
           elle se cassait en deux sans raison lisible. */}
       <p className="text-petit text-stone-500">
-        Le concept sort du cycle et revient dans trois mois pour vérifier. Ça se défait.
+        Le concept revient dans trois mois pour vérifier, et ça se défait.
       </p>
     </div>
   );
