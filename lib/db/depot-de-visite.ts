@@ -23,7 +23,13 @@ export type DepotAnonyme = {
   statut: string;
   motifDechec: string | null;
   concepts: { id: string; concept: string; tags: string[] }[];
-  /** La question écrite sur le premier concept, quand elle est là. */
+  /**
+   * La question écrite sur le premier concept **questionnable**, quand elle est là.
+   *
+   * Le premier tout court n'est pas forcément celui-là : sur un dépôt factuel,
+   * les concepts incertains sont écartés du questionnement, et un dépôt dont
+   * ils le sont tous n'en reçoit aucune. `null` est alors une fin normale.
+   */
   question: string | null;
 };
 

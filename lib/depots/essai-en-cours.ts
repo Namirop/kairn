@@ -17,11 +17,15 @@ export type AvancementDeLEssai = {
   enCours: boolean;
   concepts: { id: string; concept: string; tags: string[] }[];
   /**
-   * La question écrite sur le premier concept — l'échantillon de l'essai.
+   * La question écrite sur le premier concept **questionnable** — l'échantillon
+   * de l'essai.
    *
    * Elle arrive **après** les concepts : deux appels, deux temps. L'écran ne
    * l'attend donc pas pour montrer ce qu'il a déjà, sans quoi l'ajout de la
    * question allongerait l'attente de tout le reste au lieu de l'enrichir.
+   *
+   * Elle peut aussi ne jamais venir : un dépôt factuel dont tous les concepts
+   * sont incertains n'a rien à questionner, et l'écran s'arrête aux concepts.
    */
   question: string | null;
   /** Renseigné quand la chaîne s'est arrêtée sans rien produire. */

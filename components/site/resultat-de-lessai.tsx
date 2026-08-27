@@ -32,9 +32,10 @@ export function ResultatDeLEssai({
     On montre ce qui existe dès qu'il existe.
 
     L'essai se joue maintenant en deux temps — les concepts, puis la question
-    écrite sur le premier —, et attendre le second pour afficher le premier
-    ferait payer à tout le monde l'ajout de la question : on verrait le résultat
-    plus tard qu'avant, pour en avoir plus. C'est l'inverse de ce qu'on cherche.
+    écrite sur le premier d'entre eux qui soit questionnable —, et attendre le
+    second temps pour afficher le premier ferait payer à tout le monde l'ajout
+    de la question : on verrait le résultat plus tard qu'avant, pour en avoir
+    plus. C'est l'inverse de ce qu'on cherche.
   */
   const rienEncore = !avancement || avancement.concepts.length === 0;
 
