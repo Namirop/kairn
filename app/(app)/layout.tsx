@@ -31,16 +31,25 @@ export default async function CoquilleApplication({ children }: { children: Reac
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="bg-surface-papier min-h-dvh">
+      {/* La hauteur descend par le flux, elle ne se calcule pas.
+
+          La pile de panneaux d'un écran soustrayait la hauteur de l'en-tête à
+          celle de la fenêtre, en dur, deux fois — une valeur pour le téléphone,
+          une pour le bureau. Ça tenait tant que l'en-tête était là partout ; le
+          jour où un écran s'en passe, la pile s'arrête trop tôt et laisse sous
+          elle une bande de la couleur de la coquille. Une colonne flexible dit
+          la même chose sans chiffre : ce qui reste après l'en-tête, quel qu'il
+          soit, et rien si l'en-tête n'est pas là. */}
+      <div className="bg-surface-papier flex min-h-dvh flex-col">
         <Rail administrateur={administrateur} />
-        <div className="md:pl-28">
+        <div className="flex flex-1 flex-col md:pl-28">
           <EnTete utilisateur={utilisateur} />
           {/* Aucune mesure ici, et aucun rembourrage : chaque écran est une
               pile de panneaux qui porte les siens. Un conteneur à cet endroit
               empêcherait un fond d'aller d'un bord à l'autre, et une marge
               basse posée ici se peindrait de la couleur de la coquille, sous
               le dernier panneau — la bande d'une autre couleur, encore elle. */}
-          <main>{children}</main>
+          <main className="flex flex-1 flex-col">{children}</main>
         </div>
         <BarreBasse administrateur={administrateur} />
         <AccordFuseau enregistre={fuseau} />

@@ -24,8 +24,11 @@ export function PileDePanneaux({
   return (
     <div
       className={cn(
-        // La hauteur de l'en-tête, seul élément fixe au-dessus de la pile.
-        "flex min-h-[calc(100dvh-3.5rem)] flex-col md:min-h-[calc(100dvh-4rem)]",
+        // La hauteur vient de la coquille, qui est une colonne : la pile prend
+        // ce qui reste sous l'en-tête sans avoir à savoir combien il mesure —
+        // ni même s'il est là. Elle le soustrayait en dur, et un écran qui s'en
+        // passe laissait alors une bande de la couleur du corps sous lui.
+        "flex flex-1 flex-col",
         // Le dégagement de la barre basse appartient à la pile : posé sur la
         // coquille, il se peignait de la couleur du corps sous le dernier
         // panneau.

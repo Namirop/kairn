@@ -20,7 +20,7 @@ export default async function CoquilleSite({ children }: { children: React.React
   const utilisateur = await getCurrentUser();
 
   return (
-    <div className="bg-surface-papier min-h-dvh">
+    <div className="bg-surface-papier flex min-h-dvh flex-col">
       <header className="bg-surface-papier relative z-20">
         {/* La même mesure que la mesure « page » d'un Panneau, aux mêmes
             gouttières : sur un grand écran, un en-tête plus étroit que ce qu'il
@@ -48,7 +48,7 @@ export default async function CoquilleSite({ children }: { children: React.React
         </div>
       </header>
 
-      <main>{children}</main>
+      <main className="flex flex-1 flex-col">{children}</main>
     </div>
   );
 }
