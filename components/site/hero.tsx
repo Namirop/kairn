@@ -61,7 +61,12 @@ export function Hero({ connecte }: { connecte: boolean }) {
       surface="papier"
       aere
       mesure="large"
-      className="gap-pas-12 grid items-center md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
+      /* Sur téléphone, l'ouverture démarre juste sous l'en-tête. Le rythme de
+         campagne ouvrait de cinquante pixels au-dessus du titre : de la marge
+         prise sur le seul écran où la hauteur est comptée, et qui repoussait le
+         cairn et son geste sous le pli. Au-delà de `md`, le rythme reprend
+         intact — c'est là qu'il a un sens, il y a la hauteur pour le porter. */
+      className="max-md:pt-pas-4 gap-pas-12 grid items-center md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
       fond={<PaysageDeCairns />}
     >
       {/* Le titre passe **devant** les pierres.
@@ -122,7 +127,11 @@ export function Hero({ connecte }: { connecte: boolean }) {
             asChild
             variant="outline"
             size="lg"
-            className="mt-pas-4 md:mt-pas-6 bg-surface-papier"
+            /* Un cran plus petit sur téléphone : à la taille de bureau, le
+               bouton était le second objet le plus haut de l'écran après le
+               titre, pour une action secondaire — le sujet de l'ouverture est
+               la phrase, pas le geste. Il reprend sa pleine taille dès `md`. */
+            className="mt-pas-4 md:mt-pas-6 bg-surface-papier max-md:px-pas-6 max-md:text-petit max-md:h-10"
           >
             {connecte ? (
               <Link href={ROUTES.aujourdhui}>Aujourd&apos;hui</Link>
