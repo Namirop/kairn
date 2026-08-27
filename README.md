@@ -93,6 +93,9 @@ oubliée s'y voit comme une panne au lieu de fermer la porte en silence.
 | `RESEND_API_KEY`               | non    | Sans elle, les emails sont journalisés en dev — et l'envoi lève en prod.    |
 | `EMAIL_FROM`                   | non    | Expéditeur des emails transactionnels.                                      |
 | `CRON_SECRET`                  | oui    | Jeton `Authorization: Bearer` des routes cron.                              |
+| `BATTEMENT_JOBS_URL`           | non    | Heartbeat Better Stack signalé par `/api/cron/jobs` quand il aboutit.       |
+| `BATTEMENT_LOTS_URL`           | non    | Idem pour `/api/cron/lots`.                                                 |
+| `BATTEMENT_RAPPELS_URL`        | non    | Idem pour `/api/cron/rappels`.                                              |
 | `MOCK_AI`                      | oui    | `true` sert des fixtures locales, sans aucune requête réseau.               |
 | `AI_ENABLED`                   | oui    | `false` fait échouer immédiatement tout appel modèle.                       |
 | `AI_DAILY_CALL_CAP`            | oui    | Plafond global d'appels réels par jour, vérifié avant émission.             |

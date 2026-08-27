@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAuthorizedCron } from "@/lib/cron/authorization";
+import { signalerLeBattement } from "@/lib/cron/battement";
 import { releverLots, soumettreLotsEnAttente } from "@/lib/jobs/questions";
 
 /**
@@ -30,6 +31,8 @@ export async function GET(request: Request) {
 
   const releves = await releverLots();
   const soumises = await soumettreLotsEnAttente();
+
+  await signalerLeBattement("lots");
 
   return NextResponse.json({ releves, soumises });
 }

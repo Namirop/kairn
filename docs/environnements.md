@@ -335,6 +335,7 @@ ni ne se régénèrent, elles **disparaissent**.
 | `AI_MODEL`, `AI_MAX_TOKENS`                                                      | Réglages — identiques                                                                                                                            |
 | `EMAIL_FROM`                                                                     | Réglage — sur le domaine vérifié chez le fournisseur d'emails                                                                                    |
 | `ADMIN_EMAILS`                                                                   | Réglage — identique                                                                                                                              |
+| `BATTEMENT_JOBS_URL`, `BATTEMENT_LOTS_URL`, `BATTEMENT_RAPPELS_URL`              | Adresses — les heartbeats Better Stack ; absentes, les crons tournent sans être surveillés                                                        |
 | `ESSAI_ANONYME_SANS_LIMITE`                                                      | **Absente**, sauf le temps d'une vérification en ligne                                                                                           |
 | `SEED_USER_EMAIL`, `SEED_USER_TIMEZONE`                                          | **Absentes**                                                                                                                                     |
 

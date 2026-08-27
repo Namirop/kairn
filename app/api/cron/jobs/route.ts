@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAuthorizedCron } from "@/lib/cron/authorization";
+import { signalerLeBattement } from "@/lib/cron/battement";
 import { failExhaustedJobs, findResumableJobs } from "@/lib/db/generation-job";
 import { oublierLesVisitesAbandonnees } from "@/lib/db/depot-de-visite";
 import { runJob, type JobOutcome } from "@/lib/jobs/runner";
@@ -55,6 +56,8 @@ export async function GET(request: Request) {
   for (const job of jobs) {
     comptes[await runJob(job.id)] += 1;
   }
+
+  await signalerLeBattement("jobs");
 
   return NextResponse.json({
     repris: jobs.length,

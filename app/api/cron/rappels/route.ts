@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAuthorizedCron } from "@/lib/cron/authorization";
+import { signalerLeBattement } from "@/lib/cron/battement";
 import { envoyerLesAlertesDeStreak, envoyerLesRappels } from "@/lib/jobs/rappels";
 
 /**
@@ -32,9 +33,10 @@ export async function GET(request: Request) {
   }
 
   const maintenant = new Date();
+  const rappels = await envoyerLesRappels(maintenant);
+  const alertes = await envoyerLesAlertesDeStreak(maintenant);
 
-  return NextResponse.json({
-    rappels: await envoyerLesRappels(maintenant),
-    alertes: await envoyerLesAlertesDeStreak(maintenant),
-  });
+  await signalerLeBattement("rappels");
+
+  return NextResponse.json({ rappels, alertes });
 }
