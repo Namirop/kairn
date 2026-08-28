@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { quitterLaSessionAction } from "@/app/(app)/reviser/actions";
+import { relireLeTableauAction } from "@/app/(app)/reviser/actions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -57,7 +57,7 @@ export function ArreterLa({
 
     // Attendu avant de naviguer : c'est l'attente qui garantit que la page
     // d'arrivée sera relue, et non resservie telle qu'on l'avait laissée.
-    if (rafraichirLeTableau) await quitterLaSessionAction();
+    if (rafraichirLeTableau) await relireLeTableauAction();
 
     router.push(ROUTES.aujourdhui);
   }

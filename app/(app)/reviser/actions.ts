@@ -138,9 +138,9 @@ export async function reclamerMaitriseAction(
 
   if (!valide.success) return null;
 
-  // Pas de revalidation : elle rafraîchirait la route courante, le serveur
-  // rendrait une session désormais vide, et l'écran de fin disparaîtrait à
-  // l'instant où il s'affiche. Le tableau de bord est rendu à la demande.
+  // Pas de revalidation ici : ce n'est pas son sujet. La fin de session en
+  // demande une, une seule fois, et pour tout ce qu'elle a déplacé — voir
+  // `relireLeTableauAction`.
   return reclamerSignalDeMaitrise(utilisateur.id, valide.data);
 }
 
@@ -169,14 +169,34 @@ export async function espacementVuAction(): Promise<void> {
 }
 
 /**
- * Quitter une session en cours.
+ * Le tableau de bord est périmé : qu'il soit relu.
  *
- * Elle n'écrit rien : tout a déjà été écrit, réponse par réponse. Elle marque
- * seulement le tableau de bord comme à relire, sans quoi le client resservait
- * la page qu'il avait chargée avant la session — avec le compte de concepts dus
- * d'avant, et le travail qu'on venait de faire invisible jusqu'au rechargement.
+ * Elle n'écrit rien — tout a déjà été écrit, réponse par réponse. Elle marque
+ * seulement la page d'accueil comme à relire, sans quoi le client ressert celle
+ * qu'il avait chargée avant la session : le compte de concepts dus d'avant, et
+ * le travail qu'on vient de faire invisible jusqu'au rechargement.
+ *
+ * **Elle s'appelait `quitterLaSessionAction`, et c'est ce nom qui a fait revenir
+ * le défaut deux fois.** Nommée d'après une porte, elle n'était appelée que par
+ * cette porte-là : le jour où l'écran de fin en a ouvert trois autres — déposer,
+ * s'entraîner, revenir à aujourd'hui —, aucune n'avait de raison de la connaître,
+ * et le compteur est redevenu faux. Elle est maintenant nommée d'après son
+ * effet, et l'invariant tient en une phrase :
+ *
+ * > **Tout ce qui sort d'une session appelle cette action avant de partir.**
+ *
+ * Il n'y a que deux sorties, et elles sont toutes les deux dans
+ * `components/revision/` : `ArreterLa` pour l'abandon, `FinDeSession` pour
+ * l'achèvement. La seconde l'appelle à son affichage plutôt qu'à chacun de ses
+ * liens — quelle que soit la porte qu'on prenne ensuite, y compris la barre de
+ * navigation, le tableau est déjà marqué.
+ *
+ * Ça suppose que l'écran de fin survive au rafraîchissement que la revalidation
+ * déclenche sur la route courante. C'est le cas depuis que `/reviser` lui passe
+ * l'écran vide en accessoire au lieu d'en décider lui-même — voir
+ * `SessionDeRevision`.
  */
-export async function quitterLaSessionAction(): Promise<void> {
+export async function relireLeTableauAction(): Promise<void> {
   const utilisateur = await getCurrentUser();
 
   if (!utilisateur) return;

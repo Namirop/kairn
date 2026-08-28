@@ -33,23 +33,6 @@ export default async function PageReviser() {
     findUserStats(utilisateur.id),
   ]);
 
-  if (session.questions.length === 0) {
-    return (
-      <PileDePanneaux>
-        <Panneau surface="papier" mesure="texte" remplit centre className="md:py-pas-16">
-          <RienAReviser
-            totalConcepts={session.totalConcepts}
-            conceptsEnAttenteDeQuestions={session.conceptsEnAttenteDeQuestions}
-            prochainJourServi={session.prochainJourServi}
-            reporteAuLendemain={session.reporteAuLendemain}
-            fuseau={session.fuseau}
-            maintenant={maintenant}
-          />
-        </Panneau>
-      </PileDePanneaux>
-    );
-  }
-
   // Un rappel coupé n'a pas d'heure à annoncer, et l'annoncer quand même serait
   // promettre un email qui ne partira pas.
   const rappelActif = reglages.dailyReminderEnabled && reglages.emailOptOutAt === null;
@@ -57,6 +40,34 @@ export default async function PageReviser() {
   return (
     <SessionDeRevision
       questions={session.questions}
+      /*
+        L'écran vide est passé en accessoire, il n'est plus décidé ici.
+
+        La page en décidait, et c'est ce qui rendait la fin de session fragile :
+        une revalidation la faisait relire, le serveur voyait une session
+        désormais vide, et remplaçait l'écran de fin par « tu es à jour » à
+        l'instant où l'on venait de le mériter. Il fallait donc s'interdire
+        toute revalidation depuis cet écran — et le compteur du tableau de bord
+        est resté faux deux fois pour cette raison.
+
+        Rendu ici mais servi là-bas, l'écran vide ne coûte rien quand il ne sert
+        pas, et l'état « la session est finie » vit dans le client, où un
+        rafraîchissement du serveur ne peut pas le contredire.
+      */
+      vide={
+        <PileDePanneaux>
+          <Panneau surface="papier" mesure="texte" remplit centre className="md:py-pas-16">
+            <RienAReviser
+              totalConcepts={session.totalConcepts}
+              conceptsEnAttenteDeQuestions={session.conceptsEnAttenteDeQuestions}
+              prochainJourServi={session.prochainJourServi}
+              reporteAuLendemain={session.reporteAuLendemain}
+              fuseau={session.fuseau}
+              maintenant={maintenant}
+            />
+          </Panneau>
+        </PileDePanneaux>
+      }
       jour={jourDeLaSession(maintenant, session.fuseau)}
       serie={compteurs?.currentStreak ?? 0}
       rappel={

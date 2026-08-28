@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 import { reclamerMaitriseAction, repondreAction } from "@/app/(app)/reviser/actions";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
@@ -26,12 +26,21 @@ import type { ProchainRappel } from "@/lib/domain/prochain-rappel";
  */
 export function SessionDeRevision({
   questions,
+  vide,
   jour,
   serie,
   rappel,
   expliquerLEspacement = false,
 }: {
   questions: QuestionServie[];
+  /**
+   * Ce qu'on montre quand il n'y a rien à poser, rendu par la page.
+   *
+   * Il arrive tout fait plutôt que d'être décidé par la route : c'est ce qui
+   * permet à l'écran de fin de survivre à un rafraîchissement du serveur. Voir
+   * le commentaire de `/reviser/page.tsx`.
+   */
+  vide: ReactNode;
   /** Le jour de la session, déjà écrit dans le fuseau de l'utilisateur. */
   jour: string;
   serie: number;
@@ -82,7 +91,14 @@ export function SessionDeRevision({
 
   // La session finie, il n'y a plus de chemin à montrer : l'écran redevient une
   // pile de panneaux, comme le reste de l'application.
-  if (termine || questions.length === 0) {
+  //
+  // `termine` passe **avant** le compte de questions, et c'est tout l'objet du
+  // remaniement : une session qui vient de se terminer a vidé ce qui était dû,
+  // donc le serveur, relu, ne renverrait plus rien à poser. Si la liste vide
+  // décidait, l'écran de fin s'effacerait devant « tu es à jour » au premier
+  // rafraîchissement — et c'est ce qui interdisait de marquer le tableau de bord
+  // à relire depuis ici.
+  if (termine) {
     return (
       <PileDePanneaux>
         <Panneau surface="papier" mesure="texte" remplit centre className="md:py-pas-16">
@@ -91,6 +107,8 @@ export function SessionDeRevision({
       </PileDePanneaux>
     );
   }
+
+  if (questions.length === 0) return vide;
 
   return (
     // « Session » va en marge, la date reste dans l'en-tête. Le mot de marge est

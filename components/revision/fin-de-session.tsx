@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { compterDemainAction } from "@/app/(app)/reviser/actions";
+import { compterDemainAction, relireLeTableauAction } from "@/app/(app)/reviser/actions";
 import { Palier } from "@/components/revision/palier";
 import { PileDeSession } from "@/components/revision/pile-de-session";
 import { PrincipeDeLEspacement } from "@/components/revision/principe-de-lespacement";
@@ -54,6 +54,23 @@ export function FinDeSession({
     void compterDemainAction().then((nombre) => {
       if (vivant) setDemain(nombre);
     });
+
+    /*
+      La session est finie : le tableau de bord est périmé, et il le sait
+      maintenant plutôt qu'au clic sur l'une des quatre portes de cet écran.
+
+      C'est le point qui a manqué deux fois. La revalidation était accrochée au
+      bouton « Arrêter là » ; les liens d'ici — déposer, s'entraîner, revenir à
+      aujourd'hui, sans compter la barre de navigation — n'avaient aucune raison
+      de la connaître, et le compte de concepts dus restait celui d'avant la
+      session jusqu'au rechargement.
+
+      Appelée à l'affichage, elle vaut pour toutes les sorties d'un coup, y
+      compris celles qu'on ajoutera. Le rafraîchissement qu'elle déclenche sur
+      `/reviser` ne fait plus rien à cet écran : c'est le client qui tient
+      « la session est finie ». Voir `relireLeTableauAction`.
+    */
+    void relireLeTableauAction();
 
     return () => {
       vivant = false;
