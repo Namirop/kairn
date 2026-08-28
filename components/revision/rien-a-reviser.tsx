@@ -1,3 +1,4 @@
+import { ENTRAINEMENT_LIBRE } from "@/components/revision/entrainement-libre";
 import { Palier } from "@/components/revision/palier";
 import { ROUTES } from "@/lib/auth/routes";
 import { compte } from "@/lib/domain/accord";
@@ -29,9 +30,6 @@ type Props = {
   maintenant: Date;
 };
 
-const ENTRAINEMENT_LIBRE =
-  "L'entraînement repose d'autres questions sur les mêmes concepts. Il ne change pas ton planning.";
-
 export function RienAReviser({
   totalConcepts,
   conceptsEnAttenteDeQuestions,
@@ -49,8 +47,11 @@ export function RienAReviser({
         intitule="Session"
         titre="Tu as fait ta journée"
         explication={`${compte(reporteAuLendemain, "concept", "concepts")} ${reporteAuLendemain === 1 ? "attend" : "attendent"} demain. Le plafond de ta session tient à ça : ce qui reste est encore dû, et il passera en tête.`}
-        action={{ libelle: "S'entraîner", href: ROUTES.entrainement }}
-        note="L'entraînement repose d'autres questions sur les mêmes concepts, autant que tu veux. Il ne change pas ton planning."
+        action={{
+          libelle: "S'entraîner",
+          href: ROUTES.entrainement,
+          precision: ENTRAINEMENT_LIBRE,
+        }}
       />
     );
   }
@@ -89,8 +90,11 @@ export function RienAReviser({
           : "Rien à revoir aujourd'hui."
       }
       action={{ libelle: "Déposer autre chose", href: `${ROUTES.depots}/nouveau` }}
-      secondaire={{ libelle: "S'entraîner", href: ROUTES.entrainement }}
-      note={ENTRAINEMENT_LIBRE}
+      secondaire={{
+        libelle: "S'entraîner",
+        href: ROUTES.entrainement,
+        precision: ENTRAINEMENT_LIBRE,
+      }}
     />
   );
 }

@@ -13,6 +13,16 @@ import { SURFACES, type Surface } from "./surfaces";
  * Le sol reprend donc la surface du dernier panneau et remplit ce qui reste de
  * hauteur. Ce n'est pas un panneau de plus : c'est le même, prolongé jusqu'en
  * bas.
+ *
+ * **Le dégagement de la barre basse est une bande, plus un rembourrage.** La
+ * couture est revenue une fois de plus par là : cent douze pixels peints de la
+ * bonne couleur mais sans grain, juste sous un panneau grainé et juste au-dessus
+ * de la navigation. Ça se lisait comme une zone plus claire, et c'était
+ * exactement ça — la même teinte sans le bruit qui la mate.
+ *
+ * Le grain ne peut pas être posé sur la pile elle-même : il vit en
+ * pseudo-élément, donc en dernier enfant, et il se peindrait par-dessus les
+ * panneaux et leur texte. Il lui faut un élément à lui, et c'est cette bande.
  */
 export function PileDePanneaux({
   sol = "papier",
@@ -29,14 +39,22 @@ export function PileDePanneaux({
         // ni même s'il est là. Elle le soustrayait en dur, et un écran qui s'en
         // passe laissait alors une bande de la couleur du corps sous lui.
         "flex flex-1 flex-col",
-        // Le dégagement de la barre basse appartient à la pile : posé sur la
-        // coquille, il se peignait de la couleur du corps sous le dernier
-        // panneau.
-        "pb-28 md:pb-0",
         SURFACES[sol].fond,
       )}
     >
       {children}
+
+      {/* Le dégagement de la barre basse. Il appartient à la pile — posé sur la
+          coquille, il se peignait de la couleur du corps sous le dernier
+          panneau — et il porte la matière du sol, grain compris. */}
+      <div
+        aria-hidden
+        className={cn(
+          "relative h-28 shrink-0 overflow-hidden md:hidden",
+          SURFACES[sol].fond,
+          SURFACES[sol].grain,
+        )}
+      />
     </div>
   );
 }

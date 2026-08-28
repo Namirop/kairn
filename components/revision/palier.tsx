@@ -28,7 +28,42 @@ import { Button } from "@/components/ui/button";
  * n'ajoute pas un mot. Un palier qui n'a rien de tel à montrer n'en met pas.
  */
 
-export type Lien = { libelle: string; href: string };
+export type Lien = {
+  libelle: string;
+  href: string;
+  /**
+   * Ce que cette action-là fait, en une phrase, posée sous elle.
+   *
+   * **Elle appartient à l'action et non au palier**, et c'est la correction :
+   * posée sous les deux boutons, « D'autres questions sur les mêmes concepts »
+   * était à égale distance de « Déposer autre chose » et de « S'entraîner », et
+   * on ne savait pas lequel des deux elle décrivait. La proximité est ce qui dit
+   * l'appartenance ; il n'y avait pas de proximité à lire.
+   */
+  precision?: string;
+};
+
+/**
+ * Une action du palier : son bouton, et ce qu'elle fait juste dessous.
+ *
+ * La précision est serrée contre son bouton — deux pas, quand les deux actions
+ * en sont séparées de six. C'est ce rapport de un à trois qui dit à quoi elle se
+ * rapporte, et il ne se lit que par contraste : à un contre deux, l'œil hésitait
+ * encore.
+ */
+function ActionDePalier({ lien, contour = false }: { lien: Lien; contour?: boolean }) {
+  return (
+    <div className="gap-pas-2 flex max-w-xs flex-col items-center">
+      <Button asChild variant={contour ? "outline" : "default"}>
+        <Link href={lien.href}>{lien.libelle}</Link>
+      </Button>
+
+      {lien.precision ? (
+        <p className="text-petit text-pretty text-stone-500">{lien.precision}</p>
+      ) : null}
+    </div>
+  );
+}
 
 export function Palier({
   embleme,
@@ -38,7 +73,6 @@ export function Palier({
   action,
   secondaire,
   bouton,
-  note,
   pied,
   children,
 }: {
@@ -59,8 +93,6 @@ export function Palier({
   secondaire?: Lien;
   /** Une action qui ne mène pas ailleurs — reprendre un tour, par exemple. */
   bouton?: ReactNode;
-  /** La précision qui suit les actions, quand l'une d'elles en demande une. */
-  note?: string;
   /** La porte de sortie discrète, sous tout le reste. */
   pied?: ReactNode;
   /** Ce que ce palier ajoute entre l'explication et les actions. */
@@ -68,7 +100,7 @@ export function Palier({
 }) {
   return (
     <section className="flex w-full flex-col items-center text-center">
-      {embleme ? <div className="mb-pas-8">{embleme}</div> : null}
+      {embleme ? <div className="mb-pas-6 md:mb-pas-8">{embleme}</div> : null}
 
       {intitule ? (
         <p className="text-mono mb-pas-4 font-mono tracking-[0.14em] text-stone-500 uppercase">
@@ -81,7 +113,7 @@ export function Palier({
       </h1>
 
       {explication ? (
-        <p className="mt-pas-6 text-corps max-w-lg leading-relaxed text-pretty text-stone-500">
+        <p className="mt-pas-4 md:mt-pas-6 text-corps max-w-lg leading-relaxed text-pretty text-stone-500">
           {explication}
         </p>
       ) : null}
@@ -89,28 +121,19 @@ export function Palier({
       {children}
 
       {action || bouton ? (
-        <div className="gap-pas-3 mt-pas-12 flex flex-col sm:flex-row">
+        /* Les deux actions s'alignent en haut et non au centre : celle qui porte
+           une précision est plus haute que l'autre, et centrées, leurs boutons
+           se décalaient verticalement l'un par rapport à l'autre. */
+        <div className="gap-pas-6 mt-pas-8 md:mt-pas-12 flex flex-col items-center sm:flex-row sm:items-start">
           {bouton}
 
-          {action ? (
-            <Button asChild>
-              <Link href={action.href}>{action.libelle}</Link>
-            </Button>
-          ) : null}
+          {action ? <ActionDePalier lien={action} /> : null}
 
-          {secondaire ? (
-            <Button asChild variant="outline">
-              <Link href={secondaire.href}>{secondaire.libelle}</Link>
-            </Button>
-          ) : null}
+          {secondaire ? <ActionDePalier lien={secondaire} contour /> : null}
         </div>
       ) : null}
 
-      {note ? (
-        <p className="mt-pas-4 text-petit max-w-md text-pretty text-stone-500">{note}</p>
-      ) : null}
-
-      {pied ? <div className="mt-pas-8">{pied}</div> : null}
+      {pied ? <div className="mt-pas-6 md:mt-pas-8">{pied}</div> : null}
     </section>
   );
 }

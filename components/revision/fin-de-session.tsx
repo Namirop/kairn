@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { compterDemainAction, relireLeTableauAction } from "@/app/(app)/reviser/actions";
+import { ENTRAINEMENT_LIBRE } from "@/components/revision/entrainement-libre";
 import { Palier } from "@/components/revision/palier";
 import { PileDeSession } from "@/components/revision/pile-de-session";
 import { PrincipeDeLEspacement } from "@/components/revision/principe-de-lespacement";
@@ -50,13 +51,16 @@ function phraseDemain(nombre: number | null, heureDuRappel: number | null): stri
   if (nombre === null) return "";
 
   if (nombre === 0) {
-    return "Rien ne revient demain : tu es à jour. Ce que tu déposeras maintenant reviendra à son tour.";
+    return "Rien ne revient demain : tu es à jour. Ce que tu déposeras reviendra à son tour.";
   }
 
   const combien =
-    nombre === 1 ? "Un concept revient demain." : `${nombre} concepts reviennent demain.`;
+    nombre === 1 ? "Un concept revient demain" : `${nombre} concepts reviennent demain`;
 
-  return heureDuRappel === null ? combien : `${combien} On t'écrit à ${heureDuRappel} h.`;
+  // Deux phrases devenaient trois lignes sur un téléphone, dont la dernière ne
+  // portait que le « h ». Une seule phrase, et l'heure insécable : « 19 h » est
+  // un nombre et son unité, il ne se coupe pas.
+  return heureDuRappel === null ? `${combien}.` : `${combien}, rappel à ${heureDuRappel} h.`;
 }
 
 export function FinDeSession({
@@ -121,10 +125,15 @@ export function FinDeSession({
       // L'espace est réservé : la phrase arrive après un aller-retour, elle ne
       // doit pas pousser le bouton vers le bas en apparaissant. Deux lignes,
       // parce que c'est ce que fait la version longue à la mesure de ce palier.
-      explication={<span className="block min-h-14">{phraseDemain(demain, heureDuRappel)}</span>}
+      // Elle en faisait trois avant d'être raccourcie, et l'écran débordait
+      // alors du pli d'un téléphone.
+      explication={<span className="block min-h-12">{phraseDemain(demain, heureDuRappel)}</span>}
       action={{ libelle: "Déposer autre chose", href: `${ROUTES.depots}/nouveau` }}
-      secondaire={{ libelle: "S'entraîner", href: ROUTES.entrainement }}
-      note="D'autres questions sur les mêmes concepts. Ton planning ne bouge pas."
+      secondaire={{
+        libelle: "S'entraîner",
+        href: ROUTES.entrainement,
+        precision: ENTRAINEMENT_LIBRE,
+      }}
       pied={
         <Link
           href={ROUTES.aujourdhui}
