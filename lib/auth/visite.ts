@@ -75,7 +75,9 @@ export async function adresseDuVisiteur(): Promise<string> {
   // seau de deux visites — donc il n'ouvre rien. Mais il **ferme** la landing,
   // et sans cette ligne il la fermerait en silence : on chercherait un bug de
   // quota là où il n'y a qu'un en-tête manquant.
-  console.warn("Adresse du visiteur introuvable : les essais anonymes tombent dans un seau commun.");
+  console.warn(
+    "Adresse du visiteur introuvable : les essais anonymes tombent dans un seau commun.",
+  );
 
   return "inconnue";
 }

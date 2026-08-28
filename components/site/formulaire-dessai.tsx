@@ -91,10 +91,21 @@ export function FormulaireDEssai({
 
       <Apparition>
         <Temps>
+          {/* Ce paragraphe ne dit plus ce qu'on peut déposer, il dit ce qu'on
+              en fait.
+
+              Il commençait par une énumération — « un article, une réponse
+              qu'on t'a donnée, une page de manuel » — juste au-dessus d'un champ
+              dont l'invite en fait une autre, et à deux plis d'une troisième
+              dans « Tu déposes ». La page disait trois fois la même chose, et
+              c'est la première qui devait partir : celle du champ arrive au
+              moment du geste, là où la question se pose vraiment.
+
+              Reste le mécanisme, et il annonce exactement ce que le panneau
+              montrera ensuite — des concepts, des questions, un retour. */}
           <p className="text-stone-500">
-            Un article, une réponse qu&apos;on t&apos;a donnée, une page de manuel, ce qu&apos;un
-            collègue vient de t&apos;expliquer. Kairn le découpe en concepts et te les repose juste
-            avant que tu les oublies.
+            Kairn découpe ce que tu colles en concepts, en fait des questions, et te les repose
+            juste avant que tu les oublies.
           </p>
         </Temps>
 

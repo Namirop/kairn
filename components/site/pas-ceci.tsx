@@ -18,6 +18,14 @@ import { ROUTES } from "@/lib/auth/routes";
  * déborde du panneau et sort du cadre : une forme entière, posée bien au
  * milieu, redeviendrait une illustration.
  *
+ * **La première négation nomme la corvée, elle n'invente pas de statistique.**
+ * Elle disait « personne ne tient un jeu de cartes plus de trois semaines » :
+ * trois semaines ne vient d'aucune mesure, et « tenir un jeu de cartes » se lit
+ * d'abord comme des cartes à jouer. Surtout, elle donnait le symptôme sans la
+ * cause — or la cause est exactement ce que le produit remplace. Ce qui use
+ * n'est pas de réviser, c'est de fabriquer les cartes, et c'est ce travail-là
+ * que Kairn fait à la place.
+ *
  * Les deux paragraphes n'arrivent pas ensemble, et c'est la seule chose que
  * l'animation fait ici : les négations d'abord, l'affirmation ensuite. « C'est une
  * seule chose » est la conclusion des trois « ce n'est pas », et la lire en même
@@ -46,10 +54,10 @@ export function PasCeci({ connecte }: { connecte: boolean }) {
       <Apparition className="text-stone-300">
         <Temps>
           <p>
-            Ce n&apos;est pas une application de fiches à écrire soi-même : personne ne tient un jeu
-            de cartes plus de trois semaines. Ce n&apos;est pas un outil de prise de notes — tu en
-            as déjà un, et ce n&apos;est pas là que le savoir se fixe. Ce n&apos;est pas un
-            assistant à qui parler.
+            Ce n&apos;est pas une application de fiches à écrire soi-même : ce qui use, ce
+            n&apos;est pas de réviser, c&apos;est de fabriquer les cartes. Ce n&apos;est pas un
+            outil de prise de notes — tu en as déjà un, et ce n&apos;est pas là que le savoir se
+            fixe. Ce n&apos;est pas un assistant à qui parler.
           </p>
         </Temps>
 

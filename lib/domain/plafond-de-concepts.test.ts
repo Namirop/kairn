@@ -29,9 +29,7 @@ describe("appliquerLePlafond", () => {
   });
 
   it("garde la tête de la liste, puisque c'est elle qui est la plus importante", () => {
-    expect(appliquerLePlafond(concepts(25)).gardes).toEqual(
-      concepts(PLAFOND_CONCEPTS_PAR_DEPOT),
-    );
+    expect(appliquerLePlafond(concepts(25)).gardes).toEqual(concepts(PLAFOND_CONCEPTS_PAR_DEPOT));
   });
 
   it("rend une liste vide sans rien inventer", () => {

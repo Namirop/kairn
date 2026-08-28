@@ -5,8 +5,12 @@ import { TraceDuSentier, type EtapeDuSentier } from "@/components/site/trace-du-
 const ETAPES: EtapeDuSentier[] = [
   {
     titre: "Tu déposes",
+    // L'énumération est partie : le champ de l'essai en porte une, deux plis
+    // plus haut, au moment où la question « qu'est-ce que j'y mets ? » se pose
+    // vraiment. Reste ce que cette étape est seule à pouvoir dire — qu'il n'y a
+    // rien à faire — et le seul exemple que personne ne devine, la photo.
     texte:
-      "Une phrase notée à la volée pendant un cours, un article collé en entier, la photo d'une page de livre. Rien à formater, rien à découper toi-même.",
+      "Rien à formater, rien à découper, rien à mettre en fiches : tu colles, et c'est fini. Même la photo d'une page de livre.",
   },
   {
     titre: "Kairn découpe",

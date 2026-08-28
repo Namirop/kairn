@@ -50,7 +50,10 @@ export function useConnexionParCode(adresse: string, suite: string): ConnexionPa
       const fuseau = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const entetes = fuseau ? { [TIMEZONE_HEADER]: fuseau } : {};
 
-      const { error } = await signIn.emailOtp({ email: adresse, otp: valeur }, { headers: entetes });
+      const { error } = await signIn.emailOtp(
+        { email: adresse, otp: valeur },
+        { headers: entetes },
+      );
 
       if (error) {
         setEnCours(false);

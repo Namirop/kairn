@@ -21,6 +21,28 @@
 
 export const VARIABLE_SANS_LIMITE = "ESSAI_ANONYME_SANS_LIMITE";
 
+/**
+ * **C'est un interrupteur, pas un nombre**, et il n'y a que `true` qui l'allume.
+ *
+ * Posée à autre chose — un compte, une durée, `1`, `on` —, la variable ne fait
+ * rien et l'essai continue de refuser comme si elle n'existait pas. C'est le bon
+ * défaut : sur une page publique, une valeur mal comprise doit fermer la porte,
+ * jamais l'ouvrir. Mais le silence, lui, était un mauvais défaut — on redéploie,
+ * on retente, on relit ses cookies, et rien ne dit que c'est la valeur qui ne
+ * convient pas.
+ *
+ * Une valeur présente et refusée se journalise donc. Une variable absente ne dit
+ * rien : c'est l'état normal, et le dire à chaque dépôt noierait le reste.
+ */
 export function essaiSansLimite(): boolean {
-  return process.env[VARIABLE_SANS_LIMITE]?.trim() === "true";
+  const pose = process.env[VARIABLE_SANS_LIMITE]?.trim();
+
+  if (pose === undefined || pose.length === 0) return false;
+  if (pose === "true") return true;
+
+  console.warn(
+    `[essai] ${VARIABLE_SANS_LIMITE}=${pose} : c'est un interrupteur, seul « true » l'allume — les verrous restent en place.`,
+  );
+
+  return false;
 }

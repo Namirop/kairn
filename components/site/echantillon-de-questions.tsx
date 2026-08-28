@@ -23,6 +23,13 @@ import type { VariantFormat } from "@/lib/db/types";
  * la question change, et il vient de comprendre la rotation sans qu'on ait eu à
  * la lui expliquer. Le geste est le message.
  *
+ * **L'attente montre la forme de ce qui arrive**, comme celle du découpage.
+ * Elle ne disait qu'une ligne grise — « On les écrit, deux secondes. » — sous
+ * une liste de concepts qui, elle, venait d'apparaître : rien ne bougeait, et
+ * une phrase immobile sur une page qui vient de se remplir se lit comme une fin,
+ * pas comme une suite. On pose donc les emplacements des quatre formats et celui
+ * de la carte, aux mesures de ce qui va les remplacer.
+ *
  * **Des boutons à deux états, pas des onglets.** Le motif ARIA des onglets
  * impose la navigation aux flèches et un `tabindex` mouvant ; à demi
  * implémenté, il retire au clavier ce que la souris garde. Quatre boutons
@@ -31,6 +38,48 @@ import type { VariantFormat } from "@/lib/db/types";
  */
 
 type Question = { question: string; format: VariantFormat };
+
+/**
+ * Les largeurs des quatre emplacements de format.
+ *
+ * Celles des libellés qui viendront — « QCM » est court, « Texte à trou » ne
+ * l'est pas — pour que la rangée ne change pas de dessin en se remplissant.
+ */
+const EMPLACEMENTS = ["w-16", "w-28", "w-32", "w-24"] as const;
+
+function EnEcriture() {
+  return (
+    <section className="gap-pas-3 flex flex-col" role="status" aria-live="polite">
+      <h3 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
+        On écrit les questions
+      </h3>
+
+      <div className="gap-pas-1 flex flex-wrap" aria-hidden>
+        {EMPLACEMENTS.map((largeur, rang) => (
+          <span
+            key={largeur}
+            className={`rounded-galet block h-8 bg-stone-300/60 motion-safe:animate-pulse ${largeur}`}
+            style={{ animationDelay: `${rang * 160}ms` }}
+          />
+        ))}
+      </div>
+
+      {/* Les deux barres ont la hauteur d'une ligne d'énoncé : la carte ne
+          changera pas de taille en recevant sa question. */}
+      <div className="rounded-carte bg-surface-ombre p-pas-dedans" aria-hidden>
+        <span className="block h-6 w-full rounded-xs bg-stone-300/70 motion-safe:animate-pulse" />
+        <span
+          className="mt-pas-3 block h-6 w-3/5 rounded-xs bg-stone-300/50 motion-safe:animate-pulse"
+          style={{ animationDelay: "200ms" }}
+        />
+      </div>
+
+      <p className="text-petit max-w-xl text-stone-500">
+        Quatre formulations sur le même concept, de formats différents. Quelques secondes.
+      </p>
+    </section>
+  );
+}
 
 export function EchantillonDeQuestions({
   questions,
@@ -42,7 +91,7 @@ export function EchantillonDeQuestions({
 }) {
   const [rang, setRang] = useState(0);
 
-  if (questions.length === 0 && !enCours) return null;
+  if (questions.length === 0) return enCours ? <EnEcriture /> : null;
 
   const montree = questions[Math.min(rang, questions.length - 1)];
 
@@ -99,9 +148,7 @@ export function EchantillonDeQuestions({
             pas une phrase apprise par cœur.
           </p>
         </>
-      ) : (
-        <p className="text-petit text-stone-500">On les écrit, deux secondes.</p>
-      )}
+      ) : null}
     </section>
   );
 }

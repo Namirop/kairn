@@ -79,7 +79,15 @@ export function CarteQuestion({
         ) : null}
       </div>
 
-      <div className="rounded-carte bg-surface-papier mt-pas-3 p-pas-dedans">
+      {/* Le rembourrage descend d'un cran sur téléphone.
+
+          `--pas-dedans` suit la hauteur de fenêtre : sur un téléphone il fait
+          une trentaine de pixels, et la carte les prend quatre fois autour d'un
+          énoncé qui n'a déjà qu'une colonne étroite. L'écart entre la question
+          et son cadre y devenait plus large que celui entre deux de ses lignes.
+          Sur grand écran il n'y a rien à reprendre : la place ne manque pas, et
+          c'est ce rythme-là qui donne à la carte sa présence d'objet posé. */}
+      <div className="rounded-carte bg-surface-papier mt-pas-3 p-pas-4 md:p-pas-dedans">
         {/* Les lignes se touchent presque : un titre est une unité, et l'écart du
             corps de texte le faisait lire comme un paragraphe en gras. `text-enonce`
             est un cran sous le titre de page — assez pour dominer l'écran, pas

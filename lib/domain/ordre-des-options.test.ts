@@ -79,7 +79,11 @@ describe("ordonnerLesOptions", () => {
   });
 
   it("trie les durées, unité comprise", () => {
-    const servi = ordonnerLesOptions(["90 minutes", "20 minutes", "5 minutes", "45 minutes"], 2, "g");
+    const servi = ordonnerLesOptions(
+      ["90 minutes", "20 minutes", "5 minutes", "45 minutes"],
+      2,
+      "g",
+    );
 
     expect(servi.options).toEqual(["5 minutes", "20 minutes", "45 minutes", "90 minutes"]);
     expect(servi.options[servi.correctIndex]).toBe("5 minutes");

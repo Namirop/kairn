@@ -111,7 +111,11 @@ describe("periodeDeQuota", () => {
           const maintenant = new Date(inscription.getTime() + joursApres * 24 * 60 * 60 * 1000);
           const courante = periodeDeQuota(inscription, maintenant, "UTC");
           // Le premier instant de la période suivante ouvre bien celle qui suit.
-          const suivante = periodeDeQuota(inscription, new Date(`${courante.fin}T00:00:00Z`), "UTC");
+          const suivante = periodeDeQuota(
+            inscription,
+            new Date(`${courante.fin}T00:00:00Z`),
+            "UTC",
+          );
 
           return suivante.debut === courante.fin;
         },
