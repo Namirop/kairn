@@ -2,7 +2,7 @@ import { startOfUtcDay, sumAiCalls } from "@/lib/db/ai-call";
 import { reserverLAlerte } from "@/lib/db/alerte-quota";
 import { envoyerLAlerteDePlafond } from "@/lib/email/alerte-de-plafond";
 import { surveillerLePlafond, type EtatDuCompteur, type OutilsDAlerte } from "./alerte-de-plafond";
-import { differer } from "./hors-chemin-critique";
+import { differer } from "@/lib/hors-chemin-critique";
 
 /**
  * Le câblage de la surveillance des plafonds : la base, les emails, l'attente.

@@ -3,6 +3,11 @@ import { after } from "next/server";
 /**
  * Faire quelque chose après avoir rendu la main.
  *
+ * Il vivait sous `lib/ai/` tant que les deux seules choses à différer étaient
+ * des alertes d'appel modèle. Un retour sur le produit prévient aussi par email
+ * et n'a rien à voir avec le modèle : le garder là forcerait un formulaire de
+ * réglages à importer la couche IA pour une raison qui ne la concerne pas.
+ *
  * Un garde-fou qui casse ce qu'il surveille est pire que pas de garde-fou : une
  * alerte de plafond ne doit ni ralentir un dépôt, ni le faire échouer parce que
  * Resend a hoqueté. Elle sort donc du chemin critique.

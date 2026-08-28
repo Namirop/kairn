@@ -1,4 +1,5 @@
 import type { SujetDeRetour } from "@/lib/db/types";
+import { LIBELLE_DE_SUJET } from "@/lib/retours/libelle-du-sujet";
 
 /**
  * De quoi le retour parle : quatre choix, en un coup d'œil.
@@ -14,12 +15,8 @@ import type { SujetDeRetour } from "@/lib/db/types";
  * pilule est un geste, et ceci est une saisie.
  */
 
-const SUJETS: { valeur: SujetDeRetour; libelle: string }[] = [
-  { valeur: "BUG", libelle: "Ça ne marche pas" },
-  { valeur: "COMPORTEMENT", libelle: "Ça me surprend" },
-  { valeur: "TEXTE", libelle: "Un mot de travers" },
-  { valeur: "AUTRE", libelle: "Autre chose" },
-];
+/** L'ordre de lecture, du plus concret au plus vague. La table dit les mots. */
+const ORDRE: SujetDeRetour[] = ["BUG", "COMPORTEMENT", "TEXTE", "AUTRE"];
 
 export function ChoixDuSujet({
   choisi,
@@ -35,11 +32,11 @@ export function ChoixDuSujet({
       <legend className="text-petit mb-pas-2 text-stone-500">De quoi s&apos;agit-il</legend>
 
       <div className="gap-pas-2 flex flex-wrap">
-        {SUJETS.map((sujet) => (
+        {ORDRE.map((sujet) => (
           <label
-            key={sujet.valeur}
+            key={sujet}
             className={`rounded-champ px-pas-3 py-pas-2 text-petit has-[:focus-visible]:border-lichen cursor-pointer border transition-colors ${
-              choisi === sujet.valeur
+              choisi === sujet
                 ? "border-lichen bg-lichen/10 text-stone-900"
                 : "border-stone-300 text-stone-500 hover:border-stone-500 hover:text-stone-900"
             }`}
@@ -47,13 +44,13 @@ export function ChoixDuSujet({
             <input
               type="radio"
               name="sujet"
-              value={sujet.valeur}
-              checked={choisi === sujet.valeur}
-              onChange={() => onChoisir(sujet.valeur)}
+              value={sujet}
+              checked={choisi === sujet}
+              onChange={() => onChoisir(sujet)}
               disabled={fige}
               className="sr-only"
             />
-            {sujet.libelle}
+            {LIBELLE_DE_SUJET[sujet]}
           </label>
         ))}
       </div>

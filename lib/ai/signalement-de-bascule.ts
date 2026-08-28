@@ -6,7 +6,7 @@ import {
   surveillerLesBascules,
   type OutilsDAlerteBascule,
 } from "./alerte-de-bascule";
-import { differer } from "./hors-chemin-critique";
+import { differer } from "@/lib/hors-chemin-critique";
 
 /**
  * Le câblage de la surveillance des bascules : la base, les emails, l'attente.

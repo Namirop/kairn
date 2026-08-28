@@ -4,6 +4,8 @@ import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { ecrireUnRetour } from "@/lib/db/retour";
+import { signalerUnRetour } from "@/lib/email/signalement-de-retour";
+import { LIBELLE_DE_SUJET } from "@/lib/retours/libelle-du-sujet";
 import { SujetDeRetour } from "@/lib/db/types";
 import { preparerCapture, TAILLE_MAXIMALE_OCTETS } from "@/lib/images/capture";
 import {
@@ -111,6 +113,17 @@ export async function envoyerUnRetourAction(
       message: champs.data.message,
     };
   }
+
+  // Après la réponse, jamais avant : quelqu'un qui vient d'écrire trois phrases
+  // n'a pas à attendre un aller-retour vers Resend, et un email qui échoue ne
+  // doit pas transformer un retour écrit en erreur à l'écran.
+  signalerUnRetour({
+    sujet: LIBELLE_DE_SUJET[champs.data.sujet],
+    ecran: lireLEcran(champs.data.ecran),
+    message,
+    contexte: resumerLeContexte(champs.data.largeur, champs.data.hauteur, champs.data.agent),
+    avecCapture: capture?.ok === true,
+  });
 
   return { envoye: true };
 }

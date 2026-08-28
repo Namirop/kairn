@@ -7,7 +7,7 @@ import {
 } from "@/app/(app)/admin/retours/actions";
 import { Button } from "@/components/ui/button";
 import type { RetourLu } from "@/lib/db/retour";
-import type { SujetDeRetour } from "@/lib/db/types";
+import { LIBELLE_DE_SUJET } from "@/lib/retours/libelle-du-sujet";
 
 /**
  * Un retour, tel qu'on le relit.
@@ -26,13 +26,6 @@ import type { SujetDeRetour } from "@/lib/db/types";
  * ne doit pas sortir un retour de la pile pour de bon.
  */
 
-const SUJETS: Record<SujetDeRetour, string> = {
-  BUG: "Ça ne marche pas",
-  COMPORTEMENT: "Ça surprend",
-  TEXTE: "Un mot de travers",
-  AUTRE: "Autre",
-};
-
 const JOUR = new Intl.DateTimeFormat("fr-BE", { dateStyle: "medium", timeStyle: "short" });
 
 export function LigneDeRetour({ retour }: { retour: RetourLu }) {
@@ -47,7 +40,7 @@ export function LigneDeRetour({ retour }: { retour: RetourLu }) {
     <li className={`py-pas-6 ${traite ? "opacity-60" : ""}`}>
       <div className="gap-pas-4 flex flex-wrap items-baseline justify-between">
         <p className="text-mono font-mono tracking-[0.12em] text-stone-900 uppercase">
-          {SUJETS[retour.sujet]}
+          {LIBELLE_DE_SUJET[retour.sujet]}
           {retour.ecran ? <span className="text-stone-500"> · {retour.ecran}</span> : null}
         </p>
         <p className="text-mono font-mono text-stone-500 tabular-nums">
