@@ -24,13 +24,18 @@ import { record } from "./journal";
  */
 
 /**
- * Les deux tables qui survivent volontairement, détachées de leur auteur.
+ * Les trois tables qui survivent volontairement, détachées de leur auteur.
  *
  * La comptabilité d'un appel déjà payé ne s'efface pas avec la personne qui l'a
- * déclenché ; un signalement porte une question à corriger et non une identité.
- * Dans les deux cas le lien tombe à nul — c'est ce que la vérification exige.
+ * déclenché ; un signalement porte une question à corriger et non une identité ;
+ * un retour porte un défaut du produit, et l'effacer avec le compte perdrait le
+ * travail restant au moment même où quelqu'un part. Dans les trois cas le lien
+ * tombe à nul — c'est ce que la vérification exige.
+ *
+ * La capture d'un retour, elle, est effacée avant la suppression. Voir
+ * `supprimerLeCompte`.
  */
-const DETACHES = new Set(["AiCall", "Signalement"]);
+const DETACHES = new Set(["AiCall", "Retour", "Signalement"]);
 
 /** Les modèles qui portent un `userId`, tels que le schéma les déclare. */
 function modelesAvecUserId(): { nom: string; cascade: boolean }[] {

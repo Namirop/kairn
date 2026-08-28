@@ -18,15 +18,28 @@ import { prisma } from "@/lib/db/client";
  * le jour où une table s'ajoute — c'est la base qui tient la liste, et une
  * vérification s'assure qu'elle est complète.
  *
- * **Deux tables survivent volontairement, détachées de leur auteur.** Le registre
- * des appels modèle, parce que la comptabilité d'une dépense déjà engagée ne
- * s'efface pas avec la personne qui l'a déclenchée. Les signalements, parce
- * qu'ils portent une question à corriger et non des données personnelles — ils
- * conservent le texte de la question, jamais l'identité de qui l'a signalée.
- * Dans les deux cas le lien tombe à nul, et il ne reste rien qui désigne
- * quelqu'un.
+ * **Trois tables survivent volontairement, détachées de leur auteur.** Le
+ * registre des appels modèle, parce que la comptabilité d'une dépense déjà
+ * engagée ne s'efface pas avec la personne qui l'a déclenchée. Les signalements,
+ * parce qu'ils portent une question à corriger et non des données personnelles.
+ * Les retours sur le produit, pour la même raison : ils portent un défaut à
+ * réparer, et l'effacer avec le compte reviendrait à perdre le travail restant
+ * au moment où la personne part — souvent parce que quelque chose ne lui
+ * convenait pas. Dans les trois cas le lien tombe à nul.
+ *
+ * **La capture jointe à un retour, elle, part.** C'est la seule chose de ces
+ * trois tables qui puisse porter n'importe quoi sans que personne l'ait relu :
+ * une image montre souvent plus que ce que son auteur croit y montrer, et le
+ * texte du retour suffit à savoir ce qu'il y avait à corriger. Elle est effacée
+ * avant la suppression, pas après — la ligne perd son lien au compte à
+ * l'instant du `delete`, et on ne saurait plus laquelle viser.
  */
 export async function supprimerLeCompte(userId: string): Promise<boolean> {
+  await prisma.retour.updateMany({
+    where: { userId },
+    data: { captureData: null, captureMediaType: null },
+  });
+
   const { count } = await prisma.user.deleteMany({ where: { id: userId } });
 
   return count === 1;
@@ -58,6 +71,8 @@ export type CompteExporte = {
       passages: { le: string; note: string; mode: string; tempsMs: number }[];
     }[];
   }[];
+  /** Ce que la personne nous a écrit sur le produit. La capture n'y est pas. */
+  retours: { envoyeLe: string; sujet: string; ecran: string | null; message: string }[];
 };
 
 /**
@@ -70,6 +85,11 @@ export type CompteExporte = {
  * Les questions et les passages sont inclus : ce sont des données produites à
  * partir de ce que la personne a déposé, et sa progression ne se comprend pas
  * sans elles.
+ *
+ * Les retours sur le produit aussi : ce sont des textes qu'elle a écrits et que
+ * nous détenons, donc ils lui appartiennent. Pas la capture qu'elle y a jointe —
+ * un export est un fichier JSON qu'on relit, et y coller une image en base64 le
+ * rendrait illisible pour ce qu'elle contient déjà.
  */
 export async function exporterLeCompte(userId: string): Promise<CompteExporte | null> {
   const compte = await prisma.user.findUnique({
@@ -92,6 +112,12 @@ export async function exporterLeCompte(userId: string): Promise<CompteExporte | 
   });
 
   if (!compte) return null;
+
+  const retours = await prisma.retour.findMany({
+    where: { userId },
+    orderBy: { createdAt: "asc" },
+    select: { createdAt: true, sujet: true, ecran: true, message: true },
+  });
 
   const depots = await prisma.input.findMany({
     where: { userId },
@@ -163,6 +189,12 @@ export async function exporterLeCompte(userId: string): Promise<CompteExporte | 
           tempsMs: passage.responseTimeMs,
         })),
       })),
+    })),
+    retours: retours.map((retour) => ({
+      envoyeLe: retour.createdAt.toISOString(),
+      sujet: retour.sujet,
+      ecran: retour.ecran,
+      message: retour.message,
     })),
   };
 }

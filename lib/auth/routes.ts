@@ -20,6 +20,7 @@ export const ROUTES = {
   adminComptes: "/admin/comptes",
   adminContenu: "/admin/contenu",
   adminSignalements: "/admin/signalements",
+  adminRetours: "/admin/retours",
   /** Les réglages du modèle : appels, plafonds, mode mock. Pas ceux du compte. */
   adminPilotage: "/admin/pilotage",
   /** L'ancienne adresse de l'écran interne, gardée le temps des favoris. */

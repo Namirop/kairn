@@ -444,3 +444,63 @@ model AlerteQuota {
 
   @@id([day, compteur, cible, seuil])
 }
+
+/// Ce dont un retour parle. Quatre entrées, parce qu'elles servent à trier une
+/// pile, pas à qualifier finement : au-delà, on hésite au moment d'écrire et on
+/// renonce.
+enum SujetDeRetour {
+  /// Quelque chose ne marche pas : une erreur, un écran cassé, un geste sans effet.
+  BUG
+  /// Une phrase du produit est fausse, obscure, ou sonne mal.
+  TEXTE
+  /// Ça marche, mais pas comme on s'y attendait. C'est le plus utile des quatre.
+  COMPORTEMENT
+  AUTRE
+}
+
+/// Un retour sur le produit, écrit par qui l'utilise.
+///
+/// **Ce n'est pas un `Signalement`, et les deux ne doivent pas se confondre.**
+/// Un signalement porte sur une question générée : il est déclenché depuis
+/// l'écran de révision, il fige ce que la question disait, et il retire cette
+/// question du tirage. Un retour porte sur le produit lui-même — une logique qui
+/// surprend, un mot de travers, un écran qui déborde — et ne retire rien du
+/// tout. Mélanger les deux ferait perdre la seule chose qui rend un signalement
+/// exploitable : qu'il désigne un Variant précis.
+model Retour {
+  id String @id @default(cuid())
+
+  /// Détaché plutôt que supprimé, comme un signalement : un retour survit au
+  /// ménage de son auteur, sinon les plus anciens s'effacent en silence, et ce
+  /// sont ceux qu'on n'a pas encore traités.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  sujet   SujetDeRetour
+  message String        @db.Text
+
+  /// Où ça se passe, dit par la personne. Le formulaire vit dans les réglages,
+  /// donc l'adresse courante n'apprendrait rien — c'est la seule façon de savoir
+  /// de quel écran on parle.
+  ecran String?
+
+  /// Ce qui rend un défaut d'affichage reproductible, et rien de plus : la
+  /// largeur de la fenêtre et le navigateur. Aucun contenu déposé n'y passe.
+  contexte String?
+
+  /// La capture, gardée. C'est la différence avec celle d'un dépôt, qui part dès
+  /// que son texte est lu : ici, c'est l'image elle-même qu'on vient regarder.
+  /// Une seule route la sert, et elle est gardée par l'administration.
+  captureData      Bytes?
+  captureMediaType String?
+
+  /// Ce qui a été lu et traité. Sans marque, un retour est un retour à lire.
+  traiteLe DateTime?
+
+  createdAt DateTime @default(now())
+
+  /// Requête de l'écran d'administration : ce qui reste à lire, d'abord.
+  @@index([traiteLe, createdAt])
+  /// Le plafond par compte se compte sur une fenêtre glissante.
+  @@index([userId, createdAt])
+}

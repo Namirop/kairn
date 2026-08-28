@@ -3,6 +3,7 @@ import {
   CircleUser,
   Coins,
   Flag,
+  MessageSquareWarning,
   Gauge,
   Inbox,
   Layers,
@@ -75,6 +76,9 @@ export const DESTINATIONS_ADMIN: Destination[] = [
   { href: ROUTES.adminComptes, libelle: "Comptes", icone: Users },
   { href: ROUTES.adminContenu, libelle: "Contenu", icone: Layers },
   { href: ROUTES.adminSignalements, libelle: "Signalements", icone: Flag },
+  // « Retours » et non « Signalements du produit » : le rail fait cent douze
+  // pixels, et les deux sections ne se confondent que si on les nomme pareil.
+  { href: ROUTES.adminRetours, libelle: "Retours", icone: MessageSquareWarning },
   { href: ROUTES.adminPilotage, libelle: "Pilotage", icone: Wrench },
   // Les réglages du compte, et non ceux du modèle. Ils ont quitté le rail du
   // produit pour laisser la place à « Admin », donc ils doivent se retrouver

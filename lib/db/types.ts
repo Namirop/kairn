@@ -18,6 +18,7 @@ export {
   MotifDeSignalement,
   NotificationType,
   ReviewRating,
+  SujetDeRetour,
   VariantFacet,
   VariantFormat,
 } from "@/lib/db/generated/enums";
@@ -32,6 +33,7 @@ export type {
   EmailDeliveryModel as EmailDelivery,
   GenerationJobModel as GenerationJob,
   InputModel as Input,
+  RetourModel as Retour,
   ReviewModel as Review,
   SignalementModel as Signalement,
   UserModel as User,

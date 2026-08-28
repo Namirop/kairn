@@ -7,6 +7,7 @@ import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
 import { FormulaireDeReglages } from "@/components/reglages/formulaire-de-reglages";
+import { UnRetour } from "@/components/reglages/un-retour";
 import { estAdministrateur } from "@/lib/auth/admin";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -19,6 +20,9 @@ export const metadata: Metadata = { title: "Réglages" };
  * et une version en cache montrerait l'état d'avant.
  */
 export const dynamic = "force-dynamic";
+
+/** Les intitulés de groupe de cette page, comme dans le formulaire de réglages. */
+const GROUPE = "text-mono font-mono tracking-[0.14em] text-stone-500 uppercase";
 
 /**
  * Une donnée du compte qu'on ne change pas ici, et pourquoi.
@@ -92,6 +96,28 @@ export default async function PageReglages() {
             raison="Détecté depuis ton navigateur à chaque visite, et corrigé tout seul si tu changes de pays. Il décide quel jour il est pour toi, et à quelle heure part ton rappel."
           />
         </dl>
+
+        {/* Le seul endroit du produit où l'on peut dire qu'autre chose qu'une
+            question ne va pas.
+
+            Il est ici et pas ailleurs pour deux raisons. C'est la page qu'on
+            ouvre quand on cherche « où est-ce que je règle ça », donc celle où
+            l'on arrive déjà avec quelque chose à redire. Et le mettre dans la
+            navigation en ferait une fonctionnalité du produit, ce qu'il n'est
+            pas : c'est une porte de service, elle doit être trouvable sans
+            occuper le devant. */}
+        <section className="mt-pas-12">
+          <h2 className={GROUPE}>Un problème, une remarque</h2>
+
+          <p className="mt-pas-3 text-petit max-w-md text-stone-500">
+            Une logique qui surprend, un mot de travers, un écran qui déborde. Ça arrive à une
+            personne, jamais aux chiffres — sans toi, personne ne le saura.
+          </p>
+
+          <div className="mt-pas-6">
+            <UnRetour />
+          </div>
+        </section>
 
         {/* L'accès à l'administration a quitté cette page : il est dans le rail,
             à la place qu'occupaient les réglages. Un raccourci qui existe à deux
