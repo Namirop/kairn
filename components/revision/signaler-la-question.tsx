@@ -112,12 +112,23 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
 
         {/* Des boutons radio natifs, dessinés : la sélection se voit, les flèches
             du clavier circulent, et le champ masqué garde le focus visible sur
-            l'étiquette qui l'accompagne. */}
+            l'étiquette qui l'accompagne.
+
+            **Un arrondi de carte, pas de pilule.** Chaque motif tient sur deux
+            lignes — son intitulé et ce qu'il veut dire — et la pilule arrondit à
+            la moitié de la hauteur : sur un bloc de quatre-vingt-dix pixels, le
+            bord rentrait de quarante-cinq à l'endroit exact où le texte passe.
+            Le motif le plus long touchait presque son cadre. Dans l'échelle des
+            formes, c'est d'ailleurs une carte : un objet posé qu'on choisit, pas
+            un geste qu'on déclenche.
+
+            Le rembourrage suit : seize pixels au lieu de douze, de quoi laisser
+            respirer deux lignes plutôt qu'une étiquette. */}
         <ul className="gap-pas-2 mt-pas-4 flex flex-col">
           {MOTIFS.map((choix) => (
             <li key={choix.valeur}>
               <label
-                className={`rounded-galet px-pas-3 py-pas-3 has-[:focus-visible]:border-lichen block cursor-pointer border transition-colors ${
+                className={`rounded-carte px-pas-4 py-pas-4 has-[:focus-visible]:border-lichen block cursor-pointer border transition-colors ${
                   motif === choix.valeur
                     ? "border-lichen bg-lichen/10"
                     : "border-transparent hover:bg-stone-100"
@@ -133,7 +144,7 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
                   className="sr-only"
                 />
                 <span className="text-corps block text-stone-900">{choix.libelle}</span>
-                <span className="text-petit block text-stone-500">{choix.aide}</span>
+                <span className="mt-pas-1 text-petit block text-stone-500">{choix.aide}</span>
               </label>
             </li>
           ))}
