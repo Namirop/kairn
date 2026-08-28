@@ -3,6 +3,7 @@ import { questionServie, type QuestionServie } from "@/lib/db/question-servie";
 import { lireCadreDeSession, lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { gesteDeReponse } from "@/lib/domain/geste-de-reponse";
 import { jourSuivant, localDay } from "@/lib/domain/local-day";
+import { questionServable } from "@/lib/domain/question-servable";
 import { choisirVariante } from "@/lib/domain/rotation-variantes";
 import {
   composerSession,
@@ -118,12 +119,16 @@ export async function lireSessionDuJour(
   // retenus ne coûte rien.
   const servables = candidats.flatMap((atome) => {
     const derniereFacette = atome.reviews[0]?.variant.facet ?? null;
-    const servie = choisirVariante(atome.variants, derniereFacette);
+    // Une formulation sans texte ni réponse ne se pose pas : elle donnerait une
+    // carte blanche. La requête ne sait pas le dire — un `not: ""` laisserait
+    // passer une espace —, donc le tri se fait ici, comme le reste des règles.
+    const posables = atome.variants.filter(questionServable);
+    const servie = choisirVariante(posables, derniereFacette);
 
     // Écarté par la requête en principe ; on ne pose pas une carte vide au cas où.
     if (!servie) return [];
 
-    const variante = atome.variants.find((candidate) => candidate.id === servie.id);
+    const variante = posables.find((candidate) => candidate.id === servie.id);
 
     return variante ? [{ ...atome, variante }] : [];
   });

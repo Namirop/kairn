@@ -216,6 +216,19 @@ describe("forme de sortie de generate_variants", () => {
     expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansTrou)).lots).toHaveLength(2);
   });
 
+  /**
+   * Le cas servi en production le 28/08 : une carte blanche, et « Voir la
+   * réponse » qui n'affichait rien non plus. La relecture avait retiré ses
+   * bornes de longueur, et le minimum était parti avec elles.
+   */
+  it("fait disparaître le lot d'une question sans texte ou sans réponse", () => {
+    const sansTexte = { ...lot(1), mechanism: { ...question("EXPLAIN"), question: "" } };
+    const sansReponse = { ...lot(1), mechanism: { ...question("EXPLAIN"), answerKey: "  " } };
+
+    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansTexte)).lots).toHaveLength(2);
+    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansReponse)).lots).toHaveLength(2);
+  });
+
   it("garde un texte à trou complet", () => {
     const cloze = { sentence: "Le lichen est une ___ entre deux espèces.", accepted: ["symbiose"] };
     const juste = { ...lot(1), boundary: { ...question("CLOZE"), cloze } };

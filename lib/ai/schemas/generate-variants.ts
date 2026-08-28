@@ -147,12 +147,27 @@ function chargesDe(posee: QuestionLue) {
  * hors bornes. Servir la question reviendrait à noter faux quelqu'un qui a
  * raison, ou à montrer un trou vide.
  *
- * Ça ne fait plus tomber l'envoi pour autant : c'est le **lot** qui disparaît,
+ * **Une question sans texte, ou sans réponse, en fait partie — et c'est le cas
+ * qui est passé en production.** La relecture a laissé tomber toutes ses bornes
+ * de longueur, à raison : « une question de neuf caractères reste lisible, se
+ * voit au banc, et ne vaut pas de perdre trois lots ». Elle a laissé tomber le
+ * minimum avec elles, et une question de **zéro** caractère, elle, ne se lit
+ * pas : elle sert une carte vide, sous laquelle « Voir la réponse » n'affiche
+ * rien non plus. C'est ce qu'un compte a eu sous les yeux le 28/08, sur un
+ * concept qui n'avait plus qu'à être supprimé.
+ *
+ * Le blanc n'est pas une longueur hors bornes, c'est l'absence de la chose. On
+ * le range donc ici, avec le QCM sans options, et non dans les bornes qu'on a
+ * eu raison de retirer.
+ *
+ * Ça ne fait pas tomber l'envoi pour autant : c'est le **lot** qui disparaît,
  * et son rang manquant est rapporté par l'appelant. Les deux autres concepts du
  * même appel sont écrits.
  */
 function inexploitable(posee: QuestionLue): boolean {
   const { mcq, cloze } = chargesDe(posee);
+
+  if (posee.question.trim().length === 0 || posee.answerKey.trim().length === 0) return true;
 
   if (posee.format === "MCQ") {
     return mcq === null || normaliserLesOptions(mcq.options, mcq.correctIndex) === null;

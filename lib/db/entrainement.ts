@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/client";
 import { questionServie, type QuestionServie } from "@/lib/db/question-servie";
 import { regenererSiUsees } from "@/lib/db/regeneration";
 import type { ReviewRating } from "@/lib/db/types";
+import { questionServable } from "@/lib/domain/question-servable";
 import { apresLePassage } from "@/lib/domain/rotation-variantes";
 import { composerEntrainement, QUESTIONS_PAR_TOUR } from "@/lib/domain/selection-entrainement";
 
@@ -83,15 +84,22 @@ export async function lireTourDentrainement(
     },
   });
 
+  // Même filet que dans la session : une formulation sans texte ni réponse
+  // s'afficherait en carte blanche. Voir `question-servable.ts`.
+  const posables = concepts.map((concept) => ({
+    ...concept,
+    variants: concept.variants.filter(questionServable),
+  }));
+
   const derniersEntrainements = new Map(
-    concepts.flatMap((concept) =>
+    posables.flatMap((concept) =>
       concept.variants.map((variante) => [variante.id, variante.lastTrainedAt] as const),
     ),
   );
 
-  const tirage = composerEntrainement(concepts, derniersEntrainements, taille);
+  const tirage = composerEntrainement(posables, derniersEntrainements, taille);
   const parId = new Map(
-    concepts.flatMap((concept) =>
+    posables.flatMap((concept) =>
       concept.variants.map((variante) => [variante.id, { concept, variante }] as const),
     ),
   );
