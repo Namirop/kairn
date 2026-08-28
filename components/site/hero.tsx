@@ -143,12 +143,19 @@ export function Hero({ connecte }: { connecte: boolean }) {
       </Apparition>
 
       {/* Sur téléphone, l'emblème descend sous le rythme bas du panneau.
+
           Le rembourrage de campagne le calait à soixante-quatre pixels du bord,
           soit exactement la hauteur de la crête proche : il se posait donc sur la
-          ligne d'horizon au lieu de se tenir dans la butte. Un pas de moins, et son
-          pied passe d'une trentaine de pixels sous la crête — c'est le terrain qui
-          le porte, plus la couture du panneau. */}
-      <div className="-mb-pas-8 md:pb-pas-24 flex justify-center md:mb-0">
+          ligne d'horizon au lieu de se tenir dans la butte.
+
+          **Il descend maintenant jusqu'à mi-butte**, et c'est la mesure qui
+          compte, pas le nombre de pas : la crête proche est à 11,5 % de la
+          hauteur du panneau (`PLANS_TELEPHONE`), la butte va de là jusqu'au bas,
+          et le pied de la pierre la plus basse se pose à la moitié de cette
+          bande. Un cran de moins le laissait au-dessus, à une quinzaine de
+          pixels — assez pour qu'il ait l'air posé dessus plutôt que planté
+          dedans. Si la crête bouge, cette valeur se remesure. */}
+      <div className="-mb-pas-12 md:pb-pas-24 flex justify-center md:mb-0">
         <div className="relative aspect-[100/93] w-[min(62vw,17rem)] md:aspect-auto md:h-[clamp(20rem,52vh,36rem)] md:w-full">
           <span
             aria-hidden

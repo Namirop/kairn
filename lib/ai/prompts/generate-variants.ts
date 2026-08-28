@@ -63,6 +63,18 @@
  * les fabriquer au moment du besoin voudrait dire un appel modèle pendant une
  * session — ce que le produit s'interdit. Voir `lib/domain/aide-du-trou.ts`.
  *
+ * **Le texte à trou a été rendu unique le 28 août 2026.** « Deux questions au
+ * plus partagent le même format » autorisait deux CLOZE, et l'essai de la
+ * landing en a servi deux d'affilée sur le même concept — deux fois la même
+ * phrase, à un mot masqué près, sur la page qui convertit. La règle générale
+ * reste : sans code à citer, il ne reste que trois formats vérifiables pour
+ * trois facettes, et exiger quatre formats distincts ferait inventer un format
+ * plutôt que tenir la fidélité. L'unicité du CLOZE, elle, est toujours
+ * satisfiable — son emplacement est déjà imposé par l'envoi.
+ *
+ * L'affichage ne s'y fie pas pour autant : `unParFormat` garde une question par
+ * format sur la landing, parce qu'une consigne de prompt n'est pas une garantie.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -156,7 +168,8 @@ réponse vérifiable sans jugement : MCQ, TRUE_FALSE, CLOZE ou CODE. Une suite d
 questions à s'auto-noter épuise, et finit par être expédiée sans être lue. Sur
 MECHANISM aussi, prends un format vérifiable dès que le concept s'y prête.
 
-Deux questions au plus partagent le même format.
+Deux questions au plus partagent le même format, et jamais deux CLOZE : le texte
+à trou est imposé à une facette, et c'est le seul du groupe.
 
 L'emplacement du texte à trou t'est imposé : une des quatre facettes n'ouvre que
 ce format-là. Le masquage d'un terme marche sur presque n'importe quel concept,

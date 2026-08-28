@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { LIBELLE_FORMAT } from "@/components/depots/libelle-format";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
+import { unParFormat } from "@/lib/domain/formats-distincts";
 import type { VariantFormat } from "@/lib/db/types";
 
 /**
@@ -29,6 +30,12 @@ import type { VariantFormat } from "@/lib/db/types";
  * une phrase immobile sur une page qui vient de se remplir se lit comme une fin,
  * pas comme une suite. On pose donc les emplacements des quatre formats et celui
  * de la carte, aux mesures de ce qui va les remplacer.
+ *
+ * **Un format n'y paraît qu'une fois.** Deux « TEXTE À TROU » côte à côte —
+ * servis en production le 28/08 — cassent la démonstration au moment même où
+ * elle se fait : on vient de dire que les formulations changent de forme, et on
+ * en montre deux de la même. Voir `unParFormat`, qui dit pourquoi la sélection
+ * se fait ici et non à la génération.
  *
  * **Des boutons à deux états, pas des onglets.** Le motif ARIA des onglets
  * impose la navigation aux flèches et un `tabindex` mouvant ; à demi
@@ -91,15 +98,17 @@ export function EchantillonDeQuestions({
 }) {
   const [rang, setRang] = useState(0);
 
-  if (questions.length === 0) return enCours ? <EnEcriture /> : null;
+  const montrables = unParFormat(questions);
 
-  const montree = questions[Math.min(rang, questions.length - 1)];
+  if (montrables.length === 0) return enCours ? <EnEcriture /> : null;
+
+  const montree = montrables[Math.min(rang, montrables.length - 1)];
 
   return (
     <section className="gap-pas-3 flex flex-col">
       <h3 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-        {questions.length > 1
-          ? `${questions.length} questions sur l'un de ces concepts`
+        {montrables.length > 1
+          ? `${montrables.length} questions sur l'un de ces concepts`
           : "Une question sur l'un de ces concepts"}
       </h3>
 
@@ -108,13 +117,13 @@ export function EchantillonDeQuestions({
           {/* Les formats se donnent dans l'ordre où le lot les a écrits, et le
               bouton actif partage la surface de la carte qu'il commande : c'est
               ce qui les relie sans qu'aucune bordure ait à le dire. */}
-          {questions.length > 1 ? (
+          {montrables.length > 1 ? (
             <div
               role="group"
               aria-label="Format de la question"
               className="gap-pas-1 flex flex-wrap"
             >
-              {questions.map((question, position) => (
+              {montrables.map((question, position) => (
                 <button
                   key={`${question.format}-${position}`}
                   type="button"
