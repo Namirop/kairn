@@ -105,8 +105,7 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
         <DialogHeader>
           <DialogTitle>Qu&apos;est-ce qui ne va pas ?</DialogTitle>
           <DialogDescription>
-            Elle ne te sera plus reposée. Personne ne la réécrit tout de suite : c&apos;est lu, puis
-            corrigé à la source.
+            Elle ne te sera plus reposée. C&apos;est lu, puis corrigé à la source.
           </DialogDescription>
         </DialogHeader>
 
@@ -122,13 +121,17 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
             formes, c'est d'ailleurs une carte : un objet posé qu'on choisit, pas
             un geste qu'on déclenche.
 
-            Le rembourrage suit : seize pixels au lieu de douze, de quoi laisser
-            respirer deux lignes plutôt qu'une étiquette. */}
-        <ul className="gap-pas-2 mt-pas-4 flex flex-col">
+            **Et la fenêtre entière tient dans le pli d'un téléphone.** Elle
+            en débordait d'une trentaine de pixels, et le bas — donc « Envoyer »
+            — était coupé. Trois hauteurs y passaient sans rien porter : la
+            grille du dialogue espace déjà ses blocs de quatre pas, et chacun
+            reposait par-dessus une marge de quatre pas à lui ; le rembourrage
+            des motifs valait celui d'une carte alors qu'ils sont une liste. */}
+        <ul className="gap-pas-1 flex flex-col">
           {MOTIFS.map((choix) => (
             <li key={choix.valeur}>
               <label
-                className={`rounded-carte px-pas-4 py-pas-4 has-[:focus-visible]:border-lichen block cursor-pointer border transition-colors ${
+                className={`rounded-carte px-pas-4 py-pas-3 has-[:focus-visible]:border-lichen block cursor-pointer border transition-colors ${
                   motif === choix.valeur
                     ? "border-lichen bg-lichen/10"
                     : "border-transparent hover:bg-stone-100"
@@ -150,7 +153,7 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
           ))}
         </ul>
 
-        <div className="mt-pas-4">
+        <div>
           <label htmlFor="signalement-precision" className="text-petit block text-stone-500">
             Préciser, si tu veux
           </label>
@@ -165,7 +168,7 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
           />
         </div>
 
-        <DialogFooter className="mt-pas-2">
+        <DialogFooter>
           <Button type="button" variant="ghost" disabled={envoi} onClick={() => setOuvert(false)}>
             Annuler
           </Button>

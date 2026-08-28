@@ -23,9 +23,21 @@ import { segmentsDeCode } from "@/lib/domain/texte-code";
  * ouvertes, et le jeton a l'air cassé. Avec, chaque morceau est un jeton entier.
  * `break-words` couvre le cas pire — un identifiant plus large que sa colonne
  * débordait la carte au lieu de se couper.
+ *
+ * **Sa hauteur peinte tient dans la ligne, et c'est une contrainte, pas un
+ * réglage.** Le rembourrage vertical d'un élément en ligne n'agrandit pas la
+ * ligne : il déborde par-dessus les voisines. Sur un énoncé de deux lignes
+ * serrées à `leading-tight`, deux jetons de lignes consécutives se
+ * chevauchaient donc, et le cadre de l'un traversait les lettres de l'autre.
+ *
+ * L'interligne du jeton est fixé plutôt qu'hérité, et son rembourrage descendu :
+ * l'ensemble — texte, rembourrage, bordure — reste sous 1,2 em, ce qui passe
+ * dans les 1,25 em du titre le plus serré du produit. Toute augmentation de ces
+ * trois valeurs rouvre le défaut ; c'est de l'interligne de l'énoncé qu'il faut
+ * partir si un jeton doit grossir.
  */
 export const JETON =
-  "rounded-champ bg-jeton border border-jeton-bord font-mono text-[0.86em] font-medium px-[0.36em] py-[0.1em] [box-decoration-break:clone] break-words";
+  "rounded-champ bg-jeton border border-jeton-bord font-mono text-[0.86em] font-medium leading-[1.15] px-[0.36em] py-[0.06em] [box-decoration-break:clone] break-words";
 
 export function TexteTechnique({ children }: { children: string }) {
   return (

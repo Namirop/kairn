@@ -3,6 +3,7 @@
 import { useVenirEnVue } from "@/components/revision/use-venir-en-vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { JETON } from "@/components/typographie/texte-technique";
 import type { TexteATrou } from "@/components/revision/use-suite-de-questions";
 import { LONGUEUR_MAX_SAISIE } from "@/lib/domain/reponse-cloze";
 
@@ -183,18 +184,42 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
   }
 
   return (
-    <div ref={pistes} className="mt-pas-4" role="status">
-      <p className="text-petit text-stone-500">
-        L&apos;un de ceux-là :{" "}
-        {trou.pistes.map((piste, rang) => (
-          <span key={piste}>
-            {rang > 0 ? <span aria-hidden> · </span> : null}
-            <span className="font-mono text-stone-900">{piste}</span>
-          </span>
-        ))}
+    /*
+      Les pistes sont l'objet du moment, et elles doivent le montrer.
+
+      Alignées en ligne dans un paragraphe gris, elles avaient le poids du texte
+      qui les entoure : on venait de demander de l'aide, et l'aide arrivait au
+      rang d'une légende. Elles sont donc posées sur leur propre surface, comme
+      la carte de la question — c'est un objet qu'on lit, pas une note de bas de
+      page —, et chaque terme porte le jeton du produit.
+
+      Le jeton, et pas la pilule : dans l'échelle des formes, la pilule est un
+      geste. Or ces termes ne se cliquent pas, et c'est délibéré — on continue de
+      les écrire. Leur donner la forme d'un bouton reviendrait à transformer le
+      seul format qui fait produire la réponse en un QCM de plus.
+    */
+    <div
+      ref={pistes}
+      className="rounded-carte bg-surface-papier px-pas-4 py-pas-3 mt-pas-4 max-w-xl"
+      role="status"
+    >
+      <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
+        L&apos;un de ces termes
       </p>
 
-      <p className="mt-pas-1 text-petit text-stone-500">
+      {/* La taille du jeton est en `em` : c'est la liste qui la fixe, pas le
+          jeton. Lui poser une classe de corps par-dessus la sienne mettrait
+          deux règles de `font-size` sur le même élément, et laquelle gagne ne se
+          lit nulle part dans le code. */}
+      <ul className="gap-pas-2 mt-pas-3 text-corps flex flex-wrap">
+        {trou.pistes.map((piste) => (
+          <li key={piste} className={`${JETON} text-stone-900`}>
+            {piste}
+          </li>
+        ))}
+      </ul>
+
+      <p className="mt-pas-3 text-petit text-stone-500">
         Compté comme un rappel aidé : le concept revient un peu plus tôt.
       </p>
     </div>
