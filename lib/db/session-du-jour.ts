@@ -6,8 +6,9 @@ import { jourSuivant, localDay } from "@/lib/domain/local-day";
 import { questionServable } from "@/lib/domain/question-servable";
 import { repartirLesFormats } from "@/lib/domain/repartition-des-formats";
 import { variantesEquivalentes } from "@/lib/domain/rotation-variantes";
+import { alternerLesSujets } from "@/lib/domain/alternance-des-sujets";
 import {
-  composerSession,
+  conceptsDeLaJournee,
   estServableAujourdhui,
   jourOuIlRevient,
   plafondRestant,
@@ -114,56 +115,50 @@ export async function lireSessionDuJour(
   const reste = plafondRestant(plafond, faits);
 
   /*
-    La variante est choisie **avant** de composer, et pour tous les concepts à la
-    fois.
+    La journée est composée **avant** que les formulations soient choisies.
 
-    Avant, parce que l'ordre de service tient compte du geste de réponse : il
-    dépend du format servi, donc il n'existe pas tant que la formulation n'est
-    pas arrêtée.
+    Trois décisions ne regardent pas la formulation — ce qui est dû, dans quel
+    ordre d'urgence, et jusqu'où le plafond va. On les prend donc en premier,
+    et la répartition des formats porte ensuite sur exactement les concepts que
+    la session posera.
 
-    Pour tous à la fois, parce que la rotation ne tranche pas tout. Elle rend un
-    ensemble de variantes également bonnes, et quand elles le sont vraiment —
-    tous les concepts d'un compte neuf — c'est la session qui choisit, en
-    répartissant les formats. Concept par concept, c'était l'identifiant qui
-    décidait, et une session entière tombait sur une seule famille de formats.
+    C'est le défaut qui a fait revenir trois QCM d'affilée après la première
+    correction : la requête ramène trente-six heures d'avance, et répartir les
+    formats sur tous les candidats faisait consommer des QCM et des textes à
+    trou par des concepts dus **demain**. Les questions réellement posées
+    héritaient d'un compteur déjà déséquilibré.
 
-    L'ordre passé au répartiteur est celui des identifiants et non celui de la
-    requête : le glouton en dépend, et une session qui se recompose doit se
+    L'ordre passé au répartiteur est celui des identifiants et non celui de
+    l'urgence : le glouton en dépend, et une session qui se recompose doit se
     recomposer à l'identique.
   */
-  const proposables = candidats
-    .map((atome) => ({
-      atome,
-      // Une formulation sans texte ni réponse ne se pose pas : elle donnerait une
-      // carte blanche. La requête ne sait pas le dire — un `not: ""` laisserait
-      // passer une espace —, donc le tri se fait ici, comme le reste des règles.
-      equivalentes: variantesEquivalentes(
-        atome.variants.filter(questionServable),
-        atome.reviews[0]?.variant.facet ?? null,
-      ),
-    }))
-    .sort((une, deux) => une.atome.id.localeCompare(deux.atome.id));
+  const proposables = candidats.flatMap((atome) => {
+    // Une formulation sans texte ni réponse ne se pose pas : elle donnerait une
+    // carte blanche. La requête ne sait pas le dire — un `not: ""` laisserait
+    // passer une espace —, donc le tri se fait ici, comme le reste des règles.
+    const equivalentes = variantesEquivalentes(
+      atome.variants.filter(questionServable),
+      atome.reviews[0]?.variant.facet ?? null,
+    );
 
-  const retenues = repartirLesFormats(
-    proposables.map(({ atome, equivalentes }) =>
-      equivalentes.flatMap((servable) => {
-        const variante = atome.variants.find((candidate) => candidate.id === servable.id);
-
-        return variante ? [variante] : [];
-      }),
-    ),
-  );
-
-  const servables = proposables.flatMap(({ atome }, rang) => {
-    const variante = retenues[rang];
-
-    // Écarté par la requête en principe ; on ne pose pas une carte vide au cas où.
-    return variante ? [{ ...atome, variante }] : [];
+    return equivalentes.length > 0 ? [{ ...atome, equivalentes }] : [];
   });
 
-  const dus = servables.filter((concept) => estServableAujourdhui(concept, maintenant, fuseau));
-  const servis = composerSession(servables, maintenant, fuseau, reste, (concept) =>
-    gesteDeReponse(concept.variante.format),
+  const dus = proposables.filter((concept) => estServableAujourdhui(concept, maintenant, fuseau));
+  const retenus = conceptsDeLaJournee(proposables, maintenant, fuseau, reste);
+
+  const ordreStable = [...retenus].sort((une, deux) => une.id.localeCompare(deux.id));
+  const choisies = repartirLesFormats(ordreStable.map((concept) => concept.equivalentes));
+  const parConcept = new Map(ordreStable.map((concept, rang) => [concept.id, choisies[rang]]));
+
+  const servis = alternerLesSujets(
+    retenus.flatMap((concept) => {
+      const variante = parConcept.get(concept.id);
+
+      // Écarté plus haut en principe ; on ne pose pas une carte vide au cas où.
+      return variante ? [{ ...concept, variante }] : [];
+    }),
+    (concept) => gesteDeReponse(concept.variante.format),
   );
 
   const questions = servis.map((concept) =>

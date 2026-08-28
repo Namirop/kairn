@@ -3,6 +3,7 @@ import { claimJob, finishJob, reporterJob } from "@/lib/db/generation-job";
 import { marquerPretSiPlusRienEnAttente } from "@/lib/db/fin-de-depot";
 import type { GenerationKind } from "@/lib/db/types";
 import { JOB_HANDLERS } from "./handlers";
+import { LotIncomplet } from "./reprise-du-lot";
 
 /**
  * L'exécuteur. Il prend un job, le passe en cours, appelle le traitement et le
@@ -12,13 +13,19 @@ import { JOB_HANDLERS } from "./handlers";
  * échec est un échec. Seul un job dont le processus est mort en route reste
  * repris par le cron, et au plus trois fois.
  *
- * Une exception, et une seule : le plafond d'appels du jour. Ce n'est pas un
+ * Deux exceptions, et deux seulement. Le plafond d'appels du jour. Ce n'est pas un
  * échec, c'est un report — rien ne s'est cassé, la journée est pleine, et le
  * même travail réussira demain. Le job retourne à la file sans compter sa
  * tentative, et le dépôt continue d'annoncer un travail en cours plutôt que de
  * dire à quelqu'un que son dépôt est perdu parce que son voisin a été rapide.
+ *
+ * Et le lot incomplet. Un appel qui porte trois concepts et n'en rend qu'un a
+ * fait la moitié du travail : le refermer `DONE` laissait les deux autres sans
+ * questions pour toujours, le refermer `FAILED` jetterait celui qui est écrit.
+ * Le traitement l'a déjà rétréci à ce qui manque et rendu à la file ; ici on ne
+ * fait que ne pas le refermer.
  */
-export type JobOutcome = "DONE" | "FAILED" | "SKIPPED" | "REPORTE";
+export type JobOutcome = "DONE" | "FAILED" | "SKIPPED" | "REPORTE" | "REPRIS";
 
 function describe(error: unknown): string {
   if (error instanceof Error) return `${error.name} : ${error.message}`;
@@ -64,6 +71,13 @@ export async function runJob(jobId: string): Promise<JobOutcome> {
     return "DONE";
   } catch (error) {
     const reason = describe(error);
+
+    if (error instanceof LotIncomplet) {
+      console.warn(`Job ${job.id} (${job.kind}) repris — ${reason}`);
+      // Ni clôture du dépôt ni motif à l'écran : il attend encore quelque chose,
+      // et c'est vrai — la reprise est en file.
+      return "REPRIS";
+    }
 
     if (error instanceof AIQuotaError) {
       console.warn(`Job ${job.id} (${job.kind}) reporté — ${reason}`);

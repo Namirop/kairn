@@ -87,10 +87,10 @@ const enTout = (variante: VarianteServable) => variante.sessionCount + variante.
  * tirage — sauf s'il ne reste qu'elle, auquel cas la reposer vaut mieux que ne
  * rien poser du tout.
  */
-export function variantesEquivalentes(
-  variantes: VarianteServable[],
+export function variantesEquivalentes<T extends VarianteServable>(
+  variantes: T[],
   derniereFacette: string | null,
-): VarianteServable[] {
+): T[] {
   if (variantes.length === 0) return [];
 
   const autres = variantes.filter((variante) => variante.facet !== derniereFacette);

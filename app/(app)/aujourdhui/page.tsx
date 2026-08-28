@@ -53,7 +53,9 @@ export default async function PageAujourdhui() {
           <CompteurDu
             charge={tableau.charge}
             aDesAtoms={tableau.totalAtoms > 0}
-            questionsEnRoute={tableau.questionsEnRoute}
+            conceptsSansQuestions={tableau.conceptsSansQuestions}
+            plafond={tableau.plafond}
+            faitsAujourdhui={tableau.faitsAujourdhui}
           />
 
           {tableau.arriere.signaler ? (

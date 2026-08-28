@@ -51,7 +51,13 @@ export async function GET(request: Request) {
   // personne n'a accepté qu'il reste. Les cascades emportent concepts compris.
   const visitesOubliees = await oublierLesVisitesAbandonnees();
   const jobs = await findResumableJobs(BATCH_SIZE);
-  const comptes: Record<JobOutcome, number> = { DONE: 0, FAILED: 0, SKIPPED: 0, REPORTE: 0 };
+  const comptes: Record<JobOutcome, number> = {
+    DONE: 0,
+    FAILED: 0,
+    SKIPPED: 0,
+    REPORTE: 0,
+    REPRIS: 0,
+  };
 
   for (const job of jobs) {
     comptes[await runJob(job.id)] += 1;

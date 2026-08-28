@@ -159,11 +159,35 @@ export function composerSession<T extends ConceptDu>(
   plafond: number = PLAFOND_SESSION,
   gesteDe?: (concept: T) => string,
 ): T[] {
-  const dus = concepts
-    .filter((concept) => estServableAujourdhui(concept, maintenant, fuseau))
-    .sort(parUrgence(maintenant));
+  return alternerLesSujets(conceptsDeLaJournee(concepts, maintenant, fuseau, plafond), gesteDe);
+}
 
-  return alternerLesSujets(dus.slice(0, Math.max(0, plafond)), gesteDe);
+/**
+ * Ce que la journée servira, décidé **avant** de savoir sous quelle forme.
+ *
+ * Ce qui est dû, le plus fragile d'abord, et pas au-delà du plafond. Aucune de
+ * ces trois décisions ne regarde la formulation : c'est ce qui permet de les
+ * prendre en premier, et c'est ce qu'il fallait pour que la répartition des
+ * formats porte sur les bons concepts.
+ *
+ * **Elle portait sur tous les candidats, et c'était le défaut.** La requête en
+ * ramène trente-six heures d'avance pour n'avoir à réfléchir ni aux fuseaux ni
+ * aux changements d'heure ; répartir les formats là-dessus faisait consommer des
+ * QCM et des textes à trou par des concepts dus **demain**, qui ne seraient
+ * jamais servis. Les six questions réellement posées héritaient d'un compteur
+ * déjà déséquilibré, et la session retombait sur trois QCM d'affilée alors que
+ * l'algorithme, lui, avait bien réparti — sur un ensemble qui n'était pas le bon.
+ */
+export function conceptsDeLaJournee<T extends ConceptDu>(
+  concepts: T[],
+  maintenant: Date,
+  fuseau: string,
+  plafond: number = PLAFOND_SESSION,
+): T[] {
+  return concepts
+    .filter((concept) => estServableAujourdhui(concept, maintenant, fuseau))
+    .sort(parUrgence(maintenant))
+    .slice(0, Math.max(0, plafond));
 }
 
 /**

@@ -4,10 +4,11 @@ import { lireLaConfigEffective } from "@/lib/ai/reglages-effectifs";
 import { contratDeGeneration } from "@/lib/ai/schemas";
 import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
 import { prisma } from "@/lib/db/client";
-import { finishJob } from "@/lib/db/generation-job";
+import { finishJob, reprendreCeQuiManque } from "@/lib/db/generation-job";
 import type { GenerationJob } from "@/lib/db/types";
 import { ecrireQuestions } from "@/lib/db/variants";
 import { messageDuGroupe as construireLEnvoi } from "@/lib/domain/envoi-de-questions";
+import { LotIncomplet } from "./reprise-du-lot";
 
 /**
  * L'écriture des questions d'un job, quel que soit le chemin qui l'a apporté.
@@ -84,7 +85,27 @@ async function rangerLesLots(atomIds: string[], lots: LotRendu[]): Promise<numbe
   return manquants;
 }
 
-/** La relève d'un lot groupé : elle clôt elle-même le job qu'elle a relevé. */
+/**
+ * Les concepts d'un job dont aucun lot n'est revenu.
+ *
+ * `rangerLesLots` rend des **rangs** — c'est ce que le modèle nomme dans sa
+ * réponse. Ce qui repart en file, ce sont des concepts.
+ */
+function conceptsSansQuestions(atomIds: string[], manquants: number[]): string[] {
+  return manquants.flatMap((rang) => {
+    const atomId = atomIds[rang - 1];
+
+    return atomId ? [atomId] : [];
+  });
+}
+
+/**
+ * La relève d'un lot groupé : elle clôt le job, ou le rend à la file.
+ *
+ * Un lot qui n'a rien rendu du tout échoue, comme avant. Un lot qui n'a rendu
+ * qu'une partie ne se referme plus : ce qui manque repart, ce qui est écrit
+ * reste écrit. Voir `reprendreCeQuiManque`.
+ */
 export async function ecrireLesQuestionsDuJob(
   jobId: string,
   atomIds: string[],
@@ -92,13 +113,16 @@ export async function ecrireLesQuestionsDuJob(
 ): Promise<void> {
   const manquants = await rangerLesLots(atomIds, lots);
 
-  await finishJob(
-    jobId,
-    manquants.length === atomIds.length ? "FAILED" : "DONE",
-    manquants.length > 0
-      ? `Aucune question rendue pour le concept ${manquants.join(", ")}.`
-      : undefined,
-  );
+  if (manquants.length === 0) {
+    await finishJob(jobId, "DONE");
+    return;
+  }
+
+  const motif = `Aucune question rendue pour le concept ${manquants.join(", ")}.`;
+
+  if (await reprendreCeQuiManque(jobId, conceptsSansQuestions(atomIds, manquants), motif)) return;
+
+  await finishJob(jobId, "FAILED", motif);
 }
 
 /**
@@ -134,7 +158,25 @@ export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
 
   const manquants = await rangerLesLots(job.atomIds, lots);
 
-  if (manquants.length === job.atomIds.length) {
-    throw new Error(`Aucune question rendue pour ce job (${manquants.length} concepts).`);
+  if (manquants.length === 0) return;
+
+  /*
+    Ce qui manque repart en file plutôt que de disparaître.
+
+    Le chemin direct écrivait ce qui était venu et s'arrêtait là : un appel qui
+    portait trois concepts et n'en rendait qu'un laissait les deux autres sans
+    aucune question, définitivement — le cron ne ramasse que les jobs en file, et
+    l'écran ne dit rien tant qu'un seul concept est servable. C'est arrivé en
+    production le 28/08 sur un dépôt de six concepts.
+
+    La reprise passe par la soumission groupée : moitié prix, quelques heures de
+    latence, et c'est le bon compromis pour une dette qui ne presse pas.
+  */
+  const motif = `Aucune question rendue pour le concept ${manquants.join(", ")}.`;
+
+  if (await reprendreCeQuiManque(job.id, conceptsSansQuestions(job.atomIds, manquants), motif)) {
+    throw new LotIncomplet(motif);
   }
+
+  throw new Error(motif);
 }

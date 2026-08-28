@@ -25,8 +25,26 @@ export type TableauDeBord = {
   totalAtoms: number;
   /** L'arriéré, et depuis quand. Ce qui décide si on le dit, et comment. */
   arriere: ArriereSuivi;
-  /** Des concepts existent mais aucun ne porte encore de question. */
-  questionsEnRoute: boolean;
+  /**
+   * Combien de concepts n'ont pas encore une seule question.
+   *
+   * Un compte et non un drapeau : l'écran ne s'en servait que pour distinguer
+   * deux écrans vides, et taisait donc le cas le plus déroutant — six concepts
+   * découpés, trois questionnés, une session de trois et rien qui l'explique.
+   */
+  conceptsSansQuestions: number;
+  /**
+   * Le plafond de session de ce compte, et ce qu'il en a déjà consommé
+   * aujourd'hui.
+   *
+   * Nécessaires tous les deux pour dire **pourquoi** des concepts attendent :
+   * « une session s'arrête à vingt » était écrit en toutes lettres dans l'écran
+   * alors que le plafond se règle, et ne disait pas que la journée était déjà
+   * bien entamée — les deux seules choses qui répondent à la question qu'on se
+   * pose en lisant ce chiffre.
+   */
+  plafond: number;
+  faitsAujourdhui: number;
 };
 
 export async function lireTableauDeBord(
@@ -53,10 +71,8 @@ export async function lireTableauDeBord(
 
   // Le plafond est journalier : ce qui a déjà été revu aujourd'hui en fait partie,
   // sans quoi l'écran promettrait une session que la journée ne servira plus.
-  const charge = chargeDuJour(
-    dusAujourdhui,
-    plafondRestant(cadre.plafond, await compterFaitsAujourdhui(userId, maintenant, cadre.fuseau)),
-  );
+  const faitsAujourdhui = await compterFaitsAujourdhui(userId, maintenant, cadre.fuseau);
+  const charge = chargeDuJour(dusAujourdhui, plafondRestant(cadre.plafond, faitsAujourdhui));
   const arriere = await suivreLArriere(userId, charge.enAttente > 0, cadre.fuseau, maintenant);
 
   return {
@@ -69,6 +85,8 @@ export async function lireTableauDeBord(
     arriere,
     // Des concepts sans une seule question : le troisième écran vide, celui où
     // il n'y a rien à faire mais où rien n'est en panne non plus.
-    questionsEnRoute: totalAtoms > 0 && sansQuestions > 0,
+    conceptsSansQuestions: sansQuestions,
+    plafond: cadre.plafond,
+    faitsAujourdhui,
   };
 }

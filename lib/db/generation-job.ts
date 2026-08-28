@@ -64,6 +64,45 @@ export async function reporterJob(jobId: string, motif: string): Promise<void> {
   });
 }
 
+/**
+ * Le travail rendu par un job est incomplet : il repart en file avec ce qui
+ * manque.
+ *
+ * **C'est la faille qui laissait des concepts sans questions pour toujours.** Un
+ * appel porte trois concepts ; s'il n'en rend qu'un, `rangerLesLots` écrit ce
+ * qui est venu, signale les rangs manquants — et le job se terminait quand même
+ * `DONE`. Les deux concepts sans questions n'étaient repris par personne : ni le
+ * cron, qui ne ramasse que les jobs en file, ni l'écran, qui ne dit rien tant
+ * qu'un seul concept est servable. Ils restaient invisibles et muets.
+ *
+ * Le job est donc rétréci à ce qui manque et rendu à la file. La reprise passe
+ * par la soumission groupée, qui coûte moitié prix et peut attendre : ce n'est
+ * pas une urgence, c'est une dette. La tentative reste comptée — sans quoi un
+ * modèle qui rend systématiquement deux lots sur trois boucle sans fin.
+ *
+ * Rend `false` quand les tentatives sont épuisées : au tiers essai, on arrête et
+ * l'appelant laisse le job échouer pour de bon.
+ */
+export async function reprendreCeQuiManque(
+  jobId: string,
+  atomIds: string[],
+  motif: string,
+): Promise<boolean> {
+  const job = await prisma.generationJob.findUnique({
+    where: { id: jobId },
+    select: { attempts: true },
+  });
+
+  if (!job || job.attempts >= MAX_ATTEMPTS || atomIds.length === 0) return false;
+
+  await prisma.generationJob.update({
+    where: { id: jobId },
+    data: { atomIds, status: "QUEUED", startedAt: null, batchId: null, lastError: motif },
+  });
+
+  return true;
+}
+
 export async function finishJob(
   jobId: string,
   status: Extract<JobStatus, "DONE" | "FAILED">,

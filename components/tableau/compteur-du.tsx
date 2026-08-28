@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
-import type { ChargeDuJour } from "@/lib/domain/selection-session";
+import { compte } from "@/lib/domain/accord";
+import { PLAFOND_SESSION, type ChargeDuJour } from "@/lib/domain/selection-session";
 
 /**
  * Ce qu'il y a à revoir aujourd'hui. Le chiffre est nu, souligné d'un filet de
@@ -16,17 +17,86 @@ import type { ChargeDuJour } from "@/lib/domain/selection-session";
  * vue de la carte ts-fsrs, pas de celui de quelqu'un qui ouvre son application
  * le matin.
  */
+
+/**
+ * Pourquoi des concepts dus ne seront pas servis aujourd'hui.
+ *
+ * L'écran disait « une session s'arrête à vingt », en toutes lettres, et c'était
+ * faux deux fois. Faux sur le nombre — le plafond se règle, et quelqu'un qui l'a
+ * mis à dix lisait vingt. Faux sur la raison — on peut être arrêté à deux parce
+ * qu'on en a déjà revu dix-huit, et « une session s'arrête à vingt » sous un
+ * compteur affichant deux ne s'explique pas tout seul.
+ *
+ * Trois phrases, donc, pour trois situations qui ne se répondent pas :
+ * la journée est déjà bien entamée, le plafond par défaut mord, ou c'est un
+ * réglage qu'on a soi-même posé. Dans les deux derniers cas on dit qu'il se
+ * règle — discrètement, parce que c'est une information, pas une invitation.
+ */
+function PourquoiCertainsAttendent({
+  enAttente,
+  plafond,
+  faitsAujourdhui,
+}: {
+  enAttente: number;
+  plafond: number;
+  faitsAujourdhui: number;
+}) {
+  const suite = " Le reste revient demain, en commençant par ce qui risque le plus.";
+  const combien = `${enAttente} de plus ${enAttente === 1 ? "attend son tour" : "attendent leur tour"}`;
+
+  if (faitsAujourdhui > 0) {
+    return (
+      <>
+        {combien} : tu en as déjà revu {faitsAujourdhui} aujourd&apos;hui, sur les {plafond}{" "}
+        d&apos;une journée.{suite}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {combien}.{" "}
+      {plafond === PLAFOND_SESSION ? (
+        <>
+          Une session s&apos;arrête à {plafond} concepts, <Lien>et ça se règle</Lien>.
+        </>
+      ) : (
+        <>
+          Tu as réglé ta session à {plafond} concepts, <Lien>et ça se rechange</Lien>.
+        </>
+      )}
+      {suite}
+    </>
+  );
+}
+
+function Lien({ children }: { children: React.ReactNode }) {
+  return (
+    <Link
+      href={ROUTES.reglages}
+      className="rounded-galet underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
+    >
+      {children}
+    </Link>
+  );
+}
 export function CompteurDu({
   charge,
   aDesAtoms,
-  questionsEnRoute,
+  conceptsSansQuestions,
+  plafond,
+  faitsAujourdhui,
 }: {
   charge: ChargeDuJour;
   aDesAtoms: boolean;
-  /** Des concepts existent, mais leurs questions ne sont pas encore écrites. */
-  questionsEnRoute: boolean;
+  /** Combien de concepts n'ont pas encore une seule question écrite. */
+  conceptsSansQuestions: number;
+  /** Le plafond de session du compte, et ce qu'il en reste consommé aujourd'hui. */
+  plafond: number;
+  faitsAujourdhui: number;
 }) {
   const { aujourdhui, enAttente } = charge;
+  const questionsEnRoute = aDesAtoms && conceptsSansQuestions > 0;
 
   return (
     // Sur une colonne, tout se centre. En deux colonnes, tout revient au fer à
@@ -58,8 +128,24 @@ export function CompteurDu({
 
       {enAttente > 0 ? (
         <p className="mt-pas-2 text-petit mx-auto max-w-sm text-stone-500 md:mx-0">
-          {enAttente} de plus attendent leur tour. Une session s&apos;arrête à vingt : le reste
-          revient demain, en commençant par ce qui risque le plus.
+          <PourquoiCertainsAttendent
+            enAttente={enAttente}
+            plafond={plafond}
+            faitsAujourdhui={faitsAujourdhui}
+          />
+        </p>
+      ) : null}
+
+      {/* Ce qui manque et qui n'est pas un report.
+
+          Six concepts découpés, trois questionnés, une session de trois : l'écran
+          ne disait rien, et il n'y avait aucun moyen de comprendre où étaient
+          passés les trois autres. Le cas se dit maintenant à côté du compteur,
+          qu'il y ait quelque chose à revoir ou non. */}
+      {questionsEnRoute && aujourdhui > 0 ? (
+        <p className="mt-pas-2 text-petit mx-auto max-w-sm text-stone-500 md:mx-0">
+          {compte(conceptsSansQuestions, "concept attend", "concepts attendent")} encore leurs
+          questions. Elles s&apos;écrivent, ils rejoindront la session d&apos;eux-mêmes.
         </p>
       ) : null}
 
