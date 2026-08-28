@@ -114,7 +114,15 @@ export function SessionDeRevision({
     return (
       <PileDePanneaux>
         <Panneau surface="papier" mesure="texte" remplit centre className="md:py-pas-16">
-          <FinDeSession revus={revus} carte={carte} expliquerLEspacement={expliquerLEspacement} />
+          <FinDeSession
+            revus={revus}
+            carte={carte}
+            // L'heure seule, pas le jour : la fin de session parle toujours de
+            // demain — la journée est faite, et le cron n'écrit qu'à qui a
+            // quelque chose à revoir.
+            heureDuRappel={rappel?.heure ?? null}
+            expliquerLEspacement={expliquerLEspacement}
+          />
         </Panneau>
       </PileDePanneaux>
     );

@@ -26,21 +26,49 @@ import { ROUTES } from "@/lib/auth/routes";
  * avec elle : la pile et le compte le disent déjà deux fois.
  */
 
-function phraseDemain(nombre: number | null): string {
+/**
+ * Ce qui revient demain, et ce qu'on en fait.
+ *
+ * **C'est la seule phrase de retour du produit, et elle a deux versions parce
+ * qu'elle a deux sens.** Quand quelque chose revient, elle pose un rendez-vous :
+ * on dit combien, et à quelle heure on écrira. L'heure compte plus que le
+ * compte — c'est l'email qui ramène, pas la bonne volonté, et l'annoncer engage
+ * le produit sur quelque chose qu'il tient.
+ *
+ * Le rappel est toujours pour **demain** ici, jamais pour aujourd'hui : la
+ * journée vient d'être faite, plus rien n'est dû, et le cron n'écrit qu'à qui a
+ * quelque chose à revoir. Annoncer « aujourd'hui, 19 h » à quelqu'un qui vient de
+ * finir promettrait un email qui ne partira pas.
+ *
+ * Quand rien ne revient, « rien ne revient demain » tout court est la pire phrase
+ * qu'on puisse laisser sur un écran de fin : elle se lit comme « ne reviens pas ».
+ * On dit donc ce que ça veut dire — être à jour est l'état normal, pas un vide —
+ * et on nomme ce qui fait la suite, sans répéter le libellé du bouton juste
+ * dessous.
+ */
+function phraseDemain(nombre: number | null, heureDuRappel: number | null): string {
   if (nombre === null) return "";
-  if (nombre === 0) return "Rien ne revient demain.";
-  if (nombre === 1) return "Un concept revient demain.";
 
-  return `${nombre} concepts reviennent demain.`;
+  if (nombre === 0) {
+    return "Rien ne revient demain : tu es à jour. Ce que tu déposeras maintenant reviendra à son tour.";
+  }
+
+  const combien =
+    nombre === 1 ? "Un concept revient demain." : `${nombre} concepts reviennent demain.`;
+
+  return heureDuRappel === null ? combien : `${combien} On t'écrit à ${heureDuRappel} h.`;
 }
 
 export function FinDeSession({
   revus,
   carte,
+  heureDuRappel,
   expliquerLEspacement = false,
 }: {
   revus: number;
   carte: { atomId: string; concept: string } | null;
+  /** L'heure du rappel quotidien, chez la personne. Nulle s'il est coupé. */
+  heureDuRappel: number | null;
   /** Première session de ce compte : c'est le moment de dire pourquoi ça s'arrête. */
   expliquerLEspacement?: boolean;
 }) {
@@ -91,8 +119,9 @@ export function FinDeSession({
           : `${revus} ${revus === 1 ? "concept revu" : "concepts revus"}`
       }
       // L'espace est réservé : la phrase arrive après un aller-retour, elle ne
-      // doit pas pousser le bouton vers le bas en apparaissant.
-      explication={<span className="block min-h-6">{phraseDemain(demain)}</span>}
+      // doit pas pousser le bouton vers le bas en apparaissant. Deux lignes,
+      // parce que c'est ce que fait la version longue à la mesure de ce palier.
+      explication={<span className="block min-h-14">{phraseDemain(demain, heureDuRappel)}</span>}
       action={{ libelle: "Déposer autre chose", href: `${ROUTES.depots}/nouveau` }}
       secondaire={{ libelle: "S'entraîner", href: ROUTES.entrainement }}
       note="D'autres questions sur les mêmes concepts. Ton planning ne bouge pas."
