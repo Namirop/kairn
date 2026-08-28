@@ -49,6 +49,14 @@
  * alors le bloc à l'affichage — un étalon qui radote coûte une ligne de bruit,
  * un étalon inventé coûte une fausse certitude, et on préfère le premier.
  *
+ * **Une ligne a été ajoutée le 28 août 2026 sur le renvoi au concept.** « Quel
+ * effet, mentionné dans le concept, courbe la trajectoire de la balle ? » a été
+ * servi en session : l'écran de révision ne montre jamais le concept — l'afficher
+ * donnerait la réponse avec l'exercice —, donc la question désignait le vide, et
+ * il ne restait que deux étiquettes en petites capitales pour deviner le sujet.
+ * C'est une règle catégorique de plus, du même genre que la langue et le
+ * tutoiement, et `controlerRenvoi` mesure si elle prend.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -116,6 +124,9 @@ n'invente pas pour éviter de te répéter.
 
 CE QUI TUE UNE QUESTION
 
+- Elle renvoie au concept, au texte ou à ce qui précède : « mentionné dans le concept »,
+  « d'après le texte », « ci-dessus ». Rien de tout ça n'est montré au moment de répondre —
+  on ne voit que la question. Elle se lit seule ou elle ne se lit pas.
 - La réponse figure dans la formulation de la question.
 - La question se répond par oui ou par non alors que le format ne l'appelle pas.
 - Elle teste un mot exact plutôt que l'idée. On veut savoir si la personne comprend,

@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { VariantFacet, VariantFormat } from "@/lib/db/types";
 import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
 import { joursEntre, localDay } from "@/lib/domain/local-day";
+import { tagsSansReponse } from "@/lib/domain/tags-sans-reponse";
 
 /**
  * Une question telle qu'un écran la reçoit, quel que soit le mode.
@@ -131,11 +132,26 @@ export function questionServie(
   repere?: { maintenant: Date; fuseau: string },
 ): QuestionServie {
   const choix = lireChoix(variante.format, variante.payload, variante.answerKey);
+  const trou = lireTrou(variante.format, variante.payload);
 
   return {
     atomId: concept.id,
     concept: concept.concept,
-    tags: concept.tags,
+    /*
+      Les étiquettes qui donnent la réponse ne sont pas montrées.
+
+      `TENNIS · EFFET-MAGNUS` au-dessus d'un QCM dont la bonne option était
+      « Effet Magnus » : la réponse était écrite en petites capitales trois
+      centimètres plus haut. Le filtrage se fait ici, au dernier moment, parce
+      que c'est ici qu'on sait à la fois ce qu'on affiche et ce qu'on attend —
+      et le concept, lui, garde ses étiquettes pour le classement et pour
+      l'alternance des sujets. Voir `tags-sans-reponse.ts`.
+    */
+    tags: tagsSansReponse(concept.tags, [
+      variante.answerKey,
+      choix ? choix.options[choix.correctIndex] : null,
+      ...(trou?.accepted ?? []),
+    ]),
     variantId: variante.id,
     format: variante.format,
     facet: variante.facet,
@@ -143,7 +159,7 @@ export function questionServie(
     answerKey: variante.answerKey,
     options: choix?.options ?? null,
     correctIndex: choix?.correctIndex ?? null,
-    cloze: lireTrou(variante.format, variante.payload),
+    cloze: trou,
     vuIlYaJours: ecartDepuis(concept.lastReview, repere),
   };
 }

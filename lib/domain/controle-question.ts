@@ -1,4 +1,5 @@
 import type { Manquement } from "./manquement";
+import { renvoiAuConcept } from "./renvoi-au-concept";
 import { TROU } from "./reponse-cloze";
 
 /**
@@ -182,9 +183,7 @@ function controlerReponseCachee(variant: VariantAControler): Manquement[] {
 function controlerCharge(variant: VariantAControler): Manquement[] {
   if (!variant.chargeIgnoree) return [];
 
-  return [
-    { regle: "charge", detail: `une charge jointe à un format ${variant.format}, écartée` },
-  ];
+  return [{ regle: "charge", detail: `une charge jointe à un format ${variant.format}, écartée` }];
 }
 
 /**
@@ -239,6 +238,36 @@ function controlerCoquille(variant: VariantAControler): Manquement[] {
   ];
 }
 
+/**
+ * La question qui renvoie à un texte que personne ne voit.
+ *
+ * L'écran de révision ne montre jamais le concept — l'afficher donnerait la
+ * réponse avec l'exercice —, donc « mentionné dans le concept » désigne le vide.
+ * Il ne reste au lecteur que deux étiquettes en petites capitales au-dessus de la
+ * carte, et rien ne dit qu'elles sont ce à quoi la question renvoie.
+ *
+ * On lit ce qui **s'affiche** : la phrase trouée pour un texte à trou, le champ
+ * `question` partout ailleurs. C'est la même distinction que pour les coquilles,
+ * et pour la même raison — le `question` d'un CLOZE ne va nulle part.
+ *
+ * Signalé, jamais refusé : la question est maladroite, pas fausse, et jeter un
+ * appel qui porte trois concepts pour une tournure coûterait plus que le défaut.
+ * La correction vit dans le prompt ; ce contrôle dit si elle prend.
+ */
+function controlerRenvoi(variant: VariantAControler): Manquement[] {
+  const affiche = variant.format === "CLOZE" ? (variant.cloze?.sentence ?? "") : variant.question;
+  const renvoi = renvoiAuConcept(affiche);
+
+  if (!renvoi) return [];
+
+  return [
+    {
+      regle: "renvoi au concept",
+      detail: `la question renvoie à « ${renvoi} », qu'on ne montre pas`,
+    },
+  ];
+}
+
 /** Tout ce qu'on peut reprocher à une question sans regarder les autres. */
 export function controlerQuestion(variant: VariantAControler): Manquement[] {
   return [
@@ -247,6 +276,7 @@ export function controlerQuestion(variant: VariantAControler): Manquement[] {
     ...controlerVraiOuFaux(variant),
     ...controlerCharge(variant),
     ...controlerCoquille(variant),
+    ...controlerRenvoi(variant),
     ...controlerReponseCachee(variant),
   ];
 }
