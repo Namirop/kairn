@@ -1,4 +1,5 @@
 import { callAI } from "@/lib/ai/client";
+import { AITruncatedOutputError } from "@/lib/ai/errors";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import { lireLaConfigEffective } from "@/lib/ai/reglages-effectifs";
 import { contratDeGeneration } from "@/lib/ai/schemas";
@@ -8,7 +9,7 @@ import { finishJob, reprendreCeQuiManque } from "@/lib/db/generation-job";
 import type { GenerationJob } from "@/lib/db/types";
 import { ecrireQuestions } from "@/lib/db/variants";
 import { messageDuGroupe as construireLEnvoi } from "@/lib/domain/envoi-de-questions";
-import { LotIncomplet } from "./reprise-du-lot";
+import { LotIncomplet, scinderApresTroncature } from "./reprise-du-lot";
 
 /**
  * L'écriture des questions d'un job, quel que soit le chemin qui l'a apporté.
@@ -143,7 +144,15 @@ export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
     throw new Error(`Les concepts du job ${job.id} ont disparu.`);
   }
 
-  const { lots } = await callAI({
+  /*
+    Une sortie coupée au plafond n'est pas un échec ordinaire.
+
+    C'est le seul motif dont on sache d'avance qu'il se reproduira à
+    l'identique : la réponse était trop longue, et rien dans un nouvel essai ne
+    la raccourcirait. Le groupe repart donc coupé en deux plutôt qu'en échec —
+    voir `scinderApresTroncature`, qui ne rend jamais la main.
+  */
+  const rendu = await callAI({
     contract: contratDuGroupe(concepts),
     system: SYSTEM_PROMPTS.generate_variants,
     jobId: job.id,
@@ -154,7 +163,13 @@ export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
     // publique existe précisément pour protéger des comptes, et réciproquement.
     anonyme: depot?.anonymousSessionId != null,
     messages: [{ role: "user", content: messageDuGroupe(concepts) }],
+  }).catch(async (erreur: unknown) => {
+    if (erreur instanceof AITruncatedOutputError) await scinderApresTroncature(job, erreur);
+
+    throw erreur;
   });
+
+  const { lots } = rendu;
 
   const manquants = await rangerLesLots(job.atomIds, lots);
 

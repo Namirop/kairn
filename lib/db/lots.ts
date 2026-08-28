@@ -11,7 +11,16 @@ import type { AiBatch, GenerationJob } from "@/lib/db/types";
  * où le travail et sa réponse sont séparés par des heures.
  */
 
-/** Concepts par requête. Au-delà, la sortie frôlerait `max_tokens`. */
+/**
+ * Concepts par requête.
+ *
+ * Trois ne frôlait pas `max_tokens`, trois le touchait : à six mille jetons, la
+ * production a coupé net six sorties sur neuf échecs. Le plafond est monté, et
+ * un groupe qui déborde quand même se coupe en deux au lieu d'échouer — voir
+ * `scinderLeJobDeQuestions`. Le nombre reste à trois parce que c'est celui qui
+ * amortit le mieux la consigne, longue, sur les concepts d'un même appel ; le
+ * descendre doublerait les appels d'un dépôt pour un débordement devenu rare.
+ */
 export const CONCEPTS_PAR_JOB = 3;
 
 export type JobDeQuestions = GenerationJob & { atomIds: string[] };
@@ -51,6 +60,58 @@ export async function creerJobsDeQuestions(
       }),
     ),
   );
+}
+
+/**
+ * Coupe un job de questions en deux : ce qu'il garde, et un job neuf pour le
+ * reste.
+ *
+ * Réservé à une sortie tronquée. Le job repart en file avec la moitié haute de
+ * son groupe, l'autre moitié devient un job à part — sans quoi la reprise
+ * redemanderait exactement ce qui vient de ne pas tenir.
+ *
+ * Les deux écritures vont dans la même transaction, et c'est tout l'intérêt de
+ * les avoir mises ici : rétrécir d'abord puis créer laisserait les concepts
+ * reportés nulle part si la seconde écriture échouait, et créer d'abord puis
+ * rétrécir les ferait écrire deux fois si c'était la première.
+ *
+ * Le job neuf hérite de la date de départ et du drapeau de régénération : une
+ * réécriture différée qui se coupe en deux reste différée, et continue de
+ * compter dans le plafond hebdomadaire de son concept.
+ *
+ * Rend `false` quand les tentatives sont épuisées — l'appelant laisse alors
+ * l'échec être un échec.
+ */
+export async function scinderLeJobDeQuestions(
+  job: GenerationJob,
+  garde: string[],
+  reporte: string[],
+  motif: string,
+): Promise<boolean> {
+  const suite = await prisma.generationJob.findUnique({
+    where: { id: job.id },
+    select: { attempts: true },
+  });
+
+  if (!suite || suite.attempts >= MAX_ATTEMPTS) return false;
+
+  await prisma.$transaction([
+    prisma.generationJob.update({
+      where: { id: job.id },
+      data: { atomIds: garde, status: "QUEUED", startedAt: null, batchId: null, lastError: motif },
+    }),
+    prisma.generationJob.create({
+      data: {
+        inputId: job.inputId,
+        kind: "VARIANTS",
+        atomIds: reporte,
+        notBefore: job.notBefore,
+        regeneration: job.regeneration ?? false,
+      },
+    }),
+  ]);
+
+  return true;
 }
 
 /**
