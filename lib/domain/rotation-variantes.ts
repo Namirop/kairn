@@ -42,17 +42,6 @@ function vueLe(variante: VarianteServable): number {
   return variante.lastSessionAt ? variante.lastSessionAt.getTime() : Number.NEGATIVE_INFINITY;
 }
 
-function estPlusAncienne(candidate: VarianteServable, reference: VarianteServable): boolean {
-  const aCandidate = vueLe(candidate);
-  const aReference = vueLe(reference);
-
-  // Deux variantes jamais servies portent la même valeur infinie : c'est
-  // l'identifiant qui tranche, sans quoi l'ordre dépendrait de la requête.
-  if (aCandidate !== aReference) return aCandidate < aReference;
-
-  return candidate.id.localeCompare(reference.id) < 0;
-}
-
 /**
  * Passages par facette, sous le compteur qu'on lui demande de lire.
  *
@@ -76,32 +65,61 @@ const enSession = (variante: VarianteServable) => variante.sessionCount;
 const enTout = (variante: VarianteServable) => variante.sessionCount + variante.trainingCount;
 
 /**
- * La variante à poser, ou `null` si le concept n'a aucune question active.
+ * Les variantes que la rotation juge **également bonnes**, sans les départager.
+ *
+ * C'est le cœur de la règle, sorti de `choisirVariante` pour qu'on puisse le
+ * lire sans en subir la conclusion. Une variante est retenue quand sa facette
+ * est la moins servie du concept **et** qu'elle est la plus ancienne à égalité :
+ * ce sont les deux critères qui disent quelque chose. Au-delà, la rotation n'a
+ * plus d'avis — et c'est très exactement ce qu'on veut savoir.
+ *
+ * **Parce que ce qui les départageait ne voulait rien dire, et se voyait.** Sur
+ * un concept neuf, les quatre facettes sont à zéro passage et aucune n'a jamais
+ * été servie : tout est à égalité, et c'était l'identifiant qui tranchait. Or les
+ * quatre variantes naissent d'un même `createMany`, dans l'ordre où le modèle les
+ * a écrites — donc le plus petit identifiant désigne toujours la même position
+ * dans le lot. Tous les concepts d'un compte neuf servaient la même facette le
+ * premier jour, la même deuxième le lendemain, et une session entière tombait sur
+ * une seule famille de formats : que des textes à trou lundi, que des
+ * explications mardi, jamais un vrai ou faux.
  *
  * `derniereFacette` est celle du passage précédent sur ce concept. Elle sort du
  * tirage — sauf s'il ne reste qu'elle, auquel cas la reposer vaut mieux que ne
  * rien poser du tout.
  */
-export function choisirVariante(
+export function variantesEquivalentes(
   variantes: VarianteServable[],
   derniereFacette: string | null,
-): VarianteServable | null {
-  if (variantes.length === 0) return null;
+): VarianteServable[] {
+  if (variantes.length === 0) return [];
 
   const autres = variantes.filter((variante) => variante.facet !== derniereFacette);
   const tirage = autres.length > 0 ? autres : variantes;
   const vues = vuesParFacette(tirage, enSession);
+  const vuesDe = (variante: VarianteServable) => vues.get(variante.facet) ?? 0;
 
-  return tirage.reduce((meilleure, candidate) => {
-    const vuesCandidate = vues.get(candidate.facet) ?? 0;
-    const vuesMeilleure = vues.get(meilleure.facet) ?? 0;
+  const moinsVues = Math.min(...tirage.map(vuesDe));
+  const candidates = tirage.filter((variante) => vuesDe(variante) === moinsVues);
+  const plusAncienne = Math.min(...candidates.map(vueLe));
 
-    if (vuesCandidate !== vuesMeilleure) {
-      return vuesCandidate < vuesMeilleure ? candidate : meilleure;
-    }
+  return candidates
+    .filter((variante) => vueLe(variante) === plusAncienne)
+    .sort((une, deux) => une.id.localeCompare(deux.id));
+}
 
-    return estPlusAncienne(candidate, meilleure) ? candidate : meilleure;
-  });
+/**
+ * La variante à poser, ou `null` si le concept n'a aucune question active.
+ *
+ * Elle prend la première des équivalentes, donc l'identifiant tranche encore —
+ * c'est sans importance pour qui n'a qu'un concept sous les yeux. La session du
+ * jour, elle, en a douze : elle regarde le même ensemble et choisit autrement,
+ * dans `repartition-des-formats.ts`.
+ */
+export function choisirVariante(
+  variantes: VarianteServable[],
+  derniereFacette: string | null,
+): VarianteServable | null {
+  return variantesEquivalentes(variantes, derniereFacette)[0] ?? null;
 }
 
 /**

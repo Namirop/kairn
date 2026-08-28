@@ -4,7 +4,8 @@ import { lireCadreDeSession, lireFuseauUtilisateur } from "@/lib/db/user-setting
 import { gesteDeReponse } from "@/lib/domain/geste-de-reponse";
 import { jourSuivant, localDay } from "@/lib/domain/local-day";
 import { questionServable } from "@/lib/domain/question-servable";
-import { choisirVariante } from "@/lib/domain/rotation-variantes";
+import { repartirLesFormats } from "@/lib/domain/repartition-des-formats";
+import { variantesEquivalentes } from "@/lib/domain/rotation-variantes";
 import {
   composerSession,
   estServableAujourdhui,
@@ -112,33 +113,60 @@ export async function lireSessionDuJour(
   // Le plafond est journalier : ce qui a déjà été revu aujourd'hui en fait partie.
   const reste = plafondRestant(plafond, faits);
 
-  // La variante est choisie **avant** de composer, et c'est ce qui permet à
-  // l'ordre de service de tenir compte du geste : il dépend du format servi, donc
-  // il n'existe pas tant que la formulation n'est pas arrêtée. Le choix est une
-  // opération en mémoire, la faire sur tous les candidats plutôt que sur les
-  // retenus ne coûte rien.
-  const servables = candidats.flatMap((atome) => {
-    const derniereFacette = atome.reviews[0]?.variant.facet ?? null;
-    // Une formulation sans texte ni réponse ne se pose pas : elle donnerait une
-    // carte blanche. La requête ne sait pas le dire — un `not: ""` laisserait
-    // passer une espace —, donc le tri se fait ici, comme le reste des règles.
-    const posables = atome.variants.filter(questionServable);
-    const servie = choisirVariante(posables, derniereFacette);
+  /*
+    La variante est choisie **avant** de composer, et pour tous les concepts à la
+    fois.
+
+    Avant, parce que l'ordre de service tient compte du geste de réponse : il
+    dépend du format servi, donc il n'existe pas tant que la formulation n'est
+    pas arrêtée.
+
+    Pour tous à la fois, parce que la rotation ne tranche pas tout. Elle rend un
+    ensemble de variantes également bonnes, et quand elles le sont vraiment —
+    tous les concepts d'un compte neuf — c'est la session qui choisit, en
+    répartissant les formats. Concept par concept, c'était l'identifiant qui
+    décidait, et une session entière tombait sur une seule famille de formats.
+
+    L'ordre passé au répartiteur est celui des identifiants et non celui de la
+    requête : le glouton en dépend, et une session qui se recompose doit se
+    recomposer à l'identique.
+  */
+  const proposables = candidats
+    .map((atome) => ({
+      atome,
+      // Une formulation sans texte ni réponse ne se pose pas : elle donnerait une
+      // carte blanche. La requête ne sait pas le dire — un `not: ""` laisserait
+      // passer une espace —, donc le tri se fait ici, comme le reste des règles.
+      equivalentes: variantesEquivalentes(
+        atome.variants.filter(questionServable),
+        atome.reviews[0]?.variant.facet ?? null,
+      ),
+    }))
+    .sort((une, deux) => une.atome.id.localeCompare(deux.atome.id));
+
+  const retenues = repartirLesFormats(
+    proposables.map(({ atome, equivalentes }) =>
+      equivalentes.flatMap((servable) => {
+        const variante = atome.variants.find((candidate) => candidate.id === servable.id);
+
+        return variante ? [variante] : [];
+      }),
+    ),
+  );
+
+  const servables = proposables.flatMap(({ atome }, rang) => {
+    const variante = retenues[rang];
 
     // Écarté par la requête en principe ; on ne pose pas une carte vide au cas où.
-    if (!servie) return [];
-
-    const variante = posables.find((candidate) => candidate.id === servie.id);
-
     return variante ? [{ ...atome, variante }] : [];
   });
 
   const dus = servables.filter((concept) => estServableAujourdhui(concept, maintenant, fuseau));
-  const retenus = composerSession(servables, maintenant, fuseau, reste, (concept) =>
+  const servis = composerSession(servables, maintenant, fuseau, reste, (concept) =>
     gesteDeReponse(concept.variante.format),
   );
 
-  const questions = retenus.map((concept) =>
+  const questions = servis.map((concept) =>
     questionServie(concept, concept.variante, { maintenant, fuseau }),
   );
 
