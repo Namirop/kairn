@@ -29,8 +29,13 @@ export function EnTeteDeScene({
    * alors ici, au même seuil, pour ne pas être dit deux fois.
    */
   intituleEnMarge?: boolean;
-  /** Ce que la sortie demande avant de s'ouvrir. */
-  sortie: { titre: string; consequence: string; rafraichirLeTableau?: boolean };
+  /** Ce que la sortie demande avant de s'ouvrir, et ce qu'elle écrit en partant. */
+  sortie: {
+    titre: string;
+    consequence: string;
+    avantDeSortir?: () => Promise<void>;
+    rafraichirLeTableau?: boolean;
+  };
 }) {
   return (
     <div className="gap-pas-4 flex items-baseline justify-between">

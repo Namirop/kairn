@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 /**
  * Le temps de réponse d'un passage.
@@ -14,6 +14,12 @@ import { useCallback, useEffect, useRef } from "react";
  * Le gel est irréversible pour une question donnée : `arreter` appelé deux fois
  * garde la première mesure. C'est ce qui permet de l'appeler sans précaution
  * depuis chacun des chemins de validation.
+ *
+ * **Il rend le même objet tant que rien ne change.** Il en fabriquait un neuf à
+ * chaque rendu, et tout ce qui le prend en dépendance changeait d'identité avec
+ * lui — de proche en proche, jusqu'à un effet qui se rejouait à chaque rendu.
+ * Deux fonctions stables dans un objet qui ne l'était pas : c'est le genre de
+ * détail qui ne se voit qu'au moment où quelqu'un s'appuie dessus.
  */
 export function useChronometre(question: string | number): {
   arreter: () => void;
@@ -33,5 +39,5 @@ export function useChronometre(question: string | number): {
 
   const mesure = useCallback(() => fige.current ?? 0, []);
 
-  return { arreter, mesure };
+  return useMemo(() => ({ arreter, mesure }), [arreter, mesure]);
 }

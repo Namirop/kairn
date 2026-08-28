@@ -53,10 +53,22 @@ export function SessionDeRevision({
   const [revus, setRevus] = useState(0);
   const [carte, setCarte] = useState<{ atomId: string; concept: string } | null>(null);
   const [sorti, setSorti] = useState<{ atomId: string; concept: string } | null>(null);
+  // Une réponse est sous les yeux sans être notée : la porte de sortie le dit,
+  // et écrit le passage avant de partir.
+  const [enSuspens, setEnSuspens] = useState(false);
 
   // Une ref plutôt qu'un état : la fin de session la lit dans la foulée du
   // dernier envoi, avant qu'un rendu ait eu lieu.
   const eligibles = useRef<string[]>([]);
+  // La fonction reste dans une ref et seul le booléen est un état : c'est ce qui
+  // évite qu'un changement d'identité de la fermeture relance un rendu à chaque
+  // frappe, pour une valeur que personne n'affiche.
+  const viderLeSuspens = useRef<(() => Promise<void>) | null>(null);
+
+  const suivreLeSuspens = useCallback((abandonner: (() => Promise<void>) | null) => {
+    viderLeSuspens.current = abandonner;
+    setEnSuspens(abandonner !== null);
+  }, []);
 
   const repondre = useCallback(async (passage: PassageDonne): Promise<boolean> => {
     const resultat = await repondreAction({
@@ -123,8 +135,22 @@ export function SessionDeRevision({
           intituleEnMarge
           sortie={{
             titre: "Arrêter la session ?",
-            consequence:
-              "Ce que tu viens de revoir est enregistré. Le reste revient plus tard, à son échéance.",
+            /*
+              Ce qu'on quitte, et ce qu'il en coûte quand une réponse est déjà
+              sous les yeux.
+
+              La phrase change parce que la conséquence change. Partir sans se
+              noter, sur une question dont on vient de lire la réponse, ne peut
+              pas compter comme un rappel réussi : ce serait le seul geste du
+              produit qui permette de gagner du temps sans rien savoir. On
+              l'écrit donc comme un échec, et on le dit avant, pas après.
+            */
+            consequence: enSuspens
+              ? "Ce que tu viens de revoir est enregistré. La question en cours compte comme non sue : tu as vu sa réponse sans te noter."
+              : "Ce que tu viens de revoir est enregistré. Le reste revient plus tard, à son échéance.",
+            avantDeSortir: enSuspens
+              ? () => viderLeSuspens.current?.() ?? Promise.resolve()
+              : undefined,
             rafraichirLeTableau: true,
           }}
         />
@@ -141,6 +167,7 @@ export function SessionDeRevision({
         onRepondre={repondre}
         onFini={(comptes) => void terminer(comptes)}
         onAvance={setFaites}
+        onSuspens={suivreLeSuspens}
         actions={({ enCours, valider }) => (
           <SortieDuCycleAction enCours={enCours} onSortir={() => void valider("EASY", true)} />
         )}

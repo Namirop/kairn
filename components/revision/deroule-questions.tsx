@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { CarteQuestion } from "@/components/revision/carte-question";
 import { EnonceDeQuestion } from "@/components/revision/enonce-de-question";
 import { JeterLaPierre } from "@/components/revision/jeter-la-pierre";
@@ -32,6 +32,7 @@ export function DerouleQuestions({
   onRepondre,
   onFini,
   onAvance,
+  onSuspens,
   actions,
 }: {
   questions: QuestionServie[];
@@ -42,6 +43,15 @@ export function DerouleQuestions({
   onFini: (revus: number) => void;
   /** Combien de questions sont passées, pour ce que le mode montre à côté. */
   onAvance?: (faites: number) => void;
+  /**
+   * Signale la réponse qui est sous les yeux sans être notée, et donne de quoi
+   * l'écrire avant de partir.
+   *
+   * Rend `null` dès qu'il n'y a plus rien en suspens. Le mode qui replanifie s'en
+   * sert pour ne pas laisser une question vue s'échapper de la porte de sortie ;
+   * un mode qui ne touche à rien n'a pas à s'en soucier.
+   */
+  onSuspens?: (abandonner: (() => Promise<void>) | null) => void;
   /** Ce que ce mode-là autorise sous la question. Rien, par défaut. */
   actions?: (contexte: {
     question: QuestionServie;
@@ -51,6 +61,25 @@ export function DerouleQuestions({
 }) {
   const suite = useSuiteDeQuestions({ questions, onRepondre, onFini, onAvance });
   const question = suite.question;
+  const enSuspens = suite.enSuspens;
+
+  /*
+    On ne signale que le **basculement**, jamais la fermeture qui l'exécute.
+
+    Prendre `abandonner` en dépendance rendait l'effet dépendant d'une identité
+    qui change à chaque rendu, et l'appel remontait alors un état au parent, qui
+    re-rendait, qui re-rendait l'enfant : la page se figeait sur son écran
+    d'attente. Le drapeau, lui, ne change que deux fois par question.
+  */
+  const dernierAbandon = useRef(suite.abandonner);
+
+  useEffect(() => {
+    dernierAbandon.current = suite.abandonner;
+  });
+
+  useEffect(() => {
+    onSuspens?.(enSuspens ? () => dernierAbandon.current() : null);
+  }, [enSuspens, onSuspens]);
 
   if (!question) return null;
 

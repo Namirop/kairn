@@ -132,6 +132,31 @@ export function useSuiteDeQuestions({
     [onAvance, onFini, questions.length, rang],
   );
 
+  /**
+   * Le passage engagé mais pas encore noté, écrit avant de quitter la session.
+   *
+   * **C'était la faille de la porte de sortie.** On demande à voir la réponse,
+   * on la lit, on clique « Arrêter là » — et rien n'est enregistré : ni la
+   * question, ni le fait qu'on l'ait vue. En revenant, la même question est
+   * reposée, réponse déjà connue, et l'espacement se règle sur un rappel qui n'a
+   * pas eu lieu. C'est le seul endroit du produit où l'on peut se mentir à
+   * soi-même sans le vouloir.
+   *
+   * La note est `AGAIN`, et c'est la seule honnête : quelqu'un qui a vu la
+   * réponse et qui n'a pas voulu se situer n'a rien démontré. Le concept revient
+   * tôt, ce qui est exactement ce qu'il faut quand on ne sait pas.
+   *
+   * `engage` sans `ecrit` désigne précisément ce cas : la réponse a été révélée,
+   * une option cliquée ou une saisie vérifiée — donc le chronomètre est arrêté —
+   * mais aucun passage n'est parti. Un QCM, lui, écrit au clic : il n'est jamais
+   * en suspens.
+   */
+  const abandonner = useCallback(async () => {
+    if (!engage || ecrit) return;
+
+    await enregistrer("AGAIN");
+  }, [ecrit, engage, enregistrer]);
+
   const suivre: Valider = async (note, maitrise = false) => {
     // Sur un format dont la justesse est connue, le passage est parti au moment
     // de la réponse ; s'il a échoué, on retente avant d'avancer plutôt que de
@@ -195,5 +220,8 @@ export function useSuiteDeQuestions({
       setJetee(true);
       void enregistrer("AGAIN");
     },
+    /** Une réponse est sous les yeux et rien n'est encore parti. */
+    enSuspens: engage && !ecrit,
+    abandonner,
   };
 }

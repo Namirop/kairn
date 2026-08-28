@@ -33,11 +33,20 @@ import { ROUTES } from "@/lib/auth/routes";
 export function ArreterLa({
   titre,
   consequence,
+  avantDeSortir,
   rafraichirLeTableau = false,
 }: {
   titre: string;
   /** Ce qu'il advient de ce qu'on laisse. Une phrase, écrite par l'écran. */
   consequence: string;
+  /**
+   * Ce qui doit être écrit avant de partir, quand il reste quelque chose.
+   *
+   * Une réponse est parfois sous les yeux sans avoir été notée : c'est au mode
+   * de dire ce qu'il en fait. La porte, elle, se contente de l'attendre — et de
+   * l'attendre vraiment, sinon la navigation part avec la requête en vol.
+   */
+  avantDeSortir?: () => Promise<void>;
   /**
    * Une session a déplacé des échéances : le tableau doit les relire.
    *
@@ -54,6 +63,10 @@ export function ArreterLa({
 
   async function partir() {
     setSortie(true);
+
+    // Ce qui reste à écrire part avant tout le reste : la relecture du tableau
+    // doit voir ce passage-là, pas l'état d'avant.
+    if (avantDeSortir) await avantDeSortir();
 
     // Attendu avant de naviguer : c'est l'attente qui garantit que la page
     // d'arrivée sera relue, et non resservie telle qu'on l'avait laissée.
