@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { enregistrerLesReglagesAction, type EtatDesReglages } from "@/app/(app)/reglages/actions";
-import { Button } from "@/components/ui/button";
+import { BarreDEnregistrement } from "@/components/reglages/barre-denregistrement";
+import { Reglage } from "@/components/reglages/reglage";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -16,44 +17,17 @@ import { ecrireHeureDeRappel } from "@/lib/domain/heure-de-rappel";
  * ce que le produit fait sans nous. Un seul bouton pour les deux : ils
  * s'enregistrent ensemble, et rien ne s'écrit tant qu'une saisie est illisible.
  *
+ * Ce bouton unique a un prix, et c'est le formulaire qui le paie : entre la
+ * valeur qu'on change et le geste qui l'écrit, il y a la hauteur de tout le
+ * reste. `BarreDEnregistrement` s'en charge — ici on ne tient que la question
+ * qu'elle pose : est-ce que quelque chose a bougé depuis la dernière écriture.
+ *
  * Chaque décision à deux états est un interrupteur et non une valeur écrite :
  * « activé » demandait de chercher où on le change, et ne disait pas ce qui allait
  * arriver. L'explication de ce que la décision change est collée à elle.
  */
 
 const GROUPE = "text-mono font-mono tracking-[0.14em] text-stone-500 uppercase";
-
-/** Une décision : son nom, ce qu'elle change, son contrôle, et sa suite. */
-function Reglage({
-  nom,
-  intitule,
-  explication,
-  controle,
-  children,
-}: {
-  nom: string;
-  intitule: string;
-  explication: string;
-  controle: React.ReactNode;
-  children?: React.ReactNode;
-}) {
-  return (
-    <div className="px-pas-4 py-pas-3 rounded-champ bg-surface-papier">
-      <div className="gap-pas-4 flex items-start justify-between">
-        <div>
-          <Label htmlFor={nom} className="text-corps text-stone-900">
-            {intitule}
-          </Label>
-          <p className="mt-pas-1 text-petit max-w-md text-stone-500">{explication}</p>
-        </div>
-
-        <div className="mt-pas-1 shrink-0">{controle}</div>
-      </div>
-
-      {children}
-    </div>
-  );
-}
 
 export function FormulaireDeReglages({
   plafond,
@@ -76,9 +50,25 @@ export function FormulaireDeReglages({
   const [emails, setEmails] = useState(emailsActifs);
   const [rappel, setRappel] = useState(rappelActif);
   const [alerte, setAlerte] = useState(alerteActive);
+  const [modifie, setModifie] = useState(false);
 
+  /*
+    Une écriture réussie remet le formulaire au repos, un refus non.
+
+    Un refus laisse une valeur en attente — celle qu'on vient de taper de
+    travers — et la barre doit rester là pour le dire, avec le message qui
+    explique quoi corriger. La ranger reviendrait à annoncer que c'est écrit
+    alors que la saisie a été rejetée.
+  */
+  useEffect(() => {
+    if (etat.message) setModifie(false);
+  }, [etat]);
+
+  // Une frappe suffit à ouvrir l'attente : `input` remonte des deux champs de
+  // texte. Les interrupteurs, eux, n'émettent rien qui remonte jusqu'ici, et le
+  // disent chacun dans son geste.
   return (
-    <form action={envoyer} className="gap-pas-8 flex flex-col">
+    <form action={envoyer} onInput={() => setModifie(true)} className="gap-pas-8 flex flex-col">
       <fieldset className="gap-pas-2 flex flex-col border-0 p-0">
         <legend className={`${GROUPE} mb-pas-3`}>La session</legend>
 
@@ -115,7 +105,10 @@ export function FormulaireDeReglages({
               id="rappel"
               name="rappel"
               checked={rappel && emails}
-              onCheckedChange={setRappel}
+              onCheckedChange={(pose) => {
+                setRappel(pose);
+                setModifie(true);
+              }}
               disabled={!emails}
             />
           }
@@ -151,7 +144,10 @@ export function FormulaireDeReglages({
               id="alerte"
               name="alerte"
               checked={alerte && emails}
-              onCheckedChange={setAlerte}
+              onCheckedChange={(pose) => {
+                setAlerte(pose);
+                setModifie(true);
+              }}
               disabled={!emails}
             />
           }
@@ -162,22 +158,25 @@ export function FormulaireDeReglages({
           intitule="Emails"
           explication="Coupé, plus rien ne part sauf le code de connexion — sans lui, personne ne pourrait plus entrer dans son compte."
           controle={
-            <Switch id="emails" name="emails" checked={emails} onCheckedChange={setEmails} />
+            <Switch
+              id="emails"
+              name="emails"
+              checked={emails}
+              onCheckedChange={(pose) => {
+                setEmails(pose);
+                setModifie(true);
+              }}
+            />
           }
         />
       </fieldset>
 
-      <div className="gap-pas-4 flex flex-wrap items-center">
-        <Button type="submit" disabled={enCours}>
-          {enCours ? "Un instant" : "Enregistrer"}
-        </Button>
-
-        {/* L'espace du message est réservé : il ne fait pas sauter la page. */}
-        <p className="text-petit min-h-5 max-w-md" role="status" aria-live="polite">
-          {etat.erreur ? <span className="text-alerte">{etat.erreur}</span> : null}
-          {etat.message ? <span className="text-stone-500">{etat.message}</span> : null}
-        </p>
-      </div>
+      <BarreDEnregistrement
+        modifie={modifie}
+        enCours={enCours}
+        message={etat.message}
+        erreur={etat.erreur}
+      />
     </form>
   );
 }

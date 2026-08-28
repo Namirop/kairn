@@ -119,6 +119,22 @@
   --pas-24: 6rem;
 
   /*
+    La hauteur qu'occupe la navigation basse du téléphone.
+
+    Elle est fixée par-dessus la page, donc ce qui doit se poser au-dessus
+    d'elle a besoin de sa mesure. Recopiée en dur dans chaque composant, elle
+    finirait par mentir à l'un des deux endroits : la barre d'enregistrement des
+    réglages se rangerait sous la navigation, exactement là où elle est censée
+    se voir.
+
+    La somme suit `barre-basse.tsx` : deux rembourrages d'un demi-pas, une cible
+    de trois rem et demi, et l'encoche gestuelle. Elle vaut la même chose sur un
+    écran de bureau, où la navigation n'est pas là — ce qui s'en sert la reprend
+    donc à partir de `md`.
+  */
+  --barre-basse: calc(3.5rem + var(--pas-2) * 2 + env(safe-area-inset-bottom));
+
+  /*
     Le rythme d'un panneau de campagne, qui se mesure à la fenêtre.
 
     Six pas de haut et de bas font une ouverture ample sur un écran de quatorze
