@@ -1,25 +1,41 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PileEnConstruction } from "@/components/cairn/pile-en-construction";
+import { QuestionDeDemonstration } from "@/components/site/question-de-demonstration";
 import { Button } from "@/components/ui/button";
+import {
+  questionDeDemonstration,
+  type QuestionDeDemonstration as Question,
+} from "@/lib/domain/questions-de-demonstration";
 
 /**
  * Les quelques secondes où le découpage tourne.
  *
  * C'est le moment le plus fragile du produit : la seule page qui convertit, et
- * un écran figé pendant cinq secondes. Un texte immobile fait croire que rien ne
- * se passe, et on ferme l'onglet juste avant le résultat.
+ * dix à quinze secondes d'attente. Un écran immobile fait croire que rien ne se
+ * passe, et on ferme l'onglet juste avant le résultat.
  *
- * On montre donc la **forme de ce qui arrive** plutôt qu'un tourniquet : des
- * emplacements de concepts, au filet de lichen, aux mesures exactes de ceux qui
- * vont les remplacer. Rien ne saute quand le vrai contenu arrive, et l'attente
- * dit déjà ce qu'elle prépare.
+ * Trois choses le tiennent, et elles répondent à trois manques différents.
+ *
+ * **Un empilement qui se construit**, à la place du titre. C'est le geste du
+ * produit — une pierre, puis une autre — et il bouge vraiment, là où six barres
+ * grises qui pulsent avaient fini par ressembler à une page qui n'arrive pas à
+ * charger. Le même composant sert déjà l'attente de l'application : l'attente
+ * de Kairn a une forme, elle est la même partout.
+ *
+ * **La forme de ce qui arrive**, en dessous : des emplacements aux mesures des
+ * concepts qui vont les remplacer, dans la grille où ils s'afficheront. Rien ne
+ * saute au moment du remplacement.
+ *
+ * **Une vraie question**, au bout de quelques secondes. Elle vit dans son propre
+ * composant, et c'est là qu'est écrit ce qu'elle vient chercher.
  *
  * La progression n'est pas racontée par étapes. On ne connaît pas l'avancement
  * réel d'une extraction — il n'y a qu'un appel, et il rend ou il ne rend pas —,
  * donc annoncer « lecture… découpage… » serait inventer une barre de progression
- * qui ne mesure rien. Ce qui est honnête, c'est de dire que ça travaille, et de
- * le reconnaître quand c'est long.
+ * qui ne mesure rien. Ce qui est honnête, c'est de dire que ça travaille, de
+ * montrer ce qui se prépare, et de le reconnaître quand c'est long.
  */
 
 /** Trois emplacements : le découpage moyen en rend trois à cinq. */
@@ -32,22 +48,46 @@ const EMPLACEMENTS = [
 /** Au-delà, on le reconnaît. Se taire plus longtemps ferait douter. */
 const SECONDES_AVANT_EXCUSE = 9;
 
+/**
+ * Au-delà, on propose de quoi occuper l'attente.
+ *
+ * Assez tard pour qu'un découpage rapide ne fasse jamais clignoter une question
+ * qu'on n'a pas le temps de lire, assez tôt pour arriver bien avant le moment où
+ * on renonce.
+ */
+const SECONDES_AVANT_LA_QUESTION = 3;
+
 export function ConceptsEnAttente() {
   const [long, setLong] = useState(false);
+  const [question, setQuestion] = useState<Question | null>(null);
 
   useEffect(() => {
-    const minuteur = setTimeout(() => setLong(true), SECONDES_AVANT_EXCUSE * 1000);
+    const excuse = setTimeout(() => setLong(true), SECONDES_AVANT_EXCUSE * 1000);
+    // Le tirage se fait ici et non au rendu : la page se rend aussi côté serveur
+    // quand on la recharge en plein découpage, et deux tirages différents
+    // casseraient l'hydratation.
+    const invitation = setTimeout(
+      () => setQuestion(questionDeDemonstration(Math.random())),
+      SECONDES_AVANT_LA_QUESTION * 1000,
+    );
 
-    return () => clearTimeout(minuteur);
+    return () => {
+      clearTimeout(excuse);
+      clearTimeout(invitation);
+    };
   }, []);
 
   return (
-    <div className="gap-pas-4 flex flex-col" role="status" aria-live="polite">
-      <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-        Découpage en cours
-      </p>
+    <div className="gap-pas-6 md:gap-pas-8 flex flex-col" role="status" aria-live="polite">
+      <div className="gap-pas-4 flex items-center">
+        <PileEnConstruction className="w-10 shrink-0 md:w-14" />
 
-      <ul className="gap-pas-3 flex flex-col" aria-hidden>
+        <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-900">
+          On découpe ton texte.
+        </h2>
+      </div>
+
+      <ul className="gap-pas-4 md:gap-x-pas-8 grid md:grid-cols-2" aria-hidden>
         {EMPLACEMENTS.map(([longue, courte], rang) => (
           <li key={longue} className="border-lichen/40 pl-pas-4 border-l-2">
             {/* Deux barres aux hauteurs d'une ligne de corps : ce qui arrive
@@ -67,11 +107,13 @@ export function ConceptsEnAttente() {
       </ul>
 
       {/* La place est réservée : la phrase apparaît sans pousser ce qui suit. */}
-      <p className="text-petit min-h-5 text-stone-500">
+      <p className="text-petit min-h-5 max-w-xl text-stone-500">
         {long
           ? "C'est plus long que d'habitude. Ça arrive, laisse-lui encore un instant."
           : "Quelques secondes. Tes concepts s'affichent ici même, pas dans un écran d'inscription."}
       </p>
+
+      {question ? <QuestionDeDemonstration question={question} /> : null}
     </div>
   );
 }
@@ -100,10 +142,12 @@ export function ConceptsEnAttente() {
  */
 export function AttenteInterrompue({ onVerifier }: { onVerifier: () => void }) {
   return (
-    <div className="gap-pas-3 flex flex-col" role="status">
-      <p className="text-corps text-stone-900">Le découpage prend plus de temps que prévu.</p>
+    <div className="gap-pas-4 flex flex-col" role="status">
+      <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-900">
+        Le découpage prend son temps.
+      </h2>
 
-      <p className="text-petit max-w-md text-stone-500">
+      <p className="text-corps max-w-xl text-stone-500">
         Ton texte n&apos;est pas perdu. Reviens sur cette page dans un moment : tes concepts
         t&apos;y attendront.
       </p>
