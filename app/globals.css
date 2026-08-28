@@ -611,6 +611,36 @@
   }
 }
 
+/* La pierre qui vient de se poser dans le jeu d'attente.
+
+   Elle tombe de quelques unités et s'arrête net : c'est le contact qui rend le
+   geste satisfaisant, donc la course est courte et la sortie brutale plutôt
+   qu'amortie. Une pierre qui se pose en douceur flotte.
+
+   L'animation vit sur un groupe **intérieur**, jamais sur celui qui porte le
+   `transform` de position : une animation CSS de `transform` remplace l'attribut
+   de présentation en entier, et la pierre repartirait à l'origine du dessin. */
+@utility pierre-qui-tombe {
+  animation: pierre-qui-tombe 240ms cubic-bezier(0.3, 0, 0.2, 1) both;
+}
+
+@keyframes pierre-qui-tombe {
+  from {
+    opacity: 0.4;
+    /* En unités de la vue, pas en pourcentage : un pourcentage de `translate`
+       se mesure sur la boîte de référence, qui pour un groupe SVG est le
+       viewport entier et non la pierre. La chute aurait alors la hauteur du
+       cairn au lieu de celle d'une pierre. Six unités valent à peu près la
+       moitié d'une pierre, quelle que soit la taille rendue. */
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Un titre dont on ne garde que le trait.
    « Tu retiens peu » n'est pas la seconde ligne d'un titre, c'est ce que la
    première a perdu. La lettre évidée le dit sans qu'on l'écrive, et c'est la

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CairnAEmpiler } from "@/components/site/cairn-a-empiler";
 import { AttenteInterrompue, ConceptsEnAttente } from "@/components/site/concepts-en-attente";
 import { EchantillonDeQuestions } from "@/components/site/echantillon-de-questions";
 import { EssaiSansConcept } from "@/components/site/essai-sans-concept";
@@ -34,6 +35,14 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
  * suite — ton texte, tes concepts, ta question, garde-les — et une suite se
  * descend. Ce qu'on gagne à la déplier vaut mieux que ce qu'on perdait à tout
  * tasser au-dessus de la ligne de flottaison.
+ *
+ * **Le jeu d'attente est monté ici, et c'est le seul endroit possible.** L'essai
+ * se joue en deux temps qui ne durent pas pareil — six secondes de médiane pour
+ * le découpage, vingt pour l'écriture des questions —, et chacun se rend par une
+ * branche différente de ce composant. Un occupant posé dans l'une des deux se
+ * démonte au passage à l'autre : la pile qu'on venait de commencer disparaît au
+ * moment précis où l'attente devient longue. Posé ici, au même rang dans l'arbre
+ * quelle que soit la branche, il traverse les deux et ignore l'étape en cours.
  */
 
 export function ResultatDeLEssai({
@@ -59,11 +68,19 @@ export function ResultatDeLEssai({
   */
   const rienEncore = !avancement || avancement.concepts.length === 0;
 
+  // Le jeu ne se propose que tant que quelque chose tourne, et il disparaît dès
+  // que tout est là : c'est un occupant d'attente, pas une section de la page.
+  const attend = (!avancement || avancement.enCours) && !attenteInterrompue;
+
   if (rienEncore && (!avancement || avancement.enCours)) {
-    return attenteInterrompue ? (
-      <AttenteInterrompue onVerifier={onVerifier} />
-    ) : (
-      <ConceptsEnAttente />
+    return (
+      <AvecLeJeu jeu={attend}>
+        {attenteInterrompue ? (
+          <AttenteInterrompue onVerifier={onVerifier} />
+        ) : (
+          <ConceptsEnAttente />
+        )}
+      </AvecLeJeu>
     );
   }
 
@@ -76,27 +93,56 @@ export function ResultatDeLEssai({
   const combien = avancement.concepts.length;
 
   return (
-    <div className="gap-pas-8 md:gap-pas-12 flex flex-col" role="status">
-      <header className="gap-pas-3 flex flex-col">
-        <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-900 tabular-nums">
-          {combien} {combien === 1 ? "concept." : "concepts."}
-        </h2>
+    <AvecLeJeu jeu={attend}>
+      <div className="gap-pas-8 md:gap-pas-12 flex flex-col" role="status">
+        <header className="gap-pas-3 flex flex-col">
+          <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-900 tabular-nums">
+            {combien} {combien === 1 ? "concept." : "concepts."}
+          </h2>
 
-        <p className="text-corps max-w-xl text-stone-500">
-          {combien === 1
-            ? "Il te sera reposé seul, au moment où tu allais l'oublier."
-            : "Chacun sera reposé séparément, au moment où tu allais l'oublier."}
-        </p>
-      </header>
+          <p className="text-corps max-w-xl text-stone-500">
+            {combien === 1
+              ? "Il te sera reposé seul, au moment où tu allais l'oublier."
+              : "Chacun sera reposé séparément, au moment où tu allais l'oublier."}
+          </p>
+        </header>
 
-      <PileDeConcepts concepts={avancement.concepts} />
+        <PileDeConcepts concepts={avancement.concepts} />
 
-      {/* L'échantillon, et il ferme l'arc : ton texte, tes concepts, de vraies
+        {/* L'échantillon, et il ferme l'arc : ton texte, tes concepts, de vraies
           questions sur l'un d'eux. Sans lui, la page promettait qu'on te les
           repose sans jamais te montrer sous quelle forme. */}
-      <EchantillonDeQuestions questions={avancement.questions} enCours={avancement.enCours} />
+        <EchantillonDeQuestions questions={avancement.questions} enCours={avancement.enCours} />
 
-      <GarderLesConcepts peutRedeposer={avancement.peutRedeposer} setRecommence={setRecommence} />
+        <GarderLesConcepts peutRedeposer={avancement.peutRedeposer} setRecommence={setRecommence} />
+      </div>
+    </AvecLeJeu>
+  );
+}
+
+/**
+ * Le corps de l'essai, et le jeu à côté tant qu'on attend.
+ *
+ * Le jeu est **toujours le second enfant de ce composant**, quelle que soit la
+ * branche rendue au-dessus. C'est ce qui le fait survivre au passage du
+ * découpage à l'écriture des questions : React garde un composant qui ne change
+ * ni de position ni de type, et le démonte dès que l'un des deux bouge.
+ *
+ * Sur téléphone il passe dessous, parce qu'il n'y a pas de côté. Il reste
+ * au-dessus du pli dans les deux cas : posé sous une liste de concepts, il ne
+ * serait pas vu par ceux qui ne défilent pas, c'est-à-dire par ceux qui
+ * attendent.
+ */
+function AvecLeJeu({ jeu, children }: { jeu: boolean; children: React.ReactNode }) {
+  if (!jeu) return <>{children}</>;
+
+  return (
+    <div className="gap-pas-8 md:gap-pas-12 grid md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+      <div className="min-w-0">{children}</div>
+
+      <div className="md:pt-pas-4 order-first md:order-none">
+        <CairnAEmpiler />
+      </div>
     </div>
   );
 }

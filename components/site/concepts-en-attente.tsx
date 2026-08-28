@@ -2,21 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { PileEnConstruction } from "@/components/cairn/pile-en-construction";
-import { QuestionDeDemonstration } from "@/components/site/question-de-demonstration";
 import { Button } from "@/components/ui/button";
-import {
-  questionDeDemonstration,
-  type QuestionDeDemonstration as Question,
-} from "@/lib/domain/questions-de-demonstration";
 
 /**
  * Les quelques secondes où le découpage tourne.
  *
  * C'est le moment le plus fragile du produit : la seule page qui convertit, et
- * dix à quinze secondes d'attente. Un écran immobile fait croire que rien ne se
- * passe, et on ferme l'onglet juste avant le résultat.
+ * une attente qu'on ne contrôle pas. Mesurée sur trois semaines de production,
+ * elle va de 2,5 à 15 secondes, avec 6,3 de médiane — jamais instantanée, jamais
+ * la même. Un écran immobile fait croire que rien ne se passe, et on ferme
+ * l'onglet juste avant le résultat.
  *
- * Trois choses le tiennent, et elles répondent à trois manques différents.
+ * Deux choses le tiennent, et elles répondent à deux manques différents.
  *
  * **Un empilement qui se construit**, à la place du titre. C'est le geste du
  * produit — une pierre, puis une autre — et il bouge vraiment, là où six barres
@@ -28,8 +25,13 @@ import {
  * concepts qui vont les remplacer, dans la grille où ils s'afficheront. Rien ne
  * saute au moment du remplacement.
  *
- * **Une vraie question**, au bout de quelques secondes. Elle vit dans son propre
- * composant, et c'est là qu'est écrit ce qu'elle vient chercher.
+ * Ce qui occupe vraiment l'attente n'est plus ici. Une question de démonstration
+ * y a vécu, posée au bout de trois secondes dans une attente qui en dure six :
+ * elle avait donc trois secondes pour être lue et répondue, ce qui n'est le
+ * temps de rien. Et elle disparaissait au passage à l'écriture des questions,
+ * qui est l'attente longue — vingt secondes de médiane. Le jeu qui l'a
+ * remplacée est monté par `ResultatDeLEssai`, au-dessus des deux étapes, parce
+ * que c'est le seul endroit d'où l'on peut les traverser.
  *
  * La progression n'est pas racontée par étapes. On ne connaît pas l'avancement
  * réel d'une extraction — il n'y a qu'un appel, et il rend ou il ne rend pas —,
@@ -48,33 +50,13 @@ const EMPLACEMENTS = [
 /** Au-delà, on le reconnaît. Se taire plus longtemps ferait douter. */
 const SECONDES_AVANT_EXCUSE = 9;
 
-/**
- * Au-delà, on propose de quoi occuper l'attente.
- *
- * Assez tard pour qu'un découpage rapide ne fasse jamais clignoter une question
- * qu'on n'a pas le temps de lire, assez tôt pour arriver bien avant le moment où
- * on renonce.
- */
-const SECONDES_AVANT_LA_QUESTION = 3;
-
 export function ConceptsEnAttente() {
   const [long, setLong] = useState(false);
-  const [question, setQuestion] = useState<Question | null>(null);
 
   useEffect(() => {
     const excuse = setTimeout(() => setLong(true), SECONDES_AVANT_EXCUSE * 1000);
-    // Le tirage se fait ici et non au rendu : la page se rend aussi côté serveur
-    // quand on la recharge en plein découpage, et deux tirages différents
-    // casseraient l'hydratation.
-    const invitation = setTimeout(
-      () => setQuestion(questionDeDemonstration(Math.random())),
-      SECONDES_AVANT_LA_QUESTION * 1000,
-    );
 
-    return () => {
-      clearTimeout(excuse);
-      clearTimeout(invitation);
-    };
+    return () => clearTimeout(excuse);
   }, []);
 
   return (
@@ -112,8 +94,6 @@ export function ConceptsEnAttente() {
           ? "C'est plus long que d'habitude. Ça arrive, laisse-lui encore un instant."
           : "Quelques secondes. Tes concepts s'affichent ici même, pas dans un écran d'inscription."}
       </p>
-
-      {question ? <QuestionDeDemonstration question={question} /> : null}
     </div>
   );
 }

@@ -82,7 +82,7 @@ function EnEcriture() {
       </div>
 
       <p className="text-petit max-w-xl text-stone-500">
-        Quatre formulations sur le même concept, de formats différents. Quelques secondes.
+        Quatre formulations sur le même concept, de formats différents. Une vingtaine de secondes.
       </p>
     </section>
   );
