@@ -35,6 +35,9 @@ export const CONCEPTS_PAR_APPEL = 3;
 /** Assez de variantes pour accepter une réponse ; au-delà, on n'en lit plus. */
 const FORMES_ACCEPTEES_MAXIMUM = 8;
 
+/** Trois leurres suffisent à quatre pistes ; le reste ne se montrerait pas. */
+const LEURRES_MAXIMUM = 3;
+
 /** Ce que chaque facette demande, et les formats qu'elle ouvre. */
 const FACETTE = {
   recognition: {
@@ -243,6 +246,7 @@ const generateVariantsValidation = sortieLue.transform((sortie) => {
             ? {
                 sentence: cloze.sentence,
                 accepted: cloze.accepted.slice(0, FORMES_ACCEPTEES_MAXIMUM),
+                leurres: (cloze.leurres ?? []).slice(0, LEURRES_MAXIMUM),
               }
             : null,
         };

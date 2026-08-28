@@ -48,9 +48,7 @@ const usage = z.object({
   /** Certains modèles renvoient le coût facturé, d'autres non. */
   cost: z.number().optional(),
   /** OpenAI (via OpenRouter) rend les tokens en cache dans `prompt_tokens_details.cached_tokens`. */
-  prompt_tokens_details: z
-    .object({ cached_tokens: z.number().optional() })
-    .optional(),
+  prompt_tokens_details: z.object({ cached_tokens: z.number().optional() }).optional(),
 });
 
 const reponseSchema = z.object({
@@ -64,10 +62,7 @@ function toOpenRouterMessage(message: AiMessage): {
   role: "user" | "assistant";
   content:
     | string
-    | Array<
-        | { type: "text"; text: string }
-        | { type: "image_url"; image_url: { url: string } }
-      >;
+    | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
 } {
   if (typeof message.content === "string") {
     return { role: message.role, content: message.content };
@@ -91,9 +86,7 @@ export function pontOpenRouter(apiKey: string | undefined): PontFournisseur {
     async emettre(params: EmissionParams): Promise<EmissionResult> {
       const cle = apiKey?.trim();
       if (!cle) {
-        throw new Error(
-          "OPENROUTER_API_KEY absente — la lignée OpenRouter ne peut pas partir.",
-        );
+        throw new Error("OPENROUTER_API_KEY absente — la lignée OpenRouter ne peut pas partir.");
       }
 
       const preambule = `Réponds au format JSON, conforme exactement à ce schéma. Utilise les clés telles qu'elles apparaissent, sans les renommer ni les traduire.

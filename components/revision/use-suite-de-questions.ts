@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { useChronometre } from "@/components/revision/use-chronometre";
 import type { QuestionServie } from "@/lib/db/question-servie";
 import type { ReviewRating } from "@/lib/db/types";
+import { noteApresAide, pistesDuTrou } from "@/lib/domain/aide-du-trou";
 import { reponseAcceptee } from "@/lib/domain/reponse-cloze";
 
 /**
@@ -51,6 +52,16 @@ export type TexteATrou = {
   attendu: string;
   /** Ce qui comble le trou : la saisie en cours, puis le terme attendu. */
   comble: string | null;
+  /**
+   * Les termes proposés à qui sèche, ou rien quand la question n'a pas de quoi
+   * réduire honnêtement le champ. Voir `lib/domain/aide-du-trou.ts`.
+   */
+  pistes: string[];
+  /** Le coup de pouce a été demandé : les pistes sont à l'écran, et il se paie. */
+  aide: boolean;
+  demanderDeLaide: () => void;
+  /** Note le passage, en tenant compte de l'aide. Le seul chemin de ce format. */
+  juger: (note: ReviewRating) => void;
 };
 
 export function useSuiteDeQuestions({
@@ -71,6 +82,9 @@ export function useSuiteDeQuestions({
   const [verdict, setVerdict] = useState<VerdictDuTrou>(null);
   // Une réponse a été produite : le geste de renoncement n'a plus de sens.
   const [engage, setEngage] = useState(false);
+  // Le coup de pouce a été demandé sur cette question-là : il fait descendre la
+  // note d'un cran, et il se remet à faux en passant à la suivante.
+  const [aide, setAide] = useState(false);
   const [jetee, setJetee] = useState(false);
   const [enCours, setEnCours] = useState(false);
   const [ecrit, setEcrit] = useState(false);
@@ -125,6 +139,7 @@ export function useSuiteDeQuestions({
       setSaisie("");
       setVerdict(null);
       setEngage(false);
+      setAide(false);
       setJetee(false);
       setEcrit(false);
       setRang(rang + 1);
@@ -186,6 +201,15 @@ export function useSuiteDeQuestions({
       verdict,
       attendu,
       comble: verdict === null ? saisie.trim() || null : attendu,
+      // La graine est l'identifiant de la question : l'ordre des pistes ne bouge
+      // pas d'un affichage à l'autre, et le terme attendu ne tombe pas toujours
+      // au même rang d'une question à l'autre.
+      pistes: question?.cloze
+        ? pistesDuTrou(attendu, question.cloze.leurres, question.variantId)
+        : [],
+      aide,
+      demanderDeLaide: () => setAide(true),
+      juger: (note) => void suivre(noteApresAide(note, aide)),
     } satisfies TexteATrou,
     arreter,
     suivre,
@@ -214,7 +238,10 @@ export function useSuiteDeQuestions({
       }
 
       setVerdict("JUSTE");
-      void enregistrer("GOOD");
+      // Juste avec un coup de pouce reste un rappel, mais un cran plus facile :
+      // la note le dit, sans quoi l'aide serait gratuite et deviendrait le geste
+      // par défaut.
+      void enregistrer(noteApresAide("GOOD", aide));
     },
     jeter: () => {
       setJetee(true);

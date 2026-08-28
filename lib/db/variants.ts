@@ -19,7 +19,7 @@ export type QuestionAEcrire = {
   answerKey: string;
   options: string[] | null;
   correctIndex: number | null;
-  cloze: { sentence: string; accepted: string[] } | null;
+  cloze: { sentence: string; accepted: string[]; leurres: string[] } | null;
 };
 
 /**

@@ -229,15 +229,20 @@ describe("forme de sortie de generate_variants", () => {
     expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansReponse)).lots).toHaveLength(2);
   });
 
-  it("garde un texte à trou complet", () => {
+  /** Les questions écrites avant que l'aide existe n'ont pas de leurres. */
+  it("garde un texte à trou sans leurres, écrit avant que l'aide existe", () => {
     const cloze = { sentence: "Le lichen est une ___ entre deux espèces.", accepted: ["symbiose"] };
     const juste = { ...lot(1), boundary: { ...question("CLOZE"), cloze } };
 
     expect(GENERATE_VARIANTS.validation.parse({ lots: [juste] }).lots).toHaveLength(1);
   });
 
-  it("rend la phrase trouée et ses formes acceptées à plat, avec la question", () => {
-    const cloze = { sentence: "Le lichen est une ___ entre deux espèces.", accepted: ["symbiose"] };
+  it("rend la phrase trouée, ses formes acceptées et ses leurres à plat", () => {
+    const cloze = {
+      sentence: "Le lichen est une ___ entre deux espèces.",
+      accepted: ["symbiose"],
+      leurres: ["parasitisme", "commensalisme", "mutualisme"],
+    };
     const sortie = GENERATE_VARIANTS.validation.parse({
       lots: [{ ...lot(1), boundary: { ...question("CLOZE"), cloze } }],
     });

@@ -41,7 +41,13 @@ function mcqLu() {
 
 /** Le même texte à trou, relu. `min(1)` tient : la grammaire le recopie. */
 function clozeLu() {
-  return z.object({ sentence: z.string(), accepted: z.array(z.string()).min(1) });
+  return z.object({
+    sentence: z.string(),
+    accepted: z.array(z.string()).min(1),
+    // Facultatifs à la relecture, imposés à l'écriture : les questions écrites
+    // avant que l'aide existe n'en portent pas, et elles restent servables.
+    leurres: z.array(z.string()).nullish(),
+  });
 }
 
 /**
@@ -52,6 +58,12 @@ function clozeLu() {
  * vit dans `lib/domain/reponse-cloze.ts` : instantanée et gratuite à chaque
  * passage. Le terme masqué vient en premier — c'est celui qu'on montre quand la
  * réponse ne correspond pas, et celui dont on mesure la longueur.
+ *
+ * **Les leurres se demandent ici, au même appel, et pas plus tard.** Le coup de
+ * pouce de l'écran de révision montre trois ou quatre termes dont un seul est
+ * juste ; les fabriquer au moment où on en a besoin voudrait dire un appel modèle
+ * pendant une session, ce que le produit s'interdit. Écrits en même temps que la
+ * phrase, ils ne coûtent que quelques dizaines de jetons sur un appel déjà payé.
  */
 function cloze() {
   return z.object({
@@ -65,6 +77,12 @@ function cloze() {
       .min(1)
       .max(8)
       .describe("Les formes acceptées, le terme masqué d'abord, puis ses variantes."),
+    leurres: z
+      .array(z.string().min(1).max(120))
+      .length(3)
+      .describe(
+        "Trois termes faux, de même nature et de même longueur que le terme masqué, qu'on pourrait hésiter à mettre à sa place.",
+      ),
   });
 }
 

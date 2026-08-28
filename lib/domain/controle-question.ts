@@ -17,7 +17,7 @@ export type VariantAControler = {
   answerKey: string;
   options: string[] | null;
   correctIndex: number | null;
-  cloze?: { sentence: string; accepted: string[] } | null;
+  cloze?: { sentence: string; accepted: string[]; leurres?: string[] } | null;
   /** Ce que le modèle déclare : l'affirmation posée est-elle vraie. */
   estVraie?: boolean | null;
   /** Ce que l'envoi lui demandait. Absente quand l'appelant ne la connaît pas. */
@@ -118,6 +118,20 @@ function controlerCloze(variant: VariantAControler): Manquement[] {
 
   if (mots.length === 0 || mots.length > MOTS_MAX_DU_TROU) {
     return [{ regle: "trou", detail: `le terme masqué fait ${mots.length} mots : « ${terme} »` }];
+  }
+
+  /*
+    Un leurre qui est une forme acceptée retourne l'aide contre celui qui la
+    demande : la liste porte alors deux bonnes réponses, il en choisit une, et
+    on lui compte un échec sur une réponse juste. Signalé plutôt que refusé —
+    `pistesDuTrou` retire le doublon à l'affichage — mais un modèle qui le fait
+    souvent doit se voir au banc.
+  */
+  const acceptees = new Set(cloze.accepted.map((forme) => motsNormalises(forme)));
+  const doublons = (cloze.leurres ?? []).filter((leurre) => acceptees.has(motsNormalises(leurre)));
+
+  if (doublons.length > 0) {
+    return [{ regle: "trou", detail: `leurre accepté comme réponse : « ${doublons[0]} »` }];
   }
 
   return [];

@@ -80,13 +80,23 @@ const figeSchema = z.object({
                 options: z.array(z.string()).nullable(),
                 correctIndex: z.number().int().nullable(),
                 /**
-                 * La charge d'un texte à trou : la phrase avec le trou, et les
-                 * formes acceptées. Persistée depuis que la mesure du radotage
-                 * s'appuie dessus — le champ `question` d'un CLOZE porte au
-                 * mieux une consigne, jamais la vraie phrase à comparer.
+                 * La charge d'un texte à trou : la phrase avec le trou, les
+                 * formes acceptées, et les leurres du coup de pouce. Persistée
+                 * depuis que la mesure du radotage s'appuie dessus — le champ
+                 * `question` d'un CLOZE porte au mieux une consigne, jamais la
+                 * vraie phrase à comparer.
+                 *
+                 * Les leurres y figurent parce qu'un contrôle les relit : un
+                 * leurre qui est une forme acceptée retourne l'aide contre celui
+                 * qui la demande, et un rejeu qui ne les garderait pas
+                 * signalerait toujours zéro.
                  */
                 cloze: z
-                  .object({ sentence: z.string(), accepted: z.array(z.string()) })
+                  .object({
+                    sentence: z.string(),
+                    accepted: z.array(z.string()),
+                    leurres: z.array(z.string()).optional(),
+                  })
                   .nullable()
                   .optional(),
               }),

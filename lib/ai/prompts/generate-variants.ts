@@ -57,6 +57,12 @@
  * C'est une règle catégorique de plus, du même genre que la langue et le
  * tutoiement, et `controlerRenvoi` mesure si elle prend.
  *
+ * **Les leurres du texte à trou ont été demandés le 28 août 2026.** L'écran de
+ * révision propose un coup de pouce à qui sèche : trois ou quatre termes dont un
+ * seul est juste. Ils se demandent ici, au même appel que la phrase, parce que
+ * les fabriquer au moment du besoin voudrait dire un appel modèle pendant une
+ * session — ce que le produit s'interdit. Voir `lib/domain/aide-du-trou.ts`.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -176,6 +182,13 @@ d'autre.
 Donne les formes acceptées : le terme lui-même, ses variantes de nombre et de
 genre, ses abréviations d'usage. « les rayons ultraviolets » accepte
 « ultraviolets », « ultraviolet », « UV ».
+
+Donne aussi trois leurres : des termes faux, de même nature et de même longueur
+que le terme masqué, qu'on pourrait hésiter à mettre à sa place. Ils ne sont
+montrés qu'à quelqu'un qui sèche et demande un coup de pouce, et ils doivent
+alors réduire le champ sans le fermer — un leurre absurde n'aide personne, un
+leurre qui pourrait aussi être juste trompe celui qui le lit. Aucun d'eux n'est
+une forme acceptée du terme masqué.
 
 MCQ : exactement quatre options. Chaque mauvaise option est fausse pour une
 raison précise, une confusion que quelqu'un pourrait réellement avoir. Une

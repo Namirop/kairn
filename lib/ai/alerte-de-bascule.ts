@@ -66,9 +66,6 @@ export async function surveillerLesBascules(
       instant: maintenant,
     });
   } catch (erreur) {
-    console.error(
-      `[bascule] alerte non envoyée (${etat.bascules}/${etat.seuil})`,
-      erreur,
-    );
+    console.error(`[bascule] alerte non envoyée (${etat.bascules}/${etat.seuil})`, erreur);
   }
 }

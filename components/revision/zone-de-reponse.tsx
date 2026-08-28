@@ -69,13 +69,10 @@ export function ZoneDeReponse({
 
   if (question.cloze) {
     return (
-      <ReponseCloze
-        trou={trou}
-        enCours={enCours}
-        dernier={dernier}
-        onVerifier={onVerifier}
-        onJuger={onNoter}
-      />
+      // Le texte à trou note lui-même, par `trou.juger` : c'est le seul format
+      // dont la note dépend d'autre chose que du geste — un coup de pouce
+      // demandé la fait descendre d'un cran, et cette règle vit dans le domaine.
+      <ReponseCloze trou={trou} enCours={enCours} dernier={dernier} onVerifier={onVerifier} />
     );
   }
 

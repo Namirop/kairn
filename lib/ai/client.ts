@@ -39,7 +39,12 @@ const MOCK_LATENCY_MS = 300;
 const MODELE_DE_REPLI = "claude-sonnet-5";
 
 /** Codes d'erreur qui déclenchent un repli. Le reste (quota, config, disabled) remonte. */
-const CODES_DE_REPLI = new Set(["AI_CALL_FAILED", "AI_NO_OUTPUT", "AI_INVALID_OUTPUT", "AI_TRUNCATED"]);
+const CODES_DE_REPLI = new Set([
+  "AI_CALL_FAILED",
+  "AI_NO_OUTPUT",
+  "AI_INVALID_OUTPUT",
+  "AI_TRUNCATED",
+]);
 
 export type CallAIParams<T> = {
   contract: AiContract<T>;

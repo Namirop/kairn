@@ -1,9 +1,9 @@
 "use client";
 
+import { useVenirEnVue } from "@/components/revision/use-venir-en-vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { TexteATrou } from "@/components/revision/use-suite-de-questions";
-import type { ReviewRating } from "@/lib/db/types";
 import { LONGUEUR_MAX_SAISIE } from "@/lib/domain/reponse-cloze";
 
 /**
@@ -26,20 +26,25 @@ import { LONGUEUR_MAX_SAISIE } from "@/lib/domain/reponse-cloze";
  * À côté, on montre le terme attendu dans la phrase et on laisse dire « je
  * l'avais » : on écrit parfois un synonyme que la liste ne porte pas. C'est le
  * seul jugement demandé sur ce format, et seulement dans ce cas.
+ *
+ * **Et on peut sécher.** C'est le seul format qui demande de produire la réponse
+ * plutôt que de la reconnaître, ce qui le rend le plus utile — et parfois
+ * infranchissable : on a le concept en tête, le terme exact ne vient pas, et il
+ * ne reste qu'à s'avouer vaincu sur quelque chose qu'on savait à moitié. Trois ou
+ * quatre pistes réduisent le champ sans donner la réponse : c'est encore un
+ * rappel, plus facile, et compté comme tel. Le prix est dit avant qu'on le paie.
  */
 export function ReponseCloze({
   trou,
   enCours,
   dernier,
   onVerifier,
-  onJuger,
 }: {
   trou: TexteATrou;
   enCours: boolean;
   dernier: boolean;
   /** Compare la saisie aux formes acceptées et fige le chronomètre. */
   onVerifier: () => void;
-  onJuger: (note: ReviewRating) => void;
 }) {
   const propre = trou.saisie.trim();
 
@@ -50,8 +55,14 @@ export function ReponseCloze({
             s'allonge, et le terme qui vient de se poser dans la phrase. */}
         <p className="text-corps text-stone-900">C&apos;est le terme attendu.</p>
 
+        {trou.aide ? (
+          <p className="mt-pas-2 text-petit text-stone-500">
+            Retrouvé avec un coup de pouce : le concept revient un peu plus tôt.
+          </p>
+        ) : null}
+
         <div className="mt-pas-6">
-          <Button type="button" disabled={enCours} onClick={() => onJuger("GOOD")}>
+          <Button type="button" disabled={enCours} onClick={() => trou.juger("GOOD")}>
             {dernier ? "Terminer" : "Continuer"}
           </Button>
         </div>
@@ -74,11 +85,11 @@ export function ReponseCloze({
             type="button"
             variant="outline"
             disabled={enCours}
-            onClick={() => onJuger("HARD")}
+            onClick={() => trou.juger("HARD")}
           >
             Je l&apos;avais
           </Button>
-          <Button type="button" disabled={enCours} onClick={() => onJuger("AGAIN")}>
+          <Button type="button" disabled={enCours} onClick={() => trou.juger("AGAIN")}>
             Je ne l&apos;avais pas
           </Button>
         </div>
@@ -125,6 +136,67 @@ export function ReponseCloze({
           Vérifier
         </Button>
       </div>
+
+      <CoupDePouce trou={trou} />
     </form>
+  );
+}
+
+/**
+ * Le coup de pouce : la porte, puis les pistes.
+ *
+ * Il ne s'affiche que si la question porte de quoi le donner — les formulations
+ * écrites avant qu'il existe n'ont pas de leurres, et proposer une aide qui
+ * n'arrive pas serait pire que ne rien proposer.
+ *
+ * Discret tant qu'on n'en a pas besoin : c'est une sortie de secours, pas une
+ * option du geste. Une fois ouvert, il dit son prix dans la même phrase que ce
+ * qu'il donne — on ne découvre pas après coup que le passage a été dégradé.
+ *
+ * Les termes ne sont pas cliquables, et c'est délibéré : on continue de les
+ * écrire. C'est produire la réponse qui fixe le souvenir, et une liste à cliquer
+ * transformerait le seul format qui le demande en un QCM de plus.
+ *
+ * Il vient à l'écran comme la réponse d'un format ouvert, et pour la même
+ * raison : ce qu'on vient de demander se pose sous le pli d'un téléphone, et son
+ * prix avec.
+ */
+function CoupDePouce({ trou }: { trou: TexteATrou }) {
+  const pistes = useVenirEnVue<HTMLDivElement>(trou.aide);
+
+  if (trou.pistes.length === 0) return null;
+
+  if (!trou.aide) {
+    return (
+      <div className="mt-pas-4">
+        <Button
+          type="button"
+          variant="link"
+          size="sm"
+          className="px-0"
+          onClick={trou.demanderDeLaide}
+        >
+          Je sèche
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={pistes} className="mt-pas-4" role="status">
+      <p className="text-petit text-stone-500">
+        L&apos;un de ceux-là :{" "}
+        {trou.pistes.map((piste, rang) => (
+          <span key={piste}>
+            {rang > 0 ? <span aria-hidden> · </span> : null}
+            <span className="font-mono text-stone-900">{piste}</span>
+          </span>
+        ))}
+      </p>
+
+      <p className="mt-pas-1 text-petit text-stone-500">
+        Compté comme un rappel aidé : le concept revient un peu plus tôt.
+      </p>
+    </div>
   );
 }

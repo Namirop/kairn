@@ -22,10 +22,13 @@ const PAYLOAD_CHOIX = z.object({
 /** Ce qu'un vrai ou faux pose à côté de sa question, quand il pose quelque chose. */
 const PAYLOAD_VRAI_FAUX = z.object({ expected: z.boolean() });
 
-/** La phrase trouée et les formes acceptées d'un texte à trou. */
+/** La phrase trouée, les formes acceptées, et les leurres du coup de pouce. */
 const PAYLOAD_CLOZE = z.object({
   sentence: z.string().min(1),
   accepted: z.array(z.string().min(1)).min(1),
+  // Les questions écrites avant que l'aide existe n'en portent pas : le tableau
+  // vide est une valeur normale, et l'écran n'offre alors rien.
+  leurres: z.array(z.string().min(1)).default([]),
 });
 
 export type VarianteEnBase = {
@@ -49,7 +52,7 @@ export type QuestionServie = {
   answerKey: string;
   options: string[] | null;
   correctIndex: number | null;
-  cloze: { sentence: string; accepted: string[] } | null;
+  cloze: { sentence: string; accepted: string[]; leurres: string[] } | null;
   /**
    * Depuis combien de jours civils ce concept n'avait pas été reposé.
    *

@@ -42,7 +42,9 @@ const configSchema = z.object({
    * active le pont porté du banc (voir `fournisseurs/openrouter.ts`) et exige
    * `OPENROUTER_API_KEY`, distincte de la clé du banc.
    */
-  fournisseur: z.enum(["anthropic", "openrouter"] as const satisfies readonly Fournisseur[]).default("anthropic"),
+  fournisseur: z
+    .enum(["anthropic", "openrouter"] as const satisfies readonly Fournisseur[])
+    .default("anthropic"),
   openrouterApiKey: z.string().min(1).optional(),
 });
 
