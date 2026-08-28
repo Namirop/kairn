@@ -39,15 +39,15 @@ Ce qui manque, et qui se voit :
 
 ## Stack
 
-| Domaine            | Choix                                                                 |
-| ------------------ | --------------------------------------------------------------------- |
-| Framework          | Next.js 15 (App Router, Turbopack), React 19, TypeScript strict       |
-| Base de données    | PostgreSQL, Prisma 7 avec le driver adapter `@prisma/adapter-pg`      |
+| Domaine            | Choix                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| Framework          | Next.js 15 (App Router, Turbopack), React 19, TypeScript strict                      |
+| Base de données    | PostgreSQL, Prisma 7 avec le driver adapter `@prisma/adapter-pg`                     |
 | Authentification   | better-auth : code à six chiffres par email, Google si configuré, aucun mot de passe |
-| Répétition espacée | `ts-fsrs`                                                             |
-| Modèle             | SDK Anthropic, sorties structurées contraintes, validation Zod        |
-| Interface          | Tailwind v4, primitives shadcn/ui retokenisées, Motion                |
-| Email              | Resend                                                                |
+| Répétition espacée | `ts-fsrs`                                                                            |
+| Modèle             | SDK Anthropic, sorties structurées contraintes, validation Zod                       |
+| Interface          | Tailwind v4, primitives shadcn/ui retokenisées, Motion                               |
+| Email              | Resend                                                                               |
 
 ## Prérequis
 
@@ -317,21 +317,29 @@ sont rattachés à une `AnonymousSession` que désigne un cookie de visite, et l
 transfère au compte dans une transaction, depuis le hook `user.create.after` de better-auth : c'est
 le seul instant où l'on tient à la fois le compte neuf et le cookie.
 
-**La chaîne s'arrête à l'extraction.** Les questions, qui coûtent l'essentiel, ne sont demandées
-qu'une fois le compte créé — un visiteur qui repart coûte un appel de découpage. C'est ce qui rend
-l'ouverture tenable, et c'est pour ça que la reprise rend les identifiants des concepts à l'appelant
-plutôt que de générer elle-même : la dépense reprend là où quelqu'un s'engage.
+**La chaîne s'arrête à un seul concept questionné.** L'extraction rend tous les concepts, et le
+premier d'entre eux qui soit questionnable reçoit ses quatre questions — c'est l'échantillon que la
+landing montre, et le seul appel de génération qu'un visiteur déclenche. Les autres lots ne sont
+demandés qu'une fois le compte créé, et c'est pour ça que la reprise rend les identifiants des
+concepts à l'appelant plutôt que de générer elle-même : la dépense reprend là où quelqu'un s'engage.
 
 C'est le seul endroit du produit qui dépense sans compte identifié, donc le plus serré :
 
-| Verrou                  | Valeur                                                               |
-| ----------------------- | -------------------------------------------------------------------- |
-| Par visite (cookie)     | deux essais, mais un essai **qui rend des concepts** ferme la visite |
-| Par empreinte d'adresse | deux visites sur vingt-quatre heures glissantes                      |
-| Conservation            | sept jours, puis le cron efface ce que personne n'a réclamé          |
+| Verrou                  | Valeur                                                           |
+| ----------------------- | ---------------------------------------------------------------- |
+| Par visite (cookie)     | deux essais par vingt-quatre heures glissantes, plus deux pannes |
+| Par empreinte d'adresse | deux visites sur vingt-quatre heures glissantes                  |
+| Conservation            | sept jours, puis le cron efface ce que personne n'a réclamé      |
 
-Le second essai existe pour le cas où le premier ne rend rien — une liste de courses, un lien nu —
-qui laisserait sinon quelqu'un devant une page morte sans avoir rien vu du produit.
+Les deux essais sont dus quel qu'ait été leur résultat. Un essai qui ne rend rien — une liste de
+courses, un lien nu — laisserait sinon quelqu'un devant une page morte ; et un essai qui réussit
+n'a pas de raison de fermer la porte pour la semaine, alors que le geste le plus courant après un
+premier jet est d'en déposer un vrai.
+
+La fenêtre est glissante, donc la visite se rouvre d'elle-même le lendemain — **sur le même
+cookie**. Ouvrir une visite neuve au retour aurait laissé la précédente derrière elle : la reprise
+au compte se fait par l'identifiant du cookie, et ce qu'il ne désigne plus n'est réclamé par
+personne.
 
 Deux visites par adresse et non une, parce qu'une adresse ne désigne pas une personne : un bureau,
 une école ou un opérateur mobile derrière son CGNAT sortent par une seule IPv4, et le premier arrivé

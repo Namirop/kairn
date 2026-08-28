@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { AttenteInterrompue, ConceptsEnAttente } from "@/components/site/concepts-en-attente";
+import { EchantillonDeQuestions } from "@/components/site/echantillon-de-questions";
+import { EssaiSansConcept } from "@/components/site/essai-sans-concept";
 import { PileDeConcepts } from "@/components/site/pile-de-concepts";
 import { Button } from "@/components/ui/button";
-import { CARACTERES_MAXIMUM, longueurEnClair } from "@/lib/depots/bornes-du-depot";
 import { ROUTES } from "@/lib/auth/routes";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
@@ -14,6 +15,25 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
  * Séparé du formulaire parce que ce sont deux écrans, pas deux états d'un même —
  * l'un demande quelque chose, l'autre rend un verdict, et le second a trois fins
  * qui ne se disent pas de la même façon.
+ *
+ * **Il prend le panneau entier, et c'est le changement qui porte tout le reste.**
+ * Le résultat vivait dans la colonne de droite qui avait porté le champ : trente-
+ * six rem pour la seule preuve du produit, pendant que la moitié gauche de
+ * l'écran gardait un titre et du vide. Tout y était donc au même corps, dans la
+ * même colonne, à la queue leu leu — le nombre de concepts en petites capitales,
+ * les concepts en corps, la question en corps, le bouton sous les deux. Rien ne
+ * ressortait parce que rien n'avait la place de ressortir.
+ *
+ * Ce qui change, dans l'ordre : le nombre de concepts devient le titre de la
+ * bande, en display, à la place de « Dépose quelque chose. » — la consigne a été
+ * suivie, elle n'a plus à occuper la moitié de l'écran ; les concepts s'étalent
+ * sur deux colonnes sans rien couper ; les questions deviennent un objet à part,
+ * avec ses formats et sa carte ; l'appel à garder ferme la descente.
+ *
+ * La bande dépasse alors le pli, et c'est assumé : elle raconte maintenant une
+ * suite — ton texte, tes concepts, ta question, garde-les — et une suite se
+ * descend. Ce qu'on gagne à la déplier vaut mieux que ce qu'on perdait à tout
+ * tasser au-dessus de la ligne de flottaison.
  */
 
 export function ResultatDeLEssai({
@@ -31,11 +51,11 @@ export function ResultatDeLEssai({
   /*
     On montre ce qui existe dès qu'il existe.
 
-    L'essai se joue maintenant en deux temps — les concepts, puis la question
-    écrite sur le premier d'entre eux qui soit questionnable —, et attendre le
-    second temps pour afficher le premier ferait payer à tout le monde l'ajout
-    de la question : on verrait le résultat plus tard qu'avant, pour en avoir
-    plus. C'est l'inverse de ce qu'on cherche.
+    L'essai se joue en deux temps — les concepts, puis les questions écrites sur
+    le premier d'entre eux qui soit questionnable —, et attendre le second temps
+    pour afficher le premier ferait payer à tout le monde l'ajout des questions :
+    on verrait le résultat plus tard qu'avant, pour en avoir plus. C'est
+    l'inverse de ce qu'on cherche.
   */
   const rienEncore = !avancement || avancement.concepts.length === 0;
 
@@ -53,149 +73,78 @@ export function ResultatDeLEssai({
     ) : null;
   }
 
+  const combien = avancement.concepts.length;
+
   return (
-    <div className="gap-pas-4 flex flex-col" role="status">
-      <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-        {avancement.concepts.length}{" "}
-        {avancement.concepts.length === 1 ? "concept trouvé" : "concepts trouvés"}
-      </p>
+    <div className="gap-pas-8 md:gap-pas-12 flex flex-col" role="status">
+      <header className="gap-pas-3 flex flex-col">
+        <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-900 tabular-nums">
+          {combien} {combien === 1 ? "concept." : "concepts."}
+        </h2>
+
+        <p className="text-corps max-w-xl text-stone-500">
+          {combien === 1
+            ? "Il te sera reposé seul, au moment où tu allais l'oublier."
+            : "Chacun sera reposé séparément, au moment où tu allais l'oublier."}
+        </p>
+      </header>
 
       <PileDeConcepts concepts={avancement.concepts} />
 
-      {/* L'échantillon, et il ferme l'arc : ton texte, tes concepts, une vraie
-          question sur l'un d'eux. Sans lui, la page promettait qu'on te repose
-          quelque chose sans jamais te montrer quoi. */}
-      <Echantillon question={avancement.question} enCours={avancement.enCours} />
+      {/* L'échantillon, et il ferme l'arc : ton texte, tes concepts, de vraies
+          questions sur l'un d'eux. Sans lui, la page promettait qu'on te les
+          repose sans jamais te montrer sous quelle forme. */}
+      <EchantillonDeQuestions questions={avancement.questions} enCours={avancement.enCours} />
 
-      <div className="mt-pas-2 gap-pas-3 flex flex-wrap items-center">
+      <GarderLesConcepts peutRedeposer={avancement.peutRedeposer} setRecommence={setRecommence} />
+    </div>
+  );
+}
+
+/**
+ * La fin de la descente : garder ce qu'on vient de voir, ou déposer autre chose.
+ *
+ * Le second geste n'existait pas, parce qu'il n'y avait rien derrière : un essai
+ * qui avait abouti fermait la visite pour les sept jours du cookie. Il ne
+ * s'affiche que lorsque la base l'accorde vraiment — deux essais par tranche de
+ * vingt-quatre heures —, faute de quoi on proposerait un geste que le serveur
+ * refuserait à l'arrivée.
+ *
+ * Il est discret et il le reste. C'est une porte de sortie posée juste sous
+ * l'appel qu'on cherche à provoquer : lui donner le même poids qu'à « Les
+ * garder » reviendrait à proposer de recommencer à quelqu'un qu'on vient de
+ * convaincre.
+ */
+function GarderLesConcepts({
+  peutRedeposer,
+  setRecommence,
+}: {
+  peutRedeposer: boolean;
+  setRecommence: (valeur: boolean) => void;
+}) {
+  return (
+    <div className="gap-pas-4 flex flex-col">
+      <div className="gap-pas-4 flex flex-wrap items-center">
         <Button asChild size="lg">
           <Link href={ROUTES.connexion}>Les garder</Link>
         </Button>
+
         <span className="text-petit max-w-sm text-stone-500">
           Ton adresse suffit. On te les repose au bon moment, et tu récupères ceux-ci.
         </span>
       </div>
-    </div>
-  );
-}
 
-/**
- * L'essai n'a rien donné. **Quatre** situations, et elles ne se confondent pas.
- *
- * Deux causes qui ne s'imputent pas à la même personne, croisées avec le fait
- * qu'il reste ou non de quoi retenter. La fonction n'en couvrait que trois, et
- * la manquante était la plus contradictoire de toutes : « cet essai ne t'est pas
- * compté » sous un bouton qui referme la visite. On annonçait la gratuité et on
- * fermait la porte dans la même phrase.
- *
- * **Panne, avec une reprise.** Rien à demander à quelqu'un qui n'y est pour
- * rien : on dit que ça vient de nous, et surtout pas de changer son texte — il
- * n'y avait rien à y changer.
- *
- * **Panne, et plus de reprise.** Les pannes tolérées sont épuisées. Ce n'est
- * toujours pas sa faute, et le dire reste la première chose à faire ; ce qui
- * change, c'est qu'on ne peut plus rien lui proposer ici. Le compte devient la
- * seule suite honnête, et il est offert pour ce qu'il permettra vraiment —
- * reprendre plus tard —, pas pour garder des concepts qui n'existent pas.
- *
- * **Rejet, avec un essai qui reste.** Le motif du modèle dit ce qui manquait ;
- * c'est la seule chose de valeur qu'un rejet produise, et c'est elle qui apprend
- * à mieux déposer.
- *
- * **Rejet, et plus d'essai.** On garde le motif à l'écran — il reste la raison,
- * et elle est valable — et on propose le compte sans prétendre qu'il y a quoi
- * que ce soit à récupérer.
- */
-type Situation = { constat: string; explication: string };
-
-function situationDeLEchec(
-  panne: boolean,
-  peutRedeposer: boolean,
-  motifDechec: string | null,
-): Situation {
-  if (panne && peutRedeposer) {
-    return {
-      constat: "Le découpage n'a pas abouti, et ça ne vient pas de ton texte.",
-      explication: "Cet essai ne t'est pas compté. Relance-le, ou reviens dans un moment.",
-    };
-  }
-
-  if (panne) {
-    return {
-      constat: "Le découpage ne répond pas en ce moment.",
-      explication:
-        "Ça ne vient pas de ton texte, et rien ne t'a été compté. Avec un compte, tu pourras reprendre dès que ce sera rétabli.",
-    };
-  }
-
-  const constat = motifDechec ?? "Ce texte n'a rien donné à retenir.";
-
-  if (peutRedeposer) {
-    return {
-      constat,
-      explication:
-        "Retente avec une explication, une règle, un mécanisme — quelque chose que tu voudrais savoir dans un mois.",
-    };
-  }
-
-  return {
-    constat,
-    explication: `Un compte accepte ${longueurEnClair(CARACTERES_MAXIMUM)}, garde ce qu'il en tire, et te le repose au bon moment.`,
-  };
-}
-
-/**
- * La question de l'essai, ou son attente.
- *
- * Elle arrive après les concepts, donc il y a un moment où la liste est là et
- * pas elle. Ce moment se dit — une ligne, au même endroit que la question
- * viendra prendre — plutôt que de laisser un blanc qui ressemble à une fin.
- */
-function Echantillon({ question, enCours }: { question: string | null; enCours: boolean }) {
-  if (!question && !enCours) return null;
-
-  return (
-    <div className="mt-pas-2">
-      <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-        Ce qu&apos;on te reposera
-      </p>
-
-      {question ? (
-        <p className="mt-pas-2 text-corps text-stone-900">{question}</p>
-      ) : (
-        <p className="mt-pas-2 text-petit text-stone-500">On l&apos;écrit, deux secondes.</p>
-      )}
-    </div>
-  );
-}
-
-function EssaiSansConcept({
-  avancement,
-  setRecommence,
-}: {
-  avancement: AvancementDeLEssai;
-  setRecommence: (valeur: boolean) => void;
-}) {
-  const { panne, peutRedeposer, motifDechec } = avancement;
-  const situation = situationDeLEchec(panne, peutRedeposer, motifDechec);
-
-  return (
-    <div className="gap-pas-3 flex flex-col" role="status">
-      <p className="text-corps text-stone-900">{situation.constat}</p>
-
-      <p className="text-petit max-w-md text-stone-500">{situation.explication}</p>
-
-      <div className="mt-pas-1">
-        {peutRedeposer ? (
-          <Button type="button" variant="outline" onClick={() => setRecommence(true)}>
-            Réessayer
-          </Button>
-        ) : (
-          <Button asChild size="lg">
-            <Link href={ROUTES.connexion}>Créer un compte</Link>
-          </Button>
-        )}
-      </div>
+      {peutRedeposer ? (
+        <Button
+          type="button"
+          variant="link"
+          size="sm"
+          className="self-start px-0"
+          onClick={() => setRecommence(true)}
+        >
+          Déposer autre chose
+        </Button>
+      ) : null}
     </div>
   );
 }

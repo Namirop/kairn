@@ -10,10 +10,11 @@ import { marquerEchec } from "@/lib/db/fin-de-depot";
 import {
   compterLesDepots,
   ESSAIS_PAR_VISITE,
+  FENETRE_ESSAIS_HEURES,
   PANNES_TOLEREES,
   sessionDisponible,
-  VISITES_PAR_ADRESSE,
-} from "@/lib/db/session-anonyme";
+} from "@/lib/db/essais-de-la-visite";
+import { VISITES_PAR_ADRESSE } from "@/lib/db/session-anonyme";
 import { deposerSansCompte } from "@/lib/depots/deposer-sans-compte";
 import { executerToutLePipeline } from "./depot-simule";
 import { record } from "./journal";
@@ -22,10 +23,11 @@ import { record } from "./journal";
  * Le dépôt avant compte, éprouvé là où il coûte de l'argent.
  *
  * C'est le seul endroit du produit qui dépense sans compte identifié, donc le
- * seul où une faille se paie directement. Trois choses doivent tenir : un dépôt
- * par visite, une poignée par adresse, et **l'arrêt à l'extraction** — si les
- * questions partaient, un visiteur coûterait dix fois plus et l'ouverture ne
- * serait plus finançable.
+ * seul où une faille se paie directement. Trois choses doivent tenir : deux
+ * essais par visite et par tranche de vingt-quatre heures, une poignée de
+ * visites par adresse, et **un seul concept questionné** — si tous les concepts
+ * recevaient leurs questions, un visiteur coûterait cinq fois plus et
+ * l'ouverture ne serait plus finançable.
  */
 
 const TEXTE = `Une requête HTTP conditionnelle envoie \`If-None-Match\` avec l'étiquette reçue à la
@@ -58,27 +60,47 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
     `${vu?.concepts.length ?? 0} concept(s) affichés`,
   );
 
-  // Le point qui rend l'ouverture finançable : la chaîne s'arrête là.
+  /*
+    Le point qui rend l'ouverture finançable, et il a bougé.
+
+    L'essai s'arrêtait aux concepts, et ce cas vérifiait qu'aucune question
+    n'était écrite. Depuis que la landing montre un échantillon, **un** concept
+    reçoit son lot de quatre — c'est un appel de plus par visiteur, et pas cinq.
+    L'assertion avait gardé son ancienne forme : elle était fausse depuis, et
+    c'est précisément le genre de chose qu'un script de vérification est là pour
+    dire au lieu de la laisser passer.
+  */
   const questions = await prisma.variant.count({
     where: { atom: { anonymousSessionId: essai.sessionId } },
   });
-  const jobs = await prisma.generationJob.count({
-    where: { inputId: essai.inputId, kind: "VARIANTS" },
+  const questionnes = await prisma.atom.count({
+    where: { anonymousSessionId: essai.sessionId, variants: { some: {} } },
   });
 
   record(
-    "Essai — aucune question n'est écrite tant que personne n'a créé de compte",
-    questions === 0 && jobs === 0,
-    `${questions} question(s), ${jobs} demande(s) — la dépense s'arrête à l'extraction`,
+    "Essai — un seul concept reçoit ses quatre questions, les autres attendent le compte",
+    questionnes === 1 && questions === 4,
+    `${questions} question(s) sur ${questionnes} concept(s) questionné(s)`,
   );
 
   const second = await deposerSansCompte(TEXTE, adresse, essai.sessionId);
+  const troisieme = second.ok
+    ? await deposerSansCompte(TEXTE, adresse, essai.sessionId)
+    : { ok: false as const, motif: "le second avait déjà été refusé" };
 
   record(
-    "Essai — un essai qui a donné des concepts ferme la visite",
-    !second.ok,
-    second.ok ? "acceptée" : second.motif,
+    "Essai — un découpage réussi laisse un second essai, mais pas un troisième",
+    second.ok && !troisieme.ok,
+    second.ok
+      ? `second accordé, troisième ${troisieme.ok ? "accordé aussi" : `refusé : « ${troisieme.motif} »`}`
+      : second.motif,
   );
+
+  // Les dépôts de contrôle repartent : la suite du cas éprouve la reprise au
+  // compte, et deux extractions jamais exécutées n'ont rien à y faire.
+  await prisma.input.deleteMany({
+    where: { anonymousSessionId: essai.sessionId, id: { not: essai.inputId } },
+  });
 
   const repris = await rattacherAuCompte(essai.sessionId, userId);
   const conceptsRepris = repris.reduce((total, depot) => total + depot.atomIds.length, 0);
@@ -269,7 +291,9 @@ export async function casPlafondDesPannes(): Promise<void> {
   record(
     `Panne — ${PANNES_TOLEREES} pannes ferment la visite`,
     !refuse.ok && compte.pannes === PANNES_TOLEREES,
-    refuse.ok ? "une panne de plus est passée" : `${compte.pannes} panne(s), puis « ${refuse.motif} »`,
+    refuse.ok
+      ? "une panne de plus est passée"
+      : `${compte.pannes} panne(s), puis « ${refuse.motif} »`,
   );
 
   // Ni « tes concepts » — il n'en a aucun —, ni « tes essais sont faits » — ils
@@ -328,8 +352,8 @@ export async function casRepriseApresRejet(): Promise<void> {
 /**
  * Deux onglets partent ensemble, et les deux passent.
  *
- * Le second onglet porte le même cookie, et `sessionDisponible` dit oui tant que
- * le premier dépôt n'a rien produit : deux essais partent, deux imputables sont
+ * Le second onglet porte le même cookie, et `sessionDisponible` dit oui tant
+ * qu'il reste des essais à la visite : deux partent, deux imputables sont
  * consommés d'un coup. C'est acceptable — la visite reste dans son budget — mais
  * ça doit être **constaté** plutôt que découvert le jour où quelqu'un s'en sert.
  */
@@ -354,6 +378,81 @@ export async function casDeuxOngletsSimultanes(): Promise<void> {
     }`,
   );
 
+  await repartirDeZero(adresse);
+}
+
+/**
+ * La visite se rouvre le lendemain, sans jamais changer de cookie.
+ *
+ * C'est la règle qui permet de redéposer, et elle a deux moitiés qui doivent
+ * tenir ensemble. La première : deux essais épuisés ferment vraiment la porte,
+ * sinon la landing devient un compte gratuit. La seconde, moins évidente : ce
+ * qui se rouvre est **la même visite**, pas une neuve.
+ *
+ * Le second point est celui qui coûterait cher à rater. La reprise au compte se
+ * fait par l'identifiant du cookie ; ouvrir une visite neuve au retour laisserait
+ * la précédente derrière elle, avec ses concepts, que le cron effacerait sept
+ * jours plus tard sans que personne les ait jamais réclamés. On vérifie donc que
+ * les dépôts d'hier et d'aujourd'hui partent au compte **ensemble**.
+ */
+export async function casReouvertureLeLendemain(userId: string): Promise<void> {
+  const adresse = "203.0.113.88";
+  await repartirDeZero(adresse);
+  await prisma.input.deleteMany({ where: { userId } });
+
+  const premier = await deposerSansCompte(TEXTE, adresse, null);
+
+  if (!premier.ok) throw new Error(`L'essai a été refusé : ${premier.motif}`);
+
+  await executerToutLePipeline(premier.inputId);
+
+  const second = await deposerSansCompte(TEXTE, adresse, premier.sessionId);
+
+  if (!second.ok) throw new Error(`Le second essai a été refusé : ${second.motif}`);
+
+  await executerToutLePipeline(second.inputId);
+
+  const ferme = await deposerSansCompte(TEXTE, adresse, premier.sessionId);
+
+  record(
+    "Visite — deux essais faits, la porte est fermée",
+    !ferme.ok,
+    ferme.ok ? "un troisième essai est passé" : ferme.motif,
+  );
+
+  // On vieillit les deux dépôts au-delà de la fenêtre : c'est le lendemain, vu
+  // par la seule chose qui le décide.
+  const veille = new Date(Date.now() - (FENETRE_ESSAIS_HEURES + 1) * 60 * 60 * 1000);
+
+  await prisma.input.updateMany({
+    where: { anonymousSessionId: premier.sessionId },
+    data: { createdAt: veille },
+  });
+
+  const lendemain = await deposerSansCompte(TEXTE, adresse, premier.sessionId);
+
+  record(
+    `Visite — après ${FENETRE_ESSAIS_HEURES} h, la même visite redonne ses essais`,
+    lendemain.ok && lendemain.sessionId === premier.sessionId,
+    lendemain.ok
+      ? lendemain.sessionId === premier.sessionId
+        ? "même visite, essais rendus"
+        : "une visite neuve a été ouverte : les concepts d'hier seraient perdus"
+      : lendemain.motif,
+  );
+
+  if (lendemain.ok) await executerToutLePipeline(lendemain.inputId);
+
+  const depots = await prisma.input.count({ where: { anonymousSessionId: premier.sessionId } });
+  const repris = await rattacherAuCompte(premier.sessionId, userId);
+
+  record(
+    "Reprise — tout ce que la visite a déposé part au compte, d'hier comme d'aujourd'hui",
+    repris.length === depots && depots >= 3,
+    `${repris.length} dépôt(s) repris sur ${depots} déposé(s)`,
+  );
+
+  await prisma.input.deleteMany({ where: { userId } });
   await repartirDeZero(adresse);
 }
 

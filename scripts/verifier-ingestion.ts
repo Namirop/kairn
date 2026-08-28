@@ -79,6 +79,7 @@ async function main(): Promise<void> {
     await anonyme.casPanneNeConsommePasDEssai();
     await anonyme.casPlafondDesPannes();
     await anonyme.casDeuxOngletsSimultanes();
+    await anonyme.casReouvertureLeLendemain(userId);
     await anonyme.casLimiteParAdresse();
     await anonyme.casOubliDesVisites();
 

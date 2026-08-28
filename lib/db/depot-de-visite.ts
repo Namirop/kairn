@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import type { VariantFormat } from "@/lib/db/types";
 
 /**
  * Ce qu'une visite sans compte a produit, et ce qu'il en advient.
@@ -24,13 +25,19 @@ export type DepotAnonyme = {
   motifDechec: string | null;
   concepts: { id: string; concept: string; tags: string[] }[];
   /**
-   * La question écrite sur le premier concept **questionnable**, quand elle est là.
+   * Les questions écrites sur le premier concept **questionnable**.
    *
-   * Le premier tout court n'est pas forcément celui-là : sur un dépôt factuel,
-   * les concepts incertains sont écartés du questionnement, et un dépôt dont
-   * ils le sont tous n'en reçoit aucune. `null` est alors une fin normale.
+   * Un lot en compte quatre, de formats différents, et la landing les montre
+   * toutes : elles sont déjà écrites et déjà payées, et c'est la rotation des
+   * formulations qui distingue le produit d'un paquet de cartes. N'en montrer
+   * qu'une revenait à cacher la moitié de ce qu'on vend, pour rien.
+   *
+   * Le premier concept tout court n'est pas forcément celui-là : sur un dépôt
+   * factuel, les concepts incertains sont écartés du questionnement, et un dépôt
+   * dont ils le sont tous n'en reçoit aucune. Un tableau vide est une fin
+   * normale.
    */
-  question: string | null;
+  questions: { question: string; format: VariantFormat }[];
 };
 
 /** Ce qu'une session a produit, pour l'afficher à qui vient de déposer. */
@@ -48,11 +55,15 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
           id: true,
           concept: true,
           tags: true,
-          // Un visiteur n'en a qu'une, sur le premier concept questionnable.
-          // `take: 1` par sécurité plutôt que par attente : si la règle changeait
-          // un jour, l'écran n'en montrerait toujours qu'une au lieu de s'allonger
-          // sans que personne l'ait décidé.
-          variants: { orderBy: { createdAt: "asc" }, select: { question: true }, take: 1 },
+          // Un seul concept en reçoit, et il en reçoit quatre : c'est le lot
+          // qu'un appel écrit. `take: 4` borne l'affichage sur ce que la règle
+          // produit aujourd'hui, pour que l'écran ne s'allonge pas tout seul le
+          // jour où un lot en porterait six.
+          variants: {
+            orderBy: { createdAt: "asc" },
+            select: { question: true, format: true },
+            take: 4,
+          },
         },
       },
     },
@@ -65,7 +76,7 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
     statut: depot.status,
     motifDechec: depot.failureReason,
     concepts: depot.atoms.map(({ id, concept, tags }) => ({ id, concept, tags })),
-    question: depot.atoms.flatMap((atome) => atome.variants)[0]?.question ?? null,
+    questions: depot.atoms.flatMap((atome) => atome.variants),
   };
 }
 
@@ -78,8 +89,8 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
  * mouvement, ce qui la met hors de portée du cron de nettoyage.
  *
  * Rend les concepts **groupés par leur dépôt d'origine**, et non à plat. Une
- * visite en porte jusqu'à quatre, et le cas courant est le pire : premier dépôt
- * rejeté, second réussi. À plat, l'appelant prenait `inputIds[0]` — le dépôt
+ * visite en porte plusieurs — deux essais par jour, sur les sept jours du
+ * cookie — et le cas courant est le pire : premier dépôt rejeté, second réussi. À plat, l'appelant prenait `inputIds[0]` — le dépôt
  * **rejeté** — et lui accrochait les concepts du second. Les questions
  * atterrissaient sur les bons concepts, mais sous un dépôt en `REJECTED` que
  * `marquerPretSiPlusRienEnAttente` refuse de refermer : une incohérence qui

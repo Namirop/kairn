@@ -1,6 +1,7 @@
 import { lireLaVisite } from "@/lib/auth/visite";
+import type { VariantFormat } from "@/lib/db/types";
 import { lireLeDepotAnonyme } from "@/lib/db/depot-de-visite";
-import { sessionDisponible } from "@/lib/db/session-anonyme";
+import { sessionDisponible } from "@/lib/db/essais-de-la-visite";
 
 /**
  * Où en est l'essai de ce visiteur, s'il en a un.
@@ -17,17 +18,18 @@ export type AvancementDeLEssai = {
   enCours: boolean;
   concepts: { id: string; concept: string; tags: string[] }[];
   /**
-   * La question écrite sur le premier concept **questionnable** — l'échantillon
-   * de l'essai.
+   * Les quatre questions écrites sur le premier concept **questionnable** —
+   * l'échantillon de l'essai.
    *
-   * Elle arrive **après** les concepts : deux appels, deux temps. L'écran ne
-   * l'attend donc pas pour montrer ce qu'il a déjà, sans quoi l'ajout de la
-   * question allongerait l'attente de tout le reste au lieu de l'enrichir.
+   * Elles arrivent **après** les concepts : deux appels, deux temps. L'écran ne
+   * les attend donc pas pour montrer ce qu'il a déjà, sans quoi l'ajout des
+   * questions allongerait l'attente de tout le reste au lieu de l'enrichir.
    *
-   * Elle peut aussi ne jamais venir : un dépôt factuel dont tous les concepts
-   * sont incertains n'a rien à questionner, et l'écran s'arrête aux concepts.
+   * Elles peuvent aussi ne jamais venir : un dépôt factuel dont tous les
+   * concepts sont incertains n'a rien à questionner, et l'écran s'arrête aux
+   * concepts.
    */
-  question: string | null;
+  questions: { question: string; format: VariantFormat }[];
   /** Renseigné quand la chaîne s'est arrêtée sans rien produire. */
   motifDechec: string | null;
   /**
@@ -41,9 +43,13 @@ export type AvancementDeLEssai = {
    * La visite garde-t-elle de quoi retenter ?
    *
    * Lu ici plutôt que déduit du nombre de concepts : c'est la base qui décide, et
-   * elle ne compte pas nos pannes. L'écran s'en sert pour ne montrer « Réessayer »
-   * que quand le geste aboutira — un bouton qui promet ce que le serveur refuse
-   * est pire que pas de bouton.
+   * elle ne compte pas nos pannes. L'écran s'en sert pour ne proposer de déposer
+   * à nouveau que quand le geste aboutira — un bouton qui promet ce que le
+   * serveur refuse est pire que pas de bouton.
+   *
+   * Il se lit maintenant **aussi sur un essai réussi** : un découpage qui a
+   * abouti ne ferme plus la visite, et la page doit pouvoir rouvrir le champ à
+   * qui veut déposer autre chose.
    */
   peutRedeposer: boolean;
 };
@@ -68,11 +74,11 @@ export async function lireLEssaiEnCours(): Promise<AvancementDeLEssai | null> {
   return {
     enCours: !arrete,
     concepts: depot.concepts,
-    question: depot.question,
+    questions: depot.questions,
     motifDechec: vide && arrete ? depot.motifDechec : null,
     panne: vide && depot.statut === "FAILED",
     // Inutile de le demander tant que la chaîne tourne, et faux tant qu'elle
     // tourne : le dépôt en cours compte déjà comme un essai pris.
-    peutRedeposer: vide && arrete ? await sessionDisponible(visite) : false,
+    peutRedeposer: arrete ? await sessionDisponible(visite) : false,
   };
 }

@@ -280,14 +280,15 @@ function verifier(controle: Controle, input: Depot, questions: number): string[]
 
     if (incertains.length === 0) ecarts.push("aucun concept marqué uncertain");
 
-    // La seconde moitié du contrôle — « aucune question écrite dessus » — est
-    // vraie sans rien vérifier sur ce chemin : le dépôt anonyme n'écrit aucune
-    // question, à personne. On la constate quand même, pour que le jour où le
-    // chemin changerait, l'écart se voie ici et pas en production.
-    const avecQuestion = input.atoms.filter((atome) => atome._count.variants > 0);
+    // La seconde moitié du contrôle porte sur les **incertains**, et elle a
+    // cessé d'être vraie par construction : depuis que l'essai montre un
+    // échantillon, un concept anonyme reçoit ses questions. Un seul, et jamais
+    // un douteux — c'est ce qu'on vérifie, au lieu de vérifier qu'il n'y en a
+    // aucune, ce qui produisait un écart sur un chemin qui se porte bien.
+    const douteuxQuestionnes = incertains.filter((atome) => atome._count.variants > 0);
 
-    if (avecQuestion.length > 0) {
-      ecarts.push(`${avecQuestion.length} concept(s) portent une question sur un dépôt anonyme`);
+    if (douteuxQuestionnes.length > 0) {
+      ecarts.push(`${douteuxQuestionnes.length} concept(s) douteux portent une question`);
     }
   }
 
@@ -378,16 +379,15 @@ async function eprouverLePlafond(texte: string): Promise<string[]> {
  * sujet du portage.
  */
 /**
- * Le dépôt anonyme n'appelle **que** l'extraction.
+ * Le dépôt anonyme appelle l'extraction, puis **un** lot de questions.
  *
- * `decoupage.ts` le dit sans détour : « un dépôt anonyme… n'a pas de questions
- * — c'est là que s'arrête sa dépense ». Le chemin s'arrête après
- * `enregistrerConcepts` et marque le dépôt prêt. Compter `generate_variants`
- * dans l'estimation revenait donc à annoncer le double du vrai prix, et la
- * colonne « questions » du corpus n'a pas d'objet sur ce chemin-là : elle vaut
- * zéro par construction, pas par accident.
+ * Il n'appelait que l'extraction, et l'estimation ne comptait qu'elle. Depuis
+ * que la landing montre un échantillon, `decoupage.ts` demande les questions du
+ * premier concept questionnable : un appel de plus par visiteur, pas cinq. Ne
+ * pas le compter revenait à annoncer la moitié du vrai prix — l'erreur exactement
+ * inverse de celle que ce commentaire mettait en garde d'écrire.
  */
-const PURPOSES = ["extract_atoms"] as const;
+const PURPOSES = ["extract_atoms", "generate_variants"] as const;
 
 async function planASec(cas: Cas[]): Promise<void> {
   const avecModele = cas.filter((c) => !c.controles.includes("aucun-appel"));

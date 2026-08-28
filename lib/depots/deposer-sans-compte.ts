@@ -4,16 +4,11 @@ import { marquerEnCours } from "@/lib/db/ingestion";
 import {
   compterLesDepots,
   essaiAbouti,
-  ouvrirUneSession,
   PANNES_TOLEREES,
   sessionDisponible,
-} from "@/lib/db/session-anonyme";
-import {
-  CARACTERES_MAXIMUM,
-  CARACTERES_MAXIMUM_ANONYME,
-  CARACTERES_MINIMUM_ANONYME,
-  longueurEnClair,
-} from "@/lib/depots/bornes-du-depot";
+} from "@/lib/db/essais-de-la-visite";
+import { ouvrirUneSession } from "@/lib/db/session-anonyme";
+import { CARACTERES_MAXIMUM, longueurEnClair, motifDeLongueur } from "@/lib/depots/bornes-du-depot";
 import { essaiSansLimite, VARIABLE_SANS_LIMITE } from "@/lib/depots/essai-sans-limite";
 import { enqueueJob } from "@/lib/jobs/queue";
 
@@ -25,24 +20,29 @@ import { enqueueJob } from "@/lib/jobs/queue";
  * inscription fait fermer l'onglet, et demander un compte avant d'avoir rien
  * montré était la friction la plus coûteuse du produit.
  *
- * **La chaîne s'arrête à l'extraction.** Les questions, qui coûtent l'essentiel,
- * ne sont écrites qu'une fois le compte créé — c'est ce qui rend l'ouverture
- * finançable : un visiteur qui repart coûte le prix d'une extraction.
+ * **La chaîne s'arrête à un seul concept questionné.** L'extraction rend tous
+ * les concepts, et un seul d'entre eux reçoit ses quatre questions : c'est
+ * l'échantillon que la landing montre. Le reste des questions n'est écrit
+ * qu'une fois le compte créé — c'est ce qui rend l'ouverture finançable.
  *
  * Pas d'image ici, volontairement : une capture ajoute un appel de lecture avant
  * même l'extraction, et double la dépense d'un visiteur qui n'a rien demandé.
  * Le texte suffit à montrer ce que fait le produit.
  */
 
+/**
+ * La longueur se juge par la fonction que l'écran appelle déjà, pas par deux
+ * bornes Zod qui recopieraient ses messages. Le schéma garde ce qu'il sait faire
+ * de mieux ici : refuser ce qui n'est pas une chaîne, et couper les blancs.
+ */
 const anonymeSchema = z.object({
   texte: z
     .string()
     .trim()
-    .min(CARACTERES_MINIMUM_ANONYME, {
-      error: "Colle un peu plus de matière : une phrase ou deux, au minimum.",
-    })
-    .max(CARACTERES_MAXIMUM_ANONYME, {
-      error: `Ce texte dépasse ${longueurEnClair(CARACTERES_MAXIMUM_ANONYME)}. Crée un compte pour aller jusqu'à ${longueurEnClair(CARACTERES_MAXIMUM)}.`,
+    .superRefine((texte, controle) => {
+      const motif = motifDeLongueur(texte);
+
+      if (motif) controle.addIssue({ code: "custom", message: motif });
     }),
 });
 
@@ -52,8 +52,17 @@ export type ResultatDepotAnonyme =
 const TROP_DE_DEPOTS =
   "Beaucoup d'essais sont partis d'ici récemment. Crée un compte pour continuer — c'est gratuit.";
 
-const DEJA_DEPOSE =
-  "Tu as fait ton essai. Crée un compte pour garder tes concepts et en déposer d'autres.";
+/**
+ * Les essais du jour sont faits, et ils ont donné quelque chose.
+ *
+ * « Pour cette visite » a cessé d'être vrai le jour où les essais se sont comptés
+ * sur vingt-quatre heures glissantes : la même personne, avec le même cookie,
+ * redépose demain. Dire quand la porte se rouvre est la seule chose utile à
+ * quelqu'un qu'on refuse, et c'est aussi ce qui l'empêche d'aller chercher un
+ * autre navigateur pour la contourner.
+ */
+const ESSAIS_DU_JOUR_FAITS =
+  "Tes essais du jour sont faits. Crée un compte pour garder tes concepts et en déposer d'autres, ou reviens demain.";
 
 /**
  * Le même refus, mais sans concepts derrière.
@@ -62,7 +71,7 @@ const DEJA_DEPOSE =
  * du vide et ferait passer l'invitation pour un bug ; on dit ce qui s'est passé,
  * et ce qu'un compte change — des dépôts plus longs, et des reprises.
  */
-const ESSAIS_EPUISES = `Tes essais sont faits pour cette visite. Un compte lève la limite, accepte ${longueurEnClair(CARACTERES_MAXIMUM)}, et c'est gratuit.`;
+const ESSAIS_EPUISES = `Tes essais du jour sont faits. Un compte lève la limite, accepte ${longueurEnClair(CARACTERES_MAXIMUM)}, et c'est gratuit.`;
 
 /**
  * La visite s'est fermée sur nos pannes, pas sur ses essais.
@@ -81,7 +90,7 @@ const DECOUPAGE_INDISPONIBLE =
  * n'a de sens que s'il y en a, et « tes essais sont faits » que s'ils l'ont été.
  */
 async function motifDuRefus(sessionId: string): Promise<string> {
-  if (await essaiAbouti(sessionId)) return DEJA_DEPOSE;
+  if (await essaiAbouti(sessionId)) return ESSAIS_DU_JOUR_FAITS;
 
   const { pannes } = await compterLesDepots(sessionId);
 
@@ -91,9 +100,13 @@ async function motifDuRefus(sessionId: string): Promise<string> {
 /**
  * Dépose sans compte, ou dit pourquoi c'est refusé.
  *
- * `sessionExistante` vient du cookie. Une session qui a déjà déposé est refusée
- * plutôt que réutilisée : c'est le verrou principal, et le rendre glissant en
- * ferait un compte gratuit déguisé.
+ * `sessionExistante` vient du cookie, et elle est **réutilisée** tant qu'il lui
+ * reste des essais. C'est ce qui permet de redéposer sans compte, et c'est aussi
+ * ce qui garantit que tout ce qu'on a déposé part au compte le jour où on le
+ * crée : le cookie ne bouge jamais, donc rien ne reste derrière.
+ *
+ * Ce qui borne le geste n'est donc plus « un dépôt par cookie » mais deux
+ * essais par tranche de vingt-quatre heures — voir `sessionDisponible`.
  *
  * `ESSAI_ANONYME_SANS_LIMITE` lève les deux verrous d'un coup — voir
  * `essai-sans-limite.ts` pour ce que ça ouvre et ce que ça n'ouvre pas. Le
@@ -137,8 +150,8 @@ export async function deposerSansCompte(
       sourceType: "TEXT",
       status: "PENDING",
       // Pas de clé d'envoi : la contrainte d'unicité porte sur `(userId, clé)`,
-      // et un dépôt anonyme n'a pas de compte. C'est la session à un seul dépôt
-      // qui joue ce rôle-là, et elle le joue mieux.
+      // et un dépôt anonyme n'a pas de compte. Ce sont les essais comptés sur la
+      // visite qui jouent ce rôle-là, et ils le jouent mieux.
       submissionKey: null,
     },
     select: { id: true },
