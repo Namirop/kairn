@@ -24,20 +24,26 @@ import { segmentsDeCode } from "@/lib/domain/texte-code";
  * `break-words` couvre le cas pire — un identifiant plus large que sa colonne
  * débordait la carte au lieu de se couper.
  *
- * **Sa hauteur peinte tient dans la ligne, et c'est une contrainte, pas un
- * réglage.** Le rembourrage vertical d'un élément en ligne n'agrandit pas la
- * ligne : il déborde par-dessus les voisines. Sur un énoncé de deux lignes
- * serrées à `leading-tight`, deux jetons de lignes consécutives se
- * chevauchaient donc, et le cadre de l'un traversait les lettres de l'autre.
+ * **C'est le jeton qui ouvre sa ligne, et c'est son interligne qui le fait.**
+ * Deux jetons de lignes consécutives se chevauchaient : sur un énoncé de
+ * téléphone à vingt-quatre pixels serré à `leading-tight`, la ligne fait trente
+ * pixels et le jeton en peint trente et demi — le cadre de l'un traversait
+ * l'autre. Mesuré, pas déduit.
  *
- * L'interligne du jeton est fixé plutôt qu'hérité, et son rembourrage descendu :
- * l'ensemble — texte, rembourrage, bordure — reste sous 1,2 em, ce qui passe
- * dans les 1,25 em du titre le plus serré du produit. Toute augmentation de ces
- * trois valeurs rouvre le défaut ; c'est de l'interligne de l'énoncé qu'il faut
- * partir si un jeton doit grossir.
+ * Le réglage précédent partait d'une idée fausse : un `line-height` réduit ne
+ * rétrécit **pas** la boîte peinte d'un élément en ligne. Cette boîte vaut les
+ * métriques de la fonte plus le rembourrage et la bordure, et rien d'autre ne
+ * l'atteint. L'interligne, lui, décide de la place que le jeton **réclame dans
+ * la ligne** : monté à 1,7, il ouvre de quoi loger sa propre hauteur peinte et
+ * quatre pixels d'air, et il n'ouvre que les lignes qui en portent un.
+ *
+ * La proportion se conserve à toutes les tailles — la hauteur peinte comme la
+ * place réclamée se mesurent en `em` du corps qui les porte —, donc une seule
+ * valeur suffit du téléphone au grand écran. Baisser cet interligne, ou monter
+ * le rembourrage, rouvre le défaut.
  */
 export const JETON =
-  "rounded-champ bg-jeton border border-jeton-bord font-mono text-[0.86em] font-medium leading-[1.15] px-[0.36em] py-[0.06em] [box-decoration-break:clone] break-words";
+  "rounded-champ bg-jeton border border-jeton-bord font-mono text-[0.86em] font-medium leading-[1.7] px-[0.36em] py-[0.06em] [box-decoration-break:clone] break-words";
 
 export function TexteTechnique({ children }: { children: string }) {
   return (
