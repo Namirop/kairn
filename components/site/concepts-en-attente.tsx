@@ -71,7 +71,7 @@ export function ConceptsEnAttente() {
 
       <ul className="gap-pas-4 md:gap-x-pas-8 grid md:grid-cols-2" aria-hidden>
         {EMPLACEMENTS.map(([longue, courte], rang) => (
-          <li key={longue} className="border-lichen/40 pl-pas-4 border-l-2">
+          <li key={rang} className="border-lichen/40 pl-pas-4 border-l-2">
             {/* Deux barres aux hauteurs d'une ligne de corps : ce qui arrive
                 prend exactement cette place, donc rien ne saute. Le décalage
                 d'animation évite le clignotement à l'unisson, qui se lit comme
