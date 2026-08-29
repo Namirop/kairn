@@ -39,7 +39,7 @@ function Ligne({ intitule, valeur, raison }: { intitule: string; valeur: string;
         <dt className="text-corps text-stone-900">{intitule}</dt>
         <dd className="text-petit font-mono text-stone-700 tabular-nums">{valeur}</dd>
       </div>
-      <p className="mt-pas-1 text-petit max-w-md text-stone-500">{raison}</p>
+      <p className="mt-pas-1 text-petit text-stone-500">{raison}</p>
     </div>
   );
 }
@@ -68,7 +68,7 @@ export default async function PageReglages() {
     <PileDePanneaux sol="ombre">
       <Panneau surface="papier" mesure="colonne">
         <h1 className="text-h1-app leading-tight font-bold">Réglages</h1>
-        <p className="mt-pas-2 text-petit max-w-md text-stone-500">
+        <p className="mt-pas-2 text-petit text-stone-500">
           Ce que tu fais dans Kairn, et ce que Kairn fait sans toi.
         </p>
       </Panneau>
@@ -106,16 +106,25 @@ export default async function PageReglages() {
             navigation en ferait une fonctionnalité du produit, ce qu'il n'est
             pas : c'est une porte de service, elle doit être trouvable sans
             occuper le devant. */}
+        {/* Elle prend la surface des réglages, et c'est ce qui en fait une
+            section plutôt qu'un formulaire tombé en bas de page. Posée à nu sur
+            l'ombre, sous un intitulé en petites capitales, elle n'avait ni
+            contour ni matière là où tout le reste de la page en a : quatre
+            champs flottaient sur le fond, et rien ne disait qu'ils forment un
+            ensemble. Ce n'est pas le contenu qui manquait de poids, c'est la
+            surface qui manquait dessous. */}
         <section className="mt-pas-12">
           <h2 className={GROUPE}>Un problème, une remarque</h2>
 
-          <p className="mt-pas-3 text-petit max-w-md text-stone-500">
-            Une logique qui surprend, un mot de travers, un écran qui déborde. Ça arrive à une
-            personne, jamais aux chiffres — sans toi, personne ne le saura.
-          </p>
+          <div className="p-pas-4 md:p-pas-6 rounded-champ bg-surface-papier mt-pas-3">
+            <p className="text-petit text-stone-500">
+              Une logique qui surprend, un mot de travers, un écran qui déborde. Ça arrive à une
+              personne, jamais aux chiffres — sans toi, personne ne le saura.
+            </p>
 
-          <div className="mt-pas-6">
-            <UnRetour />
+            <div className="mt-pas-6">
+              <UnRetour />
+            </div>
           </div>
         </section>
 

@@ -108,7 +108,7 @@ export function UnRetour() {
           {enCours ? "Un instant" : "Envoyer"}
         </Button>
 
-        <p className="text-petit min-h-5 max-w-md" role="status" aria-live="polite">
+        <p className="text-petit min-h-5" role="status" aria-live="polite">
           {etat.erreur ? <span className="text-alerte">{etat.erreur}</span> : null}
         </p>
       </div>
