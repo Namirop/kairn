@@ -46,9 +46,13 @@ export default async function PageReviser() {
         La page en décidait, et c'est ce qui rendait la fin de session fragile :
         une revalidation la faisait relire, le serveur voyait une session
         désormais vide, et remplaçait l'écran de fin par « tu es à jour » à
-        l'instant où l'on venait de le mériter. Il fallait donc s'interdire
-        toute revalidation depuis cet écran — et le compteur du tableau de bord
-        est resté faux deux fois pour cette raison.
+        l'instant où l'on venait de le mériter.
+
+        La fin de session n'était que la moitié du problème : la **liste des
+        questions** se relisait aussi, plus courte de ce qu'on venait de
+        répondre, et le rang tenu par le client désignait alors la question
+        d'après. `SessionDeRevision` la gèle maintenant à l'ouverture, et
+        l'écran ne craint plus aucune relecture de la route.
 
         Rendu ici mais servi là-bas, l'écran vide ne coûte rien quand il ne sert
         pas, et l'état « la session est finie » vit dans le client, où un

@@ -48,6 +48,26 @@ export function SessionDeRevision({
   rappel: ProchainRappel | null;
   expliquerLEspacement?: boolean;
 }) {
+  /*
+    La liste est prise au premier rendu et ne bouge plus.
+
+    Une session est planifiée une fois : ce qui est dû a été décidé à l'ouverture
+    de l'écran, et rien de ce qui arrive ensuite ne doit la redécider. Le serveur,
+    lui, ne voit plus les concepts déjà répondus — donc toute relecture de la
+    route rend une liste **plus courte**, et le rang tenu par le client désigne
+    alors la question d'après. On répondait à la deuxième, on se retrouvait sur la
+    troisième avec la correction de la deuxième affichée dessous.
+
+    C'est ce qui interdisait toute revalidation depuis cet écran. L'écran de fin
+    avait déjà été mis à l'abri en recevant l'écran vide en accessoire ; il
+    manquait la liste elle-même, et c'est elle qui portait le défaut. Gelée ici,
+    le tableau de bord peut être marqué périmé à chaque réponse sans que la
+    session s'en aperçoive.
+
+    Quitter l'écran et y revenir démonte le composant : la liste se refait alors
+    depuis le serveur, ce qui est le comportement voulu.
+  */
+  const [liste] = useState(questions);
   const [termine, setTermine] = useState(false);
   const [faites, setFaites] = useState(0);
   const [revus, setRevus] = useState(0);
@@ -128,7 +148,7 @@ export function SessionDeRevision({
     );
   }
 
-  if (questions.length === 0) return vide;
+  if (liste.length === 0) return vide;
 
   return (
     // « Session » va en marge, la date reste dans l'en-tête. Le mot de marge est
@@ -165,13 +185,13 @@ export function SessionDeRevision({
       }
       mention="Session"
       rail={
-        <EtatDeSession faites={faites} total={questions.length} serie={serie} rappel={rappel} />
+        <EtatDeSession faites={faites} total={liste.length} serie={serie} rappel={rappel} />
       }
     >
       {sorti ? <SortiDuCycle concept={sorti} onAnnule={() => setSorti(null)} /> : null}
 
       <DerouleQuestions
-        questions={questions}
+        questions={liste}
         onRepondre={repondre}
         onFini={(comptes) => void terminer(comptes)}
         onAvance={setFaites}
