@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { CairnAEmpiler } from "@/components/site/cairn-a-empiler";
-import { AttenteInterrompue, ConceptsEnAttente } from "@/components/site/concepts-en-attente";
+import { AttenteAbandonnee, ConceptsEnAttente } from "@/components/site/concepts-en-attente";
 import { EchantillonDeQuestions } from "@/components/site/echantillon-de-questions";
 import { EssaiSansConcept } from "@/components/site/essai-sans-concept";
 import { PileDeConcepts } from "@/components/site/pile-de-concepts";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
+import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
 /**
  * Ce que l'essai a donné : l'attente, les concepts, ou aucun des deux.
@@ -48,13 +49,13 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 export function ResultatDeLEssai({
   avancement,
   setRecommence,
-  attenteInterrompue,
+  attente,
   onVerifier,
 }: {
   avancement: AvancementDeLEssai | null;
   setRecommence: (valeur: boolean) => void;
-  /** L'écran a cessé d'interroger sans que la chaîne ait rendu quoi que ce soit. */
-  attenteInterrompue: boolean;
+  /** Depuis combien de temps on attend, et si l'on cherche encore. */
+  attente: EtatDeLAttente;
   onVerifier: () => void;
 }) {
   /*
@@ -71,24 +72,21 @@ export function ResultatDeLEssai({
   // Le jeu ne se propose que tant que quelque chose tourne, et il disparaît dès
   // que tout est là : c'est un occupant d'attente, pas une section de la page.
   //
-  // L'aveu des quinze secondes ne le retire que sur l'écran qui n'a rien à
-  // montrer. Là, on annonce qu'on ne sait plus où en est le découpage, et jouer
-  // à côté de cet aveu sonne faux. Sur l'écran qui a déjà les concepts, rien ne
-  // va mal : l'écriture des questions dure vingt secondes de médiane, donc
-  // l'aveu tombe systématiquement en plein milieu d'une attente parfaitement
-  // normale. Le jeu y disparaissait à quinze secondes d'une attente qui en dure
-  // vingt-six — démonté juste avant la partie longue, ce qu'il existe
-  // précisément pour tenir.
-  const attend =
-    (!avancement || avancement.enCours) && !(rienEncore && attenteInterrompue);
+  // Il ne s'efface avant ça qu'à un seul endroit : l'écran qui n'a rien à
+  // montrer **et** sur lequel on a cessé de chercher. Là, il n'y a plus
+  // d'attente à occuper, seulement un geste à faire. Partout ailleurs il reste,
+  // et c'est aux quinze secondes qu'il sert le plus — on est alors parti pour
+  // bien plus long que la normale.
+  const abandonne = attente === "ABANDONNEE";
+  const attend = (!avancement || avancement.enCours) && !(rienEncore && abandonne);
 
   if (rienEncore && (!avancement || avancement.enCours)) {
     return (
       <AvecLeJeu jeu={attend}>
-        {attenteInterrompue ? (
-          <AttenteInterrompue onVerifier={onVerifier} />
+        {abandonne ? (
+          <AttenteAbandonnee onVerifier={onVerifier} />
         ) : (
-          <ConceptsEnAttente />
+          <ConceptsEnAttente attente={attente} />
         )}
       </AvecLeJeu>
     );

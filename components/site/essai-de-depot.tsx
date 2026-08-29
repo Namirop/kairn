@@ -4,7 +4,12 @@ import { useActionState, useEffect, useState } from "react";
 import { avancementDeLEssaiAction, essayerAction, type EtatEssai } from "@/app/(marketing)/actions";
 import { FormulaireDEssai } from "@/components/site/formulaire-dessai";
 import { ResultatDeLEssai } from "@/components/site/resultat-de-lessai";
-import { ABANDON_MS, AVEU_MS, pauseApres, RYTHME_VIF_MS } from "@/lib/depots/rythme-de-lattente";
+import {
+  etatDeLAttente,
+  type EtatDeLAttente,
+  pauseApres,
+  RYTHME_VIF_MS,
+} from "@/lib/depots/rythme-de-lattente";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
 /**
@@ -36,9 +41,12 @@ export function EssaiDeDepot({
   // Rouvre le champ sur un essai déjà rendu. La base tranchera : elle accorde
   // deux essais par tranche de vingt-quatre heures, quoi qu'ils aient donné.
   const [recommence, setRecommence] = useState(false);
-  // L'interrogation s'est arrêtée sans résultat. Un état à part et non l'absence
-  // d'intervalle : c'est ce que l'écran doit dire, et il faut qu'il le sache.
-  const [attenteInterrompue, setAttenteInterrompue] = useState(false);
+  // Depuis combien de temps on attend, et si l'on cherche encore. Un état à
+  // part et non l'absence d'intervalle : c'est ce que l'écran doit dire, et il
+  // faut qu'il le sache. Trois valeurs et non un booléen, parce que « c'est
+  // long » et « on a arrêté » ne se disent pas de la même façon — le premier
+  // demande de patienter, le second demande un geste.
+  const [attente, setAttente] = useState<EtatDeLAttente>("NORMALE");
   const [relance, setRelance] = useState(0);
   const [dernierEssai, setDernierEssai] = useState<string | null>(null);
 
@@ -56,7 +64,7 @@ export function EssaiDeDepot({
   if (etat.inputId && etat.inputId !== dernierEssai) {
     setDernierEssai(etat.inputId);
     setRecommence(false);
-    setAttenteInterrompue(false);
+    setAttente("NORMALE");
     setAvancement(null);
   }
 
@@ -82,8 +90,14 @@ export function EssaiDeDepot({
       setAvancement(suite);
 
       if (!suite?.enCours) return;
-      if (ecoule >= AVEU_MS) setAttenteInterrompue(true);
-      if (ecoule >= ABANDON_MS) return;
+
+      const ou = etatDeLAttente(ecoule);
+
+      setAttente(ou);
+
+      // On s'arrête là, et l'écran le dit : au-delà, ce n'est plus une
+      // extraction lente mais un job reporté que le cron reprendra.
+      if (ou === "ABANDONNEE") return;
 
       const pause = pauseApres(ecoule);
 
@@ -105,7 +119,7 @@ export function EssaiDeDepot({
   // Reprend l'interrogation pour un tour complet. La minute est repartie de
   // zéro : c'est un geste volontaire, pas une reprise automatique.
   const verifierANouveau = () => {
-    setAttenteInterrompue(false);
+    setAttente("NORMALE");
     setRelance((tour) => tour + 1);
   };
 
@@ -125,7 +139,7 @@ export function EssaiDeDepot({
         // d'un texte qu'on vient d'envoyer.
         avancement={enCours ? null : avancement}
         setRecommence={setRecommence}
-        attenteInterrompue={attenteInterrompue}
+        attente={attente}
         onVerifier={verifierANouveau}
       />
     );

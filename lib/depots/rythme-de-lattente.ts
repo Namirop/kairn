@@ -32,3 +32,29 @@ export const ABANDON_MS = 90_000;
 export function pauseApres(ecouleMs: number): number {
   return ecouleMs < AVEU_MS ? RYTHME_VIF_MS : RYTHME_LENT_MS;
 }
+
+/**
+ * Ce que l'écran a le droit de dire de son attente.
+ *
+ * Les trois états sont là parce que **deux d'entre eux se disaient de la même
+ * façon**, et que ça mentait. Passé quinze secondes, l'écran affichait « reviens
+ * plus tard » et retirait tout signe de vie ; il continuait pourtant à
+ * interroger toutes les cinq secondes, et le résultat s'affichait tout seul s'il
+ * tombait. Quelqu'un qui lisait cet écran croyait donc que le travail s'était
+ * arrêté alors qu'il tournait, et l'écran de l'attente longue était impossible à
+ * distinguer de celui de l'abandon.
+ *
+ * - `NORMALE` : on attend, et c'est l'attente ordinaire.
+ * - `LONGUE` : c'est plus long que la normale, on le dit, **et on cherche
+ *   encore**. Le résultat arrivera de lui-même.
+ * - `ABANDONNEE` : l'interrogation s'est arrêtée. Là seulement, il faut un geste
+ *   pour reprendre — et là seulement, « reviens plus tard » est vrai.
+ */
+export type EtatDeLAttente = "NORMALE" | "LONGUE" | "ABANDONNEE";
+
+export function etatDeLAttente(ecouleMs: number): EtatDeLAttente {
+  if (ecouleMs >= ABANDON_MS) return "ABANDONNEE";
+  if (ecouleMs >= AVEU_MS) return "LONGUE";
+
+  return "NORMALE";
+}

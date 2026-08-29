@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { PileEnConstruction } from "@/components/cairn/pile-en-construction";
 import { Button } from "@/components/ui/button";
+import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
 /**
  * Les quelques secondes où le découpage tourne.
@@ -38,6 +39,14 @@ import { Button } from "@/components/ui/button";
  * donc annoncer « lecture… découpage… » serait inventer une barre de progression
  * qui ne mesure rien. Ce qui est honnête, c'est de dire que ça travaille, de
  * montrer ce qui se prépare, et de le reconnaître quand c'est long.
+ *
+ * **Cet écran tient jusqu'à ce qu'on cesse vraiment de chercher.** Il change de
+ * mots deux fois — à neuf secondes on reconnaît que c'est plus long, à quinze on
+ * dit qu'on cherche encore —, mais il garde ses emplacements qui battent, parce
+ * que l'interrogation continue derrière. Ce qui le remplaçait à quinze secondes,
+ * c'était l'écran d'abandon : plus de squelette, plus de jeu, et « reviens plus
+ * tard » alors qu'on interrogeait toujours. L'abandon a maintenant son propre
+ * état, et il n'arrive qu'à quatre-vingt-dix secondes.
  */
 
 /** Trois emplacements : le découpage moyen en rend trois à cinq. */
@@ -50,7 +59,7 @@ const EMPLACEMENTS = [
 /** Au-delà, on le reconnaît. Se taire plus longtemps ferait douter. */
 const SECONDES_AVANT_EXCUSE = 9;
 
-export function ConceptsEnAttente() {
+export function ConceptsEnAttente({ attente }: { attente: EtatDeLAttente }) {
   const [long, setLong] = useState(false);
 
   useEffect(() => {
@@ -65,7 +74,7 @@ export function ConceptsEnAttente() {
         <PileEnConstruction className="w-10 shrink-0 md:w-14" />
 
         <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-900">
-          On découpe ton texte.
+          {attente === "LONGUE" ? "Le découpage prend son temps." : "On découpe ton texte."}
         </h2>
       </div>
 
@@ -88,18 +97,25 @@ export function ConceptsEnAttente() {
         ))}
       </ul>
 
-      {/* La place est réservée : la phrase apparaît sans pousser ce qui suit. */}
-      <p className="text-petit min-h-5 max-w-xl text-stone-500">
-        {long
-          ? "C'est plus long que d'habitude. Ça arrive, laisse-lui encore un instant."
-          : "Quelques secondes. Tes concepts s'affichent ici même, pas dans un écran d'inscription."}
+      {/* La place est réservée : la phrase apparaît sans pousser ce qui suit.
+
+          Trois paliers, du plus discret au plus explicite. Le dernier est le
+          seul qui compte vraiment : il dit qu'on cherche toujours et qu'il n'y a
+          rien à faire, ce qui est exactement ce que l'écran d'abandon laissait
+          croire du contraire. */}
+      <p className="text-petit min-h-5 max-w-2xl text-stone-500">
+        {attente === "LONGUE"
+          ? "On cherche encore. Tes concepts s'afficheront ici dès qu'ils arrivent, tu n'as rien à faire."
+          : long
+            ? "C'est plus long que d'habitude. Ça arrive, laisse-lui encore un instant."
+            : "Quelques secondes. Tes concepts s'affichent ici même, pas dans un écran d'inscription."}
       </p>
     </div>
   );
 }
 
 /**
- * L'attente dont on avoue ne plus savoir combien de temps elle durera.
+ * L'écran de l'abandon : on a cessé d'interroger, et on le dit.
  *
  * L'écran interrogeait soixante fois puis s'arrêtait sans rien changer à ce
  * qu'il montrait : les emplacements continuaient de battre, pour toujours, sur
@@ -110,17 +126,20 @@ export function ConceptsEnAttente() {
  * d'appels est atteint reste en file et repartira, mais pas dans la minute :
  * côté serveur c'est un report légitime, et rien ne s'est cassé.
  *
- * L'interrogation continue derrière, au ralenti, jusqu'à quatre-vingt-dix
- * secondes : si le résultat tombe, il remplace cet écran de lui-même. Le bouton
- * ne fait donc qu'accélérer ce qui se passerait de toute façon — c'est une
- * proposition, pas la seule issue.
+ * **Il ne s'affiche qu'à quatre-vingt-dix secondes, quand l'interrogation
+ * s'arrête pour de bon.** Il apparaissait à quinze, alors qu'on continuait de
+ * chercher toutes les cinq secondes : « reviens plus tard » était faux, et
+ * retirer le squelette et le jeu faisait passer pour mort un écran qui
+ * travaillait. Ce palier-là est maintenant tenu par `ConceptsEnAttente`, qui
+ * garde ses emplacements et change de mots. Ici, le bouton est vraiment la seule
+ * issue, et c'est pour ça qu'il est là.
  *
  * Ce qu'on dit est vrai au mot près. Le traitement tourne côté serveur, derrière
  * la réponse, et fermer l'onglet ne l'arrête pas. Le texte est en base, le
  * cookie de visite dure sept jours, et revenir sur la page suffit à retrouver
  * ses concepts — c'est déjà comme ça que l'écran se recharge.
  */
-export function AttenteInterrompue({ onVerifier }: { onVerifier: () => void }) {
+export function AttenteAbandonnee({ onVerifier }: { onVerifier: () => void }) {
   return (
     <div className="gap-pas-4 flex flex-col" role="status">
       <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-900">
