@@ -57,8 +57,28 @@ export function BarreDEnregistrement({
                 "px-pas-4 py-pas-3 rounded-carte bg-surface-roche grain grain-clair relative justify-between overflow-hidden text-stone-50",
             )}
           >
-            <p className={cn("text-petit relative z-10", modifie ? "text-stone-300" : "sr-only")}>
-              Modifié, pas encore enregistré
+            {/* Le refus se dit **dans la barre**, à côté du bouton qui l'a
+                déclenché.
+
+                Il vivait sous le formulaire, donc sous trois cartes de
+                réglages : sur un téléphone, la barre annonçait « modifié, pas
+                encore enregistré » pendant que la seule phrase capable
+                d'expliquer le refus attendait deux écrans plus bas. On appuyait,
+                le champ se soulignait en rouge, et il fallait deviner qu'il
+                fallait défiler pour savoir pourquoi.
+
+                Il remplace « modifié » plutôt que de s'y ajouter : les deux
+                disent la même chose — rien n'est écrit —, et le second dit en
+                plus ce qu'il faut corriger. Sa teinte est celle de la surface
+                d'alerte et non l'encre d'alerte : sur la roche, un rouge sombre
+                ne se lit pas. */}
+            <p
+              className={cn(
+                "text-petit relative z-10",
+                modifie ? (erreur ? "text-alerte-surface" : "text-stone-300") : "sr-only",
+              )}
+            >
+              {erreur ?? "Modifié, pas encore enregistré"}
             </p>
 
             <Button
@@ -75,23 +95,20 @@ export function BarreDEnregistrement({
         </div>
       </div>
 
-      {/* L'espace du message est réservé : il ne fait pas sauter la page.
+      {/* L'espace de la réussite est réservé : elle ne fait pas sauter la page.
 
-          **Le refus s'affiche toujours, la réussite non.** Les deux étaient
-          tenus par la même condition, et le refus n'apparaissait donc jamais :
-          une saisie rejetée laisse le formulaire modifié — c'est même sa
-          définition —, et la barre effaçait le seul message capable de dire
-          quoi corriger. On tapait 60 concepts par session, le champ se
-          soulignait en rouge, et rien n'expliquait que le maximum est 50.
-
-          « Enregistré. », lui, se tait dès qu'une modification attend : il
-          resterait d'une écriture précédente et dirait le contraire de la
-          barre. */}
+          Les deux messages étaient ici, tenus par la même condition — se taire
+          tant qu'une modification attend. Un refus laisse par définition le
+          formulaire modifié : le seul message capable de dire quoi corriger
+          était donc supprimé exactement quand il servait. On tapait 60 concepts
+          par session, le champ se soulignait en rouge, et rien n'expliquait que
+          le maximum est 50. Le refus est monté dans la barre ; il ne reste ici
+          que la réussite. */}
       <p className="mt-pas-3 text-petit min-h-5" role="status" aria-live="polite">
-        {erreur ? <span className="text-alerte">{erreur}</span> : null}
-        {!erreur && !modifie && message ? (
-          <span className="text-stone-500">{message}</span>
-        ) : null}
+        {/* Le refus est en vue dans la barre, mais c'est cette région-ci qui est
+            vivante : il y est répété pour les lecteurs d'écran, hors de la vue. */}
+        {erreur ? <span className="sr-only">{erreur}</span> : null}
+        {!erreur && !modifie && message ? <span className="text-stone-500">{message}</span> : null}
       </p>
     </div>
   );
