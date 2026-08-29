@@ -116,7 +116,7 @@ export function CompteurDu({
       </p>
       <span aria-hidden className="mt-pas-3 bg-lichen mx-auto block h-0.5 w-10 md:mx-0" />
 
-      <p className="mt-pas-3 mx-auto max-w-sm text-stone-500 md:mx-0">
+      <p className="mt-pas-3 mx-auto text-stone-500 md:mx-0">
         {aujourdhui === 0
           ? aDesAtoms
             ? questionsEnRoute
@@ -127,7 +127,7 @@ export function CompteurDu({
       </p>
 
       {enAttente > 0 ? (
-        <p className="mt-pas-2 text-petit mx-auto max-w-sm text-stone-500 md:mx-0">
+        <p className="mt-pas-2 text-petit mx-auto text-stone-500 md:mx-0">
           <PourquoiCertainsAttendent
             enAttente={enAttente}
             plafond={plafond}
@@ -143,7 +143,7 @@ export function CompteurDu({
           passés les trois autres. Le cas se dit maintenant à côté du compteur,
           qu'il y ait quelque chose à revoir ou non. */}
       {questionsEnRoute && aujourdhui > 0 ? (
-        <p className="mt-pas-2 text-petit mx-auto max-w-sm text-stone-500 md:mx-0">
+        <p className="mt-pas-2 text-petit mx-auto text-stone-500 md:mx-0">
           {compte(conceptsSansQuestions, "concept attend", "concepts attendent")} encore leurs
           questions. Elles s&apos;écrivent, ils rejoindront la session d&apos;eux-mêmes.
         </p>
@@ -162,7 +162,7 @@ export function CompteurDu({
           <Button asChild size="lg" variant="outline" className="w-full md:w-fit">
             <Link href={ROUTES.entrainement}>S&apos;entraîner</Link>
           </Button>
-          <span className="mt-pas-2 text-petit max-w-sm text-stone-500">
+          <span className="mt-pas-2 text-petit text-stone-500">
             D&apos;autres questions sur les mêmes concepts. Ça ne change pas ton planning.
           </span>
         </div>

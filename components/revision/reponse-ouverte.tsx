@@ -49,7 +49,7 @@ export function ReponseOuverte({
             Voir la réponse
           </Button>
 
-          <p className="text-petit max-w-xs text-stone-500">
+          <p className="text-petit text-stone-500">
             C&apos;est l&apos;effort de la retrouver qui la fixe.
           </p>
         </div>

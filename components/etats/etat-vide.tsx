@@ -28,7 +28,7 @@ export function EtatVide({
       <div>
         <p className="text-stone-900">{constat}</p>
         {contexte ? (
-          <p className="mt-pas-1 text-petit max-w-md text-stone-500">{contexte}</p>
+          <p className="mt-pas-1 text-petit text-stone-500">{contexte}</p>
         ) : null}
         {action ? <div className="mt-pas-4">{action}</div> : null}
       </div>

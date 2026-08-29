@@ -37,7 +37,7 @@ export default async function PageDepots() {
         <div className="gap-pas-6 md:gap-pas-4 flex flex-col items-center text-center md:flex-row md:flex-wrap md:items-end md:justify-between md:text-left">
           <div>
             <h1 className="text-h1-app leading-tight font-bold">Ce que tu as déposé</h1>
-            <p className="mt-pas-2 text-petit mx-auto max-w-md text-stone-500 md:mx-0">
+            <p className="mt-pas-2 text-petit mx-auto text-stone-500 md:mx-0">
               Le texte d&apos;origine n&apos;est jamais réécrit. Il reste tel que tu l&apos;as posé.
             </p>
           </div>
