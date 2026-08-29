@@ -74,6 +74,22 @@ export async function repondreAction(donnees: ReponseDonnee): Promise<ResultatRe
     return { ok: false, motif: "Ce concept est introuvable." };
   }
 
+  /*
+    Le tableau et la liste des dépôts sont périmés dès cette réponse-là.
+
+    Ils l'étaient déjà, et on ne le disait qu'à l'écran de fin de session : qui
+    s'arrête en cours de route et prend la barre du bas retombait sur un
+    décompte d'avant, avec les concepts déjà passés encore à faire. Le cas est
+    ordinaire — on répond à trois questions et on va voir où l'on en est.
+
+    Marqué ici plutôt qu'à la sortie, parce qu'il n'y a pas de sortie : on quitte
+    par un lien, par un retour arrière, par la barre du bas, ou en fermant
+    l'onglet. Le seul moment qu'on tient à coup sûr est celui où la donnée
+    change, et il ne coûte rien — l'aller-retour a déjà lieu pour enregistrer.
+  */
+  revalidatePath(ROUTES.aujourdhui);
+  revalidatePath(ROUTES.depots);
+
   return { ok: true, signal: resultat.signal };
 }
 
