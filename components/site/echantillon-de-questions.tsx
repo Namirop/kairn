@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { LIBELLE_FORMAT } from "@/components/depots/libelle-format";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
+import { EnEcriture } from "@/components/site/echantillon-en-attente";
 import { unParFormat } from "@/lib/domain/formats-distincts";
 import type { VariantFormat } from "@/lib/db/types";
+import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
 /**
  * Les questions écrites sur l'un des concepts de l'essai, et leurs formats.
@@ -37,6 +39,14 @@ import type { VariantFormat } from "@/lib/db/types";
  * en montre deux de la même. Voir `unParFormat`, qui dit pourquoi la sélection
  * se fait ici et non à la génération.
  *
+ * **L'attente d'ici s'arrête comme celle du découpage.** L'interrogation cesse à
+ * quatre-vingt-dix secondes ; sans le dire, les emplacements des formats
+ * continuaient de battre pour toujours sous des concepts déjà affichés, et rien
+ * n'indiquait qu'il fallait un geste pour aller voir. Le cas demande un job
+ * reporté — les questions n'ont jamais dépassé quarante-trois secondes en
+ * production —, mais c'est le même mensonge que celui qu'on venait de corriger
+ * à l'autre bout de la chaîne.
+ *
  * **Des boutons à deux états, pas des onglets.** Le motif ARIA des onglets
  * impose la navigation aux flèches et un `tabindex` mouvant ; à demi
  * implémenté, il retire au clavier ce que la souris garde. Quatre boutons
@@ -46,63 +56,28 @@ import type { VariantFormat } from "@/lib/db/types";
 
 type Question = { question: string; format: VariantFormat };
 
-/**
- * Les largeurs des quatre emplacements de format.
- *
- * Celles des libellés qui viendront — « QCM » est court, « Texte à trou » ne
- * l'est pas — pour que la rangée ne change pas de dessin en se remplissant.
- */
-const EMPLACEMENTS = ["w-16", "w-28", "w-32", "w-24"] as const;
-
-function EnEcriture() {
-  return (
-    <section className="gap-pas-3 flex flex-col" role="status" aria-live="polite">
-      <h3 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-        On écrit les questions
-      </h3>
-
-      <div className="gap-pas-1 flex flex-wrap" aria-hidden>
-        {EMPLACEMENTS.map((largeur, rang) => (
-          <span
-            key={largeur}
-            className={`rounded-galet block h-8 bg-stone-300/60 motion-safe:animate-pulse ${largeur}`}
-            style={{ animationDelay: `${rang * 160}ms` }}
-          />
-        ))}
-      </div>
-
-      {/* Les deux barres ont la hauteur d'une ligne d'énoncé : la carte ne
-          changera pas de taille en recevant sa question. */}
-      <div className="rounded-carte bg-surface-ombre p-pas-dedans" aria-hidden>
-        <span className="block h-6 w-full rounded-xs bg-stone-300/70 motion-safe:animate-pulse" />
-        <span
-          className="mt-pas-3 block h-6 w-3/5 rounded-xs bg-stone-300/50 motion-safe:animate-pulse"
-          style={{ animationDelay: "200ms" }}
-        />
-      </div>
-
-      {/* La mesure est celle d'une légende et non d'un paragraphe : serrée à
-          `xl`, cette phrase-là tombait sur deux lignes pour trois mots. */}
-      <p className="text-petit max-w-2xl text-stone-500">
-        Quatre formulations sur le même concept, de formats différents. Une vingtaine de secondes.
-      </p>
-    </section>
-  );
-}
-
 export function EchantillonDeQuestions({
   questions,
   enCours,
+  attente,
+  onVerifier,
 }: {
   questions: Question[];
   /** L'écriture tourne encore : les questions arrivent après les concepts. */
   enCours: boolean;
+  /** Où en est l'interrogation, pour ne pas battre après qu'elle s'est arrêtée. */
+  attente: EtatDeLAttente;
+  onVerifier: () => void;
 }) {
   const [rang, setRang] = useState(0);
 
   const montrables = unParFormat(questions);
 
-  if (montrables.length === 0) return enCours ? <EnEcriture /> : null;
+  if (montrables.length === 0) {
+    return enCours ? (
+      <EnEcriture abandonnee={attente === "ABANDONNEE"} onVerifier={onVerifier} />
+    ) : null;
+  }
 
   const montree = montrables[Math.min(rang, montrables.length - 1)];
 

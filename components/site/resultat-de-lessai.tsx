@@ -72,13 +72,13 @@ export function ResultatDeLEssai({
   // Le jeu ne se propose que tant que quelque chose tourne, et il disparaît dès
   // que tout est là : c'est un occupant d'attente, pas une section de la page.
   //
-  // Il ne s'efface avant ça qu'à un seul endroit : l'écran qui n'a rien à
-  // montrer **et** sur lequel on a cessé de chercher. Là, il n'y a plus
-  // d'attente à occuper, seulement un geste à faire. Partout ailleurs il reste,
-  // et c'est aux quinze secondes qu'il sert le plus — on est alors parti pour
-  // bien plus long que la normale.
+  // Il s'efface aussi quand on a cessé d'interroger : il n'y a alors plus
+  // d'attente à occuper, seulement un geste à faire, et un jeu à côté d'un
+  // bouton qui demande une décision détourne de la décision. Aux quinze
+  // secondes en revanche il reste, et c'est là qu'il sert le plus — on est
+  // parti pour bien plus long que la normale.
   const abandonne = attente === "ABANDONNEE";
-  const attend = (!avancement || avancement.enCours) && !(rienEncore && abandonne);
+  const attend = (!avancement || avancement.enCours) && !abandonne;
 
   if (rienEncore && (!avancement || avancement.enCours)) {
     return (
@@ -120,7 +120,12 @@ export function ResultatDeLEssai({
         {/* L'échantillon, et il ferme l'arc : ton texte, tes concepts, de vraies
           questions sur l'un d'eux. Sans lui, la page promettait qu'on te les
           repose sans jamais te montrer sous quelle forme. */}
-        <EchantillonDeQuestions questions={avancement.questions} enCours={avancement.enCours} />
+        <EchantillonDeQuestions
+          questions={avancement.questions}
+          enCours={avancement.enCours}
+          attente={attente}
+          onVerifier={onVerifier}
+        />
 
         <GarderLesConcepts peutRedeposer={avancement.peutRedeposer} setRecommence={setRecommence} />
       </div>
