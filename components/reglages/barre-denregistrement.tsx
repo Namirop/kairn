@@ -75,16 +75,23 @@ export function BarreDEnregistrement({
         </div>
       </div>
 
-      {/* L'espace du message est réservé : il ne fait pas sauter la page. Il se
-          tait pendant qu'une modification attend — « Enregistré. » resterait
-          d'une écriture précédente et dirait le contraire de la barre. */}
-      <p className="mt-pas-3 text-petit min-h-5 max-w-md" role="status" aria-live="polite">
-        {modifie ? null : (
-          <>
-            {erreur ? <span className="text-alerte">{erreur}</span> : null}
-            {message ? <span className="text-stone-500">{message}</span> : null}
-          </>
-        )}
+      {/* L'espace du message est réservé : il ne fait pas sauter la page.
+
+          **Le refus s'affiche toujours, la réussite non.** Les deux étaient
+          tenus par la même condition, et le refus n'apparaissait donc jamais :
+          une saisie rejetée laisse le formulaire modifié — c'est même sa
+          définition —, et la barre effaçait le seul message capable de dire
+          quoi corriger. On tapait 60 concepts par session, le champ se
+          soulignait en rouge, et rien n'expliquait que le maximum est 50.
+
+          « Enregistré. », lui, se tait dès qu'une modification attend : il
+          resterait d'une écriture précédente et dirait le contraire de la
+          barre. */}
+      <p className="mt-pas-3 text-petit min-h-5" role="status" aria-live="polite">
+        {erreur ? <span className="text-alerte">{erreur}</span> : null}
+        {!erreur && !modifie && message ? (
+          <span className="text-stone-500">{message}</span>
+        ) : null}
       </p>
     </div>
   );

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ecrireHeureDeRappel } from "@/lib/domain/heure-de-rappel";
+import { PLAFOND_MAX, PLAFOND_MIN } from "@/lib/domain/selection-session";
 
 /**
  * Ce qu'un compte peut décider : la longueur de sa session, et ce qu'on lui
@@ -75,7 +76,7 @@ export function FormulaireDeReglages({
         <Reglage
           nom="plafond"
           intitule="Concepts par session"
-          explication="Au-delà, une session devient une corvée qu'on abandonne au milieu. Ce qui déborde n'est pas perdu : il reste dû, et revient en tête le lendemain."
+          explication={`De ${PLAFOND_MIN} à ${PLAFOND_MAX}. Au-delà, une session devient une corvée qu'on abandonne au milieu, et ce qui déborde n'est pas perdu : il reste dû, et revient en tête le lendemain.`}
           controle={
             <Input
               id="plafond"
