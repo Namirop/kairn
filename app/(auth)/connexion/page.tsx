@@ -29,18 +29,14 @@ export default async function PageConnexion({
   if (await getCurrentUser()) redirect(suite);
 
   return (
-    <div className="gap-pas-8 flex flex-col">
-      <div>
-        <h1 className="text-h1-app leading-tight font-bold">Entrer dans Kairn</h1>
-        {/* Le même titre porte les deux temps du formulaire — l'adresse, puis le
-            code. Cette phrase doit donc rester vraie aux deux : « on t'envoie un
-            code » se contredisait avec le « Envoyé à … » affiché juste dessous
-            une fois le code parti. Ce que le code crée un compte est dit sous le
-            champ d'adresse, là où la question se pose. */}
-        <p className="mt-pas-2 text-petit text-stone-500">
-          Ton adresse suffit : un code reçu par email ouvre ta session.
-        </p>
-      </div>
+    <div className="gap-pas-6 md:gap-pas-8 flex flex-col">
+      {/* Le titre est seul. Une ligne sous lui disait « ton adresse suffit : un
+          code reçu par email ouvre ta session » pendant que le formulaire, deux
+          blocs plus bas, disait la même chose autrement — le mécanisme du code
+          expliqué deux fois sur un écran qui, lui, ne tenait pas dans un
+          téléphone. Il est dit une fois, sous le champ, là où la question se
+          pose. */}
+      <h1 className="text-h1-app leading-tight font-bold">Entrer dans Kairn</h1>
 
       <FormulaireConnexion suite={suite} />
 
@@ -63,8 +59,7 @@ export default async function PageConnexion({
         >
           politique de confidentialité
         </Link>
-        . Kairn t&apos;écrit les jours où quelque chose est à revoir, et se coupe d&apos;un clic
-        depuis les réglages comme depuis chaque email.
+        . Kairn t&apos;écrit les jours où quelque chose est à revoir, et se coupe d&apos;un clic.
       </p>
     </div>
   );

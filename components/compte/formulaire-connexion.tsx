@@ -87,8 +87,10 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
         {enCours ? "Envoi…" : "Recevoir mon code"}
       </Button>
 
+      {/* Le mécanisme du code, dit une fois et ici : c'est sous le champ que la
+          question se pose, et le titre de la page le répétait plus haut. */}
       <p className="text-petit text-stone-500">
-        Pas de mot de passe à retenir. Si tu n&apos;as pas encore de compte, le code en crée un.
+        Le code reçu par email ouvre ta session, et crée ton compte si tu n&apos;en as pas.
       </p>
     </form>
   );
