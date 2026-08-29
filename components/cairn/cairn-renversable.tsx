@@ -99,23 +99,38 @@ export function CairnRenversable({
 
       {/* La zone de prise, et c'est elle qui règle le partage du geste au doigt.
 
-          Le bloc entier gardait la verticale au défilement et ne prenait que
-          l'horizontale : un balayage oblique — le geste naturel pour faucher un
-          empilement — partait au défilement avant d'avoir touché une pierre, et
-          seul un mouvement strictement latéral marchait. Tout bloquer aurait
-          fait du cairn un trou dans la page, à l'endroit où il est le plus
-          grand.
+          **Elle traverse l'écran, elle ne couvre plus la colonne des pierres.**
+          C'est le troisième essai, et les deux premiers ont raté la même cible.
 
-          Cette bande-ci ne bloque rien d'autre que la colonne où les pierres se
-          trouvent — la pierre de base fait soixante unités de viewBox sur cent,
-          les autres moins. Le doigt posé dessus appartient au cairn, quelle que
-          soit la direction qu'il prend ensuite ; posé de part et d'autre, il
-          appartient à la page, qui défile comme partout ailleurs.
+          Le bloc entier gardait la verticale au défilement et ne prenait que
+          l'horizontale : un balayage oblique partait au défilement avant d'avoir
+          touché une pierre. La bande d'après ne couvrait que la colonne des
+          pierres — le doigt **posé dessus** appartenait bien au cairn dans
+          toutes les directions, mais le geste qu'on fait pour faucher un
+          empilement part **à côté** et le traverse, et à ce moment-là le
+          navigateur a déjà décidé de défiler. Une fois qu'il a décidé, il annule
+          le pointeur : plus aucun déplacement ne remonte jusqu'ici, et il n'y a
+          rien à rattraper après coup.
+
+          `touch-action` se lit sur ce que le doigt touche **en premier**. La
+          bande doit donc être là où le geste commence, c'est-à-dire n'importe
+          où sur la largeur — d'où `w-screen` centré, qui déborde volontairement
+          la boîte du cairn. Elle reste bornée en hauteur à celle de
+          l'empilement, environ deux cent vingt-cinq pixels sur téléphone.
+
+          **Le prix est réel et il est assumé :** on ne peut pas amorcer un
+          défilement depuis cette bande. Le titre au-dessus et tout ce qui suit
+          restent disponibles pour ça. C'est l'entre-deux entre « le cairn ne
+          réagit qu'à un geste strictement latéral » et « le cairn est un trou
+          dans la page ».
 
           Elle est transparente et n'intercepte rien : les gestes remontent au
-          bloc qui les écoute. Sa seule fonction est d'être ce que le doigt
-          touche, parce que `touch-action` se lit sur ce qu'on touche. */}
-      <span aria-hidden className="absolute inset-y-0 left-[16%] w-[68%] touch-none" />
+          bloc qui les écoute, par l'arbre et non par la géométrie — déborder de
+          son parent ne l'en détache pas. */}
+      <span
+        aria-hidden
+        className="absolute inset-y-0 left-1/2 w-screen max-w-none -translate-x-1/2 touch-none"
+      />
     </div>
   );
 }
