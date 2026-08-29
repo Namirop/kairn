@@ -8,6 +8,34 @@ import type { VariantFormat } from "@/lib/db/types";
  * ce fichier-ci s'occupe de ce qui en sort — le lire pour l'afficher, le
  * rattacher à un compte quand il y en a un, l'effacer quand il n'y en aura
  * jamais. Deux décisions différentes, et deux moments différents.
+ *
+ * **La vie d'un essai anonyme, de bout en bout.**
+ *
+ * 1. **Le dépôt.** Une `AnonymousSession` est ouverte et son identifiant part
+ *    dans le cookie `kairn_visite`, posé pour sept jours. Le texte est écrit en
+ *    base comme un `Input` ordinaire, portant `anonymousSessionId` au lieu d'un
+ *    `userId`.
+ * 2. **Le retour.** Chaque chargement de la landing lit le cookie et relit ce
+ *    que la session a produit — c'est `lireLEssaiEnCours`. Les concepts et
+ *    l'échantillon de questions réapparaissent donc tels quels, sans rien
+ *    redemander au modèle, aussi longtemps que le cookie vit. Fermer l'onglet,
+ *    revenir le lendemain, changer d'onglet : c'est le même chemin.
+ * 3. **La reprise par un compte.** À la création du compte, `rattacherAuCompte`
+ *    déplace l'`Input` et ses `Atom` sous le nouvel utilisateur et date
+ *    `claimedAt`. À partir de là, l'essai est un dépôt comme un autre et ne
+ *    s'efface plus.
+ * 4. **L'oubli.** Le cron `/api/cron/jobs` appelle `oublierLesVisitesAbandonnees`
+ *    à chaque tour. Toute session non réclamée créée il y a plus de
+ *    `JOURS_AVANT_OUBLI` jours est supprimée, et les cascades emportent le dépôt
+ *    et ses concepts.
+ *
+ * Les deux durées sont volontairement égales — sept jours pour le cookie, sept
+ * jours pour la conservation. Un cookie qui survivrait à la session désignerait
+ * un dépôt effacé : la page croirait à un essai déjà fait et refuserait celui de
+ * quelqu'un qui revient trop tard. Voir `lib/auth/visite.ts`.
+ *
+ * Ce n'est pas qu'un ménage : quelqu'un qui n'a jamais créé de compte n'a
+ * accepté aucune conservation, et son texte n'a pas à rester.
  */
 
 /**

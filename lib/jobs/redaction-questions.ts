@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db/client";
 import { finishJob, reprendreCeQuiManque } from "@/lib/db/generation-job";
 import type { GenerationJob } from "@/lib/db/types";
 import { ecrireQuestions } from "@/lib/db/variants";
+import { sansRenvoiAuConcept } from "@/lib/domain/renvoi-au-concept";
 import { messageDuGroupe as construireLEnvoi } from "@/lib/domain/envoi-de-questions";
 import { LotIncomplet, scinderApresTroncature } from "./reprise-du-lot";
 
@@ -80,7 +81,31 @@ async function rangerLesLots(atomIds: string[], lots: LotRendu[]): Promise<numbe
       continue;
     }
 
-    await ecrireQuestions(atomId, lot.variants, model);
+    /*
+      Les questions qui renvoient à un texte qu'on ne montre pas ne sont pas
+      écrites.
+
+      La règle est dans le prompt depuis le 28/08 et elle passe le plus souvent ;
+      quand elle ne passe pas, ça se sert. « D'après le mécanisme décrit dans le
+      concept, pourquoi… » a été posé en session : l'écran de révision ne montre
+      jamais le concept, donc la question désignait le vide.
+
+      Écarté ici et pas plus tôt, parce que c'est le dernier endroit qui voit un
+      lot entier avant la base. Un lot qui perd une question en garde trois, et
+      c'est le prix assumé : voir `sansRenvoiAuConcept`, qui dit pourquoi servir
+      coûterait plus cher que renoncer.
+    */
+    const gardees = sansRenvoiAuConcept(lot.variants);
+
+    // Un lot écarté en entier vaut un lot absent, et se traite comme tel : le
+    // concept repart en file. Sans ça, il resterait sans une seule question sur
+    // un job clos en succès — le défaut qu'on venait de fermer ailleurs.
+    if (gardees.length === 0) {
+      manquants.push(rang + 1);
+      continue;
+    }
+
+    await ecrireQuestions(atomId, gardees, model);
   }
 
   return manquants;

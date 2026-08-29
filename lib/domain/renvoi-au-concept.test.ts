@@ -1,5 +1,6 @@
+import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { renvoiAuConcept } from "./renvoi-au-concept";
+import { renvoiAuConcept, sansRenvoiAuConcept } from "./renvoi-au-concept";
 
 describe("renvoiAuConcept", () => {
   /** La question servie en session le 27/08, celle qui a lancé la correction. */
@@ -63,5 +64,49 @@ describe("renvoiAuConcept", () => {
 
   it("rend null sur un texte vide", () => {
     expect(renvoiAuConcept("")).toBeNull();
+  });
+});
+
+describe("sansRenvoiAuConcept", () => {
+  const bonne = { format: "MCQ", question: "Pourquoi le miel empêche-t-il les bactéries de croître ?" };
+  const fautive = {
+    format: "MCQ",
+    question: "D'après le mécanisme décrit dans le concept, pourquoi le miel les en empêche-t-il ?",
+  };
+
+  it("écarte la question qui renvoie et garde les autres", () => {
+    expect(sansRenvoiAuConcept([bonne, fautive])).toEqual([bonne]);
+  });
+
+  it("lit la phrase trouée d'un texte à trou, pas son énoncé", () => {
+    // L'énoncé d'un CLOZE ne s'affiche jamais : c'est la phrase qu'on lit.
+    const trou = {
+      format: "CLOZE",
+      question: "Ci-dessus, complète la phrase.",
+      cloze: { sentence: "Le miel contient très peu d'___." },
+    };
+    const trouFautif = {
+      format: "CLOZE",
+      question: "Complète.",
+      cloze: { sentence: "Selon le texte, le miel contient peu d'___." },
+    };
+
+    expect(sansRenvoiAuConcept([trou, trouFautif])).toEqual([trou]);
+  });
+
+  it("rend un lot vide plutôt que d'en garder une fautive", () => {
+    expect(sansRenvoiAuConcept([fautive])).toEqual([]);
+  });
+
+  it("ne touche pas à un lot sain", () => {
+    fc.assert(
+      fc.property(fc.array(fc.string(), { maxLength: 6 }), (questions) => {
+        const lot = questions.map((question) => ({ format: "MCQ", question }));
+        const garde = sansRenvoiAuConcept(lot);
+
+        // Le filtre ne réordonne rien et ne duplique rien : il retire, ou pas.
+        expect(garde).toEqual(lot.filter((q) => renvoiAuConcept(q.question) === null));
+      }),
+    );
   });
 });

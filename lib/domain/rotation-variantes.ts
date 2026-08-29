@@ -11,6 +11,35 @@
  */
 
 /**
+ * **Quand les questions d'un concept sont réécrites.** Il n'y a pas d'intervalle,
+ * pas de cron, pas de bouton : c'est l'usage qui déclenche, et deux règles le
+ * bornent.
+ *
+ * 1. **L'usure.** `regenererSiUsees` est appelé après chaque passage, en session
+ *    comme en entraînement. Quand **chaque** facette a été vue
+ *    `PASSAGES_AVANT_REGENERATION` fois, les deux modes additionnés, le lot est
+ *    déclaré usé et une écriture part en file.
+ * 2. **Le plafond.** Un même concept ne redemande pas de questions plus d'une
+ *    fois tous les `JOURS_ENTRE_REGENERATIONS` jours, quoi qu'il arrive. Sans
+ *    lui, l'entraînement illimité permettrait d'atteindre le seuil dans l'heure
+ *    et de rouvrir la dépense aussitôt.
+ *
+ * Ce que ça donne en pratique : quatre facettes à trois passages font douze
+ * passages avant la première réécriture. Sur la courbe d'espacement ordinaire —
+ * un concept revu à des intervalles qui s'allongent —, c'est **des mois**. Pour
+ * quelqu'un qui s'entraîne beaucoup sur les mêmes concepts, c'est le plafond
+ * hebdomadaire qui devient la limite.
+ *
+ * La conséquence à connaître avant d'écarter une question à l'écriture : ce
+ * qu'un lot perd, il ne le récupère pas la semaine suivante. Voir
+ * `renvoi-au-concept.ts`, qui écarte en connaissance de cause.
+ *
+ * Les autres chemins vers une réécriture sont des gestes explicites — modifier
+ * un concept, confirmer un concept douteux —, et ils passent par le même plafond
+ * : voir `lib/db/demande-de-questions.ts`.
+ */
+
+/**
  * Passages par facette au-delà desquels les questions sont usées.
  *
  * Quand chaque facette a été vue autant de fois, la personne reconnaît les

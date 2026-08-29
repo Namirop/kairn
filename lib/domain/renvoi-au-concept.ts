@@ -12,11 +12,21 @@
  * la condition pour qu'elle mesure un rappel plutôt qu'une capacité à recoller
  * un contexte manquant.
  *
- * **Ce module détecte le renvoi, il ne le répare pas.** La correction est dans
- * le prompt, où elle coûte une ligne ; ici on mesure si elle prend, question par
- * question, sur le banc comme sur ce qui est déjà en base. Une question fautive
- * reste servable — elle est maladroite, pas fausse — et sera réécrite à la
- * prochaine régénération de son concept.
+ * **Ce module ne répare rien : il détecte, et il écarte.** La correction est
+ * dans le prompt, où elle coûte une ligne ; ici on mesure si elle prend, et on
+ * refuse d'écrire ce qui la viole.
+ *
+ * **Pourquoi écarter plutôt que servir.** La question reste répondable — les
+ * options portent le contenu —, mais elle demande de deviner un contexte absent,
+ * et on ne saurait pas la corriger plus tard : les questions d'un concept ne se
+ * réécrivent qu'à l'usure, quand chaque facette a été vue trois fois, et pas
+ * plus d'une fois par semaine et par concept. Voir `rotation-variantes.ts`. Une
+ * question fautive vit donc des mois. Le lot en compte quatre : il en garde
+ * trois, et la facette manquante revient à la réécriture suivante.
+ *
+ * **Le prix est assumé.** Un concept peut sortir avec trois questions au lieu de
+ * quatre, et la mesure du banc dit à quelle fréquence ça arrive — si elle monte,
+ * c'est le prompt qu'il faut reprendre, pas ce filtre qu'il faut assouplir.
  */
 
 /** Minuscules, sans accents, apostrophes ramenées à une seule forme. */
@@ -64,4 +74,22 @@ export function renvoiAuConcept(texte: string): string | null {
   }
 
   return null;
+}
+
+/**
+ * Un lot débarrassé des questions qui renvoient à l'invisible.
+ *
+ * On regarde ce que la personne lit vraiment : la phrase trouée d'un texte à
+ * trou, l'énoncé partout ailleurs. C'est la lecture de `controlerRenvoi`, et les
+ * deux doivent rester la même — le banc mesure ce que la production écarte.
+ */
+export function sansRenvoiAuConcept<
+  T extends { format: string; question: string; cloze?: { sentence: string } | null },
+>(lot: readonly T[]): T[] {
+  return lot.filter(
+    (question) =>
+      renvoiAuConcept(
+        question.format === "CLOZE" ? (question.cloze?.sentence ?? "") : question.question,
+      ) === null,
+  );
 }
