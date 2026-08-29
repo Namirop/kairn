@@ -17,8 +17,17 @@
  * arrive. Le seul retour est visuel.
  */
 
-/** Assez pour occuper vingt secondes sans devenir une tâche à finir. */
-export const PIERRES_DU_JEU = 6;
+/**
+ * Assez pour occuper l'attente sans devenir une tâche à finir.
+ *
+ * Le compte décide aussi de la silhouette, et c'est par là qu'il s'est arrêté
+ * ici. Six pierres donnaient un empilement large et bas, qui tenait dans une
+ * vignette carrée à côté d'une colonne haute : le cairn y ressemblait à un
+ * bouton. Neuf donnaient une tour élancée, plus une tour qu'un cairn. Sept
+ * garde l'affinement visible du bas vers le haut tout en montant assez pour
+ * qu'une colonne étroite lui aille.
+ */
+export const PIERRES_DU_JEU = 7;
 
 /**
  * L'écart toléré, en unités de la vue de largeur 100.

@@ -36,8 +36,16 @@ import {
  * bouton qui ne mène nulle part vaut moins que ne rien proposer.
  */
 
-/** Les bords que le balancier ne franchit pas, en unités de la vue. */
-const MARGE = 6;
+/**
+ * Les bords que le balancier ne franchit pas, en unités de la vue.
+ *
+ * Au ras du cadre, et c'est voulu. À six unités, la pierre repartait bien avant
+ * le bord : la course était courte, le vide qui restait de chaque côté avait
+ * l'air d'une marge oubliée, et la pierre semblait rebondir sur rien. Deux
+ * unités suffisent à ce qu'elle ne sorte pas du dessin, et la course y gagne un
+ * tiers de sa longueur — donc autant de temps où viser veut dire quelque chose.
+ */
+const MARGE = 2;
 
 type Etat = { posees: PierrePosee[] };
 
@@ -129,7 +137,7 @@ export function CairnAEmpiler() {
             ? "Le cairn est monté. Recommencer."
             : `Poser une pierre. ${rang} sur ${pierres.length} posées.`
         }
-        className="rounded-carte bg-surface-ombre px-pas-4 py-pas-3 hover:bg-surface-ombre/70 w-full max-w-56 transition-colors"
+        className="rounded-carte bg-surface-ombre px-pas-2 py-pas-3 hover:bg-surface-ombre/70 w-full max-w-72 transition-colors"
       >
         <svg
           viewBox={`0 ${-hauteur + ySol} ${LARGEUR_VUE} ${hauteur}`}
@@ -151,7 +159,7 @@ export function CairnAEmpiler() {
         </svg>
       </button>
 
-      <p className="text-petit min-h-10 max-w-56 text-center text-stone-500">
+      <p className="text-petit min-h-10 max-w-72 text-center text-stone-500">
         {fini
           ? "Le cairn tient. Appuie encore pour le remonter."
           : "Appuie quand la pierre est dans l'axe. Ça ne compte pour rien."}

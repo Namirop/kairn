@@ -138,19 +138,24 @@ export function ResultatDeLEssai({
  * découpage à l'écriture des questions : React garde un composant qui ne change
  * ni de position ni de type, et le démonte dès que l'un des deux bouge.
  *
- * Sur téléphone il passe dessous, parce qu'il n'y a pas de côté. Il reste
- * au-dessus du pli dans les deux cas : posé sous une liste de concepts, il ne
- * serait pas vu par ceux qui ne défilent pas, c'est-à-dire par ceux qui
- * attendent.
+ * Sur téléphone il passe **dessous**, après le titre et les emplacements en
+ * attente, parce qu'il n'y a pas de côté. Il est passé un temps au-dessus, pour
+ * que ceux qui ne défilent pas le voient quand même : c'était mettre le
+ * remplissage devant la charge utile. Ce qu'on vient de déposer se voit
+ * d'abord, le jeu s'offre ensuite.
+ *
+ * La colonne de droite a une largeur fixe et non `auto` : le jeu est le seul
+ * élément du produit qui montre le cairn en train de se monter, et une colonne
+ * qui se serre sur sa boîte le réduisait à une vignette dans un panneau vide.
  */
 function AvecLeJeu({ jeu, children }: { jeu: boolean; children: React.ReactNode }) {
   if (!jeu) return <>{children}</>;
 
   return (
-    <div className="gap-pas-8 md:gap-pas-12 grid md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+    <div className="gap-pas-8 md:gap-pas-12 grid md:grid-cols-[minmax(0,1fr)_18rem] md:items-start">
       <div className="min-w-0">{children}</div>
 
-      <div className="md:pt-pas-4 order-first md:order-none">
+      <div className="md:pt-pas-4">
         <CairnAEmpiler />
       </div>
     </div>
@@ -185,7 +190,7 @@ function GarderLesConcepts({
           <Link href={ROUTES.connexion}>Les garder</Link>
         </Button>
 
-        <span className="text-petit max-w-sm text-stone-500">
+        <span className="text-petit max-w-2xl text-stone-500">
           Ton adresse suffit. On te les repose au bon moment, et tu récupères ceux-ci.
         </span>
       </div>
