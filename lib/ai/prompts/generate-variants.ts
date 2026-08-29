@@ -49,6 +49,13 @@
  * alors le bloc à l'affichage — un étalon qui radote coûte une ligne de bruit,
  * un étalon inventé coûte une fausse certitude, et on préfère le premier.
  *
+ * **Le verdict a été interdit en tête d'étalon le 29 août 2026.** Un étalon de
+ * QCM servi en production ouvrait par « Correct », et le bloc « Pourquoi » ne
+ * s'affiche qu'après une **mauvaise** réponse : on félicitait quelqu'un que
+ * l'écran venait de corriger. La consigne du vrai ou faux — « commence par Vrai
+ * ou Faux » — est la source la plus probable de la tournure, et elle est
+ * maintenant désignée comme une exception plutôt que comme un modèle.
+ *
  * **Une ligne a été ajoutée le 28 août 2026 sur le renvoi au concept.** « Quel
  * effet, mentionné dans le concept, courbe la trajectoire de la balle ? » a été
  * servi en session : l'écran de révision ne montre jamais le concept — l'afficher
@@ -214,6 +221,13 @@ moment où la correction s'affiche. Il dit ce qui la rend juste — la condition
 l'ordre, la cause, tels que le concept les énonce. Si le concept n'en donne
 aucune, recopie l'option plutôt que d'inventer : une redite est effacée à
 l'affichage, une invention est servie.
+
+Il n'ouvre par aucun verdict. Ni « Correct », ni « Exact », ni « Oui » : ce bloc
+n'est montré qu'à quelqu'un qui vient de **se tromper**, et l'ouvrir en le
+félicitant lui dit le contraire de ce qu'il voit à l'écran. Le verdict est déjà
+porté par les options — la bonne surlignée, la sienne marquée. Commence
+directement par ce qui explique. La consigne du vrai ou faux plus bas est une
+exception à ce format-là, pas un modèle à reprendre ici.
 
 TRUE_FALSE : l'envoi te donne, concept par concept et facette par facette, si
 l'affirmation doit être vraie ou fausse. Tu suis cette valeur, et tu la recopies
