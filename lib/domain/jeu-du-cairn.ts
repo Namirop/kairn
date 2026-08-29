@@ -12,9 +12,12 @@
  * Celui-ci démarre au dépôt et vit jusqu'à ce que tout soit là — il ignore les
  * phases, donc elles ne peuvent pas l'interrompre.
  *
- * Il n'y a ni score, ni record, ni partie perdue. C'est une attente, pas un
- * défi : une pierre mal posée se pose quand même, de travers, et la suivante
- * arrive. Le seul retour est visuel.
+ * Il n'y a ni score ni record — rien n'est compté, rien n'est gardé, et le
+ * dépôt qui tourne derrière ne s'en aperçoit pas. **Mais le cairn peut
+ * tomber**, et il faut alors le reprendre du sol : un empilement où tout tient
+ * quoi qu'on fasse n'est pas un empilement, c'est une liste qui se remplit.
+ * L'enjeu s'arrête à la pile elle-même, ce qui est déjà l'enjeu d'un vrai
+ * cairn.
  */
 
 /**
@@ -39,6 +42,23 @@ export const PIERRES_DU_JEU = 7;
  * ailleurs, c'est son dépôt qu'il attend.
  */
 export const TOLERANCE = 4;
+
+/**
+ * L'écart au-delà duquel la pierre ne repose plus sur celle du dessous.
+ *
+ * Il ne se mesure **pas** depuis le pointillé mais depuis la pierre qui porte :
+ * c'est elle qui la retient, et une pile qui zigzague finit par ne plus rien
+ * porter du tout. Poser de travers ne coûte donc rien sur le coup et tout au
+ * coup suivant, ce qui est exactement le comportement d'un empilement.
+ *
+ * La valeur vient de la géométrie, pas d'un réglage au jugé. La course de la
+ * pierre va de vingt et une unités de part et d'autre au premier rang à
+ * trente-deux au dernier — les pierres s'affinent en montant, donc elles ont
+ * plus de place pour aller —, et la période tombe de 2400 ms à 1500. Quatorze
+ * unités laissent 800 ms de fenêtre sûre en bas et 330 en haut : de quoi monter
+ * les sept en regardant, jamais en tapant au hasard.
+ */
+export const SEUIL_DE_CHUTE = 14;
 
 /** Aller-retour du balancier au premier rang, puis au dernier. */
 const PERIODE_PREMIERE_MS = 2400;
@@ -86,32 +106,47 @@ export function positionDuBalancier(
   return min + (max - min) * montee;
 }
 
+/** Ce qu'il advient d'une pierre lâchée. */
+export type Pose = "DAPLOMB" | "DE_TRAVERS" | "TOMBEE";
+
 export type PierrePosee = {
   /** L'abscisse où elle repose vraiment, dans la vue de largeur 100. */
   x: number;
-  /** Elle est tombée dans la tolérance : elle se cale sur le pointillé. */
-  dAplomb: boolean;
+  pose: Pose;
 };
 
 /**
- * Ce que devient une pierre lâchée à `x` alors que le pointillé l'attendait à
- * `cible`.
+ * Ce que devient une pierre lâchée à `x`, alors que le pointillé l'attendait à
+ * `cible` et que `appui` porte l'abscisse de ce qui la reçoit — la pierre du
+ * dessous, ou la marque au sol pour la première.
  *
- * Dans la tolérance, elle se **cale** sur la cible plutôt que de rester où elle
- * est : à trois unités près, une pierre qui reste de travers donne l'impression
- * d'avoir raté alors qu'on a réussi. Le pointillé promet une place, la réussite
- * la donne exactement.
+ * **Trois fins, dans cet ordre.**
  *
- * En dehors, elle reste où on l'a lâchée. Elle ne tombe pas, elle ne fait rien
- * perdre : elle est simplement de travers, et ça se voit — c'est tout le retour
- * dont ce jeu a besoin.
+ * Dans la tolérance du pointillé, elle se **cale** sur la cible plutôt que de
+ * rester où elle est : à trois unités près, une pierre qui reste de travers
+ * donne l'impression d'avoir raté alors qu'on a réussi. Le pointillé promet une
+ * place, la réussite la donne exactement — et cette place-là tient toujours,
+ * quelle que soit l'inclinaison de la pile. C'est ce qui empêche le jeu de
+ * devenir déloyal : viser la marque annoncée ne peut jamais faire perdre, même
+ * quand ce qui est dessous penche déjà.
+ *
+ * Sinon, elle tient tant qu'elle repose vraiment sur celle du dessous. Elle
+ * reste où on l'a lâchée, de travers, et ça se voit.
+ *
+ * Au-delà, plus rien ne la porte : elle tombe, et le cairn avec elle. C'est la
+ * seule façon de perdre, et elle demande de s'être écarté deux fois — une fois
+ * pour poser de travers, une fois pour ne pas revenir.
  */
 export function poserLaPierre(
   x: number,
   cible: number,
-  tolerance: number = TOLERANCE,
+  appui: number,
+  reglage: { tolerance?: number; seuil?: number } = {},
 ): PierrePosee {
-  const dAplomb = Math.abs(x - cible) <= Math.max(0, tolerance);
+  const tolerance = Math.max(0, reglage.tolerance ?? TOLERANCE);
+  const seuil = Math.max(0, reglage.seuil ?? SEUIL_DE_CHUTE);
 
-  return { x: dAplomb ? cible : x, dAplomb };
+  if (Math.abs(x - cible) <= tolerance) return { x: cible, pose: "DAPLOMB" };
+
+  return { x, pose: Math.abs(x - appui) <= seuil ? "DE_TRAVERS" : "TOMBEE" };
 }

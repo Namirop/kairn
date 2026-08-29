@@ -5,6 +5,7 @@ import {
   PIERRES_DU_JEU,
   poserLaPierre,
   positionDuBalancier,
+  SEUIL_DE_CHUTE,
   TOLERANCE,
 } from "./jeu-du-cairn";
 
@@ -92,16 +93,47 @@ describe("periodeDuRang", () => {
 });
 
 describe("poserLaPierre", () => {
+  /** L'appui d'aplomb : la pierre du dessous est exactement sous la cible. */
+  const SOUS = 50;
+
   it("cale la pierre sur sa cible quand elle est dans la tolérance", () => {
-    expect(poserLaPierre(52, 50)).toEqual({ x: 50, dAplomb: true });
+    expect(poserLaPierre(52, 50, SOUS)).toEqual({ x: 50, pose: "DAPLOMB" });
   });
 
   it("compte la tolérance exacte comme une réussite", () => {
-    expect(poserLaPierre(50 + TOLERANCE, 50)).toEqual({ x: 50, dAplomb: true });
+    expect(poserLaPierre(50 + TOLERANCE, 50, SOUS)).toEqual({ x: 50, pose: "DAPLOMB" });
   });
 
-  it("laisse la pierre où on l'a lâchée quand elle est à côté", () => {
-    expect(poserLaPierre(61, 50)).toEqual({ x: 61, dAplomb: false });
+  it("laisse la pierre où on l'a lâchée quand elle est à côté sans être en dehors", () => {
+    expect(poserLaPierre(61, 50, SOUS)).toEqual({ x: 61, pose: "DE_TRAVERS" });
+  });
+
+  it("compte le seuil de chute exact comme une pierre qui tient encore", () => {
+    expect(poserLaPierre(SOUS + SEUIL_DE_CHUTE, 50, SOUS).pose).toBe("DE_TRAVERS");
+  });
+
+  it("fait tomber la pierre qui ne repose plus sur celle du dessous", () => {
+    expect(poserLaPierre(SOUS + SEUIL_DE_CHUTE + 0.01, 50, SOUS).pose).toBe("TOMBEE");
+  });
+
+  it("mesure la chute depuis l'appui et non depuis la cible", () => {
+    // La pile penche : l'appui est à douze unités de la marque. Une pierre
+    // posée du même côté que la pile tient, la même posée de l'autre côté
+    // s'écarte du double et tombe.
+    expect(poserLaPierre(62, 50, 62).pose).toBe("DE_TRAVERS");
+    expect(poserLaPierre(38, 50, 62).pose).toBe("TOMBEE");
+  });
+
+  it("ne fait jamais tomber une pierre posée dans l'axe, même sur une pile penchée", () => {
+    fc.assert(
+      fc.property(
+        fc.double({ min: 0, max: 100, noNaN: true }),
+        fc.double({ min: 0, max: 100, noNaN: true }),
+        (cible, appui) => {
+          expect(poserLaPierre(cible, cible, appui).pose).toBe("DAPLOMB");
+        },
+      ),
+    );
   });
 
   it("ne rend jamais autre chose que la cible ou la position lâchée", () => {
@@ -109,29 +141,69 @@ describe("poserLaPierre", () => {
       fc.property(
         fc.double({ min: 0, max: 100, noNaN: true }),
         fc.double({ min: 0, max: 100, noNaN: true }),
-        (x, cible) => {
-          const posee = poserLaPierre(x, cible);
+        fc.double({ min: 0, max: 100, noNaN: true }),
+        (x, cible, appui) => {
+          const posee = poserLaPierre(x, cible, appui);
 
-          expect(posee.dAplomb ? posee.x === cible : posee.x === x).toBe(true);
+          expect(posee.pose === "DAPLOMB" ? posee.x === cible : posee.x === x).toBe(true);
         },
       ),
     );
   });
 
-  it("dit d'aplomb exactement quand l'écart tient dans la tolérance", () => {
+  it("dit d'aplomb exactement quand l'écart à la cible tient dans la tolérance", () => {
     fc.assert(
       fc.property(
         fc.double({ min: 0, max: 100, noNaN: true }),
         fc.double({ min: 0, max: 100, noNaN: true }),
-        (x, cible) => {
-          expect(poserLaPierre(x, cible).dAplomb).toBe(Math.abs(x - cible) <= TOLERANCE);
+        fc.double({ min: 0, max: 100, noNaN: true }),
+        (x, cible, appui) => {
+          expect(poserLaPierre(x, cible, appui).pose === "DAPLOMB").toBe(
+            Math.abs(x - cible) <= TOLERANCE,
+          );
+        },
+      ),
+    );
+  });
+
+  it("ne fait tomber que ce qui est loin de la cible et loin de l'appui", () => {
+    fc.assert(
+      fc.property(
+        fc.double({ min: 0, max: 100, noNaN: true }),
+        fc.double({ min: 0, max: 100, noNaN: true }),
+        fc.double({ min: 0, max: 100, noNaN: true }),
+        (x, cible, appui) => {
+          expect(poserLaPierre(x, cible, appui).pose === "TOMBEE").toBe(
+            Math.abs(x - cible) > TOLERANCE && Math.abs(x - appui) > SEUIL_DE_CHUTE,
+          );
+        },
+      ),
+    );
+  });
+
+  it("ne rattrape jamais une pierre en s'éloignant de l'appui", () => {
+    fc.assert(
+      fc.property(
+        fc.double({ min: 0, max: 40, noNaN: true }),
+        fc.double({ min: 0, max: 40, noNaN: true }),
+        (proche, ecartEnPlus) => {
+          const cible = 0; // hors de portée de la tolérance des deux côtés
+          const rang = ["DAPLOMB", "DE_TRAVERS", "TOMBEE"];
+          const pres = poserLaPierre(50 + proche, cible, 50).pose;
+          const loin = poserLaPierre(50 + proche + ecartEnPlus, cible, 50).pose;
+
+          expect(rang.indexOf(loin)).toBeGreaterThanOrEqual(rang.indexOf(pres));
         },
       ),
     );
   });
 
   it("n'accepte plus rien qu'une visée exacte si la tolérance est nulle", () => {
-    expect(poserLaPierre(50.5, 50, 0).dAplomb).toBe(false);
-    expect(poserLaPierre(50, 50, 0).dAplomb).toBe(true);
+    expect(poserLaPierre(50.5, 50, SOUS, { tolerance: 0 }).pose).not.toBe("DAPLOMB");
+    expect(poserLaPierre(50, 50, SOUS, { tolerance: 0 }).pose).toBe("DAPLOMB");
+  });
+
+  it("fait tout tomber si rien ne peut porter", () => {
+    expect(poserLaPierre(51, 50, SOUS, { tolerance: 0, seuil: 0 }).pose).toBe("TOMBEE");
   });
 });

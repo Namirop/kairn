@@ -641,6 +641,35 @@
   }
 }
 
+/* Le cairn qui s'écroule : la pierre de trop n'a plus rien sous elle, et la
+   pile part avec.
+
+   Chaque pierre reçoit sa propre course dans `--degringolade`, calculée depuis
+   l'endroit où elle reposait : celles qui penchaient à gauche partent à gauche.
+   Une chute identique pour toutes se lirait comme un fondu, pas comme un
+   écroulement.
+
+   Le retard suit le rang **par le haut** — la dernière posée décroche la
+   première, celles du dessous suivent —, parce que c'est elle qui a manqué son
+   appui. Le tout dure moins de six dixièmes : c'est une attente, on n'y regarde
+   pas une animation de défaite. */
+@utility pierre-qui-degringole {
+  animation: pierre-qui-degringole 420ms cubic-bezier(0.45, 0, 0.9, 0.5) both;
+  animation-delay: var(--retard-de-chute, 0ms);
+}
+
+@keyframes pierre-qui-degringole {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: var(--degringolade);
+  }
+}
+
 /* Un titre dont on ne garde que le trait.
    « Tu retiens peu » n'est pas la seconde ligne d'un titre, c'est ce que la
    première a perdu. La lettre évidée le dit sans qu'on l'écrive, et c'est la
