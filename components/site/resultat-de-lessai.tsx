@@ -70,7 +70,17 @@ export function ResultatDeLEssai({
 
   // Le jeu ne se propose que tant que quelque chose tourne, et il disparaît dès
   // que tout est là : c'est un occupant d'attente, pas une section de la page.
-  const attend = (!avancement || avancement.enCours) && !attenteInterrompue;
+  //
+  // L'aveu des quinze secondes ne le retire que sur l'écran qui n'a rien à
+  // montrer. Là, on annonce qu'on ne sait plus où en est le découpage, et jouer
+  // à côté de cet aveu sonne faux. Sur l'écran qui a déjà les concepts, rien ne
+  // va mal : l'écriture des questions dure vingt secondes de médiane, donc
+  // l'aveu tombe systématiquement en plein milieu d'une attente parfaitement
+  // normale. Le jeu y disparaissait à quinze secondes d'une attente qui en dure
+  // vingt-six — démonté juste avant la partie longue, ce qu'il existe
+  // précisément pour tenir.
+  const attend =
+    (!avancement || avancement.enCours) && !(rienEncore && attenteInterrompue);
 
   if (rienEncore && (!avancement || avancement.enCours)) {
     return (
