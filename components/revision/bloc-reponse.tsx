@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useVenirEnVue } from "@/components/revision/use-venir-en-vue";
 
 /**
  * La réponse de référence, sur sa propre matière.
@@ -16,11 +15,11 @@ import { useVenirEnVue } from "@/components/revision/use-venir-en-vue";
  * demande ; ce bloc est sombre et répond. Aucun élément nouveau n'entre dans le
  * système — c'est la surface qui change de rôle.
  *
- * **Il vient à l'écran en apparaissant.** C'est le seul bloc du produit qui
- * naisse d'un clic et se pose sous le pli : sur un téléphone, la réponse
- * s'affichait sans que rien ne bouge, et on lisait une carte inchangée en se
- * demandant si le bouton avait pris. Il ne se recentre pas pour autant — la
- * question doit rester au-dessus de sa réponse. Voir `useVenirEnVue`.
+ * **Ce n'est pas lui qui vient à l'écran, c'est ce qui le contient.** Il l'a
+ * fait un temps, et il n'amenait alors que lui : le bouton qui le suit restait
+ * dessous, derrière la barre du bas d'un téléphone. Le déplacement appartient
+ * donc à `SuiteDeLaQuestion`, qui porte le bloc **et** le geste qui vient
+ * après.
  *
  * **Le bloc prend toute la colonne, son texte non.** Arrêté aux deux tiers, il
  * s'alignait sur rien : ni sur la carte de la question au-dessus, ni sur la
@@ -36,11 +35,8 @@ export function BlocReponse({
   intitule?: string;
   children: ReactNode;
 }) {
-  const bloc = useVenirEnVue<HTMLDivElement>();
-
   return (
     <div
-      ref={bloc}
       className="rounded-carte bg-surface-roche grain grain-clair p-pas-6 md:p-pas-8 relative overflow-hidden"
     >
       {/* Les jetons de code s'inversent ici, et seulement ici : de l'encre diluée

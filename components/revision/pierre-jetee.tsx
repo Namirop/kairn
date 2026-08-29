@@ -1,6 +1,7 @@
 "use client";
 
 import { BlocReponse } from "@/components/revision/bloc-reponse";
+import { SuiteDeLaQuestion } from "@/components/revision/suite-de-la-question";
 import { useDelaiDeLecture } from "@/components/revision/use-delai-de-lecture";
 import { Button } from "@/components/ui/button";
 import { etalonLisible } from "@/lib/domain/etalon-lisible";
@@ -37,7 +38,7 @@ export function PierreJetee({
   const lu = useDelaiDeLecture(true);
 
   return (
-    <div className="mt-pas-scene">
+    <SuiteDeLaQuestion>
       <BlocReponse>
         <TexteTechnique>{etalonLisible(reponse)}</TexteTechnique>
 
@@ -62,6 +63,6 @@ export function PierreJetee({
           {lu ? "" : "Le temps de la lire."}
         </p>
       </div>
-    </div>
+    </SuiteDeLaQuestion>
   );
 }

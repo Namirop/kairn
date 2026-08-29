@@ -2,6 +2,7 @@
 
 import { BarreDeNotation } from "@/components/revision/barre-de-notation";
 import { BlocReponse } from "@/components/revision/bloc-reponse";
+import { SuiteDeLaQuestion } from "@/components/revision/suite-de-la-question";
 import { Button } from "@/components/ui/button";
 import type { ReviewRating } from "@/lib/db/types";
 import { etalonLisible } from "@/lib/domain/etalon-lisible";
@@ -57,7 +58,7 @@ export function ReponseOuverte({
   }
 
   return (
-    <div className="mt-pas-scene">
+    <SuiteDeLaQuestion>
       <BlocReponse>
         <TexteTechnique>{etalonLisible(answerKey)}</TexteTechnique>
       </BlocReponse>
@@ -66,6 +67,6 @@ export function ReponseOuverte({
       <div className="mt-pas-scene">
         <BarreDeNotation enCours={enCours} onNoter={onSeJuger} />
       </div>
-    </div>
+    </SuiteDeLaQuestion>
   );
 }

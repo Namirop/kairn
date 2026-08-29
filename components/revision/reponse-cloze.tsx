@@ -1,5 +1,6 @@
 "use client";
 
+import { SuiteDeLaQuestion } from "@/components/revision/suite-de-la-question";
 import { useVenirEnVue } from "@/components/revision/use-venir-en-vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +52,7 @@ export function ReponseCloze({
 
   if (trou.verdict === "JUSTE") {
     return (
-      <div className="mt-pas-scene">
+      <SuiteDeLaQuestion>
         {/* Un constat, pas un compliment : la récompense est l'espacement qui
             s'allonge, et le terme qui vient de se poser dans la phrase. */}
         <p className="text-corps text-stone-900">C&apos;est le terme attendu.</p>
@@ -67,13 +68,13 @@ export function ReponseCloze({
             {dernier ? "Terminer" : "Continuer"}
           </Button>
         </div>
-      </div>
+      </SuiteDeLaQuestion>
     );
   }
 
   if (trou.verdict === "RATE") {
     return (
-      <div className="mt-pas-scene">
+      <SuiteDeLaQuestion>
         <p className="text-corps text-stone-500">
           Tu as écrit <span className="font-mono text-stone-900">{propre}</span>.
         </p>
@@ -94,7 +95,7 @@ export function ReponseCloze({
             Je ne l&apos;avais pas
           </Button>
         </div>
-      </div>
+      </SuiteDeLaQuestion>
     );
   }
 

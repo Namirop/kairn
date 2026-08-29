@@ -1,6 +1,7 @@
 "use client";
 
 import { BlocReponse } from "@/components/revision/bloc-reponse";
+import { SuiteDeLaQuestion } from "@/components/revision/suite-de-la-question";
 import { etalonUtile } from "@/lib/domain/etalon-utile";
 import { useDelaiDeLecture } from "@/components/revision/use-delai-de-lecture";
 import { Button } from "@/components/ui/button";
@@ -45,7 +46,7 @@ export function CorrectionFermee({
   const lu = useDelaiDeLecture(!juste);
 
   return (
-    <div className="mt-pas-scene">
+    <SuiteDeLaQuestion>
       <p className="sr-only" role="status">
         {juste ? "Réponse juste." : "Réponse fausse."}
       </p>
@@ -68,6 +69,6 @@ export function CorrectionFermee({
           {lu ? "" : "Le temps de la lire."}
         </p>
       </div>
-    </div>
+    </SuiteDeLaQuestion>
   );
 }
