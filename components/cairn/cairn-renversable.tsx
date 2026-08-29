@@ -60,10 +60,16 @@ export function CairnRenversable({
          comprendre qu'on tenait quelque chose. La croix vise, et c'est
          exactement ce qu'on fait ici — on passe au travers.
 
-         Les gestes sont écoutés ici plutôt que sur le dessin : la zone de prise
-         posée au-dessus les fait remonter jusque-là, et le repère du viewBox se
-         calcule depuis le SVG quoi qu'il arrive. */
-      className={cn("relative h-full w-full cursor-crosshair touch-pan-y", className)}
+         **Ce bloc ne réclame plus rien au navigateur en tactile.** Il a porté
+         un `touch-action`, puis une bande transparente qui en portait un : les
+         deux revenaient à prendre au doigt une part du geste, et la seule
+         version qui marchait faisait de l'empilement une zone où la page ne
+         défile plus. Sur l'écran d'ouverture, ça se lit comme un bug — et un
+         easter egg ne vaut pas ça. Le balayage est maintenant **observé** sur la
+         fenêtre, sans jamais empêcher le défilement : voir
+         `useChuteDesPierres`. Ce qui reste ici ne concerne que la souris et le
+         tapotement. */
+      className={cn("relative h-full w-full cursor-crosshair", className)}
       onPointerMove={chute.surDeplacement}
       onPointerDown={chute.surAppui}
       onPointerLeave={chute.surSortie}
@@ -96,41 +102,6 @@ export function CairnRenversable({
           </g>
         ))}
       </svg>
-
-      {/* La zone de prise, et c'est elle qui règle le partage du geste au doigt.
-
-          **Elle traverse l'écran, elle ne couvre plus la colonne des pierres.**
-          C'est le troisième essai, et les deux premiers ont raté la même cible.
-
-          Le bloc entier gardait la verticale au défilement et ne prenait que
-          l'horizontale : un balayage oblique partait au défilement avant d'avoir
-          touché une pierre. La bande d'après ne couvrait que la colonne des
-          pierres — le doigt **posé dessus** appartenait bien au cairn dans
-          toutes les directions, mais le geste qu'on fait pour faucher un
-          empilement part **à côté** et le traverse, et à ce moment-là le
-          navigateur a déjà décidé de défiler. Une fois qu'il a décidé, il annule
-          le pointeur : plus aucun déplacement ne remonte jusqu'ici, et il n'y a
-          rien à rattraper après coup.
-
-          `touch-action` se lit sur ce que le doigt touche **en premier**. La
-          bande doit donc être là où le geste commence, c'est-à-dire n'importe
-          où sur la largeur — d'où `w-screen` centré, qui déborde volontairement
-          la boîte du cairn. Elle reste bornée en hauteur à celle de
-          l'empilement, environ deux cent vingt-cinq pixels sur téléphone.
-
-          **Le prix est réel et il est assumé :** on ne peut pas amorcer un
-          défilement depuis cette bande. Le titre au-dessus et tout ce qui suit
-          restent disponibles pour ça. C'est l'entre-deux entre « le cairn ne
-          réagit qu'à un geste strictement latéral » et « le cairn est un trou
-          dans la page ».
-
-          Elle est transparente et n'intercepte rien : les gestes remontent au
-          bloc qui les écoute, par l'arbre et non par la géométrie — déborder de
-          son parent ne l'en détache pas. */}
-      <span
-        aria-hidden
-        className="absolute inset-y-0 left-1/2 w-screen max-w-none -translate-x-1/2 touch-none"
-      />
     </div>
   );
 }
