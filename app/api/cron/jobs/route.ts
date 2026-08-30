@@ -30,16 +30,26 @@ export const maxDuration = 60;
 /**
  * Borne le travail d'un passage : le reste attendra le passage suivant.
  *
- * Les jobs tournent en série et chacun peut porter un appel modèle de dix à
- * trente secondes : trois est ce qui rentre dans la minute accordée, avec de la
- * marge pour un appel lent. À un passage toutes les dix minutes, la file absorbe
- * dix-huit jobs à l'heure — au-delà de ce qu'un compte peut produire en une
- * journée, puisque son plafond mensuel est de trente concepts.
- *
  * C'est la valeur à relever d'abord si la file prend du retard, en même temps
  * que `maxDuration` : les deux vont ensemble et l'une sans l'autre ne sert rien.
  */
-const BATCH_SIZE = 3;
+const JOBS_PAR_PASSAGE = 3;
+
+/**
+ * Au-delà, on ne commence plus de job : celui-ci ne finirait pas.
+ *
+ * Trois jobs tenaient dans la minute tant que ce passage ne reprenait que du
+ * découpage — deux secondes et demie à quinze en production. Depuis que
+ * l'écriture des questions y est revenue, un seul job peut prendre huit à
+ * quarante-trois secondes, médiane vingt : trois d'affilée débordent la minute,
+ * et un passage coupé laisse un job « en cours » qui a peut-être déjà payé son
+ * appel sans avoir écrit ce qu'il rendait.
+ *
+ * Le compte fixe ne suffit donc pas, il faut le temps. Vingt secondes laissent
+ * les quarante restantes au job qu'on démarre, ce qui couvre le neuvième
+ * décile ; le premier part toujours, sans quoi un passage ne ferait rien.
+ */
+const BUDGET_DE_DEPART_MS = 20_000;
 
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
@@ -50,7 +60,7 @@ export async function GET(request: Request) {
   // Les essais que personne n'a réclamés : leur texte n'a pas à rester, et
   // personne n'a accepté qu'il reste. Les cascades emportent concepts compris.
   const visitesOubliees = await oublierLesVisitesAbandonnees();
-  const jobs = await findResumableJobs(BATCH_SIZE);
+  const jobs = await findResumableJobs(JOBS_PAR_PASSAGE);
   const comptes: Record<JobOutcome, number> = {
     DONE: 0,
     FAILED: 0,
@@ -59,14 +69,23 @@ export async function GET(request: Request) {
     REPRIS: 0,
   };
 
+  const debut = Date.now();
+  let lances = 0;
+
   for (const job of jobs) {
+    if (lances > 0 && Date.now() - debut > BUDGET_DE_DEPART_MS) break;
+
     comptes[await runJob(job.id)] += 1;
+    lances += 1;
   }
 
   await signalerLeBattement("jobs");
 
   return NextResponse.json({
-    repris: jobs.length,
+    // Ce qui a réellement tourné, pas ce qui a été trouvé : le reste est resté
+    // en file faute de temps, et le passage suivant le reprendra.
+    repris: lances,
+    trouves: jobs.length,
     termines: comptes.DONE,
     echoues: comptes.FAILED,
     ignores: comptes.SKIPPED,

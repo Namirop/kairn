@@ -1,14 +1,15 @@
 import { prisma } from "@/lib/db/client";
-import { MAX_ATTEMPTS, STALL_AFTER_MS } from "@/lib/db/generation-job";
-import type { AiBatch, GenerationJob } from "@/lib/db/types";
+import { MAX_ATTEMPTS } from "@/lib/db/generation-job";
+import type { GenerationJob } from "@/lib/db/types";
 
 /**
- * Les jobs de questions et les lots qui les portent.
+ * Les jobs de questions : les écrire, et les couper quand ils débordent.
  *
- * Un job de questions naît en attente. Celui d'un dépôt est lancé aussitôt, en
- * appel direct ; celui d'une régénération attend la soumission groupée, qui
- * coûte moitié prix contre une latence de quelques heures. C'est le seul chemin
- * où le travail et sa réponse sont séparés par des heures.
+ * Un job naît en attente et part en appel direct, qu'il vienne d'un dépôt ou
+ * d'une régénération. C'est le seul chemin depuis le 30/08/2026 : l'envoi groupé
+ * séparait le travail de sa réponse de quelques heures pour un demi-tarif, et ce
+ * demi-tarif coûtait six à sept fois l'appel direct depuis que le modèle
+ * primaire est Luna.
  */
 
 /**
@@ -112,91 +113,4 @@ export async function scinderLeJobDeQuestions(
   ]);
 
   return true;
-}
-
-/**
- * Les jobs de questions qui attendent une soumission, les plus vieux d'abord.
- *
- * Deux populations depuis que le dépôt écrit ses questions en appel direct :
- * les régénérations, qui n'ont jamais été lancées et peuvent attendre ; et les
- * jobs qu'un appel direct a laissés en plan — jamais déclenchés, ou interrompus
- * en cours d'exécution. Le chemin groupé est leur rattrapage, et le seul
- * consommateur de ces jobs-là : sans ça, un processus recyclé au mauvais moment
- * laisserait un dépôt annoncer un travail en cours pour toujours.
- */
-export async function trouverJobsASoumettre(
-  limite: number,
-  maintenant: Date = new Date(),
-  /** Restreint aux jobs d'un compte. Absent depuis le cron, qui ramasse tout. */
-  userId?: string,
-): Promise<GenerationJob[]> {
-  const bloqueAvant = new Date(maintenant.getTime() - STALL_AFTER_MS);
-
-  return prisma.generationJob.findMany({
-    where: {
-      kind: "VARIANTS",
-      batchId: null,
-      attempts: { lt: MAX_ATTEMPTS },
-      // Une demande reportée n'entre pas dans un lot avant sa date : elle
-      // existe pour occuper la place, pas pour partir tout de suite.
-      OR: [{ notBefore: null }, { notBefore: { lte: maintenant } }],
-      AND: [{ OR: [{ status: "QUEUED" }, { status: "RUNNING", startedAt: { lt: bloqueAvant } }] }],
-      ...(userId ? { input: { userId } } : {}),
-    },
-    orderBy: { createdAt: "asc" },
-    take: limite,
-  });
-}
-
-/** Le lot est parti : ses jobs sont en cours et portent son identifiant. */
-export async function enregistrerLot(providerId: string, jobIds: string[]): Promise<AiBatch> {
-  const lot = await prisma.aiBatch.create({
-    data: { providerId, requests: jobIds.length },
-  });
-
-  await prisma.generationJob.updateMany({
-    where: { id: { in: jobIds } },
-    data: { status: "RUNNING", startedAt: new Date(), batchId: lot.id, attempts: { increment: 1 } },
-  });
-
-  return lot;
-}
-
-export async function lireLotsOuverts(limite: number): Promise<AiBatch[]> {
-  return prisma.aiBatch.findMany({
-    where: { status: "SUBMITTED" },
-    orderBy: { createdAt: "asc" },
-    take: limite,
-  });
-}
-
-export async function lireJobsDuLot(batchId: string): Promise<GenerationJob[]> {
-  return prisma.generationJob.findMany({ where: { batchId } });
-}
-
-export async function cloreLot(batchId: string, statut: "ENDED" | "FAILED"): Promise<void> {
-  await prisma.aiBatch.update({
-    where: { id: batchId },
-    data: { status: statut, endedAt: new Date(), polledAt: new Date() },
-  });
-}
-
-export async function noterRelevee(batchId: string): Promise<void> {
-  await prisma.aiBatch.update({ where: { id: batchId }, data: { polledAt: new Date() } });
-}
-
-/**
- * Rend les jobs à la file quand leur lot n'a rien donné. Ceux qui ont épuisé
- * leurs tentatives restent en échec : on ne relance pas en boucle.
- */
-export async function rendreJobsALaFile(jobIds: string[], motif: string): Promise<void> {
-  await prisma.generationJob.updateMany({
-    where: { id: { in: jobIds }, attempts: { lt: MAX_ATTEMPTS } },
-    data: { status: "QUEUED", batchId: null, lastError: motif },
-  });
-
-  await prisma.generationJob.updateMany({
-    where: { id: { in: jobIds }, attempts: { gte: MAX_ATTEMPTS } },
-    data: { status: "FAILED", finishedAt: new Date(), lastError: motif },
-  });
 }

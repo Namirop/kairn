@@ -94,7 +94,6 @@ oubliée s'y voit comme une panne au lieu de fermer la porte en silence.
 | `EMAIL_FROM`                   | non    | Expéditeur des emails transactionnels.                                      |
 | `CRON_SECRET`                  | oui    | Jeton `Authorization: Bearer` des routes cron.                              |
 | `BATTEMENT_JOBS_URL`           | non    | Heartbeat Better Stack signalé par `/api/cron/jobs` quand il aboutit.       |
-| `BATTEMENT_LOTS_URL`           | non    | Idem pour `/api/cron/lots`.                                                 |
 | `BATTEMENT_RAPPELS_URL`        | non    | Idem pour `/api/cron/rappels`.                                              |
 | `MOCK_AI`                      | oui    | `true` sert des fixtures locales, sans aucune requête réseau.               |
 | `AI_ENABLED`                   | oui    | `false` fait échouer immédiatement tout appel modèle.                       |
@@ -154,7 +153,7 @@ lib/
   domain/        Logique pure : géométrie du cairn, échéances, jours locaux,
                  période de quota, contrôles automatiques sur une génération
   db/            Seul endroit qui importe le client Prisma
-  ai/            callAI(), envoi groupé, prompts système, schémas Zod, fixtures
+  ai/            callAI(), prompts système, schémas Zod, fixtures
   depots/        Le geste de dépôt côté serveur
   images/        Lecture et réduction d'une capture avant envoi au modèle
   auth/  email/  jobs/  cron/
@@ -281,8 +280,8 @@ est rendue.
 La suite s'enchaîne par jobs : lecture de la capture s'il y en a une, puis découpage en concepts,
 puis écriture des questions. Les octets de l'image ne survivent pas à sa lecture — dès que le texte
 existe, ils sont effacés dans la même écriture. Le découpage est un appel normal, parce que c'est le
-retour visible du dépôt ; les questions partent en envoi groupé, par lots de trois concepts, parce
-qu'elles ne servent qu'à la première révision.
+retour visible du dépôt ; les questions suivent dans le même mouvement, par groupes de trois
+concepts, parce que l'entraînement libre les rend utiles à l'instant du dépôt.
 
 Rien de ce qui a coûté un appel n'est jeté : un dépôt dont les questions échouent garde ses
 concepts, et l'écran dit ce qui manque. Un concept marqué douteux par le modèle ne part pas en
@@ -366,10 +365,8 @@ quelqu'un qui veut sortir n'a pas à rentrer d'abord.
 Une ingestion écrit un `GenerationJob` et rend la main ; `after()` déclenche le traitement une fois
 la réponse envoyée. La route `GET /api/cron/jobs` reprend les travaux restés en attente et ceux dont
 le processus est mort en cours de route depuis plus de dix minutes, au plus trois fois. La route
-`GET /api/cron/lots` relève les envois groupés terminés puis soumet ceux qui attendent encore ; un
-lot resté sans réponse au bout d'un jour rend ses jobs à la file, jamais relancé en boucle. La route
 `GET /api/cron/rappels`, horaire, sélectionne les comptes dont l'heure locale correspond à leur
-heure de rappel. Les trois exigent `Authorization: Bearer $CRON_SECRET`.
+heure de rappel. Les deux exigent `Authorization: Bearer $CRON_SECRET`.
 
 Quelle que soit l'étape qui échoue, un dépôt cesse d'annoncer un travail en cours : c'est la même
 fonction qui referme, et elle garde les concepts déjà écrits.
@@ -389,8 +386,8 @@ la ponctuation.
 Le banc d'évaluation ne fait pas partie de cette commande : il dépense.
 
 `verify:ai` vérifie à l'exécution ce qu'un test unitaire ne peut pas prouver : qu'aucune requête ne
-sort en mode mock, que l'envoi groupé est borné par le même plafond que l'appel unitaire, et que ce
-plafond tient quand vingt-cinq réservations partent au même instant — cette garantie-là est dans
+sort en mode mock, que le plafond du jour refuse avant d'émettre, et qu'il tient quand vingt-cinq
+réservations partent au même instant — cette garantie-là est dans
 l'atomicité d'une instruction Postgres, pas dans le code TypeScript.
 
 `verify:ingestion` rejoue le pipeline entier sur un compte de vérification créé puis effacé : dépôt

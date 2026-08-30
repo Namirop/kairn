@@ -43,8 +43,8 @@ export async function utilisateurDeTest(): Promise<string> {
 /**
  * Exécute les jobs en attente de ce dépôt, sauf les questions.
  *
- * Sert les cas qui éprouvent le chemin groupé : ils veulent des jobs de
- * questions laissés en file, à soumettre en lot.
+ * Sert les cas qui éprouvent ce qui arrive aux questions : ils veulent le job
+ * laissé en file, pour le lancer eux-mêmes dans les conditions qu'ils posent.
  */
 export async function executerJobsEnAttente(inputId: string): Promise<number> {
   const jobs = await prisma.generationJob.findMany({
@@ -116,7 +116,6 @@ export async function repartirDeZero(userId: string): Promise<void> {
   await prisma.dailyUsage.deleteMany({ where: { userId } });
   await prisma.monthlyUsage.deleteMany({ where: { userId } });
   await prisma.waitlistEntry.deleteMany({ where: { userId } });
-  await prisma.aiBatch.deleteMany({ where: { jobs: { none: {} } } });
 }
 
 export async function compterQuestions(inputId: string): Promise<number> {

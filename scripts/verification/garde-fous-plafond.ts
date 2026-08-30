@@ -1,5 +1,4 @@
-import { submitAIBatch } from "@/lib/ai/batch";
-import { EXTRACT_ATOMS, GENERATE_VARIANTS } from "@/lib/ai/schemas";
+import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
 import { callAI } from "@/lib/ai/client";
 import { prisma } from "@/lib/db/client";
 import { readAiConfig } from "@/lib/ai/config";
@@ -9,7 +8,7 @@ import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
 import { expectFailure, record } from "./journal";
 
 /**
- * Le plafond journalier, éprouvé sur l'appel unitaire comme sur l'envoi groupé.
+ * Le plafond journalier, éprouvé sur l'appel au modèle.
  *
  * Le compteur du jour est amené à saturation puis remis exactement dans l'état
  * où il était : la vérification ne doit consommer aucune vraie place. La tenue
@@ -18,15 +17,6 @@ import { expectFailure, record } from "./journal";
  */
 
 const SATURE = 3;
-
-function requeteGroupee(reference: string) {
-  return {
-    reference,
-    contract: GENERATE_VARIANTS,
-    system: "",
-    messages: [{ role: "user" as const, content: "Concept 1.\nUn concept de vérification." }],
-  };
-}
 
 /**
  * Les deux populations ne s'affament pas l'une l'autre.
@@ -54,11 +44,17 @@ export async function verifierPartAnonyme(): Promise<void> {
   };
 
   const avantCompte = compte
-    ? await prisma.aiUserQuota.findUnique({ where: { userId_day: { userId: compte.id, day: jour } } })
+    ? await prisma.aiUserQuota.findUnique({
+        where: { userId_day: { userId: compte.id, day: jour } },
+      })
     : null;
 
   try {
-    await prisma.aiCallQuota.upsert({ where: { day: jour }, create: { day: jour }, update: { reserved: 0 } });
+    await prisma.aiCallQuota.upsert({
+      where: { day: jour },
+      create: { day: jour },
+      update: { reserved: 0 },
+    });
     await prisma.aiAnonymousQuota.upsert({
       where: { day: jour },
       create: { day: jour, reserved: config.anonymousDailyCallCap },
@@ -76,7 +72,9 @@ export async function verifierPartAnonyme(): Promise<void> {
       await prisma.aiUserQuota.deleteMany({ where: { userId: compte.id, day: jour } });
     }
 
-    const compteServi = compte ? await passe(() => reserverLesDeuxPlaces(config, { userId: compte.id })) : null;
+    const compteServi = compte
+      ? await passe(() => reserverLesDeuxPlaces(config, { userId: compte.id }))
+      : null;
     const interneServi = await passe(() => reserverLesDeuxPlaces(config, { interne: true }));
 
     record(
@@ -179,15 +177,6 @@ export async function verifierPlafond(): Promise<void> {
     process.env.MOCK_AI = "true";
     process.env.AI_DAILY_CALL_CAP = String(SATURE);
 
-    // Le mode mock ne dépense rien : il ne doit donc rien réserver, sans quoi
-    // une journée de développement viderait le plafond du jour.
-    const simule = await submitAIBatch([requeteGroupee("mock-1"), requeteGroupee("mock-2")]);
-    record(
-      "Un lot simulé n'entame pas le plafond du jour",
-      (await lireReservationsDuJour()) === SATURE && simule.requetes === 2,
-      `compteur à ${await lireReservationsDuJour()} après ${simule.requetes} requêtes simulées`,
-    );
-
     process.env.MOCK_AI = "false";
     await expectFailure("Le plafond journalier refuse avant d'émettre", "AI_QUOTA", () =>
       callAI({
@@ -197,36 +186,33 @@ export async function verifierPlafond(): Promise<void> {
       }),
     );
 
-    await expectFailure("Le plafond journalier refuse aussi un envoi groupé", "AI_QUOTA", () =>
-      submitAIBatch([requeteGroupee("lot-1"), requeteGroupee("lot-2")]),
-    );
-
     record(
       "Un refus n'entame pas le compteur",
       (await lireReservationsDuJour()) === SATURE,
       `compteur à ${await lireReservationsDuJour()}`,
     );
 
-    // Un lot prend ses places toutes ensemble ou aucune : à deux places libres,
-    // un lot de trois requêtes est refusé en entier.
+    // Une réservation multiple prend ses places toutes ensemble ou aucune : à
+    // deux places libres, une demande de trois est refusée en entier.
     const troisSurDeux = await reserverAppelsModele(SATURE + 2, 3);
     const deuxSurDeux = await reserverAppelsModele(SATURE + 2, 2);
     record(
-      "Un lot réserve ses places d'un bloc, ou aucune",
+      "Une réservation multiple prend ses places d'un bloc, ou aucune",
       !troisSurDeux.obtenue && deuxSurDeux.obtenue && deuxSurDeux.utilisees === SATURE + 2,
       `trois refusées, puis deux accordées jusqu'à ${deuxSurDeux.utilisees}`,
     );
 
-    // Le premier lot d'une journée UTC n'a aucune ligne à mettre à jour :
-    // l'insertion ne rencontre alors aucune condition de plafond. Un lot plus
-    // gros que le plafond entier s'y installerait, juste après minuit.
+    // La première réservation d'une journée UTC n'a aucune ligne à mettre à
+    // jour : l'insertion ne rencontre alors aucune condition de plafond. Une
+    // demande plus grosse que le plafond entier s'y installerait, juste après
+    // minuit.
     await prisma.aiCallQuota.deleteMany({ where: { day: jour } });
 
     const plusGrosQueLePlafond = await reserverAppelsModele(SATURE, SATURE + 1);
     record(
-      "Un lot plus gros que le plafond est refusé, même sur une journée vierge",
+      "Une demande plus grosse que le plafond est refusée, même sur une journée vierge",
       !plusGrosQueLePlafond.obtenue && (await lireReservationsDuJour()) === 0,
-      `compteur à ${await lireReservationsDuJour()} après un lot de ${SATURE + 1} sur ${SATURE}`,
+      `compteur à ${await lireReservationsDuJour()} après une demande de ${SATURE + 1} sur ${SATURE}`,
     );
   } finally {
     // Le compteur peut avoir été effacé au-dessus : on le repose tel qu'il était.

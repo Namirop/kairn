@@ -1,7 +1,7 @@
 /**
  * Le battement d'un passage de cron : le signal qu'il est allé au bout.
  *
- * Les trois routes cron sont la machinerie silencieuse du produit. Si le
+ * Les deux routes cron sont la machinerie silencieuse du produit. Si le
  * déclencheur externe s'arrête, si le secret cesse de correspondre, ou si un
  * passage meurt en cours de route, rien ne le dit : le site reste debout, la
  * surveillance de disponibilité le voit vert, et pendant ce temps les dépôts ne
@@ -15,7 +15,6 @@
 
 const ADRESSES = {
   jobs: "BATTEMENT_JOBS_URL",
-  lots: "BATTEMENT_LOTS_URL",
   rappels: "BATTEMENT_RAPPELS_URL",
 } as const;
 

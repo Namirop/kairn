@@ -65,7 +65,6 @@ async function main(): Promise<void> {
 
     await reprise.casDecoupageImpossible(userId);
     await reprise.casLectureImpossible(userId, capture);
-    await reprise.casLotPerdu(userId);
     await reprise.casEchecPartiel(userId);
 
     await limites.casDoubleEnvoi(userId);

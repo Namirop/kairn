@@ -117,8 +117,15 @@ export async function finishJob(
 /**
  * Jobs que le cron peut relancer, les plus anciens d'abord.
  *
- * Les jobs de questions en sont exclus : ils vivent dans un lot chez le
- * fournisseur, et les reprendre ici les marquerait terminés sans réponse.
+ * **Les trois natures y sont, questions comprises.** Elles en étaient exclues
+ * parce qu'un job de questions vivait dans un lot chez le fournisseur et que
+ * seule la relève du lot pouvait le refermer. L'envoi groupé n'existe plus : un
+ * job de questions part en appel direct comme les deux autres, et sans ce
+ * filet, celui dont le déclenchement après réponse n'a pas eu lieu — processus
+ * recyclé, contexte de requête perdu — restait en attente pour toujours.
+ *
+ * Un job repris est soit resté en file, soit en cours depuis plus longtemps
+ * qu'un traitement ne dure. `notBefore` tient les régénérations différées.
  */
 export async function findResumableJobs(
   limit: number,
@@ -128,7 +135,7 @@ export async function findResumableJobs(
 
   return prisma.generationJob.findMany({
     where: {
-      kind: { in: ["OCR", "ATOMS"] },
+      kind: { in: ["OCR", "ATOMS", "VARIANTS"] },
       attempts: { lt: MAX_ATTEMPTS },
       OR: [{ notBefore: null }, { notBefore: { lte: now } }],
       AND: [{ OR: [{ status: "QUEUED" }, { status: "RUNNING", startedAt: { lt: stallCutoff } }] }],

@@ -72,18 +72,17 @@ export async function casDepotTexte(userId: string): Promise<void> {
     `${depot.status}, ${depot.atoms.length} concepts, ${questions} questions`,
   );
 
-  // Le cœur du §7 : les questions sont là sans qu'aucun lot soit parti. C'est
-  // la seule assertion qui distingue l'appel direct de l'envoi groupé, les deux
-  // écrivant les mêmes questions au bout du compte.
-  const lots = await prisma.aiBatch.count({ where: { jobs: { some: { inputId } } } });
+  // Le cœur du §7 : les questions sont là et plus rien n'attend derrière. Ce qui
+  // se lisait ici à l'absence de lot se lit maintenant à la file — il n'y a plus
+  // de second chemin d'où elles pourraient venir des heures plus tard.
   const enAttente = await prisma.generationJob.count({
     where: { inputId, kind: "VARIANTS", status: { in: ["QUEUED", "RUNNING"] } },
   });
 
   record(
-    "Texte — les questions arrivent en appel direct, sans passer par un lot",
-    questions === 12 && lots === 0 && enAttente === 0,
-    `${lots} lot(s) soumis, ${enAttente} job(s) de questions encore en file`,
+    "Texte — les questions arrivent avec le dépôt, rien ne reste en file",
+    questions === 12 && enAttente === 0,
+    `${enAttente} job(s) de questions encore en file`,
   );
 
   const planifie = await prisma.variant.count({ where: { atom: { inputId }, retiredAt: null } });

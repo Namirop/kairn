@@ -13,14 +13,12 @@ import { messageDuGroupe as construireLEnvoi } from "@/lib/domain/envoi-de-quest
 import { LotIncomplet, scinderApresTroncature } from "./reprise-du-lot";
 
 /**
- * L'écriture des questions d'un job, quel que soit le chemin qui l'a apporté.
+ * L'écriture des questions d'un job.
  *
- * Deux chemins existent et partagent tout sauf l'émission. L'appel direct sert
- * le dépôt : on dépose, on veut jouer, et faire attendre les questions jusqu'au
- * lendemain cassait le geste. L'entraînement libre a invalidé le raisonnement
- * de la phase 2, qui ne tenait que tant que les questions ne servaient qu'à la
- * première révision. L'envoi groupé reste : il coûte moitié prix et sert la
- * régénération, qui peut attendre.
+ * En appel direct, et il n'y en a plus d'autre. Les questions partaient en envoi
+ * groupé — moitié prix contre quelques heures — tant qu'elles ne servaient qu'à
+ * la première révision ; l'entraînement libre les a rendues utiles à l'instant
+ * du dépôt, et le passage à Luna a retiré au demi-tarif sa raison d'être.
  */
 
 /** Les concepts d'un job, dans l'ordre du job : c'est le rang annoncé au modèle. */

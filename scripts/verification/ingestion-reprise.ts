@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/db/client";
-import { MAX_ATTEMPTS } from "@/lib/db/generation-job";
 import { deposer } from "@/lib/depots/deposer";
-import { releverLots, soumettreLotsEnAttente } from "@/lib/jobs/questions";
+import { runJob } from "@/lib/jobs/runner";
 import { executerJobsEnAttente, formulaire, libererLaJournee } from "./depot-simule";
 import { record } from "./journal";
 
@@ -104,80 +103,41 @@ export async function casLectureImpossible(userId: string, image: File): Promise
 }
 
 /**
- * Le lot part, puis disparaît avant sa relève — processus recyclé, mémoire
- * perdue. Passé le délai d'attente, ses jobs reviennent à la file.
- */
-export async function casLotPerdu(userId: string): Promise<void> {
-  const inputId = await depotAvecConcepts(userId, "verif-lot-perdu");
-
-  await soumettreLotsEnAttente();
-  await prisma.aiBatch.updateMany({
-    where: { jobs: { some: { inputId } } },
-    data: { createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000) },
-  });
-
-  // Le lot simulé ne vit qu'en mémoire du processus : le relire une fois suffit
-  // à l'oublier, ce qui reproduit exactement le lot qui ne revient jamais.
-  const { readAIBatch } = await import("@/lib/ai/batch");
-  const { GENERATE_VARIANTS } = await import("@/lib/ai/schemas");
-  const lot = await prisma.aiBatch.findFirstOrThrow({ where: { jobs: { some: { inputId } } } });
-  await readAIBatch(lot.providerId, GENERATE_VARIANTS);
-
-  await releverLots();
-
-  const job = await prisma.generationJob.findFirstOrThrow({ where: { inputId, kind: "VARIANTS" } });
-  const ferme = await prisma.aiBatch.findUniqueOrThrow({ where: { id: lot.id } });
-
-  record(
-    "Lot perdu — le lot est clos en échec et son job revient à la file",
-    ferme.status === "FAILED" && job.status === "QUEUED" && job.batchId === null,
-    `lot ${ferme.status}, job ${job.status}, tentative ${job.attempts}`,
-  );
-
-  // Ce job reste en attente : on le retire pour que le cas suivant parte seul.
-  await prisma.input.delete({ where: { id: inputId } });
-}
-
-/**
- * Le même lot échoue jusqu'au bout. Les questions manquent, les concepts
- * restent, et le dépôt cesse enfin d'annoncer un travail en cours.
+ * Le job de questions échoue pour de bon. Les questions manquent, les concepts
+ * restent, et le dépôt cesse d'annoncer un travail en cours.
+ *
+ * L'échec est provoqué en vidant le groupe du job de ses concepts : c'est la
+ * seule panne dont on sache qu'elle se reproduira à l'identique, donc la seule
+ * qui éprouve la fin de course plutôt qu'une reprise.
  */
 export async function casEchecPartiel(userId: string): Promise<void> {
   const inputId = await depotAvecConcepts(userId, "verif-echec-partiel");
+  const job = await prisma.generationJob.findFirstOrThrow({
+    where: { inputId, kind: "VARIANTS", status: "QUEUED" },
+  });
 
-  for (let tentative = 0; tentative < MAX_ATTEMPTS; tentative += 1) {
-    await soumettreLotsEnAttente();
+  await prisma.generationJob.update({
+    where: { id: job.id },
+    data: { atomIds: ["concept-disparu"] },
+  });
 
-    const lot = await prisma.aiBatch.findFirstOrThrow({
-      where: { status: "SUBMITTED", jobs: { some: { inputId } } },
-    });
-
-    await prisma.aiBatch.update({
-      where: { id: lot.id },
-      data: { createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000) },
-    });
-
-    const { readAIBatch } = await import("@/lib/ai/batch");
-    const { GENERATE_VARIANTS } = await import("@/lib/ai/schemas");
-    await readAIBatch(lot.providerId, GENERATE_VARIANTS);
-    await releverLots();
-  }
+  await runJob(job.id);
 
   const depot = await prisma.input.findUniqueOrThrow({
     where: { id: inputId },
     include: { atoms: { include: { variants: true } }, jobs: true },
   });
   const questions = depot.atoms.flatMap((atome) => atome.variants);
-  const enEchec = depot.jobs.filter((job) => job.status === "FAILED");
+  const enEchec = depot.jobs.filter((emploi) => emploi.status === "FAILED");
 
   record(
-    "Échec à mi-parcours — le dépôt garde ses concepts et ne reste pas en cours",
+    "Échec des questions — le dépôt garde ses concepts et ne reste pas en cours",
     depot.status === "READY" && depot.atoms.length === 3 && questions.length === 0,
     `${depot.status}, ${depot.atoms.length} concepts, ${questions.length} questions`,
   );
 
   record(
-    "Échec à mi-parcours — le job cesse après trois tentatives, motif enregistré",
+    "Échec des questions — le job est refermé en échec, motif enregistré",
     enEchec.length === 1 && (enEchec[0]?.lastError ?? "").length > 0,
     `${enEchec.length} job(s) en échec — ${enEchec[0]?.lastError ?? "sans motif"}`,
   );
