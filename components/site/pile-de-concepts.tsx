@@ -18,13 +18,19 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  *
  * Le filet de lichen à gauche fait le reste : c'est lui qui dit « un concept »,
  * et il se répète assez pour qu'on compte sans lire.
+ *
+ * **Chaque concept fait sa hauteur, pas celle de son rang.** Une grille étire
+ * ses cellules par défaut : le filet d'un concept de deux lignes descendait
+ * jusqu'au bas de celui de quatre lignes posé en face, et les trois lignes
+ * blanches sous le texte se lisaient comme du texte manquant. Le filet mesure ce
+ * qu'il borde, sinon il ne borde plus rien.
  */
 
 type Concept = { id: string; concept: string; tags: string[] };
 
 export function PileDeConcepts({ concepts }: { concepts: Concept[] }) {
   return (
-    <ul className="gap-pas-4 md:gap-x-pas-8 md:gap-y-pas-6 grid md:grid-cols-2">
+    <ul className="gap-pas-4 md:gap-x-pas-8 md:gap-y-pas-6 grid items-start md:grid-cols-2">
       {concepts.map((concept) => (
         <li key={concept.id} className="border-lichen pl-pas-4 border-l-2">
           <p className="text-corps leading-relaxed text-stone-900">
