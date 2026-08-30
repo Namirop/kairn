@@ -102,7 +102,12 @@ export function CairnRenversable({
               }}
               transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}
             >
-              <PoseDePierre rang={rang} derniere={rang === pierres.length - 1} anime={pose}>
+              <PoseDePierre
+                rang={rang}
+                total={pierres.length}
+                derniere={rang === pierres.length - 1}
+                anime={pose}
+              >
                 <ArêtesDePierre pierre={pierre} derniere={rang === pierres.length - 1} />
               </PoseDePierre>
             </g>

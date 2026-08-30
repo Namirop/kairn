@@ -14,19 +14,21 @@ import type { Pierre } from "@/lib/domain/cairn-stack";
 export function PierrePosee({
   pierre,
   rang,
+  total,
   derniere,
   anime,
   clair = false,
 }: {
   pierre: Pierre;
   rang: number;
+  total: number;
   derniere: boolean;
   anime: boolean;
   clair?: boolean;
 }) {
   return (
     <g transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}>
-      <PoseDePierre rang={rang} derniere={derniere} anime={anime}>
+      <PoseDePierre rang={rang} total={total} derniere={derniere} anime={anime}>
         <ArêtesDePierre pierre={pierre} derniere={derniere} clair={clair} />
       </PoseDePierre>
     </g>
