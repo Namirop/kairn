@@ -59,6 +59,14 @@ export function useChuteDesPierres(
   { cadre = CADRE_SERRE, tenu = false }: { cadre?: Cadre; tenu?: boolean } = {},
 ) {
   const refSvg = useRef<SVGSVGElement>(null);
+  /**
+   * La zone qui joue — pas le dessin.
+   *
+   * C'est elle qui dit si un geste est parti du cairn, et elle est plus large
+   * que lui : le mouvement qui fauche un empilement commence **à côté** des
+   * pierres. Voir la bande de prise dans `CairnRenversable`.
+   */
+  const refZoneDeJeu = useRef<HTMLDivElement>(null);
   const refsGroupes = useRef<(SVGGElement | null)[]>([]);
   const corps = useRef<Corps[]>(initialiser(pierres));
   const phase = useRef<Phase>("pose");
@@ -243,7 +251,7 @@ export function useChuteDesPierres(
     const surDebut = (evenement: TouchEvent) => {
       const cible = evenement.target;
       depuisLaPrise =
-        tenu && cible instanceof Node && (refSvg.current?.contains(cible) ?? false);
+        tenu && cible instanceof Node && (refZoneDeJeu.current?.contains(cible) ?? false);
       precedent = null;
     };
 
@@ -300,5 +308,5 @@ export function useChuteDesPierres(
     };
   }, [pierres, peindre]);
 
-  return { refSvg, refsGroupes, surDeplacement, surAppui, surSortie };
+  return { refSvg, refZoneDeJeu, refsGroupes, surDeplacement, surAppui, surSortie };
 }

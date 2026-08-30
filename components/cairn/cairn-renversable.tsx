@@ -5,7 +5,7 @@ import { useReducedMotion } from "motion/react";
 import { Cairn } from "@/components/cairn/cairn";
 import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
 import { PoseDePierre } from "@/components/cairn/pose-de-pierre";
-import { PriseDuCairn } from "@/components/cairn/prise-du-cairn";
+import { BandeDePrise, PriseDuCairn } from "@/components/cairn/prise-du-cairn";
 import { SolDuCairn } from "@/components/cairn/sol-du-cairn";
 import { useAnimationPossible } from "@/components/cairn/use-animation-possible";
 import { useChuteDesPierres } from "@/components/cairn/use-chute-des-pierres";
@@ -64,6 +64,7 @@ export function CairnRenversable({
   return (
     <div ref={refZone} className={cn("relative h-full w-full", className)}>
       <div
+        ref={chute.refZoneDeJeu}
         /* La croix, et pas une pierre dessinée. Un curseur en forme de pierre
            disait la matière mais pas le geste : posé sur un empilement de
            pierres, il s'y confondait, et il fallait le voir bouger pour
@@ -71,12 +72,10 @@ export function CairnRenversable({
            exactement ce qu'on fait ici — on passe au travers.
 
            **Ce bloc ne réclame rien au navigateur en tactile, sauf quand on le
-           lui demande.** Le balayage est observé sur la fenêtre, sans jamais
-           empêcher le défilement — voir `useChuteDesPierres`. `touch-none`
-           n'arrive que la prise armée, et c'est alors un choix de
-           l'utilisateur : voir `PriseDuCairn`. Les gestionnaires qui restent ici
-           ne concernent que la souris et le tapotement. */
-        className={cn("h-full w-full cursor-crosshair", tenu && "touch-none")}
+           lui demande** — voir `useChuteDesPierres` et `PriseDuCairn`. Les
+           gestionnaires qui restent ici ne concernent que la souris et le
+           tapotement. */
+        className={cn("relative h-full w-full cursor-crosshair", tenu && "touch-none")}
         onPointerMove={chute.surDeplacement}
         onPointerDown={chute.surAppui}
         onPointerLeave={chute.surSortie}
@@ -109,6 +108,9 @@ export function CairnRenversable({
             </g>
           ))}
         </svg>
+
+        {/* Le geste part à côté des pierres : voir `BandeDePrise`. */}
+        {tenu ? <BandeDePrise /> : null}
       </div>
 
       {/* Hors du bloc qui joue, et pas dedans : un appui sur la prise ne doit pas

@@ -50,3 +50,37 @@ export function PriseDuCairn({ tenu, surBascule }: { tenu: boolean; surBascule: 
     </button>
   );
 }
+
+/**
+ * La bande que la prise armée soustrait au défilement.
+ *
+ * Elle traverse l'écran. La boîte du cairn fait 62 % de la largeur sur
+ * téléphone, et le geste qui fauche un empilement part **à côté** des pierres —
+ * souvent dans la marge que cette boîte laisse de chaque côté. `touch-action`
+ * se lit sur ce que le doigt touche en premier : posé dans la marge, il
+ * appartenait encore à la page, qui défilait, et la prise avait l'air de ne
+ * rien faire.
+ *
+ * C'est la bande de l'essai du 29/08, à une différence près, et elle change
+ * tout : elle n'est plus là par défaut. On ne peut pas amorcer un défilement
+ * depuis elle, mais on l'a demandé — et un second appui la retire.
+ *
+ * Elle se pose au-dessus du dessin, exprès : ce que le doigt touche en premier
+ * doit être elle. Elle n'intercepte rien pour autant — le balayage est mesuré
+ * sur la fenêtre, et le tapotement remonte au bloc qui l'écoute.
+ *
+ * Elle déborde la boîte du cairn d'un pas en haut comme en bas, parce qu'un
+ * geste vise les pierres mais commence dans l'air autour. Un pas et pas deux :
+ * au-dessus il reste dix pixels avant le bouton de l'ouverture, qui doit rester
+ * un bouton.
+ *
+ * À placer dans un parent `relative` qui borne sa hauteur.
+ */
+export function BandeDePrise() {
+  return (
+    <span
+      aria-hidden
+      className="-inset-y-pas-6 absolute left-1/2 w-screen max-w-none -translate-x-1/2 touch-none"
+    />
+  );
+}
