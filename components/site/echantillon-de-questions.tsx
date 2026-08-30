@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { CarteDeLEchantillon } from "@/components/site/carte-de-lechantillon";
 import { LIBELLE_FORMAT } from "@/components/depots/libelle-format";
-import { TexteTechnique } from "@/components/typographie/texte-technique";
+import { parOrdreDeFormat } from "@/components/depots/ordre-des-formats";
 import { EnEcriture } from "@/components/site/echantillon-en-attente";
 import { unParFormat } from "@/lib/domain/formats-distincts";
-import type { VariantFormat } from "@/lib/db/types";
+import type { QuestionDeVitrine } from "@/lib/db/depot-de-visite";
 import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
 /**
@@ -47,6 +48,12 @@ import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
  * production —, mais c'est le même mensonge que celui qu'on venait de corriger
  * à l'autre bout de la chaîne.
  *
+ * **L'ordre des formats est fixe**, et ne suit plus celui du lot : voir
+ * `parOrdreDeFormat`. Un QCM montre en plus ses propositions — annoncé sans
+ * elles, il se lisait comme une question ouverte sous une étiquette qui promet
+ * autre chose, et c'est le format le plus reconnaissable du lot qu'on rendait
+ * illisible.
+ *
  * **Des boutons à deux états, pas des onglets.** Le motif ARIA des onglets
  * impose la navigation aux flèches et un `tabindex` mouvant ; à demi
  * implémenté, il retire au clavier ce que la souris garde. Quatre boutons
@@ -54,15 +61,13 @@ import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
  * pas sur ce qu'ils sont.
  */
 
-type Question = { question: string; format: VariantFormat };
-
 export function EchantillonDeQuestions({
   questions,
   enCours,
   attente,
   onVerifier,
 }: {
-  questions: Question[];
+  questions: QuestionDeVitrine[];
   /** L'écriture tourne encore : les questions arrivent après les concepts. */
   enCours: boolean;
   /** Où en est l'interrogation, pour ne pas battre après qu'elle s'est arrêtée. */
@@ -71,7 +76,7 @@ export function EchantillonDeQuestions({
 }) {
   const [rang, setRang] = useState(0);
 
-  const montrables = unParFormat(questions);
+  const montrables = parOrdreDeFormat(unParFormat(questions));
 
   if (montrables.length === 0) {
     return enCours ? (
@@ -91,9 +96,8 @@ export function EchantillonDeQuestions({
 
       {montree ? (
         <>
-          {/* Les formats se donnent dans l'ordre où le lot les a écrits, et le
-              bouton actif partage la surface de la carte qu'il commande : c'est
-              ce qui les relie sans qu'aucune bordure ait à le dire. */}
+          {/* Le bouton actif partage la surface de la carte qu'il commande :
+              c'est ce qui les relie sans qu'aucune bordure ait à le dire. */}
           {montrables.length > 1 ? (
             <div
               role="group"
@@ -118,18 +122,12 @@ export function EchantillonDeQuestions({
             </div>
           ) : null}
 
-          {/* La carte de l'écran de révision, à l'identique : même arrondi, même
-              corps d'énoncé, même absence de bordure. Ce qu'on montre ici n'est
-              pas une maquette de question, c'est la question telle qu'elle
-              apparaîtra — et le reconnaître plus tard fait partie de ce qu'on
-              promet. */}
-          <div className="rounded-carte bg-surface-ombre p-pas-dedans" aria-live="polite">
-            <p className="text-enonce leading-tight font-bold text-pretty break-words text-stone-900">
-              <TexteTechnique>{montree.question}</TexteTechnique>
-            </p>
-          </div>
+          <CarteDeLEchantillon question={montree.question} options={montree.options} />
 
-          <p className="text-petit max-w-xl text-stone-500">
+          {/* La mesure est celle d'une ligne pour cette phrase-là, pas celle
+              d'un paragraphe : à `max-w-xl` elle se coupait en deux au milieu
+              d'une idée, alors qu'elle en tient une seule. */}
+          <p className="text-petit max-w-4xl text-stone-500">
             Elles tournent d&apos;un passage à l&apos;autre. C&apos;est le concept qui doit tenir,
             pas une phrase apprise par cœur.
           </p>

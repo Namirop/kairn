@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { optionsDUnQCM } from "@/lib/db/question-servie";
 import type { VariantFormat } from "@/lib/db/types";
 
 /**
@@ -65,7 +66,20 @@ export type DepotAnonyme = {
    * dont ils le sont tous n'en reçoit aucune. Un tableau vide est une fin
    * normale.
    */
-  questions: { question: string; format: VariantFormat }[];
+  questions: QuestionDeVitrine[];
+};
+
+/**
+ * Une question de l'échantillon, telle que la landing la montre.
+ *
+ * Elle porte ses propositions quand elle en a : un QCM annoncé sans ses options
+ * se lit comme une question ouverte mal étiquetée. La bonne réponse, elle, ne
+ * descend pas — voir `optionsDUnQCM`.
+ */
+export type QuestionDeVitrine = {
+  question: string;
+  format: VariantFormat;
+  options: string[] | null;
 };
 
 /** Ce qu'une session a produit, pour l'afficher à qui vient de déposer. */
@@ -89,7 +103,7 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
           // jour où un lot en porterait six.
           variants: {
             orderBy: { createdAt: "asc" },
-            select: { question: true, format: true },
+            select: { question: true, format: true, payload: true },
             take: 4,
           },
         },
@@ -104,7 +118,13 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
     statut: depot.status,
     motifDechec: depot.failureReason,
     concepts: depot.atoms.map(({ id, concept, tags }) => ({ id, concept, tags })),
-    questions: depot.atoms.flatMap((atome) => atome.variants),
+    questions: depot.atoms.flatMap((atome) =>
+      atome.variants.map((variante) => ({
+        question: variante.question,
+        format: variante.format,
+        options: optionsDUnQCM(variante.format, variante.payload),
+      })),
+    ),
   };
 }
 

@@ -1,6 +1,5 @@
 import { lireLaVisite } from "@/lib/auth/visite";
-import type { VariantFormat } from "@/lib/db/types";
-import { lireLeDepotAnonyme } from "@/lib/db/depot-de-visite";
+import { lireLeDepotAnonyme, type QuestionDeVitrine } from "@/lib/db/depot-de-visite";
 import { sessionDisponible } from "@/lib/db/essais-de-la-visite";
 
 /**
@@ -29,7 +28,7 @@ export type AvancementDeLEssai = {
    * concepts sont incertains n'a rien à questionner, et l'écran s'arrête aux
    * concepts.
    */
-  questions: { question: string; format: VariantFormat }[];
+  questions: QuestionDeVitrine[];
   /** Renseigné quand la chaîne s'est arrêtée sans rien produire. */
   motifDechec: string | null;
   /**

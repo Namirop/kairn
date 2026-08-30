@@ -116,6 +116,25 @@ function lireChoix(
 }
 
 /**
+ * Les seules options d'un QCM, sans dire laquelle est la bonne.
+ *
+ * La vitrine de l'essai montre la question telle qu'elle sera posée, et un QCM
+ * sans ses propositions n'est pas un QCM — on lit une question ouverte sous une
+ * étiquette qui annonce autre chose. Elle n'a en revanche aucune raison de
+ * connaître la réponse : `correctIndex` reste ici et ne descend pas au client.
+ *
+ * Le schéma est celui d'à côté, et c'est tout l'intérêt de le lire ici : une
+ * seconde lecture du `payload` ailleurs finirait par diverger de celle-ci.
+ */
+export function optionsDUnQCM(format: VariantFormat, payload: unknown): string[] | null {
+  if (format !== "MCQ") return null;
+
+  const lu = PAYLOAD_CHOIX.safeParse(payload);
+
+  return lu.success ? lu.data.options : null;
+}
+
+/**
  * Le texte à trou, ou `null` si le format n'en est pas un — ou si sa phrase est
  * illisible, auquel cas la question repart en format ouvert plutôt que de poser
  * un champ de saisie que rien ne pourra vérifier.
