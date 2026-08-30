@@ -89,7 +89,14 @@ export function pontOpenRouter(apiKey: string | undefined): PontFournisseur {
         throw new Error("OPENROUTER_API_KEY absente — la lignée OpenRouter ne peut pas partir.");
       }
 
-      const preambule = `Réponds au format JSON, conforme exactement à ce schéma. Utilise les clés telles qu'elles apparaissent, sans les renommer ni les traduire.
+      // Le schéma n'est pas imposé aux modèles OpenAI — leur mode strict refuse
+      // nos schémas —, alors on le leur dit en toutes lettres. Là où il l'est,
+      // ce préambule ne fait que répéter la contrainte : Sonnet, qui sert de
+      // repli, reçoit donc exactement la consigne que les campagnes ont validée.
+      const strict = !params.model.startsWith("openai/");
+      const preambule = strict
+        ? ""
+        : `Réponds au format JSON, conforme exactement à ce schéma. Utilise les clés telles qu'elles apparaissent, sans les renommer ni les traduire.
 
 ${JSON.stringify(params.formatSchema.schema)}
 
@@ -101,7 +108,7 @@ ${JSON.stringify(params.formatSchema.schema)}
       // que si les requêtes atterrissent toujours chez OpenAI. Voir la fiche
       // portage-luna, §4.
       const provider: Record<string, unknown> = { require_parameters: true };
-      if (params.model.startsWith("openai/")) {
+      if (!strict) {
         provider.order = ["OpenAI"];
         provider.allow_fallbacks = false;
       }
@@ -117,7 +124,7 @@ ${JSON.stringify(params.formatSchema.schema)}
           type: "json_schema" as const,
           json_schema: {
             name: params.purpose,
-            strict: !params.model.startsWith("openai/"),
+            strict,
             schema: params.formatSchema.schema,
           },
         },

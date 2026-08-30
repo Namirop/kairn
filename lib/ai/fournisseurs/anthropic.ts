@@ -21,11 +21,8 @@ import type { EmissionParams, EmissionResult, PontFournisseur } from "./interfac
 
 let cachedClient: { key: string; sdk: Anthropic } | null = null;
 
-/**
- * Le SDK, prêt à servir. Exporté parce que `batch.ts` en a besoin sans
- * importer le paquet — c'est le seul autre consommateur légitime.
- */
-export function sdkFor(apiKey: string | undefined): Anthropic {
+/** Le SDK, prêt à servir. Privé : ce fichier est le seul à connaître le paquet. */
+function sdkFor(apiKey: string | undefined): Anthropic {
   const key = apiKey ?? "";
   if (cachedClient?.key !== key) {
     cachedClient = { key, sdk: new Anthropic({ apiKey }) };

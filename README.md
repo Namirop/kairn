@@ -89,7 +89,7 @@ oubliée s'y voit comme une panne au lieu de fermer la porte en silence.
 | `BETTER_AUTH_URL`              | oui    | URL publique de l'application, sans slash final.                            |
 | `GOOGLE_CLIENT_ID`             | non    | Sans lui et son secret, le fournisseur Google n'est simplement pas proposé. |
 | `GOOGLE_CLIENT_SECRET`         | non    | Voir ci-dessus.                                                             |
-| `ANTHROPIC_API_KEY`            | non    | Inutile tant que `MOCK_AI=true`.                                            |
+| `ANTHROPIC_API_KEY`            | non    | Inutile tant que `MOCK_AI=true`. Ne sert plus qu'à la bascule manuelle.     |
 | `RESEND_API_KEY`               | non    | Sans elle, les emails sont journalisés en dev — et l'envoi lève en prod.    |
 | `EMAIL_FROM`                   | non    | Expéditeur des emails transactionnels.                                      |
 | `CRON_SECRET`                  | oui    | Jeton `Authorization: Bearer` des routes cron.                              |

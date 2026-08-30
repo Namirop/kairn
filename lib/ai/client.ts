@@ -1,6 +1,6 @@
 import { recordAiCall } from "@/lib/db/ai-call";
 import { type AiConfig } from "./config";
-import { choisirFournisseur, sdkFor, type PontFournisseur } from "./fournisseurs";
+import { choisirFournisseur, type Fournisseur, type PontFournisseur } from "./fournisseurs";
 import { lireLaConfigEffective } from "./reglages-effectifs";
 import { provenanceDeLAppel, reserverLesDeuxPlaces } from "./reservation";
 import {
@@ -26,23 +26,36 @@ import { signalerUneBascule } from "./signalement-de-bascule";
  * garde-fous (interrupteur, mode mock, réservation), et on écrit au registre —
  * succès comme échec. Aucun retry.
  *
- * **Repli automatique.** Quand le pont primaire est OpenRouter et qu'il tombe
- * (réseau, 5xx, sortie invalide ou tronquée), Sonnet Anthropic natif prend le
- * relais — mêmes prompts, même schéma, deux campagnes ont validé qu'ils
- * tiennent le même contrat. La bascule est marquée dans `AiCall.basculee`, et
- * au-delà de cinq bascules par jour, une alerte part par email.
+ * **Repli automatique.** Quand l'appel tombe — réseau, 5xx, sortie invalide ou
+ * tronquée —, Sonnet prend le relais : mêmes prompts, même schéma, deux
+ * campagnes ont validé qu'ils tiennent le même contrat. La bascule est marquée
+ * dans `AiCall.basculee`, et au-delà de cinq bascules par jour, une alerte part
+ * par email.
+ *
+ * **Le repli reste chez le fournisseur primaire**, sur un second modèle. Il
+ * passait par Anthropic en direct, ce qui obligeait à financer un second compte
+ * pour une dépense presque nulle. Ce que ce repli-là couvrait en plus — une
+ * panne d'OpenRouter lui-même — n'est pas couvert autrement dans ce projet :
+ * l'hébergeur et la base n'ont pas de second fournisseur non plus, et payer une
+ * redondance ici pendant qu'elle manque là serait acheter l'assurance où elle
+ * est facile, pas où elle sert. Le pont Anthropic reste dans le code : une
+ * variable d'environnement suffit à basculer dessus le jour où il le faudrait.
  */
 
 const MOCK_LATENCY_MS = 300;
 
 /**
- * Le modèle du repli — Sonnet natif, la ligne de fond éprouvée.
+ * Le modèle du repli, par fournisseur — Sonnet des deux côtés, la ligne de fond
+ * éprouvée.
  *
- * Il est nommé ici et non lu dans `AI_MODEL` : le repli parle à Anthropic en
- * direct, et `AI_MODEL` porte un identifiant OpenRouter dès que le primaire
- * n'est pas Anthropic.
+ * Deux entrées pour un seul modèle, parce que l'identifiant dépend de la route :
+ * OpenRouter veut le nom préfixé, le SDK d'Anthropic le nom court. Il est nommé
+ * ici et non lu dans `AI_MODEL`, qui porte le modèle primaire.
  */
-const MODELE_ANTHROPIC = "claude-sonnet-5";
+const MODELE_DE_REPLI: Record<Fournisseur, string> = {
+  openrouter: "anthropic/claude-sonnet-5",
+  anthropic: "claude-sonnet-5",
+};
 
 /** Codes d'erreur qui déclenchent un repli. Le reste (quota, config, disabled) remonte. */
 const CODES_DE_REPLI = new Set([
@@ -87,8 +100,6 @@ export type CallAIParams<T> = {
 };
 
 /** Ré-export : `batch.ts` en a besoin sans importer le paquet. */
-export { sdkFor };
-
 /**
  * Émet une seule fois via le pont donné et journalise dans `AiCall`.
  *
@@ -174,10 +185,12 @@ async function emettreEtJournaliser<T>(
   }
 }
 
-/** Décide si l'échec du pont primaire doit basculer sur Sonnet. */
+/** Décide si l'échec de l'appel doit basculer sur le modèle de repli. */
 function doitBasculer<T>(erreur: unknown, config: AiConfig, params: CallAIParams<T>): boolean {
-  // Rien à quoi basculer si le pont primaire est déjà Anthropic natif.
-  if (config.fournisseur !== "openrouter") return false;
+  // Rien à quoi basculer si le primaire est déjà le modèle de repli : le même
+  // appel une seconde fois n'est pas un repli, c'est le retry que ce fichier
+  // s'interdit.
+  if (config.model === MODELE_DE_REPLI[config.fournisseur]) return false;
   // Une surcharge de modèle vient d'un appelant qui cible un modèle précis
   // (les juges du banc). Le remettre en silence sur Sonnet fausserait la
   // mesure et casserait le contrat de `CallAIParams.model`.
@@ -194,22 +207,17 @@ function motifDeBascule(erreur: unknown): string {
 
 async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
   const cles = { anthropicApiKey: config.apiKey, openrouterApiKey: config.openrouterApiKey };
-  const pontPrimaire = choisirFournisseur(config.fournisseur, cles);
+  const pont = choisirFournisseur(config.fournisseur, cles);
 
   try {
-    return await emettreEtJournaliser(pontPrimaire, params, config, false);
+    return await emettreEtJournaliser(pont, params, config, false);
   } catch (erreur) {
     if (!doitBasculer(erreur, config, params)) throw erreur;
-    // Bascule : Sonnet Anthropic natif reprend, mêmes prompts, même schéma.
-    // Pas de retry du côté du repli — si Anthropic échoue aussi, l'erreur
-    // remonte à l'appelant.
-    const pontRepli = choisirFournisseur("anthropic", cles);
-    const configRepli: AiConfig = {
-      ...config,
-      fournisseur: "anthropic",
-      model: MODELE_ANTHROPIC,
-    };
-    const resultat = await emettreEtJournaliser(pontRepli, params, configRepli, true);
+    // Bascule : Sonnet reprend sur le même pont, mêmes prompts, même schéma.
+    // Pas de retry derrière — si le repli échoue aussi, l'erreur remonte à
+    // l'appelant.
+    const configRepli: AiConfig = { ...config, model: MODELE_DE_REPLI[config.fournisseur] };
+    const resultat = await emettreEtJournaliser(pont, params, configRepli, true);
     signalerUneBascule(motifDeBascule(erreur));
     return resultat;
   }

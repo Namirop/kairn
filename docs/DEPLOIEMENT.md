@@ -100,7 +100,7 @@ tout le monde — d'où l'intérêt de le poser une bonne fois avant l'ouverture
 
 | Nom                 | Ce que c'est                                                 |
 | ------------------- | ------------------------------------------------------------ |
-| `ANTHROPIC_API_KEY` | Clé de production, distincte de celle de développement.      |
+| `ANTHROPIC_API_KEY` | Clé de production. Ne sert qu'à `AI_FOURNISSEUR=anthropic`.  |
 | `RESEND_API_KEY`    | **Obligatoire en ligne** : sans elle, tout envoi lève.       |
 | `EMAIL_FROM`        | Expéditeur, sur le domaine vérifié chez Resend. Obligatoire. |
 | `CRON_SECRET`       | Jeton des routes cron. Voir la section « Les crons ».        |

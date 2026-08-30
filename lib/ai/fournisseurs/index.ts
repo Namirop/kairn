@@ -23,5 +23,4 @@ export function choisirFournisseur(nom: Fournisseur, cles: ClesFournisseur): Pon
   }
 }
 
-export { sdkFor } from "./anthropic";
 export type { EmissionParams, EmissionResult, Fournisseur, PontFournisseur } from "./interface";

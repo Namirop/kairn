@@ -34,6 +34,12 @@ export const CATALOGUE: Record<string, Tarif> = {
   // renvoient au même tarif ; garder les deux évite de deviner qui appelle.
   "gpt-5.6-luna": { entreePerMillion: 0.2, sortiePerMillion: 1.2 },
   "openai/gpt-5.6-luna": { entreePerMillion: 0.2, sortiePerMillion: 1.2 },
+  // Le modèle du repli, routé par OpenRouter. Même prix que la clé courte : le
+  // préfixe dit par où l'appel passe, pas ce que le modèle vaut. OpenRouter
+  // l'affiche aujourd'hui à 2/10 — le catalogue garde 3/15, qui est le tarif
+  // public une fois la remise d'introduction expirée, et surestimer est le bon
+  // sens de l'erreur pour un garde-fou de budget.
+  "anthropic/claude-sonnet-5": { entreePerMillion: 3, sortiePerMillion: 15 },
 };
 
 /** Retenu pour un modèle inconnu : le plus cher de la table. */

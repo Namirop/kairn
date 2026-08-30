@@ -72,8 +72,8 @@ que là où la session n'a rien à donner ce jour-là — sinon, il la remplacer
 ## Capabilities and Constraints
 
 - Extraction Atoms + Variants via **OpenRouter en primaire**, avec **repli
-  automatique sur Sonnet Anthropic natif** (`claude-sonnet-5`) si OpenRouter
-  tombe (réseau, 5xx, sortie invalide ou tronquée). Mêmes prompts, même
+  automatique sur Sonnet** (`anthropic/claude-sonnet-5`), par la même route, si
+  l'appel tombe (réseau, 5xx, sortie invalide ou tronquée). Mêmes prompts, même
   schéma, deux campagnes ont validé qu'ils tiennent le même contrat. Bascule
   tracée dans `AiCall.basculee` ; alerte email au-delà de cinq bascules par
   jour. Sortie structurée par tool use, plafonds journaliers durs sur le coût.
