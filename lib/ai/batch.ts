@@ -4,7 +4,8 @@ import {
   reserverAppelsModele,
   reserverPlacesDeCompte,
 } from "@/lib/db/ai-quota";
-import { sdkFor } from "./client";
+import { MODELE_ANTHROPIC, sdkFor } from "./client";
+import type { Fournisseur } from "./fournisseurs";
 import { lireLaConfigEffective } from "./reglages-effectifs";
 import { apercuBrut } from "./diagnostic";
 import { AIDisabledError, AIQuotaError, AIUserQuotaError } from "./errors";
@@ -28,6 +29,13 @@ import type { AiContract } from "./schemas";
  * reste le seul à le connaître. Les garde-fous, eux, sont les mêmes —
  * interrupteur, mode mock, plafond du jour compté par requête, écriture au
  * registre, aucun retry.
+ *
+ * **Ce chemin parle toujours à Anthropic**, quel que soit `AI_FOURNISSEUR` :
+ * l'API de lots est la sienne, OpenRouter n'en a pas d'équivalent. Il nomme donc
+ * `MODELE_ANTHROPIC` et non `AI_MODEL`, et il l'écrit tel quel au registre.
+ * Poser `AI_MODEL` ici soumettait `openai/gpt-5.6-luna` à Anthropic depuis le
+ * passage à OpenRouter — un identifiant qu'elle ne connaît pas, donc un lot
+ * refusé et une régénération de questions qui ne repartait jamais.
  */
 
 export type RequeteGroupee<T> = {
@@ -86,7 +94,7 @@ export async function submitAIBatch<T>(
     requests: requetes.map((requete) => ({
       custom_id: requete.reference,
       params: {
-        model: config.model,
+        model: MODELE_ANTHROPIC,
         max_tokens: config.maxTokens,
         system: [{ type: "text", text: requete.system, cache_control: { type: "ephemeral" } }],
         thinking: { type: "disabled" },
@@ -146,10 +154,11 @@ export async function readAIBatch<T>(
 
   for await (const entree of await sdkFor(config.apiKey).messages.batches.results(providerId)) {
     const reference = entree.custom_id;
+    const fournisseur: Fournisseur = "anthropic";
     const ledger = {
       purpose: contract.purpose,
-      model: config.model,
-      fournisseur: config.fournisseur,
+      model: MODELE_ANTHROPIC,
+      fournisseur,
       jobId: jobIdParReference.get(reference) ?? null,
     };
 
@@ -176,7 +185,7 @@ export async function readAIBatch<T>(
       groupe: true,
     };
     const commun = { ...ledger, ...consommation, latencyMs: 0 };
-    const costUsd = computeCostUsd(config.model, consommation);
+    const costUsd = computeCostUsd(MODELE_ANTHROPIC, consommation);
     const bloc = message.content.find((candidat) => candidat.type === "text");
 
     try {

@@ -35,8 +35,17 @@ import { signalerUneBascule } from "./signalement-de-bascule";
 
 const MOCK_LATENCY_MS = 300;
 
-/** Le modèle du repli — Sonnet natif, la ligne de fond éprouvée. */
-const MODELE_DE_REPLI = "claude-sonnet-5";
+/**
+ * Le modèle servi quand on parle à Anthropic — Sonnet natif, la ligne de fond
+ * éprouvée.
+ *
+ * Il sert **deux chemins**, et c'est pour ça qu'il est exporté : le repli
+ * automatique quand le fournisseur primaire tombe, et l'envoi groupé, qui passe
+ * par l'API de lots d'Anthropic quel que soit le fournisseur réglé. Les deux
+ * doivent nommer un modèle qu'Anthropic connaît — `AI_MODEL` ne convient pas
+ * dès qu'il porte un identifiant OpenRouter.
+ */
+export const MODELE_ANTHROPIC = "claude-sonnet-5";
 
 /** Codes d'erreur qui déclenchent un repli. Le reste (quota, config, disabled) remonte. */
 const CODES_DE_REPLI = new Set([
@@ -201,7 +210,7 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
     const configRepli: AiConfig = {
       ...config,
       fournisseur: "anthropic",
-      model: MODELE_DE_REPLI,
+      model: MODELE_ANTHROPIC,
     };
     const resultat = await emettreEtJournaliser(pontRepli, params, configRepli, true);
     signalerUneBascule(motifDeBascule(erreur));
