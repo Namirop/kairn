@@ -36,13 +36,26 @@ export const PIERRES_DU_JEU = 7;
 /**
  * L'écart toléré, en unités de la vue de largeur 100.
  *
- * Généreux, et c'est le point. Une pierre fait de trente à soixante unités de
- * large : quatre unités d'écart, c'est moins d'un dixième de sa largeur, mais
- * assez pour qu'on réussisse sans viser. Le jeu doit se gagner distraitement —
- * quelqu'un qui rate parce qu'il regardait ailleurs a raison de regarder
- * ailleurs, c'est son dépôt qu'il attend.
+ * **Ce n'est plus la tolérance d'un jeu qu'on gagne distraitement, c'est celle
+ * d'une visée.** Elle valait quatre unités, choisies quand poser n'était pas
+ * compté : la pierre se calait sur sa marque au moindre passage dans la zone, et
+ * le jeu se réussissait sans regarder. Depuis que la visée vaut deux points
+ * contre un — voir `score-du-cairn.ts` —, une tolérance généreuse donne la
+ * meilleure note à qui n'a rien visé, et la note ne dit plus rien.
+ *
+ * La valeur est mesurée, pas choisie au jugé. La fenêtre de temps où la pierre
+ * est dans la zone vaut `2 × tolérance × période ÷ course`, et la course
+ * s'élargit pendant que la période raccourcit : à quatre unités, elle allait de
+ * 229 ms sur la pierre du bas à 94 ms sur celle du haut — de quoi appuyer au
+ * hasard. À deux et demie, elle va de 143 ms à 58 ms : il faut suivre la pierre.
+ *
+ * **Rater la visée ne fait toujours pas perdre.** La chute se mesure depuis la
+ * pierre du dessous, à quatorze unités (`SEUIL_DE_CHUTE`), et ce seuil-là n'a
+ * pas bougé. Quelqu'un qui pose à peu près monte ses sept pierres comme avant,
+ * un point chacune. Ce qui a changé n'est pas la difficulté du cairn, c'est le
+ * prix de la note pleine.
  */
-export const TOLERANCE = 4;
+export const TOLERANCE = 2.5;
 
 /**
  * L'écart au-delà duquel la pierre ne repose plus sur celle du dessous.

@@ -23,7 +23,15 @@ import { TROU } from "@/lib/domain/reponse-cloze";
  */
 
 /** L'emplacement vide, ou le terme qui l'a comblé. */
-function Trou({ comble, dansDuCode }: { comble: string | null; dansDuCode: boolean }) {
+function Trou({
+  comble,
+  dansDuCode,
+  surOmbre,
+}: {
+  comble: string | null;
+  dansDuCode: boolean;
+  surOmbre: boolean;
+}) {
   if (comble === null) {
     // Un emplacement, pas un soulignement : c'est le geste central de ce format,
     // et un trait fin sous une ligne de texte se remarquait à peine. Dans un
@@ -37,8 +45,12 @@ function Trou({ comble, dansDuCode }: { comble: string | null; dansDuCode: boole
     return (
       <span
         aria-hidden
+        // Le creux est une ombre sur le papier de la carte de révision. Posé sur
+        // une carte d'ombre — la vitrine de l'essai — il disparaîtrait dans son
+        // propre fond : il lui faut alors le cran de plus qui sert déjà dans un
+        // jeton, pour la même raison.
         className={`rounded-champ mx-[0.14em] inline-block h-[0.96em] w-[2.9em] translate-y-[0.06em] align-baseline ${
-          dansDuCode ? "bg-stone-300" : "bg-surface-ombre"
+          dansDuCode || surOmbre ? "bg-stone-300" : "bg-surface-ombre"
         }`}
       />
     );
@@ -49,7 +61,16 @@ function Trou({ comble, dansDuCode }: { comble: string | null; dansDuCode: boole
   return <span className="border-lichen mx-[0.06em] border-b-2 px-[0.1em]">{comble}</span>;
 }
 
-export function PhraseTrouee({ phrase, comble }: { phrase: string; comble: string | null }) {
+export function PhraseTrouee({
+  phrase,
+  comble,
+  surOmbre = false,
+}: {
+  phrase: string;
+  comble: string | null;
+  /** La phrase est posée sur une surface d'ombre et non sur du papier. */
+  surOmbre?: boolean;
+}) {
   return (
     <>
       {segmentsDeCode(phrase).map((segment, rang) => {
@@ -60,7 +81,7 @@ export function PhraseTrouee({ phrase, comble }: { phrase: string; comble: strin
           ) : (
             <>
               {avant}
-              <Trou comble={comble} dansDuCode={segment.code} />
+              <Trou comble={comble} dansDuCode={segment.code} surOmbre={surOmbre} />
               {suite.join(TROU)}
             </>
           );
