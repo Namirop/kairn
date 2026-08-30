@@ -30,13 +30,18 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
  * donnait un décalage deux fois trop discret.
  */
 
-function legende(consolides: number): string {
-  if (consolides === 0) return "Le premier concept consolidé posera la première pierre.";
+/**
+ * « Retenu » et non « consolidé » : le cairn compte deux états, la
+ * consolidation que le produit constate et l'archivage que l'utilisateur
+ * déclare. Voir `ETATS_QUI_POSENT_UNE_PIERRE`.
+ */
+function legende(retenus: number): string {
+  if (retenus === 0) return "Le premier concept retenu posera la première pierre.";
 
-  return `${consolides} ${consolides === 1 ? "concept consolidé" : "concepts consolidés"}. Une pierre chacun.`;
+  return `${retenus} ${retenus === 1 ? "concept retenu" : "concepts retenus"}. Une pierre chacun.`;
 }
 
-export function ColonneCairn({ consolides, graines }: { consolides: number; graines: string[] }) {
+export function ColonneCairn({ retenus, graines }: { retenus: number; graines: string[] }) {
   return (
     <aside className="md:mt-pas-16 flex w-full flex-col items-center md:max-w-96">
       <Tooltip>
@@ -53,17 +58,17 @@ export function ColonneCairn({ consolides, graines }: { consolides: number; grai
                 La boîte se resserre en même temps. Une pierre seule est large et
                 plate ; lui garder la hauteur d'un empilement de douze rendait le
                 même vide qu'avant, avec un contour au milieu. */}
-          {consolides === 0 ? (
+          {retenus === 0 ? (
             <div className="mx-auto h-28 w-full max-w-64 md:h-36 md:max-w-96">
               <PierreAVenir clair />
             </div>
           ) : (
             <div className="mx-auto h-64 w-full max-w-64 md:h-[26rem] md:max-w-96">
-              <Cairn nombre={consolides} graines={graines} clair />
+              <Cairn nombre={retenus} graines={graines} clair />
             </div>
           )}
         </TooltipTrigger>
-        <TooltipContent>{legende(consolides)}</TooltipContent>
+        <TooltipContent>{legende(retenus)}</TooltipContent>
       </Tooltip>
     </aside>
   );

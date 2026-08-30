@@ -106,8 +106,8 @@ export default async function PageAujourdhui() {
                 titre de section sur grand écran, et reste au corps sur mobile où
                 il tenait déjà la largeur. */}
             <p className="mt-pas-4 md:mt-pas-6 text-corps md:text-h2-app leading-relaxed">
-              Une pierre par concept consolidé. Un concept l&apos;est quand il revient de loin et
-              que tu le retrouves trois fois de suite — pas quand tu l&apos;as lu.
+              Une pierre par concept retenu : quand il revient de loin et que tu le retrouves
+              trois fois de suite, ou quand tu déclares le maîtriser. Pas quand tu l&apos;as lu.
             </p>
             <p className="mt-pas-4 text-petit text-stone-300">
               La forme de chaque pierre est tirée du concept qu&apos;elle représente. Personne
@@ -115,8 +115,12 @@ export default async function PageAujourdhui() {
             </p>
           </div>
 
+          {/* `atomsConsolidated` est le nom de la colonne, pas celui de ce
+              qu'elle compte : depuis que l'archivé pose une pierre lui aussi,
+              elle porte les deux états. Renommer la colonne demanderait une
+              migration pour un mot. */}
           <ColonneCairn
-            consolides={tableau.stats?.atomsConsolidated ?? 0}
+            retenus={tableau.stats?.atomsConsolidated ?? 0}
             graines={tableau.grainesDuCairn}
           />
         </div>

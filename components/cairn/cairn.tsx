@@ -8,7 +8,8 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 import { cn } from "@/lib/utils";
 
 /**
- * L'empilement de pierres. Une pierre par Atom consolidé.
+ * L'empilement de pierres. Une pierre par Atom retenu — consolidé, ou archivé
+ * sur déclaration. Voir `ETATS_QUI_POSENT_UNE_PIERRE`.
  *
  * `nombre` fait la hauteur, `graines` fait les formes : passer les identifiants
  * des Atoms rend l'empilement propre à chacun et stable dans le temps. Sans

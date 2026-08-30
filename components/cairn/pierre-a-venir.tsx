@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
  *
  * Un cairn vide ne rendait qu'un trait perdu au milieu du plus grand panneau de
  * l'application. Le réflexe serait d'offrir une pierre ou deux pour meubler,
- * mais le cairn compte les concepts consolidés et rien d'autre : une pierre
+ * mais le cairn compte les concepts retenus et rien d'autre : une pierre
  * donnée ferait mentir le compteur qui l'accompagne, et surtout elle volerait à
  * la première vraie pierre le seul moment où elle a du sens. Une progression ne
  * récompense que si elle est vraie.

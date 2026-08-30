@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/client";
 import { listerDepots } from "@/lib/db/depots";
 import { compterDusAujourdhui, compterFaitsAujourdhui } from "@/lib/db/session-du-jour";
 import { lireCadreDeSession } from "@/lib/db/user-settings";
+import { ETATS_QUI_POSENT_UNE_PIERRE } from "@/lib/domain/etat-maitrise";
 import { chargeDuJour, plafondRestant, type ChargeDuJour } from "@/lib/domain/selection-session";
 import type { UserStats } from "@/lib/db/types";
 import type { DepotListe } from "@/lib/db/depots";
@@ -60,7 +61,7 @@ export async function lireTableauDeBord(
       lireCadreDeSession(userId),
       prisma.userStats.findUnique({ where: { userId } }),
       prisma.atom.findMany({
-        where: { userId, state: "CONSOLIDATED" },
+        where: { userId, state: { in: ETATS_QUI_POSENT_UNE_PIERRE } },
         orderBy: { updatedAt: "asc" },
         select: { id: true },
       }),

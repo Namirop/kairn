@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { ETATS_QUI_POSENT_UNE_PIERRE } from "@/lib/domain/etat-maitrise";
 import { localDay } from "@/lib/domain/local-day";
 import {
   progressionPourXp,
@@ -66,7 +67,9 @@ export async function compterLePassage(
   const gain = xpDuPassage(passage.ratePrecedemment, passage.reussiMaintenant);
 
   const [consolides, echeances] = await Promise.all([
-    prisma.atom.count({ where: { userId: passage.userId, state: "CONSOLIDATED" } }),
+    prisma.atom.count({
+      where: { userId: passage.userId, state: { in: ETATS_QUI_POSENT_UNE_PIERRE } },
+    }),
     echeancesPassees(passage, maintenant),
   ]);
 

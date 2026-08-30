@@ -35,6 +35,22 @@ export const REUSSITES_POUR_CONSOLIDER = 3;
 
 export type EtatMaitrise = "LEARNING" | "REVIEWING" | "CONSOLIDATED" | "ARCHIVED";
 
+/**
+ * Les états qui valent une pierre au cairn.
+ *
+ * `ARCHIVED` en fait partie, et il a manqué. Le cairn ne comptait que
+ * `CONSOLIDATED` : déclarer « je maîtrise ça » sortait donc le concept de l'état
+ * compté, et **retirait sa pierre** — l'empilement rétrécissait au moment où
+ * quelqu'un disait savoir le mieux. La pierre marque un concept devenu tien, et
+ * l'archivage est une revendication plus forte que la consolidation, pas plus
+ * faible.
+ *
+ * Défini ici, et pas dans les deux requêtes qui s'en servent : le compteur et
+ * les graines du dessin doivent voir exactement le même ensemble, sans quoi la
+ * hauteur du cairn et le nombre annoncé se contredisent.
+ */
+export const ETATS_QUI_POSENT_UNE_PIERRE: EtatMaitrise[] = ["CONSOLIDATED", "ARCHIVED"];
+
 /** Notes de ts-fsrs, dans le vocabulaire de la base. */
 export type Note = "AGAIN" | "HARD" | "GOOD" | "EASY";
 
