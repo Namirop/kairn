@@ -52,7 +52,12 @@ const VITESSE_MAXIMALE = 640;
 
 type Phase = "pose" | "chute" | "attente" | "remontee";
 
-export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cadre = CADRE_SERRE) {
+export function useChuteDesPierres(
+  pierres: Pierre[],
+  actif: boolean,
+  /** `tenu` : la prise est armée, les gestes partis du cairn lui appartiennent. */
+  { cadre = CADRE_SERRE, tenu = false }: { cadre?: Cadre; tenu?: boolean } = {},
+) {
   const refSvg = useRef<SVGSVGElement>(null);
   const refsGroupes = useRef<(SVGGElement | null)[]>([]);
   const corps = useRef<Corps[]>(initialiser(pierres));
@@ -208,9 +213,15 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cad
    * la propriété. L'écoute est passive : on n'empêche jamais rien, on regarde.
    *
    * **Un défilement est vertical, un balayage est horizontal.** C'est le seul
-   * discriminant nécessaire, et il est catégorique : tout geste dont la part
-   * verticale l'emporte appartient à la page et ne transmet rien. Personne ne
-   * fauche un cairn de haut en bas.
+   * discriminant nécessaire tant qu'on regarde sans rien prendre, et il est
+   * catégorique : tout geste dont la part verticale l'emporte appartient à la
+   * page et ne transmet rien. Personne ne fauche un cairn de haut en bas.
+   *
+   * **La prise lève cette règle, et elle seule.** Quand elle est armée et que le
+   * geste est parti du cairn, la zone porte `touch-action: none` : la page ne
+   * défile pas, il n'y a donc plus rien à départager et les quatre directions
+   * valent. Un geste parti d'ailleurs reste un défilement, prise ou pas —
+   * l'exception ne concerne que ce qui commence sur l'empilement.
    *
    * Les deux points sont projetés avec la matrice **du moment**. Si la page a
    * défilé entre les deux images, le cairn a bougé sous le doigt : projeter le
@@ -221,7 +232,18 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cad
     if (!actif) return;
 
     let precedent: { x: number; y: number; t: number } | null = null;
+    /** Le geste en cours est-il parti du cairn, la prise armée. */
+    let depuisLaPrise = false;
+
     const oublier = () => {
+      precedent = null;
+      depuisLaPrise = false;
+    };
+
+    const surDebut = (evenement: TouchEvent) => {
+      const cible = evenement.target;
+      depuisLaPrise =
+        tenu && cible instanceof Node && (refSvg.current?.contains(cible) ?? false);
       precedent = null;
     };
 
@@ -239,7 +261,7 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cad
       const dx = doigt.clientX - avant.x;
       const dy = doigt.clientY - avant.y;
 
-      if (Math.abs(dx) <= Math.abs(dy)) return;
+      if (!depuisLaPrise && Math.abs(dx) <= Math.abs(dy)) return;
 
       const depuis = enCoordonneesLocales(avant.x, avant.y);
       const vers = enCoordonneesLocales(doigt.clientX, doigt.clientY);
@@ -254,16 +276,18 @@ export function useChuteDesPierres(pierres: Pierre[], actif: boolean, cadre: Cad
       frapper(depuis, vers, vitesse);
     };
 
+    window.addEventListener("touchstart", surDebut, { passive: true });
     window.addEventListener("touchmove", surBalayage, { passive: true });
     window.addEventListener("touchend", oublier, { passive: true });
     window.addEventListener("touchcancel", oublier, { passive: true });
 
     return () => {
+      window.removeEventListener("touchstart", surDebut);
       window.removeEventListener("touchmove", surBalayage);
       window.removeEventListener("touchend", oublier);
       window.removeEventListener("touchcancel", oublier);
     };
-  }, [actif, enCoordonneesLocales, frapper]);
+  }, [actif, enCoordonneesLocales, frapper, tenu]);
 
   useEffect(() => {
     corps.current = initialiser(pierres);
