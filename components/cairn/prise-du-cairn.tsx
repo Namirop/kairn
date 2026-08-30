@@ -34,9 +34,11 @@ export function PriseDuCairn({ tenu, surBascule }: { tenu: boolean; surBascule: 
       aria-label="Jouer avec le cairn"
       className={cn(
         /* La cible fait quarante-quatre pixels, le glyphe seize : c'est la zone
-           qui grandit, pas le dessin. Il se tient dans le coin bas, au bout du
-           trait de sol, là où aucune pierre ne repose et où aucune ne retombe. */
-        "rounded-galet absolute right-0 bottom-0 hidden h-11 w-11 touch-manipulation items-center justify-center transition-colors duration-200 [@media(pointer:coarse)]:flex",
+           qui grandit, pas le dessin. Il se tient en haut à droite, au-dessus
+           d'une pile qui s'affine en montant : le coin est vide, et il l'est
+           encore quand l'empilement s'écroule — les pierres tombent, elles ne
+           montent pas. */
+        "rounded-galet absolute top-0 right-0 hidden h-11 w-11 touch-manipulation items-center justify-center transition-colors duration-200 [@media(pointer:coarse)]:flex",
         /* Le repos est au gris de second plan, pas en dessous : une commande qui
            passe sous le contraste AA pour rester discrète n'est plus discrète,
            elle est invisible. La prise armée se dit deux fois — le glyphe passe

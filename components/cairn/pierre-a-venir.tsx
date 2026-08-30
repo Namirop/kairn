@@ -55,12 +55,24 @@ export function PierreAVenir({
     >
       <SolDuCairn clair={clair} />
       <g transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}>
+        {/* Le contour est en pointillé, et c'est ce qui le fait lire.
+            Plein, il dessinait une pierre — une vraie, rendue en trait —, et il
+            fallait compter les pierres du cairn d'à côté pour comprendre que
+            celle-ci n'existe pas encore. Le tireté est la convention de
+            l'emplacement vide, on la lit sans l'apprendre.
+
+            Les valeurs sont en unités de vue, où la pierre fait une soixantaine
+            de large. Tiret et vide égaux, à deux fois l'épaisseur du trait : la
+            boîte fait 256 px sur téléphone et 384 sur bureau, et un tiret plus
+            long tenait sur le second mais découpait le bord haut en cinq traits
+            sur le premier. */}
         <path
           d={pierre.chemin}
           fill="none"
           className={clair ? "stroke-stone-500" : "stroke-stone-300"}
           strokeWidth={1.2}
           strokeLinejoin="round"
+          strokeDasharray="2.5 2.5"
         />
       </g>
     </svg>
