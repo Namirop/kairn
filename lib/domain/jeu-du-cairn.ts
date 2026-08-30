@@ -12,12 +12,13 @@
  * Celui-ci démarre au dépôt et vit jusqu'à ce que tout soit là — il ignore les
  * phases, donc elles ne peuvent pas l'interrompre.
  *
- * Il n'y a ni score ni record — rien n'est compté, rien n'est gardé, et le
- * dépôt qui tourne derrière ne s'en aperçoit pas. **Mais le cairn peut
- * tomber**, et il faut alors le reprendre du sol : un empilement où tout tient
- * quoi qu'on fasse n'est pas un empilement, c'est une liste qui se remplit.
- * L'enjeu s'arrête à la pile elle-même, ce qui est déjà l'enjeu d'un vrai
- * cairn.
+ * **Le cairn peut tomber**, et il faut alors le reprendre du sol : un
+ * empilement où tout tient quoi qu'on fasse n'est pas un empilement, c'est une
+ * liste qui se remplit. Depuis le 30/08, la visée se paie aussi — voir
+ * `score-du-cairn.ts`, qui compte les trois fins ci-dessous. Rien n'en sort :
+ * le score ne quitte pas la page, ne se garde pas d'une visite à l'autre, et le
+ * dépôt qui tourne derrière ne s'en aperçoit pas. L'enjeu s'arrête à la pile
+ * elle-même, ce qui est déjà l'enjeu d'un vrai cairn.
  */
 
 /**
