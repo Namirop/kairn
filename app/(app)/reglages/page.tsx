@@ -7,11 +7,16 @@ import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
 import { FormulaireDeReglages } from "@/components/reglages/formulaire-de-reglages";
+import { TonOffre } from "@/components/reglages/ton-offre";
 import { UnRetour } from "@/components/reglages/un-retour";
 import { estAdministrateur } from "@/lib/auth/admin";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
+import { lireLOffreDuCompte } from "@/lib/db/abonnement";
 import { lireReglages } from "@/lib/db/user-settings";
+import { termeLisible } from "@/lib/domain/terme-lisible";
+import { PARAMETRE_DE_RETOUR, RETOUR_ACCEPTE } from "@/lib/paiement/achat";
+import { paiementOuvert } from "@/lib/paiement/config";
 
 export const metadata: Metadata = { title: "Réglages" };
 
@@ -44,12 +49,19 @@ function Ligne({ intitule, valeur, raison }: { intitule: string; valeur: string;
   );
 }
 
-export default async function PageReglages() {
+/** Ce que porte l'adresse au retour de Stripe. Rien d'autre n'est lu ici. */
+type Parametres = { searchParams: Promise<Record<string, string | string[] | undefined>> };
+
+export default async function PageReglages({ searchParams }: Parametres) {
   const utilisateur = await getCurrentUser();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
-  const reglages = await lireReglages(utilisateur.id);
+  const [reglages, offre, parametres] = await Promise.all([
+    lireReglages(utilisateur.id),
+    lireLOffreDuCompte(utilisateur.id),
+    searchParams,
+  ]);
 
   /**
    * L'exploitant n'a pas les mêmes besoins que la personne qui apprend.
@@ -96,6 +108,19 @@ export default async function PageReglages() {
             raison="Détecté depuis ton navigateur à chaque visite, et corrigé tout seul si tu changes de pays. Il décide quel jour il est pour toi, et à quelle heure part ton rappel."
           />
         </dl>
+
+        {/* L'offre est une donnée du compte, donc elle suit celles qu'on ne
+            change pas — et elle vient avant tout le reste parce que c'est la
+            seule de cette page qui engage de l'argent. Le geste d'achat est
+            ici et pas sur la page de tarifs : là-bas on décide, ici on paie. */}
+        <TonOffre
+          plan={offre.plan}
+          plafond={offre.plafond}
+          terme={offre.finDePeriode ? termeLisible(offre.finDePeriode, reglages.timezone) : null}
+          resilieALaFin={offre.resilieALaFin}
+          ouvert={paiementOuvert()}
+          retourDePaiement={parametres[PARAMETRE_DE_RETOUR] === RETOUR_ACCEPTE}
+        />
 
         {/* Le seul endroit du produit où l'on peut dire qu'autre chose qu'une
             question ne va pas.

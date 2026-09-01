@@ -1,5 +1,11 @@
 import { prisma } from "@/lib/db/client";
-import { type Abonnement, plafondDeConcepts, SANS_ABONNEMENT } from "@/lib/domain/plafond-du-plan";
+import {
+  type Abonnement,
+  plafondDeConcepts,
+  type Plan,
+  planEffectif,
+  SANS_ABONNEMENT,
+} from "@/lib/domain/plafond-du-plan";
 
 /**
  * L'abonnement d'un compte, réduit à ce qui décide de ses droits.
@@ -35,4 +41,40 @@ export async function plafondDuCompte(
   maintenant: Date = new Date(),
 ): Promise<number> {
   return plafondDeConcepts(await lireAbonnement(userId), maintenant);
+}
+
+/**
+ * Ce que l'écran de l'offre a besoin de savoir, en une lecture.
+ *
+ * Le plan rendu est déjà celui qui **vaut** : un abonnement dont le terme est
+ * passé sort d'ici en `GRATUIT`, comme il sort du calcul de plafond. La page
+ * n'a donc aucune règle à réappliquer — c'est ce qui garantit qu'elle n'affiche
+ * jamais « Complet » à quelqu'un dont le quota est déjà retombé à trente.
+ */
+export type OffreDuCompte = {
+  plan: Plan;
+  plafond: number;
+  finDePeriode: Date | null;
+  resilieALaFin: boolean;
+};
+
+export async function lireLOffreDuCompte(
+  userId: string,
+  maintenant: Date = new Date(),
+): Promise<OffreDuCompte> {
+  const ligne = await prisma.subscription.findUnique({
+    where: { userId },
+    select: { plan: true, currentPeriodEnd: true, cancelAtPeriodEnd: true },
+  });
+
+  const abonnement: Abonnement = ligne
+    ? { plan: ligne.plan, finDePeriode: ligne.currentPeriodEnd }
+    : SANS_ABONNEMENT;
+
+  return {
+    plan: planEffectif(abonnement, maintenant),
+    plafond: plafondDeConcepts(abonnement, maintenant),
+    finDePeriode: abonnement.finDePeriode,
+    resilieALaFin: ligne?.cancelAtPeriodEnd ?? false,
+  };
 }

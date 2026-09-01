@@ -22,11 +22,10 @@ export const metadata: Metadata = {
  * connecté, se référence depuis des conditions de vente. Une popup ne fait aucun
  * des trois, et disparaît au moment où l'on veut la montrer à quelqu'un.
  *
- * **Elle informe, elle n'encaisse pas encore.** Le geste d'achat vivra dans les
- * réglages, avec le reste de ce qui touche au compte ; ici on décide, là-bas on
- * paie. Tant que le paiement n'est pas branché, cette page dit le vrai — deux
- * offres, un prix, ce qui les sépare — sans proposer un bouton qui ne mènerait
- * nulle part.
+ * **Elle informe, elle n'encaisse pas.** Le geste d'achat vit dans les réglages,
+ * avec le reste de ce qui touche au compte : ici on décide, là-bas on paie. La
+ * carte ne se saisit ni sur l'une ni sur l'autre — elle se saisit chez Stripe,
+ * et c'est ce qui fait qu'aucun numéro ne traverse jamais ce serveur.
  *
  * Le registre est celui de la landing : surfaces pleine largeur, strates aux
  * jointures, display sur les nombres. C'est une page publique, elle a le droit
@@ -88,13 +87,16 @@ export default async function PageTarifs() {
         </div>
 
         <div className="mt-pas-12 gap-pas-4 flex flex-wrap items-center">
+          {/* Deux visiteurs, deux gestes suivants. Qui n'a pas de compte n'a
+              rien à acheter — il a d'abord à essayer, et le dire enlève la
+              carte de l'équation. Qui est connecté a fini de comparer : on
+              l'envoie là où l'on paie, et « mon offre » reste vrai qu'il paie
+              déjà ou non. */}
           <Button asChild size="lg">
-            <Link href={connecte ? ROUTES.depots : ROUTES.inscription}>
-              {connecte ? "Déposer" : "Commencer gratuitement"}
+            <Link href={connecte ? ROUTES.reglages : ROUTES.inscription}>
+              {connecte ? "Choisir mon offre" : "Commencer gratuitement"}
             </Link>
           </Button>
-          {/* Rien à ajouter pour quelqu'un de connecté tant que l'écran de
-              l'offre n'existe pas : l'y envoyer serait l'envoyer nulle part. */}
           {connecte ? null : (
             <p className="text-petit text-stone-500">Sans carte, sans engagement.</p>
           )}
