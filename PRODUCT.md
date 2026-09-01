@@ -84,12 +84,25 @@ que là où la session n'a rien à donner ce jour-là — sinon, il la remplacer
 - Mode mock par défaut en développement, aucun appel modèle silencieux,
   plafond journalier et interrupteur global.
 
-**Prévues juste après le launch** :
+**Modèle économique** — chantier ouvert le 01/09/2026, pas encore en production :
 
-- **Modèle freemium.** Un nombre de dépôts gratuits offerts à l'inscription.
-  Au-delà, achat de dépôts supplémentaires via abonnement mensuel ou annuel.
-  Implémentation prévue directement après le launch — pas encore en production
-  mais tranché.
+- **Freemium, et l'unité est le concept, pas le dépôt.** Un compte gratuit
+  retient **30 concepts par période**, la période étant le mois glissant depuis
+  la date d'inscription. Ce qui n'a pas servi dans la période est perdu : rien ne
+  se reporte. Un second rideau borne les dépôts à 60, parce qu'une extraction se
+  paie même quand elle ne rend aucun concept.
+- **Un plan payant unique**, décliné mensuel et annuel : **7 € par mois ou 70 €
+  par an** — deux mois offerts —, qui porte le plafond à **300 concepts par
+  période**. Un seul plan tant que le produit n'a pas de quoi en distinguer deux.
+- **Encaissement par Stripe**, Checkout et portail client hébergés : aucune donnée
+  de carte ne touche le produit.
+- **La limite gratuite est commerciale, et il faut l'assumer comme telle.** Elle
+  a été technique : au tarif Sonnet, une période saturée coûtait près d'un
+  demi-dollar. Depuis le passage à Luna, un dépôt complet — extraction et ses
+  quatre questions — coûte 0,004 $, et une période gratuite saturée quelques
+  centimes. Écrire encore que cette limite « tient le coût des appels au modèle »
+  serait faux. Le plafond gratuit pourra monter : ce sera une décision de prix,
+  jamais une contrainte de coût.
 
 **Conditionnelles au succès du produit** :
 

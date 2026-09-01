@@ -6,15 +6,22 @@ import { debutEnDate, periodeDeQuota, type PeriodeDeQuota } from "@/lib/domain/p
  * Trois limites, trois rôles.
  *
  * **Le plafond porte sur les concepts, et il se compte au mois**, sur une
- * période ancrée au jour d'inscription. Trente par jour tenaient tant que le
- * produit ne servait qu'à son auteur ; ouvert à tous, un compte gratuit qui
- * sature quotidiennement coûterait une trentaine de dollars par mois. Trente par
- * mois ramène ce maximum sous le demi-dollar, et c'est ce qui rend l'ouverture
- * possible.
+ * période ancrée au jour d'inscription.
  *
- * C'est le concept qui coûte — extraction et questions, autour de 0,015 $ — et
- * c'est aussi la bonne unité pour l'utilisateur : quelqu'un qui dépose une
- * phrase ne doit pas consommer autant que quelqu'un qui colle un article.
+ * C'est la bonne unité pour l'utilisateur : quelqu'un qui dépose une phrase ne
+ * doit pas consommer autant que quelqu'un qui colle un article. Ça reste vrai.
+ *
+ * **Mais ce plafond n'est plus une contrainte de coût, et il ne faut pas le
+ * relire comme telle.** Il l'a été : au tarif Sonnet, ce commentaire annonçait
+ * une trentaine de dollars par mois pour un compte qui saturait tous les jours,
+ * et trente concepts par mois ramenaient ce maximum sous le demi-dollar. Depuis
+ * le passage à `gpt-5.6-luna`, un dépôt complet — son extraction et ses quatre
+ * questions — coûte **0,004 $** : mesuré au registre le 01/09/2026, pas estimé.
+ * Une période gratuite saturée coûte donc quelques centimes.
+ *
+ * Ce qui reste est un plafond **commercial**, et c'est ce qu'il faut assumer en
+ * le changeant : le monter ne met plus aucun budget en danger, le tenir bas est
+ * une décision de prix. Le plan payant s'y branche en le remplaçant.
  *
  * Le plafond de dépôts reste en second rideau, et il passe au mois lui aussi :
  * chaque dépôt paie une extraction quoi qu'elle rende, et un dépôt rejeté n'en
@@ -38,10 +45,10 @@ export const CONCEPTS_PAR_PERIODE = 30;
  * rideau-là quelqu'un pourrait ne déposer que des textes rejetés, sans fin.
  *
  * Le chiffre vient de là : soixante extractions de 8 000 caractères, autour de
- * 2 400 tokens d'entrée chacune, coûtent près de **0,45 $**. Ce commentaire
- * annonçait 0,30 $, calculés sur des extractions courtes — l'ordre de grandeur
- * tenait, la justification écrite était fausse, et c'est elle qu'on relira le
- * jour où on voudra changer la valeur.
+ * 2 400 tokens d'entrée chacune. Elles coûtaient près de **0,45 $** au tarif
+ * Sonnet ; au tarif Luna elles en coûtent **une trentaine de fois moins**. Comme
+ * le plafond de concepts, ce rideau ne protège plus un budget — il protège
+ * contre l'abus, ce qui est un autre métier et se règle sur un autre chiffre.
  *
  * Le double du plafond de concepts. Un dépôt rend un à vingt concepts
  * (`PLAFOND_CONCEPTS_PAR_DEPOT`) : trente concepts s'atteignent donc en deux
