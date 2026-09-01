@@ -32,6 +32,17 @@ model Subscription {
   /// que de laisser croire au renouvellement.
   cancelAtPeriodEnd Boolean @default(false)
 
+  /// L'instant de l'événement Stripe qui a écrit les lignes ci-dessus.
+  ///
+  /// Stripe ne garantit pas l'ordre d'arrivée de ses webhooks, et il les rejoue.
+  /// Sans cette borne, une résiliation partie avant un renouvellement pourrait
+  /// arriver après lui et écraser le bon terme par l'ancien : le compte perdrait
+  /// un mois déjà payé, silencieusement. Un événement plus ancien que celui-ci
+  /// est donc ignoré.
+  ///
+  /// Nul sur un compte dont aucun événement n'est encore arrivé.
+  stripeEventAt DateTime?
+
   /// Le client chez Stripe. Un compte, un client, pour toujours.
   stripeCustomerId     String? @unique
   /// L'abonnement en cours chez Stripe. Change à chaque réabonnement.
