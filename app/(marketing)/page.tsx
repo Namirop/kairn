@@ -74,8 +74,15 @@ export default async function PageAccueil() {
 
           {/* Atteignables sans compte, et depuis la seule page publique : une
               politique de confidentialité derrière une connexion ne sert à
-              personne. */}
+              personne. Les tarifs sont du même ordre — ce qu'on veut pouvoir
+              lire avant de s'engager, sans avoir à s'engager pour le lire. */}
           <nav className="gap-pas-4 text-mono flex flex-wrap">
+            <Link
+              href={ROUTES.tarifs}
+              className="rounded-galet text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
+            >
+              Tarifs
+            </Link>
             <Link
               href={ROUTES.mentionsLegales}
               className="rounded-galet text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
