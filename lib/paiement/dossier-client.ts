@@ -1,4 +1,5 @@
 import { attacherLeClientStripe, lireDossierStripe } from "@/lib/db/ecriture-de-labonnement";
+import { mentionDeFacture, TVA_COLLECTEE } from "@/lib/domain/mention-de-tva";
 import { stripe } from "./client";
 
 /**
@@ -33,6 +34,11 @@ export async function clientStripeDuCompte(compte: {
       // c'est notre ligne qui fait foi — mais à retrouver un compte depuis le
       // tableau de bord Stripe quand on cherche pourquoi un paiement a échoué.
       metadata: { userId: compte.id },
+      // Le pied de page suit le client et non la facture : Stripe le recopie
+      // sur chacune, y compris celles des renouvellements, que ce code ne verra
+      // jamais passer. Le poser ailleurs obligerait à intercepter chaque
+      // échéance pour ajouter une phrase obligatoire.
+      invoice_settings: { footer: mentionDeFacture(TVA_COLLECTEE) ?? undefined },
     },
     // Deux clics sur « Payer » à une seconde d'écart, c'est deux clients
     // Stripe pour la même personne, dont un orphelin qui portera peut-être un
