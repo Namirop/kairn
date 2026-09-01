@@ -35,10 +35,10 @@ const decale = (secondes: number) => new Date(T0.getTime() + secondes * 1000);
 async function main(): Promise<void> {
   const { prisma } = await import("@/lib/db/client");
   const { creerCompte, effacerComptes } = await import("./verification/abus-fabrique");
-  const { attacherLeClientStripe, enregistrerLEtatDeLAbonnement } = await import(
-    "@/lib/db/ecriture-de-labonnement"
-  );
+  const { attacherLeClientStripe, enregistrerLEtatDeLAbonnement } =
+    await import("@/lib/db/ecriture-de-labonnement");
   const { lireLOffreDuCompte } = await import("@/lib/db/abonnement");
+  const { compteDuClientStripe } = await import("@/lib/db/ecriture-de-labonnement");
   const { etatDepuisStripe } = await import("@/lib/domain/rapport-de-stripe");
 
   await effacerComptes([COMPTE]);
@@ -111,6 +111,21 @@ async function main(): Promise<void> {
       `plan ${apresTerme.plan}, plafond ${apresTerme.plafond}`,
     );
 
+    // ---- Le voisin de palier ----------------------------------------------
+    // Un endpoint webhook écoute un **compte** Stripe, pas un produit. Si un
+    // autre projet partage un jour ce compte, ses abonnements arriveront ici.
+    // Le filtre n'est pas une métadonnée qu'on choisit de croire : c'est une
+    // jointure sur notre propre table, qui ne contient que des clients que
+    // Kairn a créés lui-même.
+    const etranger = await compteDuClientStripe("cus_dun_autre_produit");
+    const notre = await compteDuClientStripe(CLIENT);
+
+    record(
+      "Le client d'un autre produit du même compte Stripe ne désigne aucun compte Kairn",
+      etranger === null && notre === COMPTE,
+      `étranger : ${etranger ?? "aucun"}, nôtre : ${notre ?? "aucun"}`,
+    );
+
     // ---- La course ---------------------------------------------------------
     // Le vrai enjeu : deux webhooks traités ensemble. Les deux lisent la même
     // ancienne valeur avant d'écrire, et sans le verrou dans le `where`, le plus
@@ -141,7 +156,11 @@ async function main(): Promise<void> {
 
     const reste = await prisma.subscription.count({ where: { userId: COMPTE } });
 
-    record("Aucune ligne d'abonnement ne subsiste après la passe", reste === 0, `${reste} ligne(s)`);
+    record(
+      "Aucune ligne d'abonnement ne subsiste après la passe",
+      reste === 0,
+      `${reste} ligne(s)`,
+    );
   }
 }
 
