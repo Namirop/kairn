@@ -37,6 +37,7 @@
     "verify:ingestion": "tsx scripts/verifier-ingestion.ts",
     "verifier:depot-anonyme": "tsx scripts/verifier-le-depot-anonyme.ts",
     "valider:rejet": "tsx scripts/valider-le-rejet-et-le-ton.ts",
+    "verify:abonnement": "tsx scripts/verifier-abonnement.ts",
     "verify:session": "tsx scripts/verifier-session.ts",
     "verify:abus": "tsx scripts/verifier-abus.ts",
     "verify:contrastes": "tsx scripts/verifier-contrastes.ts",
