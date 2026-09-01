@@ -1,10 +1,7 @@
 import { prisma } from "@/lib/db/client";
-import {
-  compterConceptsRetenus,
-  DEPOTS_PAR_PERIODE,
-  estEnListeDattente,
-  inscrireEnListeDattente,
-} from "@/lib/db/quota-depots";
+import { estEnListeDattente, inscrireEnListeDattente } from "@/lib/db/liste-dattente";
+import { compterConceptsRetenus } from "@/lib/db/comptage-de-la-periode";
+import { DEPOTS_PAR_PERIODE } from "@/lib/db/quota-depots";
 import { PLAFOND_GRATUIT } from "@/lib/domain/plafond-du-plan";
 import { deposer, type ResultatDepot } from "@/lib/depots/deposer";
 import { formulaire, repartirDeZero, vieillirLesDepots } from "./depot-simule";

@@ -8,11 +8,9 @@ import { PlafondAtteint } from "@/components/depots/plafond-atteint";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { plafondDuCompte } from "@/lib/db/abonnement";
-import {
-  DEPOTS_PAR_PERIODE,
-  estEnListeDattente,
-  lireUsageDeLaPeriode,
-} from "@/lib/db/quota-depots";
+import { estEnListeDattente } from "@/lib/db/liste-dattente";
+import { lireUsageDeLaPeriode } from "@/lib/db/periode-du-compte";
+import { DEPOTS_PAR_PERIODE } from "@/lib/db/quota-depots";
 import { compterLesDepots } from "@/lib/db/depots";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { inviteDeDepot } from "@/lib/domain/invites-de-depot";

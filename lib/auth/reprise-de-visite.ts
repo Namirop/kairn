@@ -1,5 +1,5 @@
 import { creerJobsDeQuestions } from "@/lib/db/lots";
-import { compterLaVisiteReprise } from "@/lib/db/quota-depots";
+import { compterLaVisiteReprise } from "@/lib/db/comptage-de-la-periode";
 import { rattacherAuCompte } from "@/lib/db/depot-de-visite";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { lireLaVisite, oublierLaVisite } from "@/lib/auth/visite";

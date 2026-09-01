@@ -1,9 +1,23 @@
 import { plafondDuCompte } from "@/lib/db/abonnement";
 import { prisma } from "@/lib/db/client";
+import { lireUsageDeLaPeriode, periodeDuCompte } from "@/lib/db/periode-du-compte";
 import { localDay } from "@/lib/domain/local-day";
-import { debutEnDate, periodeDeQuota, type PeriodeDeQuota } from "@/lib/domain/periode-de-quota";
+import { debutEnDate } from "@/lib/domain/periode-de-quota";
 
 /**
+ * Prendre une place de la période, ou la refuser.
+ *
+ * Ce module décide **avant** la dépense. Ce qui la lit vit dans
+ * `periode-du-compte.ts`, ce qui l'enregistre après coup dans
+ * `comptage-de-la-periode.ts` : trois rôles, et celui-ci est le seul qui puisse
+ * dire non.
+ *
+ * Il tient d'un bloc et ne se découpe pas plus loin. La fenêtre de débit n'est
+ * pas une limite à part rangée ailleurs : elle vit dans la ligne qu'on
+ * verrouille, sans quoi l'incrément et le refus ne tiendraient plus dans la
+ * même instruction — et c'est exactement le bug qu'elle a corrigé, dix envois
+ * simultanés qui lisaient tous zéro.
+ *
  * Trois limites, trois rôles.
  *
  * **Le plafond porte sur les concepts, et il se compte au mois**, sur une
@@ -82,45 +96,6 @@ export type Autorisation =
        */
       plafond: number;
     };
-
-/**
- * La période en cours d'un compte.
- *
- * L'ancrage est la date d'inscription. Un compte introuvable — supprimé entre
- * deux requêtes — ancre sur maintenant : il n'obtiendra rien de toute façon,
- * autant que le calcul ne lève pas.
- */
-export async function periodeDuCompte(
-  userId: string,
-  fuseau: string,
-  maintenant: Date = new Date(),
-): Promise<PeriodeDeQuota> {
-  const compte = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { createdAt: true },
-  });
-
-  return periodeDeQuota(compte?.createdAt ?? maintenant, maintenant, fuseau);
-}
-
-export type UsageDeLaPeriode = {
-  depots: number;
-  concepts: number;
-  periode: PeriodeDeQuota;
-};
-
-export async function lireUsageDeLaPeriode(
-  userId: string,
-  fuseau: string,
-  maintenant: Date = new Date(),
-): Promise<UsageDeLaPeriode> {
-  const periode = await periodeDuCompte(userId, fuseau, maintenant);
-  const usage = await prisma.monthlyUsage.findUnique({
-    where: { userId_periodStart: { userId, periodStart: debutEnDate(periode) } },
-  });
-
-  return { depots: usage?.deposits ?? 0, concepts: usage?.concepts ?? 0, periode };
-}
 
 /**
  * Prend une place de la période, ou la refuse.
@@ -261,78 +236,4 @@ export async function rendreDepot(
     where: { userId, periodStart: debutEnDate(periode), deposits: { gt: 0 } },
     data: { deposits: { decrement: 1 } },
   });
-}
-
-/**
- * Les concepts qu'un dépôt vient de rendre entrent au compteur.
- *
- * Écrit après l'extraction, puisque c'est elle qui dit combien. La période se
- * recalcule à cet instant-là : un dépôt fait la veille du basculement dont
- * l'extraction rend le lendemain compte sur la période neuve, ce qui vaut mieux
- * que de compter dans une période déjà close.
- */
-export async function compterConceptsRetenus(
-  userId: string,
-  fuseau: string,
-  concepts: number,
-  maintenant: Date = new Date(),
-): Promise<void> {
-  if (concepts <= 0) return;
-
-  const periode = await periodeDuCompte(userId, fuseau, maintenant);
-
-  await prisma.$executeRaw`
-    INSERT INTO "MonthlyUsage" ("userId", "periodStart", "concepts", "deposits", "createdAt", "updatedAt")
-    VALUES (${userId}, ${periode.debut}::date, ${concepts}, 0, now(), now())
-    ON CONFLICT ("userId", "periodStart") DO UPDATE
-      SET "concepts" = "MonthlyUsage"."concepts" + ${concepts},
-          "updatedAt" = now()
-  `;
-}
-
-/**
- * Ce qu'un essai fait sans compte prend au compteur, une fois réclamé.
- *
- * Un compte neuf démarrait avec les concepts de son essai **en plus** de ses
- * trente : le chemin anonyme ne passe par aucun quota, et la reprise ne
- * comptait rien. Trois concepts offerts par compte n'est pas ruineux, mais la
- * limite annoncée cessait d'être la limite réelle, et c'est ça qu'on ne veut
- * pas — un plafond qu'on affiche se tient.
- *
- * Le dépôt entre aussi. Le second rideau borne les extractions payées quoi
- * qu'elles rendent, et celle-là l'a été comme les autres.
- *
- * C'est un décompte, pas une réservation : la dépense a déjà eu lieu, il n'y a
- * plus rien à refuser. Un compte peut donc passer au-dessus du plafond à cet
- * instant précis, et c'est le seul endroit où ça arrive.
- */
-export async function compterLaVisiteReprise(
-  userId: string,
-  fuseau: string,
-  concepts: number,
-  maintenant: Date = new Date(),
-): Promise<void> {
-  const periode = await periodeDuCompte(userId, fuseau, maintenant);
-  const retenus = Math.max(concepts, 0);
-
-  await prisma.$executeRaw`
-    INSERT INTO "MonthlyUsage" ("userId", "periodStart", "concepts", "deposits", "createdAt", "updatedAt")
-    VALUES (${userId}, ${periode.debut}::date, ${retenus}, 1, now(), now())
-    ON CONFLICT ("userId", "periodStart") DO UPDATE
-      SET "concepts" = "MonthlyUsage"."concepts" + ${retenus},
-          "deposits" = "MonthlyUsage"."deposits" + 1,
-          "updatedAt" = now()
-  `;
-}
-
-export async function inscrireEnListeDattente(userId: string, motif?: string): Promise<void> {
-  await prisma.waitlistEntry.upsert({
-    where: { userId },
-    create: { userId, motif: motif ?? null },
-    update: { motif: motif ?? null },
-  });
-}
-
-export async function estEnListeDattente(userId: string): Promise<boolean> {
-  return (await prisma.waitlistEntry.count({ where: { userId } })) > 0;
 }

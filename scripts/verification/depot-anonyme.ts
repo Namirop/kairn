@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/client";
-import { compterLaVisiteReprise, lireUsageDeLaPeriode } from "@/lib/db/quota-depots";
+import { lireUsageDeLaPeriode } from "@/lib/db/periode-du-compte";
+import { compterLaVisiteReprise } from "@/lib/db/comptage-de-la-periode";
 import {
   JOURS_AVANT_OUBLI,
   lireLeDepotAnonyme,

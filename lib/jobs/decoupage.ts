@@ -5,7 +5,7 @@ import { enregistrerConcepts, enregistrerLExtraction, lireDepot } from "@/lib/db
 import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
 import { marquerPretSiPlusRienEnAttente, marquerRejet } from "@/lib/db/fin-de-depot";
 import { creerJobsDeQuestions } from "@/lib/db/lots";
-import { compterConceptsRetenus } from "@/lib/db/quota-depots";
+import { compterConceptsRetenus } from "@/lib/db/comptage-de-la-periode";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import type { GenerationJob } from "@/lib/db/types";
 import { declencher } from "./queue";

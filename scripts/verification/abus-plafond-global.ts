@@ -4,7 +4,7 @@ import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
 import { prisma } from "@/lib/db/client";
 import { lirePlacesDeCompte, lireReservationsDuJour } from "@/lib/db/ai-quota";
-import { lireUsageDeLaPeriode } from "@/lib/db/quota-depots";
+import { lireUsageDeLaPeriode } from "@/lib/db/periode-du-compte";
 import { deposer } from "@/lib/depots/deposer";
 import { enModeCompteur, viderLeCompte } from "./abus-fabrique";
 import { executerToutLePipeline, formulaire } from "./depot-simule";

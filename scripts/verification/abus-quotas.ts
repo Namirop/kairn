@@ -1,11 +1,8 @@
 import { readFileSync } from "node:fs";
 import { prisma } from "@/lib/db/client";
-import {
-  DEPOTS_PAR_PERIODE,
-  compterConceptsRetenus,
-  lireUsageDeLaPeriode,
-  periodeDuCompte,
-} from "@/lib/db/quota-depots";
+import { lireUsageDeLaPeriode, periodeDuCompte } from "@/lib/db/periode-du-compte";
+import { compterConceptsRetenus } from "@/lib/db/comptage-de-la-periode";
+import { DEPOTS_PAR_PERIODE } from "@/lib/db/quota-depots";
 import { PLAFOND_GRATUIT } from "@/lib/domain/plafond-du-plan";
 import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 import { deposer, type ResultatDepot } from "@/lib/depots/deposer";

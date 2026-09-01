@@ -11,7 +11,7 @@ import {
   supprimerConcept,
 } from "@/lib/db/concepts";
 import { lireAvancementDuDepot } from "@/lib/db/depot-detaille";
-import { inscrireEnListeDattente } from "@/lib/db/quota-depots";
+import { inscrireEnListeDattente } from "@/lib/db/liste-dattente";
 import { supprimerDepot } from "@/lib/db/reprise-depot";
 import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 import { deposer } from "@/lib/depots/deposer";

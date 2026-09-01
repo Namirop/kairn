@@ -5,7 +5,8 @@ import { exporterLeCompte, supprimerLeCompte } from "@/lib/db/compte";
 import { compterLePassage } from "@/lib/db/progression";
 import { enregistrerRevision } from "@/lib/db/revision";
 import { signalerUneQuestion } from "@/lib/db/signalement";
-import { compterConceptsRetenus, reserverDepot } from "@/lib/db/quota-depots";
+import { compterConceptsRetenus } from "@/lib/db/comptage-de-la-periode";
+import { reserverDepot } from "@/lib/db/quota-depots";
 import { fabriquerConcept } from "./abus-fabrique";
 import { record } from "./journal";
 
