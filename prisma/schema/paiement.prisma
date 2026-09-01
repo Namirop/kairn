@@ -1,0 +1,42 @@
+// L'abonnement d'un compte, et ce que Stripe en dit.
+//
+// Une ligne par compte, créée à la première visite du paiement et jamais
+// supprimée : un compte qui a payé puis arrêté garde son identifiant client, et
+// c'est lui qui rattachera un réabonnement au même dossier plutôt que d'en
+// ouvrir un second chez Stripe.
+//
+// Ce modèle ne décide rien. Il enregistre ce que le webhook rapporte, et le
+// plafond qui en découle se calcule dans `lib/domain/plafond-du-plan.ts` — une
+// fonction pure, testable sans base ni réseau. Toute logique d'abonnement écrite
+// ici ou dans une requête serait hors de portée des tests.
+
+model Subscription {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  plan PlanCompte @default(GRATUIT)
+
+  /// Jusqu'à quand le plan payant vaut, tel que Stripe l'annonce.
+  ///
+  /// C'est ce champ qui fait qu'une résiliation ne coupe rien au milieu : le
+  /// plan reste écrit, et c'est la date qui décide. Nul sur un compte qui n'a
+  /// jamais payé — et un plan payant dont la date est passée vaut gratuit, sans
+  /// qu'aucune tâche de fond n'ait eu à le réécrire. C'est voulu : un droit qui
+  /// dépend d'un cron pour expirer est un droit qui traîne quand le cron tombe.
+  currentPeriodEnd DateTime?
+
+  /// L'abonnement est résilié mais court jusqu'à son terme.
+  ///
+  /// N'entre pas dans le calcul du plafond — `currentPeriodEnd` suffit à ça.
+  /// Sert à l'écran, qui doit pouvoir dire « ton accès s'arrête le 12 » plutôt
+  /// que de laisser croire au renouvellement.
+  cancelAtPeriodEnd Boolean @default(false)
+
+  /// Le client chez Stripe. Un compte, un client, pour toujours.
+  stripeCustomerId     String? @unique
+  /// L'abonnement en cours chez Stripe. Change à chaque réabonnement.
+  stripeSubscriptionId String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

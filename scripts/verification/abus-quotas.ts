@@ -1,15 +1,15 @@
 import { readFileSync } from "node:fs";
 import { prisma } from "@/lib/db/client";
 import {
-  CONCEPTS_PAR_PERIODE,
   DEPOTS_PAR_PERIODE,
   compterConceptsRetenus,
   lireUsageDeLaPeriode,
   periodeDuCompte,
 } from "@/lib/db/quota-depots";
+import { PLAFOND_GRATUIT } from "@/lib/domain/plafond-du-plan";
 import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 import { deposer, type ResultatDepot } from "@/lib/depots/deposer";
-import { MOTIFS_DE_REFUS } from "@/lib/depots/refus-de-quota";
+import { refusDeQuota } from "@/lib/depots/refus-de-quota";
 import { GESTES_PAR_FENETRE, prendreUnGeste } from "@/lib/db/limite-de-gestes";
 import { enregistrerEntrainement } from "@/lib/db/entrainement";
 import { debutEnDate } from "@/lib/domain/periode-de-quota";
@@ -90,7 +90,7 @@ export async function casPlafondConcurrent(userId: string): Promise<void> {
 /** Le décompte des concepts a lieu après l'extraction, faute de savoir avant. */
 export async function casDecompteApresExtraction(userId: string): Promise<void> {
   await viderLeCompte(userId);
-  await compterConceptsRetenus(userId, FUSEAU, CONCEPTS_PAR_PERIODE - 1);
+  await compterConceptsRetenus(userId, FUSEAU, PLAFOND_GRATUIT - 1);
 
   const depot = await deposer(
     userId,
@@ -118,13 +118,13 @@ export async function casDecompteApresExtraction(userId: string): Promise<void> 
     !suivant.ok && suivant.quota === true,
     suivant.ok
       ? "accepté"
-      : `${ecrits} concept(s) sur la dernière place, compteur à ${usage.concepts}/${CONCEPTS_PAR_PERIODE} — puis « ${suivant.motif} »`,
+      : `${ecrits} concept(s) sur la dernière place, compteur à ${usage.concepts}/${PLAFOND_GRATUIT} — puis « ${suivant.motif} »`,
   );
 
   record(
     "Quota — le plafond s'annonce pour ce qu'il est, approximatif",
-    MOTIFS_DE_REFUS.concepts.includes("autour de"),
-    MOTIFS_DE_REFUS.concepts,
+    refusDeQuota("concepts", PLAFOND_GRATUIT).motif.includes("autour de"),
+    refusDeQuota("concepts", PLAFOND_GRATUIT).motif,
   );
 
   const avant = usage.concepts;

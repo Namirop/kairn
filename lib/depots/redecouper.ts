@@ -36,7 +36,7 @@ export async function redecouper(userId: string, inputId: string): Promise<Resul
   const fuseau = await lireFuseauUtilisateur(userId);
   const place = await reserverDepot(userId, fuseau);
 
-  if (!place.accorde) return { ok: false, ...refusDeQuota(place.motif) };
+  if (!place.accorde) return { ok: false, ...refusDeQuota(place.motif, place.plafond) };
 
   // La place prise sur un redécoupage qui n'a pas lieu est rendue : le compteur
   // suit ce qui a été lancé, pas ce qui a été tenté.

@@ -1,3 +1,4 @@
+import { plafondDuCompte } from "@/lib/db/abonnement";
 import { prisma } from "@/lib/db/client";
 import { localDay } from "@/lib/domain/local-day";
 import { debutEnDate, periodeDeQuota, type PeriodeDeQuota } from "@/lib/domain/periode-de-quota";
@@ -33,15 +34,20 @@ import { debutEnDate, periodeDeQuota, type PeriodeDeQuota } from "@/lib/domain/p
  * remplacent pas.
  */
 
-/** Ce qu'une période permet de retenir. C'est la limite que l'écran annonce. */
-export const CONCEPTS_PAR_PERIODE = 30;
+/**
+ * Ce qu'une période permet de retenir, c'est le plan du compte qui le dit.
+ *
+ * C'était une constante ; `lib/domain/plafond-du-plan.ts` la remplace, et le
+ * plafond se lit désormais par compte. Rien ici ne connaît les plans ni leurs
+ * valeurs : ce module réserve des places, il ne décide pas combien il y en a.
+ */
 
 /**
  * Second rideau : au-delà, ce sont les extractions qu'on paie pour rien.
  *
  * C'est le seul endroit où la longueur d'un texte échappe au quota en concepts.
  * Un dépôt rejeté paie son extraction et ne rend aucun concept : il n'entre donc
- * jamais dans le compteur que `CONCEPTS_PAR_PERIODE` surveille, et sans ce
+ * jamais dans le compteur que le plafond de concepts surveille, et sans ce
  * rideau-là quelqu'un pourrait ne déposer que des textes rejetés, sans fin.
  *
  * Le chiffre vient de là : soixante extractions de 8 000 caractères, autour de
@@ -63,7 +69,19 @@ export const DEPOTS_PAR_FENETRE = 3;
 
 export type Autorisation =
   | { accorde: true; restants: number }
-  | { accorde: false; motif: "concepts" | "depots" | "debit"; restants: number };
+  | {
+      accorde: false;
+      motif: "concepts" | "depots" | "debit";
+      restants: number;
+      /**
+       * La limite qui a refusé, portée par le refus.
+       *
+       * Le message qui l'annonce est écrit ailleurs, et il doit dire le plafond
+       * de *ce* compte. Le lui faire relire en base serait une seconde lecture
+       * qui peut ne pas rendre la même chose que celle qui vient de décider.
+       */
+      plafond: number;
+    };
 
 /**
  * La période en cours d'un compte.
@@ -128,6 +146,10 @@ export async function reserverDepot(
 ): Promise<Autorisation> {
   const periode = await periodeDuCompte(userId, fuseau, maintenant);
   const debut = periode.debut;
+  // Lu une fois, puis porté jusqu'au refus. Le relire après coup pourrait rendre
+  // une autre valeur — un abonnement qui commence entre les deux lectures — et
+  // le message annoncerait alors une limite qui n'est pas celle qui a décidé.
+  const plafond = await plafondDuCompte(userId, maintenant);
 
   const lignes = await prisma.$queryRaw<{ deposits: number; concepts: number }[]>`
     INSERT INTO "MonthlyUsage" ("userId", "periodStart", "concepts", "deposits", "createdAt", "updatedAt")
@@ -135,17 +157,23 @@ export async function reserverDepot(
     ON CONFLICT ("userId", "periodStart") DO UPDATE
       SET "deposits" = "MonthlyUsage"."deposits" + 1,
           "updatedAt" = now()
-      WHERE "MonthlyUsage"."concepts" < ${CONCEPTS_PAR_PERIODE}
+      WHERE "MonthlyUsage"."concepts" < ${plafond}
         AND "MonthlyUsage"."deposits" < ${DEPOTS_PAR_PERIODE}
     RETURNING "deposits", "concepts"
   `;
 
   const prise = lignes[0];
 
-  if (!prise) return { accorde: false, ...(await motifDuRefus(userId, fuseau, maintenant)) };
+  if (!prise) {
+    return {
+      accorde: false,
+      ...(await motifDuRefus(userId, fuseau, plafond, maintenant)),
+      plafond,
+    };
+  }
 
   if (await fenetreDeDebitOuverte(userId, fuseau, maintenant)) {
-    return { accorde: true, restants: Math.max(0, CONCEPTS_PAR_PERIODE - prise.concepts) };
+    return { accorde: true, restants: Math.max(0, plafond - prise.concepts) };
   }
 
   await rendreDepot(userId, fuseau, maintenant);
@@ -153,7 +181,8 @@ export async function reserverDepot(
   return {
     accorde: false,
     motif: "debit",
-    restants: Math.max(0, CONCEPTS_PAR_PERIODE - prise.concepts),
+    restants: Math.max(0, plafond - prise.concepts),
+    plafond,
   };
 }
 
@@ -210,13 +239,14 @@ async function fenetreDeDebitOuverte(
 async function motifDuRefus(
   userId: string,
   fuseau: string,
+  plafond: number,
   maintenant: Date,
 ): Promise<{ motif: "concepts" | "depots"; restants: number }> {
   const usage = await lireUsageDeLaPeriode(userId, fuseau, maintenant);
 
-  if (usage.concepts >= CONCEPTS_PAR_PERIODE) return { motif: "concepts", restants: 0 };
+  if (usage.concepts >= plafond) return { motif: "concepts", restants: 0 };
 
-  return { motif: "depots", restants: Math.max(0, CONCEPTS_PAR_PERIODE - usage.concepts) };
+  return { motif: "depots", restants: Math.max(0, plafond - usage.concepts) };
 }
 
 /** Le dépôt n'a finalement pas été écrit : sa place retourne au compteur. */

@@ -4,6 +4,7 @@
 //   profile.prisma     réglages et statistiques d'un compte
 //   learning.prisma    Input → Atom → Variant → Review
 //   operations.prisma  jobs, traçabilité des appels modèle, quotas, emails
+//   paiement.prisma    abonnement d'un compte, et ce que Stripe en dit
 
 generator client {
   provider = "prisma-client"

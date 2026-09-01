@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/db/client";
 import {
   compterConceptsRetenus,
-  CONCEPTS_PAR_PERIODE,
   DEPOTS_PAR_PERIODE,
   estEnListeDattente,
   inscrireEnListeDattente,
 } from "@/lib/db/quota-depots";
+import { PLAFOND_GRATUIT } from "@/lib/domain/plafond-du-plan";
 import { deposer, type ResultatDepot } from "@/lib/depots/deposer";
 import { formulaire, repartirDeZero, vieillirLesDepots } from "./depot-simule";
 import { record } from "./journal";
@@ -66,7 +66,7 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
 
   // Le quota porte sur les concepts, et l'extraction n'a pas lieu ici : on
   // remplit le compteur comme le ferait le découpage, jusqu'à une place près.
-  await compterConceptsRetenus(userId, "Europe/Paris", CONCEPTS_PAR_PERIODE - 1);
+  await compterConceptsRetenus(userId, "Europe/Paris", PLAFOND_GRATUIT - 1);
 
   const dernier = await deposerTexte(userId, "verif-quota-limite");
   record(
@@ -80,7 +80,7 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
 
   const surnumeraire = await deposerTexte(userId, "verif-quota-plein");
   record(
-    `Quota — le dépôt qui suit les ${CONCEPTS_PAR_PERIODE} concepts est refusé, et se sait refusé`,
+    `Quota — le dépôt qui suit les ${PLAFOND_GRATUIT} concepts est refusé, et se sait refusé`,
     !surnumeraire.ok && surnumeraire.quota === true,
     surnumeraire.ok ? "accepté" : surnumeraire.motif,
   );
@@ -88,8 +88,8 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
   const consommes = await prisma.monthlyUsage.findFirst({ where: { userId } });
   record(
     "Quota — un refus n'entame ni les concepts ni les dépôts de la période",
-    (consommes?.concepts ?? 0) === CONCEPTS_PAR_PERIODE && (consommes?.deposits ?? 0) === 4,
-    `${consommes?.concepts ?? 0} concept(s) sur ${CONCEPTS_PAR_PERIODE}, ${consommes?.deposits ?? 0} dépôt(s)`,
+    (consommes?.concepts ?? 0) === PLAFOND_GRATUIT && (consommes?.deposits ?? 0) === 4,
+    `${consommes?.concepts ?? 0} concept(s) sur ${PLAFOND_GRATUIT}, ${consommes?.deposits ?? 0} dépôt(s)`,
   );
 }
 

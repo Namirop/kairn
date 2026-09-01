@@ -158,3 +158,17 @@ enum CompteurDeQuota {
   COMPTE
   ANONYME
 }
+
+/// Le plan d'un compte, et ce qu'il ouvre comme plafond de concepts.
+///
+/// `GRATUIT` est l'état de tout le monde tant que rien n'a été payé, et l'état
+/// où l'on retombe quand un abonnement finit. Les deux plans payants ne
+/// diffèrent que par leur cadence de facturation : ils ouvrent le même plafond,
+/// et rien dans le produit ne doit les distinguer ailleurs qu'à l'écran du
+/// paiement. Le jour où ils ouvriraient des droits différents, ce serait deux
+/// offres et non deux cadences, et ça se dirait autrement.
+enum PlanCompte {
+  GRATUIT
+  MENSUEL
+  ANNUEL
+}

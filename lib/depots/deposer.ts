@@ -68,7 +68,7 @@ export async function deposer(userId: string, donnees: FormData): Promise<Result
   const place = await reserverDepot(userId, fuseau);
 
   if (!place.accorde) {
-    return { ok: false, ...refusDeQuota(place.motif) };
+    return { ok: false, ...refusDeQuota(place.motif, place.plafond) };
   }
 
   const capture = champs.image ? await preparerCapture(champs.image) : null;

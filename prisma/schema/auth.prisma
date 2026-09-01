@@ -25,6 +25,7 @@ model User {
   retours      Retour[]
   emailsSent   EmailDelivery[]
   waitlist     WaitlistEntry?
+  subscription Subscription?
 }
 
 model Session {

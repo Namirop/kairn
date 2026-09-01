@@ -1,5 +1,3 @@
-import { CONCEPTS_PAR_PERIODE } from "@/lib/db/quota-depots";
-
 /**
  * Ce qu'un refus de quota dit.
  *
@@ -11,23 +9,36 @@ import { CONCEPTS_PAR_PERIODE } from "@/lib/db/quota-depots";
  * donc les deux prennent une place, donc les deux la refusent dans les mêmes
  * termes.
  */
-export const MOTIFS_DE_REFUS = {
-  // « Autour de », et c'est exact. Un dépôt est autorisé tant qu'il reste une
-  // place, puis rend ce qu'il rend : le dernier de la période peut retenir huit
-  // concepts sur une place. Annoncer un nombre rond que le produit dépasse d'un
-  // quart, c'était afficher un plafond qui est en fait un plancher.
-  //
-  // Aucun des deux ne dit quand ça repart : la date dépend du compte, et
-  // l'écran qui la connaît l'ajoute. Une phrase qui dirait « demain » serait
-  // fausse de trois semaines pour la plupart des gens.
-  concepts: `Tu as atteint la limite du mois, autour de ${CONCEPTS_PAR_PERIODE} concepts.`,
-  depots: "Tu as fait tous les dépôts du mois.",
-  debit: "Trop de dépôts coup sur coup. Laisse passer une minute.",
-} as const;
+export type MotifDeRefus = "concepts" | "depots" | "debit";
 
-export type MotifDeRefus = keyof typeof MOTIFS_DE_REFUS;
+/**
+ * Le message d'un refus, dit à l'utilisateur.
+ *
+ * Le plafond est reçu, plus lu : il dépend du plan du compte depuis que le
+ * paiement existe, et une constante annoncerait trente concepts à quelqu'un qui
+ * en a trois cents. Il vient du refus lui-même, qui le porte depuis la décision.
+ *
+ * « Autour de », et c'est exact. Un dépôt est autorisé tant qu'il reste une
+ * place, puis rend ce qu'il rend : le dernier de la période peut retenir huit
+ * concepts sur une place. Annoncer un nombre rond que le produit dépasse d'un
+ * quart, c'était afficher un plafond qui est en fait un plancher.
+ *
+ * Aucun message ne dit quand ça repart : la date dépend du compte, et l'écran
+ * qui la connaît l'ajoute. Une phrase qui dirait « demain » serait fausse de
+ * trois semaines pour la plupart des gens.
+ *
+ * `quota` distingue la limite de la période de celle du débit : l'une se compte
+ * en semaines, l'autre en secondes.
+ */
+export function refusDeQuota(
+  motif: MotifDeRefus,
+  plafond: number,
+): { motif: string; quota: boolean } {
+  const messages: Record<MotifDeRefus, string> = {
+    concepts: `Tu as atteint la limite du mois, autour de ${plafond} concepts.`,
+    depots: "Tu as fait tous les dépôts du mois.",
+    debit: "Trop de dépôts coup sur coup. Laisse passer une minute.",
+  };
 
-/** Un refus de place, dit à l'utilisateur. `quota` distingue le jour du débit. */
-export function refusDeQuota(motif: MotifDeRefus): { motif: string; quota: boolean } {
-  return { motif: MOTIFS_DE_REFUS[motif], quota: motif !== "debit" };
+  return { motif: messages[motif], quota: motif !== "debit" };
 }
