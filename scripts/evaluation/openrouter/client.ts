@@ -1,4 +1,4 @@
-import { z, type ZodType } from "zod";
+import { z } from "zod";
 import { AICallFailedError, AIMissingOutputError, AITruncatedOutputError } from "@/lib/ai/errors";
 import type { AiMessage } from "@/lib/ai/message";
 import { toOutputSchema } from "@/lib/ai/output-schema";
@@ -81,7 +81,9 @@ const reponseSchema = z.object({
  */
 function toOpenRouterMessage(message: AiMessage): {
   role: "user" | "assistant";
-  content: string | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
+  content:
+    | string
+    | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
 } {
   if (typeof message.content === "string") {
     return { role: message.role, content: message.content };
@@ -112,10 +114,12 @@ function lireSortie<T>(contract: AiContract<T>, texte: string): T {
   } catch {
     throw new AIMissingOutputError(contract.purpose);
   }
-  const parse = (contract.validation as ZodType<T>).safeParse(brut);
+  const parse = contract.validation.safeParse(brut);
   if (!parse.success) {
     if (process.env.OPENROUTER_DEBUG === "1") {
-      console.error(`[debug] Sortie brute rejetée pour « ${contract.purpose} » :\n${texte.slice(0, 2000)}`);
+      console.error(
+        `[debug] Sortie brute rejetée pour « ${contract.purpose} » :\n${texte.slice(0, 2000)}`,
+      );
     }
     throw new AICallFailedError(contract.purpose, parse.error);
   }
@@ -185,7 +189,7 @@ ${JSON.stringify(format.schema)}
     reponse = await fetch(ENDPOINT, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${cle}`,
+        Authorization: `Bearer ${cle}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(corps),
@@ -232,4 +236,3 @@ ${JSON.stringify(format.schema)}
     },
   };
 }
-

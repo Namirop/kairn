@@ -86,7 +86,7 @@ export function planGeneration(fige: { depots: DepotFige[] }): Plan {
  */
 export function planFidelite(fige: { depots: DepotFige[] }): Plan {
   const promptTokens = tok(SYSTEM_FIDELITE);
-  let plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
+  const plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
 
   for (const depot of fige.depots) {
     const questionnables = conceptsAQuestionner(depot.concepts, depot.nature);

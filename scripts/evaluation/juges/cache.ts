@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
+import { z } from "zod";
 import type { CouvertureAttendu } from "../attendus";
-import type { VerdictDoublon } from "./doublon";
+import { SENS_DOUBLON, type VerdictDoublon } from "./doublon";
 import type { VerdictFidelite } from "./fidelite";
 import type { VerdictInvention, VerdictManque } from "./residu";
 
@@ -37,6 +38,55 @@ export type CacheDeMesure = {
   depots: Record<string, CacheDeDepot>;
 };
 
+/**
+ * Le cache est relu, donc il est validé.
+ *
+ * Il est écrit par ce module lui-même, ce qui rend la validation inutile en
+ * marche normale — mais un cache se garde entre deux versions du banc, et c'est
+ * précisément là qu'il ment : un verdict d'une forme antérieure passerait sans
+ * bruit et casserait quinze appels plus loin, sur une ligne qui n'y est pour
+ * rien. Le schéma le refuse tout de suite et nomme le fichier à supprimer.
+ *
+ * C'est aussi ce que le CLAUDE.md demande : un `JSON.parse` rend `unknown`, et
+ * ce qui le transforme en type est un schéma, jamais une assertion.
+ */
+const motive = z.object({ motif: z.string() });
+
+const verdictDoublon = z.object({
+  independants: z.boolean().nullable(),
+  sens: z.enum(SENS_DOUBLON).nullable(),
+  questionSurA: z.string().nullable(),
+  questionSurB: z.string().nullable(),
+});
+
+const cacheDeDepot = z.object({
+  doublons: z.array(verdictDoublon).optional(),
+  residu: z
+    .object({
+      manques: z.array(motive.extend({ retenir: z.boolean().nullable() })),
+      inventions: z.array(motive.extend({ soutenu: z.boolean().nullable() })),
+    })
+    .optional(),
+  fidelite: z
+    .record(z.string(), z.array(motive.extend({ juste: z.boolean().nullable() })))
+    .optional(),
+  attendus: z
+    .array(
+      z.object({
+        attendu: z.string(),
+        candidats: z.array(z.object({ concept: z.string(), proximite: z.number() })),
+        couvertParProximite: z.boolean(),
+        verdict: motive.extend({ couvert: z.boolean().nullable() }).optional(),
+      }),
+    )
+    .optional(),
+});
+
+const cacheDeMesure = z.object({
+  fige: z.string(),
+  depots: z.record(z.string(), cacheDeDepot),
+});
+
 function cheminDuCache(cheminFige: string): string {
   return join(DOSSIER, basename(cheminFige));
 }
@@ -46,7 +96,17 @@ export function chargerCache(cheminFige: string): CacheDeMesure {
   if (!existsSync(chemin)) {
     return { fige: basename(cheminFige), depots: {} };
   }
-  return JSON.parse(readFileSync(chemin, "utf8")) as CacheDeMesure;
+  const lu = cacheDeMesure.safeParse(JSON.parse(readFileSync(chemin, "utf8")));
+
+  if (!lu.success) {
+    throw new Error(
+      `Cache illisible : ${chemin}
+Il a probablement été écrit par une version antérieure du banc. Supprime-le et relance.`,
+      { cause: lu.error },
+    );
+  }
+
+  return lu.data;
 }
 
 /**

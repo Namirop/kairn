@@ -12,8 +12,7 @@ import type { ScoreDeColonne, ScoreDepot } from "./execution";
  * — c'est la seule garantie que l'ordre A/B/C/D est le même dans les deux.
  */
 
-const ETIQUETTES = ["A", "B", "C", "D"] as const;
-export type Etiquette = (typeof ETIQUETTES)[number];
+export type Etiquette = "A" | "B" | "C" | "D";
 
 export type EtiqueteesAvecScore = {
   etiquette: Etiquette;
@@ -67,12 +66,22 @@ function ligneStatut(score: ScoreDeColonne): string {
   return `**arrêt 2× juges** après ${score.statut.nom} — ${score.statut.coutReel.toFixed(4)} $ contre ${score.statut.coutEstime.toFixed(4)} $ estimés`;
 }
 
-function ligneRecap(label: string, score: ScoreDeColonne | ReferenceSonnet, extraction: string, juges: string, total: string): string {
+function ligneRecap(
+  label: string,
+  score: ScoreDeColonne | ReferenceSonnet,
+  extraction: string,
+  juges: string,
+  total: string,
+): string {
   const attendus = totalAttendus(score);
   return `| ${label.padEnd(6)} | ${totalConcepts(score).toString().padStart(8)} | ${totalRejets(score).toString().padStart(6)} | ${totalEchecs(score).toString().padStart(6)} | ${totalDoublons(score).toString().padStart(8)} | ${totalManques(score).toString().padStart(7)} | ${totalInventions(score).toString().padStart(10)} | ${attendus.couverts}/${attendus.total} | ${extraction.padStart(10)} | ${juges.padStart(8)} | ${total.padStart(8)} |`;
 }
 
-function ligneDetailDepot(nom: string, depotSonnet: ScoreDepot | undefined, cellules: (ScoreDepot | undefined)[]): string {
+function ligneDetailDepot(
+  nom: string,
+  depotSonnet: ScoreDepot | undefined,
+  cellules: (ScoreDepot | undefined)[],
+): string {
   const cellSonnet = formaterCellule(depotSonnet);
   const cellsChallengers = cellules.map(formaterCellule);
   return `| ${nom.padEnd(30)} | ${cellSonnet.padEnd(24)} | ${cellsChallengers.map((c) => c.padEnd(24)).join(" | ")} |`;
@@ -102,14 +111,20 @@ export function rendreLeTableauAveugle(
   lignes.push("");
   lignes.push(`> ${BANDEAU_DE_CAMPAGNE}`);
   lignes.push("");
-  lignes.push(`Colonnes A à D : quatre challengers, ordre randomisé, correspondance dans un fichier séparé. Colonne Sonnet : la référence du figé \`2026-08-20-11h58\`, jamais rejouée à cette passe (arrêt 1 du 2026-08-21).`);
+  lignes.push(
+    `Colonnes A à D : quatre challengers, ordre randomisé, correspondance dans un fichier séparé. Colonne Sonnet : la référence du figé \`2026-08-20-11h58\`, jamais rejouée à cette passe (arrêt 1 du 2026-08-21).`,
+  );
   lignes.push("");
 
   // Récap
   lignes.push(`## Vue d'ensemble`);
   lignes.push("");
-  lignes.push(`| Col.   | Concepts | Rejets | Échecs | Doublons | Manques | Inventions | Attendus | Extr. $   | Juges $  | Total $  |`);
-  lignes.push(`|:-------|---------:|-------:|-------:|---------:|--------:|-----------:|---------:|----------:|---------:|---------:|`);
+  lignes.push(
+    `| Col.   | Concepts | Rejets | Échecs | Doublons | Manques | Inventions | Attendus | Extr. $   | Juges $  | Total $  |`,
+  );
+  lignes.push(
+    `|:-------|---------:|-------:|-------:|---------:|--------:|-----------:|---------:|----------:|---------:|---------:|`,
+  );
   lignes.push(ligneRecap(`${REFERENCE.nom}`, reference, "réf.", "réf.", "réf."));
   for (const { etiquette, score } of colonnes) {
     const extraction = score.factureExtraction.usd.toFixed(4);
@@ -135,10 +150,17 @@ export function rendreLeTableauAveugle(
   ];
   lignes.push(`## Détail par dépôt`);
   lignes.push("");
-  lignes.push(`Format d'une cellule : \`Nc\` concepts, \`nD\` doublons confirmés, \`nM\` manques confirmés, \`nI\` inventions confirmées, \`x/yA\` attendus couverts. « rejet » quand le modèle a refusé, « échec » sur panne technique.`);
+  lignes.push(
+    `Format d'une cellule : \`Nc\` concepts, \`nD\` doublons confirmés, \`nM\` manques confirmés, \`nI\` inventions confirmées, \`x/yA\` attendus couverts. « rejet » quand le modèle a refusé, « échec » sur panne technique.`,
+  );
   lignes.push("");
   lignes.push(`| ${enTete.map((e, i) => (i === 0 ? e.padEnd(30) : e.padEnd(24))).join(" | ")} |`);
-  lignes.push(`|${"-".repeat(32)}|${enTete.slice(1).map(() => "-".repeat(26)).join("|")}|`);
+  lignes.push(
+    `|${"-".repeat(32)}|${enTete
+      .slice(1)
+      .map(() => "-".repeat(26))
+      .join("|")}|`,
+  );
 
   const nomsDepots = reference.depots.map((d) => d.nom).sort();
   for (const nom of nomsDepots) {
@@ -151,16 +173,15 @@ export function rendreLeTableauAveugle(
   return lignes.join("\n");
 }
 
-export function rendreLaCorrespondance(
-  colonnes: EtiqueteesAvecScore,
-  emisA: Date,
-): string {
+export function rendreLaCorrespondance(colonnes: EtiqueteesAvecScore, emisA: Date): string {
   const lignes: string[] = [];
   lignes.push(`# Correspondance étiquette → challenger — campagne 1`);
   lignes.push("");
   lignes.push(`Émis le ${emisA.toISOString()}.`);
   lignes.push("");
-  lignes.push(`Ce fichier n'est **pas** ouvert à l'arrêt 2 : il fixe seulement l'étiquetage pour que la mesure puisse être reproduite. Le rapport aveuglé (\`campagne-1-<horodatage>.md\`) est le seul document qui doit être lu à ce stade.`);
+  lignes.push(
+    `Ce fichier n'est **pas** ouvert à l'arrêt 2 : il fixe seulement l'étiquetage pour que la mesure puisse être reproduite. Le rapport aveuglé (\`campagne-1-<horodatage>.md\`) est le seul document qui doit être lu à ce stade.`,
+  );
   lignes.push("");
   for (const { etiquette, score } of colonnes) {
     lignes.push(`- **${etiquette}** → ${score.challenger.nom} (\`${score.challenger.id}\`)`);

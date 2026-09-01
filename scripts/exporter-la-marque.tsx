@@ -54,8 +54,8 @@ function symboleEnImage(clair: boolean, hauteur: number): React.ReactElement {
   const svg = symboleSeul({ pierres: PIERRES_DENSE, clair, hauteurPx: hauteur * 2 });
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- ce moteur rend une
-    // image, pas une page : `next/image` n'y existe pas.
+    // Ce moteur rend une image, pas une page : `next/image` n'y existe pas.
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={`data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`}
       height={hauteur}

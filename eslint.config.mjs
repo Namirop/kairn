@@ -90,6 +90,11 @@ const eslintConfig = [
       "**/build/**",
       "**/next-env.d.ts",
       "**/lib/db/generated/**",
+      // L'outillage des skills installés. Ce n'est pas le code de ce projet, il
+      // ne suit pas ses règles et n'a pas à les suivre : cent quatre-vingt-dix
+      // erreurs venues de là rendaient le rapport inutilisable, et donc le lint
+      // inutile comme garde-fou.
+      "**/.claude/**",
     ],
   },
 ];

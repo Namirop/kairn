@@ -90,7 +90,7 @@ export function planExtraction(corpus: Depot[], fige: { depots: DepotFige[] }): 
 export function planDoublon(fige: { depots: DepotFige[] }, verdicts: VerdictsFige): Plan {
   const promptTokens = tok(SYSTEM_DOUBLON);
   const parNom = new Map(fige.depots.map((d) => [d.nom, d]));
-  let plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
+  const plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
 
   for (const [nom, entry] of Object.entries(verdicts.depots)) {
     const paires = entry.doublons ?? [];
@@ -122,7 +122,7 @@ export function planDoublon(fige: { depots: DepotFige[] }, verdicts: VerdictsFig
 export function planResidu(fige: { depots: DepotFige[] }, verdicts: VerdictsFige): Plan {
   const promptTokens = tok(SYSTEM_RESIDU);
   const parNom = new Map(fige.depots.map((d) => [d.nom, d]));
-  let plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
+  const plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
 
   for (const [nom, entry] of Object.entries(verdicts.depots)) {
     const manques = entry.residu?.manques ?? [];
@@ -143,7 +143,7 @@ export function planResidu(fige: { depots: DepotFige[] }, verdicts: VerdictsFige
 /** Le juge des attendus — un appel par dépôt qui porte des attendus. */
 export function planAttendus(verdicts: VerdictsFige): Plan {
   const promptTokens = tok(SYSTEM_ATTENDUS);
-  let plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
+  const plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
 
   for (const entry of Object.values(verdicts.depots)) {
     const attendus = entry.attendus ?? [];

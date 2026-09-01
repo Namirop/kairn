@@ -11,8 +11,7 @@ import type { ScoreDeColonneQuestions, ScoreDepotQuestions } from "./execution-q
  * Cette fois, elle **ne quitte pas le dépôt** : Fable ne la reçoit pas.
  */
 
-const ETIQUETTES = ["A", "B"] as const;
-export type Etiquette = (typeof ETIQUETTES)[number];
+export type Etiquette = "A" | "B";
 
 export type EtiqueteesAvecScore = {
   etiquette: Etiquette;
@@ -115,15 +114,23 @@ export function rendreLeTableauAveugleQuestions(
   lignes.push("");
   lignes.push(`> ${BANDEAU_DE_CAMPAGNE}`);
   lignes.push("");
-  lignes.push(`Colonnes A et B : deux finalistes désignés à l'arrêt 2 de la campagne 1 (Gemini 3.7 Flash et GPT-5.6 Luna, ordre randomisé). Correspondance conservée localement, non transmise. Colonne Sonnet : la référence du figé \`2026-08-20-11h58\`, fidélité lue depuis les verdicts existants (pas de rejeu).`);
+  lignes.push(
+    `Colonnes A et B : deux finalistes désignés à l'arrêt 2 de la campagne 1 (Gemini 3.7 Flash et GPT-5.6 Luna, ordre randomisé). Correspondance conservée localement, non transmise. Colonne Sonnet : la référence du figé \`2026-08-20-11h58\`, fidélité lue depuis les verdicts existants (pas de rejeu).`,
+  );
   lignes.push("");
 
   lignes.push(`## Vue d'ensemble`);
   lignes.push("");
-  lignes.push(`Légende : \`Concepts\` questionnables · \`Variants\` rendus · \`Éch.\` groupes en échec · \`Fidélité\` KO/total · \`Radotage\` intra/inter · \`Formats\` concepts avec 4 formats distincts / total · \`Cible V/F\` manquées/total`);
+  lignes.push(
+    `Légende : \`Concepts\` questionnables · \`Variants\` rendus · \`Éch.\` groupes en échec · \`Fidélité\` KO/total · \`Radotage\` intra/inter · \`Formats\` concepts avec 4 formats distincts / total · \`Cible V/F\` manquées/total`,
+  );
   lignes.push("");
-  lignes.push(`| Col.   | Con. | Var. | Éch. | Fidélité | Rad. i/e | Formats | Cible V/F | Gén. $   | Fid. $   | Total $  |`);
-  lignes.push(`|:-------|-----:|-----:|-----:|:---------|:---------|--------:|:----------|---------:|---------:|---------:|`);
+  lignes.push(
+    `| Col.   | Con. | Var. | Éch. | Fidélité | Rad. i/e | Formats | Cible V/F | Gén. $   | Fid. $   | Total $  |`,
+  );
+  lignes.push(
+    `|:-------|-----:|-----:|-----:|:---------|:---------|--------:|:----------|---------:|---------:|---------:|`,
+  );
   lignes.push(ligneRecap(REFERENCE.nom, totauxRef, "réf.", "réf.", "réf."));
   for (const { etiquette, score } of colonnes) {
     const totaux = totaliser(score.depots);
@@ -143,11 +150,22 @@ export function rendreLeTableauAveugleQuestions(
 
   lignes.push(`## Détail par dépôt`);
   lignes.push("");
-  lignes.push(`Format d'une cellule : \`Nv\` variants rendus, \`Néc\` groupes échoués, \`fX/Y\` fidélité (KO/total), \`rIN\`/\`rEN\` radotage intra/inter, \`cX/Y\` cible V/F (manquées/total). Les mesures nulles sont omises pour lisibilité. « rien à questionner » quand le dépôt n'a que des rejets ou des uncertain.`);
+  lignes.push(
+    `Format d'une cellule : \`Nv\` variants rendus, \`Néc\` groupes échoués, \`fX/Y\` fidélité (KO/total), \`rIN\`/\`rEN\` radotage intra/inter, \`cX/Y\` cible V/F (manquées/total). Les mesures nulles sont omises pour lisibilité. « rien à questionner » quand le dépôt n'a que des rejets ou des uncertain.`,
+  );
   lignes.push("");
-  const enTete = ["Dépôt", REFERENCE.nom.padEnd(20), ...colonnes.map((c) => c.etiquette.padEnd(20))];
+  const enTete = [
+    "Dépôt",
+    REFERENCE.nom.padEnd(20),
+    ...colonnes.map((c) => c.etiquette.padEnd(20)),
+  ];
   lignes.push(`| ${enTete.map((e, i) => (i === 0 ? e.padEnd(30) : e.padEnd(20))).join(" | ")} |`);
-  lignes.push(`|${"-".repeat(32)}|${enTete.slice(1).map(() => "-".repeat(22)).join("|")}|`);
+  lignes.push(
+    `|${"-".repeat(32)}|${enTete
+      .slice(1)
+      .map(() => "-".repeat(22))
+      .join("|")}|`,
+  );
 
   const nomsDepots = reference.depots.map((d) => d.nom).sort();
   for (const nom of nomsDepots) {
@@ -155,7 +173,9 @@ export function rendreLeTableauAveugleQuestions(
     const cs = colonnes.map((c) => c.score.depots.find((d) => d.nom === nom));
     const cellRef = formaterCellule(s);
     const cellsChallengers = cs.map(formaterCellule);
-    lignes.push(`| ${nom.padEnd(30)} | ${cellRef.padEnd(20)} | ${cellsChallengers.map((c) => c.padEnd(20)).join(" | ")} |`);
+    lignes.push(
+      `| ${nom.padEnd(30)} | ${cellRef.padEnd(20)} | ${cellsChallengers.map((c) => c.padEnd(20)).join(" | ")} |`,
+    );
   }
   lignes.push("");
 
@@ -171,7 +191,9 @@ export function rendreLaCorrespondanceQuestions(
   lignes.push("");
   lignes.push(`Émis le ${emisA.toISOString()}.`);
   lignes.push("");
-  lignes.push(`Fable a demandé que la correspondance **ne quitte pas le dépôt cette fois**. Ce fichier reste local, sert à la reproductibilité, et n'est pas envoyé à l'arrêt 3.`);
+  lignes.push(
+    `Fable a demandé que la correspondance **ne quitte pas le dépôt cette fois**. Ce fichier reste local, sert à la reproductibilité, et n'est pas envoyé à l'arrêt 3.`,
+  );
   lignes.push("");
   for (const { etiquette, score } of colonnes) {
     lignes.push(`- **${etiquette}** → ${score.finaliste.nom} (\`${score.finaliste.id}\`)`);
