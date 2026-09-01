@@ -3,6 +3,7 @@ import { recordEmailDelivery } from "@/lib/db/reminder-audience";
 import { findUserEmail } from "@/lib/db/user";
 import { findUserSettings } from "@/lib/db/user-settings";
 import { localDay } from "@/lib/domain/local-day";
+import { adresseDeLApp } from "@/lib/site/adresse-de-lapp";
 import { sendEmail } from "./client";
 import { renderAlerteDeStreak, type AlerteDeStreakPayload } from "./templates/alerte-de-streak";
 import {
@@ -38,10 +39,6 @@ export type NotificationOutcome =
 
 type Liens = { sessionUrl: string; unsubscribeUrl: string };
 
-function baseUrl(): string {
-  return (process.env.BETTER_AUTH_URL ?? "http://localhost:3000").replace(/\/$/, "");
-}
-
 /** Le réglage qui gouverne ce type-là. Chacun a le sien, et il est respecté ici. */
 function estActive(
   type: NotificationType,
@@ -72,9 +69,9 @@ export async function sendNotification(
 
   if (!recipient) return { status: "SKIPPED", reason: "NO_EMAIL" };
 
-  const unsubscribeUrl = `${baseUrl()}/desinscription?jeton=${createUnsubscribeToken(userId)}`;
+  const unsubscribeUrl = `${adresseDeLApp()}/desinscription?jeton=${createUnsubscribeToken(userId)}`;
   const email = composer(notification, {
-    sessionUrl: `${baseUrl()}${ROUTES.aujourdhui}`,
+    sessionUrl: `${adresseDeLApp()}${ROUTES.aujourdhui}`,
     unsubscribeUrl,
   });
 

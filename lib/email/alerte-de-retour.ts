@@ -1,4 +1,5 @@
 import { ROUTES } from "@/lib/auth/routes";
+import { adresseDeLApp } from "@/lib/site/adresse-de-lapp";
 import { sendEmail } from "./client";
 import { renderAlerteDeRetour, type AlerteDeRetourPayload } from "./templates/alerte-de-retour";
 
@@ -13,10 +14,6 @@ import { renderAlerteDeRetour, type AlerteDeRetourPayload } from "./templates/al
  */
 export type RetourAAnnoncer = Omit<AlerteDeRetourPayload, "lien">;
 
-function baseUrl(): string {
-  return (process.env.BETTER_AUTH_URL ?? "http://localhost:3000").replace(/\/$/, "");
-}
-
 export async function envoyerLAlerteDeRetour(retour: RetourAAnnoncer): Promise<void> {
   const destinataire = process.env.EMAIL_ALERTES?.trim();
 
@@ -25,7 +22,10 @@ export async function envoyerLAlerteDeRetour(retour: RetourAAnnoncer): Promise<v
     return;
   }
 
-  const email = renderAlerteDeRetour({ ...retour, lien: `${baseUrl()}${ROUTES.adminRetours}` });
+  const email = renderAlerteDeRetour({
+    ...retour,
+    lien: `${adresseDeLApp()}${ROUTES.adminRetours}`,
+  });
 
   await sendEmail({
     to: destinataire,
