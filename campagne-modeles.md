@@ -59,12 +59,12 @@ chantier séparé, à faire une fois seulement, quand on saura qui a gagné.
 Quatre, choisis pour couvrir trois lignées et deux paliers de prix. Référence : Sonnet 5 à
 3 $ / 15 $ le million.
 
-| Modèle | Prix in/out | Ce qu'il teste |
-|---|---|---|
-| **Gemini 3.1 Pro** | 2 $ / 12 $ | moins cher **et** peut-être meilleur |
-| **GPT-5.6 Terra** | 2 $ / 12 $ | même palier, autre lignée |
-| **Gemini 3.6 Flash** | 1,50 $ / 7,50 $ | le milieu de gamme suffit-il |
-| **Mistral Medium 3.5** | 1,50 $ / 7,50 $ | hébergement UE, français natif |
+| Modèle                 | Prix in/out     | Ce qu'il teste                       |
+| ---------------------- | --------------- | ------------------------------------ |
+| **Gemini 3.1 Pro**     | 2 $ / 12 $      | moins cher **et** peut-être meilleur |
+| **GPT-5.6 Terra**      | 2 $ / 12 $      | même palier, autre lignée            |
+| **Gemini 3.6 Flash**   | 1,50 $ / 7,50 $ | le milieu de gamme suffit-il         |
+| **Mistral Medium 3.5** | 1,50 $ / 7,50 $ | hébergement UE, français natif       |
 
 Le français compte : le produit est francophone et le corpus l'est à 26 dépôts sur 27. Mistral est
 là pour ça autant que pour son prix.
@@ -116,11 +116,11 @@ justifie après coup le choix qui arrange.
 3. **aucun plancher absolu n'est franchi** : fidélité ≤ 10 % des questions, manques ≤ à la
    référence sur le corpus, aucun dépôt ne perd d'attendu déjà couvert par la référence
 
-*Amendement du 2026-08-24 (arrêt 2 de la campagne 1) : le plancher manques passe de « ≤ 8 » à
+_Amendement du 2026-08-24 (arrêt 2 de la campagne 1) : le plancher manques passe de « ≤ 8 » à
 « ≤ à la référence ». La borne fixée à 8 datait du passage 11h58 où la référence Sonnet avait 6
 manques ; poser un chiffre absolu figeait un état qui bougerait au prochain figé. La règle scale
 désormais avec la référence — on demande simplement de ne pas faire pire que Sonnet. S'applique
-aux deux campagnes, y compris rétroactivement à la lecture du rapport aveuglé de la campagne 1.*
+aux deux campagnes, y compris rétroactivement à la lecture du rapport aveuglé de la campagne 1._
 
 **En cas d'égalité sur les trois** : le moins cher gagne.
 
@@ -143,13 +143,13 @@ qu'on espérait.
 
 ## §7 · Budget et ordre
 
-| Étape | Où | Coût estimé |
-|---|---|---|
-| Validation du juge sur le figé existant | OpenRouter | ~0,15 $ |
-| Campagne 1 — 4 challengers, extraction seule | OpenRouter | ~2,50 $ |
-| Campagne 2 — les 2 meilleurs, questions à concepts figés | OpenRouter | ~3,00 $ |
-| Colonne de référence Sonnet | déjà payée | 0 $ |
-| **Total** | | **~6 $** |
+| Étape                                                    | Où         | Coût estimé |
+| -------------------------------------------------------- | ---------- | ----------- |
+| Validation du juge sur le figé existant                  | OpenRouter | ~0,15 $     |
+| Campagne 1 — 4 challengers, extraction seule             | OpenRouter | ~2,50 $     |
+| Campagne 2 — les 2 meilleurs, questions à concepts figés | OpenRouter | ~3,00 $     |
+| Colonne de référence Sonnet                              | déjà payée | 0 $         |
+| **Total**                                                |            | **~6 $**    |
 
 Charger **10 $** sur OpenRouter couvre la campagne avec de la marge pour une seconde vague ou un
 challenger de plus. Rien de plus ne part sur le compte Anthropic.

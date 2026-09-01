@@ -68,7 +68,10 @@ describe("renvoiAuConcept", () => {
 });
 
 describe("sansRenvoiAuConcept", () => {
-  const bonne = { format: "MCQ", question: "Pourquoi le miel empêche-t-il les bactéries de croître ?" };
+  const bonne = {
+    format: "MCQ",
+    question: "Pourquoi le miel empêche-t-il les bactéries de croître ?",
+  };
   const fautive = {
     format: "MCQ",
     question: "D'après le mécanisme décrit dans le concept, pourquoi le miel les en empêche-t-il ?",

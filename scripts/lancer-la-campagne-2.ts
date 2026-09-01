@@ -47,10 +47,7 @@ import type { Vecteur } from "./evaluation/mesures/espace";
 
 const RAPPORTS = join(import.meta.dirname, "evaluation", "rapports", "campagne");
 
-const FINALISTES_IDS = new Set([
-  "google/gemini-3.7-flash",
-  "openai/gpt-5.6-luna",
-]);
+const FINALISTES_IDS = new Set(["google/gemini-3.7-flash", "openai/gpt-5.6-luna"]);
 
 function finalistes(): ModeleOpenRouter[] {
   const trouves = CHALLENGERS.filter((c) => FINALISTES_IDS.has(c.id));
@@ -65,10 +62,14 @@ function refuser(motif: string): never {
   process.exit(1);
 }
 
-function melangerEtiquettes(items: ModeleOpenRouter[]): { etiquette: Etiquette; finaliste: ModeleOpenRouter }[] {
+function melangerEtiquettes(
+  items: ModeleOpenRouter[],
+): { etiquette: Etiquette; finaliste: ModeleOpenRouter }[] {
   const etiquettes: Etiquette[] = ["A", "B"];
   if (items.length !== etiquettes.length) {
-    throw new Error(`Le mélange attend ${etiquettes.length} finalistes, il en a reçu ${items.length}.`);
+    throw new Error(
+      `Le mélange attend ${etiquettes.length} finalistes, il en a reçu ${items.length}.`,
+    );
   }
   const ordre = [...items];
   for (let i = ordre.length - 1; i > 0; i--) {
@@ -82,7 +83,9 @@ function melangerEtiquettes(items: ModeleOpenRouter[]): { etiquette: Etiquette; 
 
 async function main(): Promise<void> {
   const emettre = process.argv.includes("--emettre");
-  console.info(`# Campagne 2 — ${emettre ? "émission" : "plan à sec (ajoute --emettre pour dépenser)"}\n`);
+  console.info(
+    `# Campagne 2 — ${emettre ? "émission" : "plan à sec (ajoute --emettre pour dépenser)"}\n`,
+  );
 
   // 1. Vérifications préalables.
   const refus = await verifierLeListing([REFERENCE, ...finalistes(), JUGE_PRINCIPAL]);
@@ -110,7 +113,9 @@ async function main(): Promise<void> {
     );
   }
   const totalEstime = [...estimations.values()].reduce((s, e) => s + e.generation + e.fidelite, 0);
-  console.info(`\n**Total estimé** : ~${totalEstime.toFixed(4)} $. Budget de sortie par appel : ${BUDGET_SORTIE_CAMPAGNE} tokens.\n`);
+  console.info(
+    `\n**Total estimé** : ~${totalEstime.toFixed(4)} $. Budget de sortie par appel : ${BUDGET_SORTIE_CAMPAGNE} tokens.\n`,
+  );
 
   if (!emettre) {
     console.info(`Rien n'a été émis. Relance avec --emettre pour dépenser.`);
@@ -133,7 +138,11 @@ async function main(): Promise<void> {
       statut: { code: "complete" as const },
     },
   }));
-  writeFileSync(cheminCorrespondance, rendreLaCorrespondanceQuestions(correspondanceProvisoire, emisA), "utf8");
+  writeFileSync(
+    cheminCorrespondance,
+    rendreLaCorrespondanceQuestions(correspondanceProvisoire, emisA),
+    "utf8",
+  );
   console.info(`\nCorrespondance locale : ${cheminCorrespondance}\n`);
 
   // 5. Émettre colonne par colonne.
@@ -195,7 +204,9 @@ async function main(): Promise<void> {
   );
   console.info(`Rapport aveuglé (à envoyer à Fable) : ${cheminRapport}`);
   console.info(`Correspondance (à garder au dépôt)  : ${cheminCorrespondance}`);
-  console.info(`\n**Facture réelle** : ${totalReel.toFixed(4)} $ (estimation ~${totalEstime.toFixed(4)} $).`);
+  console.info(
+    `\n**Facture réelle** : ${totalReel.toFixed(4)} $ (estimation ~${totalEstime.toFixed(4)} $).`,
+  );
 }
 
 main().catch((erreur: unknown) => {

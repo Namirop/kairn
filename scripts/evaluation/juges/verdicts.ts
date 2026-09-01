@@ -49,10 +49,7 @@ export type VerdictsDuDepot = {
  * appel par dépôt tant qu'il y a au moins un attendu ; le dépôt sans attendu
  * n'appelle rien.
  */
-async function juger(
-  nom: string,
-  couvertures: CouvertureAttendu[],
-): Promise<CouvertureAttendu[]> {
+async function juger(nom: string, couvertures: CouvertureAttendu[]): Promise<CouvertureAttendu[]> {
   if (couvertures.length === 0) return [];
 
   const soumis = couvertures.map((c) => ({
@@ -75,9 +72,7 @@ export async function jugerLesSignalements(
   cheminFige: string,
 ): Promise<VerdictsDuDepot[]> {
   const parNom = new Map(depots.map((depot) => [depot.nom, depot]));
-  const couverturesParNom = new Map(
-    couverturesInitiales.map((c) => [c.nom, c.couvertures]),
-  );
+  const couverturesParNom = new Map(couverturesInitiales.map((c) => [c.nom, c.couvertures]));
   const cache = chargerCache(cheminFige);
   const verdicts: VerdictsDuDepot[] = [];
 
@@ -173,4 +168,3 @@ export function compterLesAppelsDesJuges(
 
   return { doublon, residu, fidelite, attendus };
 }
-

@@ -78,7 +78,10 @@ function etatDuDepot(depot: DepotFige): EtatDuDepot {
   // 18/08 sur 27 : appel raté sans échec écrit). Il vaut mieux l'annoncer
   // pour ce qu'il est plutôt que de le lire comme un dépôt extrait.
   if (depot.concepts.length === 0) {
-    return { statut: "en-echec", motif: "extraction en échec silencieux (aucun concept, aucun motif)" };
+    return {
+      statut: "en-echec",
+      motif: "extraction en échec silencieux (aucun concept, aucun motif)",
+    };
   }
   return { statut: "extrait" };
 }

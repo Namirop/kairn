@@ -20,7 +20,11 @@ import {
   planExtraction,
   planResidu,
 } from "./evaluation/campagne/plan";
-import { passerParColonne, type ScoreDeColonne, type ScoreDepot } from "./evaluation/campagne/execution";
+import {
+  passerParColonne,
+  type ScoreDeColonne,
+  type ScoreDepot,
+} from "./evaluation/campagne/execution";
 import {
   rendreLaCorrespondance,
   rendreLeTableauAveugle,
@@ -57,10 +61,14 @@ function refuser(motif: string): never {
   process.exit(1);
 }
 
-function melangerEtiquettes(challengers: ModeleOpenRouter[]): { etiquette: Etiquette; challenger: ModeleOpenRouter }[] {
+function melangerEtiquettes(
+  challengers: ModeleOpenRouter[],
+): { etiquette: Etiquette; challenger: ModeleOpenRouter }[] {
   const etiquettes: Etiquette[] = ["A", "B", "C", "D"];
   if (challengers.length !== etiquettes.length) {
-    throw new Error(`Le mélange attend ${etiquettes.length} challengers, il en a reçu ${challengers.length}.`);
+    throw new Error(
+      `Le mélange attend ${etiquettes.length} challengers, il en a reçu ${challengers.length}.`,
+    );
   }
   // Fisher-Yates avec Math.random — la correspondance est écrite au disque
   // immédiatement, une réémission tirerait un autre ordre et le rapport
@@ -91,8 +99,7 @@ function scoreDepotDepuisFige(
     rejet: depot.rejet,
     echec: depot.echec?.motif ?? null,
     doublonsSignales: v?.doublons?.length ?? 0,
-    doublonsConfirmes:
-      v?.doublons?.filter((p) => p.independants === false).length ?? 0,
+    doublonsConfirmes: v?.doublons?.filter((p) => p.independants === false).length ?? 0,
     manquesSignales: v?.residu?.manques.length ?? 0,
     manquesConfirmes: v?.residu?.manques.filter((m) => m.retenir === true).length ?? 0,
     inventionsSignalees: v?.residu?.inventions.length ?? 0,
@@ -119,7 +126,9 @@ async function main(): Promise<void> {
   const emettre = process.argv.includes("--emettre");
   const challengers = challengersSelectionnes();
   const rejeu = challengers.length !== CHALLENGERS.length;
-  console.info(`# Campagne 1 — ${emettre ? "émission" : "plan à sec (ajoute --emettre pour dépenser)"}${rejeu ? ` (rejeu ${challengers[0]?.nom})` : ""}\n`);
+  console.info(
+    `# Campagne 1 — ${emettre ? "émission" : "plan à sec (ajoute --emettre pour dépenser)"}${rejeu ? ` (rejeu ${challengers[0]?.nom})` : ""}\n`,
+  );
 
   // 1. Vérifications préalables
   const refus = await verifierLeListing([REFERENCE, ...challengers, JUGE_PRINCIPAL]);
@@ -156,7 +165,9 @@ async function main(): Promise<void> {
     );
   }
   const totalEstime = [...estimations.values()].reduce((s, e) => s + e.extraction + e.juges, 0);
-  console.info(`\n**Total campagne estimé** : ~${totalEstime.toFixed(4)} $. Budget de sortie par appel : ${BUDGET_SORTIE_CAMPAGNE} tokens.\n`);
+  console.info(
+    `\n**Total campagne estimé** : ~${totalEstime.toFixed(4)} $. Budget de sortie par appel : ${BUDGET_SORTIE_CAMPAGNE} tokens.\n`,
+  );
 
   if (!emettre) {
     console.info(`Rien n'a été émis. Relance avec --emettre pour dépenser.`);
@@ -191,7 +202,9 @@ async function main(): Promise<void> {
     rendreLaCorrespondance(correspondanceProvisoire, emisA),
     "utf8",
   );
-  console.info(`\nCorrespondance écrite (à ne pas ouvrir avant l'arrêt 2) : ${cheminCorrespondance}\n`);
+  console.info(
+    `\nCorrespondance écrite (à ne pas ouvrir avant l'arrêt 2) : ${cheminCorrespondance}\n`,
+  );
 
   // 5. Émettre colonne par colonne
   const scores: { etiquette: Etiquette; score: ScoreDeColonne }[] = [];
@@ -231,7 +244,9 @@ async function main(): Promise<void> {
   );
   console.info(`Rapport aveuglé : ${cheminRapport}`);
   console.info(`Correspondance   : ${cheminCorrespondance}`);
-  console.info(`\n**Facture réelle** : ${totalReel.toFixed(4)} $ (estimation ~${totalEstime.toFixed(4)} $).`);
+  console.info(
+    `\n**Facture réelle** : ${totalReel.toFixed(4)} $ (estimation ~${totalEstime.toFixed(4)} $).`,
+  );
 }
 
 main().catch((erreur: unknown) => {

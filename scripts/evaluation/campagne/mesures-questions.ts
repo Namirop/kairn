@@ -46,9 +46,7 @@ function texteARadoter(variant: VariantServi): string {
  * Toutes les questions d'un dépôt à mesurer, avec leur rang de concept.
  * Un concept sans variants ne contribue pas.
  */
-export function questionsARadoter(
-  variantsParConcept: readonly VariantServi[][],
-): QuestionSituee[] {
+export function questionsARadoter(variantsParConcept: readonly VariantServi[][]): QuestionSituee[] {
   return variantsParConcept.flatMap((variants, rangConcept) =>
     variants.map((variant) => ({ texte: texteARadoter(variant), concept: rangConcept })),
   );
@@ -94,9 +92,10 @@ export function compterLaDiversiteDesFormats(
 }
 
 /** Compte les TRUE_FALSE dont `estVraie` ne matche pas la cible imposée. */
-export function compterLesCiblesManquees(
-  variantsParConcept: readonly VariantServi[][],
-): { total: number; manquees: number } {
+export function compterLesCiblesManquees(variantsParConcept: readonly VariantServi[][]): {
+  total: number;
+  manquees: number;
+} {
   let total = 0;
   let manquees = 0;
   for (const variants of variantsParConcept) {

@@ -113,9 +113,8 @@ async function main(): Promise<void> {
     }),
   );
 
-  const { verifierPlafond, verifierPartAnonyme } = await import(
-    "./verification/garde-fous-plafond"
-  );
+  const { verifierPlafond, verifierPartAnonyme } =
+    await import("./verification/garde-fous-plafond");
   await verifierPlafond();
   await verifierPartAnonyme();
 

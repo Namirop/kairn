@@ -32,10 +32,7 @@ import { conceptsQuestionnables, estimerColonne } from "./evaluation/campagne/pl
  */
 
 /** Les finalistes de l'arrêt 2 (2026-08-24) — désignés par leur identifiant. */
-const FINALISTES_IDS = new Set([
-  "google/gemini-3.7-flash",
-  "openai/gpt-5.6-luna",
-]);
+const FINALISTES_IDS = new Set(["google/gemini-3.7-flash", "openai/gpt-5.6-luna"]);
 
 function finalistes(): ModeleOpenRouter[] {
   const trouves = CHALLENGERS.filter((c) => FINALISTES_IDS.has(c.id));
@@ -51,9 +48,15 @@ async function main(): Promise<void> {
   console.info(BANDEAU_DE_CAMPAGNE);
   console.info();
   console.info("## Rappels non négociables\n");
-  console.info("- La colonne de référence Sonnet questions n'est pas rejouée (figé `11h58`, verdicts fidélité déjà rendus).");
-  console.info(`- Budget de sortie unique : **${BUDGET_SORTIE_CAMPAGNE} tokens** par appel, même barre pour tous.`);
-  console.info("- Radotage, cible vrai/faux et couverture des formats sont des mesures géométriques — pas de juge LLM.");
+  console.info(
+    "- La colonne de référence Sonnet questions n'est pas rejouée (figé `11h58`, verdicts fidélité déjà rendus).",
+  );
+  console.info(
+    `- Budget de sortie unique : **${BUDGET_SORTIE_CAMPAGNE} tokens** par appel, même barre pour tous.`,
+  );
+  console.info(
+    "- Radotage, cible vrai/faux et couverture des formats sont des mesures géométriques — pas de juge LLM.",
+  );
   console.info();
 
   const cheminFige = dernierFige();
@@ -74,12 +77,18 @@ async function main(): Promise<void> {
   console.info(`## Périmètre lu`);
   console.info(`- Figé : ${basename(cheminFige)} (${fige.modele}, ${fige.emisA.slice(0, 16)} UTC)`);
   console.info(`- Corpus : ${fige.depots.length} dépôts, dont ${depotsRejetes} rejets.`);
-  console.info(`- Concepts figés : ${totalConcepts}, dont **${totalQuestionnables} questionnables** (uncertain écartés selon la nature).`);
+  console.info(
+    `- Concepts figés : ${totalConcepts}, dont **${totalQuestionnables} questionnables** (uncertain écartés selon la nature).`,
+  );
   console.info();
 
   console.info(`## Coût estimé par colonne\n`);
-  console.info(`| Colonne              | Prix in/out    | Génération A / in / out         | Juge fidélité A / in / out       | Coût   |`);
-  console.info(`|:---------------------|---------------:|:---------------------------------|:---------------------------------|-------:|`);
+  console.info(
+    `| Colonne              | Prix in/out    | Génération A / in / out         | Juge fidélité A / in / out       | Coût   |`,
+  );
+  console.info(
+    `|:---------------------|---------------:|:---------------------------------|:---------------------------------|-------:|`,
+  );
 
   // Ligne référence : rappel non facturé
   const prixRef = `${REFERENCE.prixInParM}/${REFERENCE.prixOutParM}`;
@@ -106,16 +115,28 @@ async function main(): Promise<void> {
     );
   }
   console.info();
-  console.info(`**Total campagne 2** : ~${coutTotalCampagne.toFixed(4)} $ (${finalistes().length} finalistes × génération + fidélité Haiku).`);
+  console.info(
+    `**Total campagne 2** : ~${coutTotalCampagne.toFixed(4)} $ (${finalistes().length} finalistes × génération + fidélité Haiku).`,
+  );
   console.info();
   if (planGenerationRef && planFideliteRef) {
-    console.info(`Le coût du juge de fidélité est identique pour chaque colonne (juge sur les questions rendues par la colonne — même nombre d'appels par concept).`);
-    console.info(`Génération : **${planGenerationRef.appels} appels** par colonne (concepts groupés par 3).`);
-    console.info(`Fidélité   : **${planFideliteRef.appels} appels** par colonne (un par concept qui a des questions).`);
+    console.info(
+      `Le coût du juge de fidélité est identique pour chaque colonne (juge sur les questions rendues par la colonne — même nombre d'appels par concept).`,
+    );
+    console.info(
+      `Génération : **${planGenerationRef.appels} appels** par colonne (concepts groupés par 3).`,
+    );
+    console.info(
+      `Fidélité   : **${planFideliteRef.appels} appels** par colonne (un par concept qui a des questions).`,
+    );
   }
   console.info();
-  console.info(`Garde-fou 2× (par colonne) — arrêt sec si le coût réel dépasse le double de l'estimation.`);
-  console.info(`Marge d'erreur ~20 % (tokens estimés chars/4). Facture réelle sur OpenRouter à l'émission.`);
+  console.info(
+    `Garde-fou 2× (par colonne) — arrêt sec si le coût réel dépasse le double de l'estimation.`,
+  );
+  console.info(
+    `Marge d'erreur ~20 % (tokens estimés chars/4). Facture réelle sur OpenRouter à l'émission.`,
+  );
 }
 
 main().catch((erreur: unknown) => {

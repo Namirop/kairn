@@ -72,7 +72,9 @@ function ajouter(a: Facture, b: { in: number; out: number; usd: number; appels: 
 function motifCourt(erreur: unknown): string {
   const cause = erreur instanceof Error && erreur.cause instanceof Error ? erreur.cause : null;
   return erreur instanceof Error
-    ? cause ? `${erreur.message} — cause : ${cause.message}` : erreur.message
+    ? cause
+      ? `${erreur.message} — cause : ${cause.message}`
+      : erreur.message
     : String(erreur);
 }
 
@@ -136,9 +138,12 @@ export async function passerParColonne(
       // l'arrêt 1 avait montré que les fournisseurs Alibaba/Novita mentent sur
       // ce qu'ils supportent. On journalise donc la chaîne complète.
       const cause = erreur instanceof Error && erreur.cause instanceof Error ? erreur.cause : null;
-      const motif = erreur instanceof Error
-        ? cause ? `${erreur.message} — cause : ${cause.message}` : erreur.message
-        : String(erreur);
+      const motif =
+        erreur instanceof Error
+          ? cause
+            ? `${erreur.message} — cause : ${cause.message}`
+            : erreur.message
+          : String(erreur);
       echecs.set(depot.nom, motif);
       figes.push({ nom: depot.nom, texte, rejet: null, concepts: [], echec: { motif } });
       loguer(`  ✗ ${depot.nom} — échec : ${motif.slice(0, 400)}`);

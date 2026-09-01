@@ -54,9 +54,7 @@ const verdictInvention = z.object({
 });
 
 const sortieLue = z.object({
-  manques: z
-    .array(verdictManque)
-    .describe("Un verdict par phrase soumise, dans l'ordre reçu."),
+  manques: z.array(verdictManque).describe("Un verdict par phrase soumise, dans l'ordre reçu."),
   inventions: z
     .array(verdictInvention)
     .describe("Un verdict par concept soumis, dans l'ordre reçu."),

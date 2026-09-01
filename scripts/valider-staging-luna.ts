@@ -3,11 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { callAI } from "@/lib/ai/client";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
-import {
-  CONCEPTS_PAR_APPEL,
-  contratDeGeneration,
-  EXTRACT_ATOMS,
-} from "@/lib/ai/schemas";
+import { CONCEPTS_PAR_APPEL, contratDeGeneration, EXTRACT_ATOMS } from "@/lib/ai/schemas";
 import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
 import { messageDuGroupe } from "@/lib/domain/envoi-de-questions";
 import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
@@ -96,12 +92,12 @@ async function main(): Promise<void> {
   console.info(`\n## 2. Génération d'un lot (${CONCEPTS_PAR_APPEL} concepts)`);
   const groupe = questionnables.slice(0, CONCEPTS_PAR_APPEL);
   if (groupe.length < CONCEPTS_PAR_APPEL) {
-    refuser(`dépôt témoin sous-dimensionné : ${groupe.length} concepts au lieu de ${CONCEPTS_PAR_APPEL}.`);
+    refuser(
+      `dépôt témoin sous-dimensionné : ${groupe.length} concepts au lieu de ${CONCEPTS_PAR_APPEL}.`,
+    );
   }
   const trou = emplacementDuTexteATrou(groupe[0]?.concept ?? "");
-  const contenu = messageDuGroupe(
-    groupe.map((c) => ({ graine: c.concept, concept: c.concept })),
-  );
+  const contenu = messageDuGroupe(groupe.map((c) => ({ graine: c.concept, concept: c.concept })));
   const generation = await callAI({
     contract: contratDeGeneration(trou),
     system: SYSTEM_PROMPTS.generate_variants,
@@ -118,13 +114,17 @@ async function main(): Promise<void> {
   console.info(`  · facettes couvertes : ${[...facets].join(", ")}`);
   const trueFalse = premier.variants.filter((v) => v.format === "TRUE_FALSE");
   if (trueFalse.length > 0) {
-    console.info(`  · ${trueFalse.length} vrai/faux — cible imposée + estVraie rendue à vérifier au registre`);
+    console.info(
+      `  · ${trueFalse.length} vrai/faux — cible imposée + estVraie rendue à vérifier au registre`,
+    );
   }
 
   // 4. Facture au registre
   const consommation = await sumAiCalls(debut);
   console.info(`\n## 3. Registre`);
-  console.info(`  ${consommation.calls} appels, ${Number(consommation.costUsd).toFixed(6)} $ au tarif catalogue.`);
+  console.info(
+    `  ${consommation.calls} appels, ${Number(consommation.costUsd).toFixed(6)} $ au tarif catalogue.`,
+  );
   console.info(`  Total du jour depuis 00:00 UTC : à lire dans /admin/pilotage.`);
   void startOfUtcDay;
 

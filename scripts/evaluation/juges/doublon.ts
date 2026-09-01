@@ -37,10 +37,7 @@ export const SENS_DOUBLON = ["A_couvre_B", "B_couvre_A", "equivalents"] as const
  * n'existe pas ; s'il la trouve, il ne peut plus la nier.
  */
 const paireLue = z.object({
-  numero: z
-    .number()
-    .int()
-    .describe("Le numéro de la paire jugée, tel que présenté (### Paire N)."),
+  numero: z.number().int().describe("Le numéro de la paire jugée, tel que présenté (### Paire N)."),
   questionSurB: z
     .string()
     .nullable()

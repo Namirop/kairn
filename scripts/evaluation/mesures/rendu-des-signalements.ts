@@ -37,7 +37,9 @@ function verdictDeManque(verdict: { retenir: boolean | null; motif: string } | u
   return `  → ${decision} — ${verdict.motif}`;
 }
 
-function verdictDInvention(verdict: { soutenu: boolean | null; motif: string } | undefined): string {
+function verdictDInvention(
+  verdict: { soutenu: boolean | null; motif: string } | undefined,
+): string {
   if (!verdict) return "";
   if (verdict.soutenu === null) return `  → *abstention* — ${verdict.motif}`;
   const decision = verdict.soutenu ? "soutenu" : "**invention**";
@@ -119,7 +121,10 @@ function verdictDeFidelite(verdict: VerdictFidelite): string {
 }
 
 function rendreLaQuestion(variant: VariantFige, verdict: VerdictFidelite | undefined): string[] {
-  const lignes = [`- **${variant.format}** — ${extrait(variant.question)}`, `  R. ${extrait(variant.answerKey)}`];
+  const lignes = [
+    `- **${variant.format}** — ${extrait(variant.question)}`,
+    `  R. ${extrait(variant.answerKey)}`,
+  ];
   if (variant.options && variant.options.length > 0) {
     lignes.push(`  Options : ${variant.options.map((o) => `« ${extrait(o)} »`).join(" · ")}`);
   }
@@ -169,7 +174,10 @@ function rendreLaFidelite(
       if (verdict.juste === true) return;
       const variant = variants[rang];
       if (!variant) {
-        details.push(`  - question #${rang + 1} : ${verdictDeFidelite(verdict).trim().replace(/^→\s*/, "")}`, "");
+        details.push(
+          `  - question #${rang + 1} : ${verdictDeFidelite(verdict).trim().replace(/^→\s*/, "")}`,
+          "",
+        );
         return;
       }
       details.push(...rendreLaQuestion(variant, verdict).map((l) => (l ? `  ${l}` : l)));

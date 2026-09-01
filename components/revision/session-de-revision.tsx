@@ -184,9 +184,7 @@ export function SessionDeRevision({
         />
       }
       mention="Session"
-      rail={
-        <EtatDeSession faites={faites} total={liste.length} serie={serie} rappel={rappel} />
-      }
+      rail={<EtatDeSession faites={faites} total={liste.length} serie={serie} rappel={rappel} />}
     >
       {sorti ? <SortiDuCycle concept={sorti} onAnnule={() => setSorti(null)} /> : null}
 

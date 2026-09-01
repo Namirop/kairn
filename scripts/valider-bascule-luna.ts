@@ -71,7 +71,9 @@ async function main(): Promise<void> {
       system: SYSTEM_PROMPTS.extract_atoms,
       messages: [{ role: "user", content: "L'eau bout à 100 degrés au niveau de la mer." }],
     });
-    console.info(`  ✓ callAI a rendu une valeur : ${resultat.atoms.length} concept(s) extraits — le repli a servi.`);
+    console.info(
+      `  ✓ callAI a rendu une valeur : ${resultat.atoms.length} concept(s) extraits — le repli a servi.`,
+    );
   } catch (erreur) {
     process.env.AI_MODEL = modeleOriginal;
     console.error(`  ✗ callAI a levé au lieu de basculer :`, erreur);
@@ -101,11 +103,16 @@ async function main(): Promise<void> {
   }
 
   const echecPrimaire = lignesDuTest.find((l) => !l.success && l.provider === "openrouter");
-  const succesRepli = lignesDuTest.find((l) => l.success && l.provider === "anthropic" && l.basculee);
-  if (!echecPrimaire) refuser("aucun échec sur le pont OpenRouter — le forçage n'a pas déclenché la bascule.");
+  const succesRepli = lignesDuTest.find(
+    (l) => l.success && l.provider === "anthropic" && l.basculee,
+  );
+  if (!echecPrimaire)
+    refuser("aucun échec sur le pont OpenRouter — le forçage n'a pas déclenché la bascule.");
   if (!succesRepli) refuser("aucun succès Sonnet marqué `basculee=true` — le repli n'a pas servi.");
 
-  console.info(`\n✓ Bascule validée : Luna a échoué (attendu), Sonnet a servi, ligne marquée basculee=true.`);
+  console.info(
+    `\n✓ Bascule validée : Luna a échoué (attendu), Sonnet a servi, ligne marquée basculee=true.`,
+  );
   void debutJour;
 }
 

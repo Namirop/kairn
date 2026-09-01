@@ -59,7 +59,9 @@ function ajouter(a: Facture, b: { in: number; out: number; usd: number; appels: 
 function motifCourt(erreur: unknown): string {
   const cause = erreur instanceof Error && erreur.cause instanceof Error ? erreur.cause : null;
   return erreur instanceof Error
-    ? cause ? `${erreur.message} — cause : ${cause.message}` : erreur.message
+    ? cause
+      ? `${erreur.message} — cause : ${cause.message}`
+      : erreur.message
     : String(erreur);
 }
 
@@ -116,12 +118,16 @@ export async function passerParColonneQuestions(
         for (let i = 0; i < groupe.length; i++) if (!rangsRendus.has(i)) echecs += 1;
       } catch (erreur) {
         echecs += groupe.length;
-        loguer(`  ✗ ${depot.nom} · groupe de ${groupe.length} — ${motifCourt(erreur).slice(0, 200)}`);
+        loguer(
+          `  ✗ ${depot.nom} · groupe de ${groupe.length} — ${motifCourt(erreur).slice(0, 200)}`,
+        );
       }
     }
 
     // Aligner sur l'ordre des concepts questionnables (concepts sans variants = tableau vide).
-    const parConceptOrdonne: VariantServi[][] = questionnables.map((c) => parConcept.get(c.concept) ?? []);
+    const parConceptOrdonne: VariantServi[][] = questionnables.map(
+      (c) => parConcept.get(c.concept) ?? [],
+    );
     variantsParDepot.set(depot.nom, parConceptOrdonne);
     echecsParDepot.set(depot.nom, echecs);
     loguer(
@@ -159,9 +165,10 @@ export async function passerParColonneQuestions(
   for (let rangDepot = 0; rangDepot < fige.depots.length; rangDepot++) {
     const depot = fige.depots[rangDepot]!;
     const variantsParConcept = variantsParDepot.get(depot.nom) ?? [];
-    const mesures = variantsParConcept.length === 0
-      ? null
-      : mesurerLeDepotQuestions(depot.nom, variantsParConcept, passe.vecteur);
+    const mesures =
+      variantsParConcept.length === 0
+        ? null
+        : mesurerLeDepotQuestions(depot.nom, variantsParConcept, passe.vecteur);
 
     let fideliteKO = 0;
     let fideliteAbstenues = 0;
@@ -195,7 +202,9 @@ export async function passerParColonneQuestions(
           else if (v.juste === false) fideliteKO += 1;
         }
       } catch (erreur) {
-        loguer(`  ✗ fidélité ${depot.nom} concept ${rangConcept + 1} — ${motifCourt(erreur).slice(0, 200)}`);
+        loguer(
+          `  ✗ fidélité ${depot.nom} concept ${rangConcept + 1} — ${motifCourt(erreur).slice(0, 200)}`,
+        );
       }
     }
 
@@ -271,9 +280,10 @@ export function scoreReferenceSonnet(
     if (v === null) throw new Error(`Vecteur manquant pour: ${texte.slice(0, 60)}`);
     return v;
   };
-  const mesures = variantsParConcept.length === 0 || variantsParConcept.every((v) => v.length === 0)
-    ? null
-    : mesurerLeDepotQuestions(depot.nom, variantsParConcept, vecteurNonNul);
+  const mesures =
+    variantsParConcept.length === 0 || variantsParConcept.every((v) => v.length === 0)
+      ? null
+      : mesurerLeDepotQuestions(depot.nom, variantsParConcept, vecteurNonNul);
 
   return {
     nom: depot.nom,

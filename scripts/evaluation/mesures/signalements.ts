@@ -45,9 +45,7 @@ function sousLePlancher(entrees: Rapproche[], plancher: number): Rapproche[] {
   return entrees.filter((entree) => entree.proximite < plancher);
 }
 
-function signalerLeRadotage(
-  radotage: MesuresDuDepot["radotage"],
-): SignalementsDuDepot["radotage"] {
+function signalerLeRadotage(radotage: MesuresDuDepot["radotage"]): SignalementsDuDepot["radotage"] {
   if (radotage === null) return null;
 
   return {

@@ -42,9 +42,7 @@ const verdictAttendu = z.object({
 });
 
 const sortieLue = z.object({
-  attendus: z
-    .array(verdictAttendu)
-    .describe("Un verdict par attendu soumis, dans l'ordre reçu."),
+  attendus: z.array(verdictAttendu).describe("Un verdict par attendu soumis, dans l'ordre reçu."),
 });
 
 const attendusForme = sortieLue.extend({

@@ -74,7 +74,8 @@ async function main(): Promise<void> {
     // Un dépôt sans concepts sans motif de rejet est un échec silencieux :
     // le figé d'avant la persistance d'`echec` n'écrivait rien pour eux. On
     // le rattrape ici en même temps que les échecs explicites.
-    const enEchec = depot.echec !== undefined || (depot.rejet === null && depot.concepts.length === 0);
+    const enEchec =
+      depot.echec !== undefined || (depot.rejet === null && depot.concepts.length === 0);
     if (enEchec) {
       aRextraire.push(depot);
       continue;
@@ -105,7 +106,9 @@ async function main(): Promise<void> {
   console.info(
     `À combler : ${totalRegenerations} lot(s) de questions sur ${aCompleter.length} dépôt(s) — ${aCompleter.map((d) => d.nom).join(", ") || "aucun"}.`,
   );
-  console.info(`Plafond du jour : ${await lireReservationsDuJour()}/${process.env.AI_DAILY_CALL_CAP} déjà réservés.\n`);
+  console.info(
+    `Plafond du jour : ${await lireReservationsDuJour()}/${process.env.AI_DAILY_CALL_CAP} déjà réservés.\n`,
+  );
 
   if (totalExtractions + totalRegenerations === 0) {
     console.info("Rien à compléter. Le figé est intact.");

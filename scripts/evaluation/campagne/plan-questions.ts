@@ -71,8 +71,11 @@ export function planGeneration(fige: { depots: DepotFige[] }): Plan {
     // Tokens d'entrée par appel : prompt + les 3 concepts (~100 chars par
     // concept en moyenne) + enveloppe utilisateur. Le dernier lot peut porter
     // 1 ou 2 concepts au lieu de 3 — approximation acceptable au plan à sec.
-    const tailleConceptMoyenne = questionnables.reduce((s, c) => s + tok(c.concept), 0) / questionnables.length;
-    tokensIn += Math.round(nbAppels * (promptTokens + CONCEPTS_PAR_APPEL * (tailleConceptMoyenne + 30) + 80));
+    const tailleConceptMoyenne =
+      questionnables.reduce((s, c) => s + tok(c.concept), 0) / questionnables.length;
+    tokensIn += Math.round(
+      nbAppels * (promptTokens + CONCEPTS_PAR_APPEL * (tailleConceptMoyenne + 30) + 80),
+    );
   }
 
   return { appels, tokensIn, tokensOut };

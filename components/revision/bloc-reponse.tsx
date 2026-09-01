@@ -36,9 +36,7 @@ export function BlocReponse({
   children: ReactNode;
 }) {
   return (
-    <div
-      className="rounded-carte bg-surface-roche grain grain-clair p-pas-6 md:p-pas-8 relative overflow-hidden"
-    >
+    <div className="rounded-carte bg-surface-roche grain grain-clair p-pas-6 md:p-pas-8 relative overflow-hidden">
       {/* Les jetons de code s'inversent ici, et seulement ici : de l'encre diluée
           sur la roche est plus sombre que la roche, donc invisible. */}
       <div className="[&_code]:bg-jeton-clair [&_code]:border-jeton-bord-clair relative z-10">

@@ -91,9 +91,13 @@ async function main(): Promise<void> {
     );
   }
   console.info();
-  console.info(`Bascules Luna → Sonnet : **${bascules}** sur la période (${(bascules / nbJours).toFixed(1)}/jour en moyenne, seuil d'alerte : 5/jour).`);
+  console.info(
+    `Bascules Luna → Sonnet : **${bascules}** sur la période (${(bascules / nbJours).toFixed(1)}/jour en moyenne, seuil d'alerte : 5/jour).`,
+  );
   console.info();
-  console.info(`Fourchette annoncée au portage (portage-luna.md §4) : −55 à −75 % contre Sonnet en catalogue. Comparer au coût qui aurait été facturé sur Sonnet (multiplier les tokens Luna par le ratio des prix : 2/0,2 pour l'entrée, 10/1,2 pour la sortie).`);
+  console.info(
+    `Fourchette annoncée au portage (portage-luna.md §4) : −55 à −75 % contre Sonnet en catalogue. Comparer au coût qui aurait été facturé sur Sonnet (multiplier les tokens Luna par le ratio des prix : 2/0,2 pour l'entrée, 10/1,2 pour la sortie).`,
+  );
 }
 
 main()

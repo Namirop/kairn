@@ -47,10 +47,7 @@ type Comptes = {
   abstentions: number;
 };
 
-function comptes(
-  signalements: SignalementsDuDepot[],
-  verdicts: VerdictsDuDepot[],
-): Comptes {
+function comptes(signalements: SignalementsDuDepot[], verdicts: VerdictsDuDepot[]): Comptes {
   const c: Comptes = {
     manquesReels: 0,
     inventionsReelles: 0,

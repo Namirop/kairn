@@ -51,18 +51,16 @@ function argument(drapeau: string): string | undefined {
 }
 
 async function main(): Promise<void> {
-  const { attendusDuDepot, couvertureDesAttendus, tousLesAttendus } = await import(
-    "./evaluation/attendus"
-  );
+  const { attendusDuDepot, couvertureDesAttendus, tousLesAttendus } =
+    await import("./evaluation/attendus");
   const { dernierFige, lireFige } = await import("./evaluation/fige");
   const { plonger } = await import("./evaluation/mesures/embeddings");
   const { mesurerLeDepot, textesDuDepot } = await import("./evaluation/mesures/signaux");
   const { signaler } = await import("./evaluation/mesures/signalements");
   const { rendreLaCalibration } = await import("./evaluation/mesures/rapport-de-calibration");
   const { rendreLesMesures } = await import("./evaluation/mesures/rapport-de-mesures");
-  const { compterLesAppelsDesJuges, jugerLesSignalements } = await import(
-    "./evaluation/juges/verdicts"
-  );
+  const { compterLesAppelsDesJuges, jugerLesSignalements } =
+    await import("./evaluation/juges/verdicts");
 
   const chemin = argument("--fige") ?? dernierFige();
 
@@ -162,7 +160,9 @@ async function main(): Promise<void> {
   const debutJuges = new Date();
   const verdicts = await jugerLesSignalements(signalements, depots, couvertures, chemin);
   const consommation = await sumAiCalls(debutJuges);
-  console.info(`Juges : ${consommation.calls} appels, ${Number(consommation.costUsd).toFixed(4)} $.`);
+  console.info(
+    `Juges : ${consommation.calls} appels, ${Number(consommation.costUsd).toFixed(4)} $.`,
+  );
 
   const rapport = rendreLesMesures(
     mesures,

@@ -236,16 +236,16 @@ de code cités, jamais pour du texte de lecture.
 ### Hierarchy
 
 - **H1 Site** (Bricolage Grotesque, 700, `clamp(2.25rem, calc((100vw - 4rem) /
-  7.4), 3.75rem)` mobile puis `clamp(3.5rem, min(7.4vw, 9.6vh), 6.5rem)`
+7.4), 3.75rem)` mobile puis `clamp(3.5rem, min(7.4vw, 9.6vh), 6.5rem)`
   desktop, leading 0.95, tracking -0.03em) : titres de campagne marketing.
   Deux lignes maximum. Le diviseur 7,4 est mesuré sur la phrase la plus longue
   du hero (« Tu lis beaucoup. »).
 - **H1 App** (Bricolage Grotesque, 700, `clamp(1.75rem, min(3vw, 4.4vh),
-  2.5rem)`) : titres des écrans internes.
+2.5rem)`) : titres des écrans internes.
 - **Énoncé** (Bricolage Grotesque, 600, `clamp(1.375rem, min(2.6vw, 3.2vh),
-  2rem)`) : énoncé d'une question, un cran sous H1 app, avec mesure élargie.
+2rem)`) : énoncé d'une question, un cran sous H1 app, avec mesure élargie.
 - **Nombre** (Bricolage Grotesque, 700, `clamp(3.5rem, min(6vw, 9vh),
-  5.75rem)`) : grands nombres du tableau de bord.
+5.75rem)`) : grands nombres du tableau de bord.
 - **H2 Site** (Bricolage Grotesque, 3.75rem desktop / 2.5rem mobile) : titres
   de section marketing secondaires.
 - **H2 App** (Bricolage Grotesque, 1.5rem desktop / 1.125rem mobile) : titres
@@ -268,7 +268,7 @@ négatif jusqu'à -0.045em. Le titre n'est pas une phrase qui respire, c'est un
 bloc qui frappe.
 
 **The Ratio-Pas-Immobilité Rule.** Sur grand écran, tout le bas de l'échelle
-monte, mais moins vite que le corps — la hiérarchie tient dans le *rapport*,
+monte, mais moins vite que le corps — la hiérarchie tient dans le _rapport_,
 pas dans l'immobilité des seconds plans. Treize, quinze, dix-huit sur grand
 écran ; douze, quatorze, seize sur mobile.
 

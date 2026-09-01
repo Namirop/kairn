@@ -28,9 +28,7 @@ export function manquementsDeLangue(evaluation: DepotEvalue): string[] {
   const duDepot = langueApparente(evaluation.texte);
 
   if (duDepot && duDepot !== declaree) {
-    manquements.push(
-      `le dépôt paraît écrit en \`${duDepot}\`, la lecture déclare \`${declaree}\``,
-    );
+    manquements.push(`le dépôt paraît écrit en \`${duDepot}\`, la lecture déclare \`${declaree}\``);
   }
 
   const desConcepts = langueApparente(

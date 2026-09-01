@@ -39,7 +39,8 @@ par découpe côté serveur.
 ## A — Bornes basses
 
 ### A1 · Sous le minimum → refus Zod, aucun appel modèle
-*(31 caractères)*
+
+_(31 caractères)_
 
 ```
 Les lichens poussent lentement.
@@ -51,7 +52,8 @@ Les lichens poussent lentement.
 ---
 
 ### A2 · Juste au-dessus du minimum → ça rend
-*(113 caractères)*
+
+_(113 caractères)_
 
 ```
 Un lichen n'est pas une plante mais l'association d'un champignon et d'une algue, chacun incapable de vivre seul.
@@ -65,7 +67,8 @@ un échec ». Ce qui compte : que ça rende quelque chose et que l'écran l'affi
 ## B — Formats courts, domaines variés
 
 ### B3 · Cuisine — une phrase dense
-*(242 caractères)*
+
+_(242 caractères)_
 
 ```
 La réaction de Maillard n'est pas une caramélisation : elle fait réagir un sucre avec un acide aminé, pas un sucre avec lui-même. Elle démarre vers 140 °C, ce qui explique pourquoi une viande jetée dans une poêle trop froide ne brunit jamais.
@@ -77,7 +80,8 @@ température au concept de la distinction Maillard/caramélisation.
 ---
 
 ### B4 · Droit du travail — fait sec
-*(196 caractères)*
+
+_(196 caractères)_
 
 ```
 En France, la période d'essai d'un CDI cadre est de quatre mois maximum, renouvellement compris elle ne peut pas dépasser huit mois. Le renouvellement doit être prévu par la convention collective.
@@ -89,7 +93,8 @@ modèle ne doit pas fabriquer de contexte juridique absent du texte.
 ---
 
 ### B5 · Sport / physiologie — vocabulaire courant
-*(344 caractères)*
+
+_(344 caractères)_
 
 ```
 Les courbatures ne viennent pas de l'acide lactique. Le lactate est évacué en une heure ou deux après l'effort, alors que les courbatures apparaissent douze à quarante-huit heures plus tard. Ce sont des micro-déchirures des fibres musculaires, provoquées surtout par la phase excentrique du mouvement — celle où le muscle s'allonge sous charge.
@@ -103,7 +108,8 @@ idée fausse répandue **corrigée**, donc le modèle ne doit **pas** poser `unc
 ## C — Formats moyens
 
 ### C6 · Finance personnelle — explication propre
-*(739 caractères)*
+
+_(739 caractères)_
 
 ```
 Le taux de rendement interne et le rendement annualisé ne mesurent pas la même chose. Le rendement annualisé regarde le point de départ et le point d'arrivée d'un capital, et déduit un taux moyen ; il ignore complètement les versements faits entre les deux. Le TRI, lui, tient compte de la date de chaque versement, ce qui le rend beaucoup plus juste quand on investit régulièrement plutôt qu'en une fois.
@@ -116,7 +122,8 @@ La conséquence pratique est contre-intuitive : deux personnes qui finissent ave
 ---
 
 ### C7 · Explication maladroite, à l'oral — le prompt doit reformuler
-*(555 caractères)*
+
+_(555 caractères)_
 
 ```
 alors en gros la franchise c'est le truc que toi tu payes avant que l'assurance paye. genre t'as 300 balles de franchise, ta bagnole elle en a pour 1000 de réparation, ben t'en sors 300 et eux ils mettent les 700. et du coup si le truc coûte moins que la franchise ben en fait ça sert à rien de déclarer, t'as tout à payer quand même et en plus ça peut te faire monter ta cotisation l'année d'après. après y'a des franchises fixes et des franchises en pourcentage, genre 10% du montant, et là plus le sinistre est gros plus tu raques, c'est un peu vicieux
@@ -128,7 +135,8 @@ modèle ne doit inventer ni plafond légal ni information absente du texte.
 ---
 
 ### C8 · Notes décousues, en puces
-*(607 caractères)*
+
+_(607 caractères)_
 
 ```
 Réunion urbanisme mardi — notes
@@ -150,7 +158,8 @@ rejeté, le prompt confond les deux.
 ## D — Cas de contrôle
 
 ### D9 · Affirmation factuellement fausse → `uncertain: true`
-*(220 caractères)*
+
+_(220 caractères)_
 
 ```
 La Grande Muraille de Chine est la seule construction humaine visible à l'œil nu depuis la Lune. Elle mesure environ 21 000 kilomètres et a été construite d'un seul tenant sous la dynastie Qin, en une trentaine d'années.
@@ -162,7 +171,8 @@ corriger, ni ajouter la version juste. Vérifier ensuite qu'aucune question n'es
 ---
 
 ### D10 · Anglais → sortie en anglais
-*(360 caractères)*
+
+_(360 caractères)_
 
 ```
 Survivorship bias is the error of concentrating on the entities that made it past a selection process and overlooking those that did not. The classic example is Abraham Wald's work on returning bombers: the armour should go where the returning planes were not hit, because the planes hit in those places never came back. The absence of data is itself the data.
@@ -173,7 +183,8 @@ Survivorship bias is the error of concentrating on the entities that made it pas
 ---
 
 ### D11 · Pavé collé d'article — sujet non technique
-*(1 876 caractères)*
+
+_(1 876 caractères)_
 
 ```
 Pendant longtemps, on a expliqué la disparition des mammouths laineux par la chasse humaine, puis par le réchauffement de la fin du Pléistocène. Les deux hypothèses tenaient mal seules : la chasse n'expliquait pas pourquoi les populations continentales s'effondrent bien avant le pic de pression humaine, et le climat n'expliquait pas pourquoi l'espèce avait survécu à plusieurs réchauffements comparables au cours des cent mille années précédentes.
@@ -192,7 +203,8 @@ concept ne doit dire « ce mécanisme » sans se suffire à lui-même.
 ---
 
 ### D12 · Presque à la borne — ~3 750 caractères
-*(à assembler : coller D11 deux fois de suite, séparé par une ligne vide)*
+
+_(à assembler : coller D11 deux fois de suite, séparé par une ligne vide)_
 
 **Attendu** : le nombre de concepts ne doit **pas** doubler — la déduplication doit absorber la
 répétition. Teste aussi l'affichage à hauteur bornée (3 visibles + défilement) et le comportement
@@ -205,7 +217,8 @@ serveur.
 ---
 
 ### D13 · Dépassement de borne → refus client + serveur
-*(coller D11 trois fois : ~5 600 caractères)*
+
+_(coller D11 trois fois : ~5 600 caractères)_
 
 **Attendu** : bouton désactivé, compteur en `text-alerte`, et si l'envoi passe quand même, refus
 Zod côté serveur. Aucun essai consommé, aucun coût, aucune ligne `AiCall`.
@@ -215,7 +228,8 @@ Zod côté serveur. Aucun essai consommé, aucun coût, aucune ligne `AiCall`.
 ## E — Sans concept extractible (test des rejets)
 
 ### E14 · Organisation pure
-*(256 caractères)*
+
+_(256 caractères)_
 
 ```
 Penser à rappeler le garage avant vendredi pour le contrôle technique, récupérer le colis au point relais avant qu'il reparte, relancer Julien sur le devis, et bloquer deux heures samedi matin pour finir le rangement du garage. Acheter des piles AAA aussi.
@@ -227,7 +241,8 @@ pas « ce texte est invalide ».
 ---
 
 ### E15 · Opinion et ressenti, sans contenu factuel
-*(311 caractères)*
+
+_(311 caractères)_
 
 ```
 Franchement je sais pas quoi penser de cette série. Les trois premiers épisodes m'ont scotché, après ça retombe complètement et la fin je l'ai vue venir à des kilomètres. Les acteurs sont bons mais le scénario tourne en rond. Je pense que je vais quand même regarder la saison 2, ne serait-ce que par curiosité.
@@ -239,7 +254,8 @@ trois actes » — ce serait un faux positif, et il faut le voir.
 ---
 
 ### E16 · Trop vague pour une question précise
-*(201 caractères)*
+
+_(201 caractères)_
 
 ```
 Il faut vraiment que je fasse plus attention à ma manière de communiquer au travail, être plus clair, plus direct, moins dans l'implicite. Ça éviterait beaucoup de malentendus sur les projets en cours.
