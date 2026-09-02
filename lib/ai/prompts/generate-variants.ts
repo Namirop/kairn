@@ -142,6 +142,15 @@ que des éléments présents dans le concept. Élaborer au-delà — un chiffre 
 donné, une cause non écrite — c'est la ligne à ne pas franchir. Les points
 attendus se rappellent en citant, pas en expliquant.
 
+**Elle énonce, elle ne corrige pas.** Ce bloc est lu par quelqu'un qui vient
+d'essayer, pas par un correcteur qui barème une copie. Il dit ce qui est, à
+l'indicatif : « La crise éclate aux États-Unis, puis se diffuse au monde
+entier. » Jamais ce qu'il aurait fallu faire, jamais ce qui aurait été
+insuffisant. Sont donc exclus « il fallait », « la réponse doit mentionner »,
+« une réponse qui ne cite que… est insuffisante », et toute tournure qui juge
+une copie plutôt que d'expliquer un concept. Une phrase qui commence par un
+reproche est une phrase à réécrire.
+
 Sur un concept pauvre, la fidélité prime sur la variété. Deux questions
 proches mais fidèles valent mieux qu'une question inventée. La répétition
 entre questions d'un même Atom est un défaut moins grave que l'infidélité —
@@ -210,6 +219,13 @@ alors réduire le champ sans le fermer — un leurre absurde n'aide personne, un
 leurre qui pourrait aussi être juste trompe celui qui le lit. Aucun d'eux n'est
 une forme acceptée du terme masqué.
 
+Chaque leurre doit pouvoir se glisser dans la phrase sans la casser : il
+s'accorde avec ce qui précède et suit le trou — élision, genre, nombre,
+préposition. Sur « n'a rien d'\_\_\_ », « esthétique » se tient, « technique »
+non : « d'technique » ne se dit pas, et le leurre s'élimine à la grammaire sans
+rien savoir du concept. Un leurre qu'on écarte sans réfléchir ne réduit pas le
+champ, il le réduit **à la place** de celui qui cherche.
+
 MCQ : exactement quatre options. Chaque mauvaise option est fausse pour une
 raison précise, une confusion que quelqu'un pourrait réellement avoir. Une
 option manifestement absurde rend la question inutile. Les quatre options ont
@@ -242,9 +258,21 @@ Quand elle doit être fausse, elle l'est d'un cheveu — une condition inversée
 cas particulier étendu à tous, deux étapes permutées — jamais grossièrement. Elle
 reste crédible pour quelqu'un qui a mal compris le concept.
 
-Dans les deux cas, \`answerKey\` commence par « Vrai » ou « Faux », puis dit en une
-phrase ce qui le justifie.
+Dans les deux cas, \`answerKey\` **n'ouvre par aucun verdict**. Ni « Vrai », ni
+« Faux » : les deux propositions sont à l'écran au moment où ce bloc s'affiche,
+la juste surlignée et celle qui a été choisie marquée — le répéter en tête
+occupe la première phrase à dire ce qui est déjà lu deux fois. Commence
+directement par ce qui explique : sur une affirmation fausse, ce qu'elle
+déforme et ce que le concept dit à la place.
 
 SHORT_ANSWER et EXPLAIN : la personne répond en texte libre et jugera elle-même.
-Écris \`answerKey\` pour qu'elle puisse se juger honnêtement : les points attendus,
-formulés simplement, et ce qui compte comme une réponse insuffisante.`;
+\`answerKey\` est l'étalon contre lequel elle se compare, donc elle **porte la
+réponse**, énoncée en clair et en entier — c'est le seul format où l'écran ne la
+montre nulle part ailleurs.
+
+Elle l'énonce, elle ne la prescrit pas. « La crise éclate aux États-Unis avec le
+krach de Wall Street, puis se diffuse au monde entier », et non « il fallait
+indiquer que… ». N'ajoute pas ce qui compterait comme insuffisant : celui qui
+lit compare sa réponse à la tienne et choisit lui-même parmi quatre nuances —
+lui dicter le seuil, c'est faire son travail à sa place et le faire mal, puisque
+tu ne sais pas ce qu'il a répondu.`;

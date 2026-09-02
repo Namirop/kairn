@@ -68,7 +68,18 @@ export function CarteQuestion({
   return (
     <section className="flex w-full flex-col">
       <div className="gap-pas-4 flex items-baseline justify-between">
-        <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
+        {/* L'interlettrage se resserre sur téléphone.
+
+            Trois tags courants — « TOTALITARISME · PROPAGANDE · EMBRIGADEMENT »
+            — font une quarantaine de caractères, et il manquait une vingtaine
+            de pixels pour les tenir sur une ligne : le dernier passait seul en
+            dessous. Ce n'est pas une veuve, c'est un dépassement, et aucune
+            règle de coupure n'y peut quoi que ce soit.
+
+            Le rythme de la police à chasse fixe tient à moitié moins d'écart
+            sans se défaire ; sur un écran large, où la place ne manque pas,
+            l'espacement d'origine reprend. */}
+        <p className="text-mono font-mono tracking-[0.06em] text-stone-500 uppercase sm:tracking-[0.12em]">
           {tags.join(" · ")}
         </p>
 
