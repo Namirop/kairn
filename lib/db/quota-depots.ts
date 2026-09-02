@@ -1,4 +1,5 @@
 import { plafondDuCompte } from "@/lib/db/abonnement";
+import { plafondDeDepots } from "@/lib/domain/plafond-du-plan";
 import { prisma } from "@/lib/db/client";
 import { lireUsageDeLaPeriode, periodeDuCompte } from "@/lib/db/periode-du-compte";
 import { localDay } from "@/lib/domain/local-day";
@@ -64,18 +65,16 @@ import { debutEnDate } from "@/lib/domain/periode-de-quota";
  * jamais dans le compteur que le plafond de concepts surveille, et sans ce
  * rideau-là quelqu'un pourrait ne déposer que des textes rejetés, sans fin.
  *
- * Le chiffre vient de là : soixante extractions de 8 000 caractères, autour de
- * 2 400 tokens d'entrée chacune. Elles coûtaient près de **0,45 $** au tarif
- * Sonnet ; au tarif Luna elles en coûtent **une trentaine de fois moins**. Comme
- * le plafond de concepts, ce rideau ne protège plus un budget — il protège
- * contre l'abus, ce qui est un autre métier et se règle sur un autre chiffre.
+ * L'ordre de grandeur vient de là : soixante extractions de 8 000 caractères,
+ * autour de 2 400 tokens d'entrée chacune. Elles coûtaient près de **0,45 $** au
+ * tarif Sonnet ; au tarif Luna elles en coûtent **une trentaine de fois moins**.
+ * Comme le plafond de concepts, ce rideau ne protège plus un budget — il protège
+ * contre l'abus, ce qui est un autre métier.
  *
- * Le double du plafond de concepts. Un dépôt rend un à vingt concepts
- * (`PLAFOND_CONCEPTS_PAR_DEPOT`) : trente concepts s'atteignent donc en deux
- * articles denses comme en trente phrases, et soixante dépôts laissent la place
- * aux deux usages.
+ * **Le nombre n'est plus écrit ici**, il se dérive du plafond du compte : voir
+ * `plafondDeDepots` dans le domaine, qui dit pourquoi un rideau figé annulait
+ * l'offre payante.
  */
-export const DEPOTS_PAR_PERIODE = 60;
 
 /** Fenêtre courte du débit, et ce qu'on y tolère. */
 export const FENETRE_DEBIT_SECONDES = 60;
@@ -133,7 +132,7 @@ export async function reserverDepot(
       SET "deposits" = "MonthlyUsage"."deposits" + 1,
           "updatedAt" = now()
       WHERE "MonthlyUsage"."concepts" < ${plafond}
-        AND "MonthlyUsage"."deposits" < ${DEPOTS_PAR_PERIODE}
+        AND "MonthlyUsage"."deposits" < ${plafondDeDepots(plafond)}
     RETURNING "deposits", "concepts"
   `;
 

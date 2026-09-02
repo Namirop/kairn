@@ -2,8 +2,7 @@ import { readFileSync } from "node:fs";
 import { prisma } from "@/lib/db/client";
 import { lireUsageDeLaPeriode, periodeDuCompte } from "@/lib/db/periode-du-compte";
 import { compterConceptsRetenus } from "@/lib/db/comptage-de-la-periode";
-import { DEPOTS_PAR_PERIODE } from "@/lib/db/quota-depots";
-import { PLAFOND_GRATUIT } from "@/lib/domain/plafond-du-plan";
+import { PLAFOND_GRATUIT, plafondDeDepots } from "@/lib/domain/plafond-du-plan";
 import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 import { deposer, type ResultatDepot } from "@/lib/depots/deposer";
 import { refusDeQuota } from "@/lib/depots/refus-de-quota";
@@ -13,6 +12,9 @@ import { debutEnDate } from "@/lib/domain/periode-de-quota";
 import { executerToutLePipeline, formulaire } from "./depot-simule";
 import { fabriquerConcept, viderLeCompte } from "./abus-fabrique";
 import { record } from "./journal";
+
+/** Ce que la vérification vise : ses comptes sont gratuits. */
+const DEPOTS_DUN_COMPTE_GRATUIT = plafondDeDepots(PLAFOND_GRATUIT);
 
 /**
  * Les quotas d'ingestion : l'atomicité, le moment du décompte, ce qui revient
@@ -71,7 +73,7 @@ export async function casDebitConcurrent(userId: string): Promise<void> {
 /** Le plafond de dépôts du jour, éprouvé sur les deux dernières places. */
 export async function casPlafondConcurrent(userId: string): Promise<void> {
   await viderLeCompte(userId);
-  await poserLesDepotsDeLaPeriode(userId, DEPOTS_PAR_PERIODE - 2);
+  await poserLesDepotsDeLaPeriode(userId, DEPOTS_DUN_COMPTE_GRATUIT - 2);
 
   const resultats = await Promise.all(enParallele(userId, "verif-plafond-simultane"));
   const acceptes = resultats.filter((resultat) => resultat.ok).length;
@@ -79,8 +81,8 @@ export async function casPlafondConcurrent(userId: string): Promise<void> {
 
   record(
     `Quota — ${SIMULTANES} dépôts simultanés sur deux places libres n'en prennent que deux`,
-    acceptes === 2 && usage.depots === DEPOTS_PAR_PERIODE,
-    `${acceptes} accepté(s), compteur à ${usage.depots}/${DEPOTS_PAR_PERIODE}`,
+    acceptes === 2 && usage.depots === DEPOTS_DUN_COMPTE_GRATUIT,
+    `${acceptes} accepté(s), compteur à ${usage.depots}/${DEPOTS_DUN_COMPTE_GRATUIT}`,
   );
 }
 

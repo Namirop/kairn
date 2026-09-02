@@ -7,6 +7,7 @@ import {
   PLAFOND_PAYANT,
   type Plan,
   plafondDeConcepts,
+  plafondDeDepots,
   planEffectif,
   SANS_ABONNEMENT,
 } from "./plafond-du-plan";
@@ -142,5 +143,28 @@ describe("estPayant", () => {
         },
       ),
     );
+  });
+});
+
+describe("plafondDeDepots", () => {
+  it("double le plafond de concepts des deux plans", () => {
+    expect(plafondDeDepots(PLAFOND_GRATUIT)).toBe(60);
+    expect(plafondDeDepots(PLAFOND_PAYANT)).toBe(600);
+  });
+
+  it("ne passe jamais sous le plafond de concepts", () => {
+    // La propriété qui a motivé le calcul. Quelqu'un qui dépose une phrase à la
+    // fois consomme un dépôt par concept : si le rideau des dépôts tombait le
+    // premier, il annulerait le plafond acheté sans que rien ne le dise.
+    fc.assert(
+      fc.property(fc.integer({ min: 1, max: 100_000 }), (concepts) => {
+        expect(plafondDeDepots(concepts)).toBeGreaterThanOrEqual(concepts);
+      }),
+    );
+  });
+
+  it("suit le plan sans le contredire", () => {
+    // Payer doit ouvrir les deux rideaux, jamais un seul.
+    expect(plafondDeDepots(PLAFOND_PAYANT)).toBeGreaterThan(plafondDeDepots(PLAFOND_GRATUIT));
   });
 });

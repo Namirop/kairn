@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/db/client";
 import { estEnListeDattente, inscrireEnListeDattente } from "@/lib/db/liste-dattente";
 import { compterConceptsRetenus } from "@/lib/db/comptage-de-la-periode";
-import { DEPOTS_PAR_PERIODE } from "@/lib/db/quota-depots";
-import { PLAFOND_GRATUIT } from "@/lib/domain/plafond-du-plan";
+import { PLAFOND_GRATUIT, plafondDeDepots } from "@/lib/domain/plafond-du-plan";
 import { deposer, type ResultatDepot } from "@/lib/depots/deposer";
 import { formulaire, repartirDeZero, vieillirLesDepots } from "./depot-simule";
 import { record } from "./journal";
+
+/** Ce que la vérification vise : ses comptes sont gratuits. */
+const DEPOTS_DUN_COMPTE_GRATUIT = plafondDeDepots(PLAFOND_GRATUIT);
 
 /**
  * Ce qui borne le dépôt : l'envoi répété, le débit, le quota du jour.
@@ -94,7 +96,7 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
 export async function casPlafondDeDepots(userId: string): Promise<void> {
   await repartirDeZero(userId);
 
-  for (let numero = 1; numero <= DEPOTS_PAR_PERIODE; numero += 1) {
+  for (let numero = 1; numero <= DEPOTS_DUN_COMPTE_GRATUIT; numero += 1) {
     const resultat = await deposerTexte(userId, `verif-depots-${numero}`);
 
     if (!resultat.ok) throw new Error(`Le dépôt ${numero} aurait dû passer : ${resultat.motif}`);
@@ -105,7 +107,7 @@ export async function casPlafondDeDepots(userId: string): Promise<void> {
   const consommes = await prisma.monthlyUsage.findFirst({ where: { userId } });
 
   record(
-    `Quota — le dépôt ${DEPOTS_PAR_PERIODE + 1} est refusé même sans un seul concept retenu`,
+    `Quota — le dépôt ${DEPOTS_DUN_COMPTE_GRATUIT + 1} est refusé même sans un seul concept retenu`,
     !surnumeraire.ok && surnumeraire.quota === true && (consommes?.concepts ?? 0) === 0,
     surnumeraire.ok ? "accepté" : surnumeraire.motif,
   );

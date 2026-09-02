@@ -83,3 +83,24 @@ export function plafondDeConcepts(abonnement: Abonnement, maintenant: Date): num
 export function estPayant(abonnement: Abonnement, maintenant: Date): boolean {
   return planEffectif(abonnement, maintenant) !== "GRATUIT";
 }
+
+/**
+ * Combien de dépôts pour un plafond de concepts donné.
+ *
+ * **Le rideau des dépôts doit suivre le plan, sinon il l'annule.** Il existe
+ * parce qu'un dépôt rejeté paie son extraction sans rendre le moindre concept :
+ * sans lui, on pourrait déposer des textes rejetés sans fin. Mais il était figé
+ * à soixante, posé quand trente concepts étaient le seul plafond — si bien qu'un
+ * compte payant, qui a droit à trois cents concepts, était arrêté au soixantième
+ * dépôt. Une phrase par dépôt, et l'offre achetée rendait le cinquième de ce
+ * qu'elle promet.
+ *
+ * Le double, donc, et pas un chiffre en dur : un dépôt rend un à vingt concepts,
+ * si bien qu'un plafond s'atteint en autant d'articles denses que de phrases
+ * courtes, et le double laisse la place aux deux usages.
+ */
+export const DEPOTS_PAR_CONCEPT = 2;
+
+export function plafondDeDepots(plafondDeConcepts: number): number {
+  return plafondDeConcepts * DEPOTS_PAR_CONCEPT;
+}
