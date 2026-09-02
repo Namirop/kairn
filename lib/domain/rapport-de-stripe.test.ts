@@ -2,6 +2,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { planEffectif } from "./plafond-du-plan";
 import {
+  abonnementVivant,
   type CadenceStripe,
   etatDepuisStripe,
   evenementARetenir,
@@ -142,5 +143,43 @@ describe("evenementARetenir", () => {
     const resiliation = new Date("2026-09-01T12:00:00Z");
 
     expect(evenementARetenir(renouvellement, resiliation)).toBe(false);
+  });
+});
+
+describe("abonnementVivant", () => {
+  it("ne tient pour finis que canceled et incomplete_expired", () => {
+    const finis = TOUS_LES_STATUTS.filter((statut) => !abonnementVivant(statut));
+
+    expect(finis).toEqual(["canceled", "incomplete_expired"]);
+  });
+
+  it("tient past_due pour vivant, alors qu'il n'ouvre aucun droit", () => {
+    // Les deux règles ne se recouvrent pas, et c'est tout l'intérêt : une carte
+    // qui échoue coupe l'accès sans fermer l'abonnement. Racheter par-dessus
+    // ferait deux abonnements dont le premier repartirait à la première relance
+    // réussie.
+    const impaye: RapportDeStripe = {
+      statut: "past_due",
+      cadence: "month",
+      finDePeriode: new Date("2026-10-01T00:00:00Z"),
+      resilieALaFin: false,
+    };
+
+    expect(abonnementVivant(impaye.statut)).toBe(true);
+    expect(etatDepuisStripe(impaye).plan).toBe("GRATUIT");
+  });
+
+  it("laisse racheter après une résiliation effective", () => {
+    expect(abonnementVivant("canceled")).toBe(false);
+  });
+
+  it("tient pour vivant tout statut qui ouvre un droit", () => {
+    fc.assert(
+      fc.property(rapport(), (rapport) => {
+        if (etatDepuisStripe(rapport).plan === "GRATUIT") return;
+
+        expect(abonnementVivant(rapport.statut)).toBe(true);
+      }),
+    );
   });
 });

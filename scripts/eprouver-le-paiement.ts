@@ -2,12 +2,14 @@ import "dotenv/config";
 import { prisma } from "@/lib/db/client";
 import { MENTION_FRANCHISE } from "@/lib/domain/mention-de-tva";
 import { PRIX_ANNUEL, PRIX_MENSUEL } from "@/lib/domain/prix";
-import type { CadenceStripe } from "@/lib/domain/rapport-de-stripe";
+import { abonnementVivant, type CadenceStripe } from "@/lib/domain/rapport-de-stripe";
 import { ouvrirLePaiement } from "@/lib/paiement/achat";
 import { CLE_DU_PRIX, prixDeLaCadence } from "@/lib/paiement/catalogue";
 import { stripe } from "@/lib/paiement/client";
 import { lireConfigDePaiement } from "@/lib/paiement/config";
 import { clientStripeDuCompte } from "@/lib/paiement/dossier-client";
+import { fermerLAbonnementDuCompte } from "@/lib/paiement/fermeture-du-compte";
+import { lireLeRapport } from "@/lib/paiement/rapport";
 import { arreterLAbonnement, reprendreLAbonnement } from "@/lib/paiement/resiliation";
 import { comparerAvecStripe } from "./verification/etat-du-paiement";
 import { conclure, record } from "./verification/journal";
@@ -178,9 +180,18 @@ async function nettoyer(userId: string): Promise<void> {
   });
 
   if (ligne?.stripeSubscriptionId) {
-    await stripe().subscriptions.cancel(ligne.stripeSubscriptionId);
+    // La fonction de production, et non un `cancel` écrit pour l'occasion :
+    // c'est elle qui coupe l'abonnement quand un compte est supprimé, et c'est
+    // le seul endroit où elle s'exerce contre un vrai abonnement.
+    await fermerLAbonnementDuCompte(userId);
 
-    record("L'abonnement de test est annulé chez Stripe", true, ligne.stripeSubscriptionId);
+    const apres = await stripe().subscriptions.retrieve(ligne.stripeSubscriptionId);
+
+    record(
+      "La fermeture coupe l'abonnement chez Stripe, tout de suite",
+      !abonnementVivant(lireLeRapport(apres).statut),
+      `${ligne.stripeSubscriptionId} → ${apres.status}`,
+    );
   }
 
   await prisma.subscription.updateMany({

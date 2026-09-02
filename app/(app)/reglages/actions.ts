@@ -10,6 +10,8 @@ import { enregistrerLesReglages, optOutOfEmails, reprendreLesEmails } from "@/li
 import { confirmationValide, MOT_DE_CONFIRMATION } from "@/lib/domain/confirmation-de-suppression";
 import { lireHeureDeRappel } from "@/lib/domain/heure-de-rappel";
 import { lirePlafondDeSession, PLAFOND_MAX, PLAFOND_MIN } from "@/lib/domain/selection-session";
+import { PaiementError } from "@/lib/paiement/erreurs";
+import { fermerLAbonnementDuCompte } from "@/lib/paiement/fermeture-du-compte";
 
 /**
  * Les gestes irréversibles d'un compte.
@@ -47,6 +49,30 @@ export async function supprimerMonCompteAction(
 
   if (!valide.success) {
     return { erreur: `Recopie « ${MOT_DE_CONFIRMATION} » pour confirmer.` };
+  }
+
+  // **L'abonnement se coupe avant le compte, et jamais l'inverse.** La ligne
+  // `Subscription` part en cascade avec le compte, et elle emporte l'identifiant
+  // du client Stripe : après le `delete`, plus rien ici ne sait quel abonnement
+  // continue de prélever. C'est donc maintenant ou jamais.
+  //
+  // Un échec renonce à la suppression plutôt que de la forcer. Garder un compte
+  // de trop se répare d'un clic ; un prélèvement qui court sans plus aucune
+  // trace se répare en fouillant le tableau de bord Stripe, si tant est qu'on
+  // s'aperçoive qu'il court.
+  try {
+    await fermerLAbonnementDuCompte(utilisateur.id);
+  } catch (erreur) {
+    console.error("[paiement] fermeture refusée", {
+      userId: utilisateur.id,
+      code: erreur instanceof PaiementError ? erreur.code : "INCONNU",
+      erreur,
+    });
+
+    return {
+      erreur:
+        "Ton abonnement n'a pas pu être arrêté, et on ne supprime pas un compte qui paie encore. Réessaie dans un instant.",
+    };
   }
 
   const efface = await supprimerLeCompte(utilisateur.id);

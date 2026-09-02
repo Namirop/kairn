@@ -78,6 +78,34 @@ export function planDeLaCadence(cadence: CadenceStripe): Plan {
 }
 
 /**
+ * Les deux seuls statuts dont on ne revient pas.
+ *
+ * Un abonnement `canceled` ou `incomplete_expired` est fini : il ne facturera
+ * plus rien et ne peut pas être repris. Tous les autres sont vivants, y compris
+ * ceux qui n'ouvrent aucun droit — `past_due` relance la carte pendant des
+ * semaines, `paused` reprendra, `incomplete` attend une authentification.
+ */
+const STATUTS_TERMINAUX: readonly StatutStripe[] = ["canceled", "incomplete_expired"];
+
+/**
+ * Cet abonnement peut-il encore facturer ?
+ *
+ * **La question n'est pas « ouvre-t-il un droit ».** Ce sont deux règles
+ * distinctes et il ne faut pas les confondre : un abonnement `past_due` ne donne
+ * accès à rien — `etatDepuisStripe` le refuse — mais il existe toujours chez
+ * Stripe, il relance la carte, et il facturera dès qu'un paiement passe.
+ *
+ * Elle sert à interdire un second achat. Quelqu'un qui a déjà un abonnement
+ * vivant et qui repaie se retrouve avec deux abonnements pour un seul compte,
+ * donc deux prélèvements par mois — et notre ligne, qui n'en retient qu'un, rend
+ * le premier invisible. C'est le genre de doublon qu'on ne découvre qu'à la
+ * réclamation, parce qu'aucun des deux paiements n'échoue.
+ */
+export function abonnementVivant(statut: StatutStripe): boolean {
+  return !STATUTS_TERMINAUX.includes(statut);
+}
+
+/**
  * L'état à écrire, d'après ce que Stripe rapporte.
  *
  * **Le terme est recopié même quand le plan retombe à gratuit.** La ligne dit
