@@ -3,6 +3,12 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 
 /**
+ * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
+ * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
+ * « Les commandes retirées ».
+ */
+
+/**
  * L'épreuve de l'instrument par ablation.
  *
  * Elle répond à une question que la passe de mesure ne peut pas se poser
@@ -27,9 +33,9 @@ import { basename, join } from "node:path";
  * Rien n'est plongé : tous les vecteurs viennent du cache. Coût zéro, y compris
  * au vingtième rejeu.
  *
- *   npm run eval:ablation
- *   npm run eval:ablation -- --depot 22,26
- *   npm run eval:ablation -- --fige <chemin>
+ *   npx tsx scripts/eprouver-la-mesure.ts
+ *   npx tsx scripts/eprouver-la-mesure.ts -- --depot 22,26
+ *   npx tsx scripts/eprouver-la-mesure.ts -- --fige <chemin>
  */
 
 const RAPPORTS = join(import.meta.dirname, "evaluation", "rapports");

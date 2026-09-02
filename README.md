@@ -116,27 +116,29 @@ droit, et où en est le dossier TVA.
 
 ## Scripts
 
-| Commande                    | Effet                                                     |
-| --------------------------- | --------------------------------------------------------- |
-| `npm run dev`               | Serveur de développement                                  |
-| `npm run build`             | Build de production                                       |
-| `npm run typecheck`         | `tsc --noEmit`                                            |
-| `npm run lint`              | ESLint, frontières d'architecture comprises               |
-| `npm test`                  | Vitest sur `lib/domain/`, propriétés fast-check comprises |
-| `npm run test:watch`        | Vitest en veille                                          |
-| `npm run format`            | Prettier en écriture                                      |
-| `npm run db:migrate`        | `prisma migrate dev`                                      |
-| `npm run db:deploy`         | `prisma migrate deploy`, pour un environnement déployé    |
-| `npm run db:seed`           | Remplit la base ; rejouable sans dupliquer                |
-| `npm run db:studio`         | Prisma Studio                                             |
-| `npm run verify:ai`         | Vérifie les garde-fous d'appel modèle à l'exécution       |
-| `npm run verify:ingestion`  | Rejoue l'ingestion de bout en bout, en mode mock          |
-| `npm run verify:session`    | Rejoue le moteur de révision et l'entraînement libre      |
-| `npm run verify:abus`       | Passe d'audit : quotas, débit, propriété, cycle de vie    |
-| `npm run verify:contrastes` | Mesure les ratios WCAG des couples posés par l'interface  |
+| Commande                      | Effet                                                     |
+| ----------------------------- | --------------------------------------------------------- |
+| `npm run dev`                 | Serveur de développement                                  |
+| `npm run build`               | Build de production                                       |
+| `npm run typecheck`           | `tsc --noEmit`                                            |
+| `npm run lint`                | ESLint, frontières d'architecture comprises               |
+| `npm test`                    | Vitest sur `lib/domain/`, propriétés fast-check comprises |
+| `npm run test:watch`          | Vitest en veille                                          |
+| `npm run format`              | Prettier en écriture                                      |
+| `npm run db:migrate`          | `prisma migrate dev`                                      |
+| `npm run db:deploy`           | `prisma migrate deploy`, pour un environnement déployé    |
+| `npm run db:seed`             | Remplit la base ; rejouable sans dupliquer                |
+| `npm run db:studio`           | Prisma Studio                                             |
+| `npm run verifier:ai`         | Vérifie les garde-fous d'appel modèle à l'exécution       |
+| `npm run verifier:ingestion`  | Rejoue l'ingestion de bout en bout, en mode mock          |
+| `npm run verifier:session`    | Rejoue le moteur de révision et l'entraînement libre      |
+| `npm run verifier:abus`       | Passe d'audit : quotas, débit, propriété, cycle de vie    |
+| `npm run verifier:contrastes` | Mesure les ratios WCAG des couples posés par l'interface  |
+| `npm run verifier:abonnement` | Prouve qu'un abonnement ne remonte pas le temps           |
+| `npm run eprouver:paiement`   | Le parcours d'achat contre le vrai Stripe, en mode test   |
 
-`npm run eval:generation` existe aussi : c'est le banc d'évaluation, décrit plus bas. C'est le seul
-script du dépôt qui émet de vrais appels, et il ne part pas sans qu'on le lui dise deux fois.
+`npm run evaluer:generation` existe aussi : c'est le banc d'évaluation, décrit plus bas. C'est le
+seul script du dépôt qui émet de vrais appels, et il ne part pas sans qu'on le lui dise deux fois.
 
 Ce tableau dit ce que font les commandes. **Le principe qui les gouverne est dans
 `docs/outillage.md`** : les trois registres à ne pas mélanger, la pyramide de vérification et ce
@@ -236,7 +238,7 @@ convertir sans que rien ne le signale. Le poser revient donc à choisir ce qu'on
 une journée qui tourne mal, puis à diviser par le coût d'un appel : cinq dollars par jour font environ
 quatre cents appels.
 
-`npm run verify:ai` pose un piège sur `fetch` et vérifie ces garde-fous à l'exécution plutôt que sur
+`npm run verifier:ai` pose un piège sur `fetch` et vérifie ces garde-fous à l'exécution plutôt que sur
 parole.
 
 Le raisonnement étendu reste coupé sur les trois appels : rien dans ces intentions n'a montré qu'il
@@ -262,7 +264,7 @@ telle quelle et marquée douteuse — et la liste de courses, rejetée avec son 
 choisi par mot-clé, à défaut par longueur : deux exécutions sur le même dépôt rendent la même
 chose.
 
-`npm run eval:generation` fait passer un corpus de dépôts (`scripts/evaluation/corpus/`) au vrai
+`npm run evaluer:generation` fait passer un corpus de dépôts (`scripts/evaluation/corpus/`) au vrai
 modèle et écrit un rapport lisible : par dépôt les concepts extraits, par concept ses quatre
 questions et leur facette. Des contrôles automatiques signalent ce qui se vérifie sans jugement
 humain — renvoi hors du concept, facettes répétées ou servies dans le désordre, options de QCM aux
@@ -273,8 +275,8 @@ C'est le seul endroit du dépôt autorisé à dépenser. Il exige `MOCK_AI=false
 le nombre d'appels qu'il va émettre, et ne part qu'à l'appel de `--emettre` :
 
 ```bash
-MOCK_AI=false npm run eval:generation             # affiche le plan et s'arrête
-MOCK_AI=false npm run eval:generation -- --emettre
+MOCK_AI=false npm run evaluer:generation             # affiche le plan et s'arrête
+MOCK_AI=false npm run evaluer:generation -- --emettre
 ```
 
 ### Ingestion
@@ -382,7 +384,7 @@ fonction qui referme, et elle garde les concepts déjà écrits.
 ## Vérification
 
 ```bash
-npm run typecheck && npm run lint && npm test && npm run build && npm run verify:ai && npm run verify:ingestion
+npm run typecheck && npm run lint && npm test && npm run build && npm run verifier:ai && npm run verifier:ingestion
 ```
 
 Les tests couvrent `lib/domain/` — logique pure, donc testable sans base ni réseau. Cinq propriétés

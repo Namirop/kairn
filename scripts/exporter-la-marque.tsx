@@ -9,7 +9,7 @@ import { symboleSeul } from "@/lib/design/symbole-svg";
 /**
  * Les trois variantes de la marque, en images, pour les usages hors application.
  *
- * `npm run marque`. Ce sont des fichiers de référence : ce qu'on joint à un
+ * `npm run exporter:marque`. Ce sont des fichiers de référence : ce qu'on joint à un
  * magasin d'applications, ce qu'on colle dans une présentation, ce qu'on regarde
  * pour juger. L'application, elle, ne les sert jamais — elle rend le composant.
  *

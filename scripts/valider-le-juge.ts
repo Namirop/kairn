@@ -8,6 +8,11 @@ import {
   type Facture,
 } from "./evaluation/openrouter/juges";
 import {
+  /**
+   * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
+   * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
+   * « Les commandes retirées ».
+   */
   JUGE_PRINCIPAL,
   JUGES_CANDIDATS,
   KIMI_K2_0905_ECARTE,
@@ -38,8 +43,8 @@ import {
  *
  * Deux modes :
  *
- *   npm run valider:juge                              # JUGE_PRINCIPAL (Haiku)
- *   npm run valider:juge -- --candidat=<id>           # un candidat OpenRouter
+ *   npx tsx scripts/valider-le-juge.ts                              # JUGE_PRINCIPAL (Haiku)
+ *   npx tsx scripts/valider-le-juge.ts -- --candidat=<id>           # un candidat OpenRouter
  *
  * L'identifiant `<id>` doit correspondre à une constante déclarée dans
  * `modeles.ts` — soit `JUGE_PRINCIPAL`, soit un des `JUGES_ECARTES` conservés

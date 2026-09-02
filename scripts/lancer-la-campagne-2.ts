@@ -28,6 +28,12 @@ import { verifierLeListing } from "./evaluation/openrouter/verification";
 import type { Vecteur } from "./evaluation/mesures/espace";
 
 /**
+ * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
+ * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
+ * « Les commandes retirées ».
+ */
+
+/**
  * L'émission de la campagne 2 — les deux finalistes désignés à l'arrêt 2
  * (Gemini 3.7 Flash + GPT-5.6 Luna) génèrent leurs questions sur les concepts
  * figés du 11h58, Haiku via OpenRouter juge la fidélité, et le rapport aveuglé
@@ -38,7 +44,7 @@ import type { Vecteur } from "./evaluation/mesures/espace";
  *
  * Trois garde-fous :
  * 1. `--emettre` obligatoire, sans quoi le script se contente du plan à sec
- *    (préférer `npm run planifier:campagne2` pour la vue chiffrée seule).
+ *    (préférer `npx tsx scripts/planifier-la-campagne-2.ts` pour la vue chiffrée seule).
  * 2. Garde-fou de dérive **2×** appliqué séparément à génération et fidélité
  *    (voir `passerParColonneQuestions` + mémoire `garde-fou-derive-2x`).
  * 3. Cache d'embeddings Voyage réutilisé pour les questions Sonnet déjà

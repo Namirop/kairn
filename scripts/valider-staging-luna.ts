@@ -10,6 +10,12 @@ import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
 import { sumAiCalls, startOfUtcDay } from "@/lib/db/ai-call";
 
 /**
+ * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
+ * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
+ * « Les commandes retirées ».
+ */
+
+/**
  * Validation staging — le chemin produit complet sur un seul dépôt de contrôle.
  *
  * Fait tourner extraction puis génération d'un lot de trois questions sur

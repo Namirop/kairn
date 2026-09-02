@@ -13,7 +13,7 @@ import { conclure, record } from "./verification/journal";
  * pointent la base sur un port fermé, et le piège sur `fetch`, armé avant le
  * premier import, reste le dernier rempart.
  *
- *   npm run verify:abus
+ *   npm run verifier:abus
  */
 
 const tentativesReseau: string[] = [];

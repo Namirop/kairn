@@ -115,7 +115,7 @@ pure et testée qui dit _pourquoi_, une fois dans le `where` de l'instruction SQ
 Sans la seconde, deux webhooks traités en parallèle liraient tous les deux l'ancienne valeur et le
 plus vieux gagnerait une fois sur deux. Cette garantie-là n'est pas dans le TypeScript, elle est
 dans l'atomicité de Postgres — et c'est pour ça qu'elle se vérifie contre une vraie base
-(`npm run verify:abonnement`).
+(`npm run verifier:abonnement`).
 
 **3. Les codes de retour parlent à Stripe**, qui relance pendant trois jours ce qu'il n'a pas
 réussi à livrer. `400` dit « n'insiste pas, ta requête est mauvaise » ; `500` dit « réessaie, c'est

@@ -12,7 +12,7 @@ import "dotenv/config";
  * Le décompte se fait sur un jour sentinelle très éloigné, jamais sur
  * aujourd'hui : la vérification ne doit pas consommer de vraies places.
  *
- *   npm run verify:ai
+ *   npm run verifier:ai
  */
 
 const JOUR_SENTINELLE = new Date("2999-01-01T12:00:00.000Z");

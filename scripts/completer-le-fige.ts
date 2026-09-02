@@ -25,8 +25,8 @@ appliquerCapDuBanc();
  * de `fige.ts` reprenne les dépôts inchangés du précédent. Un rejeu ordinaire
  * (`eval:rejeu`) suit ensuite si on veut regénérer proprement l'ensemble.
  *
- *   MOCK_AI=false npm run eval:completer                 # le plan
- *   MOCK_AI=false npm run eval:completer -- --emettre    # complétion réelle
+ *   MOCK_AI=false npm run evaluer:completer                 # le plan
+ *   MOCK_AI=false npm run evaluer:completer -- --emettre    # complétion réelle
  *
  * Comme `eval:generation`, il exige `MOCK_AI=false` explicitement et ne
  * dépense qu'à l'ajout de `--emettre`.

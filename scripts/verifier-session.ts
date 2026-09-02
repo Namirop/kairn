@@ -13,7 +13,7 @@ import { conclure, record } from "./verification/journal";
  * `enregistrerRevision`. Aucun appel modèle n'est nécessaire : le moteur ne
  * dépend pas du modèle, et c'est justement ce que cette phase doit démontrer.
  *
- *   npm run verify:session
+ *   npm run verifier:session
  */
 
 const tentativesReseau: string[] = [];

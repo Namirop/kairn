@@ -8,7 +8,7 @@ import { conclure, expectFailure, record } from "./verification/journal";
  * toute tentative de sortie réseau vers l'API lève au lieu de partir. Il vérifie
  * ensuite le mode mock, l'interrupteur et le plafond journalier.
  *
- *   npm run verify:ai
+ *   npm run verifier:ai
  */
 
 const networkAttempts: string[] = [];

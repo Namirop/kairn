@@ -9,6 +9,11 @@ import { SYSTEM_DOUBLON } from "./evaluation/juges/doublon";
 import { SYSTEM_RESIDU } from "./evaluation/juges/residu";
 import { BANDEAU_DE_CAMPAGNE, BUDGET_SORTIE_CAMPAGNE } from "./evaluation/openrouter/campagne";
 import {
+  /**
+   * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
+   * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
+   * « Les commandes retirées ».
+   */
   CHALLENGERS,
   JUGE_PRINCIPAL,
   REFERENCE,

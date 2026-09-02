@@ -20,11 +20,11 @@ appliquerCapDuBanc();
  * `MOCK_AI=false`, `AI_ENABLED=true`, et un gate `--emettre` pour ne rien payer
  * sans le vouloir.
  *
- *   npm run eval:mesures                       # signaux seuls, aucun appel
- *   npm run eval:mesures -- --emettre          # signaux + juges (dépense)
- *   npm run eval:mesures -- --calibrer         # sans plancher : les listes triées
- *   npm run eval:mesures -- --fige <chemin>    # un figé précis
- *   npm run eval:mesures -- --depot 15,23      # restreint à des dépôts
+ *   npm run evaluer:mesures                       # signaux seuls, aucun appel
+ *   npm run evaluer:mesures -- --emettre          # signaux + juges (dépense)
+ *   npm run evaluer:mesures -- --calibrer         # sans plancher : les listes triées
+ *   npm run evaluer:mesures -- --fige <chemin>    # un figé précis
+ *   npm run evaluer:mesures -- --depot 15,23      # restreint à des dépôts
  *
  * Coût des juges : ~30 appels Haiku pour le corpus au 18 août, soit quelques
  * dizaines de centimes. Il tombera à ~130 appels et 0,40 $ le jour où les

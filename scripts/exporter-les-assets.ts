@@ -6,7 +6,7 @@ import { symboleSeul, symboleSurPastille } from "@/lib/design/symbole-svg";
 /**
  * Produit les fichiers de marque qui ne suivent aucun jeton.
  *
- * `npm run assets`. À relancer quand la géométrie des pierres change, ou quand la
+ * `npm run exporter:assets`. À relancer quand la géométrie des pierres change, ou quand la
  * graine du logo change — c'est-à-dire jamais, mais la commande existe pour que
  * personne n'ait à rouvrir un outil de dessin.
  *

@@ -18,7 +18,7 @@ import { conclure, record } from "./verification/journal";
  * L'enjeu est un mois payé qui disparaît sans un bruit : ni erreur, ni
  * réclamation, juste un compte retombé à trente concepts.
  *
- *   npm run verify:abonnement
+ *   npm run verifier:abonnement
  */
 
 const COMPTE = "verification-abonnement";

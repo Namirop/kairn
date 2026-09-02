@@ -6,6 +6,12 @@ import { prisma } from "@/lib/db/client";
 import { startOfUtcDay } from "@/lib/db/ai-call";
 
 /**
+ * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
+ * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
+ * « Les commandes retirées ».
+ */
+
+/**
  * Validation staging — la bascule Luna → Sonnet sert quand Luna tombe.
  *
  * On force un échec du pont OpenRouter en pointant `AI_MODEL` vers un

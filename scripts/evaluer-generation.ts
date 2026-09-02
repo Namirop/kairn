@@ -19,9 +19,9 @@ appliquerCapDuBanc();
  * `MOCK_AI=false` explicitement, annonce ce qu'il va émettre, et ne part qu'à
  * l'appel de `--emettre` :
  *
- *   MOCK_AI=false npm run eval:generation                  # le plan
- *   MOCK_AI=false npm run eval:generation -- --emettre     # le passage complet
- *   MOCK_AI=false npm run eval:rejeu -- --emettre          # le rejeu du dernier figé
+ *   MOCK_AI=false npm run evaluer:generation                  # le plan
+ *   MOCK_AI=false npm run evaluer:generation -- --emettre     # le passage complet
+ *   MOCK_AI=false npm run evaluer:rejeu -- --emettre          # le rejeu du dernier figé
  *
  * `--depot <fragments>` restreint aux dépôts dont le nom contient l'un de ces
  * fragments, séparés par des virgules ; `--rejeu <chemin>` désigne un figé

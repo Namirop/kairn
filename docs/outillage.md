@@ -122,10 +122,34 @@ Le préfixe dit le registre, pas le sujet :
 - `verify:` — une vérification qui tourne seule, sans clé ni service tiers.
 - `eprouver:` — une épreuve contre un vrai service, lancée à la main.
 
-**L'état actuel du dépôt ne respecte pas encore cette règle** : `verify:` et `verifier:` coexistent,
-`valider:`, `eval:`, `lancer:` et `planifier:` viennent de chantiers clos, et `verify:` est le seul
-anglicisme d'un dépôt entièrement en français. C'est un rangement identifié, pas un principe
-contredit.
+- `evaluer:` — le banc d'évaluation de la génération, qui mesure et dépense.
+- `exporter:` — ce qui sort du dépôt : images, marque.
+
+Deux commandes restent sans préfixe parce qu'elles ne forment pas un registre à elles seules :
+`lire:cache` et `depot:code`.
+
+---
+
+## Les commandes retirées
+
+Le 2 septembre 2026, huit commandes sont sorties du `package.json` en application de la règle
+ci-dessus. **Leurs fichiers sont restés dans `scripts/`**, chacun avec une note en tête qui renvoie
+ici. On les relance à la main :
+
+```bash
+npx tsx scripts/<le-fichier>.ts
+```
+
+| Commande retirée                          | Pourquoi                                      |
+| ----------------------------------------- | --------------------------------------------- |
+| `planifier:campagne`, `lancer:campagne`   | Campagne d'évaluation de modèles n°1, close   |
+| `planifier:campagne2`, `lancer:campagne2` | Campagne n°2, close — le modèle est arbitré   |
+| `valider:juge`                            | Le juge de ces campagnes                      |
+| `valider:staging`, `valider:bascule`      | Portage vers OpenRouter, livré                |
+| `eval:ablation`                           | Épreuve de l'instrument de mesure, concluante |
+
+Ce ne sont pas des suppressions : une campagne suivante remettra ses deux lignes. Ce qui a été
+retiré, c'est leur présence dans une liste qu'on lit pour savoir ce qu'on peut faire aujourd'hui.
 
 ---
 

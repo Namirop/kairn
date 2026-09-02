@@ -12,7 +12,7 @@ import type { MesuresDuDepot, Paire, PaireDeQuestions, Rapproche } from "./signa
  *
  * Séparé de `signaux.ts`, et ce n'est pas de la cérémonie : les signaux se
  * calculent sans seuil, et doivent pouvoir continuer à se calculer sans seuil.
- * C'est ce qui permet de recalibrer — `npm run eval:mesures -- --calibrer`
+ * C'est ce qui permet de recalibrer — `npm run evaluer:mesures -- --calibrer`
  * rend les mêmes listes, triées, sans rien signaler. Le jour où le modèle
  * d'embedding change, les planchers sautent et la géométrie, elle, ne bouge pas.
  *

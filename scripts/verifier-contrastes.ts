@@ -15,7 +15,7 @@ import { conclure, record } from "./verification/journal";
  * seule « roche » est sombre. Un composant écrit pour l'une et posé sur l'autre
  * y était invisible, et le nom suffisait à s'y tromper.
  *
- *   npm run verify:contrastes
+ *   npm run verifier:contrastes
  */
 
 const AA_TEXTE = 4.5;

@@ -10,7 +10,7 @@ import { conclure, record } from "./verification/journal";
  * import : une sortie réseau vers l'API ferait échouer la vérification au lieu
  * de coûter quelque chose.
  *
- *   npm run verify:ingestion
+ *   npm run verifier:ingestion
  */
 
 const tentativesReseau: string[] = [];

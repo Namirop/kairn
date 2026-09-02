@@ -5,6 +5,10 @@ prisma/migrations
 public
 package-lock.json
 
+# Cache du hook de design : généré, hors du dépôt, et il faisait échouer
+# `format:check` sur un fichier que personne n'écrit à la main.
+.impeccable/
+
 # Documents de Romain : leur mise en forme lui appartient.
 CLAUDE.md
 phase-0-prompt.md

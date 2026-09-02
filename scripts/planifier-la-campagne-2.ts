@@ -11,6 +11,12 @@ import {
 import { conceptsQuestionnables, estimerColonne } from "./evaluation/campagne/plan-questions";
 
 /**
+ * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
+ * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
+ * « Les commandes retirées ».
+ */
+
+/**
  * Le plan à sec de la campagne 2 — génération de questions sur les concepts
  * figés du 11h58, par les deux finalistes désignés à l'arrêt 2 de la campagne
  * 1 (Gemini 3.7 Flash et GPT-5.6 Luna), puis juge Haiku via OpenRouter pour

@@ -26,6 +26,11 @@ import {
   type ScoreDepot,
 } from "./evaluation/campagne/execution";
 import {
+  /**
+   * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
+   * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
+   * « Les commandes retirées ».
+   */
   rendreLaCorrespondance,
   rendreLeTableauAveugle,
   type Etiquette,
