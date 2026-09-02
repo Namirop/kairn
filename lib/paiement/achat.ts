@@ -1,9 +1,12 @@
 import { ROUTES } from "@/lib/auth/routes";
-import type { CadenceStripe } from "@/lib/domain/rapport-de-stripe";
+import { lireDossierStripe } from "@/lib/db/ecriture-de-labonnement";
+import { abonnementVivant, type CadenceStripe } from "@/lib/domain/rapport-de-stripe";
 import { adresseDeLApp } from "@/lib/site/adresse-de-lapp";
 import { prixDeLaCadence } from "./catalogue";
 import { stripe } from "./client";
 import { clientStripeDuCompte } from "./dossier-client";
+import { AbonnementDejaOuvertError } from "./erreurs";
+import { lireLeRapport } from "./rapport";
 
 /**
  * Ouvrir un paiement, et rendre l'adresse où l'envoyer.
@@ -27,10 +30,37 @@ import { clientStripeDuCompte } from "./dossier-client";
 export const PARAMETRE_DE_RETOUR = "paiement";
 export const RETOUR_ACCEPTE = "fait";
 
+/**
+ * Refuse d'ouvrir un paiement à qui en a déjà un.
+ *
+ * L'écran ne montre pas le bouton d'achat à un compte abonné — mais un écran
+ * n'est pas une garantie. Deux onglets ouverts sur les réglages, dont l'un
+ * affiche encore l'état d'avant, suffisent : les deux paiements aboutissent,
+ * Stripe crée deux abonnements pour le même client, et notre ligne n'en retient
+ * qu'un. Le premier devient alors invisible pour Kairn tout en continuant de
+ * prélever tous les mois.
+ *
+ * La garde est ici et pas dans l'action, parce que c'est la fonction qui vend :
+ * tout ce qui ouvre un paiement doit la traverser, y compris un script.
+ */
+async function refuserSiDejaAbonne(userId: string): Promise<void> {
+  const { abonnementId } = await lireDossierStripe(userId);
+
+  if (!abonnementId) return;
+
+  const abonnement = await stripe().subscriptions.retrieve(abonnementId);
+
+  if (abonnementVivant(lireLeRapport(abonnement).statut)) {
+    throw new AbonnementDejaOuvertError(abonnementId);
+  }
+}
+
 export async function ouvrirLePaiement(
   compte: { id: string; email: string; name: string },
   cadence: CadenceStripe,
 ): Promise<string> {
+  await refuserSiDejaAbonne(compte.id);
+
   const client = await clientStripeDuCompte(compte);
   const prix = await prixDeLaCadence(cadence);
   const app = adresseDeLApp();

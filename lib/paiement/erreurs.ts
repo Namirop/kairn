@@ -76,3 +76,19 @@ export class AucunAbonnementError extends PaiementError {
     super("Ce compte n'a pas d'abonnement en cours.");
   }
 }
+
+/**
+ * Un achat a été demandé sur un compte qui a déjà un abonnement vivant.
+ *
+ * Le symétrique du précédent, et le plus coûteux des deux : arrêter deux fois
+ * ne fait rien, payer deux fois fait deux abonnements. L'écran n'affiche pas le
+ * bouton dans ce cas, donc y arriver suppose un onglet en retard ou un second
+ * clic — deux choses ordinaires, dont aucune ne doit pouvoir débiter deux fois.
+ */
+export class AbonnementDejaOuvertError extends PaiementError {
+  readonly code = "PAIEMENT_ABONNEMENT_DEJA_OUVERT";
+
+  constructor(abonnementId: string) {
+    super(`Ce compte a déjà l'abonnement ${abonnementId}.`);
+  }
+}

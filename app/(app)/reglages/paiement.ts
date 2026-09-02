@@ -8,7 +8,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { prendreUnGeste } from "@/lib/db/limite-de-gestes";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { ouvrirLePaiement } from "@/lib/paiement/achat";
-import { PaiementError } from "@/lib/paiement/erreurs";
+import { AbonnementDejaOuvertError, PaiementError } from "@/lib/paiement/erreurs";
 import { arreterLAbonnement, reprendreLAbonnement } from "@/lib/paiement/resiliation";
 
 /**
@@ -43,6 +43,15 @@ const SESSION_EXPIREE = "Ta session a expiré. Reconnecte-toi.";
 const ECHEC = "Le paiement n'a pas pu s'ouvrir. Réessaie dans un instant.";
 
 /**
+ * Ce qu'on dit à qui paie une seconde fois.
+ *
+ * Ça n'arrive pas en cliquant : l'écran ne montre le bouton qu'à un compte sans
+ * abonnement. Ça arrive avec un onglet resté ouvert sur l'état d'avant — et la
+ * bonne réponse est alors de le rafraîchir, pas de réessayer.
+ */
+const DEJA_ABONNE = "Ton abonnement est déjà ouvert. Recharge la page pour voir où il en est.";
+
+/**
  * Ouvre la page de paiement et y envoie.
  *
  * La redirection est hors du `try` : `redirect()` fonctionne en levant une
@@ -70,9 +79,13 @@ export async function payerAction(
   try {
     adresse = await ouvrirLePaiement(utilisateur, cadence.data);
   } catch (erreur) {
-    console.error("[paiement] ouverture refusée", { userId: utilisateur.id, erreur });
+    console.error("[paiement] ouverture refusée", {
+      userId: utilisateur.id,
+      code: erreur instanceof PaiementError ? erreur.code : "INCONNU",
+      erreur,
+    });
 
-    return { erreur: ECHEC };
+    return { erreur: erreur instanceof AbonnementDejaOuvertError ? DEJA_ABONNE : ECHEC };
   }
 
   redirect(adresse);
