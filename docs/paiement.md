@@ -177,9 +177,14 @@ Noter que **résilier ne supprime rien** : ça lève un drapeau (`cancel_at_peri
 l'abonnement courir jusqu'à son terme. C'est la date qui coupe, pas le geste — donc reprendre est
 un simple retour en arrière, sans nouveau paiement.
 
-Deux emails de Stripe comptent double tant que le portail n'est pas branché, et ils ne se règlent
-**que** dans le tableau de bord, jamais par l'API : les reçus de paiement, et surtout la relance en
-cas d'échec de carte, qui porte le seul lien permettant de la mettre à jour.
+La configuration du portail est écrite dans le code, pas réglée dans le tableau de bord, et elle se
+retrouve par une métadonnée plutôt que par un identifiant — même raison que les `lookup_key` du
+catalogue. `npm run eprouver:paiement -- portail` la relit depuis Stripe et constate le partage :
+c'est le seul moyen de savoir qu'elle n'a pas été modifiée entre-temps depuis le tableau de bord.
+
+Deux emails de Stripe restent utiles, et ils ne se règlent **que** dans le tableau de bord, jamais
+par l'API : les reçus de paiement, et la relance en cas d'échec de carte. La seconde reste le seul
+chemin pour qui ne revient pas de lui-même sur l'application.
 
 ---
 
