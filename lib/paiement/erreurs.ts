@@ -92,3 +92,18 @@ export class AbonnementDejaOuvertError extends PaiementError {
     super(`Ce compte a déjà l'abonnement ${abonnementId}.`);
   }
 }
+
+/**
+ * Le portail a été demandé pour un compte qui n'a pas de dossier Stripe.
+ *
+ * Un compte qui n'a jamais approché le paiement n'a pas de client chez Stripe,
+ * donc rien à voir dans un portail — pas de facture, pas de carte. L'écran ne
+ * propose pas le lien dans ce cas ; y arriver suppose un onglet en retard.
+ */
+export class AucunDossierStripeError extends PaiementError {
+  readonly code = "PAIEMENT_AUCUN_DOSSIER";
+
+  constructor() {
+    super("Ce compte n'a pas de dossier chez Stripe.");
+  }
+}

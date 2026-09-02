@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import {
   type EtatDuPaiement,
   payerAction,
+  portailAction,
   renouvellementAction,
 } from "@/app/(app)/reglages/paiement";
 import { Button } from "@/components/ui/button";
@@ -16,9 +17,9 @@ import { PRIX_ANNUEL, PRIX_MENSUEL } from "@/lib/domain/prix";
  *
  * À part du panneau qui les héberge, et pas seulement pour tenir une longueur :
  * ce sont les seuls éléments de tout le produit qui ouvrent une page de
- * paiement ou résilient un abonnement. Les garder dans un fichier qui ne fait
- * que ça rend visible, à la relecture comme à la revue, tout ajout d'un
- * troisième geste d'argent.
+ * paiement, résilient un abonnement ou envoient chez Stripe. Les garder dans un
+ * fichier qui ne fait que ça rend visible, à la relecture comme à la revue, tout
+ * ajout d'un geste d'argent.
  */
 
 /** Les deux cadences. Deux boutons, pas deux colonnes : le choix est fait, il reste à payer. */
@@ -101,6 +102,34 @@ export function Renouvellement({ resilieALaFin }: { resilieALaFin: boolean }) {
       >
         {resilieALaFin ? "Reprendre l'abonnement" : "Arrêter le renouvellement"}
       </Button>
+
+      <Message erreur={etat.erreur} />
+    </form>
+  );
+}
+
+/**
+ * Le seul lien qui sorte du produit.
+ *
+ * Discret et non un bouton : ce n'est pas ce qu'on vient faire sur cet écran.
+ * Quelqu'un l'ouvre parce que sa carte a expiré ou qu'il lui faut une facture —
+ * deux fois par an, et il sait déjà ce qu'il cherche.
+ *
+ * Le libellé nomme les deux choses qu'on y trouve, parce que c'est tout ce qu'on
+ * y trouve : la configuration du portail refuse le reste.
+ */
+export function Portail() {
+  const [etat, action, enCours] = useActionState<EtatDuPaiement, FormData>(portailAction, {});
+
+  return (
+    <form action={action}>
+      <button
+        type="submit"
+        disabled={enCours}
+        className="rounded-galet text-petit text-stone-500 underline-offset-4 transition-colors hover:text-stone-900 hover:underline focus-visible:underline disabled:opacity-60"
+      >
+        Factures et moyen de paiement
+      </button>
 
       <Message erreur={etat.erreur} />
     </form>

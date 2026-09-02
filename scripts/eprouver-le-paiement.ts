@@ -9,6 +9,7 @@ import { stripe } from "@/lib/paiement/client";
 import { lireConfigDePaiement } from "@/lib/paiement/config";
 import { clientStripeDuCompte } from "@/lib/paiement/dossier-client";
 import { fermerLAbonnementDuCompte } from "@/lib/paiement/fermeture-du-compte";
+import { ouvrirLePortail } from "@/lib/paiement/portail";
 import { lireLeRapport } from "@/lib/paiement/rapport";
 import { arreterLAbonnement, reprendreLAbonnement } from "@/lib/paiement/resiliation";
 import { comparerAvecStripe } from "./verification/etat-du-paiement";
@@ -32,12 +33,13 @@ import { conclure, record } from "./verification/journal";
  *   npm run eprouver:paiement -- ouvrir --compte=moi@exemple.fr
  *   (payer avec 4242 4242 4242 4242, une date future, n'importe quel CVC)
  *   npm run eprouver:paiement -- etat --compte=moi@exemple.fr
+ *   npm run eprouver:paiement -- portail --compte=moi@exemple.fr
  *   npm run eprouver:paiement -- arreter --compte=moi@exemple.fr
  *   npm run eprouver:paiement -- reprendre --compte=moi@exemple.fr
  *   npm run eprouver:paiement -- nettoyer --compte=moi@exemple.fr
  */
 
-const GESTES = ["ouvrir", "etat", "arreter", "reprendre", "nettoyer"] as const;
+const GESTES = ["ouvrir", "etat", "portail", "arreter", "reprendre", "nettoyer"] as const;
 
 type Geste = (typeof GESTES)[number];
 
@@ -128,6 +130,51 @@ async function ouvrir(compte: Compte): Promise<void> {
   console.info(`\nPayer ici, avec la carte 4242 4242 4242 4242 :\n${adresse}\n`);
 }
 
+/**
+ * Ouvre le portail, et vérifie qu'il ne propose que ce qu'on lui a laissé.
+ *
+ * Le partage des gestes est une décision de produit — résilier dans Kairn, la
+ * carte chez Stripe — et elle vit dans un objet de configuration qui dort chez
+ * eux. Rien dans le dépôt ne garantit qu'il n'a pas été modifié depuis le
+ * tableau de bord : seule une lecture le dit.
+ */
+async function portail(compte: Compte): Promise<void> {
+  const adresse = await ouvrirLePortail(compte.id);
+
+  record("Le portail s'ouvre pour ce compte", adresse.startsWith("https://"), adresse);
+
+  const configurations = await stripe().billingPortal.configurations.list({
+    active: true,
+    limit: 100,
+  });
+  const notre = configurations.data.find((c) => c.metadata?.projet === "portail-kairn");
+
+  if (!notre) {
+    record("Une configuration porte notre marque", false, "aucune trouvée");
+
+    return;
+  }
+
+  const f = notre.features;
+
+  record(
+    "Le portail montre les factures et laisse changer de carte",
+    f.invoice_history.enabled && f.payment_method_update.enabled,
+    `factures ${f.invoice_history.enabled}, carte ${f.payment_method_update.enabled}`,
+  );
+
+  record(
+    "Le portail ne résilie ni ne change d'offre — ces gestes restent dans Kairn",
+    !f.subscription_cancel.enabled && !f.subscription_update.enabled,
+    `résiliation ${f.subscription_cancel.enabled}, changement d'offre ${f.subscription_update.enabled}`,
+  );
+
+  console.info(`
+Le portail est ici :
+${adresse}
+`);
+}
+
 async function main(): Promise<string> {
   refuserLaProduction();
 
@@ -144,6 +191,11 @@ async function main(): Promise<string> {
       await comparerAvecStripe(compte.id);
 
       return "Notre ligne et celle de Stripe disent la même chose.";
+
+    case "portail":
+      await portail(compte);
+
+      return "Le portail s'ouvre, et n'ouvre que ce qu'on lui laisse.";
 
     case "arreter":
       await arreterLAbonnement(compte.id);

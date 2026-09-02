@@ -1,4 +1,4 @@
-import { Achat, Renouvellement } from "@/components/reglages/gestes-de-loffre";
+import { Achat, Portail, Renouvellement } from "@/components/reglages/gestes-de-loffre";
 import { PLAFOND_PAYANT, type Plan } from "@/lib/domain/plafond-du-plan";
 
 /**
@@ -27,9 +27,25 @@ type Props = {
   ouvert: boolean;
   /** On revient de Stripe, paiement accepté — le webhook n'est peut-être pas encore passé. */
   retourDePaiement: boolean;
+  /**
+   * Le compte a un dossier chez Stripe.
+   *
+   * Vrai dès qu'il a approché le paiement une fois, même sans jamais avoir payé.
+   * C'est ce qui décide d'afficher le portail : sans dossier, il n'y a ni
+   * facture ni carte à y voir, et le lien mènerait à une erreur.
+   */
+  dossier: boolean;
 };
 
-export function TonOffre({ plan, plafond, terme, resilieALaFin, ouvert, retourDePaiement }: Props) {
+export function TonOffre({
+  plan,
+  plafond,
+  terme,
+  resilieALaFin,
+  ouvert,
+  retourDePaiement,
+  dossier,
+}: Props) {
   const paye = plan !== "GRATUIT";
 
   return (
@@ -57,6 +73,12 @@ export function TonOffre({ plan, plafond, terme, resilieALaFin, ouvert, retourDe
         <div className="mt-pas-6">
           {paye ? <Renouvellement resilieALaFin={resilieALaFin} /> : <Achat ouvert={ouvert} />}
         </div>
+
+        {dossier && ouvert ? (
+          <div className="mt-pas-4">
+            <Portail />
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -69,7 +91,7 @@ function Etat({
   resilieALaFin,
   ouvert,
   retourDePaiement,
-}: Omit<Props, "plan" | "plafond"> & { paye: boolean }) {
+}: Omit<Props, "plan" | "plafond" | "dossier"> & { paye: boolean }) {
   if (paye && resilieALaFin) {
     return (
       <>

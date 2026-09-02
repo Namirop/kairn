@@ -8,11 +8,12 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { prendreUnGeste } from "@/lib/db/limite-de-gestes";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { ouvrirLePaiement } from "@/lib/paiement/achat";
+import { ouvrirLePortail } from "@/lib/paiement/portail";
 import { AbonnementDejaOuvertError, PaiementError } from "@/lib/paiement/erreurs";
 import { arreterLAbonnement, reprendreLAbonnement } from "@/lib/paiement/resiliation";
 
 /**
- * Les trois gestes d'argent : payer, arrêter, reprendre.
+ * Les quatre gestes d'argent : payer, arrêter, reprendre, et ouvrir le portail.
  *
  * Ils vivent à part des autres gestes du compte parce qu'ils touchent à une
  * carte bancaire, et qu'un import distrait ne doit pas pouvoir mettre l'un
@@ -52,6 +53,14 @@ const ECHEC = "Le paiement n'a pas pu s'ouvrir. Réessaie dans un instant.";
 const DEJA_ABONNE = "Ton abonnement est déjà ouvert. Recharge la page pour voir où il en est.";
 
 /**
+ * Ce qu'on dit quand le portail ne s'ouvre pas.
+ *
+ * Le portail ne change aucun droit — on y consulte des factures et on y met une
+ * carte à jour — donc son échec n'a rien d'urgent à annoncer. Il se réessaie.
+ */
+const PORTAIL_FERME = "Tes factures ne s'ouvrent pas pour l'instant. Réessaie dans un instant.";
+
+/**
  * Ouvre la page de paiement et y envoie.
  *
  * La redirection est hors du `try` : `redirect()` fonctionne en levant une
@@ -86,6 +95,39 @@ export async function payerAction(
     });
 
     return { erreur: erreur instanceof AbonnementDejaOuvertError ? DEJA_ABONNE : ECHEC };
+  }
+
+  redirect(adresse);
+}
+
+/**
+ * Envoie au portail Stripe, où vivent les factures et le moyen de paiement.
+ *
+ * Ces deux-là seulement : la configuration du portail refuse explicitement la
+ * résiliation et le changement d'offre, qui se font dans Kairn. Comme pour
+ * l'achat, la redirection est hors du `try`.
+ */
+export async function portailAction(): Promise<EtatDuPaiement> {
+  const utilisateur = await getCurrentUser();
+
+  if (!utilisateur) return { erreur: SESSION_EXPIREE };
+
+  if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
+    return { erreur: TROP_VITE };
+  }
+
+  let adresse: string;
+
+  try {
+    adresse = await ouvrirLePortail(utilisateur.id);
+  } catch (erreur) {
+    console.error("[paiement] portail refusé", {
+      userId: utilisateur.id,
+      code: erreur instanceof PaiementError ? erreur.code : "INCONNU",
+      erreur,
+    });
+
+    return { erreur: PORTAIL_FERME };
   }
 
   redirect(adresse);

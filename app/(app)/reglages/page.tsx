@@ -16,6 +16,7 @@ import { lireLOffreDuCompte } from "@/lib/db/abonnement";
 import { lireReglages } from "@/lib/db/user-settings";
 import { termeLisible } from "@/lib/domain/terme-lisible";
 import { PARAMETRE_DE_RETOUR, RETOUR_ACCEPTE } from "@/lib/paiement/achat";
+import { lireDossierStripe } from "@/lib/db/ecriture-de-labonnement";
 import { paiementOuvert } from "@/lib/paiement/config";
 
 export const metadata: Metadata = { title: "Réglages" };
@@ -57,9 +58,12 @@ export default async function PageReglages({ searchParams }: Parametres) {
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
-  const [reglages, offre, parametres] = await Promise.all([
+  const [reglages, offre, dossier, parametres] = await Promise.all([
     lireReglages(utilisateur.id),
     lireLOffreDuCompte(utilisateur.id),
+    // Un dossier chez Stripe, même sans abonnement en cours : c'est ce qui dit
+    // s'il y a des factures et une carte à aller voir.
+    lireDossierStripe(utilisateur.id),
     searchParams,
   ]);
 
@@ -120,6 +124,7 @@ export default async function PageReglages({ searchParams }: Parametres) {
           resilieALaFin={offre.resilieALaFin}
           ouvert={paiementOuvert()}
           retourDePaiement={parametres[PARAMETRE_DE_RETOUR] === RETOUR_ACCEPTE}
+          dossier={dossier.clientId !== null}
         />
 
         {/* Le seul endroit du produit où l'on peut dire qu'autre chose qu'une
