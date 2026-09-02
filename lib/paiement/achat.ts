@@ -45,6 +45,18 @@ export async function ouvrirLePaiement(
     // rien passé, et l'écran n'a rien à raconter.
     cancel_url: `${app}${ROUTES.reglages}`,
     client_reference_id: compte.id,
+    // Le nom du titulaire, recopié du tunnel vers le client Stripe.
+    //
+    // Kairn ne demande pas de nom à l'inscription — c'est voulu, on ouvre un
+    // compte avec une adresse et rien d'autre. Mais Stripe, lui, demande le nom
+    // du titulaire de la carte : sans cette ligne il le garde pour le moyen de
+    // paiement, et les factures sortent au nom de personne. Ça ne gêne pas qui
+    // paie sept euros pour lui-même ; ça gêne qui veut passer l'abonnement en
+    // frais professionnels.
+    //
+    // « auto » plutôt qu'un champ de plus dans le tunnel : l'information est
+    // déjà saisie, il ne manquait que de dire où la ranger.
+    customer_update: { name: "auto" },
     // Portée par l'abonnement lui-même, donc présente sur tous les événements
     // qu'il produira. Le rattachement, lui, passe par le client Stripe, qui est
     // à nous : ces métadonnées servent au diagnostic, pas à la décision.
