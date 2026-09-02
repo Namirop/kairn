@@ -1,3 +1,4 @@
+import { AttenteDuPaiement } from "@/components/reglages/attente-du-paiement";
 import { Achat, Portail, Renouvellement } from "@/components/reglages/gestes-de-loffre";
 import { PLAFOND_PAYANT, type Plan } from "@/lib/domain/plafond-du-plan";
 
@@ -74,6 +75,12 @@ export function TonOffre({
           {paye ? <Renouvellement resilieALaFin={resilieALaFin} /> : <Achat ouvert={ouvert} />}
         </div>
 
+        {retourDePaiement && !paye ? (
+          <div className="mt-pas-3">
+            <AttenteDuPaiement />
+          </div>
+        ) : null}
+
         {dossier && ouvert ? (
           <div className="mt-pas-4">
             <Portail />
@@ -101,6 +108,10 @@ function Etat({
     );
   }
 
+  if (paye && retourDePaiement) {
+    return <>Ton paiement est passé. Ton offre court jusqu&apos;au {terme}.</>;
+  }
+
   if (paye) return <>Renouvelé le {terme}. Tu peux arrêter quand tu veux.</>;
 
   // Le retour de Stripe et l'arrivée du webhook sont deux chemins distincts, et
@@ -108,7 +119,10 @@ function Etat({
   // vient de payer lit « Gratuit » et croit son paiement perdu.
   if (retourDePaiement) {
     return (
-      <>Ton paiement est passé. Il faut quelques secondes pour qu&apos;il arrive jusqu&apos;ici.</>
+      <>
+        Ton paiement est passé. Il faut quelques secondes pour qu&apos;il arrive jusqu&apos;ici —
+        cet écran se met à jour tout seul.
+      </>
     );
   }
 

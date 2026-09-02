@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { BlocJournal } from "@/components/administration/bloc-journal";
+import { BlocPaiement } from "@/components/administration/bloc-paiement";
 import { BlocReglages } from "@/components/administration/bloc-reglages";
 import { PageAdmin } from "@/components/administration/page-admin";
 import { exigerUnAdministrateur } from "@/lib/auth/garde-admin";
 import { lireLeJournal, lireLesReglagesPosés } from "@/lib/db/reglages";
+import { lireLEtatDuPaiement } from "@/lib/paiement/etat-pour-ladministration";
 
 export const metadata: Metadata = { title: "Pilotage · Administration" };
 
@@ -28,7 +30,13 @@ export const dynamic = "force-dynamic";
 export default async function PagePilotage() {
   await exigerUnAdministrateur();
 
-  const [reglages, journal] = await Promise.all([lireLesReglagesPosés(), lireLeJournal()]);
+  const [reglages, journal, paiement] = await Promise.all([
+    lireLesReglagesPosés(),
+    lireLeJournal(),
+    // Le seul bloc de cet écran qui ne se manœuvre pas : `PAIEMENT_LIVE` reste
+    // un geste chez l'hébergeur, et ce qui est ici sert à savoir où l'on est.
+    lireLEtatDuPaiement(),
+  ]);
 
   // Les valeurs d'environnement voyagent jusqu'au formulaire pour qu'un champ
   // vide veuille dire quelque chose. Aucune n'est un secret : ce sont les six
@@ -49,6 +57,7 @@ export default async function PagePilotage() {
       contexte="Les réglages du modèle. Ce qui est posé ici s'applique au prochain appel, sans redéploiement ; un champ vide laisse la variable d'environnement décider."
     >
       <BlocReglages poses={reglages} environnement={environnement} />
+      <BlocPaiement etat={paiement} />
       <BlocJournal lignes={journal} />
     </PageAdmin>
   );

@@ -89,3 +89,30 @@ export function paiementOuvert(): boolean {
     return false;
   }
 }
+
+/** Dans quel monde le paiement parle, ou s'il ne parle pas. */
+export type ModeDePaiement = "ferme" | "test" | "live";
+
+/**
+ * L'état du paiement, pour l'écran qui le regarde.
+ *
+ * **Il se lit, il ne se change pas.** `PAIEMENT_LIVE` est le dernier verrou
+ * avant d'encaisser du vrai argent avec une vraie clé : le rendre pilotable
+ * depuis un écran web le rendrait franchissable d'un clic distrait, pour un
+ * geste qu'on ne pose qu'une fois dans la vie d'un produit. C'est la même règle
+ * que celle déjà écrite pour `ADMIN_EMAILS` — la liste qui décide qui ouvre
+ * l'écran d'administration ne se modifie pas depuis cet écran.
+ *
+ * Ce qui manquait n'était pas l'interrupteur, c'était de savoir où l'on est.
+ */
+export function modeDePaiement(): ModeDePaiement {
+  try {
+    const { cleSecrete } = lireConfigDePaiement();
+
+    return CLE_DE_PRODUCTION.test(cleSecrete) ? "live" : "test";
+  } catch {
+    // Même silence volontaire que `paiementOuvert()`, et pour la même raison :
+    // un paiement fermé est un état normal du produit, pas un incident.
+    return "ferme";
+  }
+}
