@@ -110,6 +110,10 @@ Les valeurs réelles vivent dans `.env`, qui n'est pas versionné. `.env.example
 Ce que chacune vaut en production — et pourquoi certaines se régénèrent au lieu de se recopier —
 est dans `docs/environnements.md`.
 
+Le paiement a ses propres variables et sa propre logique : `docs/paiement.md` dit ce que Stripe
+fait, ce qu'on ne lui laisse pas faire, pourquoi le webhook est le seul chemin qui accorde un
+droit, et où en est le dossier TVA.
+
 ## Scripts
 
 | Commande                    | Effet                                                     |
