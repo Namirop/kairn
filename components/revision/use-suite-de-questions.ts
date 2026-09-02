@@ -200,7 +200,12 @@ export function useSuiteDeQuestions({
       saisir: setSaisie,
       verdict,
       attendu,
-      comble: verdict === null ? saisie.trim() || null : attendu,
+      // Le trou porte la saisie tant qu'on cherche, puis le terme attendu dès
+      // qu'on ne cherche plus — vérification faite **ou pierre jetée**. Renoncer
+      // laissait le creux vide alors que la réponse s'affichait juste en
+      // dessous : on lisait le terme sans jamais voir la phrase juste, et c'est
+      // pourtant elle qu'on est venu apprendre.
+      comble: verdict === null && !jetee ? saisie.trim() || null : attendu,
       // La graine est l'identifiant de la question : l'ordre des pistes ne bouge
       // pas d'un affichage à l'autre, et le terme attendu ne tombe pas toujours
       // au même rang d'une question à l'autre.

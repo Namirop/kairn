@@ -75,7 +75,7 @@ export function FormulaireDeReglages({
 
         <Reglage
           nom="plafond"
-          intitule="Concepts par session"
+          intitule="Concepts par jour"
           explication={`De ${PLAFOND_MIN} à ${PLAFOND_MAX}. Au-delà, une session devient une corvée qu'on abandonne au milieu, et ce qui déborde n'est pas perdu : il reste dû, et revient en tête le lendemain.`}
           controle={
             <Input

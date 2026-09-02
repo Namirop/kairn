@@ -452,6 +452,47 @@
     background-color: var(--stone-400);
   }
 
+  /*
+    Les fins de ligne, réglées une fois pour toutes.
+
+    Le symptôme revenait sans cesse : un mot seul sur la dernière ligne d'un
+    paragraphe, un titre coupé en « trois mots / un mot ». Il avait été corrigé
+    six ou sept fois, à la main, au fil des écrans où on le remarquait — sur
+    deux cent quarante balises de texte du produit, onze portaient le garde-fou.
+    Corriger au cas par cas ne pouvait pas marcher : le défaut naît de chaque
+    nouvelle phrase écrite, pas des anciennes.
+
+    D'où une règle de base plutôt qu'une classe à ne pas oublier.
+
+    `balance` sur les titres : le navigateur y répartit les mots pour que les
+    lignes fassent la même longueur, ce qui est ce qu'on veut d'un titre court.
+    Il abandonne au-delà de quelques lignes, donc un titre long ne coûte rien.
+
+    `pretty` sur le texte courant : il ne cherche pas l'équilibre — ce serait
+    faux sur un paragraphe — mais il refuse la veuve, ce mot resté seul en bas
+    qui donne l'impression d'un texte mal coupé.
+
+    Une classe `text-balance` ou `text-pretty` posée sur un élément l'emporte
+    toujours : ces règles-ci sont le défaut, pas une contrainte.
+  */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  dt,
+  dd,
+  figcaption,
+  blockquote {
+    text-wrap: pretty;
+  }
+
   body {
     background-color: var(--surface-papier);
     color: var(--foreground);

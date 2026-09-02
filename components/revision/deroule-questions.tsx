@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { CarteQuestion } from "@/components/revision/carte-question";
 import { EnonceDeQuestion } from "@/components/revision/enonce-de-question";
 import { JeterLaPierre } from "@/components/revision/jeter-la-pierre";
+import { demandeUneProduction } from "@/lib/domain/geste-attendu";
 import { PierreJetee } from "@/components/revision/pierre-jetee";
 import { reponseDeSecours } from "@/components/revision/reponse-de-secours";
 import {
@@ -116,7 +117,12 @@ export function DerouleQuestions({
             onNoter={(note) => void suite.suivre(note)}
           />
 
-          {suite.engage ? null : <JeterLaPierre enCours={suite.enCours} onJeter={suite.jeter} />}
+          {/* Renoncer n'a de sens que là où il faut produire quelque chose —
+              un choix à cliquer, un terme à saisir. Sur une question ouverte,
+              « Voir la réponse » est déjà la sortie, et ne coûte rien. */}
+          {suite.engage || !demandeUneProduction(question) ? null : (
+            <JeterLaPierre enCours={suite.enCours} onJeter={suite.jeter} />
+          )}
         </>
       )}
 
