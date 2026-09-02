@@ -136,6 +136,7 @@ droit, et où en est le dossier TVA.
 | `npm run verifier:contrastes` | Mesure les ratios WCAG des couples posés par l'interface  |
 | `npm run verifier:abonnement` | Prouve qu'un abonnement ne remonte pas le temps           |
 | `npm run eprouver:paiement`   | Le parcours d'achat contre le vrai Stripe, en mode test   |
+| `npm run regenerer:questions` | Remet en file les questions d'un prompt qui a changé      |
 
 `npm run evaluer:generation` existe aussi : c'est le banc d'évaluation, décrit plus bas. C'est le
 seul script du dépôt qui émet de vrais appels, et il ne part pas sans qu'on le lui dise deux fois.

@@ -28,6 +28,7 @@
     "verifier:depot-anonyme": "tsx scripts/verifier-le-depot-anonyme.ts",
     "verifier:openrouter": "tsx scripts/verifier-openrouter.ts",
     "eprouver:paiement": "tsx scripts/eprouver-le-paiement.ts",
+    "regenerer:questions": "tsx scripts/regenerer-les-questions.ts",
     "evaluer:generation": "tsx scripts/evaluer-generation.ts",
     "evaluer:rejeu": "tsx scripts/evaluer-generation.ts --rejeu",
     "evaluer:completer": "tsx scripts/completer-le-fige.ts",
