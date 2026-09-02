@@ -134,6 +134,10 @@ est dans `docs/environnements.md`.
 `npm run eval:generation` existe aussi : c'est le banc d'évaluation, décrit plus bas. C'est le seul
 script du dépôt qui émet de vrais appels, et il ne part pas sans qu'on le lui dise deux fois.
 
+Ce tableau dit ce que font les commandes. **Le principe qui les gouverne est dans
+`docs/outillage.md`** : les trois registres à ne pas mélanger, la pyramide de vérification et ce
+qui décide de l'étage, et pourquoi la commande d'un chantier clos sort du `package.json`.
+
 ## Architecture
 
 ```

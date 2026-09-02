@@ -1,0 +1,143 @@
+# L'outillage : scripts, vérifications, `package.json`
+
+Ce document explique **pourquoi** le dépôt a les commandes qu'il a, et comment décider où ranger
+une nouvelle. Le README, lui, liste ce qu'elles font. Les principes ci-dessous ne sont pas propres
+à Kairn : ils valent pour n'importe quel projet du même genre.
+
+---
+
+## Les outils, et ce que chacun couvre
+
+| Outil                  | Ce qu'il vérifie                                                          |
+| ---------------------- | ------------------------------------------------------------------------- |
+| **TypeScript** (`tsc`) | Ce qui est vrai à la compilation : formes, exhaustivité des `switch`      |
+| **ESLint**             | Les règles qu'un type ne dit pas, dont les frontières entre dossiers      |
+| **Prettier**           | La forme du code, pour que les diffs ne portent que du sens               |
+| **Vitest**             | La logique pure de `lib/domain/`, sans base ni réseau                     |
+| **fast-check**         | Les règles vraies pour **toutes** les entrées, pas trois exemples choisis |
+| **tsx**                | Exécute un `.ts` directement, sans étape de build — tous les scripts      |
+| **Prisma CLI**         | Le schéma, les migrations, la console de base                             |
+| **Stripe CLI**         | Le tunnel de webhooks vers la machine locale, et le catalogue             |
+
+`tsx` mérite un mot : c'est lui qui rend les scripts possibles. Sans lui, chaque vérification
+demanderait une compilation séparée ou un fichier JavaScript à part, et personne n'en écrirait.
+
+---
+
+## Trois registres de commandes, à ne pas mélanger
+
+C'est le principe central, et le seul qui demande de la discipline dans le temps.
+
+### 1. Le cycle de vie
+
+`dev`, `build`, `start`, `test`, `lint`, `typecheck`, `format`, `db:*`. Elles existent dans tout
+projet, tout le monde les connaît, elles ne bougent jamais. Rien à décider.
+
+### 2. Les vérifications durables
+
+Elles exercent des invariants que les tests unitaires **ne peuvent pas** atteindre, et elles
+restent tant que le sujet existe. Chez Kairn : `verify:ai`, `verify:ingestion`, `verify:session`,
+`verify:abus`, `verify:abonnement`, `verify:contrastes`, `eprouver:paiement`.
+
+### 3. Les chantiers ponctuels
+
+Une campagne d'évaluation, une migration de fournisseur, un banc de mesure mené une fois. Elles
+servent quelques jours, puis le chantier se ferme.
+
+**Une fois le chantier clos, la commande sort de `package.json`.** Pas le fichier — il reste dans
+`scripts/`, git le garde, et le remettre coûte une ligne. Ce qui sort, c'est la ligne du
+`package.json`, parce que `npm run` doit lister **ce qu'on peut faire aujourd'hui**, pas
+l'archéologie du projet. Une liste de quarante commandes dont dix sont mortes ne se lit plus, et
+la première conséquence est qu'on cesse de la lire — y compris pour les dix qui comptent.
+
+---
+
+## La pyramide de vérification
+
+Trois étages, du moins cher au plus cher. **Ne monte d'un étage que ce que l'étage du dessous ne
+peut pas prouver.**
+
+### Étage 1 — Les tests unitaires, sur du pur
+
+`lib/domain/` ne connaît ni Next, ni Prisma, ni le réseau. Ses fonctions prennent des valeurs et
+rendent des valeurs, l'instant courant compris — c'est pour ça qu'elles se testent gratuitement, et
+que tout ce qui est intéressant y a été poussé.
+
+Quand une règle est vraie pour toutes les entrées — un ordre qui se conserve, un signe qui
+s'inverse, un résultat déterministe — elle s'écrit en propriété fast-check plutôt qu'en trois
+exemples. Une propriété qui échoue est un bug : on corrige le code, jamais la propriété.
+
+### Étage 2 — Les vérifications contre une vraie base
+
+Certaines garanties ne sont pas dans le TypeScript. Elles sont dans le `where` d'une instruction
+Postgres, et seule une vraie base peut les prouver :
+
+- deux webhooks traités **en même temps** ne doivent pas laisser le plus ancien gagner ;
+- vingt-cinq réservations parties au même instant ne doivent pas dépasser le plafond ;
+- supprimer un compte ne doit laisser **aucune ligne** dans **aucune** table.
+
+Ces scripts créent un compte de vérification, jouent le scénario, puis effacent. Ils écrivent leurs
+constats dans un carnet (`scripts/verification/journal.ts`) et concluent d'un bloc : une
+vérification se lit d'un coup, pas au fil de l'eau. Chaque constat est formulé comme la règle qu'on
+veut voir tenir — de sorte qu'une ligne en échec soit un **trou**, et non une panne du script.
+
+### Étage 3 — Les épreuves contre un vrai service
+
+Le dernier étage ne prouve qu'une chose, mais elle est irremplaçable : que la forme réelle des
+objets d'un service tiers correspond à ce que le code croit. Aucune fixture ne le dira jamais — une
+fixture est écrite d'après la même lecture que le code, donc elle reproduit fidèlement le
+malentendu.
+
+`eprouver:paiement` en est l'exemple : il a trouvé, dès sa première exécution, que **plus aucun
+achat ne pouvait aboutir** — un réglage du compte Stripe exigeait un champ que le catalogue n'avait
+pas. Le code était juste, les tests verts, et rien n'aurait signalé le problème avant le premier
+client.
+
+Ces épreuves ne tournent pas seules et ne rejoignent pas la suite : elles demandent des clés, un
+tunnel ouvert, parfois un navigateur au milieu. **D'où leur nom : `eprouver:` et non `verify:`.**
+On les lance à la main, quand on touche au sujet.
+
+---
+
+## Ce qui décide de l'étage
+
+Une question, dans cet ordre :
+
+1. La règle est-elle exprimable sur des valeurs pures ? → **étage 1**, et pousse la règle dans
+   `lib/domain/` si elle n'y est pas.
+2. Dépend-elle de la concurrence, d'une contrainte SQL, d'une cascade ? → **étage 2**.
+3. Dépend-elle de la forme réelle d'un objet venu d'ailleurs, ou d'un secret ? → **étage 3**.
+
+La question n'est jamais « est-ce testable » mais « qu'est-ce qui serait faux si je me trompais ».
+Un plafond de dépenses mal compté vide un compte en banque ; une couleur mal choisie se rattrape.
+On teste là où l'erreur coûte, pas au prorata d'un pourcentage de couverture.
+
+---
+
+## Nommer une commande
+
+Le préfixe dit le registre, pas le sujet :
+
+- `db:` — tout ce qui parle au schéma ou à la base.
+- `verify:` — une vérification qui tourne seule, sans clé ni service tiers.
+- `eprouver:` — une épreuve contre un vrai service, lancée à la main.
+
+**L'état actuel du dépôt ne respecte pas encore cette règle** : `verify:` et `verifier:` coexistent,
+`valider:`, `eval:`, `lancer:` et `planifier:` viennent de chantiers clos, et `verify:` est le seul
+anglicisme d'un dépôt entièrement en français. C'est un rangement identifié, pas un principe
+contredit.
+
+---
+
+## Ce qui se transpose ailleurs
+
+Quatre choses, indépendantes de Kairn :
+
+1. **Séparer ce qui est pur de ce qui ne l'est pas**, et y pousser toute la logique intéressante.
+   C'est ce qui rend une suite de tests rapide et durable ; tout le reste en découle.
+2. **Ne pas confondre « couvert » et « éprouvé ».** Un service tiers n'est jamais couvert par des
+   fixtures : la seule preuve est un aller-retour réel, au moins une fois.
+3. **Sortir les commandes des chantiers clos.** Un `package.json` est une liste de ce qui se fait
+   aujourd'hui ; laisser vivre les commandes mortes, c'est la rendre illisible d'un projet à l'autre.
+4. **Écrire les constats comme des règles**, pas comme des étapes. « Deux événements traités
+   ensemble laissent toujours le plus récent » se relit dans six mois ; « étape 4 OK » ne dit rien.
