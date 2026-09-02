@@ -21,12 +21,11 @@ import type { ReactNode } from "react";
  * donc à `SuiteDeLaQuestion`, qui porte le bloc **et** le geste qui vient
  * après.
  *
- * **Le bloc prend toute la colonne, son texte non.** Arrêté aux deux tiers, il
- * s'alignait sur rien : ni sur la carte de la question au-dessus, ni sur la
- * rangée d'actions en dessous, et cette arête au milieu du vide se remarquait
- * avant qu'on ait lu la réponse. Le texte, lui, garde une mesure longue mais
- * bornée — une question est un titre et peut s'étaler, une réponse est un
- * paragraphe et n'a rien à gagner à faire onze cents pixels de large.
+ * **Le bloc prend toute la colonne, son texte non**, et l'intitulé occupe ce qui
+ * reste. Le texte garde une mesure bornée — une question est un titre et peut
+ * s'étaler, une réponse est un paragraphe et n'a rien à gagner à faire onze
+ * cents pixels de large. Ce qui manquait, c'était de donner un rôle à la place
+ * ainsi libérée, au lieu de la laisser en creux à droite d'une arête.
  */
 export function BlocReponse({
   intitule = "La réponse",
@@ -39,10 +38,27 @@ export function BlocReponse({
     <div className="rounded-carte bg-surface-roche grain grain-clair p-pas-6 md:p-pas-8 relative overflow-hidden">
       {/* Les jetons de code s'inversent ici, et seulement ici : de l'encre diluée
           sur la roche est plus sombre que la roche, donc invisible. */}
-      <div className="[&_code]:bg-jeton-clair [&_code]:border-jeton-bord-clair relative z-10">
-        <p className="text-mono font-mono tracking-[0.12em] text-stone-400 uppercase">{intitule}</p>
+      {/* L'intitulé passe dans la marge dès qu'il y a de la place : c'est une
+          glose, la forme d'une note portée à côté du texte qu'elle qualifie —
+          celle des dictionnaires et des éditions annotées, qui est exactement ce
+          qu'est ce bloc.
 
-        <div className="mt-pas-3 text-corps max-w-3xl leading-relaxed whitespace-pre-wrap text-stone-50">
+          Elle règle le vide sans y toucher. La scène fait onze cent cinquante
+          pixels et le texte s'arrête à sept cent soixante-huit ; élargir le
+          texte pour combler l'écart lui donnerait cent vingt-huit caractères par
+          ligne, où l'œil ne retrouve plus la ligne suivante. La question, elle,
+          peut s'étaler : elle est en gros caractères, et la même largeur y fait
+          une mesure normale. Ce n'est donc pas la mesure du texte qui était
+          fausse, c'est que la carte ne faisait rien de la place qui restait.
+
+          Sous six cent quarante pixels, l'intitulé repasse au-dessus : une
+          colonne de marge sur un téléphone mangerait la moitié de la ligne. */}
+      <div className="[&_code]:bg-jeton-clair [&_code]:border-jeton-bord-clair gap-pas-3 sm:gap-pas-8 relative z-10 flex flex-col sm:grid sm:grid-cols-[8.5rem_1fr] sm:items-start">
+        <p className="text-mono font-mono tracking-[0.12em] text-stone-400 uppercase sm:pt-[0.3em]">
+          {intitule}
+        </p>
+
+        <div className="text-corps leading-relaxed whitespace-pre-wrap text-stone-50">
           {children}
         </div>
       </div>

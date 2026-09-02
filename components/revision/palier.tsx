@@ -53,15 +53,9 @@ export type Lien = {
  */
 function ActionDePalier({ lien, contour = false }: { lien: Lien; contour?: boolean }) {
   return (
-    <div className="gap-pas-2 flex max-w-xs flex-col items-center">
-      <Button asChild variant={contour ? "outline" : "default"}>
-        <Link href={lien.href}>{lien.libelle}</Link>
-      </Button>
-
-      {lien.precision ? (
-        <p className="text-petit text-pretty text-stone-500">{lien.precision}</p>
-      ) : null}
-    </div>
+    <Button asChild variant={contour ? "outline" : "default"}>
+      <Link href={lien.href}>{lien.libelle}</Link>
+    </Button>
   );
 }
 
@@ -98,6 +92,10 @@ export function Palier({
   /** Ce que ce palier ajoute entre l'explication et les actions. */
   children?: ReactNode;
 }) {
+  const precisions = [action, secondaire]
+    .map((lien) => lien?.precision)
+    .filter((precision): precision is string => Boolean(precision));
+
   return (
     <section className="flex w-full flex-col items-center text-center">
       {embleme ? <div className="mb-pas-6 md:mb-pas-8">{embleme}</div> : null}
@@ -121,15 +119,33 @@ export function Palier({
       {children}
 
       {action || bouton ? (
-        /* Les deux actions s'alignent en haut et non au centre : celle qui porte
-           une précision est plus haute que l'autre, et centrées, leurs boutons
-           se décalaient verticalement l'un par rapport à l'autre. */
-        <div className="gap-pas-6 mt-pas-8 md:mt-pas-12 flex flex-col items-center sm:flex-row sm:items-start">
+        /* Les actions forment une paire : mêmes dimensions, même ligne de base.
+           Chacune portait sa propre précision en dessous, et comme une seule en
+           a une, une colonne faisait trois lignes quand l'autre en faisait une —
+           la précision étant plus large que les deux boutons réunis, le centre
+           optique de la rangée glissait vers elle, et le lien de pied restait
+           centré sur une page dont plus rien ne l'était. */
+        <div className="gap-pas-3 sm:gap-pas-4 mt-pas-8 md:mt-pas-12 flex flex-col items-center sm:flex-row">
           {bouton}
 
           {action ? <ActionDePalier lien={action} /> : null}
 
           {secondaire ? <ActionDePalier lien={secondaire} contour /> : null}
+        </div>
+      ) : null}
+
+      {/* Les précisions vivent sous la paire, jamais sous un bouton. Elles y
+          restent lisibles parce qu'elles nomment l'action dont elles parlent :
+          « S'entraîner pose d'autres questions… » se rattache tout seul, là où
+          « D'autres questions… » avait besoin d'être posé juste dessous pour
+          qu'on sache de quoi il s'agissait. */}
+      {precisions.length > 0 ? (
+        <div className="gap-pas-1 mt-pas-4 flex max-w-md flex-col">
+          {precisions.map((precision) => (
+            <p key={precision} className="text-petit text-pretty text-stone-500">
+              {precision}
+            </p>
+          ))}
         </div>
       ) : null}
 

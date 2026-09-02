@@ -7,5 +7,11 @@
  * fausse ; et celle-ci porte l'engagement qui distingue l'entraînement de la
  * session, qui est que le planning ne bouge pas.
  */
+/**
+ * Elle **nomme le bouton** dont elle parle. Posée sous une paire d'actions, une
+ * précision qui commence par « D'autres questions… » ne dit pas à laquelle des
+ * deux elle se rapporte ; celle-ci se rattache toute seule, et peut donc vivre
+ * sous l'ensemble plutôt que collée à un seul bouton.
+ */
 export const ENTRAINEMENT_LIBRE =
-  "D'autres questions sur les mêmes concepts. Ton planning ne bouge pas.";
+  "S'entraîner pose d'autres questions sur les mêmes concepts, sans rien changer à ton planning.";
