@@ -49,6 +49,25 @@ export async function ouvrirLePaiement(
     // qu'il produira. Le rattachement, lui, passe par le client Stripe, qui est
     // à nous : ces métadonnées servent au diagnostic, pas à la décision.
     subscription_data: { metadata: { userId: compte.id } },
+    // **Le vendeur, c'est Kairn.** Managed Payments est activé par défaut sur le
+    // compte Stripe et ferait de Stripe le marchand de référence : il
+    // collecterait et reverserait la TVA dans quatre-vingts pays, émettrait les
+    // factures et les emails à notre place, et prélèverait 3,5 % de plus par
+    // transaction. Sans ce refus, la session est simplement rejetée — le
+    // catalogue n'a pas de code de taxe, que Managed Payments exige.
+    //
+    // Le refus est écrit ici plutôt que laissé à une case du tableau de bord,
+    // parce que c'est une décision de facturation : elle doit se lire dans le
+    // code qui vend, et ne pas dépendre d'un réglage que personne ne relit.
+    //
+    // Décidée le 02/09/2026, sur la comparaison des deux coûts : 3,5 % dès le
+    // premier euro contre un service — la conformité de TVA multi-pays — qui ne
+    // sert qu'au-delà de 10 000 € de ventes annuelles aux particuliers du reste
+    // de l'UE, seuil auquel la franchise en base européenne répond sans
+    // commission. Rien n'est fermé : Managed Payments s'active plus tard, mais
+    // pour les seuls abonnements souscrits après. Ceux d'avant n'y sont jamais
+    // éligibles, et c'est ce qui fait que le choix se pose maintenant.
+    managed_payments: { enabled: false },
   });
 
   if (!session.url) {
