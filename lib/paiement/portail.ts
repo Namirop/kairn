@@ -4,7 +4,7 @@ import { adresseDeLApp } from "@/lib/site/adresse-de-lapp";
 import { ORIGINE_DU_SITE } from "@/lib/site/origine";
 import { stripe } from "./client";
 import { lireConfigDePaiement } from "./config";
-import { AucunDossierStripeError } from "./erreurs";
+import { AucunDossierStripeError, objetIntrouvableChezStripe } from "./erreurs";
 
 /**
  * Le portail hébergé, pour les deux gestes qu'on ne construit pas.
@@ -101,6 +101,18 @@ export async function ouvrirLePortail(userId: string): Promise<string> {
 
   if (!clientId) throw new AucunDossierStripeError();
 
+  try {
+    return await sessionDePortail(clientId);
+  } catch (erreur) {
+    // Le dossier date d'un autre mode, ou a été supprimé : il n'a ni facture ni
+    // carte à montrer. Le prochain achat en ouvrira un neuf.
+    if (objetIntrouvableChezStripe(erreur)) throw new AucunDossierStripeError();
+
+    throw erreur;
+  }
+}
+
+async function sessionDePortail(clientId: string): Promise<string> {
   const session = await stripe().billingPortal.sessions.create({
     customer: clientId,
     configuration: await configurationDuPortail(),

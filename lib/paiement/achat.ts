@@ -5,7 +5,7 @@ import { adresseDeLApp } from "@/lib/site/adresse-de-lapp";
 import { prixDeLaCadence } from "./catalogue";
 import { stripe } from "./client";
 import { clientStripeDuCompte } from "./dossier-client";
-import { AbonnementDejaOuvertError } from "./erreurs";
+import { AbonnementDejaOuvertError, objetIntrouvableChezStripe } from "./erreurs";
 import { lireLeRapport } from "./rapport";
 
 /**
@@ -48,7 +48,18 @@ async function refuserSiDejaAbonne(userId: string): Promise<void> {
 
   if (!abonnementId) return;
 
-  const abonnement = await stripe().subscriptions.retrieve(abonnementId);
+  let abonnement;
+
+  try {
+    abonnement = await stripe().subscriptions.retrieve(abonnementId);
+  } catch (erreur) {
+    // Un abonnement que Stripe ne connaît pas ne peut rien facturer, donc il
+    // n'interdit rien. C'est le cas de tous ceux qu'une ligne a gardés d'un
+    // mode test après la bascule : les refuser bloquerait l'achat pour de bon.
+    if (objetIntrouvableChezStripe(erreur)) return;
+
+    throw erreur;
+  }
 
   if (abonnementVivant(lireLeRapport(abonnement).statut)) {
     throw new AbonnementDejaOuvertError(abonnementId);

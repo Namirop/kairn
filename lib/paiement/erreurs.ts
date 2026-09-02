@@ -107,3 +107,27 @@ export class AucunDossierStripeError extends PaiementError {
     super("Ce compte n'a pas de dossier chez Stripe.");
   }
 }
+
+/**
+ * Cet objet Stripe a-t-il disparu — ou n'a-t-il jamais existé dans ce mode ?
+ *
+ * **Le cas qui a motivé cette fonction est la bascule.** Test et production sont
+ * deux jeux de données étanches : un client créé avec une clé de test n'existe
+ * pas pour une clé de production. Le jour où l'on bascule, toutes les lignes
+ * `Subscription` de la base pointent vers des identifiants d'un monde qui n'est
+ * plus le nôtre, et chaque appel échoue en `resource_missing`.
+ *
+ * Le second cas est banal : un objet supprimé depuis le tableau de bord.
+ *
+ * Les deux appellent la même réponse — cet identifiant ne vaut plus rien, il
+ * faut le remplacer ou l'oublier — et aucun des deux n'est transitoire, donc
+ * réessayer ne servirait à rien.
+ */
+export function objetIntrouvableChezStripe(erreur: unknown): boolean {
+  return (
+    erreur !== null &&
+    typeof erreur === "object" &&
+    "code" in erreur &&
+    erreur.code === "resource_missing"
+  );
+}

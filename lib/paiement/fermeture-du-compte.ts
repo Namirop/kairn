@@ -1,6 +1,7 @@
 import { lireDossierStripe } from "@/lib/db/ecriture-de-labonnement";
 import { abonnementVivant } from "@/lib/domain/rapport-de-stripe";
 import { stripe } from "./client";
+import { objetIntrouvableChezStripe } from "./erreurs";
 import { lireLeRapport } from "./rapport";
 
 /**
@@ -36,7 +37,17 @@ export async function fermerLAbonnementDuCompte(userId: string): Promise<void> {
 
   if (!abonnementId) return;
 
-  const abonnement = await stripe().subscriptions.retrieve(abonnementId);
+  let abonnement;
+
+  try {
+    abonnement = await stripe().subscriptions.retrieve(abonnementId);
+  } catch (erreur) {
+    // Introuvable : il ne prélève rien, il n'y a rien à couper. Refuser la
+    // suppression du compte ici serait la bloquer pour toujours.
+    if (objetIntrouvableChezStripe(erreur)) return;
+
+    throw erreur;
+  }
 
   if (!abonnementVivant(lireLeRapport(abonnement).statut)) return;
 
