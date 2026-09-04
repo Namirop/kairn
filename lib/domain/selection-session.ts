@@ -1,5 +1,6 @@
 import { alternerLesSujets } from "./alternance-des-sujets";
 import { jourSuivant, localDay } from "./local-day";
+import { bornerLeNeuf } from "./part-de-nouveaute";
 import { parUrgence } from "./urgence-de-revision";
 
 /**
@@ -184,10 +185,20 @@ export function conceptsDeLaJournee<T extends ConceptDu>(
   fuseau: string,
   plafond: number = PLAFOND_SESSION,
 ): T[] {
-  return concepts
-    .filter((concept) => estServableAujourdhui(concept, maintenant, fuseau))
-    .sort(parUrgence(maintenant))
-    .slice(0, Math.max(0, plafond));
+  /*
+    La coupe au plafond passe par `bornerLeNeuf` plutôt que par un `slice`.
+
+    Un concept jamais revu porte une urgence infinie, à raison — il n'a jamais
+    été retrouvé une seule fois. Mais son échéance est posée au dépôt, si bien
+    qu'un gros dépôt prenait toute la session pendant des jours et repoussait ce
+    qui était déjà commencé. Le total servi ne change pas, la composition si.
+  */
+  return bornerLeNeuf(
+    concepts
+      .filter((concept) => estServableAujourdhui(concept, maintenant, fuseau))
+      .sort(parUrgence(maintenant)),
+    plafond,
+  );
 }
 
 /**
