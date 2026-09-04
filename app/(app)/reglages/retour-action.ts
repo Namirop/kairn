@@ -7,7 +7,8 @@ import { ecrireUnRetour } from "@/lib/db/retour";
 import { signalerUnRetour } from "@/lib/email/signalement-de-retour";
 import { LIBELLE_DE_SUJET } from "@/lib/retours/libelle-du-sujet";
 import { SujetDeRetour } from "@/lib/db/types";
-import { preparerCapture, TAILLE_MAXIMALE_OCTETS } from "@/lib/images/capture";
+import { TAILLE_MAXIMALE_OCTETS } from "@/lib/depots/bornes-du-depot";
+import { preparerCapture } from "@/lib/images/capture";
 import {
   lireLEcran,
   lireLeMessage,

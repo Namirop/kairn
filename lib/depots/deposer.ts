@@ -1,10 +1,15 @@
 import { z } from "zod";
 import { creerDepot, marquerEnCours } from "@/lib/db/ingestion";
 import { reserverDepot, rendreDepot } from "@/lib/db/quota-depots";
-import { CARACTERES_MAXIMUM, longueurEnClair } from "@/lib/depots/bornes-du-depot";
+import {
+  CARACTERES_MAXIMUM,
+  IMAGE_TROP_LOURDE,
+  longueurEnClair,
+  TAILLE_MAXIMALE_OCTETS,
+} from "@/lib/depots/bornes-du-depot";
 import { refusDeQuota } from "@/lib/depots/refus-de-quota";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
-import { preparerCapture, TAILLE_MAXIMALE_OCTETS } from "@/lib/images/capture";
+import { preparerCapture } from "@/lib/images/capture";
 import { enqueueJob } from "@/lib/jobs/queue";
 
 /**
@@ -61,7 +66,7 @@ export async function deposer(userId: string, donnees: FormData): Promise<Result
   }
 
   if (champs.image && champs.image.size > TAILLE_MAXIMALE_OCTETS) {
-    return { ok: false, motif: "Cette image dépasse 5 Mo." };
+    return { ok: false, motif: IMAGE_TROP_LOURDE };
   }
 
   const fuseau = await lireFuseauUtilisateur(userId);

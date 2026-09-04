@@ -62,6 +62,40 @@ export const CARACTERES_MAXIMUM_ANONYME = 4000;
 export const CARACTERES_MINIMUM_ANONYME = 40;
 
 /**
+ * Ce qu'une capture a le droit de peser à l'arrivée, avant compression.
+ *
+ * Elle vivait dans le module qui lit les images, et ce module importe `sharp` :
+ * l'écran ne pouvait donc pas la connaître, et laissait partir un fichier de
+ * douze mégaoctets pour le voir refuser au retour. Depuis qu'un partage du
+ * système peut joindre une capture sans que personne l'ait choisie dans un
+ * sélecteur, ce détour n'est plus tenable — le refus doit se lire avant l'envoi,
+ * comme celui de la longueur.
+ */
+export const TAILLE_MAXIMALE_OCTETS = 5 * 1024 * 1024;
+
+/**
+ * Le refus, dit une seule fois pour les trois endroits qui le prononcent.
+ *
+ * L'écran avant l'envoi, le dépôt avant de réserver la place, et le lecteur
+ * d'images au moment de décoder. Il y en avait déjà deux versions, une courte et
+ * une longue, pour la même règle.
+ */
+export const IMAGE_TROP_LOURDE =
+  "Cette image dépasse 5 Mo. Recadre-la sur ce qui t'intéresse, ou réduis-la avant de la déposer.";
+
+/**
+ * Ce qu'on dit d'un texte plus long que ce qu'un dépôt accepte.
+ *
+ * Il ne se tronque pas : couper au seizième millier tomberait au milieu d'une
+ * phrase, et le début d'une conversation est justement le morceau dont on n'a
+ * rien à retenir. C'est à la personne de garder ce qui compte, et le message
+ * dit les deux nombres pour qu'elle sache de combien elle dépasse.
+ */
+export function tropLongPourUnDepot(caracteres: number): string {
+  return `C'est ${caracteres.toLocaleString("fr-FR")} signes, et un dépôt en prend ${CARACTERES_MAXIMUM.toLocaleString("fr-FR")}. Garde le passage qui compte.`;
+}
+
+/**
  * Une longueur en signes, plus ce qu'elle représente en mots.
  *
  * « Textes plus longs » ne veut rien dire : pour un visiteur, ça peut être trois

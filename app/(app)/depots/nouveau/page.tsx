@@ -20,11 +20,17 @@ import { quandRepartLeCompteur } from "@/lib/domain/remise-a-zero";
 
 export const metadata: Metadata = { title: "Déposer" };
 
-export default async function PageNouveauDepot() {
+export default async function PageNouveauDepot({
+  searchParams,
+}: {
+  /** `partage=absent` : un partage du système est arrivé et n'a pas pu être retenu. */
+  searchParams: Promise<{ partage?: string }>;
+}) {
   const utilisateur = await getCurrentUser();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
+  const { partage } = await searchParams;
   const fuseau = await lireFuseauUtilisateur(utilisateur.id);
   const [usage, inscrit, depotsFaits, offre] = await Promise.all([
     lireUsageDeLaPeriode(utilisateur.id, fuseau),
@@ -83,6 +89,7 @@ export default async function PageNouveauDepot() {
             cleEnvoi={crypto.randomUUID()}
             invite={inviteDeDepot(Math.random())}
             premierDepot={aucunDepot}
+            partageManque={partage === "absent"}
           />
         )}
       </Panneau>

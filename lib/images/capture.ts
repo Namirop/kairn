@@ -1,4 +1,5 @@
 import sharp from "sharp";
+import { IMAGE_TROP_LOURDE, TAILLE_MAXIMALE_OCTETS } from "@/lib/depots/bornes-du-depot";
 
 /**
  * Ce qu'on accepte d'une capture, et ce qu'on en fait avant de l'envoyer.
@@ -11,9 +12,6 @@ import sharp from "sharp";
  * pixel coûte des tokens sans rien apporter à la lecture.
  */
 
-/** Taille acceptée à l'arrivée, avant compression. */
-export const TAILLE_MAXIMALE_OCTETS = 5 * 1024 * 1024;
-
 /** Bord long au-delà duquel on réduit : le modèle n'en tire rien de plus. */
 const BORD_LONG = 1568;
 
@@ -25,11 +23,7 @@ export type LectureCapture = { ok: true; capture: CaptureLue } | { ok: false; mo
 
 export async function preparerCapture(fichier: File): Promise<LectureCapture> {
   if (fichier.size > TAILLE_MAXIMALE_OCTETS) {
-    return {
-      ok: false,
-      motif:
-        "Cette image dépasse 5 Mo. Recadre-la sur ce qui t'intéresse, ou réduis-la avant de la déposer.",
-    };
+    return { ok: false, motif: IMAGE_TROP_LOURDE };
   }
 
   const octets = Buffer.from(await fichier.arrayBuffer());
