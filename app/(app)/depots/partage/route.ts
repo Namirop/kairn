@@ -22,3 +22,17 @@ import { NextResponse } from "next/server";
 export function POST(requete: Request): Response {
   return NextResponse.redirect(new URL("/depots/nouveau?partage=absent", requete.url), 303);
 }
+
+/**
+ * La même adresse en lecture, qui n'arrive que par un détour.
+ *
+ * Un partage envoyé sans session ne passe pas par le worker : le middleware le
+ * renvoie vers la connexion en mémorisant le chemin, et l'y ramène une fois la
+ * session ouverte — en lecture cette fois, puisqu'un renvoi ne rejoue pas un
+ * envoi. Sans ce handler, la personne finissait sa connexion sur un 405.
+ *
+ * Le partage, lui, a bien été perdu en route : le formulaire le dit.
+ */
+export function GET(requete: Request): Response {
+  return NextResponse.redirect(new URL("/depots/nouveau?partage=absent", requete.url), 303);
+}
