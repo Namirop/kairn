@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { RegistreServiceWorker } from "@/components/pwa/registre-service-worker";
 import { PAPIER } from "@/lib/design/couleurs-hors-css";
 import { ORIGINE_DU_SITE } from "@/lib/site/origine";
@@ -57,6 +58,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={classesPolices}>
         {children}
         <RegistreServiceWorker />
+        {/* La mesure d'audience de Vercel : combien de visites, sur quelles
+            pages, d'où. Sans cookie et sans identifiant qui suive quelqu'un d'un
+            site à l'autre — c'est la raison de ce choix-là plutôt qu'un autre,
+            et c'est ce qui permet de ne pas poser de bandeau. La page
+            « Confidentialité » le dit, et elle doit continuer de le dire.
+
+            Posée à la racine pour couvrir la landing comme l'application : ce
+            qu'on veut savoir, c'est où les gens s'arrêtent, et l'essentiel de
+            cette réponse est dans le passage de l'une à l'autre. */}
+        <Analytics />
       </body>
     </html>
   );

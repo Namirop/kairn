@@ -18,6 +18,13 @@ export const metadata: Metadata = { title: "Confidentialité" };
  * publicitaires ; et **l'empreinte d'adresse IP**, qui reste une donnée
  * personnelle même hachée, puisque hacher pseudonymise et n'anonymise pas.
  *
+ * **La mesure d'audience a sa propre rubrique depuis le 04/09/2026**, parce que
+ * la page disait « aucun cookie de mesure d'audience » et que cette phrase, seule,
+ * se lit comme « aucune mesure ». Elle reste vraie — la mesure de Vercel ne dépose
+ * rien et ne recoupe rien d'un site à l'autre, et c'est ce qui dispense de
+ * bandeau —, mais une vérité qui laisse croire autre chose ne vaut pas mieux
+ * qu'une omission. Ce qui remonte est donc écrit, ligne par ligne.
+ *
  * **La base du rappel quotidien est le contrat, pas le consentement**, et c'est un
  * choix qui suit le code : `dailyReminderEnabled` vaut vrai à la création du
  * compte. Un consentement pré-coché n'est pas un consentement — écrire
@@ -54,7 +61,16 @@ const RUBRIQUES: RubriqueLegale[] = [
       "Les cookies de session, préfixés « better-auth. », te maintiennent connecté. Un mois, renouvelé à chaque visite.",
       "« kairn_visite » retient l'essai que tu fais sans compte, le temps de te permettre de le récupérer en créant un compte. Sept jours, la même durée que ce qu'il désigne.",
       "Aucun traceur publicitaire, aucun cookie de mesure d'audience, aucun partage à des tiers en dehors des sous-traitants techniques listés plus bas.",
+      "Il y a bien une mesure d'audience — combien de visites, sur quelles pages, depuis quel pays —, mais elle ne pose aucun cookie et ne te suit pas d'un site à l'autre. Elle est décrite juste en dessous.",
       "Le contenu que tu déposes n'apparaît jamais dans les journaux du serveur : ils ne portent que des identifiants.",
+    ],
+  },
+  {
+    titre: "Mesure d'audience",
+    corps: [
+      "Savoir combien de personnes viennent et sur quelles pages elles s'arrêtent, c'est ce qui dit quoi corriger. Ça se fait sans cookie et sans profil : la mesure de Vercel ne dépose rien sur ton appareil et ne construit aucun identifiant qui te suive d'un site à l'autre.",
+      "Ce qui remonte : la page visitée, la page d'où tu viens, le pays, le type d'appareil et de navigateur. Rien de ce que tu déposes, rien de ton compte, aucune adresse IP conservée — elle sert à dériver un numéro de visite qui change chaque jour, puis elle est jetée.",
+      "C'est pour ça qu'il n'y a pas de bandeau : sans cookie, sans identifiant persistant et sans recoupement entre sites, il n'y a rien à te faire accepter.",
     ],
   },
   {
@@ -64,7 +80,7 @@ const RUBRIQUES: RubriqueLegale[] = [
       "Nous avons désactivé sur notre compte OpenRouter toute option autorisant l'entraînement sur les données transmises. OpenRouter ne conserve pas le contenu des requêtes, mais des métadonnées techniques (horodatage, modèle, volume de tokens). OpenAI, sous-traitant ultérieur, conserve les données jusqu'à 30 jours pour la surveillance des abus, puis les supprime.",
       "Anthropic Ireland, Limited (Dublin, Irlande), pour le même traitement, en repli automatique quand OpenRouter est indisponible. Ses conditions commerciales interdisent l'entraînement de modèles sur le contenu de ses clients, et ses journaux d'appels sont supprimés sous trente jours.",
       "Neon, LLC — société du groupe Databricks, Inc. —, pour l'hébergement de la base de données, sur une infrastructure située à Francfort, en Allemagne.",
-      "Vercel Inc., pour l'hébergement de l'application, avec une exécution en région européenne.",
+      "Vercel Inc., pour l'hébergement de l'application, avec une exécution en région européenne, et pour la mesure d'audience décrite plus haut.",
       "Plus Five Five, Inc. (Resend), pour l'acheminement des emails.",
       `Leurs engagements contractuels ont été relus le ${EDITEUR.verifieLe}. Cette vérification est refaite une fois par an.`,
     ],
