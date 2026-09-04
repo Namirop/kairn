@@ -10,9 +10,20 @@
  * que de disparaître. Le reste du texte n'est jamais touché — « Faux. La réponse
  * attendue mentionne… » garde sa phrase entière, parce que l'étiquette n'y est
  * pas en tête.
+ *
+ * **Le texte à trou en a une à lui**, et elle a échappé au tour du 02/09 qui a
+ * mis les autres formats à l'indicatif : « Le terme attendu est « collectivise » :
+ * l'économie soviétique est collectivisée… ». Sur ce format, le terme vient de
+ * se poser dans la phrase, souligné de lichen, deux centimètres au-dessus du
+ * bloc. L'annoncer une seconde fois occupe la première ligne à redire ce que
+ * l'œil vient de lire. La consigne d'écriture est corrigée de son côté ; ici on
+ * rattrape le stock, qui vivra des mois.
  */
-const ETIQUETTE =
-  /^\s*(?:l[ae]\s+)?(?:r[eé]ponse(?:\s+(?:attendue?s?|correcte?s?))?|attendu|[eé]talon)\s*[:—-]\s*/i;
+const ETIQUETTES: readonly RegExp[] = [
+  /^\s*(?:l[ae]\s+)?(?:r[eé]ponse(?:\s+(?:attendue?s?|correcte?s?))?|attendu|[eé]talon)\s*[:—-]\s*/i,
+  /^\s*l[ea]\s+(?:terme|mot|expression)\s+(?:attendue?|masqu[eé]e?|manquante?|recherch[eé]e?)\s+(?:est|[eé]tait)\s*[«"“']?[^«»"“”:]{1,60}[»"”']?\s*[:—–-]\s*/i,
+  /^\s*the\s+(?:expected|missing|hidden)\s+(?:term|word|answer)\s+is\s*[«"“']?[^«»"“”:]{1,60}[»"”']?\s*[:—–-]\s*/i,
+];
 
 /**
  * L'étiquette retirée laissait une phrase qui commence en minuscule, parce
@@ -29,9 +40,13 @@ function enPhrase(texte: string): string {
 }
 
 export function etalonLisible(answerKey: string): string {
-  const sansEtiquette = answerKey.replace(ETIQUETTE, "");
+  for (const etiquette of ETIQUETTES) {
+    const sansEtiquette = answerKey.replace(etiquette, "");
 
-  if (sansEtiquette === answerKey || sansEtiquette.trim().length === 0) return answerKey;
+    if (sansEtiquette === answerKey || sansEtiquette.trim().length === 0) continue;
 
-  return enPhrase(sansEtiquette);
+    return enPhrase(sansEtiquette);
+  }
+
+  return answerKey;
 }

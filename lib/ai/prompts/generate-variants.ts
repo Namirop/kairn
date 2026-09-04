@@ -100,6 +100,14 @@
  * lecture répare le stock (`trouSansRedite`), le contrôle mesure, et cette
  * consigne arrête d'en produire.
  *
+ * **Deux étalons qui redisaient ce qui est déjà à l'écran, corrigés le 4
+ * septembre 2026.** Le texte à trou n'avait aucune règle — le tour du 02/09 a mis
+ * les autres formats à l'indicatif et l'a oublié —, et « Le terme attendu est
+ * « collectivise » : … » annonçait un mot qui venait de se poser dans la phrase,
+ * souligné, deux centimètres plus haut. Le QCM, lui, avait la sienne mais trop
+ * lâche : « recopie l'option » est devenu « recopie l'option mot pour mot »,
+ * parce que `etalonUtile` efface une redite exacte et pas une paraphrase.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -225,6 +233,10 @@ trou. Sur « une fenêtre de \_\_\_ semaines », on masque « 52 » et pas « 52
 le second mot est déjà sous les yeux, le redemander l'afficherait deux fois et ferait
 compter fausse la bonne réponse.
 
+Son \`answerKey\` ne réannonce pas le terme. Il vient de se poser dans la phrase,
+souligné, au moment où ce bloc s'affiche : ni « Le terme attendu est… », ni « Le
+mot masqué est… ». Commence par ce qu'il fallait avoir compris pour le trouver.
+
 Avant de choisir le mot à masquer, vérifie qu'on ne pourrait pas le retrouver en
 lisant seulement le reste de la phrase. Si la grammaire le rend prévisible, ou
 si le reste de la phrase le paraphrase ou l'explique, choisis un autre mot ou
@@ -258,8 +270,9 @@ une longueur et une forme comparables : la bonne réponse ne doit pas se repére
 Son \`answerKey\` ne recopie pas la bonne option : elle est déjà surlignée au
 moment où la correction s'affiche. Il dit ce qui la rend juste — la condition,
 l'ordre, la cause, tels que le concept les énonce. Si le concept n'en donne
-aucune, recopie l'option plutôt que d'inventer : une redite est effacée à
-l'affichage, une invention est servie.
+aucune, recopie l'option **mot pour mot** plutôt que d'inventer ou de la
+reformuler : la redite exacte est effacée à l'affichage, la paraphrase est
+servie et n'apprend rien à qui vient de lire l'option surlignée.
 
 Il n'ouvre par aucun verdict. Ni « Correct », ni « Exact », ni « Oui » : ce bloc
 n'est montré qu'à quelqu'un qui vient de **se tromper**, et l'ouvrir en le

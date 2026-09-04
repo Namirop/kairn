@@ -1,3 +1,5 @@
+import { racineDeMot } from "./racine-de-mot";
+
 /**
  * L'étalon dit-il autre chose que la bonne option ?
  *
@@ -36,16 +38,29 @@
 const MOTS_EN_PLUS = 3;
 
 /**
- * Casse, ponctuation et espaces effacés : il ne reste que les mots.
+ * Casse, ponctuation, accords et espaces effacés : il ne reste que des racines.
  *
- * Les accents restent — les deux textes viennent de la même génération, dans la
- * même langue, et les effacer n'apporterait que des collisions.
+ * Les accents partaient déjà avec la casse ; les accords partent maintenant
+ * aussi. Un étalon qui recopiait son option en changeant un pluriel ou un temps
+ * — « exécution » pour « exécute », « mesurés » pour « mesure » — passait pour
+ * une explication et occupait un bloc à ne rien dire. Les deux textes viennent
+ * de la même génération, dans la même langue, à propos du même concept : deux
+ * racines qui se confondent y sont le même mot bien plus souvent qu'un hasard.
+ *
+ * Ça ne rattrape pas une paraphrase franche — « tandis que » pour « alors que »
+ * reste deux textes différents pour qui compte des mots. C'est le prompt qui
+ * tient cette part-là, en demandant une recopie mot pour mot quand le concept ne
+ * donne aucune cause à énoncer.
  */
 function normaliser(texte: string): string {
   return texte
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
+    .trim()
+    .split(" ")
+    .filter((mot) => mot !== "")
+    .map(racineDeMot)
+    .join(" ");
 }
 
 /**

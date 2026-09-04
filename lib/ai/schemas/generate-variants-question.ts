@@ -168,7 +168,9 @@ export function questionATrou(facette: string) {
         .string()
         .min(1)
         .max(2000)
-        .describe("Le terme masqué, en clair, et ce qu'il fallait avoir compris pour le trouver."),
+        .describe(
+          "Ce qu'il fallait avoir compris pour trouver le terme masqué. Ne le réannonce pas : il s'affiche dans la phrase au moment où ce texte est lu.",
+        ),
       cloze: cloze(),
     })
     .describe(facette);

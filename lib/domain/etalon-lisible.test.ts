@@ -66,3 +66,34 @@ describe("etalonLisible", () => {
     );
   });
 });
+
+describe("l'étiquette du texte à trou", () => {
+  it("retire l'annonce du terme, déjà posé dans la phrase", () => {
+    expect(
+      etalonLisible(
+        "Le terme attendu est « collectivise » : l'économie soviétique est collectivisée à partir de 1928.",
+      ),
+    ).toBe("L'économie soviétique est collectivisée à partir de 1928.");
+    expect(etalonLisible("Le mot masqué est « bokeh » : il désigne le flou d'arrière-plan.")).toBe(
+      "Il désigne le flou d'arrière-plan.",
+    );
+    expect(
+      etalonLisible("The expected term is “cold open”: it runs before the title sequence."),
+    ).toBe("It runs before the title sequence.");
+  });
+
+  it("laisse la phrase entière quand l'annonce n'est pas une étiquette", () => {
+    expect(etalonLisible("Le terme attendu vient du grec ancien.")).toBe(
+      "Le terme attendu vient du grec ancien.",
+    );
+    expect(etalonLisible("Le mot masqué est le pivot de la phrase, sans autre indice.")).toBe(
+      "Le mot masqué est le pivot de la phrase, sans autre indice.",
+    );
+  });
+
+  it("ne fait pas disparaître un étalon qui n'est que son étiquette", () => {
+    expect(etalonLisible("Le terme attendu est « collectivise » :")).toBe(
+      "Le terme attendu est « collectivise » :",
+    );
+  });
+});

@@ -88,3 +88,24 @@ describe("etalonUtile", () => {
     );
   });
 });
+
+describe("les accords ne font pas une explication", () => {
+  it("masque une recopie qui ne change qu'un nombre ou un temps", () => {
+    expect(
+      etalonUtile(
+        "Elle doit mettre à jour tous les index existant sur la table.",
+        "Mettre à jour tous les index existants sur la table",
+      ),
+    ).toBe(false);
+    expect(etalonUtile("La commande mesure les temps.", "La commande mesure le temps")).toBe(false);
+  });
+
+  it("montre encore un étalon qui ajoute une cause", () => {
+    expect(
+      etalonUtile(
+        "La commande mesure les temps, parce qu'elle exécute réellement la requête au lieu de l'estimer.",
+        "La commande mesure le temps",
+      ),
+    ).toBe(true);
+  });
+});
