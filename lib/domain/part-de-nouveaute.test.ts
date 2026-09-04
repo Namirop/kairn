@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { bornerLeNeuf, PART_NEUVE, placesPourLeNeuf } from "./part-de-nouveaute";
+import { ARRIERE_QUI_FERME, bornerLeNeuf, PART_NEUVE, placesPourLeNeuf } from "./part-de-nouveaute";
 
 const HIER = new Date("2026-09-03T10:00:00Z");
 
@@ -24,9 +24,22 @@ const unConcept = fc.record({
 
 describe("placesPourLeNeuf", () => {
   it("garantit sa part quand la révision se bouscule", () => {
-    expect(placesPourLeNeuf(20, 100)).toBe(8);
-    expect(placesPourLeNeuf(5, 100)).toBe(2);
-    expect(placesPourLeNeuf(50, 100)).toBe(20);
+    expect(placesPourLeNeuf(20, 30)).toBe(8);
+    expect(placesPourLeNeuf(5, 8)).toBe(2);
+    expect(placesPourLeNeuf(50, 80)).toBe(20);
+  });
+
+  it("ferme l'entrée quand l'arriéré décroche", () => {
+    expect(placesPourLeNeuf(20, 41)).toBe(0);
+    expect(placesPourLeNeuf(5, 11)).toBe(0);
+    expect(placesPourLeNeuf(50, 101)).toBe(0);
+  });
+
+  // Deux journées de retard sont un accident, pas un décrochage : la garantie
+  // tient jusqu'au seuil compris et ne tombe qu'au-delà.
+  it("tient jusqu'au seuil, et pas un concept de plus", () => {
+    expect(placesPourLeNeuf(20, 40)).toBe(8);
+    expect(placesPourLeNeuf(20, 41)).toBe(0);
   });
 
   it("prend tout ce que la révision ne réclame pas", () => {
@@ -36,8 +49,8 @@ describe("placesPourLeNeuf", () => {
   });
 
   it("laisse au moins une place tant que la session en a une", () => {
-    expect(placesPourLeNeuf(1, 50)).toBe(1);
-    expect(placesPourLeNeuf(2, 50)).toBe(1);
+    expect(placesPourLeNeuf(1, 2)).toBe(1);
+    expect(placesPourLeNeuf(2, 4)).toBe(1);
   });
 
   it("ne rend rien d'une session vide ou négative", () => {
@@ -45,13 +58,15 @@ describe("placesPourLeNeuf", () => {
     expect(placesPourLeNeuf(-3, 10)).toBe(0);
   });
 
-  it("ne dépasse jamais le plafond, ni ne descend sous sa part", () => {
+  it("ne dépasse jamais le plafond, et tient sa part tant que l'arriéré tient", () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 60 }),
         fc.integer({ min: 0, max: 300 }),
         (plafond, disponibles) => {
           const places = placesPourLeNeuf(plafond, disponibles);
+
+          if (disponibles > ARRIERE_QUI_FERME * plafond) return places === 0;
 
           return places <= plafond && places >= Math.max(1, Math.round(plafond * PART_NEUVE));
         },
@@ -95,6 +110,19 @@ describe("bornerLeNeuf", () => {
     const candidats = [neuf("a"), revu("b"), neuf("c"), revu("d"), neuf("e")];
 
     expect(bornerLeNeuf(candidats, 3).map((c) => c.id)).toEqual(["a", "b", "d"]);
+  });
+
+  it("rend la session entière à la révision quand l'arriéré décroche", () => {
+    // Soixante concepts en retard sur une session de vingt : plus rien n'entre,
+    // et l'entrée repartira d'elle-même quand l'arriéré repassera sous le seuil.
+    expect(compte(bornerLeNeuf([...neufs(50), ...revus(60)], 20))).toEqual({
+      neufs: 0,
+      revus: 20,
+    });
+  });
+
+  it("rouvre l'entrée dès que l'arriéré repasse sous le seuil", () => {
+    expect(compte(bornerLeNeuf([...neufs(50), ...revus(40)], 20))).toEqual({ neufs: 8, revus: 12 });
   });
 
   it("rend une session vide sur un plafond nul", () => {

@@ -28,6 +28,12 @@
  * Ce que la journée sert au total ne change pas : c'est toujours le plafond, ou
  * tout ce qui est dû s'il y en a moins. Seule la composition change. Le tableau
  * de bord, qui ne compte que des nombres, n'a rien à réapprendre.
+ *
+ * **Trois régimes, et le troisième est celui qui sauve.** Quand rien ne presse,
+ * le neuf prend toute la session. Quand la révision se bouscule, il garde sa
+ * part. Quand l'arriéré décroche, il n'a plus rien : voir `ARRIERE_QUI_FERME`,
+ * qui dit pourquoi une garantie sans soupape aggrave ce qu'elle prétend
+ * corriger.
  */
 
 /**
@@ -42,23 +48,50 @@
 export const PART_NEUVE = 0.4;
 
 /**
+ * L'arriéré à partir duquel l'entrée se ferme, en journées de session.
+ *
+ * **La garantie est calibrée pour une rafale, pas pour un débit.** Un concept
+ * neuf coûte environ quatre passages dans son premier mois — J+1, J+3, J+7,
+ * J+15. Huit entrées par jour tenues dans la durée produisent donc une trentaine
+ * de révisions quotidiennes, pour un plafond à vingt : à ce rythme l'arriéré ne
+ * se résorbe jamais, et la garantie qui devait protéger la révision finit par
+ * l'étouffer à son tour. Le débit réellement soutenable est plutôt de quatre à
+ * cinq par jour sur une session de vingt.
+ *
+ * Un gros dépôt suivi de calme, en revanche, se digère très bien : c'est
+ * exactement ce que la garantie sert, et il ne faut pas la retirer pour autant.
+ *
+ * Ce qui manquait, c'est la soupape. Au-delà de deux journées de retard, la
+ * garantie s'efface et la session se consacre entièrement à ce qui est en train
+ * d'être oublié ; l'entrée repart d'elle-même quand l'arriéré repasse sous le
+ * seuil. C'est ce qu'un utilisateur d'Anki fait à la main en mettant son quota de
+ * nouvelles cartes à zéro le temps de remonter — ici personne n'a à y penser.
+ *
+ * Deux journées et pas une : à une seule, une mauvaise journée fermerait
+ * l'entrée du lendemain. Le seuil doit distinguer un accident d'un décrochage.
+ */
+export const ARRIERE_QUI_FERME = 2;
+
+/**
  * Les places que le neuf peut prendre.
  *
  * Le maximum des deux règles : sa part garantie, et tout ce que la révision
  * laisse. Jamais plus que le plafond, puisque les deux termes y sont bornés.
  *
- * Au moins une place dès que la session en a une : une part arrondie à zéro
- * arrêterait l'introduction pour toujours, et un concept qui n'entre jamais ne
- * vaut pas mieux qu'un concept perdu.
+ * Au moins une place dès que la session en a une — une part arrondie à zéro
+ * arrêterait l'introduction pour toujours —, **sauf quand l'arriéré passe le
+ * seuil** : là, la garantie tombe à rien, et c'est délibéré.
  */
 export function placesPourLeNeuf(plafond: number, revusDisponibles: number): number {
   const borne = Math.max(0, plafond);
 
   if (borne === 0) return 0;
 
-  const garantie = Math.max(1, Math.round(borne * PART_NEUVE));
+  const arriere = Math.max(0, revusDisponibles);
+  const garantie =
+    arriere > ARRIERE_QUI_FERME * borne ? 0 : Math.max(1, Math.round(borne * PART_NEUVE));
 
-  return Math.max(garantie, borne - Math.max(0, revusDisponibles));
+  return Math.max(garantie, borne - arriere);
 }
 
 /**
