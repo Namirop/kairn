@@ -29,14 +29,14 @@
  * c'est le prompt qu'il faut reprendre, pas ce filtre qu'il faut assouplir.
  */
 
-/** Minuscules, sans accents, apostrophes ramenées à une seule forme. */
+/** Minuscules, apostrophes ramenées à une seule forme, espaces resserrés. */
+function minuscule(texte: string): string {
+  return texte.toLowerCase().replace(/[’‘`]/g, "'").replace(/\s+/g, " ");
+}
+
+/** La même chose, accents ôtés : c'est la forme que lisent les motifs ci-dessous. */
 function aplati(texte: string): string {
-  return texte
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[’‘`]/g, "'")
-    .replace(/\s+/g, " ");
+  return minuscule(texte).normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
 /**
@@ -61,6 +61,38 @@ const RENVOIS: readonly RegExp[] = [
   /\bci-dessus\b|\bci-dessous\b|\bplus haut\b|\bci-contre\b/,
   /\bthis\s+(?:concept|text|passage|excerpt|statement|note)\b/,
   /\b(?:mentioned|described|stated|given|shown)\s+(?:above|in the (?:concept|text|passage))\b/,
+  /\bmentioned\b(?!\s+(?:in|by|above|earlier|below))/,
+];
+
+/**
+ * Le participe de citation employé seul, qui pointe sans nommer.
+ *
+ * « **Compare les deux indicateurs mentionnés** et précise lequel prédit le
+ * mieux l'issue d'un match » — servi en session. Aucun indicateur n'est
+ * mentionné : on ne voit que la question. C'est la même faute que « mentionné
+ * dans le concept », en plus discret, et elle échappait aux motifs ci-dessus qui
+ * exigent tous que la cible du renvoi soit nommée.
+ *
+ * **Les accents comptent ici, et c'est pour ça que ce motif est à part.** Sans
+ * eux, « mentionné » et « il mentionne » sont le même mot, et la seconde forme
+ * est une phrase parfaitement normale. Le participe accentué, lui, ne peut que
+ * renvoyer à quelque chose. On ne relève pas « cité », homographe d'un nom
+ * courant, ni les participes ordinaires — « décrit », « donné » — qui ont mille
+ * emplois légitimes : le renvoi se reconnaît au verbe de citation.
+ *
+ * La négation garde ce qui nomme sa source : « mentionné par Newton »,
+ * « évoquée dans la loi » désignent quelque chose que le lecteur peut situer.
+ *
+ * Les bornes sont des assertions de lettre et non des `\b` : la limite de mot de
+ * JavaScript se calcule sur l'ASCII, où « é » n'est pas une lettre. `\bévoqué\b`
+ * ne reconnaît donc ni le début ni la fin du mot qu'il nomme.
+ */
+const LETTRE = "a-zà-öø-ÿ";
+
+const RENVOIS_ACCENTUES: readonly RegExp[] = [
+  new RegExp(
+    `(?<![${LETTRE}])(?:mentionn|évoqu)ée?s?(?![${LETTRE}])(?!\\s+(?:dans|par|au|aux|à|comme|ci-|plus haut))`,
+  ),
 ];
 
 /** La tournure fautive trouvée dans ce texte, ou `null`. */
@@ -69,6 +101,14 @@ export function renvoiAuConcept(texte: string): string | null {
 
   for (const motif of RENVOIS) {
     const trouve = motif.exec(plat);
+
+    if (trouve) return trouve[0];
+  }
+
+  const accentue = minuscule(texte);
+
+  for (const motif of RENVOIS_ACCENTUES) {
+    const trouve = motif.exec(accentue);
 
     if (trouve) return trouve[0];
   }

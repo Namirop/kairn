@@ -113,3 +113,32 @@ describe("sansRenvoiAuConcept", () => {
     );
   });
 });
+
+describe("le participe de citation employé seul", () => {
+  it("relève un renvoi qui ne nomme pas ce qu'il désigne", () => {
+    expect(
+      renvoiAuConcept(
+        "Compare les deux indicateurs mentionnés et précise lequel prédit le mieux l'issue d'un match.",
+      ),
+    ).toBe("mentionnés");
+    expect(renvoiAuConcept("Quel mécanisme évoqué courbe la trajectoire ?")).toBe("évoqué");
+    expect(renvoiAuConcept("La condition mentionnée suffit-elle ?")).toBe("mentionnée");
+    expect(renvoiAuConcept("Compare the two indicators mentioned.")).toBe("mentioned");
+  });
+
+  it("laisse passer un participe qui nomme sa source", () => {
+    expect(renvoiAuConcept("L'effet mentionné par Newton porte son nom.")).toBeNull();
+    expect(renvoiAuConcept("La règle évoquée dans la loi de 1905 s'applique.")).toBeNull();
+    expect(renvoiAuConcept("The rule mentioned in the RFC applies.")).toBeNull();
+  });
+
+  it("ne confond pas le participe avec le verbe conjugué", () => {
+    expect(renvoiAuConcept("Le rapport mentionne une hausse de trois points.")).toBeNull();
+    expect(renvoiAuConcept("Ce traité évoque une paix durable.")).toBeNull();
+  });
+
+  it("ne relève pas les homographes d'un nom courant", () => {
+    expect(renvoiAuConcept("La cité interdite compte neuf mille pièces.")).toBeNull();
+    expect(renvoiAuConcept("Le mécanisme décrit une trajectoire parabolique.")).toBeNull();
+  });
+});

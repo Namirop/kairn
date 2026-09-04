@@ -108,6 +108,13 @@
  * lâche : « recopie l'option » est devenu « recopie l'option mot pour mot »,
  * parce que `etalonUtile` efface une redite exacte et pas une paraphrase.
  *
+ * **Le renvoi au concept se fait aussi par le participe seul, relevé le 4
+ * septembre 2026.** « Compare les deux indicateurs mentionnés et précise lequel
+ * prédit le mieux l'issue d'un match » a été servi en session : aucun des deux
+ * n'est nommé, et l'écran ne montre pas le concept. `renvoiAuConcept` le relève
+ * maintenant, donc la question serait écartée sans être écrite — cette consigne
+ * évite d'en perdre une pour rien.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -186,7 +193,9 @@ CE QUI TUE UNE QUESTION
 
 - Elle renvoie au concept, au texte ou à ce qui précède : « mentionné dans le concept »,
   « d'après le texte », « ci-dessus ». Rien de tout ça n'est montré au moment de répondre —
-  on ne voit que la question. Elle se lit seule ou elle ne se lit pas.
+  on ne voit que la question. Elle se lit seule ou elle ne se lit pas. Le participe employé
+  seul renvoie tout autant : « compare les deux indicateurs **mentionnés** » ne nomme aucun
+  des deux, et personne ne peut aller les chercher. Nomme-les, ou n'y renvoie pas.
 - La réponse figure dans la formulation de la question.
 - La question se répond par oui ou par non alors que le format ne l'appelle pas.
 - Elle teste un mot exact plutôt que l'idée. On veut savoir si la personne comprend,
