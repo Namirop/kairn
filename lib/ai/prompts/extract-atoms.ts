@@ -30,6 +30,38 @@
  * modèle fait déjà, c'est ce que la liste du dépôt affiche, et c'est ce qui
  * permet à l'écran de dire où la lecture s'est arrêtée quand elle s'arrête.
  *
+ * **Deux règles ajoutées le 4 septembre 2026, à la relecture d'un dépôt de
+ * 7 431 signes.**
+ *
+ * 1. *Le degré de certitude ne s'ajoute pas.* La source disait « le navigateur
+ *    consulte sa liste HSTS », la sortie a écrit « peut consulter ». Le modèle
+ *    se couvre tout seul, et « peut », « généralement », « typiquement »,
+ *    « devraient idéalement » revenaient partout. Ce n'est pas de la prudence :
+ *    c'est un concept rendu flou, donc une question dont la bonne réponse est
+ *    floue — sur un format où l'on se note soi-même, personne ne sait plus s'il
+ *    avait juste. La section interdisait déjà d'ajouter du **contenu** ; elle ne
+ *    disait rien de la **nuance**.
+ * 2. *Un concept affirme une seule chose.* Un des vingt empilait la limite de
+ *    HTTP/1.1, le multiplexage de HTTP/2 et le blocage de tête de file qui
+ *    persiste malgré lui — trois mécanismes en un. « QUAND FUSIONNER » disait
+ *    quand ne pas séparer et n'avait pas son test symétrique ; le voici, et il
+ *    est opérationnel : si l'énoncé a besoin de « mais » ou « tandis que » pour
+ *    relier deux mécanismes, c'est deux concepts.
+ *
+ * **La seconde peut faire pencher trop loin**, et c'est ce qu'il faudra
+ * regarder : la section de fusion a été écrite sur 64 doublons mesurés, et un
+ * test de découpe trop zélé les ferait revenir. Elle est volontairement bornée
+ * aux *mécanismes différents* — pas à toute conjonction. Ces deux règles partent
+ * en production sans passage au banc, sur décision de Romain : elles se jugeront
+ * sur les dépôts réels.
+ *
+ * **Ce qui n'a pas été fait, et pourquoi.** Faire varier le nombre de questions
+ * de deux à cinq selon les facettes « réellement trouvées » a été proposé et
+ * écarté : les quatre facettes ne se trouvent pas, elles sont imposées, et c'est
+ * cette contrainte qui empêche de servir quatre habillages du même angle. Le cas
+ * du concept pauvre est déjà traité, en sens inverse et exprès — voir
+ * `generate-variants.ts`, « la fidélité prime sur la variété ».
+ *
  * **Le critère d'altérité a été ajouté le 27 août 2026**, à la demande de
  * Romain, après que E16 a été rejeté puis accepté sur deux tirages du même
  * texte. Accepté, il donnait un texte à trous sur le souhait que la personne
@@ -88,6 +120,13 @@ borderline coûte moins que le laisser produire ses jumelles.
 Ne fusionne pas ce qui ne se déduit pas : deux mécanismes distincts, une règle et son
 exception, un principe et son cas où il ne s'applique plus restent séparés.
 
+Le test qui tranche dans ce sens-là : un concept affirme **une seule chose**. Si
+l'énoncer demande « mais », « tandis que », « en revanche » ou « alors que » pour relier
+deux mécanismes différents, ce sont deux concepts. Un concept qui empile la limite d'un
+protocole, la solution qui l'a remplacée et ce qui bloque encore malgré elle n'en est
+pas un : c'en est trois, et les quatre questions qu'il produira n'en interrogeront qu'un
+tiers chacune.
+
 COMBIEN
 
 Autant que le contenu en porte, pas un de plus. Une phrase dense peut en porter deux ;
@@ -108,6 +147,15 @@ Tu n'ajoutes rien. Pas de contexte que tu connais et qui n'est pas dans le texte
 de précision technique absente, pas d'exemple inventé. Un concept doit être entièrement
 soutenu par ce qui a été déposé. Cette règle prime sur la clarté : mieux vaut un
 concept étroit et fidèle qu'un concept enrichi.
+
+**Tu n'ajoutes pas non plus de prudence.** Le degré de certitude est celui de la source,
+jamais le tien. « Le navigateur consulte sa liste » ne devient pas « peut consulter » ;
+« la clé est éphémère » ne devient pas « est généralement éphémère ». Ces « peut », ces
+« typiquement », ces « devraient idéalement » ne protègent personne : ils rendent flou un
+concept qui ne l'était pas, et la question qui en sortira aura une réponse floue que
+celui qui se note lui-même ne saura pas trancher.
+
+Si la source hésite, hésite avec elle et dans ses mots. Si elle affirme, affirme.
 
 CE QUE LE DÉPÔT PRÉTEND ÊTRE
 
