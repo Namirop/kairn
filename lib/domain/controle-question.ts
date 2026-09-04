@@ -1,3 +1,4 @@
+import { termeDebordeSurLaPhrase } from "./bord-du-trou";
 import type { Manquement } from "./manquement";
 import { renvoiAuConcept } from "./renvoi-au-concept";
 import { TROU } from "./reponse-cloze";
@@ -118,6 +119,24 @@ function controlerCloze(variant: VariantAControler): Manquement[] {
 
   if (mots.length === 0 || mots.length > MOTS_MAX_DU_TROU) {
     return [{ regle: "trou", detail: `le terme masqué fait ${mots.length} mots : « ${terme} »` }];
+  }
+
+  /*
+    Un terme qui redit un mot posé contre le trou.
+
+    « une fenêtre de ___ semaines », terme « 52 semaines » : la phrase comblée
+    affiche « 52 semaines semaines », et « 52 » — la bonne réponse — est comptée
+    fausse parce que la comparaison exige le même nombre de mots. Réparé à la
+    lecture par `trouSansRedite` ; signalé ici pour que le banc dise si la
+    consigne du prompt prend.
+  */
+  if (termeDebordeSurLaPhrase(cloze.sentence, terme)) {
+    return [
+      {
+        regle: "trou",
+        detail: `le terme masqué redit un mot qui borde le trou : « ${terme} »`,
+      },
+    ];
   }
 
   /*

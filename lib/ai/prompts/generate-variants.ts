@@ -93,6 +93,13 @@
  * `payload`, et une affirmation qui ne le dit pas n'est plus écrite du tout —
  * voir `sansAffirmationMuette`.
  *
+ * **Le terme masqué ne borde plus sa propre phrase, depuis le 4 septembre 2026.**
+ * « une fenêtre de \_\_\_ semaines » avec « 52 semaines » pour terme affichait
+ * « 52 semaines semaines » une fois le trou comblé, et comptait « 52 » — la bonne
+ * réponse — comme fausse, la comparaison exigeant le même nombre de mots. La
+ * lecture répare le stock (`trouSansRedite`), le contrôle mesure, et cette
+ * consigne arrête d'en produire.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -212,6 +219,11 @@ court et demande ce qu'il produit, ce qui lui manque, ou ce qui le casse.
 CLOZE : une phrase du concept dont on masque le terme porteur de sens. Le trou
 fait un à trois mots, jamais une proposition entière. Ne masque ni un article,
 ni un mot de liaison, ni un verbe passe-partout.
+
+Le terme masqué ne reprend aucun mot qui reste écrit juste avant ou juste après le
+trou. Sur « une fenêtre de \_\_\_ semaines », on masque « 52 » et pas « 52 semaines » :
+le second mot est déjà sous les yeux, le redemander l'afficherait deux fois et ferait
+compter fausse la bonne réponse.
 
 Avant de choisir le mot à masquer, vérifie qu'on ne pourrait pas le retrouver en
 lisant seulement le reste de la phrase. Si la grammaire le rend prévisible, ou

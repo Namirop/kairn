@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { VariantFacet, VariantFormat } from "@/lib/db/types";
+import { trouSansRedite } from "@/lib/domain/bord-du-trou";
 import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
 import { joursEntre, localDay } from "@/lib/domain/local-day";
 import { tagsSansReponse } from "@/lib/domain/tags-sans-reponse";
@@ -138,13 +139,17 @@ export function optionsDUnQCM(format: VariantFormat, payload: unknown): string[]
  * Le texte à trou, ou `null` si le format n'en est pas un — ou si sa phrase est
  * illisible, auquel cas la question repart en format ouvert plutôt que de poser
  * un champ de saisie que rien ne pourra vérifier.
+ *
+ * Le terme attendu est rendu à sa juste longueur au passage : quand il redit un
+ * mot posé contre le trou, la phrase l'affiche deux fois et la comparaison
+ * refuse la bonne réponse. Voir `trouSansRedite`.
  */
 function lireTrou(format: VariantFormat, payload: unknown): QuestionServie["cloze"] {
   if (format !== "CLOZE") return null;
 
   const lu = PAYLOAD_CLOZE.safeParse(payload);
 
-  return lu.success ? lu.data : null;
+  return lu.success ? trouSansRedite(lu.data) : null;
 }
 
 export function questionServie(
