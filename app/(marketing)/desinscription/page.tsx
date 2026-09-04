@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { FormulaireDesinscription } from "@/components/compte/formulaire-desinscription";
+import { Panneau } from "@/components/coquille/panneau";
+import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
+import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/lib/auth/routes";
 import { readUnsubscribeToken } from "@/lib/email/unsubscribe";
 
 export const metadata: Metadata = { title: "Ne plus recevoir d'emails", robots: { index: false } };
@@ -10,6 +15,20 @@ export const metadata: Metadata = { title: "Ne plus recevoir d'emails", robots: 
  * L'affichage ne modifie rien : les scanners de messagerie ouvrent les liens
  * des emails, et une désinscription déclenchée par un robot serait une
  * désinscription qu'on n'a pas demandée. Seul le bouton écrit.
+ *
+ * **C'est une halte, et elle se dessine comme telle.** Elle posait son titre en
+ * haut à gauche d'un panneau vide, hors de toute mesure — une colonne plus large
+ * que l'écran d'un téléphone, donc sans une gouttière, le texte contre le bord —
+ * et laissait les deux tiers de la hauteur en dessous. C'est le défaut que
+ * `Palier` a corrigé côté révision, pour la même raison : quand un écran ne porte
+ * que trois lignes, c'est le titre qui doit porter le vide, et le vide doit être
+ * réparti autour de lui.
+ *
+ * Le lien mort a son propre titre. Quelqu'un qui arrive ici a cliqué sur une
+ * intention, pas sur une page : lui répondre « Ne plus recevoir d'emails » puis
+ * lui expliquer en petits caractères que ça ne marchera pas, c'est lui faire
+ * lire deux fois avant de comprendre. L'écran dit ce qui s'est passé, puis ce
+ * qu'il reste à faire — et il ouvre la porte plutôt que de la nommer.
  */
 export default async function PageDesinscription({
   searchParams,
@@ -17,30 +36,31 @@ export default async function PageDesinscription({
   searchParams: Promise<{ jeton?: string }>;
 }) {
   const { jeton } = await searchParams;
-  const valide = jeton ? readUnsubscribeToken(jeton) !== null : false;
+  const valide = jeton !== undefined && readUnsubscribeToken(jeton) !== null;
 
   return (
-    <div className="py-pas-24 mx-auto max-w-md">
-      <h1 className="font-display text-h1-app leading-tight font-bold">
-        Ne plus recevoir d&apos;emails
-      </h1>
+    <PileDePanneaux sol="papier">
+      <Panneau surface="papier" mesure="texte" remplit centre>
+        <h1 className="font-display text-h2-site leading-[1.05] font-bold tracking-[-0.02em] text-balance text-stone-900">
+          {valide ? "Ne plus recevoir d'emails" : "Ce lien n'est plus valide"}
+        </h1>
 
-      {valide && jeton ? (
-        <>
-          <p className="mt-pas-3 text-stone-500">
-            Ton compte reste intact. Seuls les rappels par email s&apos;arrêtent — tu peux les
-            réactiver depuis tes réglages.
-          </p>
-          <div className="mt-pas-8">
-            <FormulaireDesinscription jeton={jeton} />
-          </div>
-        </>
-      ) : (
-        <p className="mt-pas-3 text-stone-500">
-          Ce lien n&apos;est plus valide. Ouvre le dernier email reçu, ou coupe les rappels depuis
-          tes réglages une fois connecté.
+        <p className="mt-pas-4 md:mt-pas-6 text-corps max-w-lg leading-relaxed text-pretty text-stone-500">
+          {valide
+            ? "Ton compte reste intact. Seuls les rappels par email s'arrêtent — tu peux les réactiver quand tu veux."
+            : "Les liens de désinscription expirent. Ouvre le dernier email reçu, ou coupe les rappels depuis tes réglages."}
         </p>
-      )}
-    </div>
+
+        <div className="mt-pas-8 md:mt-pas-12">
+          {valide && jeton !== undefined ? (
+            <FormulaireDesinscription jeton={jeton} />
+          ) : (
+            <Button asChild>
+              <Link href={ROUTES.reglages}>Ouvrir mes réglages</Link>
+            </Button>
+          )}
+        </div>
+      </Panneau>
+    </PileDePanneaux>
   );
 }
