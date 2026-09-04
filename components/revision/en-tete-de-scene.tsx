@@ -42,7 +42,7 @@ export function EnTeteDeScene({
       <p className="gap-pas-3 flex flex-wrap items-baseline">
         <span
           className={`text-mono font-mono tracking-[0.14em] text-stone-500 uppercase ${
-            intituleEnMarge ? "@min-[96rem]:hidden" : ""
+            intituleEnMarge ? "@min-[92rem]:hidden" : ""
           }`}
         >
           {intitule}

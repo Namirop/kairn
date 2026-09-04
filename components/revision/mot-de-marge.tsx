@@ -55,8 +55,18 @@ export function MotDeMarge({ mot }: { mot: string }) {
     // qu'on veut à distance fixe de la colonne, et sa largeur dépend du corps.
     // Le seuil porte sur la colonne et non sur la fenêtre — avec le rail à
     // droite, la même fenêtre laisse deux marges très différentes.
+    //
+    // Quatre-vingt-douze rems, et c'est le plancher : le contenu de la colonne
+    // est borné à soixante-douze, donc la marge vaut dix rems de chaque côté, et
+    // le mot le plus large en a besoin de neuf. C'est « SESSION » qui commande —
+    // sept lettres, donc dessiné à quatre-vingt-treize pixels, plus les trois
+    // rems qui le tiennent à distance de la colonne. Descendre plus bas ferait
+    // toucher le mot et le texte. Le seuil était à quatre-vingt-seize, ce qui
+    // laissait deux rems inutiles et coupait juste au-dessus d'un écran de deux
+    // mille cinq cents à cent cinquante pour cent — la configuration de bureau
+    // la plus courante passait à cinq pixels près, du mauvais côté.
     <p
-      className="mr-pas-12 pointer-events-none absolute inset-y-0 right-full hidden justify-between font-mono leading-none text-stone-300 uppercase select-none [writing-mode:vertical-rl] @min-[96rem]:flex"
+      className="mr-pas-12 pointer-events-none absolute inset-y-0 right-full hidden justify-between font-mono leading-none text-stone-300 uppercase select-none [writing-mode:vertical-rl] @min-[92rem]:flex"
       style={{ fontSize: `${corpsDeLaMarge(lettres.length)}px` }}
     >
       {/* Lettre à lettre pour l'œil, d'un bloc pour l'oreille : épelé, le mot
