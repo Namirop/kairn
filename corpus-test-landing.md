@@ -18,8 +18,9 @@ pas combien.
 État de référence : figé `2026-08-20-11h58`, prompts A1 + B1 + B2, `openai/gpt-5.6-luna` en
 production via OpenRouter.
 
-Bornes : min 40 caractères, max 4000 caractères. Plafond produit : 20 concepts par dépôt, appliqué
-par découpe côté serveur.
+Bornes du visiteur : min 40 caractères, max 4000 — inchangées, alors que le plafond d'un compte est
+passé à 16 000 le 04/09/2026. Plafond produit : 50 concepts par dépôt, appliqué par découpe côté
+serveur, et la découpe suit **l'ordre du texte** et non un classement par importance.
 
 ---
 
@@ -210,9 +211,9 @@ _(à assembler : coller D11 deux fois de suite, séparé par une ligne vide)_
 répétition. Teste aussi l'affichage à hauteur bornée (3 visibles + défilement) et le comportement
 à l'approche de la borne des 4000 caractères.
 
-Le plafond serveur de **20 concepts** n'est pas en jeu ici — aucun texte du corpus n'en approche.
-S'il l'était, la découpe serveur s'appliquerait, avec son drapeau de troncature calculé côté
-serveur.
+Le plafond serveur de **50 concepts** n'est pas en jeu ici — aucun texte du corpus n'en approche, et
+la borne de 4 000 signes d'un visiteur rend le cas hors d'atteinte. S'il l'était, la découpe serveur
+s'appliquerait, avec son drapeau de troncature calculé côté serveur.
 
 ---
 

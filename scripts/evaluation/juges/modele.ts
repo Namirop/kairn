@@ -23,8 +23,10 @@ export const MODELE_DES_JUGES = "claude-haiku-4-5";
 /**
  * De quoi rendre un verdict par candidat sur le plus gros lot.
  *
- * `23-pave-maximal` porte vingt concepts ; un dépôt peut donc présenter une
- * vingtaine de candidats au même juge, chacun avec son motif. Explicite, comme
+ * `23-pave-maximal` porte une vingtaine de concepts ; un dépôt peut donc
+ * présenter autant de candidats au même juge, chacun avec son motif. Le corpus
+ * n'a pas de texte qui approche le plafond de cinquante — s'il en gagne un, ce
+ * budget est le premier à revoir. Explicite, comme
  * partout ailleurs — jamais laissé au défaut du SDK.
  */
 export const TOKENS_DES_JUGES = 4000;

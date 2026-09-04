@@ -15,7 +15,7 @@ import { dayToUtcDate, localDay } from "./local-day";
  *
  * Tout se calcule sur des étiquettes `AAAA-MM-JJ` dans le calendrier de
  * l'utilisateur. Un décompte mensuel qui basculerait à minuit UTC rendrait à
- * quelqu'un ses trente concepts au milieu de sa soirée, ou la veille au soir.
+ * quelqu'un le quota de sa période au milieu de sa soirée, ou la veille au soir.
  */
 
 /** Une période de facturation, bornes comprises pour le début, exclue pour la fin. */

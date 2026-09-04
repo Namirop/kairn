@@ -48,6 +48,7 @@ Ce qui manque, et qui se voit :
 | Modèle             | SDK Anthropic, sorties structurées contraintes, validation Zod                       |
 | Interface          | Tailwind v4, primitives shadcn/ui retokenisées, Motion                               |
 | Email              | Resend                                                                               |
+| Mesure d'audience  | Vercel Web Analytics, sans cookie ni identifiant persistant                          |
 
 ## Prérequis
 

@@ -112,7 +112,7 @@ export function estPayant(abonnement: Abonnement, maintenant: Date): boolean {
  * parce qu'un dépôt rejeté paie son extraction sans rendre le moindre concept :
  * sans lui, on pourrait déposer des textes rejetés sans fin. Mais il était figé
  * à soixante, posé quand trente concepts étaient le seul plafond — si bien qu'un
- * compte payant, qui a droit à trois cents concepts, était arrêté au soixantième
+ * compte payant, qui a droit à cinq cents concepts, était arrêté au soixantième
  * dépôt. Une phrase par dépôt, et l'offre achetée rendait le cinquième de ce
  * qu'elle promet.
  *

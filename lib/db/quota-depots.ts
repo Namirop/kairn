@@ -65,9 +65,11 @@ import { debutEnDate } from "@/lib/domain/periode-de-quota";
  * jamais dans le compteur que le plafond de concepts surveille, et sans ce
  * rideau-là quelqu'un pourrait ne déposer que des textes rejetés, sans fin.
  *
- * L'ordre de grandeur vient de là : soixante extractions de 8 000 caractères,
- * autour de 2 400 tokens d'entrée chacune. Elles coûtaient près de **0,45 $** au
- * tarif Sonnet ; au tarif Luna elles en coûtent **une trentaine de fois moins**.
+ * L'ordre de grandeur vient de là : le rideau vaut le double du plafond de
+ * concepts, donc cent extractions pour un compte gratuit, de seize mille
+ * caractères au pire — autour de 4 800 tokens d'entrée chacune. Au tarif Sonnet
+ * ce plein aurait coûté plus d'un dollar ; au tarif Luna il en coûte **une
+ * trentaine de fois moins**.
  * Comme le plafond de concepts, ce rideau ne protège plus un budget — il protège
  * contre l'abus, ce qui est un autre métier.
  *

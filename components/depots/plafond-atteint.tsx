@@ -27,8 +27,8 @@ type Props = {
    * Laquelle des deux limites a fermé la période.
    *
    * Elles ne se disent pas pareil et se confondre coûte cher : annoncer
-   * « autour de trente concepts » à quelqu'un qui en a consommé douze mais
-   * déposé soixante fois, c'est lui décrire un bug.
+   * « autour de cinquante concepts » à quelqu'un qui en a consommé douze mais
+   * déposé cent fois, c'est lui décrire un bug.
    */
   motif: "concepts" | "depots";
   /** Le nombre atteint : des concepts ou des dépôts selon le motif. */

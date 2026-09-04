@@ -207,6 +207,12 @@ désaturé qui signale et un accent ember réservé à l'affichage du streak.
 - **`--jeton-clair`** (`color-mix(in oklab, #f2f2ef 12%, transparent)`) :
   version pour la surface roche — encre diluée y serait plus sombre que le
   fond.
+- **Un jeton court ne se coupe pas** (≤ 20 signes, seuil mesuré sur la ligne la
+  plus étroite du produit). `s-maxage=300` se coupait sur son trait d'union, et
+  `box-decoration-break: clone` donnait deux cadres entiers : on lisait deux
+  termes là où il y en a un. Le cadre cloné reste pour les longs extraits, où la
+  coupure est inévitable et où deux cadres pleins valent mieux qu'un cadre
+  fendu.
 
 ### Named Rules
 

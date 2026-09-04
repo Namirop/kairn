@@ -15,8 +15,8 @@ export type MotifDeRefus = "concepts" | "depots" | "debit";
  * Le message d'un refus, dit à l'utilisateur.
  *
  * Le plafond est reçu, plus lu : il dépend du plan du compte depuis que le
- * paiement existe, et une constante annoncerait trente concepts à quelqu'un qui
- * en a trois cents. Il vient du refus lui-même, qui le porte depuis la décision.
+ * paiement existe, et une constante annoncerait cinquante concepts à quelqu'un
+ * qui en a cinq cents. Il vient du refus lui-même, qui le porte depuis la décision.
  *
  * « Autour de », et c'est exact. Un dépôt est autorisé tant qu'il reste une
  * place, puis rend ce qu'il rend : le dernier de la période peut retenir huit
