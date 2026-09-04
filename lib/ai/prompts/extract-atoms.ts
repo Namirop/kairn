@@ -14,7 +14,21 @@
  * la règle de fusion (une conséquence directe entre dans son concept parent),
  * le contexte du coût (chaque concept produit 3-4 questions repassées pendant
  * des mois), et un rappel que la règle de tri existante reste — le plafond
- * serveur en dépend.
+ * serveur en dépendait alors.
+ *
+ * **Cette règle de tri a été retirée le 4 septembre 2026.** Elle demandait de
+ * classer du plus important au moins important, pour que le plafond serveur
+ * puisse couper la queue sans rien perdre d'essentiel. Mesuré sur le seul dépôt
+ * tronqué de la production : dix-huit des vingt concepts gardés se suivaient dans
+ * l'ordre exact du texte, et le dernier tombait à 87 % de sa longueur. Le modèle
+ * rendait l'ordre de lecture, pas un classement — c'est la cinquième propriété de
+ * distribution que ce projet aurait tenue par de la prose, après le plafond de
+ * concepts, la langue, la position de la bonne réponse et la part d'affirmations
+ * fausses. Aucune n'a tenu.
+ *
+ * L'ordre du texte est donc **demandé** au lieu d'être subi : c'est ce que le
+ * modèle fait déjà, c'est ce que la liste du dépôt affiche, et c'est ce qui
+ * permet à l'écran de dire où la lecture s'est arrêtée quand elle s'arrête.
  *
  * **Le critère d'altérité a été ajouté le 27 août 2026**, à la demande de
  * Romain, après que E16 a été rejeté puis accepté sur deux tirages du même
@@ -81,9 +95,9 @@ trois paragraphes de remplissage peuvent n'en porter qu'un. Ne complète jamais 
 atteindre un nombre. Un dépôt d'une ligne qui ne porte qu'une idée rend exactement un
 concept — c'est un bon résultat, pas un échec.
 
-N'écarte aucun concept. Classe-les du plus important au moins important, et rends-les
-dans cet ordre — le plus important d'abord. Si le texte en porte beaucoup, c'est cet
-ordre qui décidera de ce qui est gardé, et c'est toi qui le connais.
+N'écarte aucun concept. Rends-les dans l'ordre du texte : le premier concept est
+celui que le texte aborde en premier. Quelqu'un qui relit sa liste doit y retrouver
+le chemin de ce qu'il a déposé.
 
 REFORMULER, SANS AJOUTER
 

@@ -33,8 +33,8 @@ export async function reprendreLaVisite(userId: string): Promise<void> {
 
     // Ce que l'essai a produit entre au compteur du mois. Avant, il n'y entrait
     // nulle part : le chemin anonyme ne passe par aucun quota, si bien qu'un
-    // compte neuf démarrait avec ses concepts d'essai en plus des trente
-    // annoncés. Compté ici parce que c'est le premier instant où ces concepts
+    // compte neuf démarrait avec ses concepts d'essai en plus de ce qui lui
+    // était annoncé. Compté ici parce que c'est le premier instant où ces concepts
     // ont un compte à qui appartenir.
     await compterLaVisiteReprise(userId, await lireFuseauUtilisateur(userId), concepts);
 

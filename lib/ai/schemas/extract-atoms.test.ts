@@ -15,6 +15,9 @@ const concept = (rang: number) => ({
   uncertain: false,
 });
 
+/** Une sortie qui dépasse, quelle que soit la valeur du plafond. */
+const DE_TROP = PLAFOND_CONCEPTS_PAR_DEPOT + 5;
+
 const sortie = (combien: number, reste: Record<string, unknown> = {}) => ({
   nature: "FACTUEL",
   langue: "fr",
@@ -24,16 +27,18 @@ const sortie = (combien: number, reste: Record<string, unknown> = {}) => ({
 });
 
 describe("validation de extract_atoms", () => {
-  it("garde les vingt premiers concepts d'une sortie qui en rend vingt-cinq, sans lever", () => {
-    const lu = EXTRACT_ATOMS.validation.parse(sortie(25));
+  it("coupe au plafond une sortie qui le dépasse, sans lever", () => {
+    const lu = EXTRACT_ATOMS.validation.parse(sortie(DE_TROP));
 
     expect(lu.atoms).toHaveLength(PLAFOND_CONCEPTS_PAR_DEPOT);
-    expect(lu.rendus).toBe(25);
+    expect(lu.rendus).toBe(DE_TROP);
     expect(lu.tronque).toBe(true);
   });
 
-  it("garde la tête de la liste, celle que le prompt fait classer en premier", () => {
-    const lu = EXTRACT_ATOMS.validation.parse(sortie(25));
+  // La tête, c'est le début du texte : le prompt fait rendre les concepts dans
+  // l'ordre de lecture depuis le 04/09/2026, et plus par importance.
+  it("garde la tête de la liste, celle que le prompt fait rendre en premier", () => {
+    const lu = EXTRACT_ATOMS.validation.parse(sortie(DE_TROP));
 
     expect(lu.atoms[0]?.concept).toContain("numéro 0");
     expect(lu.atoms.at(-1)?.concept).toContain(`numéro ${PLAFOND_CONCEPTS_PAR_DEPOT - 1}`);
@@ -133,9 +138,10 @@ describe("les concepts qui se déclarent dérivés d'un voisin", () => {
   });
 
   it("laisse le plafond faire seul son travail", () => {
-    // Vingt-cinq rendus dont les cinq premiers se déclarent dérivés : ce sont
-    // bien les vingt premiers qui restent, dans l'ordre d'importance rendu.
-    const renvois = Array.from({ length: 25 }, (_, rang) => (rang < 5 ? 25 : null));
+    // Une sortie qui dépasse, dont les cinq premiers se déclarent dérivés : ce
+    // sont bien les premiers qui restent, dans l'ordre rendu. Le compte des
+    // dérivés est une mesure, il n'écarte rien.
+    const renvois = Array.from({ length: DE_TROP }, (_, rang) => (rang < 5 ? DE_TROP : null));
     const lu = EXTRACT_ATOMS.validation.parse(avecRenvois(renvois));
 
     expect(lu.derives).toBe(5);

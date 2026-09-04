@@ -19,9 +19,17 @@
  * réellement tenus. Un `.max()` n'est donc pas une limite, c'est un vœu — et un
  * vœu ne doit pas avoir le pouvoir de tout jeter.
  *
- * La sélection redevient notre travail : le prompt demande au modèle de classer
- * ses concepts du plus important au moins important, et de n'en écarter aucun.
- * Couper la queue d'une liste n'a de sens que si la tête est la plus importante.
+ * **La coupe emporte la fin du texte, et il faut le savoir.** Le prompt a
+ * longtemps demandé un classement par importance, pour que couper la queue ne
+ * perde rien d'essentiel. Mesuré le 04/09/2026 sur le seul dépôt tronqué de la
+ * production : dix-huit des vingt concepts gardés se suivaient dans l'ordre exact
+ * du texte, et le dernier tombait à 87 % de sa longueur. Le modèle rendait
+ * l'ordre de lecture, jamais un classement.
+ *
+ * La consigne a été retirée plutôt que renforcée — une propriété de distribution
+ * tenue par de la prose n'a jamais tenu sur ce projet, cinq fois sur cinq. Ce
+ * plafond coupe donc **positionnellement**, l'écran le dit ainsi, et la seule
+ * défense qui reste est de le poser assez haut pour qu'il ne coupe pas.
  */
 
 export const PLAFOND_CONCEPTS_PAR_DEPOT = 20;

@@ -126,11 +126,29 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
         </h2>
 
         {depot.conceptsTronques ? (
-          // La borne est la nôtre : le message dit ce qui s'est passé et ouvre
-          // une porte, sans conseiller de déposer moins ni reprocher la longueur.
+          /*
+            La borne est la nôtre : le message dit ce qui s'est passé et ouvre une
+            porte, sans conseiller de déposer moins ni reprocher la longueur.
+
+            **Il annonçait « les plus importants », et c'était faux.** Les concepts
+            sortent dans l'ordre du texte, pas par importance : mesuré le 04/09/2026
+            sur le seul dépôt tronqué de la production, dix-huit des vingt concepts
+            gardés se suivaient dans l'ordre exact du texte, et le dernier tombait à
+            87 % de sa longueur. La coupe emportait donc la fin — qui n'est pas la
+            partie la moins utile, juste la dernière.
+
+            Une consigne de prompt demandait ce classement. C'est la cinquième
+            propriété de distribution que ce projet aurait tenue par de la prose, et
+            comme les quatre autres elle ne tenait pas. Elle a été retirée plutôt
+            que renforcée : le modèle rend maintenant l'ordre du texte, que la liste
+            affiche, et le message dit où la lecture s'est arrêtée. « Dépose la
+            suite » demandait à l'utilisateur de deviner où couper ; le dernier
+            concept de la liste le lui montre.
+          */
           <p className="mt-pas-2 text-petit text-stone-500">
-            Ce texte en portait plus. On a gardé les {PLAFOND_CONCEPTS_PAR_DEPOT} plus importants —
-            dépose la suite si tu veux le reste.
+            Ce texte en portait plus de {PLAFOND_CONCEPTS_PAR_DEPOT}. On l&apos;a suivi dans
+            l&apos;ordre et on s&apos;est arrêté au dernier concept de cette liste — dépose la fin
+            du texte pour avoir le reste.
           </p>
         ) : null}
 

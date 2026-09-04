@@ -4,6 +4,9 @@ import { appliquerLePlafond, PLAFOND_CONCEPTS_PAR_DEPOT } from "./plafond-de-con
 
 const concepts = (combien: number) => Array.from({ length: combien }, (_, rang) => rang);
 
+/** Une liste qui dépasse, quelle que soit la valeur du plafond. */
+const DE_TROP = PLAFOND_CONCEPTS_PAR_DEPOT + 5;
+
 describe("appliquerLePlafond", () => {
   it("laisse passer une liste sous le plafond", () => {
     const applique = appliquerLePlafond(concepts(5));
@@ -21,15 +24,20 @@ describe("appliquerLePlafond", () => {
   });
 
   it("coupe au plafond et se souvient de ce qui avait été rendu", () => {
-    const applique = appliquerLePlafond(concepts(25));
+    const applique = appliquerLePlafond(concepts(DE_TROP));
 
     expect(applique.gardes).toHaveLength(PLAFOND_CONCEPTS_PAR_DEPOT);
-    expect(applique.rendus).toBe(25);
+    expect(applique.rendus).toBe(DE_TROP);
     expect(applique.tronque).toBe(true);
   });
 
-  it("garde la tête de la liste, puisque c'est elle qui est la plus importante", () => {
-    expect(appliquerLePlafond(concepts(25)).gardes).toEqual(concepts(PLAFOND_CONCEPTS_PAR_DEPOT));
+  // La tête, parce que le modèle rend l'ordre du texte : ce qui est gardé est
+  // donc le début de ce qui a été déposé, et pas les concepts les plus
+  // importants. C'est ce que l'écran annonce depuis le 04/09/2026.
+  it("garde la tête de la liste, c'est-à-dire le début du texte", () => {
+    expect(appliquerLePlafond(concepts(DE_TROP)).gardes).toEqual(
+      concepts(PLAFOND_CONCEPTS_PAR_DEPOT),
+    );
   });
 
   it("rend une liste vide sans rien inventer", () => {

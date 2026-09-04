@@ -133,7 +133,7 @@ export function FormulaireDepot({
           //
           // « Ce mois-ci » et non « aujourd'hui » : `restants` vient de
           // `CONCEPTS_PAR_PERIODE`, qui est mensuel. L'écran annonçait donc
-          // trente concepts pour la journée, et quelqu'un qui les déposait
+          // le plafond du mois pour la journée, et quelqu'un qui les déposait
           // trouvait zéro le lendemain sans comprendre. La valeur était juste,
           // le mot à côté était faux.
           `Il te reste ${restants} ${restants === 1 ? "concept" : "concepts"} à retenir ce mois-ci.`
