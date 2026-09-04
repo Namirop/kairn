@@ -45,12 +45,45 @@ import { segmentsDeCode } from "@/lib/domain/texte-code";
 export const JETON =
   "rounded-champ bg-jeton border border-jeton-bord font-mono text-[0.86em] font-medium leading-[1.7] px-[0.36em] py-[0.06em] [box-decoration-break:clone] break-words";
 
+/**
+ * Au-delà, un jeton ne tient plus sur la ligne la plus étroite du produit.
+ *
+ * Mesuré sur ce qu'il y a de plus serré : un énoncé de révision sur un téléphone
+ * de trois cent quatre-vingt-dix points, où la carte laisse un peu plus de vingt
+ * signes de mono à une ligne. En dessous du seuil, un jeton qui se coupe se
+ * coupe **par choix de la mise en page** et non par manque de place — et c'est
+ * ce choix-là qu'on retire.
+ */
+const SIGNES_INSECABLES = 20;
+
+/**
+ * Le jeton court ne se coupe pas.
+ *
+ * `s-maxage=300` porte un trait d'union, et un trait d'union est une occasion de
+ * coupure ordinaire : la fin de ligne emportait « s- » et laissait
+ * « maxage=300 » à la ligne suivante. Avec `box-decoration-break: clone`, chaque
+ * moitié reçoit son cadre entier — on lisait deux termes là où il y en a un, et
+ * la question portait sur celui-là.
+ *
+ * On ne renonce pas au cadre cloné pour autant : c'est lui qui sauve les longs
+ * extraits, où la coupure est inévitable et où deux cadres pleins valent mieux
+ * qu'un cadre fendu. On retire la coupure là où elle n'était pas nécessaire,
+ * c'est-à-dire presque partout — un nom de directive, un identifiant, un appel
+ * de méthode tiennent tous sous le seuil.
+ */
+export function jetonInsecable(terme: string): boolean {
+  return terme.trim().length <= SIGNES_INSECABLES;
+}
+
 export function TexteTechnique({ children }: { children: string }) {
   return (
     <>
       {segmentsDeCode(children).map((segment, rang) =>
         segment.code ? (
-          <code key={rang} className={JETON}>
+          <code
+            key={rang}
+            className={jetonInsecable(segment.texte) ? `${JETON} whitespace-nowrap` : JETON}
+          >
             {segment.texte}
           </code>
         ) : (

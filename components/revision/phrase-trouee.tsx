@@ -1,5 +1,5 @@
 import { Fragment, type ReactNode } from "react";
-import { JETON } from "@/components/typographie/texte-technique";
+import { JETON, jetonInsecable } from "@/components/typographie/texte-technique";
 import { segmentsDeCode } from "@/lib/domain/texte-code";
 import { TROU } from "@/lib/domain/reponse-cloze";
 
@@ -89,8 +89,14 @@ export function PhraseTrouee({
         return segment.code ? (
           // Un jeton qui porte le trou ne se coupe pas en bout de ligne : la
           // moitié du terme restait au-dessus de son emplacement, avec un fond de
-          // jeton fendu en deux.
-          <code key={rang} className={`${JETON} ${suite.length === 0 ? "" : "whitespace-nowrap"}`}>
+          // jeton fendu en deux. Les jetons courts non plus, pour la raison que
+          // dit `jetonInsecable` — deux cadres pleins se lisent comme deux termes.
+          <code
+            key={rang}
+            className={`${JETON} ${
+              suite.length === 0 && !jetonInsecable(segment.texte) ? "" : "whitespace-nowrap"
+            }`}
+          >
             {contenu}
           </code>
         ) : (

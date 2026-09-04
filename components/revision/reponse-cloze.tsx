@@ -4,7 +4,7 @@ import { SuiteDeLaQuestion } from "@/components/revision/suite-de-la-question";
 import { useVenirEnVue } from "@/components/revision/use-venir-en-vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { JETON } from "@/components/typographie/texte-technique";
+import { JETON, jetonInsecable } from "@/components/typographie/texte-technique";
 import type { TexteATrou } from "@/components/revision/use-suite-de-questions";
 import { LONGUEUR_MAX_SAISIE } from "@/lib/domain/reponse-cloze";
 
@@ -214,7 +214,10 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
           lit nulle part dans le code. */}
       <ul className="gap-pas-2 mt-pas-3 text-corps flex flex-wrap">
         {trou.pistes.map((piste) => (
-          <li key={piste} className={`${JETON} text-stone-900`}>
+          <li
+            key={piste}
+            className={`${JETON} text-stone-900 ${jetonInsecable(piste) ? "whitespace-nowrap" : ""}`}
+          >
             {piste}
           </li>
         ))}
