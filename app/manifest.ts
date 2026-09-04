@@ -29,6 +29,40 @@ export default function manifest(): MetadataRoute.Manifest {
      * demandée, et cette ligne-ci n'est qu'un confort là où elle s'applique.
      */
     launch_handler: { client_mode: "navigate-existing" },
+    /**
+     * Kairn dans la feuille de partage du système.
+     *
+     * C'est le raccourci du geste qui existe déjà : sélectionner un passage
+     * dans une conversation, un article, une réponse d'assistant, et le déposer
+     * sans passer par le presse-papier. Les noms de champs sont ceux du
+     * formulaire de dépôt — `texte`, `image` — parce que c'est le même
+     * formulaire qui les reçoit à l'arrivée.
+     *
+     * **L'envoi est intercepté par le service worker**, jamais par une route :
+     * ce qui a été partagé est rangé sur l'appareil et repris par le champ, si
+     * bien qu'un partage abandonné n'a rien envoyé à personne. La route de même
+     * adresse n'existe que pour le cas où le worker ne répond pas.
+     *
+     * Les quatre types d'image sont ceux que la lecture sait décoder. Déclarer
+     * `image/*` ferait apparaître Kairn dans la feuille pour des formats qu'elle
+     * refuserait ensuite — un raccourci qui mène à un refus n'est pas un
+     * raccourci.
+     *
+     * Rien de tout ça n'existe sur iOS : une application posée sur l'écran
+     * d'accueil ne peut pas s'inscrire dans la feuille de partage. Le
+     * copier-coller reste le chemin de tout le monde.
+     */
+    share_target: {
+      action: "/depots/partage",
+      method: "POST",
+      enctype: "multipart/form-data",
+      params: {
+        title: "titre",
+        text: "texte",
+        url: "lien",
+        files: [{ name: "image", accept: ["image/jpeg", "image/png", "image/webp", "image/gif"] }],
+      },
+    },
     background_color: PAPIER,
     theme_color: PAPIER,
     categories: ["education", "productivity"],
