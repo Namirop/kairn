@@ -22,7 +22,9 @@ import { accord, compte } from "@/lib/domain/accord";
  *
  * Le lien est une ancre, pas un bouton. Il ne déclenche rien, il déplace le
  * regard — et sur un dépôt qui en porte plusieurs, c'est au premier qu'on veut
- * aller, les autres se suivant dans l'ordre du texte.
+ * aller, les autres se suivant dans l'ordre du texte. Il ne se coupe pas en deux :
+ * sur téléphone, où la ligne fait trois lignes et le tout est centré, « Voir » et
+ * « le premier » se retrouvaient sur deux rangs et le geste se lisait en morceaux.
  */
 
 /** L'ancre posée sur le premier concept douteux, et visée par le lien. */
@@ -40,7 +42,7 @@ export function ConceptsAVerifier({ nombre }: { nombre: number }) {
         {accord(nombre, "il reste", "ils restent")} sans questions.{" "}
         <a
           href={`#${ANCRE_A_VERIFIER}`}
-          className="rounded-galet text-stone-900 underline decoration-stone-300 underline-offset-4 transition-colors hover:decoration-stone-900"
+          className="rounded-galet whitespace-nowrap text-stone-900 underline decoration-stone-300 underline-offset-4 transition-colors hover:decoration-stone-900"
         >
           {accord(nombre, "Le voir", "Voir le premier")}
         </a>
