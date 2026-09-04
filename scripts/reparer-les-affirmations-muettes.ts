@@ -32,6 +32,12 @@ import { conclure, record } from "./verification/journal";
  * une contre-vérité ne coûte rien à corriger et ne se négocie pas ; réécrire
  * coûte un appel, et les essais sans compte s'éteignent d'eux-mêmes.
  *
+ * **Il se rejoue.** Les deux gestes ne se déduisent pas l'un de l'autre : ce
+ * qu'on retire se lit sur les affirmations vivantes, ce qu'on redemande se lit
+ * sur les concepts qui n'ont plus d'affirmation servable — retirée à l'instant
+ * ou lors d'un passage précédent. Un second passage ne retire donc plus rien et
+ * redemande ce qui manquait encore, au lieu de ne rien trouver du tout.
+ *
  *   npm run reparer:affirmations                   # simulation, n'écrit rien
  *   npm run reparer:affirmations -- --pour-de-vrai
  */
@@ -39,77 +45,110 @@ import { conclure, record } from "./verification/journal";
 /** Ce qu'un vrai ou faux devrait poser à côté de sa question. */
 const VERDICT = z.object({ expected: z.boolean() });
 
-type Muette = { id: string; atomId: string; inputId: string; userId: string | null };
+/** Le concept, tel que `demanderDesQuestions` le veut, et à qui il appartient. */
+type Concept = { id: string; inputId: string; userId: string | null };
+
+type Affirmation = {
+  variantId: string;
+  concept: Concept;
+  vivante: boolean;
+  muette: boolean;
+};
 
 /**
- * Les affirmations qu'aucun écran ne sait poser.
+ * Toutes les affirmations, dites muettes ou non.
  *
  * Le test est celui de la lecture, et pas une règle recopiée : `choixDUnVraiOuFaux`
  * est la fonction que `questionServie` appelle pour reconstruire les deux
  * propositions. Ce qu'elle refuse ici est exactement ce qui retombe en question
  * ouverte à l'écran.
  */
-async function affirmationsMuettes(): Promise<Muette[]> {
+async function affirmations(): Promise<Affirmation[]> {
   const vraisOuFaux = await prisma.variant.findMany({
-    where: { format: "TRUE_FALSE", retiredAt: null },
+    where: { format: "TRUE_FALSE" },
     select: {
       id: true,
       answerKey: true,
       payload: true,
+      retiredAt: true,
       atom: { select: { id: true, inputId: true, userId: true } },
     },
     orderBy: { createdAt: "asc" },
   });
 
-  return vraisOuFaux.flatMap((variante) => {
+  return vraisOuFaux.map((variante) => {
     const verdict = VERDICT.safeParse(variante.payload);
-    const choix = choixDUnVraiOuFaux(
-      verdict.success ? verdict.data.expected : null,
-      variante.answerKey,
-    );
 
-    if (choix !== null) return [];
-
-    return [
-      {
-        id: variante.id,
-        atomId: variante.atom.id,
-        inputId: variante.atom.inputId,
-        userId: variante.atom.userId,
-      },
-    ];
+    return {
+      variantId: variante.id,
+      concept: variante.atom,
+      vivante: variante.retiredAt === null,
+      muette:
+        choixDUnVraiOuFaux(verdict.success ? verdict.data.expected : null, variante.answerKey) ===
+        null,
+    };
   });
 }
 
+/**
+ * Les concepts qui n'ont plus d'affirmation servable, et qui en avaient une.
+ *
+ * On ne se fie pas à ce qu'on vient de retirer : un passage précédent a pu
+ * retirer sans réussir à redemander, et ce concept-là doit rester rattrapable.
+ * La condition est donc un état, pas un événement — au moins une affirmation
+ * muette dans son histoire, et aucune affirmation vivante et servable.
+ */
+function conceptsSansAffirmation(toutes: readonly Affirmation[]): Concept[] {
+  const servables = new Set(
+    toutes.filter((une) => une.vivante && !une.muette).map((une) => une.concept.id),
+  );
+  const touches = new Map<string, Concept>();
+
+  for (const une of toutes) {
+    if (!une.muette || servables.has(une.concept.id)) continue;
+
+    touches.set(une.concept.id, une.concept);
+  }
+
+  return [...touches.values()].filter((concept) => concept.userId !== null);
+}
+
 async function main(): Promise<string> {
-  const muettes = await affirmationsMuettes();
-  const aReecrire = muettes.filter((muette) => muette.userId !== null);
+  const toutes = await affirmations();
+  const aRetirer = toutes.filter((une) => une.vivante && une.muette);
+  const aReecrire = conceptsSansAffirmation(toutes);
 
   console.info(
-    `${muettes.length} affirmation(s) sans verdict, sur ${aReecrire.length} concept(s) de compte à réécrire.\n`,
+    `${aRetirer.length} affirmation(s) sans verdict encore servie(s), et ${aReecrire.length} concept(s) de compte à réécrire.\n`,
   );
 
-  if (muettes.length === 0) return "Rien à réparer.";
+  if (aRetirer.length === 0 && aReecrire.length === 0) return "Rien à réparer.";
 
   if (!process.argv.includes("--pour-de-vrai")) {
     return "Simulation : rien n'a été écrit. Ajoute --pour-de-vrai pour retirer et remettre en file.";
   }
 
-  const retirees = await prisma.variant.updateMany({
-    where: { id: { in: muettes.map((muette) => muette.id) }, retiredAt: null },
-    data: { retiredAt: new Date() },
-  });
+  if (aRetirer.length > 0) {
+    const retirees = await prisma.variant.updateMany({
+      where: { id: { in: aRetirer.map((une) => une.variantId) }, retiredAt: null },
+      data: { retiredAt: new Date() },
+    });
 
-  record("Affirmations retirées du tirage", retirees.count === muettes.length, `${retirees.count}`);
+    record(
+      "Affirmations retirées du tirage",
+      retirees.count === aRetirer.length,
+      `${retirees.count}`,
+    );
+  }
 
   const issues = new Map<string, number>();
 
-  for (const muette of aReecrire) {
+  for (const concept of aReecrire) {
     // `reporter` parce qu'on vient de retirer une question : refuser sans rien
     // écrire laisserait le concept avec trois facettes pour toujours, alors que
     // le plafond hebdomadaire n'est qu'un délai. La demande part toute seule le
     // jour où elle devient légitime.
-    const demande = await demanderDesQuestions(muette, new Date(), { reporter: true });
+    const demande = await demanderDesQuestions(concept, new Date(), { reporter: true });
 
     issues.set(demande.etat, (issues.get(demande.etat) ?? 0) + 1);
   }
