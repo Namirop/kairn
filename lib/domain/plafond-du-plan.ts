@@ -36,8 +36,17 @@ export type Plan = "GRATUIT" | "MENSUEL" | "ANNUEL";
  */
 export const PLAFOND_GRATUIT = 50;
 
-/** Ce que le plan payant ouvre, mensuel comme annuel : les deux ne diffèrent que par leur cadence. */
-export const PLAFOND_PAYANT = 300;
+/**
+ * Ce que le plan payant ouvre, mensuel comme annuel : les deux ne diffèrent que
+ * par leur cadence.
+ *
+ * Porté de trois cents à cinq cents le 4 septembre 2026, dans le même mouvement
+ * que le gratuit. L'écart entre les deux offres est ce qui se vend, et le
+ * gratuit venait de monter de vingt : le laisser à trois cents aurait resserré
+ * la marche sans que personne ne l'ait décidé. Aucun budget en jeu — une période
+ * payante saturée reste sous les deux dollars au tarif Luna.
+ */
+export const PLAFOND_PAYANT = 500;
 
 /**
  * L'abonnement tel que la base le garde, réduit à ce qui décide du plafond.

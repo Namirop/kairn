@@ -149,7 +149,7 @@ describe("estPayant", () => {
 describe("plafondDeDepots", () => {
   it("double le plafond de concepts des deux plans", () => {
     expect(plafondDeDepots(PLAFOND_GRATUIT)).toBe(100);
-    expect(plafondDeDepots(PLAFOND_PAYANT)).toBe(600);
+    expect(plafondDeDepots(PLAFOND_PAYANT)).toBe(1000);
   });
 
   it("ne passe jamais sous le plafond de concepts", () => {

@@ -92,7 +92,7 @@ que là où la session n'a rien à donner ce jour-là — sinon, il la remplacer
   se reporte. Un second rideau borne les dépôts à 100, parce qu'une extraction se
   paie même quand elle ne rend aucun concept.
 - **Un plan payant unique**, décliné mensuel et annuel : **7 € par mois ou 70 €
-  par an** — deux mois offerts —, qui porte le plafond à **300 concepts par
+  par an** — deux mois offerts —, qui porte le plafond à **500 concepts par
   période**. Un seul plan tant que le produit n'a pas de quoi en distinguer deux.
 - **Encaissement par Stripe**, Checkout et portail client hébergés : aucune donnée
   de carte ne touche le produit.
