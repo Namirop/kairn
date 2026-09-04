@@ -116,27 +116,28 @@ droit, et où en est le dossier TVA.
 
 ## Scripts
 
-| Commande                      | Effet                                                     |
-| ----------------------------- | --------------------------------------------------------- |
-| `npm run dev`                 | Serveur de développement                                  |
-| `npm run build`               | Build de production                                       |
-| `npm run typecheck`           | `tsc --noEmit`                                            |
-| `npm run lint`                | ESLint, frontières d'architecture comprises               |
-| `npm test`                    | Vitest sur `lib/domain/`, propriétés fast-check comprises |
-| `npm run test:watch`          | Vitest en veille                                          |
-| `npm run format`              | Prettier en écriture                                      |
-| `npm run db:migrate`          | `prisma migrate dev`                                      |
-| `npm run db:deploy`           | `prisma migrate deploy`, pour un environnement déployé    |
-| `npm run db:seed`             | Remplit la base ; rejouable sans dupliquer                |
-| `npm run db:studio`           | Prisma Studio                                             |
-| `npm run verifier:ai`         | Vérifie les garde-fous d'appel modèle à l'exécution       |
-| `npm run verifier:ingestion`  | Rejoue l'ingestion de bout en bout, en mode mock          |
-| `npm run verifier:session`    | Rejoue le moteur de révision et l'entraînement libre      |
-| `npm run verifier:abus`       | Passe d'audit : quotas, débit, propriété, cycle de vie    |
-| `npm run verifier:contrastes` | Mesure les ratios WCAG des couples posés par l'interface  |
-| `npm run verifier:abonnement` | Prouve qu'un abonnement ne remonte pas le temps           |
-| `npm run eprouver:paiement`   | Le parcours d'achat contre le vrai Stripe, en mode test   |
-| `npm run regenerer:questions` | Remet en file les questions d'un prompt qui a changé      |
+| Commande                       | Effet                                                       |
+| ------------------------------ | ----------------------------------------------------------- |
+| `npm run dev`                  | Serveur de développement                                    |
+| `npm run build`                | Build de production                                         |
+| `npm run typecheck`            | `tsc --noEmit`                                              |
+| `npm run lint`                 | ESLint, frontières d'architecture comprises                 |
+| `npm test`                     | Vitest sur `lib/domain/`, propriétés fast-check comprises   |
+| `npm run test:watch`           | Vitest en veille                                            |
+| `npm run format`               | Prettier en écriture                                        |
+| `npm run db:migrate`           | `prisma migrate dev`                                        |
+| `npm run db:deploy`            | `prisma migrate deploy`, pour un environnement déployé      |
+| `npm run db:seed`              | Remplit la base ; rejouable sans dupliquer                  |
+| `npm run db:studio`            | Prisma Studio                                               |
+| `npm run verifier:ai`          | Vérifie les garde-fous d'appel modèle à l'exécution         |
+| `npm run verifier:ingestion`   | Rejoue l'ingestion de bout en bout, en mode mock            |
+| `npm run verifier:session`     | Rejoue le moteur de révision et l'entraînement libre        |
+| `npm run verifier:abus`        | Passe d'audit : quotas, débit, propriété, cycle de vie      |
+| `npm run verifier:contrastes`  | Mesure les ratios WCAG des couples posés par l'interface    |
+| `npm run verifier:abonnement`  | Prouve qu'un abonnement ne remonte pas le temps             |
+| `npm run eprouver:paiement`    | Le parcours d'achat contre le vrai Stripe, en mode test     |
+| `npm run regenerer:questions`  | Remet en file les questions d'un prompt qui a changé        |
+| `npm run reparer:affirmations` | Retire les vrais ou faux sans verdict et redemande leur lot |
 
 `npm run evaluer:generation` existe aussi : c'est le banc d'évaluation, décrit plus bas. C'est le
 seul script du dépôt qui émet de vrais appels, et il ne part pas sans qu'on le lui dise deux fois.

@@ -55,7 +55,8 @@
             "boundary": {
               "format": "TRUE_FALSE",
               "question": "Un `setTimeout(…, 0)` écrit avant une promesse déjà résolue s'exécute avant la suite de cette promesse.",
-              "answerKey": "Faux. L'ordre d'écriture ne compte pas : la file des microtâches est vidée avant que la tâche de la minuterie ne soit prise, quel que soit le délai demandé."
+              "answerKey": "L'ordre d'écriture ne compte pas : la file des microtâches est vidée avant que la tâche de la minuterie ne soit prise, quel que soit le délai demandé.",
+              "estVraie": false
             },
             "application": {
               "format": "MCQ",

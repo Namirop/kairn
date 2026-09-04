@@ -82,6 +82,17 @@
  * L'affichage ne s'y fie pas pour autant : `unParFormat` garde une question par
  * format sur la landing, parce qu'une consigne de prompt n'est pas une garantie.
  *
+ * **Le verdict d'un vrai ou faux est devenu obligatoire le 4 septembre 2026**, et
+ * cette ligne-là répare un écran cassé. `estVraie` désigne laquelle des deux
+ * propositions est la bonne ; elle n'était écrite nulle part en base, et la seule
+ * trace du verdict restait le mot « Vrai » ou « Faux » en tête d'étalon — que la
+ * correction du 02/09 vient d'interdire, à raison. Toute affirmation réécrite
+ * depuis a perdu ses deux boutons et a été servie en question ouverte : une
+ * phrase posée à plat, qu'on lit comme le concept à retenir, alors qu'une sur
+ * deux est fausse par construction. Le verdict s'écrit maintenant dans le
+ * `payload`, et une affirmation qui ne le dit pas n'est plus écrite du tout —
+ * voir `sansAffirmationMuette`.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -249,7 +260,8 @@ TRUE_FALSE : l'envoi te donne, concept par concept et facette par facette, si
 l'affirmation doit être vraie ou fausse. Tu suis cette valeur, et tu la recopies
 dans \`estVraie\`. Ce n'est pas une préférence à arbitrer : la répartition est
 décidée avant l'appel, et une affirmation rendue à l'envers de ce qui est demandé
-est un défaut.
+est un défaut. \`estVraie\` n'est jamais laissée vide : c'est elle qui dit laquelle
+des deux propositions est la bonne, et sans elle la question n'est pas servie.
 
 Quand elle doit être vraie, elle porte sur le point précis du concept où l'on
 peut se tromper, jamais sur son résumé : une évidence ne teste rien.

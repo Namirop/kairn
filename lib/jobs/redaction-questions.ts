@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db/client";
 import { finishJob, reprendreCeQuiManque } from "@/lib/db/generation-job";
 import type { GenerationJob } from "@/lib/db/types";
 import { ecrireQuestions } from "@/lib/db/variants";
+import { sansAffirmationMuette } from "@/lib/domain/affirmation-muette";
 import { sansRenvoiAuConcept } from "@/lib/domain/renvoi-au-concept";
 import { messageDuGroupe as construireLEnvoi } from "@/lib/domain/envoi-de-questions";
 import { LotIncomplet, scinderApresTroncature } from "./reprise-du-lot";
@@ -93,7 +94,14 @@ async function rangerLesLots(atomIds: string[], lots: LotRendu[]): Promise<numbe
       c'est le prix assumé : voir `sansRenvoiAuConcept`, qui dit pourquoi servir
       coûterait plus cher que renoncer.
     */
-    const gardees = sansRenvoiAuConcept(lot.variants);
+    /*
+      Et les affirmations qui ne disent pas si elles sont vraies.
+
+      Un vrai ou faux sans verdict ne peut pas se poser : il retombe en question
+      ouverte, et l'écran sert alors une phrase à plat — dont une sur deux est
+      fausse par construction. Voir `sansAffirmationMuette`.
+    */
+    const gardees = sansAffirmationMuette(sansRenvoiAuConcept(lot.variants));
 
     // Un lot écarté en entier vaut un lot absent, et se traite comme tel : le
     // concept repart en file. Sans ça, il resterait sans une seule question sur

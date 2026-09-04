@@ -20,6 +20,8 @@ export type QuestionAEcrire = {
   options: string[] | null;
   correctIndex: number | null;
   cloze: { sentence: string; accepted: string[]; leurres: string[] } | null;
+  /** Ce que le modèle déclare d'une affirmation. Nul sur tout autre format. */
+  estVraie?: boolean | null;
 };
 
 /**
@@ -34,6 +36,18 @@ export type QuestionAEcrire = {
  * n'existe pas encore — `createMany` les fait naître en base. Elle en a les deux
  * propriétés utiles : une facette n'apparaît qu'une fois par lot, donc chaque
  * question a la sienne, et elle ne bouge pas d'une régénération à l'autre.
+ *
+ * **Un vrai ou faux y pose son verdict, et ce n'est pas un détail de stockage.**
+ * Il ne l'a jamais fait : la génération rendait `estVraie`, le schéma le lisait,
+ * le contrôle le relisait contre la cible — et l'écriture le jetait. La seule
+ * trace qui restait était le mot « Vrai » ou « Faux » en tête de `answerKey`,
+ * que `choixDUnVraiOuFaux` allait chercher faute de mieux. Le 02/09, le prompt a
+ * interdit ce verdict en tête, à raison : les deux propositions sont déjà à
+ * l'écran. Le dernier signal a disparu avec lui, et chaque affirmation réécrite
+ * depuis est retombée en question ouverte — une phrase posée à plat, sans ses
+ * deux boutons, dont une sur deux est fausse par construction. On révisait des
+ * contre-vérités. Le verdict est donc écrit, et le repli sur `answerKey` ne sert
+ * plus qu'aux lignes d'avant.
  */
 function payloadDe(question: QuestionAEcrire, atomId: string) {
   if (question.cloze) return question.cloze;
@@ -44,6 +58,10 @@ function payloadDe(question: QuestionAEcrire, atomId: string) {
       question.correctIndex,
       `${atomId}:${question.facet}`,
     );
+  }
+
+  if (question.format === "TRUE_FALSE" && typeof question.estVraie === "boolean") {
+    return { expected: question.estVraie };
   }
 
   return undefined;
