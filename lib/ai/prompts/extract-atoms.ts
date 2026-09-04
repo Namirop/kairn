@@ -48,6 +48,17 @@
  *    est opérationnel : si l'énoncé a besoin de « mais » ou « tandis que » pour
  *    relier deux mécanismes, c'est deux concepts.
  *
+ * **Une troisième le 4 septembre, relevée sur le premier dépôt qui en a produit.**
+ * Le modèle marquait bien les affirmations douteuses — trois sur quatre justes au
+ * contrôle —, mais il prenait aussi ses distances *dans le texte* : « le dépôt
+ * affirme que », « X est présenté comme ». Quatre concepts sur trente-six. Le
+ * doute est déjà porté par le drapeau, qui s'affiche à côté ; le redire dans le
+ * concept le grave, et il y reste le jour où la personne confirme — une question
+ * servie porte alors « la température est **présentée comme** plus déterminante »,
+ * et interroge sur ce que dit le dépôt plutôt que sur le fait. La consigne
+ * « telle qu'elle a été déposée » existait déjà ; elle dit maintenant ce qu'elle
+ * veut dire.
+ *
  * **La seconde peut faire pencher trop loin**, et c'est ce qu'il faudra
  * regarder : la section de fusion a été écrite sur 64 doublons mesurés, et un
  * test de découpe trop zélé les ferait revenir. Elle est volontairement bornée
@@ -179,6 +190,13 @@ incorrecte, tu l'extrais quand même, telle qu'elle a été déposée, et tu mar
 \`uncertain: true\`. Tu ne la corriges pas et tu n'ajoutes pas la version juste : ce
 n'est pas à toi de trancher à la place de la personne, et une correction silencieuse
 serait pire que le doute.
+
+« Telle qu'elle a été déposée » veut dire **à l'indicatif**, comme tous les autres
+concepts. Tu n'écris ni « le dépôt affirme que », ni « X est présenté comme », ni
+« selon le texte » : ces tournures rapportent au lieu d'énoncer, et le concept cesse
+alors de se lire seul — il désigne un dépôt que l'écran ne montre jamais. Le doute
+est porté par \`uncertain\`, qui s'affiche à côté du concept ; le redire dans le texte
+le grave, et il y reste le jour où la personne confirme.
 
 Réserve ce marqueur aux erreurs nettes. Une simplification, une approximation
 pédagogique ou un choix de vocabulaire discutable ne sont pas des erreurs.

@@ -34,12 +34,23 @@ function Questions({ nombre }: { nombre: number }) {
   );
 }
 
-export function ConceptCorrigeable({ concept, inputId }: { concept: ConceptLu; inputId: string }) {
+export function ConceptCorrigeable({
+  concept,
+  inputId,
+  ancre,
+}: {
+  concept: ConceptLu;
+  inputId: string;
+  /** L'ancre du premier concept douteux, visée depuis le chapeau du dépôt. */
+  ancre?: string;
+}) {
   const [edition, setEdition] = useState(false);
   const [texte, setTexte] = useState(concept.concept);
 
   return (
-    <li className="p-pas-6 rounded-carte bg-surface-papier">
+    // Le dégagement de l'ancre vaut la barre du haut, qui est collante : sans
+    // lui, le concept visé arrive sous elle et on croit avoir atterri ailleurs.
+    <li id={ancre} className="p-pas-6 rounded-carte bg-surface-papier scroll-mt-20 md:scroll-mt-24">
       {edition ? (
         <form action={modifierConceptAction} className="gap-pas-3 flex flex-col">
           <input type="hidden" name="atomId" value={concept.id} />

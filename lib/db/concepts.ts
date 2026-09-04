@@ -70,6 +70,27 @@ export type GesteSurConcept = string[] | null;
  * Réécrit un concept. Ses questions ne le décrivent plus : elles sortent du
  * tirage et repartent en écriture. Pour la mémoire, c'est un concept neuf même
  * s'il garde son identifiant — la planification recommence.
+ *
+ * **Un concept réécrit ne redevient jamais douteux, et c'est une décision.**
+ * `uncertain` tombe à faux quoi que dise le nouveau texte : la modification ne
+ * repasse pas par le modèle, elle ne relance que l'écriture des questions. Donc
+ * quelqu'un qui corrige une virgule en laissant l'erreur aura ses questions sur
+ * l'erreur, sans second avertissement.
+ *
+ * Le choix se défend par ce qui vient de se passer à l'écran. La personne a lu
+ * « ce passage paraît factuellement douteux », elle a ouvert le champ, elle a
+ * réécrit : c'est une décision informée, prise sur l'information qu'on lui devait.
+ * Une application qui la contredirait une seconde fois sur le même texte
+ * n'arbitrerait plus, elle discuterait — et le prompt dit explicitement que
+ * trancher à la place de la personne est ce qu'on ne fait pas.
+ *
+ * L'argument du coût ne tient pas, lui, et il ne faut pas s'en servir : cette
+ * fonction paie déjà un appel modèle par modification, pour les questions. Rejuger
+ * le texte n'en coûterait pas un de plus si on le demandait au même appel.
+ *
+ * Ce qui la ferait changer : voir des concepts faux revenir en session après une
+ * correction de forme. Rien ne le mesure aujourd'hui — un signalement porte sur
+ * une question, pas sur le fait qu'elle vienne d'un concept réécrit.
  */
 export async function modifierConcept(
   atomId: string,

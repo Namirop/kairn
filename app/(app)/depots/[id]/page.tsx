@@ -5,6 +5,7 @@ import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
 import { ConceptCorrigeable } from "@/components/depots/concept-corrigeable";
+import { ANCRE_A_VERIFIER, ConceptsAVerifier } from "@/components/depots/concepts-a-verifier";
 import { GestesDuDepot } from "@/components/depots/gestes-du-depot";
 import { SuivreLAvancement } from "@/components/depots/suivre-lavancement";
 import { VideDuDepot } from "@/components/depots/vide-du-depot";
@@ -55,6 +56,9 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
     concepts: depot.concepts.length,
   });
   const texte = depot.rawContent.trim() || depot.extractedText || "";
+  // Les concepts que le modèle a marqués douteux, dans l'ordre de la liste :
+  // c'est le premier qui porte l'ancre, et c'est vers lui que le chapeau mène.
+  const aVerifier = depot.concepts.filter((concept) => concept.uncertain);
 
   return (
     <PileDePanneaux sol="ombre">
@@ -84,6 +88,8 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
             )}
             <span>Déposé {anciennete(depot.createdAt, new Date(), fuseau)}</span>
           </p>
+
+          <ConceptsAVerifier nombre={aVerifier.length} />
 
           {/* Tant qu'un travail tourne, l'écran se recharge tout seul quand il
               aboutit. Monté seulement dans ce cas : sur un dépôt prêt, rejeté ou
@@ -159,7 +165,12 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
         ) : (
           <ul className="mt-pas-4 gap-pas-2 flex flex-col">
             {depot.concepts.map((concept) => (
-              <ConceptCorrigeable key={concept.id} concept={concept} inputId={depot.id} />
+              <ConceptCorrigeable
+                key={concept.id}
+                concept={concept}
+                inputId={depot.id}
+                ancre={concept.id === aVerifier[0]?.id ? ANCRE_A_VERIFIER : undefined}
+              />
             ))}
           </ul>
         )}
