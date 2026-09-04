@@ -148,7 +148,7 @@ describe("estPayant", () => {
 
 describe("plafondDeDepots", () => {
   it("double le plafond de concepts des deux plans", () => {
-    expect(plafondDeDepots(PLAFOND_GRATUIT)).toBe(60);
+    expect(plafondDeDepots(PLAFOND_GRATUIT)).toBe(100);
     expect(plafondDeDepots(PLAFOND_PAYANT)).toBe(600);
   });
 

@@ -32,7 +32,30 @@
  * défense qui reste est de le poser assez haut pour qu'il ne coupe pas.
  */
 
-export const PLAFOND_CONCEPTS_PAR_DEPOT = 20;
+/**
+ * Le plafond, et pourquoi il vaut cinquante.
+ *
+ * **Ce n'est plus une limite de produit, c'est une soupape.** Tant qu'il coupe,
+ * il coûte à l'utilisateur ce qu'aucun message ne rattrape : des concepts perdus,
+ * et la charge de retrouver où couper son texte pour récupérer le reste. La seule
+ * bonne valeur est donc celle qui ne se déclenche pas.
+ *
+ * La borne réelle d'un dépôt est sa longueur : 8 000 signes. Sur le seul dépôt
+ * qui a touché le plafond en production — 7 431 signes —, le modèle a rendu
+ * **22 concepts**, soit 338 signes par concept. Atteindre cinquante depuis
+ * 8 000 signes demanderait 160 signes par concept sur toute la longueur : c'est
+ * la densité des dépôts d'une phrase, pas celle d'un article.
+ *
+ * Ce qui reste couvert : une extraction qui part en vrille sur un texte
+ * pathologique — une liste de deux cents entrées, un glossaire — où le modèle
+ * rendrait quatre-vingts concepts et ouvrirait autant de questions à écrire.
+ * C'est de l'abus, pas de l'usage, et c'est le métier de ce plafond-là.
+ *
+ * Il vaut le plafond mensuel du plan gratuit, et ce n'est pas une coïncidence :
+ * un dépôt ne peut pas, à lui seul, dépasser ce qu'un compte gratuit retient
+ * dans le mois. Les deux se changent ensemble ou la règle se perd.
+ */
+export const PLAFOND_CONCEPTS_PAR_DEPOT = 50;
 
 export type Troncature<T> = {
   /** Ce qu'on garde, dans l'ordre rendu. */

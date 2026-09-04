@@ -301,7 +301,7 @@ génération — lui écrire des questions riverait une erreur que personne n'a 
 d'être confirmé, réécrit ou supprimé.
 
 Trois limites bornent le geste. Deux se comptent **au mois**, sur une période ancrée au jour
-d'inscription et lue dans le calendrier de l'utilisateur : environ trente concepts, et soixante
+d'inscription et lue dans le calendrier de l'utilisateur : environ cinquante concepts, et cent
 dépôts en second rideau. La troisième est le débit, trois dépôts par minute, et elle reste courte —
 elle protège le serveur sur la minute, pas le budget sur le mois. Le plafond porte sur le concept
 parce que c'est lui qui coûte, et parce que déposer une phrase ne doit pas coûter autant que coller

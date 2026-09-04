@@ -21,8 +21,20 @@ export type Plan = "GRATUIT" | "MENSUEL" | "ANNUEL";
  * Ce plafond n'est plus une contrainte de coût — une période saturée coûte
  * quelques centimes au tarif Luna. C'est un plafond commercial, et le monter est
  * une décision de prix qui ne met aucun budget en danger.
+ *
+ * **Il passe de trente à cinquante le 4 septembre 2026, et la raison est un
+ * chiffre.** Un article de 7 431 signes a rendu 22 concepts en production. À
+ * trente, un dépôt dense consommait donc les trois quarts du mois gratuit : le
+ * compte était plein avant d'avoir servi deux fois, et c'est précisément le
+ * public visé — celui qui colle un cours ou un article — qui butait le plus vite.
+ * Un plafond gratuit doit laisser essayer le produit pour de bon, pas une fois.
+ *
+ * Cinquante, parce que c'est aussi ce qu'un seul dépôt peut rendre au maximum
+ * (`PLAFOND_CONCEPTS_PAR_DEPOT`) : la règle qui en découle se dit en une phrase —
+ * un dépôt ne peut pas, à lui seul, dépasser le mois d'un compte gratuit. Les
+ * deux valeurs se changent ensemble.
  */
-export const PLAFOND_GRATUIT = 30;
+export const PLAFOND_GRATUIT = 50;
 
 /** Ce que le plan payant ouvre, mensuel comme annuel : les deux ne diffèrent que par leur cadence. */
 export const PLAFOND_PAYANT = 300;
@@ -95,9 +107,9 @@ export function estPayant(abonnement: Abonnement, maintenant: Date): boolean {
  * dépôt. Une phrase par dépôt, et l'offre achetée rendait le cinquième de ce
  * qu'elle promet.
  *
- * Le double, donc, et pas un chiffre en dur : un dépôt rend un à vingt concepts,
- * si bien qu'un plafond s'atteint en autant d'articles denses que de phrases
- * courtes, et le double laisse la place aux deux usages.
+ * Le double, donc, et pas un chiffre en dur : un dépôt rend un à cinquante
+ * concepts, si bien qu'un plafond s'atteint en autant d'articles denses que de
+ * phrases courtes, et le double laisse la place aux deux usages.
  */
 export const DEPOTS_PAR_CONCEPT = 2;
 

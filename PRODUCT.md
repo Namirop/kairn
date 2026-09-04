@@ -87,9 +87,9 @@ que là où la session n'a rien à donner ce jour-là — sinon, il la remplacer
 **Modèle économique** — chantier ouvert le 01/09/2026, pas encore en production :
 
 - **Freemium, et l'unité est le concept, pas le dépôt.** Un compte gratuit
-  retient **30 concepts par période**, la période étant le mois glissant depuis
+  retient **50 concepts par période**, la période étant le mois glissant depuis
   la date d'inscription. Ce qui n'a pas servi dans la période est perdu : rien ne
-  se reporte. Un second rideau borne les dépôts à 60, parce qu'une extraction se
+  se reporte. Un second rideau borne les dépôts à 100, parce qu'une extraction se
   paie même quand elle ne rend aucun concept.
 - **Un plan payant unique**, décliné mensuel et annuel : **7 € par mois ou 70 €
   par an** — deux mois offerts —, qui porte le plafond à **300 concepts par
