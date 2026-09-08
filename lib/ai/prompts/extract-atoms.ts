@@ -83,6 +83,18 @@
  * peut-il se tromper dessus ? Le contre-exemple `PERSONNEL` est dans le prompt
  * parce que la frontière est étroite : une procédure d'équipe s'apprend, une
  * intention sur cette équipe non.
+ *
+ * **Une règle ajoutée le 8 septembre 2026, sur un concept servi en session.** « Le
+ * gazon produit l'effet inverse, en accélérant la balle et en abaissant son
+ * rebond » : la règle d'autoportance existait déjà, mais elle ne nommait que les
+ * pronoms et les renvois explicites. « L'effet inverse » n'est ni l'un ni
+ * l'autre — c'est une comparaison dont le terme de référence est le concept
+ * d'à côté, et l'écran de révision ne montre jamais les concepts. La question
+ * demandait donc de retrouver un mot qui ne se retrouve que si l'on a le voisin
+ * sous les yeux. La règle nomme maintenant ce cas et donne la réécriture.
+ *
+ * Elle part en production sans passage au banc, sur décision de Romain, comme
+ * les deux du 4 septembre : elle se jugera sur les dépôts réels.
  */
 export const EXTRACT_ATOMS_PROMPT = `Tu découpes ce qu'une personne vient d'apprendre en concepts unitaires, pour qu'ils
 lui soient reposés plus tard.
@@ -106,6 +118,15 @@ un détail d'un concept voisin, et il y est rattaché.
 Chaque concept doit être autoportant : il se comprend seul, sans le texte d'origine
 ni les concepts voisins. Pas de « comme vu plus haut », pas de « cette méthode », pas
 de pronom dont l'antécédent est ailleurs.
+
+**Une comparaison porte ses deux termes.** « L'effet inverse », « le contraire », « à
+la différence des autres », « plus rapide », « moins coûteux » ne se comprennent que
+si le concept dit inverse de quoi, différent de quoi, plus rapide que quoi. Ce ne sont
+pas des pronoms et la règle ci-dessus ne les attrape pas, mais ils désignent le même
+absent : un concept voisin que la question ne montrera jamais. Écris ce que la chose
+fait, pas ce qu'elle fait « à l'inverse ». « Le gazon produit l'effet inverse » devient
+« Le gazon accélère la balle et abaisse son rebond ». Si l'opposition est elle-même ce
+qu'il y a à retenir, nomme les deux termes dans la phrase.
 
 QUAND FUSIONNER
 

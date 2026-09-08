@@ -115,6 +115,15 @@
  * maintenant, donc la question serait écartée sans être écrite — cette consigne
  * évite d'en perdre une pour rien.
  *
+ * **Le trou ne se pose plus sur une relation, depuis le 8 septembre 2026.** Un
+ * texte à trou servi en session masquait « effet inverse » dans « Le gazon
+ * produit l'\_\_\_, en accélérant la balle » : le terme est bien porteur du sens
+ * de la phrase, et c'est exactement ce qui le rendait impossible — il ne se
+ * retrouve qu'en ayant le concept de la terre battue sous les yeux, que cet
+ * écran ne montre pas. La cause première est en amont, dans le découpage, et
+ * elle y est corrigée le même jour (voir `extract-atoms.ts`) ; cette consigne-ci
+ * est la seconde barrière, pour le stock déjà découpé.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -236,6 +245,12 @@ court et demande ce qu'il produit, ce qui lui manque, ou ce qui le casse.
 CLOZE : une phrase du concept dont on masque le terme porteur de sens. Le trou
 fait un à trois mots, jamais une proposition entière. Ne masque ni un article,
 ni un mot de liaison, ni un verbe passe-partout.
+
+Ne masque pas non plus une expression de renvoi ou de comparaison — « l'effet
+inverse », « le contraire », « la même chose », « à la différence de » — même quand
+elle porte le sens de la phrase. Elle ne se retrouve qu'avec le concept d'à côté, et
+cet écran ne montre jamais les concepts. Le trou tombe sur le fait, pas sur la
+relation.
 
 Le terme masqué ne reprend aucun mot qui reste écrit juste avant ou juste après le
 trou. Sur « une fenêtre de \_\_\_ semaines », on masque « 52 » et pas « 52 semaines » :
