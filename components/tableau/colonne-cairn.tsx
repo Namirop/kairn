@@ -1,7 +1,6 @@
 import { Cairn } from "@/components/cairn/cairn";
 import { PierreAVenir } from "@/components/cairn/pierre-a-venir";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { tracerLeSentier } from "@/lib/domain/cairn-sentier";
 
 /**
  * L'élément signature et ce qu'il compte.
@@ -43,15 +42,6 @@ function legende(retenus: number): string {
 }
 
 export function ColonneCairn({ retenus, graines }: { retenus: number; graines: string[] }) {
-  // Le dessin donne ses proportions à sa boîte, au lieu de flotter au milieu
-  // d'une boîte de hauteur fixe. Deux pierres dans une case de seize rems, le
-  // SVG s'y centre et l'écran affiche deux cents pixels de roche vide au-dessus
-  // et autant en dessous — sur un téléphone, c'est la moitié du panneau. Les
-  // bornes de hauteur restent : passé une dizaine de pierres, l'empilement est
-  // plus haut que large, c'est elles qui reprennent la main et le cadrage ne
-  // change pas.
-  const { largeur, hauteur } = tracerLeSentier(retenus, graines);
-
   return (
     <aside className="md:mt-pas-16 flex w-full flex-col items-center md:max-w-96">
       <Tooltip>
@@ -73,11 +63,31 @@ export function ColonneCairn({ retenus, graines }: { retenus: number; graines: s
               <PierreAVenir clair />
             </div>
           ) : (
-            <div
-              className="mx-auto max-h-64 w-full max-w-64 md:max-h-[26rem] md:max-w-96"
-              style={{ aspectRatio: `${largeur} / ${hauteur}` }}
-            >
-              <Cairn nombre={retenus} graines={graines} clair />
+            /* **Le dessin donne sa hauteur, la boîte ne la lui impose plus.**
+               Elle était fixe — seize rems sur téléphone, vingt-six sur grand
+               écran — alors que la hauteur d'un empilement suit son nombre de
+               pierres : à deux pierres, le SVG s'y centrait et laissait deux
+               cents pixels de roche vide au-dessus, autant en dessous.
+
+               C'est le SVG qui porte la mesure, et non un `aspect-ratio` sur la
+               boîte : le ratio venait du viewBox, il était donc juste, mais il
+               demandait au conteneur de résoudre une hauteur que Safari iOS
+               laissait à `auto` dans cette pile — bouton de l'info-bulle, aside
+               en colonne. Le SVG retombait alors sur sa taille intrinsèque et
+               débordait sur la bande de progression. Un SVG en largeur pleine et
+               hauteur automatique tient son ratio de son viewBox, sans que
+               personne n'ait rien à résoudre.
+
+               Les bornes de hauteur restent, et reprennent la main passé une
+               dizaine de pierres : l'empilement y devient plus haut que large,
+               et le cadrage des grands cairns ne change pas. */
+            <div className="mx-auto w-full max-w-64 md:max-w-96">
+              <Cairn
+                nombre={retenus}
+                graines={graines}
+                clair
+                className="h-auto max-h-64 md:max-h-[26rem]"
+              />
             </div>
           )}
         </TooltipTrigger>
