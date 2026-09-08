@@ -68,15 +68,19 @@ export function Hero({ connecte }: { connecte: boolean }) {
       surface="papier"
       aere
       mesure="large"
-      /* Sur téléphone, l'ouverture démarre juste sous l'en-tête. Le rythme de
+      /* Sur téléphone, l'ouverture démarre peu sous l'en-tête. Le rythme de
          campagne ouvrait de cinquante pixels au-dessus du titre : de la marge
          prise sur le seul écran où la hauteur est comptée, et qui repoussait le
          cairn et son geste sous le pli. Au-delà de `md`, le rythme reprend
-         intact — c'est là qu'il a un sens, il y a la hauteur pour le porter. */
+         intact — c'est là qu'il a un sens, il y a la hauteur pour le porter.
+
+         Deux pas et non un : la marque et le titre se touchaient presque, et
+         l'ouverture avait l'air de commencer dans l'en-tête. Le cairn reste au-
+         dessus du pli, c'est la mesure qui borne ce réglage. */
       /* `--hauteur-cairn` est la mesure que les deux colonnes partagent : le
          cairn l'occupe, le titre s'y centre. Elle vit ici parce qu'aucune des
          deux ne peut la lire chez l'autre. */
-      className="max-md:pt-pas-4 gap-pas-12 grid items-center [--hauteur-cairn:clamp(20rem,52vh,36rem)] md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
+      className="max-md:pt-pas-8 gap-pas-12 grid items-center [--hauteur-cairn:clamp(20rem,52vh,36rem)] md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
       fond={<PaysageDeCairns />}
     >
       {/* Le titre passe **devant** les pierres.
