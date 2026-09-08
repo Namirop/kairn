@@ -1,6 +1,7 @@
 import { Cairn } from "@/components/cairn/cairn";
 import { PierreAVenir } from "@/components/cairn/pierre-a-venir";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { tracerLeSentier } from "@/lib/domain/cairn-sentier";
 
 /**
  * L'élément signature et ce qu'il compte.
@@ -42,6 +43,15 @@ function legende(retenus: number): string {
 }
 
 export function ColonneCairn({ retenus, graines }: { retenus: number; graines: string[] }) {
+  // Le dessin donne ses proportions à sa boîte, au lieu de flotter au milieu
+  // d'une boîte de hauteur fixe. Deux pierres dans une case de seize rems, le
+  // SVG s'y centre et l'écran affiche deux cents pixels de roche vide au-dessus
+  // et autant en dessous — sur un téléphone, c'est la moitié du panneau. Les
+  // bornes de hauteur restent : passé une dizaine de pierres, l'empilement est
+  // plus haut que large, c'est elles qui reprennent la main et le cadrage ne
+  // change pas.
+  const { largeur, hauteur } = tracerLeSentier(retenus, graines);
+
   return (
     <aside className="md:mt-pas-16 flex w-full flex-col items-center md:max-w-96">
       <Tooltip>
@@ -63,7 +73,10 @@ export function ColonneCairn({ retenus, graines }: { retenus: number; graines: s
               <PierreAVenir clair />
             </div>
           ) : (
-            <div className="mx-auto h-64 w-full max-w-64 md:h-[26rem] md:max-w-96">
+            <div
+              className="mx-auto max-h-64 w-full max-w-64 md:max-h-[26rem] md:max-w-96"
+              style={{ aspectRatio: `${largeur} / ${hauteur}` }}
+            >
               <Cairn nombre={retenus} graines={graines} clair />
             </div>
           )}

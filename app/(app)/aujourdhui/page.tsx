@@ -95,7 +95,7 @@ export default async function PageAujourdhui() {
       <Panneau
         surface="roche"
         remplit
-        className="py-pas-12 md:py-pas-24 gap-pas-16 md:gap-pas-24 flex flex-col justify-center"
+        className="py-pas-12 md:py-pas-24 gap-pas-12 md:gap-pas-24 flex flex-col justify-center"
       >
         <div className="gap-pas-8 md:gap-pas-12 grid items-center md:grid-cols-[1fr_auto]">
           <div className="max-w-lg">
