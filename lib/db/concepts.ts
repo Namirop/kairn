@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import { demanderDesQuestions } from "@/lib/db/demande-de-questions";
+import { recompterLesPierres } from "@/lib/db/pierres-du-cairn";
 import { retirerQuestions } from "@/lib/db/variants";
 import { compterReussitesConsecutives, etatApresRevision } from "@/lib/domain/etat-maitrise";
 
@@ -106,6 +107,10 @@ export async function modifierConcept(
     data: { concept: texte, uncertain: false, ...CARTE_NEUVE, due: new Date() },
   });
 
+  // Un concept consolidé qu'on réécrit repart en apprentissage : sa pierre
+  // tombe, et le cairn doit le savoir avant la prochaine session.
+  await recompterLesPierres(userId);
+
   return relancerLesQuestions(atomId, atome.inputId);
 }
 
@@ -165,11 +170,17 @@ export async function desarchiverConcept(
     },
   });
 
+  // L'archivage déclaré posait une pierre ; la remise en révision la reprend,
+  // sauf si l'histoire du concept le rend consolidé de plein droit.
+  await recompterLesPierres(userId);
+
   return true;
 }
 
 export async function supprimerConcept(atomId: string, userId: string): Promise<boolean> {
   const { count } = await prisma.atom.deleteMany({ where: { id: atomId, userId } });
+
+  if (count === 1) await recompterLesPierres(userId);
 
   return count === 1;
 }
