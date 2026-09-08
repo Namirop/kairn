@@ -49,11 +49,7 @@ export default async function PageTarifs() {
 
       <Strates de="papier" vers="ombre" graine="tarifs-offres" />
 
-      {/* La mesure s'élargit d'un cran pour les deux offres. Les grands nombres
-          y sont entrés, et une colonne de trois cent soixante pixels les faisait
-          toucher les deux bords de leur bloc — le rapport de un à dix se lit mal
-          quand les deux chiffres sont à l'étroit de la même façon. */}
-      <Panneau surface="ombre" aere mesure="page">
+      <Panneau surface="ombre" aere mesure="colonne">
         <Offres />
       </Panneau>
 
