@@ -7,6 +7,7 @@ import {
   modifierConceptAction,
   supprimerConceptAction,
 } from "@/app/(app)/depots/actions";
+import { BlocDetache } from "@/components/coquille/bloc-detache";
 import { SuppressionEnDeuxTemps } from "@/components/depots/suppression-en-deux-temps";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { Badge } from "@/components/ui/badge";
@@ -94,11 +95,13 @@ export function ConceptCorrigeable({
           </p>
 
           {concept.uncertain ? (
-            <p className="mt-pas-3 border-alerte pl-pas-3 text-petit border-l-2 text-stone-500">
-              Ce passage a été extrait tel que tu l&apos;as déposé, mais il paraît factuellement
-              douteux. Personne ne l&apos;a vérifié — aucune question n&apos;a été écrite dessus
-              pour ne pas river une erreur.
-            </p>
+            <BlocDetache ton="alerte" className="mt-pas-3">
+              <p className="text-petit text-stone-500">
+                Ce passage a été extrait tel que tu l&apos;as déposé, mais il paraît factuellement
+                douteux. Personne ne l&apos;a vérifié — aucune question n&apos;a été écrite dessus
+                pour ne pas river une erreur.
+              </p>
+            </BlocDetache>
           ) : (
             <Questions nombre={concept.questions} />
           )}

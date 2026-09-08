@@ -10,16 +10,13 @@ import { ROUTES } from "@/lib/auth/routes";
  * c'est-à-dire tout ce qui a de la valeur ici.
  *
  * La couleur est celle des alertes, pas l'accent du produit : cet écran est
- * interne, et `--ember` appartient au streak. Le bloc n'est pas une carte —
- * l'écran est fait de filets, pas de boîtes — mais un aplat tenu par un filet à
- * gauche, qui le pose à côté du contenu sans l'imiter.
+ * interne, et `--ember` appartient au streak. C'est un aplat, et rien de plus :
+ * il portait en outre un filet d'alerte à gauche, qui redisait sur deux pixels
+ * ce que la surface entière disait déjà.
  */
 export function ConfigIllisible({ motif }: { motif: string }) {
   return (
-    <section
-      aria-labelledby="config-illisible"
-      className="px-pas-4 py-pas-4 border-alerte bg-alerte-surface border-l-2"
-    >
+    <section aria-labelledby="config-illisible" className="px-pas-4 py-pas-4 bg-alerte-surface">
       <h2 id="config-illisible" className="text-corps text-alerte font-semibold">
         La configuration du modèle ne se lit pas
       </h2>

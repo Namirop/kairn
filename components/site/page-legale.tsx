@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
+import { BlocDetache } from "@/components/coquille/bloc-detache";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { ROUTES } from "@/lib/auth/routes";
@@ -79,13 +80,15 @@ export function PageLegale({
             ) : null}
 
             {rubrique.aRemplir ? (
-              <ul className="border-ember/40 mt-pas-4 pl-pas-4 gap-pas-2 flex flex-col border-l-2">
-                {rubrique.aRemplir.map((manque) => (
-                  <li key={manque} className="text-petit text-stone-500">
-                    À compléter — {manque}
-                  </li>
-                ))}
-              </ul>
+              <BlocDetache ton="alerte" className="mt-pas-4">
+                <ul className="gap-pas-2 flex flex-col">
+                  {rubrique.aRemplir.map((manque) => (
+                    <li key={manque} className="text-petit text-stone-500">
+                      À compléter — {manque}
+                    </li>
+                  ))}
+                </ul>
+              </BlocDetache>
             ) : null}
           </section>
         ))}
