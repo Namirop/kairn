@@ -12,7 +12,7 @@ import { PLAFOND_GRATUIT } from "@/lib/domain/plafond-du-plan";
 export const metadata: Metadata = {
   title: "Ce que ça coûte",
   description:
-    "Trente concepts par mois gratuitement, trois cents pour sept euros. Ce qui change entre les deux, et ce qui ne change pas.",
+    "Cinquante concepts par mois gratuitement, cinq cents pour sept euros. Ce qui change entre les deux, et ce qui ne change pas.",
 };
 
 /**
@@ -49,7 +49,11 @@ export default async function PageTarifs() {
 
       <Strates de="papier" vers="ombre" graine="tarifs-offres" />
 
-      <Panneau surface="ombre" aere mesure="colonne">
+      {/* La mesure s'élargit d'un cran pour les deux offres. Les grands nombres
+          y sont entrés, et une colonne de trois cent soixante pixels les faisait
+          toucher les deux bords de leur bloc — le rapport de un à dix se lit mal
+          quand les deux chiffres sont à l'étroit de la même façon. */}
+      <Panneau surface="ombre" aere mesure="page">
         <Offres />
       </Panneau>
 

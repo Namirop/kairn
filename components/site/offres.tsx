@@ -17,13 +17,24 @@ import { cn } from "@/lib/utils";
  * du volume à la colonne payante — et ça se vérifie, puisque rien d'autre dans
  * le produit ne lit le plan.
  *
- * Le filet de lichen désigne l'offre payante. C'est le seul accent de la page,
- * et il a une fonction : dire laquelle des deux colonnes est celle qu'on vend.
+ * **C'est donc lui qui porte la display, et le prix qui passe dessous.** Les
+ * deux colonnes ouvraient sur leur prix en grand : sept euros contre zéro, ce
+ * qui met en avant la seule chose dont le visiteur se méfie et enterre la seule
+ * qu'il compare. Le rapport de un à dix se lit maintenant de loin, et le prix
+ * arrive après, à la taille d'un renseignement — ce qu'il est, à sept euros.
+ *
+ * **La colonne vendue est posée sur du papier, l'autre reste à plat sur
+ * l'ombre.** Elle se désignait par un filet de lichen, qui était le seul accent
+ * de la page ; le contraste de matière dit la même chose plus fort, sans dépenser
+ * la couleur, et c'est la forme que ce produit donne partout à ce qui compte. Le
+ * rembourrage est le même des deux côtés — sans quoi les deux colonnes ne se
+ * liraient plus sur les mêmes lignes, et une comparaison désalignée n'en est pas
+ * une.
  */
 
 export function Offres() {
   return (
-    <div className="gap-pas-6 md:gap-pas-8 grid md:grid-cols-2">
+    <div className="gap-pas-4 md:gap-pas-6 grid items-start md:grid-cols-2">
       <Offre
         nom="Gratuit"
         prix="0 €"
@@ -60,35 +71,38 @@ function Offre({
   second?: string;
   concepts: number;
   raison: string;
-  /** L'offre payante. Porte le seul accent de la page. */
+  /** L'offre payante. C'est elle qui est posée. */
   vendue?: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        "pl-pas-4 gap-pas-4 flex flex-col border-l-2",
-        vendue ? "border-lichen" : "border-stone-300",
-      )}
-    >
-      <p className="text-mono font-mono tracking-wide text-stone-500 uppercase">{nom}</p>
+    <div className={cn("p-pas-6 md:p-pas-8", vendue && "rounded-carte bg-surface-papier")}>
+      <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">{nom}</p>
 
-      <p className="gap-pas-2 flex items-baseline">
-        {/* La display porte les grands nombres, et un prix en est un. */}
-        <span className="font-display text-h2-site leading-none font-bold tracking-[-0.02em]">
-          {prix}
-        </span>
-        <span className="text-petit text-stone-500">{cadence}</span>
+      {/* Le nombre est la seule chose qui distingue les deux offres. Il prend
+          donc la display et l'échelle des grands nombres du produit — la même
+          que le compteur du jour, qui est l'autre chiffre qu'on vient lire. La
+          colonne gratuite le porte en gris : elles ne se valent pas, et le dire
+          par la teinte évite de le dire par un badge. */}
+      <p
+        className={cn(
+          "mt-pas-4 font-display text-nombre leading-none font-medium tabular-nums",
+          vendue ? "text-stone-900" : "text-stone-500",
+        )}
+      >
+        {concepts}
       </p>
+      <p className="mt-pas-2 text-corps text-stone-900">concepts par mois</p>
 
-      {second ? <p className="text-mono font-mono text-stone-500">{second}</p> : null}
+      <div className="mt-pas-6 pt-pas-6 border-t border-stone-300/70">
+        <p className="gap-pas-2 flex flex-wrap items-baseline">
+          <span className="text-h2-app font-semibold tabular-nums">{prix}</span>
+          <span className="text-petit text-stone-500">{cadence}</span>
+        </p>
 
-      <p className="text-corps text-stone-900">
-        {/* Le nombre est la seule chose qui distingue les deux offres : il porte
-            donc le poids, et la phrase autour reste au corps courant. */}
-        <span className="font-mono font-semibold tabular-nums">{concepts}</span> concepts par mois.
-      </p>
+        {second ? <p className="mt-pas-1 text-mono font-mono text-stone-500">{second}</p> : null}
 
-      <p className="text-petit text-stone-500">{raison}</p>
+        <p className="mt-pas-3 text-petit text-stone-500">{raison}</p>
+      </div>
     </div>
   );
 }
