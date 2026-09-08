@@ -5,6 +5,7 @@ import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
 import { ConceptCorrigeable } from "@/components/depots/concept-corrigeable";
+import { EntreeDansLaSerie } from "@/components/depots/entree-dans-la-serie";
 import { ANCRE_A_VERIFIER, ConceptsAVerifier } from "@/components/depots/concepts-a-verifier";
 import { GestesDuDepot } from "@/components/depots/gestes-du-depot";
 import { SuivreLAvancement } from "@/components/depots/suivre-lavancement";
@@ -14,6 +15,7 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireDepotDetaille } from "@/lib/db/depot-detaille";
+import { lireChargeDuJour } from "@/lib/db/session-du-jour";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";
@@ -55,6 +57,9 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
     travaux: depot.travauxEnCours,
     concepts: depot.concepts.length,
   });
+  // Lu seulement une fois la chaîne finie : c'est le seul état où le compte de
+  // la journée tient compte de ce dépôt.
+  const duJour = etat === "pret" ? await lireChargeDuJour(utilisateur.id) : null;
   const texte = depot.rawContent.trim() || depot.extractedText || "";
   // Les concepts que le modèle a marqués douteux, dans l'ordre de la liste :
   // c'est le premier qui porte l'ancre, et c'est vers lui que le chapeau mène.
@@ -98,6 +103,12 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
           {ATTENDS.has(etat) ? (
             <SuivreLAvancement inputId={depot.id} etat={etat} concepts={depot.concepts.length} />
           ) : null}
+
+          {/* Ce que ce dépôt vient de changer à la journée, et la porte qui va
+              avec. Seulement quand la chaîne a fini : l'annoncer pendant qu'elle
+              tourne ferait compter des concepts qui n'ont pas encore leurs
+              questions. */}
+          {duJour ? <EntreeDansLaSerie charge={duJour.charge} /> : null}
         </div>
 
         {texte ? (

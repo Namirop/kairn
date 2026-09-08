@@ -49,7 +49,13 @@ export async function deposerAction(_precedent: EtatDepot, donnees: FormData): P
   }
 
   revalidatePath(ROUTES.depots);
-  redirect(ROUTES.depots);
+
+  // Sur le dépôt qu'on vient de faire, et non sur la liste. C'est le seul écran
+  // qui se recharge tout seul quand le découpage aboutit — la liste, elle, reste
+  // figée sur « en cours » jusqu'à ce qu'on pense à la recharger. On y regardait
+  // donc un dépôt qui n'avançait pas, alors que ses questions étaient écrites
+  // quinze secondes plus tard.
+  redirect(`${ROUTES.depots}/${resultat.inputId}`);
 }
 
 /**

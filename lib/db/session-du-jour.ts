@@ -8,10 +8,12 @@ import { repartirLesFormats } from "@/lib/domain/repartition-des-formats";
 import { variantesEquivalentes } from "@/lib/domain/rotation-variantes";
 import { alternerLesSujets } from "@/lib/domain/alternance-des-sujets";
 import {
+  chargeDuJour,
   conceptsDeLaJournee,
   estServableAujourdhui,
   jourOuIlRevient,
   plafondRestant,
+  type ChargeDuJour,
 } from "@/lib/domain/selection-session";
 
 /**
@@ -239,6 +241,32 @@ export async function compterDusAujourdhui(
   });
 
   return candidats.filter((atome) => estServableAujourdhui(atome, maintenant, fuseau)).length;
+}
+
+/**
+ * Ce que la journée sert et ce qu'elle reporte, avec de quoi le dire.
+ *
+ * Le tableau de bord composait ces quatre valeurs lui-même. Un second écran en a
+ * eu besoin — la page d'un dépôt, qui dit ce que les concepts qu'on vient
+ * d'obtenir changent à la journée —, et recomposer la même chose ailleurs, c'est
+ * se donner deux définitions de la charge du jour. Elles divergent toujours.
+ */
+export async function lireChargeDuJour(
+  userId: string,
+  maintenant: Date = new Date(),
+): Promise<{ charge: ChargeDuJour; plafond: number; faitsAujourdhui: number; fuseau: string }> {
+  const cadre = await lireCadreDeSession(userId);
+  const [dus, faitsAujourdhui] = await Promise.all([
+    compterDusAujourdhui(userId, maintenant),
+    compterFaitsAujourdhui(userId, maintenant, cadre.fuseau),
+  ]);
+
+  return {
+    charge: chargeDuJour(dus, plafondRestant(cadre.plafond, faitsAujourdhui)),
+    plafond: cadre.plafond,
+    faitsAujourdhui,
+    fuseau: cadre.fuseau,
+  };
 }
 
 /**
