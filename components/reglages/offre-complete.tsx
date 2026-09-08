@@ -24,7 +24,7 @@ import { PLAFOND_PAYANT } from "@/lib/domain/plafond-du-plan";
  */
 export function OffreComplete() {
   return (
-    <div className="p-pas-4 md:p-pas-6 rounded-champ bg-surface-lichen mt-pas-6">
+    <div className="p-pas-4 md:p-pas-6 rounded-champ bg-surface-lichen mt-pas-3">
       <div className="gap-pas-3 flex flex-wrap items-baseline justify-between">
         <p className="text-corps font-semibold text-stone-900">L&apos;offre complète</p>
         <p className="text-petit font-mono text-stone-700 tabular-nums">

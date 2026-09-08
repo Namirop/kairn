@@ -94,11 +94,6 @@ export function TonOffre({
           </div>
         ) : null}
 
-        {/* L'offre à prendre, quand il y en a une à prendre. Le lien vers les
-            tarifs la remplace tant que le paiement n'est pas ouvert : il n'y a
-            alors rien à proposer, mais il y a toujours quelque chose à lire. */}
-        {!paye && ouvert ? <OffreComplete /> : null}
-
         {!paye && !ouvert ? (
           <p className="mt-pas-4">
             <Link
@@ -117,6 +112,15 @@ export function TonOffre({
           </div>
         ) : null}
       </div>
+
+      {/* L'offre à prendre est une carte sœur, pas un bloc dans la première.
+
+          Ce sont deux sujets — ce que tu as, ce que tu peux prendre — et les
+          emboîter donnait une surface teintée posée sur du papier, deux tons
+          qui ne se séparent que de quelques centièmes de luminance : le bloc qui
+          devait ressortir se fondait dans celui qui le contenait. Sur l'ombre du
+          panneau, le lichen tranche. */}
+      {!paye && ouvert ? <OffreComplete /> : null}
     </section>
   );
 }
