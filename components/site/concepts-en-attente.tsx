@@ -80,7 +80,9 @@ export function ConceptsEnAttente({ attente }: { attente: EtatDeLAttente }) {
 
       <ul className="gap-pas-4 md:gap-x-pas-8 grid md:grid-cols-2" aria-hidden>
         {EMPLACEMENTS.map(([longue, courte], rang) => (
-          <li key={rang} className="border-lichen/40 pl-pas-4 border-l-2">
+          // La même règle en tête que dans `PileDeConcepts` : ce squelette
+          // annonce la liste qui va le remplacer, il doit en avoir la forme.
+          <li key={rang} className="pt-pas-3 border-t border-stone-300/70">
             {/* Deux barres aux hauteurs d'une ligne de corps : ce qui arrive
                 prend exactement cette place, donc rien ne saute. Le décalage
                 d'animation évite le clignotement à l'unisson, qui se lit comme

@@ -16,14 +16,20 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  * lignes de mesure de hauteur, d'observateur de redimensionnement et de chevron
  * de fin de course sont parties avec le problème qu'elles réglaient.
  *
- * Le filet de lichen à gauche fait le reste : c'est lui qui dit « un concept »,
- * et il se répète assez pour qu'on compte sans lire.
+ * **Une règle en tête de chaque concept dit où il commence.** C'était un filet
+ * de lichen le long de chacun, et six filets verts alignés font un peigne : une
+ * liste n'a pas besoin d'être distinguée du reste de la page, elle a besoin que
+ * ses items se distinguent entre eux. La règle est horizontale, en gris de
+ * pierre, et elle se répète assez pour qu'on compte sans lire.
+ *
+ * Elle est en tête de chacun plutôt qu'entre eux : la grille pose deux colonnes,
+ * et un séparateur posé entre deux items d'une même colonne ne s'aligne sur rien
+ * de la colonne d'en face.
  *
  * **Chaque concept fait sa hauteur, pas celle de son rang.** Une grille étire
- * ses cellules par défaut : le filet d'un concept de deux lignes descendait
- * jusqu'au bas de celui de quatre lignes posé en face, et les trois lignes
- * blanches sous le texte se lisaient comme du texte manquant. Le filet mesure ce
- * qu'il borde, sinon il ne borde plus rien.
+ * ses cellules par défaut, et c'était visible du temps du filet vertical : celui
+ * d'un concept de deux lignes descendait jusqu'au bas de celui de quatre lignes
+ * posé en face. `items-start` reste ce qui l'en empêche.
  */
 
 type Concept = { id: string; concept: string; tags: string[] };
@@ -32,7 +38,7 @@ export function PileDeConcepts({ concepts }: { concepts: Concept[] }) {
   return (
     <ul className="gap-pas-4 md:gap-x-pas-8 md:gap-y-pas-6 grid items-start md:grid-cols-2">
       {concepts.map((concept) => (
-        <li key={concept.id} className="border-lichen pl-pas-4 border-l-2">
+        <li key={concept.id} className="pt-pas-3 border-t border-stone-300/70">
           <p className="text-corps leading-relaxed text-stone-900">
             <TexteTechnique>{concept.concept}</TexteTechnique>
           </p>
