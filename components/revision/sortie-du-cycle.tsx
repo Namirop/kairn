@@ -60,8 +60,15 @@ export function SortiDuCycle({
       role="status"
       className="rounded-champ bg-surface-papier mb-pas-8 px-pas-4 py-pas-3 md:px-pas-6 bande-qui-se-pose w-full"
     >
-      <div className="gap-pas-2 flex flex-wrap items-baseline">
-        <p className="text-petit text-stone-500">
+      {/* Sur un téléphone, la phrase prend la largeur entière et le geste passait
+          seul à la ligne, décalé de son propre rembourrage : un mot souligné
+          suspendu entre deux lignes de gris, qui ne se rattachait plus à rien.
+          Il se pose donc au bout de la première ligne, à l'opposé de la phrase
+          qu'il défait — la bande fait la largeur d'un pouce, les deux restent à
+          portée l'un de l'autre. Dès `md`, la phrase et le geste tiennent
+          ensemble sur une ligne et le geste revient contre son mot. */}
+      <div className="gap-pas-4 md:gap-pas-2 flex items-baseline justify-between md:flex-wrap md:justify-start">
+        <p className="text-petit min-w-0 text-stone-500">
           <span className="font-semibold text-stone-900">Sorti du cycle</span>, il reviendra dans
           trois mois.
         </p>
@@ -69,12 +76,16 @@ export function SortiDuCycle({
         {/* Le seul geste de la bande. En pilule, il pesait plus lourd que la
             phrase qu'il défait ; en fantôme, il ne se distinguait pas du gris
             autour. Souligné, il se lit comme ce qu'il est — un geste de texte,
-            posé contre sa phrase — et garde la hauteur de cible d'un bouton. */}
+            posé contre sa phrase — et garde la hauteur de cible d'un bouton.
+
+            Sans rembourrage à droite sur téléphone : il y est aligné au bord du
+            contenu, et deux pas de plus l'auraient désaligné de la phrase du
+            concept qui suit. */}
         <Button
           type="button"
           variant="link"
           size="sm"
-          className="px-pas-2"
+          className="pl-pas-2 md:pr-pas-2 shrink-0 pr-0"
           disabled={enCours}
           onClick={() => void annuler()}
         >
