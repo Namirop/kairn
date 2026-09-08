@@ -42,6 +42,13 @@ import { PaysageDeCairns } from "@/components/site/paysage-de-cairns";
  * et il est posé sur les deux — n'en décaler qu'une ferait glisser le cairn par
  * rapport au titre alors qu'ils tiennent la même ligne d'horizon.
  *
+ * **Elles partagent aussi leur hauteur, et c'est `--hauteur-cairn`.** Le bas
+ * commun suffisait tant que la fenêtre restait basse ; sur un écran haut, le
+ * cairn touche son plafond pendant que le panneau suit la fenêtre, et le titre
+ * descend seul jusqu'au pied du dessin. Le titre prend donc la mesure du cairn
+ * et s'y centre : ils se lisent sur le même axe à toutes les hauteurs, sans que
+ * le cairn quitte sa butte.
+ *
  * **Sur téléphone, le cairn était réduit de moitié, et il ne l'est plus.** Il
  * avait été ramené à une signature pour une raison qui tenait alors : posé sur
  * du papier vide, à sa taille de bureau, il occupait plus de hauteur que le
@@ -66,7 +73,10 @@ export function Hero({ connecte }: { connecte: boolean }) {
          prise sur le seul écran où la hauteur est comptée, et qui repoussait le
          cairn et son geste sous le pli. Au-delà de `md`, le rythme reprend
          intact — c'est là qu'il a un sens, il y a la hauteur pour le porter. */
-      className="max-md:pt-pas-4 gap-pas-12 grid items-center md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
+      /* `--hauteur-cairn` est la mesure que les deux colonnes partagent : le
+         cairn l'occupe, le titre s'y centre. Elle vit ici parce qu'aucune des
+         deux ne peut la lire chez l'autre. */
+      className="max-md:pt-pas-4 gap-pas-12 grid items-center [--hauteur-cairn:clamp(20rem,52vh,36rem)] md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
       fond={<PaysageDeCairns />}
     >
       {/* Le titre passe **devant** les pierres.
@@ -86,7 +96,20 @@ export function Hero({ connecte }: { connecte: boolean }) {
           et le bloc commençait alors soixante-huit pixels plus bas chez les
           autres — la hauteur du bouton absent, les deux colonnes se calant en
           bas. On compensait ce trou ; il n'y en a plus. */}
-      <Apparition className="md:pb-pas-24 relative z-10">
+      {/* **Le titre se centre sur le cairn, il ne se cale plus à côté de lui.**
+          Les deux colonnes tenaient leur bas commun, ce qui va tant que la
+          fenêtre reste basse : le cairn plafonne à trente-six rems, le titre le
+          rejoint par le bas, et l'écart entre leurs deux milieux est de l'ordre
+          d'un centimètre. Sur un écran haut, le cairn atteint son plafond
+          pendant que le panneau, lui, continue de grandir avec la fenêtre — le
+          titre descend alors seul, et se retrouve au pied du dessin qu'il est
+          censé accompagner.
+
+          Il prend donc la hauteur du cairn et s'y centre : les deux se lisent
+          sur le même axe quelle que soit la fenêtre, et le cairn ne bouge pas
+          d'un pixel. `min-h` et non `h` — un titre qui déborderait sa mesure
+          pousse sa boîte au lieu d'en sortir. */}
+      <Apparition className="md:pb-pas-24 relative z-10 md:flex md:min-h-[var(--hauteur-cairn)] md:flex-col md:justify-center">
         <h1 className="font-display text-ouverture leading-[0.95] font-bold tracking-[-0.03em] text-balance md:leading-[0.84] md:tracking-[-0.045em]">
           <Temps balise="span" className="block">
             Tu lis beaucoup.
@@ -156,7 +179,7 @@ export function Hero({ connecte }: { connecte: boolean }) {
           pixels — assez pour qu'il ait l'air posé dessus plutôt que planté
           dedans. Si la crête bouge, cette valeur se remesure. */}
       <div className="-mb-pas-12 md:pb-pas-24 flex justify-center md:mb-0">
-        <div className="relative aspect-[100/93] w-[min(62vw,17rem)] md:aspect-auto md:h-[clamp(20rem,52vh,36rem)] md:w-full">
+        <div className="relative aspect-[100/93] w-[min(62vw,17rem)] md:aspect-auto md:h-[var(--hauteur-cairn)] md:w-full">
           <span
             aria-hidden
             className="rounded-galet absolute bottom-[1%] left-1/2 h-[5%] w-[56%] -translate-x-1/2 bg-stone-900 opacity-[0.15] blur-[9px]"
