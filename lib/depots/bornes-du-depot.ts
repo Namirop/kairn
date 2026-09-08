@@ -139,8 +139,18 @@ export const RIEN_A_DECOUPER =
 
 export const TROP_COURT = "Colle un peu plus de matière : une phrase ou deux, au minimum.";
 
+/**
+ * Le refus de longueur d'un essai, et la seule chose importante qu'il ait à
+ * dire : **ce n'est pas la limite du produit.**
+ *
+ * Quatre mille signes est la borne d'une démonstration, pas celle d'un dépôt.
+ * Qui la rencontre sans qu'on le lui dise en conclut que Kairn n'accepte pas les
+ * textes longs, et referme l'onglet sur un produit qui accepte quatre fois plus
+ * dès qu'on a un compte. C'est le refus le plus coûteux de la page qui convertit,
+ * et le nommer coûte une phrase.
+ */
 export function tropLong(): string {
-  return `Ce texte dépasse ${longueurEnClair(CARACTERES_MAXIMUM_ANONYME)}. Crée un compte pour aller jusqu'à ${longueurEnClair(CARACTERES_MAXIMUM)}.`;
+  return `Ce texte dépasse ${longueurEnClair(CARACTERES_MAXIMUM_ANONYME)}, la limite d'un essai sans compte. Un compte en prend ${longueurEnClair(CARACTERES_MAXIMUM)}, et il est gratuit.`;
 }
 
 export function motifDeLongueur(texte: string): string | null {

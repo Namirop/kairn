@@ -3,7 +3,11 @@
 import { useRef, useState, type FormEvent } from "react";
 import { Apparition, Temps } from "@/components/site/apparition";
 import { Button } from "@/components/ui/button";
-import { CARACTERES_MAXIMUM_ANONYME, motifDeLongueur } from "@/lib/depots/bornes-du-depot";
+import {
+  CARACTERES_MAXIMUM_ANONYME,
+  motifDeLongueur,
+  tropLong,
+} from "@/lib/depots/bornes-du-depot";
 
 /**
  * L'invitation à déposer : le titre, ce qu'on en fait, et le champ.
@@ -172,7 +176,14 @@ export function FormulaireDEssai({
               enCours={enCours}
               trop={trop}
               longueur={texte.length}
-              erreur={erreurLocale ?? erreurServeur}
+              /* Le dépassement se dit **pendant** qu'on colle, sans attendre
+                 l'envoi : à six mille signes, la phrase n'est pas prématurée,
+                 c'est exactement ce qu'il y a à lire — et elle dit que la borne
+                 est celle de l'essai, pas celle du produit. Les bornes basses,
+                 elles, gardent leur silence jusqu'au clic : recalculées à
+                 chaque frappe, elles feraient passer « il n'y a rien » à « c'est
+                 trop court » au troisième caractère. */
+              erreur={erreurLocale ?? (trop ? tropLong() : erreurServeur)}
               reprise={reprise}
             />
           </form>
