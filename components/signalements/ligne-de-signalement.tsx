@@ -1,3 +1,4 @@
+import { BlocDetache } from "@/components/coquille/bloc-detache";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 import type { SignalementLu } from "@/lib/db/signalement";
 import type { MotifDeSignalement } from "@/lib/db/types";
@@ -44,9 +45,9 @@ export function LigneDeSignalement({ signalement }: { signalement: SignalementLu
       </p>
 
       {signalement.commentaire ? (
-        <p className="border-lichen mt-pas-3 pl-pas-3 text-petit max-w-prose border-l-2 text-stone-800">
-          {signalement.commentaire}
-        </p>
+        <BlocDetache className="mt-pas-3">
+          <p className="text-petit max-w-prose text-stone-800">{signalement.commentaire}</p>
+        </BlocDetache>
       ) : null}
 
       <p className="mt-pas-3 text-petit max-w-prose text-stone-500">

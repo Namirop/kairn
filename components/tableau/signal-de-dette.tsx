@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BlocDetache } from "@/components/coquille/bloc-detache";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
@@ -16,10 +17,15 @@ import { ROUTES } from "@/lib/auth/routes";
  * Le nombre de jours est donné, pas arrondi en « quelques ». On le connaît, et
  * le flou fait plus peur que le chiffre : « quelques jours » se lit comme un
  * reproche qu'on n'ose pas chiffrer, « six jours » se lit comme un fait.
+ *
+ * Il se détache en gris de pierre, et pas en ember : cet accent-là appartient à
+ * la série et à rien d'autre. Le mettre ici, fût-ce à quarante pour cent, en
+ * faisait la couleur de deux choses opposées — ce qu'on tient, et ce qui
+ * s'accumule.
  */
 export function SignalDeDette({ enAttente, jours }: { enAttente: number; jours: number }) {
   return (
-    <div className="border-ember/40 pl-pas-4 border-l-2">
+    <BlocDetache>
       <p className="text-corps max-w-prose leading-relaxed text-stone-900">
         Ça fait {jours} jours que l&apos;arriéré ne descend pas : {enAttente} concepts attendent
         derrière la session du jour.
@@ -35,6 +41,6 @@ export function SignalDeDette({ enAttente, jours }: { enAttente: number; jours: 
         </Link>
         .
       </p>
-    </div>
+    </BlocDetache>
   );
 }

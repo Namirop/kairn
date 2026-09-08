@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BlocDetache } from "@/components/coquille/bloc-detache";
 import { ListeDattente } from "@/components/depots/liste-dattente";
 import { ROUTES } from "@/lib/auth/routes";
 import { PLAFOND_PAYANT } from "@/lib/domain/plafond-du-plan";
@@ -39,20 +40,22 @@ type Props = {
 
 export function PlafondAtteint({ remiseAZero, inscrit, motif, limite, offreAProposer }: Props) {
   return (
-    <div className="border-lichen pl-pas-4 gap-pas-3 flex max-w-xl flex-col border-l-2">
+    <BlocDetache className="max-w-xl">
       {/* Les mêmes mots que le refus côté serveur : c'est la même limite.
           « Autour de » pour les concepts seulement — un dépôt rend ce qu'il
           rend, donc le dernier de la période peut passer le plafond sans qu'on
           l'ait mal compté. Des dépôts, eux, se comptent un par un. */}
-      <p className="text-corps text-pretty text-stone-900">
-        {motif === "concepts"
-          ? `Tu as atteint la limite du mois, autour de ${limite} concepts.`
-          : `Tu as atteint la limite du mois, ${limite} dépôts.`}{" "}
-        Le compteur repart {remiseAZero}.
-      </p>
+      <div className="gap-pas-3 flex flex-col">
+        <p className="text-corps text-pretty text-stone-900">
+          {motif === "concepts"
+            ? `Tu as atteint la limite du mois, autour de ${limite} concepts.`
+            : `Tu as atteint la limite du mois, ${limite} dépôts.`}{" "}
+          Le compteur repart {remiseAZero}.
+        </p>
 
-      {offreAProposer ? <Offre /> : <Signalement inscrit={inscrit} motif={motif} />}
-    </div>
+        {offreAProposer ? <Offre /> : <Signalement inscrit={inscrit} motif={motif} />}
+      </div>
+    </BlocDetache>
   );
 }
 
