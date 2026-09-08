@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import {
   type EtatDuPaiement,
@@ -9,7 +8,6 @@ import {
   renouvellementAction,
 } from "@/app/(app)/reglages/paiement";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/lib/auth/routes";
 import { PRIX_ANNUEL, PRIX_MENSUEL } from "@/lib/domain/prix";
 
 /**
@@ -22,20 +20,18 @@ import { PRIX_ANNUEL, PRIX_MENSUEL } from "@/lib/domain/prix";
  * ajout d'un geste d'argent.
  */
 
-/** Les deux cadences. Deux boutons, pas deux colonnes : le choix est fait, il reste à payer. */
+/**
+ * Les deux cadences. Deux boutons, pas deux colonnes : le choix est fait, il
+ * reste à payer.
+ *
+ * Le refus d'un paiement fermé appartient à l'écran qui héberge ces boutons, pas
+ * à eux : c'est lui qui sait ce qu'il y a à dire à la place, et il n'a alors
+ * aucune raison de charger un composant qui ne fait qu'engager de l'argent.
+ */
 export function Achat({ ouvert }: { ouvert: boolean }) {
   const [etat, action, enCours] = useActionState<EtatDuPaiement, FormData>(payerAction, {});
 
-  if (!ouvert) {
-    return (
-      <Link
-        href={ROUTES.tarifs}
-        className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
-      >
-        Voir les tarifs
-      </Link>
-    );
-  }
+  if (!ouvert) return null;
 
   return (
     <>
@@ -48,7 +44,7 @@ export function Achat({ ouvert }: { ouvert: boolean }) {
         </Cadence>
       </div>
 
-      <p className="mt-pas-2 text-petit text-stone-500">
+      <p className="mt-pas-3 text-petit text-stone-500">
         L&apos;année revient à dix mois payés pour douze. La carte se saisit chez Stripe.
       </p>
 
@@ -136,10 +132,19 @@ export function Portail() {
   );
 }
 
-/** L'emplacement du message est réservé : une erreur ne décale pas les boutons. */
+/**
+ * Le message n'occupe plus rien tant qu'il n'a rien à dire.
+ *
+ * Sa place était réservée en permanence — une ligne sous chaque geste, pour une
+ * phrase qui paraît un jour sur cent. Trois gestes dans la même carte, et c'était
+ * soixante pixels de vide qui écartaient « arrêter le renouvellement » du lien
+ * vers les factures au point qu'ils n'avaient plus l'air d'appartenir au même
+ * sujet. Il est **sous** son bouton : il ne décale que ce qui vient après, à
+ * l'instant où quelqu'un lit une erreur, et ce déplacement-là se comprend.
+ */
 function Message({ erreur }: { erreur?: string }) {
   return (
-    <p className="mt-pas-2 text-petit min-h-5" role="status" aria-live="polite">
+    <p className="mt-pas-2 text-petit empty:mt-0" role="status" aria-live="polite">
       {erreur ? <span className="text-alerte">{erreur}</span> : null}
     </p>
   );

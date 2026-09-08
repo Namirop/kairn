@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { AttenteDuPaiement } from "@/components/reglages/attente-du-paiement";
-import { Achat, Portail, Renouvellement } from "@/components/reglages/gestes-de-loffre";
-import { PLAFOND_PAYANT, type Plan } from "@/lib/domain/plafond-du-plan";
+import { Portail, Renouvellement } from "@/components/reglages/gestes-de-loffre";
+import { OffreComplete } from "@/components/reglages/offre-complete";
+import { ROUTES } from "@/lib/auth/routes";
+import { type Plan } from "@/lib/domain/plafond-du-plan";
 
 /**
  * L'offre du compte, et le geste qui la change.
@@ -12,9 +15,23 @@ import { PLAFOND_PAYANT, type Plan } from "@/lib/domain/plafond-du-plan";
  * de vente.
  *
  * Le registre est donc celui des réglages : pas de display, pas d'accent, les
- * chiffres en mono comme partout où ce produit affiche une donnée. Le seul
- * poids visuel est sur le nom de l'offre et sur le nombre de concepts, parce
- * que c'est ce qu'on vient vérifier.
+ * chiffres en mono comme partout où ce produit affiche une donnée.
+ *
+ * **Le nom de l'offre et son plafond sont un couple, et ils se touchent.** Ils
+ * vivaient aux deux extrémités d'une rangée en `justify-between` : sur un écran
+ * large, « Complet » et « 500 concepts par mois » se retrouvaient à neuf cents
+ * pixels l'un de l'autre, et l'un des deux se lisait sans l'autre. Ce qu'on vient
+ * vérifier sur cet écran, c'est justement leur rapport.
+ *
+ * **Un filet sépare l'offre de ce qu'on en fait.** Sans lui, l'identité, l'état
+ * et les gestes s'empilaient à intervalle égal, et la carte n'avait pas de
+ * structure — trois blocs de la même importance dont aucun n'ouvrait.
+ *
+ * **Les deux gestes tiennent la même rangée.** « Arrêter le renouvellement » et
+ * « Factures et moyen de paiement » étaient séparés de soixante pixels de vide,
+ * fabriqués par la place que chaque bouton réservait à un message d'erreur qui
+ * n'arrive jamais. Ils appartiennent au même sujet — ce que je fais de mon
+ * abonnement —, ils se lisent ensemble.
  */
 
 type Props = {
@@ -54,14 +71,14 @@ export function TonOffre({
       <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">Ton offre</h2>
 
       <div className="p-pas-4 md:p-pas-6 rounded-champ bg-surface-papier mt-pas-3">
-        <div className="gap-pas-4 flex flex-wrap items-baseline justify-between">
-          <p className="text-corps font-semibold text-stone-900">{paye ? "Complet" : "Gratuit"}</p>
-          <p className="text-petit font-mono text-stone-700 tabular-nums">
-            {plafond} concepts par mois
-          </p>
-        </div>
+        <p className="text-h2-app leading-none font-semibold text-stone-900">
+          {paye ? "Complet" : "Gratuit"}
+        </p>
+        <p className="mt-pas-2 text-petit font-mono text-stone-500 tabular-nums">
+          {plafond} concepts par mois
+        </p>
 
-        <p className="mt-pas-1 text-petit max-w-prose text-stone-500">
+        <p className="mt-pas-4 pt-pas-4 text-petit max-w-prose border-t border-stone-300/70 text-stone-500">
           <Etat
             paye={paye}
             terme={terme}
@@ -71,19 +88,32 @@ export function TonOffre({
           />
         </p>
 
-        <div className="mt-pas-6">
-          {paye ? <Renouvellement resilieALaFin={resilieALaFin} /> : <Achat ouvert={ouvert} />}
-        </div>
-
         {retourDePaiement && !paye ? (
           <div className="mt-pas-3">
             <AttenteDuPaiement />
           </div>
         ) : null}
 
-        {dossier && ouvert ? (
-          <div className="mt-pas-4">
-            <Portail />
+        {/* L'offre à prendre, quand il y en a une à prendre. Le lien vers les
+            tarifs la remplace tant que le paiement n'est pas ouvert : il n'y a
+            alors rien à proposer, mais il y a toujours quelque chose à lire. */}
+        {!paye && ouvert ? <OffreComplete /> : null}
+
+        {!paye && !ouvert ? (
+          <p className="mt-pas-4">
+            <Link
+              href={ROUTES.tarifs}
+              className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
+            >
+              Voir les tarifs
+            </Link>
+          </p>
+        ) : null}
+
+        {paye || (dossier && ouvert) ? (
+          <div className="gap-pas-4 mt-pas-6 flex flex-wrap items-center">
+            {paye ? <Renouvellement resilieALaFin={resilieALaFin} /> : null}
+            {dossier && ouvert ? <Portail /> : null}
           </div>
         ) : null}
       </div>
@@ -128,10 +158,5 @@ function Etat({
 
   if (!ouvert) return <>Le paiement n&apos;est pas encore ouvert.</>;
 
-  return (
-    <>
-      L&apos;offre complète ouvre {PLAFOND_PAYANT} concepts par mois, sur la même période que la
-      tienne.
-    </>
-  );
+  return <>Tout ce que le produit sait faire est ouvert. C&apos;est le volume qui est borné.</>;
 }
