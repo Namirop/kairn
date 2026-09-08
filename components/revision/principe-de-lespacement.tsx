@@ -26,7 +26,10 @@ export function PrincipeDeLEspacement() {
   }, []);
 
   return (
-    <div className="border-lichen pl-pas-4 border-l-2">
+    // Du papier posé, et non un filet : ce paragraphe n'a pas de libellé pour
+    // l'annoncer, et c'est le seul cas où le blanc ne suffit pas à le détacher
+    // du palier qui l'entoure.
+    <div className="p-pas-4 md:p-pas-6 rounded-carte bg-surface-ombre">
       <p className="text-corps leading-relaxed text-stone-900">
         Une session s&apos;arrête quand elle a servi ce qui était dû. Chaque concept retrouvé
         revient de plus loin — deux jours, puis une semaine, puis un mois. C&apos;est l&apos;écart

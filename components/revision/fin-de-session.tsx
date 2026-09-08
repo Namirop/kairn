@@ -151,9 +151,16 @@ export function FinDeSession({
 
       {/* Le concept est cité, donc aligné à gauche : une phrase de contenu
           centrée se lit moins bien, et c'est le seul texte de l'écran qui ne
-          vient pas du produit. */}
+          vient pas du produit.
+
+          Et il est posé, plutôt que bordé d'un filet de lichen. C'est la forme
+          que ce produit donne à ce qui compte — la bande d'annulation de la
+          session est la même chose —, et elle ne dépense pas l'accent : le
+          lichen ne signalait plus rien à force de border huit blocs qui
+          n'avaient ni statut ni urgence. Un bloc posé se distingue par sa
+          matière. */}
       {carte ? (
-        <div className="mt-pas-12 border-lichen pl-pas-4 max-w-lg border-l-2 text-left">
+        <div className="mt-pas-12 p-pas-4 md:p-pas-6 rounded-carte bg-surface-ombre max-w-lg text-left">
           <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
             Tu maîtrises ça
           </p>
