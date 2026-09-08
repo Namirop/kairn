@@ -83,19 +83,40 @@ export const PANNES_TOLEREES = 2;
  * de vingt-quatre heures a fini de passer dessus.
  *
  * Une visite réclamée, elle, ne se rouvre jamais : son contenu appartient à un
- * compte, et c'est par ce compte qu'on dépose maintenant.
+ * compte. Elle n'interdit rien pour autant — c'est une visite neuve qui prend le
+ * relais, voir `etatDeLaVisite`.
  */
-export async function sessionDisponible(sessionId: string): Promise<boolean> {
+export type EtatDeLaVisite = "ouverte" | "epuisee" | "close";
+
+/**
+ * Trois états, et le troisième manquait.
+ *
+ * **Une visite close n'est pas une visite épuisée**, et les confondre a fermé la
+ * landing à quelqu'un qui n'avait rien dépensé. Le cookie vit sept jours et
+ * survit à ce qu'il désigne : une visite réclamée par un compte, une visite
+ * purgée de la base. Dans les deux cas il n'y a rien à compter — donc rien à
+ * refuser. C'est une visite de plus qui commence, et le plafond par adresse
+ * reste seul juge de savoir s'il en reste une à ouvrir.
+ *
+ * « Une visite réclamée ne se rouvre jamais » reste vrai, et c'est bien ce qui se
+ * passe : elle ne se rouvre pas, une autre s'ouvre. Ce qu'elle contient
+ * appartient au compte et n'est repris par personne d'autre.
+ */
+export async function etatDeLaVisite(sessionId: string): Promise<EtatDeLaVisite> {
   const session = await prisma.anonymousSession.findUnique({
     where: { id: sessionId },
     select: { claimedAt: true },
   });
 
-  if (!session || session.claimedAt !== null) return false;
+  if (!session || session.claimedAt !== null) return "close";
 
   const { imputables, pannes } = await compterLesDepots(sessionId);
 
-  return imputables < ESSAIS_PAR_VISITE && pannes < PANNES_TOLEREES;
+  return imputables < ESSAIS_PAR_VISITE && pannes < PANNES_TOLEREES ? "ouverte" : "epuisee";
+}
+
+export async function sessionDisponible(sessionId: string): Promise<boolean> {
+  return (await etatDeLaVisite(sessionId)) !== "epuisee";
 }
 
 /**

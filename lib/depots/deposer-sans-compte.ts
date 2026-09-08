@@ -4,8 +4,8 @@ import { marquerEnCours } from "@/lib/db/ingestion";
 import {
   compterLesDepots,
   essaiAbouti,
+  etatDeLaVisite,
   PANNES_TOLEREES,
-  sessionDisponible,
 } from "@/lib/db/essais-de-la-visite";
 import { ouvrirUneSession } from "@/lib/db/session-anonyme";
 import { CARACTERES_MAXIMUM, longueurEnClair, motifDeLongueur } from "@/lib/depots/bornes-du-depot";
@@ -132,12 +132,18 @@ export async function deposerSansCompte(
     );
   }
 
-  if (!sansLimite && sessionExistante && !(await sessionDisponible(sessionExistante))) {
+  const visite = !sansLimite && sessionExistante ? await etatDeLaVisite(sessionExistante) : "close";
+
+  if (visite === "epuisee" && sessionExistante) {
     return { ok: false, motif: await motifDuRefus(sessionExistante) };
   }
 
+  // « close » ouvre une visite neuve plutôt que de refuser : le cookie désigne
+  // alors une visite qui n'existe plus, ou qui appartient déjà à un compte. Il
+  // n'y avait rien à compter dessus, et on répondait pourtant « tes essais du
+  // jour sont faits » à quelqu'un qui n'avait rien dépensé.
   const session =
-    sessionExistante && !sansLimite
+    visite === "ouverte" && sessionExistante
       ? { ouverte: true as const, sessionId: sessionExistante }
       : await ouvrirUneSession(adresse, sansLimite);
 
