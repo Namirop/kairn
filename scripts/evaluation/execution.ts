@@ -107,7 +107,6 @@ export type DepotEvalue = {
   lecture?: { langue: string | null; exploitable: boolean };
   /** Absentes quand l'extraction a échoué : le modèle n'a rien rendu de lisible. */
   nature?: NatureDuDepot;
-  langue?: string;
   rejet: string | null;
   concepts: ConceptEvalue[];
   echec?: Echec;
@@ -360,7 +359,6 @@ export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
       texte,
       lecture,
       nature: extraction.nature,
-      langue: extraction.langue,
       rejet: extraction.rejected,
       derives: extraction.derives,
       tronque: extraction.tronque,
@@ -381,7 +379,6 @@ export async function rejouerDepot(fige: DepotFige): Promise<DepotEvalue> {
     texte: fige.texte,
     lecture: fige.lecture,
     nature: fige.nature,
-    langue: fige.langue,
     rejet: fige.rejet,
     concepts: evalues,
     reprises,

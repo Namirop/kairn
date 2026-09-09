@@ -62,8 +62,7 @@ function rendreDepot({ evaluation, consommation }: Passage): string[] {
   ];
 
   if (evaluation.nature) {
-    const langue = evaluation.langue ? `, langue \`${evaluation.langue}\`` : "";
-    lignes.push(`Nature lue : \`${evaluation.nature}\`${langue}.`, "");
+    lignes.push(`Nature lue : \`${evaluation.nature}\`.`, "");
   }
 
   for (const manquement of manquementsDeLangue(evaluation)) {

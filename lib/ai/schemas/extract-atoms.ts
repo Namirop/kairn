@@ -68,9 +68,6 @@ const sortieLue = z.object({
     .describe(
       "FACTUEL si le dépôt prétend être vrai du monde, FICTION s'il décrit un univers ou un jeu, PERSONNEL s'il est vrai mais invérifiable de l'extérieur.",
     ),
-  langue: z
-    .string()
-    .describe("La langue du dépôt, en deux lettres minuscules : fr, en, es, de, it…"),
   atoms: z
     .array(atomeLu)
     .describe("Autant que le contenu en porte. Vide si le dépôt ne donne aucun concept."),
@@ -88,7 +85,6 @@ const sortieLue = z.object({
  * s'en apercevrait la première, après la dépense.
  */
 export const extractAtomsForme = sortieLue.extend({
-  langue: sortieLue.shape.langue.length(2),
   atoms: z
     .array(
       atomeLu.extend({
@@ -116,7 +112,6 @@ const extractAtomsValidation = sortieLue.transform((sortie) => {
 
   return {
     nature: sortie.nature,
-    langue: sortie.langue.trim().toLowerCase(),
     // `deriveDe` ne survit pas à la relecture : c'est une mesure, pas une
     // donnée du produit. Voir `lib/domain/concepts-derives.ts` pour ce qu'il a
     // coûté quand il coupait.

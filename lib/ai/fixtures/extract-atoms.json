@@ -5,7 +5,6 @@
       "keywords": ["liste de courses", "lentilles corail"],
       "output": {
         "nature": "FACTUEL",
-        "langue": "fr",
         "atoms": [],
         "rejected": "C'est une liste de courses : il n'y a pas de connaissance à te reposer plus tard. Dépose plutôt une règle, un mécanisme ou une explication que tu veux garder."
       }
@@ -15,7 +14,6 @@
       "keywords": ["dragon des cendres"],
       "output": {
         "nature": "FICTION",
-        "langue": "fr",
         "atoms": [
           {
             "concept": "Le dragon des cendres ne crache pas de flamme mais une poussière brûlante, qui s'enflamme au contact de l'air humide.",
@@ -36,7 +34,6 @@
       "keywords": ["concurrently"],
       "output": {
         "nature": "FACTUEL",
-        "langue": "fr",
         "atoms": [
           {
             "concept": "`CREATE INDEX CONCURRENTLY` pose un verrou exclusif sur la table pendant toute la construction de l'index, ce qui bloque les écritures.",
@@ -57,7 +54,6 @@
       "keywords": ["ça repart en boucle"],
       "output": {
         "nature": "FACTUEL",
-        "langue": "fr",
         "atoms": [
           {
             "concept": "La fonction rendue par un `useEffect` est appelée avant chaque réexécution de l'effet et au démontage du composant. C'est là qu'on défait ce que l'effet a mis en place.",
@@ -83,7 +79,6 @@
       "minInputChars": 0,
       "output": {
         "nature": "FACTUEL",
-        "langue": "fr",
         "atoms": [
           {
             "concept": "`Array.prototype.at()` accepte un index négatif, compté depuis la fin du tableau : `at(-1)` rend le dernier élément.",
@@ -99,7 +94,6 @@
       "minInputChars": 300,
       "output": {
         "nature": "FACTUEL",
-        "langue": "fr",
         "atoms": [
           {
             "concept": "Chaque instruction d'un Dockerfile produit une couche. Une couche n'est réutilisée que si toutes celles qui la précèdent sont inchangées, d'où l'intérêt de copier le manifeste de dépendances avant le code source.",
@@ -125,7 +119,6 @@
       "minInputChars": 1500,
       "output": {
         "nature": "FACTUEL",
-        "langue": "fr",
         "atoms": [
           {
             "concept": "JavaScript exécute une seule pile d'appels à la fois. Tant qu'une fonction n'a pas rendu la main, rien d'autre ne s'exécute : ni minuterie échue, ni promesse résolue, ni gestionnaire d'événement.",

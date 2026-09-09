@@ -95,18 +95,57 @@
  *
  * Elle part en production sans passage au banc, sur décision de Romain, comme
  * les deux du 4 septembre : elle se jugera sur les dépôts réels.
+ *
+ * **La langue de sortie a été renversée le 9 septembre 2026, et `langue` retirée
+ * avec elle.** La consigne disait « écris dans la langue du dépôt » ; trois dépôts
+ * de production l'ont montrée intenable dès qu'un texte français cite une langue
+ * étrangère. Une explication française de `ser` et `estar`, contenant « soy
+ * francés » et « la sopa está fría », a rendu trois concepts intégralement en
+ * espagnol — jusqu'aux étiquettes, `gramatica-espanola`. Une liste d'expressions
+ * anglaises a rendu ses concepts en français et ses vingt-quatre questions en
+ * anglais, options comprises.
+ *
+ * Le défaut n'est pas propre aux langues : il se déclenche sur tout dépôt dont la
+ * langue apparente n'est pas celle dans laquelle la personne écrit. La cause est
+ * la consigne elle-même — elle demandait une **décision** (quelle langue ?) avant
+ * l'écriture, et c'est cette décision qui se trompait. Il n'y a plus de décision :
+ * le français est inconditionnel, et la seule règle qui reste est de ne pas
+ * traduire ce qui est cité.
+ *
+ * `langue` disparaît pour la même raison. Sa justification était « la déclarer et
+ * l'écrire sont la même décision, prise une fois » ; sans décision, le champ n'a
+ * plus d'objet, rien dans le produit ne le lisait — il n'existe pas de colonne
+ * `langue` sur `Input` — et le laisser à côté d'une consigne inconditionnelle
+ * rouvrait la porte qu'on ferme. Le banc s'en passe : `langueApparente` lit le
+ * texte déposé directement, sans dépendre de ce que le modèle déclare. Le
+ * contrôle y gagne — il ne pouvait pas voir un dépôt espagnol rendre des
+ * concepts espagnols, les deux étant cohérents entre eux.
+ *
+ * L'ironie du corpus : `18-anglais.txt` a été ajouté parce qu'il rendait des
+ * concepts français là où on en voulait des anglais. C'est désormais le
+ * comportement attendu, et le fichier devient un témoin de conformité.
  */
 export const EXTRACT_ATOMS_PROMPT = `Tu découpes ce qu'une personne vient d'apprendre en concepts unitaires, pour qu'ils
 lui soient reposés plus tard.
 
 LA LANGUE
 
-Tu écris dans la langue du dépôt, jamais dans une autre. Un texte déposé en anglais
-rend des concepts en anglais. C'est ce que la personne relira : la traduire lui donne
-un dépôt qu'elle n'a pas fait.
+Tu écris toujours en français, quelle que soit la langue du dépôt. Un article en
+anglais, une note en espagnol, une liste de vocabulaire : les concepts qui en sortent
+sont en français. Il n'y a pas de langue à choisir ici — c'est celle dans laquelle la
+personne révisera, et la seule que l'application lui parle.
 
-Renseigne \`langue\` avec la langue du dépôt, en deux lettres minuscules : \`fr\`, \`en\`,
-\`es\`, \`de\`, \`it\`. La déclarer et l'écrire sont la même décision, prise une fois.
+Ce que le dépôt **cite** garde sa langue : un mot, une expression, une phrase
+d'exemple, un terme technique, un nom propre. Tu les recopies tels quels, entre
+guillemets, sans les traduire ni les translittérer. C'est souvent eux qu'il y a à
+retenir, et les traduire effacerait exactement ce qu'on voulait apprendre.
+
+Un dépôt qui dit « El verbo ser se usa para expresar la identidad » rend un concept
+qui dit : Le verbe espagnol « ser » exprime l'identité, l'origine et la profession —
+« soy francés », « es médico ».
+
+Quand le sens d'un terme cité fait partie de ce qu'il y a à retenir, le concept porte
+les deux : la forme dans sa langue, le sens en français.
 
 CE QU'EST UN CONCEPT
 
@@ -252,6 +291,6 @@ reproche, en disant ce qui manquerait pour que ce soit exploitable.
 
 LES ÉTIQUETTES
 
-Une à trois par concept, en minuscules, sans accent ni espace : \`closures\`,
+Une à trois par concept, en français, en minuscules, sans accent ni espace : \`closures\`,
 \`postgres\`, \`index-partiel\`. Elles servent à regrouper, pas à décrire. Reprends celles
 déjà utilisées ailleurs quand elles conviennent, plutôt que d'en inventer une variante.`;

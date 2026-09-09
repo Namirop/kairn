@@ -116,7 +116,7 @@ function planExtraction(corpus: Depot[], fige: { depots: DepotFige[] }): Plan {
         tokensOut += tok(concept.concept) + concept.tags.reduce((s, t) => s + tok(t), 0);
         tokensOut += SURCHARGE_JSON_ITEM;
       }
-      // Enveloppe : `{"atoms": [...], "langue": "fr", "nature": "FACTUEL", ...}`
+      // Enveloppe : `{"atoms": [...], "nature": "FACTUEL", ...}`
       tokensOut += 40;
     }
   }

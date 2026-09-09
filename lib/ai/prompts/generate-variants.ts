@@ -124,6 +124,27 @@
  * elle y est corrigée le même jour (voir `extract-atoms.ts`) ; cette consigne-ci
  * est la seconde barrière, pour le stock déjà découpé.
  *
+ * **Les questions sont passées au français inconditionnel le 9 septembre 2026.**
+ * La consigne disait « dans la langue du concept », et un concept français citant
+ * une expression anglaise a suffi à faire basculer les quatre questions en
+ * anglais. Sur la liste d'expressions de production — six concepts tous rédigés
+ * en français, chacun citant sa tournure —, les vingt-quatre questions sont
+ * sorties en anglais, énoncés, options et étalons compris. Le concept disait
+ * « L'expression anglaise « to put up with » signifie « supporter » » et la
+ * question demandait « Which meaning best matches “to put up with” ? ».
+ *
+ * Même cause qu'à l'extraction, corrigée le même jour et de la même manière : la
+ * consigne demandait une décision, la décision se trompait, il n'y a plus de
+ * décision. Ce qui reste est la distinction entre le texte qui **porte** la
+ * question — français — et ce sur quoi elle porte, cité tel quel. Une option de
+ * QCM peut donc être une forme étrangère, et c'est même ce qu'on veut sur du
+ * vocabulaire : l'énoncé donne le sens en français, les options donnent les
+ * formes, et la question se pose enfin dans le sens où elle est difficile.
+ *
+ * La ligne sur le trou d'un terme étranger vient de là. Sans elle, le modèle
+ * masque indifféremment la forme ou la glose ; masquer la glose française d'un
+ * mot anglais fait réviser du français à quelqu'un qui apprend l'anglais.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -139,15 +160,16 @@ ils seront servis à des semaines d'intervalle.
 
 LA LANGUE
 
-Tu écris chaque question, chaque réponse et chaque option dans la langue du concept
-qu'elle porte. Un concept en anglais donne des questions en anglais, jusqu'aux options
-de ses QCM. Personne ne veut réviser en français une note prise en anglais.
+Tu écris en français : l'énoncé, les options, la réponse-étalon. Toujours, quelle que
+soit la langue du concept. Il n'y a pas de langue à choisir ici.
 
-Ce n'est pas la langue de cette consigne qui décide, c'est celle du concept qu'on te
-donne. Regarde-la avant d'écrire, pas après.
+Ce que le concept cite — un mot, une expression, une phrase d'exemple, un terme
+technique — se recopie dans sa langue, sans traduction ni translittération. C'est le
+texte qui **porte** la question qui est en français, pas ce sur quoi elle porte : une
+option de QCM peut donc être une forme étrangère, et un texte à trou peut masquer un
+mot dans la phrase d'exemple citée telle quelle.
 
-En français, une question qui s'adresse au lecteur le tutoie : « Explique », jamais
-« Expliquez ».
+Une question qui s'adresse au lecteur le tutoie : « Explique », jamais « Expliquez ».
 
 LA RÈGLE QUI COMPTE
 
@@ -260,6 +282,10 @@ compter fausse la bonne réponse.
 Son \`answerKey\` ne réannonce pas le terme. Il vient de se poser dans la phrase,
 souligné, au moment où ce bloc s'affiche : ni « Le terme attendu est… », ni « Le
 mot masqué est… ». Commence par ce qu'il fallait avoir compris pour le trouver.
+
+Quand le concept apparie un terme étranger et son sens en français, le trou tombe sur
+le terme étranger. C'est lui qu'il s'agit de savoir produire ; le sens, lui, est déjà
+dans la phrase qui entoure le trou.
 
 Avant de choisir le mot à masquer, vérifie qu'on ne pourrait pas le retrouver en
 lisant seulement le reste de la phrase. Si la grammaire le rend prévisible, ou

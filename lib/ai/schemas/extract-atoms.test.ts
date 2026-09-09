@@ -20,7 +20,6 @@ const DE_TROP = PLAFOND_CONCEPTS_PAR_DEPOT + 5;
 
 const sortie = (combien: number, reste: Record<string, unknown> = {}) => ({
   nature: "FACTUEL",
-  langue: "fr",
   atoms: Array.from({ length: combien }, (_, rang) => concept(rang)),
   rejected: combien === 0 ? "Rien à retenir ici." : null,
   ...reste,
@@ -64,10 +63,6 @@ describe("validation de extract_atoms", () => {
     const lu = EXTRACT_ATOMS.validation.parse(sortie(0, { atoms: [trop], rejected: null }));
 
     expect(lu.atoms[0]?.tags).toEqual(["une", "deux", "trois"]);
-  });
-
-  it("normalise la langue déclarée", () => {
-    expect(EXTRACT_ATOMS.validation.parse(sortie(1, { langue: " EN " })).langue).toBe("en");
   });
 
   it("ignore un motif de rejet posé à côté de concepts extraits", () => {

@@ -31,7 +31,6 @@ const figeSchema = z.object({
       // rendre invalides ferait taire toute la référence d'un coup — `lirePrecedent`
       // se contenterait de prévenir, et le rejeu repartirait de rien.
       nature: z.enum(NATURES_DE_DEPOT).optional(),
-      langue: z.string().optional(),
       rejet: z.string().nullable(),
       // Persisté depuis la reprise automatique du banc. Un dépôt sans `echec`
       // et sans concepts est un rejet du produit (motif dans `rejet`) ; un
@@ -188,7 +187,6 @@ export function ecrireFige(
         texte: evaluation.texte,
         lecture: evaluation.lecture,
         nature: evaluation.nature,
-        langue: evaluation.langue,
         rejet: evaluation.rejet,
         echec: evaluation.echec ? { motif: evaluation.echec.motif } : undefined,
         reprises: evaluation.reprises > 0 ? evaluation.reprises : undefined,

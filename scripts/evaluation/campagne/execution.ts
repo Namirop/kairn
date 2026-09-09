@@ -88,7 +88,6 @@ function faireDepotFige(nom: string, texte: string, extraction: ExtractAtomsOutp
     nom,
     texte,
     nature: extraction.nature,
-    langue: extraction.langue,
     rejet: extraction.rejected,
     concepts,
   };

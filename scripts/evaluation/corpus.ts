@@ -44,8 +44,10 @@ import type { AiImagePart } from "@/lib/ai/message";
  *   propre, pour la règle « un détail d'un concept voisin y est rattaché »
  * - `17-faux-grand-public` : `uncertain` hors du technique, deux erreurs nettes
  *   et une simplification acceptable qu'il faut laisser tranquille
- * - `18-anglais` : le seul dépôt non francophone, pour « écris dans la langue
- *   du dépôt »
+ * - `18-anglais` : un dépôt non francophone. Il a été ajouté pour éprouver
+ *   « écris dans la langue du dépôt » — la consigne inverse de celle
+ *   d'aujourd'hui —, et ce qu'il rendait alors, des concepts français, est
+ *   devenu le résultat attendu. C'est un témoin de conformité, plus un piège
  * - `19-chiffres-et-dates` : de quoi trouer un chiffre utile plutôt qu'un mot
  *   de liaison
  * - `20-narratif-historique` : des mécanismes noyés dans un récit, là où il
@@ -64,6 +66,26 @@ import type { AiImagePart } from "@/lib/ai/message";
  * entiers, qui feraient 10 782 signes quand un dépôt en accepte 8 000
  * (`CARACTERES_MAXIMUM`) : un banc qui mesure ce que le produit ne peut pas
  * recevoir ne mesure rien.
+ *
+ * `28` à `30` couvrent la langue de sortie, ajoutés le 9 septembre 2026 quand
+ * elle est passée au français inconditionnel. Ils viennent de la production, où
+ * le défaut s'est vu en premier, et ils tiennent les trois formes qu'il prend :
+ *
+ * - `28-citations-etrangeres` : un texte **français** qui cite abondamment une
+ *   langue étrangère. C'est le cas le plus traître, et le seul qui ne se devine
+ *   pas : la langue apparente du dépôt n'est pas celle dans laquelle la personne
+ *   écrit. Servi en production, il a rendu trois concepts intégralement en
+ *   espagnol, étiquettes comprises. Ce qu'on regarde : des concepts français, et
+ *   « soy francés », « es médico », « está aburrido » recopiés tels quels
+ * - `29-integralement-espagnol` : un dépôt sans un mot de français, sur un sujet
+ *   qui n'a rien de linguistique. `18-anglais` tient déjà ce cas ; celui-ci le
+ *   double dans une langue romane, où la frontière avec le français est plus
+ *   mince et le glissement plus facile
+ * - `30-vocabulaire-bilingue` : une liste d'expressions et de leurs traductions.
+ *   Le dépôt le plus court du lot et celui qui a produit le plus de dégâts —
+ *   concepts français, vingt-quatre questions anglaises. C'est aussi le seul qui
+ *   éprouve la direction du texte à trou : le trou doit tomber sur l'expression
+ *   anglaise, pas sur sa glose française
  *
  * `24-fiction` et `25-notes-personnelles` éprouvent la nature du dépôt. Leurs
  * énoncés n'ont pas à être vrais du monde — les règles d'un jeu inventé, le

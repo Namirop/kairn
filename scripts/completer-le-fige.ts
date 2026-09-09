@@ -142,7 +142,6 @@ async function main(): Promise<void> {
       texte: evalue.texte,
       lecture: evalue.lecture,
       nature: evalue.nature,
-      langue: evalue.langue,
       rejet: evalue.rejet,
       echec: evalue.echec ? { motif: evalue.echec.motif } : undefined,
       reprises: evalue.reprises > 0 ? evalue.reprises : undefined,

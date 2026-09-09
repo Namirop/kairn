@@ -90,7 +90,7 @@ async function main(): Promise<void> {
   });
   const questionnables = conceptsAQuestionner(extraction.atoms, extraction.nature);
   console.info(
-    `  ✓ nature ${extraction.nature}, langue ${extraction.langue}, ${extraction.atoms.length} concepts (${questionnables.length} questionnables)`,
+    `  ✓ nature ${extraction.nature}, ${extraction.atoms.length} concepts (${questionnables.length} questionnables)`,
   );
   if (extraction.atoms.length === 0) refuser("extraction vide sur le dépôt témoin.");
 
