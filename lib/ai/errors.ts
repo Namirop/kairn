@@ -100,7 +100,29 @@ export class AIInvalidOutputError extends AiError {
 /**
  * La réponse a été coupée par `max_tokens`. Le bloc d'outil est peut-être
  * présent et syntaxiquement valide, mais incomplet : c'est un échec, pas un
- * succès partiel. Relever `AI_MAX_TOKENS` plutôt que rejouer à l'identique.
+ * succès partiel.
+ *
+ * **Ce n'est pas le signal qu'il faut relever `AI_MAX_TOKENS`**, contrairement à
+ * ce que cette note disait jusqu'au 09/09/2026. Mesuré sur la seule troncature
+ * du projet — une sur 156 écritures de questions : un appel ordinaire rend 1 792
+ * jetons en moyenne et 8 369 au grand maximum, quand celui-là a tapé les 10 000
+ * du plafond en 69 secondes, puis **de nouveau** 10 000 en 96 secondes sur le
+ * repli Sonnet. Deux lignées différentes, le même mur : ce n'est pas une sortie
+ * un peu trop longue, c'est une génération qui part en vrille.
+ *
+ * Le plafond est donc le coupe-circuit, pas la gêne. Le relever ferait brûler
+ * plus de jetons à un appel qui ne finira pas davantage, et le ferait déborder
+ * des soixante secondes du passage de cron — un job qui ne peut plus jamais
+ * aboutir, à la place d'un qu'on rattrape.
+ *
+ * Ce qui rattrape, c'est `scinderApresTroncature` : les deux moitiés du groupe
+ * de trois qui avait débordé ont rendu 1 051 et 1 247 jetons, soit deux appels
+ * parfaitement ordinaires. Le contenu n'était pas en cause, la taille du groupe
+ * l'était — pour cet appel-là, et pas pour les 155 autres.
+ *
+ * Le plafond ne se relève que pour un **concept seul** qui déborde : là, aucun
+ * découpage ne reste, et c'est le seul cas que `scinderLeGroupe` ne sait pas
+ * traiter. Il n'est jamais arrivé.
  */
 export class AITruncatedOutputError extends AiError {
   readonly code = "AI_TRUNCATED";

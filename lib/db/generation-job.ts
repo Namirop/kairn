@@ -115,7 +115,7 @@ export async function finishJob(
 }
 
 /**
- * Jobs que le cron peut relancer, les plus anciens d'abord.
+ * Jobs que le cron peut relancer : les dépôts d'abord, puis les plus anciens.
  *
  * **Les trois natures y sont, questions comprises.** Elles en étaient exclues
  * parce qu'un job de questions vivait dans un lot chez le fournisseur et que
@@ -126,6 +126,24 @@ export async function finishJob(
  *
  * Un job repris est soit resté en file, soit en cours depuis plus longtemps
  * qu'un traitement ne dure. `notBefore` tient les régénérations différées.
+ *
+ * **Une régénération passe toujours après un dépôt, quel que soit son âge.**
+ * L'ancienneté seule les mettait dans la même file, et le 09/09/2026 elle a
+ * donné ce qu'elle devait donner : vingt et un jobs de réparation datés du 04/09,
+ * dont le `notBefore` venait d'échoir, se sont retrouvés devant un dépôt fait à
+ * l'instant. À trois jobs par passage toutes les quinze minutes, la personne
+ * regardait un dépôt sans questions pendant près de deux heures, sans qu'aucune
+ * erreur ne le dise.
+ *
+ * Les deux natures ne se valent pas et n'ont pas à se ranger ensemble. Une
+ * régénération réécrit des questions qui existent déjà, sous un prompt qui a
+ * changé : personne ne l'attend, et un jour de retard ne coûte rien. Un dépôt
+ * est quelqu'un devant un écran. Ce n'est pas une priorité qu'on accorde, c'est
+ * la seule qui décrive ce qui se passe réellement.
+ *
+ * L'ancienneté départage à l'intérieur de chaque nature, et rien ne peut mourir
+ * de faim : les dépôts arrivent quelques-uns par jour, la file se vide, et les
+ * régénérations reprennent la main dès qu'il n'y a plus personne à servir.
  */
 export async function findResumableJobs(
   limit: number,
@@ -140,7 +158,7 @@ export async function findResumableJobs(
       OR: [{ notBefore: null }, { notBefore: { lte: now } }],
       AND: [{ OR: [{ status: "QUEUED" }, { status: "RUNNING", startedAt: { lt: stallCutoff } }] }],
     },
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ regeneration: "asc" }, { createdAt: "asc" }],
     take: limit,
   });
 }

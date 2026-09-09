@@ -1,4 +1,5 @@
 import { termeDebordeSurLaPhrase } from "./bord-du-trou";
+import { trouDevoileSaReponse } from "./trou-devoile";
 import type { Manquement } from "./manquement";
 import { renvoiAuConcept } from "./renvoi-au-concept";
 import { TROU } from "./reponse-cloze";
@@ -135,6 +136,25 @@ function controlerCloze(variant: VariantAControler): Manquement[] {
       {
         regle: "trou",
         detail: `le terme masqué redit un mot qui borde le trou : « ${terme} »`,
+      },
+    ];
+  }
+
+  /*
+    Un terme qu'on peut lire ailleurs dans sa propre phrase.
+
+    « Dans « es ___ », la phrase signifie qu'il est ennuyeux, tandis que « está
+    aburrido » signifie qu'il s'ennuie. » : le mot masqué est écrit en clair six
+    mots plus loin, et le trou ne demande plus que de recopier. Rien n'est cassé
+    ici — la question marche, elle ne teste simplement plus rien —, donc rien à
+    réparer à la lecture, contrairement au débordement ci-dessus. Le prompt porte
+    la consigne depuis longtemps ; ceci dit enfin si elle prend.
+  */
+  if (trouDevoileSaReponse(cloze.sentence, terme)) {
+    return [
+      {
+        regle: "trou",
+        detail: `le terme masqué est écrit ailleurs dans la phrase : « ${terme} »`,
       },
     ];
   }
