@@ -8,6 +8,7 @@ import { ColonneCairn } from "@/components/tableau/colonne-cairn";
 import { CompteurDu } from "@/components/tableau/compteur-du";
 import { ListeDepots } from "@/components/tableau/liste-depots";
 import { ProgressionDuCairn } from "@/components/tableau/progression-du-cairn";
+import { TitreDuCairn } from "@/components/tableau/titre-du-cairn";
 import { SignalDeDette } from "@/components/tableau/signal-de-dette";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -104,9 +105,7 @@ export default async function PageAujourdhui() {
       >
         <div className="gap-pas-8 md:gap-pas-12 grid items-center md:grid-cols-[1fr_auto]">
           <div className="max-w-lg">
-            <h2 className="text-mono font-mono tracking-[0.14em] text-stone-300 uppercase">
-              Ton cairn
-            </h2>
+            <TitreDuCairn retenus={tableau.stats?.atomsConsolidated ?? 0} />
             {/* Le texte qui porte la promesse du produit monte au registre d'un
                 titre de section sur grand écran, et reste au corps sur mobile où
                 il tenait déjà la largeur. */}
