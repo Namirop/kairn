@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import { deposerAction, type EtatDepot } from "@/app/(app)/depots/actions";
 import { ExemplesDeDepot } from "@/components/depots/exemples-de-depot";
 import { reprendreLePartage } from "@/components/depots/partage-recu";
@@ -13,6 +13,7 @@ import {
   tropLongPourUnDepot,
 } from "@/lib/depots/bornes-du-depot";
 import { LIEN_SANS_MATIERE } from "@/lib/domain/texte-partage";
+import { reduireLaCapture } from "@/lib/images/reduire-la-capture";
 
 /**
  * Le geste de dépôt : un champ, une pièce jointe facultative, un bouton.
@@ -31,6 +32,12 @@ import { LIEN_SANS_MATIERE } from "@/lib/domain/texte-partage";
  * formulaire dans les deux cas, à dessein : on relit, on coupe ce qui déborde,
  * puis on dépose. Un partage qui déposerait directement enlèverait le seul
  * moment où l'on peut tailler dans ce qui a été sélectionné.
+ *
+ * **Toute capture passe par la réduction avant d'entrer dans l'état.** C'est le
+ * seul endroit où une image arrive — sélecteur ou partage —, donc le seul où la
+ * poser. Tout ce qui suit — l'affichage du nom, le refus de poids, l'envoi — ne
+ * voit alors que l'image réduite, et c'est exactement ce qu'on veut : c'est elle
+ * qui part.
  */
 
 /** Au-delà, on montre le compteur : avant, il n'apprend rien à personne. */
@@ -69,7 +76,38 @@ export function FormulaireDepot({
   const [etat, action, enCours] = useActionState<EtatDepot, FormData>(deposerAction, {});
   const [texte, setTexte] = useState("");
   const [capture, setCapture] = useState<File | null>(null);
+  const [preparation, setPreparation] = useState(false);
   const [lienSeul, setLienSeul] = useState(false);
+
+  /*
+    Le rang du choix en cours, pour que seul le dernier compte.
+
+    Réduire une image de plusieurs mégaoctets prend le temps d'un décodage et
+    d'un réencodage. Qui change d'avis pendant ce temps-là verrait la première
+    capture s'installer après la seconde, et déposerait celle qu'il venait de
+    remplacer. Le compteur tranche : un rendu qui n'est plus le dernier demandé
+    est jeté.
+  */
+  const rang = useRef(0);
+
+  const choisirLaCapture = useCallback(async (fichier: File | null) => {
+    const moi = (rang.current += 1);
+
+    if (!fichier) {
+      setCapture(null);
+      setPreparation(false);
+      return;
+    }
+
+    setPreparation(true);
+
+    const reduite = await reduireLaCapture(fichier);
+
+    if (rang.current !== moi) return;
+
+    setCapture(reduite);
+    setPreparation(false);
+  }, []);
 
   // Le partage attend sur l'appareil ; il est lu une fois, puis effacé.
   useEffect(() => {
@@ -79,14 +117,14 @@ export function FormulaireDepot({
       if (!monte || !partage) return;
 
       setTexte(partage.texte);
-      setCapture(partage.capture);
       setLienSeul(partage.lienSeul);
+      void choisirLaCapture(partage.capture);
     });
 
     return () => {
       monte = false;
     };
-  }, []);
+  }, [choisirLaCapture]);
 
   const refus = refusDuFormulaire(etat.erreur, capture, texte);
 
@@ -116,7 +154,7 @@ export function FormulaireDepot({
       </div>
 
       <div className="gap-pas-4 flex flex-wrap items-center justify-between">
-        <PieceJointe fichier={capture} onChoisir={setCapture} />
+        <PieceJointe fichier={capture} onChoisir={choisirLaCapture} />
 
         <div className="gap-pas-4 flex items-center">
           {texte.length > SEUIL_COMPTEUR ? (
@@ -128,8 +166,8 @@ export function FormulaireDepot({
               {texte.length.toLocaleString("fr-FR")} / {CARACTERES_MAXIMUM.toLocaleString("fr-FR")}
             </span>
           ) : null}
-          <Button type="submit" disabled={enCours || refus !== null}>
-            {enCours ? "Dépôt en cours…" : "Déposer"}
+          <Button type="submit" disabled={enCours || preparation || refus !== null}>
+            {enCours ? "Dépôt en cours…" : preparation ? "Lecture de la capture…" : "Déposer"}
           </Button>
         </div>
       </div>

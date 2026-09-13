@@ -1,5 +1,9 @@
 import sharp from "sharp";
-import { IMAGE_TROP_LOURDE, TAILLE_MAXIMALE_OCTETS } from "@/lib/depots/bornes-du-depot";
+import {
+  BORD_LONG_CAPTURE,
+  IMAGE_TROP_LOURDE,
+  TAILLE_MAXIMALE_OCTETS,
+} from "@/lib/depots/bornes-du-depot";
 
 /**
  * Ce qu'on accepte d'une capture, et ce qu'on en fait avant de l'envoyer.
@@ -9,11 +13,12 @@ import { IMAGE_TROP_LOURDE, TAILLE_MAXIMALE_OCTETS } from "@/lib/depots/bornes-d
  * capacité du décodeur à lire l'image.
  *
  * L'image est ensuite réduite : au-delà de la largeur utile au modèle, chaque
- * pixel coûte des tokens sans rien apporter à la lecture.
+ * pixel coûte des tokens sans rien apporter à la lecture. Le navigateur l'a en
+ * principe déjà fait — voir `reduireLaCapture` —, et cette passe-ci ne change
+ * alors plus rien : `withoutEnlargement` laisse passer ce qui tient déjà dans
+ * la mesure. C'est voulu. Ce qui arrive ici n'a pas forcément vu un navigateur
+ * : un partage du système, une reprise, un outil interne. Le serveur décide.
  */
-
-/** Bord long au-delà duquel on réduit : le modèle n'en tire rien de plus. */
-const BORD_LONG = 1568;
 
 const FORMATS_LISIBLES = new Set(["jpeg", "png", "webp", "gif"]);
 
@@ -43,7 +48,12 @@ export async function preparerCapture(fichier: File): Promise<LectureCapture> {
 
   const reduite = await image
     .rotate()
-    .resize({ width: BORD_LONG, height: BORD_LONG, fit: "inside", withoutEnlargement: true })
+    .resize({
+      width: BORD_LONG_CAPTURE,
+      height: BORD_LONG_CAPTURE,
+      fit: "inside",
+      withoutEnlargement: true,
+    })
     .webp({ quality: 82 })
     .toBuffer();
 

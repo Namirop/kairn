@@ -62,7 +62,7 @@ export const CARACTERES_MAXIMUM_ANONYME = 4000;
 export const CARACTERES_MINIMUM_ANONYME = 40;
 
 /**
- * Ce qu'une capture a le droit de peser à l'arrivée, avant compression.
+ * Ce qu'une capture a le droit de peser au moment de partir, après réduction.
  *
  * Elle vivait dans le module qui lit les images, et ce module importe `sharp` :
  * l'écran ne pouvait donc pas la connaître, et laissait partir un fichier de
@@ -70,8 +70,60 @@ export const CARACTERES_MINIMUM_ANONYME = 40;
  * système peut joindre une capture sans que personne l'ait choisie dans un
  * sélecteur, ce détour n'est plus tenable — le refus doit se lire avant l'envoi,
  * comme celui de la longueur.
+ *
+ * **Elle passe de cinq mégaoctets à quatre le 13/09/2026, et ce n'est pas un
+ * resserrage.** Cinq n'a jamais été atteignable : une fonction de l'hébergeur
+ * refuse un corps de requête au-delà de quatre mégaoctets et demi, quoi qu'on
+ * règle par ailleurs. Le produit annonçait donc une borne que le transport ne
+ * tenait pas, et ce qui passait au-dessus tombait en panne au lieu d'être
+ * refusé. Quatre laisse la place au texte et à l'enveloppe du formulaire.
+ *
+ * **Ce qu'on perd est nul en pratique.** Elle porte sur ce qui part, et ce qui
+ * part est déjà réduit par le navigateur — `reduireLaCapture` ramène une
+ * capture de téléphone de trois mégaoctets à quelques centaines de kilooctets.
+ * Une photo de huit mégaoctets, qu'on refusait hier, passe donc aujourd'hui. La
+ * borne ne se rencontre plus que si la réduction n'a pas pu se faire, et elle
+ * est alors le dernier garde-fou avant une panne.
  */
-export const TAILLE_MAXIMALE_OCTETS = 5 * 1024 * 1024;
+export const TAILLE_MAXIMALE_OCTETS = 4 * 1024 * 1024;
+
+/**
+ * Le bord long au-delà duquel une capture est réduite.
+ *
+ * La mesure est celle du modèle : au-delà, chaque pixel coûte des jetons sans
+ * rien apprendre de plus à la lecture. Elle est ici et non dans le module qui
+ * lit les images, parce que depuis le 13/09/2026 les deux côtés réduisent — le
+ * navigateur avant l'envoi, le serveur après réception — et qu'une mesure en
+ * double est une mesure qui finit par diverger. Ce module-ci est le seul que
+ * les deux peuvent charger : celui des images importe `sharp`.
+ */
+export const BORD_LONG_CAPTURE = 1568;
+
+/**
+ * Ce qu'une consigne jointe à un dépôt a le droit de faire de long.
+ *
+ * Trois cents signes, c'est deux phrases : « n'inclus pas la partie sur les
+ * prix », « ignore la barre latérale, c'est une capture d'écran ». C'est
+ * exactement l'usage — cadrer ce qu'il y a à retenir dans ce qu'on vient de
+ * coller. Au-delà, ce n'est plus une consigne, c'est du contenu qui aurait dû
+ * être déposé ; il entrerait en concurrence avec le texte au lieu de le
+ * cadrer, et le prompt n'a aucun moyen d'arbitrer entre les deux.
+ *
+ * Le refus se lit avant l'envoi comme les autres bornes — la borne est ici, et
+ * le champ compte dessus.
+ */
+export const CONSIGNE_MAXIMUM = 300;
+
+/**
+ * Ce qu'on dit d'une consigne trop longue.
+ *
+ * Elle ne se tronque pas : couper une consigne au trois-centième signe la
+ * retournerait parfois — « n'inclus pas la partie sur les prix, sauf le tableau
+ * de la fin » coupé au milieu dit le contraire de ce qu'on voulait.
+ */
+export function tropLonguePourUneConsigne(caracteres: number): string {
+  return `Ta consigne fait ${caracteres.toLocaleString("fr-FR")} signes, et elle en prend ${CONSIGNE_MAXIMUM}. Dis-la en une phrase ou deux.`;
+}
 
 /**
  * Le refus, dit une seule fois pour les trois endroits qui le prononcent.
@@ -81,7 +133,7 @@ export const TAILLE_MAXIMALE_OCTETS = 5 * 1024 * 1024;
  * une longue, pour la même règle.
  */
 export const IMAGE_TROP_LOURDE =
-  "Cette image dépasse 5 Mo. Recadre-la sur ce qui t'intéresse, ou réduis-la avant de la déposer.";
+  "Cette image est trop lourde pour partir. Recadre-la sur ce qui t'intéresse, ou réduis-la avant de la déposer.";
 
 /**
  * Ce qu'on dit d'un texte plus long que ce qu'un dépôt accepte.
