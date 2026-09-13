@@ -29,11 +29,22 @@ import { cn } from "@/lib/utils";
  */
 export function BlocDetache({
   ton = "pierre",
+  filetCentre = false,
   className,
   children,
 }: {
   /** `alerte` pour ce qui prévient d'un défaut. `pierre` partout ailleurs. */
   ton?: "pierre" | "alerte";
+  /**
+   * Le filet se centre tant que le bloc est seul dans la largeur.
+   *
+   * Sur téléphone, les chapeaux du produit se centrent et reprennent le fer à
+   * gauche dès que la grille s'ouvre — c'est déjà ce que fait le filet sous le
+   * compteur du jour. Un bloc posé dans un chapeau centré avec son filet resté à
+   * gauche donne deux axes de lecture pour quatre lignes de texte, et c'est ce
+   * qu'on voyait sur l'écran d'un dépôt.
+   */
+  filetCentre?: boolean;
   className?: string;
   children: React.ReactNode;
 }) {
@@ -41,7 +52,11 @@ export function BlocDetache({
     <div className={className}>
       <span
         aria-hidden
-        className={cn("mb-pas-3 block h-0.5 w-10", ton === "alerte" ? "bg-alerte" : "bg-stone-300")}
+        className={cn(
+          "mb-pas-3 block h-0.5 w-10",
+          filetCentre && "mx-auto md:mx-0",
+          ton === "alerte" ? "bg-alerte" : "bg-stone-300",
+        )}
       />
       {children}
     </div>

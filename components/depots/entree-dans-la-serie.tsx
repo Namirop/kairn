@@ -29,18 +29,24 @@ import type { ChargeDuJour } from "@/lib/domain/selection-session";
  * pour laquelle un concept tout neuf n'entre pas dans la série, et c'est
  * exactement le cas où le silence se lirait comme la panne qu'on vient de
  * corriger.
+ *
+ * **Il suit l'axe du chapeau qui l'accueille**, au lieu de repartir au fer à
+ * gauche sur un téléphone où tout le reste est centré. Le bouton y prend la
+ * largeur, comme celui du compteur du jour : c'est la même décision du même
+ * écran — commencer —, et un bouton de deux centimètres posé sous un titre
+ * centré se lisait comme un reste de mise en page.
  */
 export function EntreeDansLaSerie({ charge }: { charge: ChargeDuJour }) {
   if (charge.aujourdhui === 0 && charge.enAttente === 0) return null;
 
   return (
-    <BlocDetache className="mt-pas-6 text-left">
+    <BlocDetache filetCentre className="mt-pas-6 text-center md:text-left">
       {charge.aujourdhui > 0 ? (
         <>
           <p className="text-corps text-stone-900">
             Ta série du jour en compte {compte(charge.aujourdhui, "concept", "concepts")}.
           </p>
-          <Button asChild className="mt-pas-3">
+          <Button asChild className="mt-pas-4 w-full md:w-auto">
             <Link href={ROUTES.reviser}>Commencer</Link>
           </Button>
         </>
