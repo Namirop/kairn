@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font-size",
+        "value": "14px",
+        "files": [
+          "lib/email/templates/alerte-de-paiement.ts"
+        ],
+        "createdAt": "2026-09-13T17:36:57.740Z",
+        "reason": "Gabarit d'email HTML : les tailles sont en px en ligne, comme les six autres gabarits de lib/email/templates — un email ne peut pas lire les jetons du site."
+      }
+    ]
+  }
+}

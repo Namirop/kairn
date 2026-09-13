@@ -17,7 +17,16 @@ import { defineConfig } from "vitest/config";
  * pour rester vérifiables ici : le périmètre s'élargit, la règle ne bouge pas —
  * ni base, ni réseau, ni horloge.
  *
- * La troisième exception est la géométrie du banc, `scripts/evaluation/mesures/`.
+ * La troisième est l'alerte du paiement, `lib/paiement/`. Elle relève exactement
+ * du même cas que celles de `lib/ai/`, à un détail près qui la rend plus
+ * coûteuse encore : ce qu'elle surveille est la seule panne du produit qui coûte
+ * de l'argent à quelqu'un d'autre. Une alerte qui part soixante-douze fois — la
+ * relance de Stripe dure trois jours — se perd dans une boîte qu'on cesse de
+ * lire ; une alerte qui casse le webhook qu'elle surveille transforme une panne
+ * rattrapable en panne définitive. Mêmes conditions d'admission : collaborateurs
+ * reçus en paramètre, ni base, ni réseau, ni horloge.
+ *
+ * La quatrième est la géométrie du banc, `scripts/evaluation/mesures/`.
  * Elle échoue elle aussi sans bruit, et d'une façon particulièrement coûteuse :
  * une segmentation qui dérive d'un passage à l'autre fait apparaître des manques
  * qui n'existent pas, et deux rapports cessent de se comparer sans que rien ne
@@ -35,6 +44,7 @@ export default defineConfig({
       "lib/domain/**/*.test.ts",
       "lib/ai/*.test.ts",
       "lib/ai/schemas/**/*.test.ts",
+      "lib/paiement/*.test.ts",
       "scripts/evaluation/mesures/**/*.test.ts",
     ],
     environment: "node",
