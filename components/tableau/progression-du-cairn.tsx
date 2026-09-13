@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { IndiceTactile, Infobulle } from "@/components/ui/infobulle";
 import { avancementDuNiveau } from "@/lib/domain/progression";
 
 /**
@@ -23,6 +23,12 @@ import { avancementDuNiveau } from "@/lib/domain/progression";
  *
  * Rien n'est mis en carte. Deux cartes côte à côte auraient posé des contenants
  * sur le seul panneau du produit qui n'en porte aucun.
+ *
+ * **Les deux explications s'ouvrent aussi au doigt depuis le 13/09/2026.** Elles
+ * étaient dans des info-bulles, qui répondent à un survol et à rien d'autre :
+ * sur un téléphone — c'est-à-dire là où ce produit s'installe — personne n'a
+ * jamais pu lire ce qu'était une série ni d'où venait le niveau. Voir
+ * `Infobulle`, qui bascule sur ce que l'appareil sait faire.
  */
 
 const ETIQUETTE = "text-mono font-mono tracking-[0.14em] text-stone-400 uppercase";
@@ -45,19 +51,24 @@ function Serie({ streak }: { streak: number }) {
   }
 
   return (
-    <Tooltip>
-      <TooltipTrigger className="rounded-galet block w-full text-center">
-        <p className={ETIQUETTE}>Série</p>
-        <p className={`${CHIFFRE} text-ember-clair`}>{streak}</p>
-        <p className="text-mono text-ember-clair mt-pas-2 font-mono tracking-[0.14em] uppercase">
-          {streak === 1 ? "session" : "sessions d'affilée"}
-        </p>
-      </TooltipTrigger>
-      <TooltipContent>
-        Le nombre de sessions consécutives, sans en manquer une. Une journée où rien n&apos;arrive à
-        échéance ne compte pas, et ne casse rien.
-      </TooltipContent>
-    </Tooltip>
+    <Infobulle
+      className="rounded-galet block w-full text-center"
+      contenu={
+        <>
+          Le nombre de sessions consécutives, sans en manquer une. Une journée où rien n&apos;arrive
+          à échéance ne compte pas, et ne casse rien.
+        </>
+      }
+    >
+      <p className={ETIQUETTE}>
+        Série
+        <IndiceTactile />
+      </p>
+      <p className={`${CHIFFRE} text-ember-clair`}>{streak}</p>
+      <p className="text-mono text-ember-clair mt-pas-2 font-mono tracking-[0.14em] uppercase">
+        {streak === 1 ? "session" : "sessions d'affilée"}
+      </p>
+    </Infobulle>
   );
 }
 
@@ -65,34 +76,39 @@ function Niveau({ xp }: { xp: number }) {
   const { niveau, part, restant } = avancementDuNiveau(xp);
 
   return (
-    <Tooltip>
-      <TooltipTrigger className="rounded-galet block w-full text-center">
-        <p className={ETIQUETTE}>Niveau</p>
-        <p className={CHIFFRE}>{niveau}</p>
+    <Infobulle
+      className="rounded-galet block w-full text-center"
+      contenu={
+        <>
+          Un point par question passée en session, un de plus quand tu retrouves un concept que tu
+          avais raté. La justesse n&apos;entre pas dans le calcul.
+        </>
+      }
+    >
+      <p className={ETIQUETTE}>
+        Niveau
+        <IndiceTactile />
+      </p>
+      <p className={CHIFFRE}>{niveau}</p>
 
-        {/* La strate qui se remplit. Pleine largeur et à angles vifs plutôt
+      {/* La strate qui se remplit. Pleine largeur et à angles vifs plutôt
             qu'une gouttière arrondie : c'est une couche qui monte, pas une jauge
             de tableau de bord.
 
             Le rail est en `stone-500` et non dans le gris des séparateurs : un
             rail invisible ne dit pas ce qui reste, et c'est justement ce qu'on
             est venu montrer. */}
-        <span aria-hidden className="mt-pas-4 block h-1 w-full overflow-hidden bg-stone-500">
-          <span
-            className="block h-full bg-stone-50"
-            style={{ width: `${Math.round(part * 100)}%` }}
-          />
-        </span>
+      <span aria-hidden className="mt-pas-4 block h-1 w-full overflow-hidden bg-stone-500">
+        <span
+          className="block h-full bg-stone-50"
+          style={{ width: `${Math.round(part * 100)}%` }}
+        />
+      </span>
 
-        <p className="text-mono mt-pas-2 font-mono text-stone-400 tabular-nums">
-          {restant} XP avant le niveau {niveau + 1}
-        </p>
-      </TooltipTrigger>
-      <TooltipContent>
-        Un point par question passée en session, un de plus quand tu retrouves un concept que tu
-        avais raté. La justesse n&apos;entre pas dans le calcul.
-      </TooltipContent>
-    </Tooltip>
+      <p className="text-mono mt-pas-2 font-mono text-stone-400 tabular-nums">
+        {restant} XP avant le niveau {niveau + 1}
+      </p>
+    </Infobulle>
   );
 }
 
