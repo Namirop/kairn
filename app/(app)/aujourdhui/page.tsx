@@ -56,11 +56,16 @@ export default async function PageAujourdhui() {
             conceptsSansQuestions={tableau.conceptsSansQuestions}
             plafond={tableau.plafond}
             faitsAujourdhui={tableau.faitsAujourdhui}
+            detteSignalee={tableau.arriere.signaler}
           />
 
           {tableau.arriere.signaler ? (
             <div className="mt-pas-8">
-              <SignalDeDette enAttente={tableau.charge.enAttente} jours={tableau.arriere.jours} />
+              <SignalDeDette
+                enAttente={tableau.charge.enAttente}
+                jours={tableau.arriere.jours}
+                plafond={tableau.plafond}
+              />
             </div>
           ) : null}
 

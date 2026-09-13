@@ -8,7 +8,7 @@ import { PLAFOND_SESSION, type ChargeDuJour } from "@/lib/domain/selection-sessi
  * Ce qu'il y a à revoir aujourd'hui. Le chiffre est nu, souligné d'un filet de
  * lichen, et suivi de sa phrase — un nombre sans contexte ne dit rien.
  *
- * Le chiffre affiché est celui de la session, pas celui de l'arriéré. Trente-huit
+ * Le chiffre affiché est celui de la session, pas celui du retard. Trente-huit
  * décourage sans rien apprendre : la session en servira vingt, et les dix-huit
  * autres reviennent demain sans que rien ne soit perdu. Le total reste dit, sous
  * le compteur, parce que le cacher serait mentir dans l'autre sens.
@@ -19,6 +19,51 @@ import { PLAFOND_SESSION, type ChargeDuJour } from "@/lib/domain/selection-sessi
  */
 
 /**
+ * La phrase du compteur, quand il est à zéro.
+ *
+ * **Quatre zéros, pas un.** Rien n'a jamais été déposé ; les concepts sont là
+ * mais leurs questions s'écrivent ; la journée est faite ; ou il n'y a
+ * simplement rien à revoir. Les trois premiers se disaient déjà ; le troisième,
+ * non — et c'est le seul qui se lisait faux.
+ *
+ * **« Les prochains concepts reviendront d'eux-mêmes » était un mensonge une
+ * fois sur deux.** Cette phrase s'affichait aussi quand vingt-sept concepts
+ * attendaient derrière un plafond atteint : ils ne revenaient pas d'eux-mêmes,
+ * ils étaient au bout d'une file. Un écran qui annonce le calme au-dessus d'un
+ * paragraphe qui annonce l'attente n'est pas seulement fouillis, il est faux.
+ *
+ * La journée faite se reconnaît à ce qu'on a revu quelque chose : le plafond est
+ * journalier, donc un compteur à zéro derrière des passages faits ne veut dire
+ * qu'une chose.
+ */
+function PhraseDuJour({
+  aDesAtoms,
+  questionsEnRoute,
+  faitsAujourdhui,
+}: {
+  aDesAtoms: boolean;
+  questionsEnRoute: boolean;
+  faitsAujourdhui: number;
+}) {
+  if (!aDesAtoms) return <>Rien à revoir tant que tu n&apos;as rien déposé.</>;
+
+  if (questionsEnRoute) {
+    return <>Tes concepts sont là, leurs questions s&apos;écrivent. Reviens dans un moment.</>;
+  }
+
+  if (faitsAujourdhui > 0) {
+    return (
+      <>
+        Ta journée est faite : {compte(faitsAujourdhui, "concept revu", "concepts revus")}, le
+        maximum d&apos;une journée.
+      </>
+    );
+  }
+
+  return <>Rien à revoir aujourd&apos;hui. Les prochains concepts reviendront d&apos;eux-mêmes.</>;
+}
+
+/**
  * Pourquoi des concepts dus ne seront pas servis aujourd'hui.
  *
  * L'écran disait « une session s'arrête à vingt », en toutes lettres, et c'était
@@ -27,35 +72,14 @@ import { PLAFOND_SESSION, type ChargeDuJour } from "@/lib/domain/selection-sessi
  * qu'on en a déjà revu dix-huit, et « une session s'arrête à vingt » sous un
  * compteur affichant deux ne s'explique pas tout seul.
  *
- * Trois phrases, donc, pour trois situations qui ne se répondent pas :
- * la journée est déjà bien entamée, le plafond par défaut mord, ou c'est un
- * réglage qu'on a soi-même posé. Dans les deux derniers cas on dit qu'il se
- * règle — discrètement, parce que c'est une information, pas une invitation.
+ * **Il ne parle plus de la journée entamée.** C'est maintenant la phrase du
+ * compteur qui le dit, et le redire ici faisait lire deux fois le même fait à
+ * trois lignes d'écart — la moitié du fouillis de cet écran tenait là.
  */
-function PourquoiCertainsAttendent({
-  enAttente,
-  plafond,
-  faitsAujourdhui,
-}: {
-  enAttente: number;
-  plafond: number;
-  faitsAujourdhui: number;
-}) {
-  const suite = " Le reste revient demain, en commençant par ce qui risque le plus.";
-  const combien = `${enAttente} de plus ${enAttente === 1 ? "attend son tour" : "attendent leur tour"}`;
-
-  if (faitsAujourdhui > 0) {
-    return (
-      <>
-        {combien} : tu en as déjà revu {faitsAujourdhui} aujourd&apos;hui, sur les {plafond}{" "}
-        d&apos;une journée.{suite}
-      </>
-    );
-  }
-
+function PourquoiCertainsAttendent({ enAttente, plafond }: { enAttente: number; plafond: number }) {
   return (
     <>
-      {combien}.{" "}
+      {enAttente} de plus {enAttente === 1 ? "attend son tour" : "attendent leur tour"}.{" "}
       {plafond === PLAFOND_SESSION ? (
         <>
           Une session s&apos;arrête à {plafond} concepts, <Lien>et ça se règle</Lien>.
@@ -64,8 +88,8 @@ function PourquoiCertainsAttendent({
         <>
           Tu as réglé ta session à {plafond} concepts, <Lien>et ça se rechange</Lien>.
         </>
-      )}
-      {suite}
+      )}{" "}
+      Le reste revient demain, en commençant par ce qui risque le plus.
     </>
   );
 }
@@ -80,12 +104,14 @@ function Lien({ children }: { children: React.ReactNode }) {
     </Link>
   );
 }
+
 export function CompteurDu({
   charge,
   aDesAtoms,
   conceptsSansQuestions,
   plafond,
   faitsAujourdhui,
+  detteSignalee,
 }: {
   charge: ChargeDuJour;
   aDesAtoms: boolean;
@@ -94,6 +120,14 @@ export function CompteurDu({
   /** Le plafond de session du compte, et ce qu'il en reste consommé aujourd'hui. */
   plafond: number;
   faitsAujourdhui: number;
+  /**
+   * Le signal de dette est affiché juste en dessous.
+   *
+   * Il dit la même chose que « vingt-sept de plus attendent leur tour », en
+   * mieux : depuis combien de temps, et quoi y faire. Les deux ensemble, c'était
+   * le même nombre annoncé deux fois en quatre lignes.
+   */
+  detteSignalee: boolean;
 }) {
   const { aujourdhui, enAttente } = charge;
   const questionsEnRoute = aDesAtoms && conceptsSansQuestions > 0;
@@ -117,22 +151,20 @@ export function CompteurDu({
       <span aria-hidden className="mt-pas-3 bg-lichen mx-auto block h-0.5 w-10 md:mx-0" />
 
       <p className="mt-pas-3 mx-auto text-stone-500 md:mx-0">
-        {aujourdhui === 0
-          ? aDesAtoms
-            ? questionsEnRoute
-              ? "Tes concepts sont là, leurs questions s'écrivent. Reviens dans un moment."
-              : "Rien à revoir aujourd'hui. Les prochains concepts reviendront d'eux-mêmes."
-            : "Rien à revoir tant que tu n'as rien déposé."
-          : `${aujourdhui === 1 ? "concept à revoir" : "concepts à revoir"} aujourd'hui.`}
-      </p>
-
-      {enAttente > 0 ? (
-        <p className="mt-pas-2 text-petit mx-auto text-stone-500 md:mx-0">
-          <PourquoiCertainsAttendent
-            enAttente={enAttente}
-            plafond={plafond}
+        {aujourdhui === 0 ? (
+          <PhraseDuJour
+            aDesAtoms={aDesAtoms}
+            questionsEnRoute={questionsEnRoute}
             faitsAujourdhui={faitsAujourdhui}
           />
+        ) : (
+          `${aujourdhui === 1 ? "concept à revoir" : "concepts à revoir"} aujourd'hui.`
+        )}
+      </p>
+
+      {enAttente > 0 && !detteSignalee ? (
+        <p className="mt-pas-2 text-petit mx-auto text-stone-500 md:mx-0">
+          <PourquoiCertainsAttendent enAttente={enAttente} plafond={plafond} />
         </p>
       ) : null}
 
