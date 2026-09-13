@@ -16,7 +16,7 @@ import { conclure, record } from "./verification/journal";
  * Postgres. Comme le plafond concurrent, ça demande une vraie base.
  *
  * L'enjeu est un mois payé qui disparaît sans un bruit : ni erreur, ni
- * réclamation, juste un compte retombé à trente concepts.
+ * réclamation, juste un compte retombé au plafond gratuit.
  *
  *   npm run verifier:abonnement
  */
@@ -40,6 +40,14 @@ async function main(): Promise<void> {
   const { lireLOffreDuCompte } = await import("@/lib/db/abonnement");
   const { compteDuClientStripe } = await import("@/lib/db/ecriture-de-labonnement");
   const { etatDepuisStripe } = await import("@/lib/domain/rapport-de-stripe");
+  // Les deux plafonds viennent de la règle, ils ne se recopient pas.
+  //
+  // Ils étaient écrits en clair plus bas — trente et trois cents —, et ils ont
+  // été portés à cinquante et cinq cents le 04/09/2026 sans que ce fichier
+  // bouge. Deux vérifications sur huit échouaient donc depuis, en annonçant un
+  // défaut qui n'existait pas : un script de contrôle qui crie faux est un
+  // script qu'on cesse de lancer, et c'est plus grave que de ne pas l'avoir.
+  const { PLAFOND_GRATUIT, PLAFOND_PAYANT } = await import("@/lib/domain/plafond-du-plan");
 
   await effacerComptes([COMPTE]);
   await creerCompte(COMPTE);
@@ -67,7 +75,7 @@ async function main(): Promise<void> {
 
     record(
       "Un abonnement actif ouvre le plan payant",
-      premier === "ecrit" && apresAchat.plan === "MENSUEL" && apresAchat.plafond === 300,
+      premier === "ecrit" && apresAchat.plan === "MENSUEL" && apresAchat.plafond === PLAFOND_PAYANT,
       `${premier}, plan ${apresAchat.plan}, plafond ${apresAchat.plafond}`,
     );
 
@@ -107,7 +115,7 @@ async function main(): Promise<void> {
 
     record(
       "Un plan payant dont le terme est passé ne vaut plus rien",
-      apresTerme.plan === "GRATUIT" && apresTerme.plafond === 30,
+      apresTerme.plan === "GRATUIT" && apresTerme.plafond === PLAFOND_GRATUIT,
       `plan ${apresTerme.plan}, plafond ${apresTerme.plafond}`,
     );
 
