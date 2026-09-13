@@ -29,6 +29,28 @@ export function stripe(): Stripe {
   cache = {
     cle: cleSecrete,
     stripe: new Stripe(cleSecrete, {
+      /*
+        La version d'API est **épinglée**, et pas laissée au SDK.
+
+        Sans cette ligne, le SDK vise sa `LatestApiVersion` — c'est-à-dire une
+        valeur qui change quand on met le paquet à jour. Un `npm update` de
+        routine déplacerait donc la version d'API que Stripe applique à nos
+        appels, sans qu'aucune ligne de ce dépôt ne bouge et sans que rien ne le
+        dise.
+
+        Ce n'est pas théorique ici : `lireLeRapport` lit `current_period_end`
+        **sur la ligne** de l'abonnement, parce que Stripe l'y a déplacé depuis
+        l'abonnement lui-même. C'est exactement le genre de déplacement qu'une
+        version d'API décide, et il casserait la lecture du terme — donc le
+        droit d'un compte payant — en silence.
+
+        La valeur est celle que le SDK installé vise aujourd'hui : l'épingler ne
+        change rien maintenant, et c'est le but. Elle se monte à la main, en
+        relisant ce que la nouvelle version déplace.
+
+        Pratique reprise de DevisRapide, qui l'épingle pour la même raison.
+      */
+      apiVersion: "2026-08-26.dahlia",
       // Ce que le produit dit de lui-même dans le tableau de bord Stripe, à
       // côté de chaque appel. Sert au diagnostic quand deux environnements
       // écrivent sur le même compte.
