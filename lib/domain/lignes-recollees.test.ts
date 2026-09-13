@@ -54,6 +54,17 @@ describe("lignesRecollees", () => {
     expect(lignesRecollees(texte).split("\n")).toHaveLength(2);
   });
 
+  it("ne recolle pas du code sur une ligne de commentaire", () => {
+    // Relevé sur un dépôt de production dont la lecture n'a pas posé de
+    // barrières : la ligne de commentaire était pleine à moins d'un signe près.
+    const code = [
+      "// tout sauf l'échec définitif est retenté au run suivant",
+      "const aTraiter = (detail) => !detail || (detail.ko && detail.ko !== 404);",
+    ].join("\n");
+
+    expect(lignesRecollees(code)).toBe(code);
+  });
+
   it("laisse un texte d'une seule ligne intact", () => {
     expect(lignesRecollees("Une phrase seule.")).toBe("Une phrase seule.");
     expect(lignesRecollees("")).toBe("");

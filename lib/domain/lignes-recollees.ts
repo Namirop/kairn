@@ -52,8 +52,16 @@ const PART_PLEINE = 0.8;
  * disent « nouvelle entrée ». Sans elles, deux puces qui se suivent dans un
  * paragraphe dense se retrouveraient dans la même phrase — le cas s'est présenté
  * sur le premier dépôt de code lu par la reconnaissance de texte.
+ *
+ * **La double barre y est, et c'est un filet de sécurité.** Un extrait de code
+ * arrive en principe entre barrières — le prompt de lecture le demande — et ce
+ * module ne le voit alors jamais. Quand il n'y en a pas, une ligne de
+ * commentaire suivie d'une ligne de code se recollait en une phrase si la
+ * première était pleine. Mesuré sur la production : elle l'était à moins d'un
+ * signe près, et rien d'autre que la chance ne l'a sauvée. Une ligne qui
+ * commence par deux barres n'est jamais la suite de la précédente.
  */
-const OUVRE_UNE_ENTREE = /^\s*(?:[-*•–—>#]|\d{1,3}[.)])\s/;
+const OUVRE_UNE_ENTREE = /^\s*(?:\/\/|[-*•–—>#]|\d{1,3}[.)])\s/;
 
 function normaliser(texte: string): string {
   return texte.replace(/\r\n?/g, "\n");
