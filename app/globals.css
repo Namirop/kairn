@@ -582,6 +582,40 @@
   }
 }
 
+/* Le même ascenseur, sur la roche.
+
+   `ascenseur-discret` est réglé pour le papier : son pouce en gris de sol y est
+   juste assez présent. Posé sur la roche, c'est l'inverse — un rail clair et
+   large en travers d'un bloc sombre, qui devient l'objet le plus visible de la
+   carte alors qu'il n'est qu'une indication. Le pouce y descend donc au gris de
+   lichen, et la barre à la moitié de son épaisseur par défaut.
+
+   Il ne disparaît pas : c'est la seule chose qui dise qu'une ligne de code
+   continue hors du cadre, et une ligne coupée sans le dire se lit comme une
+   ligne complète. */
+@utility ascenseur-sur-roche {
+  scrollbar-width: thin;
+  scrollbar-color: var(--stone-500) transparent;
+
+  &::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--stone-500);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--stone-400);
+  }
+}
+
 /* La ligne qui s'oublie.
 
    « Tu retiens peu. » arrive **pleine**, comme la ligne du dessus, puis son
