@@ -139,6 +139,18 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
                 s&apos;arrête à {CARACTERES_MAXIMUM.toLocaleString("fr-FR")} caractères.
               </p>
             ) : null}
+
+            {/* La consigne se lit **sous** le dépôt, et non au-dessus : c'est ce
+                qu'on a dit du texte, pas le texte. Sans titre à elle, qui en
+                ferait une troisième section de même poids que les deux vraies
+                — ce qu'on a déposé, ce qu'on en a tiré. Elle explique ce qui
+                manque dans la liste, et c'est le seul service qu'on lui
+                demande. */}
+            {depot.instruction ? (
+              <p className="mt-pas-3 text-petit text-stone-500">
+                Ta consigne : «&nbsp;{depot.instruction}&nbsp;»
+              </p>
+            ) : null}
           </section>
         ) : null}
       </Panneau>

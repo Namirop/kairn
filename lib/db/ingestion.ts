@@ -19,6 +19,8 @@ export type DepotADeposer = {
   image?: { donnees: Uint8Array<ArrayBuffer>; mediaType: string };
   /** La clé de l'envoi : deux fois la même ne crée qu'un dépôt. */
   cleEnvoi: string;
+  /** Ce que la personne a dit de son dépôt, pour cadrer le découpage. */
+  consigne?: string;
 };
 
 export type ConceptAEcrire = {
@@ -45,6 +47,7 @@ export async function creerDepot(
       data: {
         userId: depot.userId,
         rawContent: depot.texte,
+        instruction: depot.consigne ?? null,
         sourceType: depot.image ? "IMAGE" : "TEXT",
         imageData: depot.image?.donnees ?? null,
         imageMediaType: depot.image?.mediaType ?? null,

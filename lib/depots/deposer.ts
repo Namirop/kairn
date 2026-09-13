@@ -3,9 +3,11 @@ import { creerDepot, marquerEnCours } from "@/lib/db/ingestion";
 import { reserverDepot, rendreDepot } from "@/lib/db/quota-depots";
 import {
   CARACTERES_MAXIMUM,
+  CONSIGNE_MAXIMUM,
   IMAGE_TROP_LOURDE,
   longueurEnClair,
   TAILLE_MAXIMALE_OCTETS,
+  tropLonguePourUneConsigne,
 } from "@/lib/depots/bornes-du-depot";
 import { refusDeQuota } from "@/lib/depots/refus-de-quota";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
@@ -34,12 +36,22 @@ const depotSchema = z.object({
   // écrit ici pour les deux bornes — sans lui, c'est la phrase brute de Zod, en
   // anglais, qui s'affiche sous le bouton.
   cleEnvoi: z.string().min(8, { error: CLE_ILLISIBLE }).max(64, { error: CLE_ILLISIBLE }),
+  // Facultative, et bornée court : c'est une phrase de cadrage, pas un second
+  // dépôt. Le message est écrit ici parce qu'il est le même que celui du champ.
+  consigne: z.string().max(CONSIGNE_MAXIMUM, {
+    error: (issue) => tropLonguePourUneConsigne(String(issue.input).length),
+  }),
 });
 
 export type ResultatDepot =
   { ok: true; inputId: string; nouveau: boolean } | { ok: false; motif: string; quota?: boolean };
 
-export type ChampsDepot = { texte: string; cleEnvoi: string; image: File | null };
+export type ChampsDepot = {
+  texte: string;
+  cleEnvoi: string;
+  consigne: string;
+  image: File | null;
+};
 
 function lireChamps(donnees: FormData): ChampsDepot {
   const fichier = donnees.get("image");
@@ -47,13 +59,18 @@ function lireChamps(donnees: FormData): ChampsDepot {
   return {
     texte: (donnees.get("texte") ?? "").toString(),
     cleEnvoi: (donnees.get("cleEnvoi") ?? "").toString(),
+    consigne: (donnees.get("consigne") ?? "").toString(),
     image: fichier instanceof File && fichier.size > 0 ? fichier : null,
   };
 }
 
 export async function deposer(userId: string, donnees: FormData): Promise<ResultatDepot> {
   const champs = lireChamps(donnees);
-  const valide = depotSchema.safeParse({ texte: champs.texte, cleEnvoi: champs.cleEnvoi });
+  const valide = depotSchema.safeParse({
+    texte: champs.texte,
+    cleEnvoi: champs.cleEnvoi,
+    consigne: champs.consigne,
+  });
 
   if (!valide.success) {
     return { ok: false, motif: valide.error.issues[0]?.message ?? "Ce dépôt n'est pas recevable." };
@@ -86,6 +103,9 @@ export async function deposer(userId: string, donnees: FormData): Promise<Result
   const { input, nouveau } = await creerDepot({
     userId,
     texte,
+    // Vide vaut absente : une consigne faite d'espaces ne cadre rien, et la
+    // ranger obligerait le découpage à se demander ce qu'elle veut dire.
+    consigne: valide.data.consigne.trim() || undefined,
     image: capture?.ok ? capture.capture : undefined,
     cleEnvoi: valide.data.cleEnvoi,
   });

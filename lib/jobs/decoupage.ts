@@ -1,5 +1,6 @@
 import { callAI } from "@/lib/ai/client";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
+import { depotADecouper } from "@/lib/ai/prompts/depot-a-decouper";
 import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
 import { enregistrerConcepts, enregistrerLExtraction, lireDepot } from "@/lib/db/ingestion";
 import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
@@ -43,7 +44,9 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
     // reprises par le cron et les outils internes, qui n'ont personne derrière
     // et n'ont donc pas à puiser dans la part du public.
     anonyme: depot.anonymousSessionId !== null,
-    messages: [{ role: "user", content: texte }],
+    // La consigne voyage avec le dépôt, à côté et jamais dedans. Sans elle, le
+    // message reste le texte nu, tel qu'il l'a toujours été.
+    messages: [{ role: "user", content: depotADecouper(texte, depot.instruction) }],
   });
 
   await enregistrerLExtraction(depot.id, {

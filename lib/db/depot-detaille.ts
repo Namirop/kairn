@@ -33,6 +33,8 @@ export type DepotDetaille = {
   id: string;
   rawContent: string;
   extractedText: string | null;
+  /** La consigne jointe au dépôt, ou rien. Relue pour être montrée, pas pour agir. */
+  instruction: string | null;
   status: InputStatus;
   failureReason: string | null;
   /** Le dépôt portait plus de concepts que le plafond ; on a gardé la tête. */
@@ -57,6 +59,7 @@ export async function lireDepotDetaille(
       id: true,
       rawContent: true,
       extractedText: true,
+      instruction: true,
       status: true,
       failureReason: true,
       conceptsTronques: true,

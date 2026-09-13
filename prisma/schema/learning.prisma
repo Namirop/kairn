@@ -52,6 +52,22 @@ model Input {
   /// refusée avant l'envoi.
   texteTronque Boolean @default(false)
 
+  /// La consigne que la personne a jointe à son dépôt, ou rien.
+  ///
+  /// Elle ne fait pas partie du dépôt : le dépôt est ce qu'on veut retenir,
+  /// elle est ce qu'on dit du dépôt. D'où une colonne à part plutôt qu'un
+  /// préfixe collé à `rawContent` — celui-ci est contractuellement « jamais
+  /// modifié », et l'écran qui le relit doit montrer le texte, pas la consigne.
+  ///
+  /// Elle ne sert qu'au découpage, et elle y sert à **restreindre** : écarter
+  /// une partie du texte, dire ce qui n'est pas à retenir, préciser le cadre.
+  /// Le prompt le dit, et dit aussi qu'elle n'ajoute jamais de contenu — un
+  /// concept reste entièrement soutenu par ce qui a été déposé.
+  ///
+  /// Conservée après coup : c'est ce qui permet au redécoupage de repartir dans
+  /// les mêmes termes, et à l'écran du dépôt de montrer ce qu'on avait demandé.
+  instruction String?
+
   /// Clé d'un envoi, émise par le formulaire. Deux envois du même geste — double
   /// clic, reprise réseau — portent la même et ne créent qu'un dépôt.
   submissionKey String?

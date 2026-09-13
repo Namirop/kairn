@@ -2,15 +2,18 @@
 
 import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import { deposerAction, type EtatDepot } from "@/app/(app)/depots/actions";
+import { BoutonDeConsigne, ChampDeConsigne } from "@/components/depots/consigne-du-depot";
 import { ExemplesDeDepot } from "@/components/depots/exemples-de-depot";
 import { reprendreLePartage } from "@/components/depots/partage-recu";
 import { PieceJointe } from "@/components/depots/piece-jointe";
 import { Button } from "@/components/ui/button";
 import {
   CARACTERES_MAXIMUM,
+  CONSIGNE_MAXIMUM,
   IMAGE_TROP_LOURDE,
   TAILLE_MAXIMALE_OCTETS,
   tropLongPourUnDepot,
+  tropLonguePourUneConsigne,
 } from "@/lib/depots/bornes-du-depot";
 import { LIEN_SANS_MATIERE } from "@/lib/domain/texte-partage";
 import { reduireLaCapture } from "@/lib/images/reduire-la-capture";
@@ -49,10 +52,16 @@ const SEUIL_COMPTEUR = Math.floor(CARACTERES_MAXIMUM * 0.75);
  * Un seul refus à la fois, dans l'ordre où on peut y remédier : ce que le
  * serveur a répondu passe avant ce que l'écran voit venir.
  */
-function refusDuFormulaire(erreur: string | undefined, capture: File | null, texte: string) {
+function refusDuFormulaire(
+  erreur: string | undefined,
+  capture: File | null,
+  texte: string,
+  consigne: string,
+) {
   if (erreur) return erreur;
   if (capture && capture.size > TAILLE_MAXIMALE_OCTETS) return IMAGE_TROP_LOURDE;
   if (texte.length > CARACTERES_MAXIMUM) return tropLongPourUnDepot(texte.length);
+  if (consigne.length > CONSIGNE_MAXIMUM) return tropLonguePourUneConsigne(consigne.length);
 
   return null;
 }
@@ -76,6 +85,8 @@ export function FormulaireDepot({
   const [etat, action, enCours] = useActionState<EtatDepot, FormData>(deposerAction, {});
   const [texte, setTexte] = useState("");
   const [capture, setCapture] = useState<File | null>(null);
+  const [consigne, setConsigne] = useState("");
+  const [consigneOuverte, setConsigneOuverte] = useState(false);
   const [preparation, setPreparation] = useState(false);
   const [lienSeul, setLienSeul] = useState(false);
 
@@ -126,7 +137,7 @@ export function FormulaireDepot({
     };
   }, [choisirLaCapture]);
 
-  const refus = refusDuFormulaire(etat.erreur, capture, texte);
+  const refus = refusDuFormulaire(etat.erreur, capture, texte, consigne);
 
   return (
     <form action={action} noValidate className="gap-pas-4 flex max-w-3xl flex-col">
@@ -153,8 +164,24 @@ export function FormulaireDepot({
         />
       </div>
 
+      {/* Fermer la consigne l'efface : une consigne qu'on ne voit plus mais qui
+          partirait quand même serait le pire des deux états. */}
+      {consigneOuverte ? (
+        <ChampDeConsigne
+          valeur={consigne}
+          onChange={setConsigne}
+          onFermer={() => {
+            setConsigne("");
+            setConsigneOuverte(false);
+          }}
+        />
+      ) : null}
+
       <div className="gap-pas-4 flex flex-wrap items-center justify-between">
-        <PieceJointe fichier={capture} onChoisir={choisirLaCapture} />
+        <div className="gap-pas-3 flex flex-wrap items-center">
+          <PieceJointe fichier={capture} onChoisir={choisirLaCapture} />
+          {consigneOuverte ? null : <BoutonDeConsigne onOuvrir={() => setConsigneOuverte(true)} />}
+        </div>
 
         <div className="gap-pas-4 flex items-center">
           {texte.length > SEUIL_COMPTEUR ? (
