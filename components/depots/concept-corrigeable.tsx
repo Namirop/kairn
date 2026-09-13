@@ -9,7 +9,7 @@ import {
 } from "@/app/(app)/depots/actions";
 import { BlocDetache } from "@/components/coquille/bloc-detache";
 import { SuppressionEnDeuxTemps } from "@/components/depots/suppression-en-deux-temps";
-import { TexteTechnique } from "@/components/typographie/texte-technique";
+import { TexteRiche } from "@/components/typographie/texte-riche";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ConceptLu } from "@/lib/db/depot-detaille";
@@ -90,9 +90,13 @@ export function ConceptCorrigeable({
             {concept.archivedByUser ? <Badge>Sorti du cycle</Badge> : null}
           </div>
 
-          <p className="mt-pas-2 text-corps text-stone-900">
-            <TexteTechnique>{concept.concept}</TexteTechnique>
-          </p>
+          {/* Un concept n'a jamais porté d'extrait de plusieurs lignes en
+              production, et le prompt n'en demande pas. `TexteRiche` est là pour
+              le jour où : le même texte, lu de la même façon qu'au-dessus, dans
+              la carte du dépôt dont il sort. */}
+          <div className="mt-pas-2 text-corps text-stone-900">
+            <TexteRiche>{concept.concept}</TexteRiche>
+          </div>
 
           {concept.uncertain ? (
             <BlocDetache ton="alerte" className="mt-pas-3">

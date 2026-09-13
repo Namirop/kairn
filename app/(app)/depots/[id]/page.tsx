@@ -11,7 +11,7 @@ import { GestesDuDepot } from "@/components/depots/gestes-du-depot";
 import { SuivreLAvancement } from "@/components/depots/suivre-lavancement";
 import { VideDuDepot } from "@/components/depots/vide-du-depot";
 import { Badge } from "@/components/ui/badge";
-import { TexteTechnique } from "@/components/typographie/texte-technique";
+import { TexteRiche } from "@/components/typographie/texte-riche";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireDepotDetaille } from "@/lib/db/depot-detaille";
@@ -121,10 +121,18 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
                 chaîne, et les voir traités autrement laissait croire que le
                 produit avait ajouté quelque chose. La convention est celle de qui
                 colle une doc, pas une devinette — un terme sans accents graves
-                reste du texte, on ne cherche pas à reconnaître du code. */}
-            <p className="mt-pas-3 p-pas-4 text-petit rounded-carte bg-surface-ombre whitespace-pre-wrap text-stone-700">
-              <TexteTechnique>{texte}</TexteTechnique>
-            </p>
+                reste du texte, on ne cherche pas à reconnaître du code.
+
+                **`whitespace-pre-wrap` a fait place à `TexteRiche`.** Il gardait
+                *tous* les retours à la ligne, y compris ceux qu'aucun humain
+                n'avait voulus : un texte collé depuis un éditeur qui enroule à
+                soixante-cinq signes s'affichait sur une colonne de soixante-cinq
+                signes au milieu d'une carte deux fois plus large. Et il ne
+                connaissait pas les barrières de code, si bien qu'un extrait de
+                trois lignes se rendait en une pluie de jetons sans rapport. */}
+            <div className="mt-pas-3 p-pas-4 text-petit rounded-carte bg-surface-ombre text-stone-700">
+              <TexteRiche>{texte}</TexteRiche>
+            </div>
             {depot.texteTronque ? (
               <p className="mt-pas-2 text-petit text-stone-500">
                 La capture portait plus de texte qu&apos;un dépôt n&apos;en accepte. La lecture

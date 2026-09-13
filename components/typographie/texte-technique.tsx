@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { blocsDeTexte, porteDuCodeEnBloc } from "@/lib/domain/blocs-de-texte";
 import { segmentsDeCode } from "@/lib/domain/texte-code";
 
 /**
@@ -75,10 +76,10 @@ export function jetonInsecable(terme: string): boolean {
   return terme.trim().length <= SIGNES_INSECABLES;
 }
 
-export function TexteTechnique({ children }: { children: string }) {
+function Segments({ texte }: { texte: string }) {
   return (
     <>
-      {segmentsDeCode(children).map((segment, rang) =>
+      {segmentsDeCode(texte).map((segment, rang) =>
         segment.code ? (
           <code
             key={rang}
@@ -92,4 +93,44 @@ export function TexteTechnique({ children }: { children: string }) {
       )}
     </>
   );
+}
+
+/**
+ * L'extrait de plusieurs lignes, réduit à un jeton, faute de mieux.
+ *
+ * Ce composant vit en ligne : dans un titre de carte, dans une option de QCM,
+ * dans un aperçu coupé à deux lignes. Un extrait en bloc n'y a pas sa place —
+ * c'est `TexteRiche` qui le rend, là où le contenu est de la lecture au long.
+ *
+ * Mais il peut en arriver un, et il faut alors qu'il se lise. `segmentsDeCode`
+ * ne connaît que la paire d'accents en ligne : trois accents graves lui font
+ * voir le nom du langage dans un cadre, la première ligne dans un autre, et le
+ * mot resté au bout dans un troisième. Un seul jeton pour tout l'extrait n'est
+ * pas beau, mais il est juste — et c'est un état qu'aucun concept ni aucune
+ * question de la production n'a encore connu.
+ */
+function ExtraitsEnLigne({ texte }: { texte: string }) {
+  return (
+    <>
+      {blocsDeTexte(texte).map((bloc, rang) => (
+        <Fragment key={rang}>
+          {rang > 0 ? " " : null}
+          {bloc.type === "code" ? (
+            <code className={JETON}>{bloc.texte}</code>
+          ) : (
+            <Segments texte={bloc.texte} />
+          )}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+export function TexteTechnique({ children }: { children: string }) {
+  // Le chemin ordinaire est celui d'avant, au caractère près : le détour ne
+  // s'ouvre que sur un texte qui porte vraiment une barrière, c'est-à-dire
+  // jamais, jusqu'au jour où.
+  if (porteDuCodeEnBloc(children)) return <ExtraitsEnLigne texte={children} />;
+
+  return <Segments texte={children} />;
 }
