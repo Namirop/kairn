@@ -177,7 +177,13 @@ export function FormulaireDepot({
         />
       ) : null}
 
-      <div className="gap-pas-4 flex flex-wrap items-center justify-between">
+      {/* Deux facultatifs à gauche, le geste à droite — et les uns au-dessus de
+          l'autre dès que la largeur ne les tient plus. La rangée s'enroulait
+          déjà à deux boutons ; à trois, elle rendait sur un téléphone trois
+          petits boutons empilés au fer à gauche dont le dernier était le seul
+          qui compte. Il prend donc la largeur, comme tous les gestes principaux
+          du produit en mobile. */}
+      <div className="gap-pas-4 flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between">
         <div className="gap-pas-3 flex flex-wrap items-center">
           <PieceJointe fichier={capture} onChoisir={choisirLaCapture} />
           {consigneOuverte ? null : <BoutonDeConsigne onOuvrir={() => setConsigneOuverte(true)} />}
@@ -193,7 +199,11 @@ export function FormulaireDepot({
               {texte.length.toLocaleString("fr-FR")} / {CARACTERES_MAXIMUM.toLocaleString("fr-FR")}
             </span>
           ) : null}
-          <Button type="submit" disabled={enCours || preparation || refus !== null}>
+          <Button
+            type="submit"
+            className="flex-1 md:flex-none"
+            disabled={enCours || preparation || refus !== null}
+          >
             {enCours ? "Dépôt en cours…" : preparation ? "Lecture de la capture…" : "Déposer"}
           </Button>
         </div>
