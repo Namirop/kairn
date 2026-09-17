@@ -56,7 +56,7 @@ const ETAPES: EtapeDuSentier[] = [
  */
 export function Sentier() {
   return (
-    <Panneau surface="glacier" aere className="gap-pas-12 grid md:grid-cols-[1fr_minmax(0,36rem)]">
+    <Panneau surface="ombre" aere className="gap-pas-12 grid md:grid-cols-[1fr_minmax(0,36rem)]">
       <Apparition>
         <Temps>
           <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">

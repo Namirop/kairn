@@ -30,7 +30,7 @@ export function ExemplesDeDepot({ onChoisir }: { onChoisir: (texte: string) => v
             <button
               type="button"
               onClick={() => onChoisir(exemple.texte)}
-              className="rounded-galet px-pas-3 py-pas-2 text-petit hover:border-glacier-profond focus-visible:border-glacier-profond border border-stone-300 text-stone-500 transition-colors hover:text-stone-900"
+              className="rounded-galet px-pas-3 py-pas-2 text-petit hover:border-lichen focus-visible:border-lichen border border-stone-300 text-stone-500 transition-colors hover:text-stone-900"
             >
               {exemple.etiquette}
             </button>

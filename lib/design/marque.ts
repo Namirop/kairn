@@ -115,7 +115,7 @@ export function cadreDuSymbole(pierres: number): CadreDuSymbole {
  * vers le haut. Trois pierres sombres qui se suivent, dans une marque, ressemblent
  * à un bug.
  *
- * Le rang du sommet ne passe pas par ici : il est entièrement glacier.
+ * Le rang du sommet ne passe pas par ici : il est entièrement lichen.
  */
 export function nuanceDuRang(rang: number, total: number): 0 | 1 | 2 {
   if (total <= 1) return 0;

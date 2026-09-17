@@ -1,7 +1,7 @@
 import type { Pierre } from "@/lib/domain/cairn-stack";
 
 /**
- * Le tracé d'une pierre : sa forme, et l'arête de glacier quand c'est la
+ * Le tracé d'une pierre : sa forme, et l'arête de lichen quand c'est la
  * dernière posée.
  *
  * Ce fichier ne dépend d'aucune animation, contrairement à `pierre-posee.tsx` :
@@ -13,11 +13,8 @@ import type { Pierre } from "@/lib/domain/cairn-stack";
  * Les nuances d'une pierre, selon la surface qui la porte.
  *
  * Sur la roche, les pierres s'inversent en gris clairs — sans quoi un
- * empilement sombre sur un panneau sombre n'existerait pas. **L'arête du sommet
- * s'inverse avec elles**, ce que l'accent d'avant ne faisait pas : le glacier
- * vif donne 6,94 sur la roche et 1,76 sur le papier, le profond l'inverse.
- * Aucune teinte unique ne tient les deux fonds au-dessus des trois pour un d'un
- * objet graphique — c'est la mesure qui tranche, pas le goût.
+ * empilement sombre sur un panneau sombre n'existerait pas. Le lichen du
+ * sommet, lui, ne bouge pas : c'est la constante de l'identité.
  */
 const NUANCES = ["fill-stone-900", "fill-stone-800", "fill-stone-700"] as const;
 const NUANCES_CLAIRES = ["fill-stone-50", "fill-stone-100", "fill-stone-300"] as const;
@@ -43,7 +40,7 @@ function Emplacement({ pierre, clair }: { pierre: Pierre; clair: boolean }) {
   );
 }
 
-/** Le tracé de la pierre, et l'arête de glacier sur la dernière posée. */
+/** Le tracé de la pierre, et l'arête de lichen sur la dernière posée. */
 export function ArêtesDePierre({
   pierre,
   derniere,
@@ -64,7 +61,7 @@ export function ArêtesDePierre({
       {derniere ? (
         <path
           d={pierre.chemin}
-          className={clair ? "stroke-glacier" : "stroke-glacier-profond"}
+          className="stroke-lichen"
           strokeWidth={1.4}
           strokeLinecap="round"
           fill="none"

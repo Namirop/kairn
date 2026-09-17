@@ -4,25 +4,25 @@ description: Retenir ce qu'on apprend, une pierre à la fois.
 colors:
   papier: "#f2f2ef"
   ombre: "#e4e4df"
-  glacier-surface: "#bfe6ee"
-  roche: "#282e34"
+  lichen-surface: "#e8eadf"
+  roche: "#2a2e2c"
   stone-50: "#f2f2ef"
   stone-100: "#e4e4df"
-  stone-300: "#bdc0c2"
-  stone-400: "#97a0a4"
-  stone-500: "#5b6368"
-  stone-700: "#3b4248"
-  stone-800: "#282e34"
-  stone-900: "#141920"
-  glacier: "#3fc9de"
-  glacier-profond: "#0e6b7c"
+  stone-300: "#bfc0ba"
+  stone-400: "#9aa09b"
+  stone-500: "#5e635f"
+  stone-700: "#3d4240"
+  stone-800: "#2a2e2c"
+  stone-900: "#16191a"
+  lichen: "#7a8b4f"
+  lichen-deep: "#5f6e3b"
   ember: "#b4552f"
   ember-deep: "#9e4526"
   ember-clair: "#d98a63"
   alerte: "#9a3b2c"
   alerte-surface: "#f3e6e2"
-  data-mark: "#0e6b7c"
-  data-mark-zero: "#cdd0d2"
+  data-mark: "#5f6e3b"
+  data-mark-zero: "#cfd0ca"
 typography:
   display:
     fontFamily: "Bricolage Grotesque, ui-sans-serif, system-ui, sans-serif"
@@ -109,7 +109,7 @@ séduire, c'est là parce que tu en as besoin. La forme suit la fonction, mais
 elle a du grain.**
 
 Le système est **calme, minéral et délibéré**. Quatre surfaces mates
-(papier / ombre / glacier / roche) suffisent à séparer les sujets — aucun trait
+(papier / ombre / lichen / roche) suffisent à séparer les sujets — aucun trait
 fin, aucune bordure grise. Une seule audace visuelle est autorisée : le cairn
 lui-même, dessiné à la main, aux pierres légèrement irrégulières dérivées d'un
 seed déterministe. Toute autre exubérance est proscrite.
@@ -127,16 +127,12 @@ seed déterministe. Toute autre exubérance est proscrite.
   séquence.
 - Les hero avec grand titre centré + illustration abstraite décorative + trois
   cartes-features en dessous.
-- **Le cyan en aplat de bouton.** C'est le tell propre à cette teinte : le
-  turquoise est la couleur la plus « SaaS » qui existe, et ce qui l'en garde ici
-  est son emploi — une surface, un lavis, du grain — jamais un remplissage de
-  commande.
 
 **Key Characteristics:**
 
-- Palette minérale sur quatre surfaces mates (papier / ombre / glacier / roche).
-- Un seul accent chromatique (glacier, en deux registres), un seul accent chaud
-  (ember), chacun réservé à un emploi unique.
+- Palette minérale sur quatre surfaces mates (papier / ombre / lichen / roche).
+- Un seul accent chromatique (lichen), un seul accent chaud (ember), chacun
+  réservé à un emploi unique.
 - Typographie serrée en trois rôles (Bricolage Grotesque display, Satoshi
   texte, Geist Mono données).
 - Grain overlay léger sur toutes les surfaces — se sent, ne se voit pas.
@@ -146,25 +142,17 @@ seed déterministe. Toute autre exubérance est proscrite.
 
 ## Colors
 
-Une palette minérale de gris papier à roche sombre, avec un accent glacier qui
-signale et un accent ember réservé à l'affichage du streak. Les gris sont
-tempérés vers l'ardoise, jamais vers le vert : sous un accent froid, un gris
-verdâtre vire à l'olive, et c'est la moitié qu'on oublie quand on change une
-palette. Les deux surfaces les plus claires, elles, restent chaudes — c'est
-l'écart de température entre le papier et le glacier qui fait la qualité.
+Une palette minérale de gris papier à roche sombre, avec un accent lichen
+désaturé qui signale et un accent ember réservé à l'affichage du streak.
 
-### Primary (accent unique du produit, en deux registres)
+### Primary (accent unique du produit)
 
-Les deux ne sont pas interchangeables, et c'est la mesure qui les sépare.
-
-- **Glacier** (`--glacier` #3fc9de) : la lumière. Surfaces, lavis, aplats, et le
-  sommet du cairn sur la roche, où il porte 6,94. Il ne donne que **1,76 sur le
-  papier** : jamais un texte ni un trait avec lui sur du clair, pas même un filet
-  de deux pixels.
-- **Glacier Profond** (`--glacier-profond` #0e6b7c) : le signal. Focus, bonne
-  réponse, sélection, appel à l'action, data-mark des graphiques internes, et le
-  sommet du cairn sur fond clair. 5,49 sur le papier — AA plein, là où l'accent
-  d'avant tombait à 3,32 et échouait au seuil du texte.
+- **Vert Lichen Désaturé** (`--lichen` #7a8b4f) : l'accent unique de l'app.
+  N'apparaît que sur le sommet du cairn et sur l'outline de focus. Sa rareté
+  est ce qui le rend signal.
+- **Lichen Approfondi** (`--lichen-deep` #5f6e3b) : version foncée pour tenir
+  4,7:1 de contraste sur le papier. Sert au focus visible et au data-mark des
+  graphiques internes.
 
 ### Tertiary (streak uniquement)
 
@@ -181,19 +169,20 @@ Les deux ne sont pas interchangeables, et c'est la mesure qui les sépare.
   surface de lecture par défaut.
 - **Ombre** (`--surface-ombre` #e4e4df, alias `--stone-100`) : panneau
   alterné, jamais deux d'affilée.
-- **Glacier Surface** (`--surface-glacier` #bfe6ee) : un seul panneau dans
+- **Lichen Surface** (`--surface-lichen` #e8eadf) : un seul panneau dans
   toute l'application — celui où le produit tient sa promesse. Interdit tout
-  autre usage du glacier sur cet écran, sauf le sommet du cairn.
-- **Roche Sombre** (`--surface-roche` #282e34) : deux panneaux maximum. Le
-  texte et les pierres s'y inversent en gris clairs, et le sommet du cairn
-  s'inverse avec eux : il y passe au glacier vif.
-- **Encre Granit** (`--stone-900` #141920) : texte principal sur surfaces
+  autre usage du lichen sur cet écran, sauf le sommet du cairn.
+- **Roche Sombre** (`--surface-roche` #2a2e2c) : deux panneaux maximum. Le
+  texte et les pierres s'y inversent en gris clairs ; le sommet lichen reste
+  lichen.
+- **Encre Granit** (`--stone-900` #16191a) : texte principal sur surfaces
   claires.
-- **Gris de Pierre** (`--stone-500` #5b6368) : texte secondaire, traits porteurs
+- **Gris Lichen** (`--stone-500` #5e635f) : texte secondaire, traits porteurs
   d'information.
-- **Gris Ardoise** (`--stone-400` #97a0a4) : texte secondaire sur surface
-  sombre (tient 5,15 sur roche, là où stone-500 tombait à 2,88).
-- **Gris Sol** (`--stone-300` #bdc0c2) : traits légers, indicateurs de fond,
+- **Gris Feuille** (`--stone-400` #9aa09b) : texte secondaire sur surface
+  sombre (tient 6,63 sur roche et 5,16 sur ombre, là où stone-500 tombait à
+  2,88).
+- **Gris Sol** (`--stone-300` #bfc0ba) : traits légers, indicateurs de fond,
   ascenseur discret.
 
 ### Sémantique
@@ -204,10 +193,10 @@ Les deux ne sont pas interchangeables, et c'est la mesure qui les sépare.
 
 ### Data (graphiques internes uniquement)
 
-- **Data Mark** (`--data-mark` #0e6b7c) : tous les graphiques mesurent une
-  grandeur, jamais une catégorie — une seule teinte suffit. C'est le glacier
-  profond, pour tenir 5,49 sur le papier là où le vif tombe à 1,76.
-- **Data Mark Zero** (`--data-mark-zero` #cdd0d2) : amorce grise pour qu'un
+- **Data Mark** (`--data-mark` #5f6e3b) : tous les graphiques mesurent une
+  grandeur, jamais une catégorie — une seule teinte suffit. C'est le lichen
+  approfondi pour tenir 4,7:1 sur le papier.
+- **Data Mark Zero** (`--data-mark-zero` #cfd0ca) : amorce grise pour qu'un
   jour sans donnée se lise comme un zéro et non comme un trou dans la série.
 
 ### Jetons de code (transparence contextuelle)
@@ -227,15 +216,9 @@ Les deux ne sont pas interchangeables, et c'est la mesure qui les sépare.
 
 ### Named Rules
 
-**The One Glacier Rule.** Le glacier apparaît uniquement sur le sommet du cairn,
-l'outline de focus, l'état choisi d'une réponse ou d'un réglage, et le data-mark
-des graphiques internes. Nulle part ailleurs. Sa rareté est ce qui le rend
-signal — l'exception qui donne du sens.
-
-**Le registre se choisit par le fond, pas par le goût.** Vif sur la roche et en
-lavis, profond partout où il y a du texte ou un trait sur du clair. Un objet
-graphique doit tenir trois pour un : le sommet du cairn s'inverse donc avec les
-pierres, puisque aucune des deux valeurs ne passe ce seuil sur les deux fonds.
+**The One Lichen Rule.** Le lichen apparaît uniquement sur le sommet du cairn,
+l'outline de focus, et le data-mark des graphiques internes. Nulle part
+ailleurs. Sa rareté est ce qui le rend signal — l'exception qui donne du sens.
 
 **The One Ember Rule.** L'ember n'apparaît que sur l'affichage du streak.
 Jamais ailleurs, même comme deuxième accent, même « juste pour cette fois ».
@@ -347,7 +330,7 @@ que personne n'écrit à côté.
 
 **Plat avec ombres réservées au cairn.** Aucun composant de l'interface ne
 porte d'ombre : la profondeur se joue via les quatre surfaces (papier → ombre
-→ glacier → roche, du plus clair au plus foncé) et le grain overlay qui donne
+→ lichen → roche, du plus clair au plus foncé) et le grain overlay qui donne
 de la matière. **Une seule exception documentée** : les pierres du cairn
 peuvent acquérir une ombre légère au sol pour renforcer leur présence
 sculptée. Cette ombre-là n'est pas encore implémentée — c'est la direction, à
@@ -398,7 +381,7 @@ autre radius n'est légitime.
 - **Behavior** : le grain vit derrière le contenu. `aere=true` applique
   `--pas-campagne` (rythme marketing), `false` applique `--pas-dedans`
   (rythme app).
-- **API** : `<Panneau surface="papier|ombre|glacier|roche" mesure="texte|colonne|page|large" aere centre remplit fond={...} />`
+- **API** : `<Panneau surface="papier|ombre|lichen|roche" mesure="texte|colonne|page|large" aere centre remplit fond={...} />`
 - **Fichier** : `components/coquille/panneau.tsx`.
 
 ### Strates
@@ -419,14 +402,14 @@ autre radius n'est légitime.
 - **Primary** : fond `--stone-900`, texte `--stone-50`. Padding
   `0.75rem 2rem`. Hauteur minimum 44 px (cible tactile).
 - **Hover** : léger décalage vertical ou variation de teinte (pas d'ombre).
-- **Focus** : outline `--glacier-profond` 2 px, offset 2 px.
+- **Focus** : outline `--lichen-deep` 2 px, offset 2 px.
 - **Character** : sobre, ferme, sans ornementation.
 
 ### Inputs
 
 - **Style** : **aucun fond, aucune bordure.** Un trait de 2 px sous le champ,
   en `--stone-500`. Le champ s'écrit à même le papier.
-- **Focus** : le trait passe en `--glacier-profond`. Pas de changement d'épaisseur
+- **Focus** : le trait passe en `--lichen-deep`. Pas de changement d'épaisseur
   (le bouton ne doit pas se décaler d'un pixel à chaque entrée).
 - **Character** : « un sol, pas une boîte ».
 
@@ -449,7 +432,7 @@ autre radius n'est légitime.
   geste souris/tactile (chute physique des pierres, `overflow-visible` sur le
   SVG pour laisser les stones sortir).
 - **Palette** : stones en `--stone-800` à `--stone-900`, sommet couronné du
-  contour `--glacier-profond` sur fond clair, `--glacier` sur la roche.
+  contour `--lichen`.
 - **Composants** : `Cairn`, `CairnRenversable`, `PierreSeule`, `PoseDePierre`,
   `ArêtesDePierre`, `SolDuCairn`, `PileEnConstruction`, `SilhouetteDeCairn`
   dans `components/cairn/`.
@@ -458,14 +441,12 @@ autre radius n'est légitime.
 
 ### Do:
 
-- **Do** utiliser une des quatre surfaces (`papier`, `ombre`, `glacier`,
+- **Do** utiliser une des quatre surfaces (`papier`, `ombre`, `lichen`,
   `roche`) pour poser un panneau. Le fond va d'un bord à l'autre.
 - **Do** séparer deux sujets par un changement de surface via `<Strates>`,
   jamais par un `<hr>` ni un filet.
-- **Do** utiliser `--glacier` uniquement sur le sommet du cairn, l'outline de
-  focus, l'état choisi, ou le data-mark des graphiques.
-- **Do** choisir le registre sur la mesure : `--glacier` pour un aplat ou un
-  lavis, `--glacier-profond` dès qu'il y a du texte ou un trait sur du clair.
+- **Do** utiliser `--lichen` uniquement sur le sommet du cairn, l'outline de
+  focus, ou le data-mark des graphiques.
 - **Do** utiliser `--ember` uniquement sur l'affichage du streak.
 - **Do** dessiner le cairn comme la seule audace visuelle du produit — chaque
   page importante peut en porter trace.
@@ -495,10 +476,8 @@ autre radius n'est légitime.
 - **Don't** enrober un champ de saisie dans une boîte. Un trait sous le champ
   suffit.
 - **Don't** ajouter d'ombres à un composant. Seul le cairn en porte au sol.
-- **Don't** utiliser `--glacier` ou `--ember` en dehors de leurs emplois
+- **Don't** utiliser `--lichen` ou `--ember` en dehors de leurs emplois
   réservés — même « juste pour cette fois ».
-- **Don't** poser `--glacier` vif sur du clair pour autre chose qu'un aplat ou
-  un lavis. À 1,76 contre 1, un texte y est illisible et un filet invisible.
 - **Don't** peindre des catégories dans un graphique. Les graphiques mesurent
   des grandeurs (`--data-mark`), pas des types.
 - **Don't** écrire de pixels arbitraires dans un composant. Passer par un

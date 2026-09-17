@@ -142,8 +142,8 @@ export function FormulaireDEssai({
                   `focus-visible` du thème est neutralisé ici, précisément pour
                   que son anneau ne redessine pas la boîte qu'on vient d'enlever.
                   Deux pixels transparents au repos ne se voient pas, passent au
-                  glacier à l'entrée dans le champ, et ne décalent rien. */}
-              <div className="mt-pas-2 focus-within:border-glacier-profond border-b-2 border-transparent transition-colors">
+                  lichen à l'entrée dans le champ, et ne décalent rien. */}
+              <div className="mt-pas-2 focus-within:border-lichen-deep border-b-2 border-transparent transition-colors">
                 {/* **Sa hauteur est fixe, et c'est le champ qui défile.** Il
                     grandissait avec son contenu jusqu'à un plafond : à cette
                     taille de corps, coller un article faisait pousser un mur de

@@ -20,14 +20,14 @@ export default async function CoquilleSite({ children }: { children: React.React
   const utilisateur = await getCurrentUser();
 
   return (
-    <div className="coquille-site bg-surface-papier flex min-h-dvh flex-col">
+    <div className="bg-surface-papier flex min-h-dvh flex-col">
       {/* **L'en-tête porte le grain du panneau qu'il coiffe.** Il avait la même
           teinte que le hero et paraissait pourtant plus clair : le grain descend
           sur les panneaux depuis qu'il a quitté la page entière, et l'en-tête,
           qui n'en est pas un, était resté au papier nu. Sur un téléphone, où le
           hero commence à deux centimètres sous la marque, la couture se voyait
           en travers de l'écran. */}
-      <header className="grain relative z-20 bg-[var(--fond-en-tete)] transition-colors">
+      <header className="bg-surface-papier grain relative z-20">
         {/* La même mesure que la mesure « page » d'un Panneau, aux mêmes
             gouttières : sur un grand écran, un en-tête plus étroit que ce qu'il
             coiffe posait la marque en retrait du titre qu'elle surplombe, et le
@@ -47,7 +47,7 @@ export default async function CoquilleSite({ children }: { children: React.React
           </Link>
           <Link
             href={utilisateur ? ROUTES.aujourdhui : ROUTES.connexion}
-            className="text-h2-app rounded-galet px-pas-6 py-pas-3 hover:bg-surface-ombre text-[var(--encre-en-tete)] transition-colors hover:text-stone-900"
+            className="text-h2-app rounded-galet px-pas-6 py-pas-3 hover:bg-surface-ombre text-stone-500 transition-colors hover:text-stone-900"
           >
             {utilisateur ? "Aujourd'hui" : "Se connecter"}
           </Link>

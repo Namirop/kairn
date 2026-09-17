@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 /**
  * Un bloc qui se détache du flux, ouvert par un filet horizontal court.
  *
- * **Il remplace le filet vertical d'accent**, qui longeait huit blocs du
+ * **Il remplace le filet vertical de lichen**, qui longeait huit blocs du
  * produit pour cinq intentions différentes — distinguer, lister, alerter,
  * signaler une dette, marquer une offre. Trois défauts s'y empilaient. Le
- * l'accent est unique et il était dépensé en bordure décorative, si bien
+ * lichen est l'accent unique et il était dépensé en bordure décorative, si bien
  * qu'il ne signalait plus rien nulle part. Un trait qui court sur cinq lignes
  * est la forme exacte du bloc de citation d'une documentation, et c'est ce qui
  * le faisait lire comme un motif générique plutôt que comme une décision. Et il

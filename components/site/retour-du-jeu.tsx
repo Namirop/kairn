@@ -45,7 +45,7 @@ export function GainDePoints({
       aria-hidden
       style={{ left: gauche, top: haut }}
       className={`text-mono pointer-events-none absolute -translate-x-1/2 font-mono font-medium tabular-nums ${
-        parfait ? "text-glacier-profond" : "text-stone-500"
+        parfait ? "text-lichen-deep" : "text-stone-500"
       }`}
       initial={{ opacity: 0, y: 0, scale: 0.7 }}
       animate={{ opacity: [0, 1, 1, 0], y: [0, -8, -16, -28], scale: [0.7, 1.12, 1, 1] }}

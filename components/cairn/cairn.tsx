@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
  * dessiner.
  *
  * La pierre du sommet du **dernier** cairn se pose en arrivant : c'est celle
- * qu'on vient de gagner, et son arête porte le glacier.
+ * qu'on vient de gagner, et son arête porte le lichen.
  *
  * L'animation est un supplément, jamais un préalable : c'est ce que dit
  * `useAnimationPossible`, et le geste de la pose vit dans `PoseDePierre`.

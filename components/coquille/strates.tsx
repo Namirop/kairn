@@ -12,7 +12,7 @@ import { SURFACES, variableDe, type Surface } from "./surfaces";
  * la coupe est plus tendue sur un grand écran et plus resserrée sur un
  * téléphone, comme une strate qu'on regarde de plus ou moins loin.
  *
- * Les deux veines se calculent par `color-mix` vers le gris de pierre : aucune
+ * Les deux veines se calculent par `color-mix` vers le gris de lichen : aucune
  * couleur n'est inventée ici, elles dérivent toutes des tokens existants. Elles
  * ne se contentent pas d'interpoler entre les deux surfaces — entre le papier
  * et l'ombre, l'écart est si faible qu'un dégradé en trois pas ne se voyait

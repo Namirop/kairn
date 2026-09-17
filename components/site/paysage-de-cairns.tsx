@@ -41,16 +41,9 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
  * gardé — voir `PLANS_TELEPHONE`.
  */
 
-/**
- * L'encre d'une pierre, diluée dans le ciel à mesure qu'elle s'éloigne.
- *
- * Dans le ciel et non dans le papier : c'est ce que fait la brume. Tant que le
- * ciel était blanc les deux revenaient au même ; maintenant qu'il est bleu,
- * diluer dans le papier laisserait des silhouettes grises devant un ciel de
- * couleur — un dessin posé sur un fond, au lieu d'un paysage.
- */
+/** L'encre d'une pierre, diluée dans le papier à mesure qu'elle s'éloigne. */
 const encre = (part: number) =>
-  `color-mix(in oklab, var(--stone-500) ${part.toFixed(1)}%, var(--ciel-horizon))`;
+  `color-mix(in oklab, var(--stone-500) ${part.toFixed(1)}%, var(--surface-papier))`;
 
 /** Les trois nuances d'un cairn, dérivées de sa part d'encre. */
 const teintesDe = (part: number): [string, string, string] => [
@@ -59,16 +52,9 @@ const teintesDe = (part: number): [string, string, string] => [
   encre(part * 0.7),
 ];
 
-/**
- * La terre d'un plan, entre l'ombre et le ciel.
- *
- * Le plan proche est à cent pour cent d'ombre : il garde donc sa couleur
- * propre, un gris chaud, et c'est juste — ce qui est près de nous n'est pas
- * bleui. Seuls les lointains prennent le ciel, et l'écart de température entre
- * les deux est ce qui creuse la distance.
- */
+/** La terre d'un plan, entre l'ombre et le papier. */
 const terre = (part: number) =>
-  `color-mix(in oklab, var(--surface-ombre) ${part.toFixed(0)}%, var(--ciel-horizon))`;
+  `color-mix(in oklab, var(--surface-ombre) ${part.toFixed(0)}%, var(--surface-papier))`;
 
 /**
  * Une ligne de crête, tracée dans l'espace commun aux deux plans.
@@ -143,10 +129,8 @@ type Plan = {
  * déjà et n'a pas besoin d'être dessiné — c'est le grain, que chaque panneau
  * porte derrière son contenu, monté jusqu'à ce qu'il se sente sans se voir.
  *
- * La valeur descend donc de haut en bas en trois temps seulement : le ciel,
- * une terre claire au lointain, la masse d'ombre au premier plan. Le ciel était
- * du papier — « un blanc qui n'était pas un ciel », disait déjà cette note un
- * peu plus haut. Il en est un maintenant. Le
+ * La valeur descend donc de haut en bas en trois temps seulement : le ciel en
+ * papier, une terre claire au lointain, la masse d'ombre au premier plan. Le
  * nombre de pierres baisse avec la distance — de loin, un empilement se lit à
  * sa masse et non à son compte —, et l'encre monte d'un plan à l'autre pour que
  * le lointain existe au lieu de s'effacer.
@@ -365,38 +349,16 @@ function PlanDuPaysage({ plan, graine }: { plan: Plan; graine: string }) {
  * balisage lui-même, et il achète de ne jamais avoir de paysage en retard d'une
  * rotation d'écran.
  */
-/**
- * Le ciel, dans la bande que sa composition lui laisse.
- *
- * Il est ici et non sur le panneau parce qu'il appartient au paysage : c'est la
- * crête qui lui donne son bas, et les lointains qui lui empruntent sa couleur.
- * Posé sur le panneau, il serait un fond coloré derrière un dessin ; posé ici,
- * il en fait partie.
- *
- * Les masses de terrain se peignent après lui et le recouvrent à partir de leur
- * crête : il n'a donc pas besoin de savoir où il s'arrête, il est simplement
- * derrière.
- */
-function Ciel({ variante }: { variante: "zenith" | "crete" }) {
-  return variante === "zenith" ? (
-    <div className="ciel-du-zenith pointer-events-none absolute inset-x-0 top-0 h-[46%]" />
-  ) : (
-    <div className="ciel-de-crete pointer-events-none absolute inset-x-0 top-[38%] bottom-0" />
-  );
-}
-
 export function PaysageDeCairns() {
   return (
     <>
       <div className="pointer-events-none absolute inset-0 md:hidden">
-        <Ciel variante="crete" />
         {PLANS_TELEPHONE.map((plan, rang) => (
           <PlanDuPaysage key={plan.crete} plan={plan} graine={`paysage-tel-${rang}`} />
         ))}
       </div>
 
       <div className="pointer-events-none absolute inset-0 hidden md:block">
-        <Ciel variante="zenith" />
         {PLANS.map((plan, rang) => (
           <PlanDuPaysage key={plan.crete} plan={plan} graine={`paysage-${rang}`} />
         ))}

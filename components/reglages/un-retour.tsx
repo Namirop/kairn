@@ -79,7 +79,7 @@ export function UnRetour() {
           maxLength={MESSAGE_MAX}
           disabled={enCours}
           placeholder="Ce que tu faisais, ce à quoi tu t'attendais, ce qui s'est passé."
-          className="rounded-champ mt-pas-2 px-pas-3 py-pas-2 text-petit focus-visible:border-glacier-profond w-full resize-none border border-stone-300 bg-transparent text-stone-900 outline-none disabled:opacity-45"
+          className="rounded-champ mt-pas-2 px-pas-3 py-pas-2 text-petit focus-visible:border-lichen w-full resize-none border border-stone-300 bg-transparent text-stone-900 outline-none disabled:opacity-45"
         />
       </div>
 

@@ -14,7 +14,7 @@
  * **Le texte à trou en a une à lui**, et elle a échappé au tour du 02/09 qui a
  * mis les autres formats à l'indicatif : « Le terme attendu est « collectivise » :
  * l'économie soviétique est collectivisée… ». Sur ce format, le terme vient de
- * se poser dans la phrase, souligné de glacier, deux centimètres au-dessus du
+ * se poser dans la phrase, souligné de lichen, deux centimètres au-dessus du
  * bloc. L'annoncer une seconde fois occupe la première ligne à redire ce que
  * l'œil vient de lire. La consigne d'écriture est corrigée de son côté ; ici on
  * rattrape le stock, qui vivra des mois.

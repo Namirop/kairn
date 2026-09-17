@@ -131,9 +131,9 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
           {MOTIFS.map((choix) => (
             <li key={choix.valeur}>
               <label
-                className={`rounded-carte px-pas-4 py-pas-3 has-[:focus-visible]:border-glacier-profond block cursor-pointer border transition-colors ${
+                className={`rounded-carte px-pas-4 py-pas-3 has-[:focus-visible]:border-lichen block cursor-pointer border transition-colors ${
                   motif === choix.valeur
-                    ? "border-glacier-profond bg-glacier/10"
+                    ? "border-lichen bg-lichen/10"
                     : "border-transparent hover:bg-stone-100"
                 }`}
               >
@@ -164,7 +164,7 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
             rows={2}
             maxLength={500}
             disabled={envoi}
-            className="rounded-champ mt-pas-2 px-pas-3 py-pas-2 text-petit focus-visible:border-glacier-profond w-full resize-none border border-stone-300 bg-transparent text-stone-900 outline-none disabled:opacity-45"
+            className="rounded-champ mt-pas-2 px-pas-3 py-pas-2 text-petit focus-visible:border-lichen w-full resize-none border border-stone-300 bg-transparent text-stone-900 outline-none disabled:opacity-45"
           />
         </div>
 

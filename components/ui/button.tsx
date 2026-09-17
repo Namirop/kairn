@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  * pilule est un geste. Aucune ombre, aucun halo : le relief vient du contraste
  * de surface, et le survol change de surface plutôt que d'opacité.
  *
- * Le focus est traité globalement par l'outline glacier de globals.css, pas par
+ * Le focus est traité globalement par l'outline lichen de globals.css, pas par
  * un ring propre au composant — d'où l'absence d'`outline-none` ici, qui
  * l'effacerait sans rien mettre à la place.
  *

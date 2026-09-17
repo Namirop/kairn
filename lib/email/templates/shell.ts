@@ -12,14 +12,10 @@
 const PALETTE = {
   paper: "#E4E4DF",
   surface: "#F2F2EF",
-  border: "#BDC0C2",
-  muted: "#5B6368",
-  ink: "#141920",
-  /**
-   * `--glacier-profond`, et non le glacier vif : c'est un fond de bouton qui
-   * porte du blanc. Le vif n'y donnerait que 1,79 contre 1, illisible.
-   */
-  glacier: "#0E6B7C",
+  border: "#BFC0BA",
+  muted: "#5E635F",
+  ink: "#16191A",
+  lichen: "#7A8B4F",
   ember: "#B4552F",
   /// Sémantique, et pas la couleur du produit : un échec n'est pas un accent.
   alerte: "#9A3B2C",

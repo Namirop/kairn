@@ -119,7 +119,7 @@ export function TonOffre({
           emboîter donnait une surface teintée posée sur du papier, deux tons
           qui ne se séparent que de quelques centièmes de luminance : le bloc qui
           devait ressortir se fondait dans celui qui le contenait. Sur l'ombre du
-          panneau, le glacier tranche. */}
+          panneau, le lichen tranche. */}
       {!paye && ouvert ? <OffreComplete /> : null}
     </section>
   );

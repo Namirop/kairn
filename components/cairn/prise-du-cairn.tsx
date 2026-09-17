@@ -42,8 +42,8 @@ export function PriseDuCairn({ tenu, surBascule }: { tenu: boolean; surBascule: 
         /* Le repos est au gris de second plan, pas en dessous : une commande qui
            passe sous le contraste AA pour rester discrète n'est plus discrète,
            elle est invisible. La prise armée se dit deux fois — le glyphe passe
-           au glacier profond, et un lavis très pâle le pose sur le sentier. */
-        tenu ? "bg-glacier/20 text-glacier-profond" : "text-stone-500",
+           au lichen, et un disque très pâle le pose sur le sentier. */
+        tenu ? "bg-lichen/20 text-lichen-deep" : "text-stone-500",
       )}
     >
       <Crosshair aria-hidden className="h-4 w-4" strokeWidth={1.5} />

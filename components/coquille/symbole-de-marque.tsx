@@ -10,12 +10,11 @@ import { cadreDuSymbole, empilementDuLogo, nuanceDuRang } from "@/lib/design/mar
  * garde le tirage — c'est ce qui rend chaque empilement personnel. Un logo demande
  * l'inverse : une dégradation franche, la plus sombre en bas.
  *
- * **Le sommet est une pierre entièrement glacier.** Dans `Cairn`, seule son arête
+ * **Le sommet est une pierre entièrement lichen.** Dans `Cairn`, seule son arête
  * l'est ; à seize pixels, une arête d'un pixel et demi disparaît. C'est le seul
- * point de couleur de toute l'identité, et il s'inverse avec les pierres : le
- * glacier vif sur la roche, où il porte 6,94 contre 1, le glacier profond sur le
- * clair, où il porte 5,49. Le vif y tomberait à 1,76, sous les trois pour un
- * exigés d'un objet graphique — une identité illisible n'est plus une identité.
+ * point de couleur de toute l'identité, et il ne s'inverse pas sur fond sombre —
+ * les pierres passent en gris clairs, le sommet reste lichen. Il porte 3,7 contre
+ * 1 sur la roche, au-dessus des trois pour un exigés d'un objet graphique.
  */
 
 const NUANCES = ["fill-stone-900", "fill-stone-800", "fill-stone-700"] as const;
@@ -54,9 +53,7 @@ export function SymboleDeMarque({
             d={pierre.chemin}
             className={
               rang === empilement.pierres.length - 1
-                ? clair
-                  ? "fill-glacier"
-                  : "fill-glacier-profond"
+                ? "fill-lichen"
                 : teintes[nuanceDuRang(rang, empilement.pierres.length)]
             }
           />

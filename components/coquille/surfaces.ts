@@ -10,7 +10,7 @@
  * qu'on ne voit qu'en production.
  */
 
-export type Surface = "papier" | "ombre" | "glacier" | "roche";
+export type Surface = "papier" | "ombre" | "lichen" | "roche";
 
 type Habillage = {
   fond: string;
@@ -40,8 +40,8 @@ export const SURFACES: Record<Surface, Habillage> = {
     objet: "bg-surface-papier",
     sombre: false,
   },
-  glacier: {
-    fond: "bg-surface-glacier",
+  lichen: {
+    fond: "bg-surface-lichen",
     encre: "text-stone-900",
     second: "text-stone-500",
     grain: "grain",
