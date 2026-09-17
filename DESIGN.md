@@ -4,7 +4,7 @@ description: Retenir ce qu'on apprend, une pierre à la fois.
 colors:
   papier: "#f2f2ef"
   ombre: "#e4e4df"
-  glacier-surface: "#dceef2"
+  glacier-surface: "#bfe6ee"
   roche: "#282e34"
   stone-50: "#f2f2ef"
   stone-100: "#e4e4df"
@@ -181,7 +181,7 @@ Les deux ne sont pas interchangeables, et c'est la mesure qui les sépare.
   surface de lecture par défaut.
 - **Ombre** (`--surface-ombre` #e4e4df, alias `--stone-100`) : panneau
   alterné, jamais deux d'affilée.
-- **Glacier Surface** (`--surface-glacier` #dceef2) : un seul panneau dans
+- **Glacier Surface** (`--surface-glacier` #bfe6ee) : un seul panneau dans
   toute l'application — celui où le produit tient sa promesse. Interdit tout
   autre usage du glacier sur cet écran, sauf le sommet du cairn.
 - **Roche Sombre** (`--surface-roche` #282e34) : deux panneaux maximum. Le

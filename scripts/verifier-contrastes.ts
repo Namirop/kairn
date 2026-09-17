@@ -101,6 +101,10 @@ const COMBINAISONS: Combinaison[] = [
   // dense est le zénith. C'est là qu'une silhouette a le moins de contraste.
   { texte: "stone-900", fond: "glacier", role: "cairn sur le ciel", seuil: AA_TEXTE },
   { texte: "stone-500", fond: "glacier", role: "cairn lointain sur le ciel", seuil: AA_LARGE },
+  // L'en-tête de l'ouverture est posé sur le zénith : son lien y est du
+  // texte, et c'est le seul texte que le glacier vif porte dans tout le
+  // produit. `stone-500` n'y donnait que 3,10.
+  { texte: "stone-700", fond: "glacier", role: "lien d'en-tête sur le ciel", seuil: AA_TEXTE },
   {
     texte: "glacier-profond",
     fond: "surface-papier",

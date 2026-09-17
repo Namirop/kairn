@@ -80,7 +80,7 @@ export function Hero({ connecte }: { connecte: boolean }) {
       /* `--hauteur-cairn` est la mesure que les deux colonnes partagent : le
          cairn l'occupe, le titre s'y centre. Elle vit ici parce qu'aucune des
          deux ne peut la lire chez l'autre. */
-      className="max-md:pt-pas-8 gap-pas-12 grid items-center [--hauteur-cairn:clamp(20rem,52vh,36rem)] md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
+      className="ouverture max-md:pt-pas-8 gap-pas-12 grid items-center [--hauteur-cairn:clamp(20rem,52vh,36rem)] md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
       fond={<PaysageDeCairns />}
     >
       {/* Le titre passe **devant** les pierres.

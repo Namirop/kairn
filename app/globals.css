@@ -27,7 +27,7 @@
   */
   --surface-papier: #f2f2ef;
   --surface-ombre: #e4e4df;
-  --surface-glacier: #dceef2;
+  --surface-glacier: #bfe6ee;
   --surface-roche: #282e34;
 
   /*
@@ -98,6 +98,22 @@
   */
   --ciel-zenith: var(--glacier);
   --ciel-horizon: var(--surface-glacier);
+
+  /*
+    Ce que porte l'en-tête, qui dépend de ce qu'il coiffe.
+
+    Il est en papier partout, et c'est juste : il coiffe un panneau de papier.
+    Sur l'ouverture de bureau il coiffe un ciel, et sa bande claire posait alors
+    un trait net en travers de l'écran, juste sous la marque — la couture exacte
+    que ce fichier décrivait déjà pour le grain, revenue par la couleur. Il prend
+    donc le zénith, qui est la première valeur du dégradé d'en dessous : les deux
+    se rejoignent sans jointure.
+
+    Son lien descend d'un gris avec : `stone-500` ne donne que 3,10 sur le
+    zénith, et un lien de navigation est du texte.
+  */
+  --fond-en-tete: var(--surface-papier);
+  --encre-en-tete: var(--stone-500);
 
   /* Réservé au streak, nulle part ailleurs. */
   --ember: #b4552f;
@@ -867,6 +883,20 @@
   `titre-creux` remplit ses lettres de la couleur de sa surface, et un titre
   évidé posé sur du ciel redeviendrait un titre plein.
 */
+/*
+  L'ouverture prévient sa coquille qu'elle porte un ciel.
+
+  De bureau seulement : sur téléphone, le ciel se range sous le titre, l'en-tête
+  coiffe donc du papier comme partout ailleurs, et lui donner le zénith y
+  recréerait la couture qu'on retire ici.
+*/
+@media (width >= 48rem) {
+  .coquille-site:has(.ouverture) {
+    --fond-en-tete: var(--ciel-zenith);
+    --encre-en-tete: var(--stone-700);
+  }
+}
+
 @utility ciel-du-zenith {
   background-image: linear-gradient(
     to bottom,
