@@ -129,8 +129,8 @@ signale. Le dimensionnement des trois plafonds est expliqué dans le README, à 
 section « Appels au modèle » ; garder `AI_DAILY_CALL_CAP` nettement au-dessus de
 `AI_DAILY_CALL_CAP_PAR_COMPTE` multiplié par le nombre de comptes actifs. Le
 modèle de repli, Sonnet, n'est pas une variable : son identifiant est fixé dans
-`lib/ai/client.ts`, et une bascule émet un second appel sur la place déjà
-réservée.
+`lib/ai/client.ts`, et une bascule prend sa propre place au plafond global :
+plafond atteint, pas de repli.
 
 ### Paiement
 

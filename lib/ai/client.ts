@@ -2,7 +2,7 @@ import { recordAiCall } from "@/lib/db/ai-call";
 import { type AiConfig } from "./config";
 import { choisirFournisseur, type Fournisseur, type PontFournisseur } from "./fournisseurs";
 import { lireLaConfigEffective } from "./reglages-effectifs";
-import { provenanceDeLAppel, reserverLesDeuxPlaces } from "./reservation";
+import { provenanceDeLAppel, reserverLaPlaceDuRepli, reserverLesDeuxPlaces } from "./reservation";
 import {
   AICallFailedError,
   AIDisabledError,
@@ -52,7 +52,7 @@ const MOCK_LATENCY_MS = 300;
  * OpenRouter veut le nom préfixé, le SDK d'Anthropic le nom court. Il est nommé
  * ici et non lu dans `AI_MODEL`, qui porte le modèle primaire.
  */
-const MODELE_DE_REPLI: Record<Fournisseur, string> = {
+export const MODELE_DE_REPLI: Record<Fournisseur, string> = {
   openrouter: "anthropic/claude-sonnet-5",
   anthropic: "claude-sonnet-5",
 };
@@ -213,6 +213,10 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
     return await emettreEtJournaliser(pont, params, config, false);
   } catch (erreur) {
     if (!doitBasculer(erreur, config, params)) throw erreur;
+    // Le repli est une seconde émission réelle : il prend sa place au plafond
+    // global, sinon une panne du primaire doublerait les émissions sous le même
+    // plafond. Plafond atteint, pas de repli : l'échec du primaire remonte.
+    if (!(await reserverLaPlaceDuRepli(config))) throw erreur;
     // Bascule : Sonnet reprend sur le même pont, mêmes prompts, même schéma.
     // Pas de retry derrière — si le repli échoue aussi, l'erreur remonte à
     // l'appelant.

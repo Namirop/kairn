@@ -1,3 +1,4 @@
+import { MODELE_DE_REPLI } from "@/lib/ai/client";
 import { prisma } from "@/lib/db/client";
 import type { AtomState, ReviewRating } from "@/lib/db/types";
 import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
@@ -149,8 +150,8 @@ export type Comptage<T> = {
 };
 
 /**
- * Le mode compteur : mock coupé, clé retirée, base de l'API renvoyée sur un
- * port fermé.
+ * Le mode compteur : mock coupé, clés retirées, pont Anthropic imposé et sa base
+ * renvoyée sur un port fermé.
  *
  * Le mode mock ne réserve rien et n'écrit rien au registre — il ne peut donc
  * pas dire combien d'appels seraient partis. On coupe donc le mock pour que
@@ -158,6 +159,12 @@ export type Comptage<T> = {
  * émettre, écrire sa ligne. L'émission, elle, ne va nulle part — pas de clé,
  * et une base pointée sur `127.0.0.1:9`. Ce qui se compte ici, c'est ce que le
  * produit aurait facturé.
+ *
+ * Le pont Anthropic est imposé parce que c'est le seul dont la base se
+ * redirige ; la clé OpenRouter est retirée quand même. Le modèle primaire est
+ * posé sur le modèle de repli : chaque émission échoue ici, et laisser le repli
+ * ouvert doublerait tous les comptages pour une panne qui n'existe pas. Le repli
+ * a son propre cas, qui le rouvre (`casRepli`).
  *
  * Ce que ce mode touche au plafond global du jour est rendu à la fin, et les
  * lignes écrites au registre sont effacées : une vérification ne consomme pas
@@ -176,12 +183,18 @@ export async function enModeCompteur<T>(
     AI_DAILY_CALL_CAP: process.env.AI_DAILY_CALL_CAP,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     ANTHROPIC_BASE_URL: process.env.ANTHROPIC_BASE_URL,
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+    AI_FOURNISSEUR: process.env.AI_FOURNISSEUR,
+    AI_MODEL: process.env.AI_MODEL,
   };
 
   process.env.MOCK_AI = "false";
   process.env.AI_DAILY_CALL_CAP = String(plafond);
   delete process.env.ANTHROPIC_API_KEY;
+  delete process.env.OPENROUTER_API_KEY;
   process.env.ANTHROPIC_BASE_URL = "http://127.0.0.1:9";
+  process.env.AI_FOURNISSEUR = "anthropic";
+  process.env.AI_MODEL = MODELE_DE_REPLI.anthropic;
 
   try {
     const resultat = await action();

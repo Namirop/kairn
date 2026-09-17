@@ -222,7 +222,8 @@ et ils ne défendent pas la même chose.
 
 **`AI_DAILY_CALL_CAP` protège ton budget.** C'est le nombre maximal d'appels que
 le produit entier peut réserver dans une journée, tous comptes confondus — une
-bascule vers le modèle de repli émet un second appel réel sur la même place. Une
+bascule vers le modèle de repli prend sa propre place, et n'a pas lieu si le
+plafond est atteint. Une
 ligne par jour dans la table `AiCallQuota`, et la réservation tient dans une seule
 instruction SQL qui incrémente et refuse dans le même mouvement — compter les
 appels déjà passés avant d'émettre serait une course, et deux appels simultanés

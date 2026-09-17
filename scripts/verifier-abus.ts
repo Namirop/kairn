@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { conclure, record } from "./verification/journal";
+import { versUnFournisseurDeModele } from "./verification/hotes-des-fournisseurs";
 
 /**
  * La passe d'audit : abus, quotas, et cycle de vie des concepts.
@@ -22,7 +23,7 @@ const vraiFetch = globalThis.fetch;
 globalThis.fetch = function fetchPiege(input: RequestInfo | URL, init?: RequestInit) {
   const url = typeof input === "string" ? input : input.toString();
 
-  if (!url.includes("anthropic.com")) return vraiFetch(input, init);
+  if (!versUnFournisseurDeModele(url)) return vraiFetch(input, init);
 
   tentativesReseau.push(url);
   return Promise.reject(new Error(`Requête sortante interdite pendant la vérification : ${url}`));
@@ -42,6 +43,7 @@ async function main(): Promise<void> {
   const quotas = await import("./verification/abus-quotas");
   const propriete = await import("./verification/abus-propriete");
   const global = await import("./verification/abus-plafond-global");
+  const repli = await import("./verification/abus-repli");
 
   await effacerComptes([COMPTE_A, COMPTE_B]);
 
@@ -72,6 +74,9 @@ async function main(): Promise<void> {
 
     await propriete.casRessourcesDunAutre(a, b, maintenant);
 
+    // Avant les cas du plafond global : `casPartDuCompte` retire en sortant la
+    // part par compte de l'environnement, et la configuration ne se valide plus.
+    await repli.casRepli();
     await global.casVoisinBloquant(a, b);
     await global.casPartDuCompte(a, b);
 

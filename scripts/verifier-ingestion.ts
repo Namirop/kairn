@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { conclure, record } from "./verification/journal";
+import { versUnFournisseurDeModele } from "./verification/hotes-des-fournisseurs";
 
 /**
  * Preuve, à l'exécution, que l'ingestion tient de bout en bout : un dépôt entre,
@@ -19,7 +20,7 @@ const vraiFetch = globalThis.fetch;
 globalThis.fetch = function fetchPiege(input: RequestInfo | URL, init?: RequestInit) {
   const url = typeof input === "string" ? input : input.toString();
 
-  if (!url.includes("anthropic.com")) return vraiFetch(input, init);
+  if (!versUnFournisseurDeModele(url)) return vraiFetch(input, init);
 
   tentativesReseau.push(url);
   return Promise.reject(new Error(`Requête sortante interdite pendant la vérification : ${url}`));

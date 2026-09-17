@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { conclure, expectFailure, record } from "./verification/journal";
+import { versUnFournisseurDeModele } from "./verification/hotes-des-fournisseurs";
 
 /**
  * Preuve, à l'exécution, que les garde-fous d'appel modèle tiennent.
@@ -16,7 +17,7 @@ const realFetch = globalThis.fetch;
 
 function trippedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const url = typeof input === "string" ? input : input.toString();
-  if (!url.includes("anthropic.com")) return realFetch(input, init);
+  if (!versUnFournisseurDeModele(url)) return realFetch(input, init);
 
   networkAttempts.push(url);
   return Promise.reject(new Error(`Requête sortante interdite pendant la vérification : ${url}`));

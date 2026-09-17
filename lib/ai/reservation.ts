@@ -101,3 +101,24 @@ export async function reserverLesDeuxPlaces(
 
   throw new AIQuotaError(reservation.utilisees, config.dailyCallCap);
 }
+
+/**
+ * La place d'un repli : une seconde émission réelle, donc une place au plafond
+ * global, qui protège le budget. Pas de part de compte ni de trafic anonyme :
+ * elles comptent des demandes, et la demande a déjà pris la sienne.
+ *
+ * Rend `false` quand le plafond est atteint, sans lever : l'appelant renonce au
+ * repli et laisse remonter l'échec du modèle primaire.
+ */
+export async function reserverLaPlaceDuRepli(config: AiConfig): Promise<boolean> {
+  const reservation = await reserverAppelModele(config.dailyCallCap);
+
+  signalerLEtatDuCompteur({
+    compteur: "GLOBAL",
+    cible: null,
+    utilisees: reservation.utilisees,
+    plafond: config.dailyCallCap,
+  });
+
+  return reservation.obtenue;
+}

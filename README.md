@@ -246,9 +246,10 @@ recopiés en tête du prompt système, et c'est la validation Zod qui tient la f
 tronquée —, le même pont réémet une fois sur Sonnet, dont l'identifiant est fixé dans
 `lib/ai/client.ts` et non lu dans `AI_MODEL`. La ligne du repli porte `AiCall.basculee`, et au-delà
 de cinq bascules dans la journée une alerte part à `EMAIL_ALERTES`. Aucun repli quand le modèle
-primaire est déjà Sonnet, ni quand l'appelant impose son modèle. Les deux émissions tiennent sur la
-place réservée une seule fois : le plafond compte des appels à `callAI()`, et une bascule y fait
-deux appels réels pour une place.
+primaire est déjà Sonnet, ni quand l'appelant impose son modèle. Le repli est une seconde émission
+réelle : il prend sa propre place au plafond global, qui protège le budget, mais pas de part de
+compte ni de trafic anonyme, qui comptent des demandes. Plafond atteint, pas de repli : l'échec du
+primaire remonte.
 
 La forme envoyée n'est pas produite par l'assistant du SDK, qui rétrograde `enum` et `const` en
 simple description : `lib/ai/output-schema.ts` dérive le schéma JSON à la main pour les conserver,
@@ -476,7 +477,7 @@ concept douteux puis confirmé, concept réécrit, dépôt de fiction, découpag
 échec à mi-parcours, double envoi, débit, quota, rideau des dépôts, liste d'attente. Il couvre aussi
 le dépôt sans compte : la visite consommée, le second essai ouvert par un premier resté vide, la
 limite par empreinte d'adresse, la reprise au compte et l'oubli de ce que personne n'a réclamé. Le même piège sur `fetch` y est armé : la vérification échoue si une
-requête part vers l'API d'Anthropic.
+requête part vers un fournisseur de modèle.
 
 `verifier:session` rejoue le moteur de révision et l'entraînement libre, la progression comptée, la
 série autour de minuit local, la trace qu'un signalement laisse quand le concept est supprimé, la
@@ -485,16 +486,18 @@ ligne derrière elle, dans aucune table.
 
 `verifier:abus` est la passe d'audit : cycle de vie des concepts, vecteurs de régénération comptés en
 appels réellement émis, atomicité des compteurs sous concurrence, remboursement d'une panne,
-propriété des ressources entre deux comptes, et part de compte face au plafond global. Chaque
+propriété des ressources entre deux comptes, part de compte face au plafond global, et place prise
+par un repli. Chaque
 constat y est écrit comme la règle qu'on veut voir tenir, si bien qu'une ligne en échec est un trou
 et non une panne de la vérification. Les cas qui comptent des appels coupent le mode mock — qui ne
 réserve ni n'enregistre rien, donc ne peut rien compter — et émettent sans clé vers un port fermé :
 ce qui se compte est ce que le produit aurait facturé, sans qu'une requête sorte.
 
-Ces pièges et ce port fermé ne gardent que le pont Anthropic : ils ne reconnaissent que
-`anthropic.com`, et ne touchent ni `AI_FOURNISSEUR` ni `OPENROUTER_API_KEY`. Les vérifications
-supposent donc `AI_FOURNISSEUR` absente ou à `anthropic` ; avec `openrouter`, un cas qui coupe le
-mode mock partirait vers OpenRouter sans être vu.
+Les pièges reconnaissent les hôtes des deux ponts, listés dans
+`scripts/verification/hotes-des-fournisseurs.ts` : un pont ajouté doit y être déclaré. Le mode
+compteur impose le pont Anthropic, le seul dont la base se redirige, retire les deux clés, et pose le
+modèle primaire sur le modèle de repli : chaque émission y échoue, et un repli ouvert doublerait les
+comptages. Le repli a son propre cas, qui le rouvre.
 
 `verifier:contrastes` lit les jetons de couleur dans `app/globals.css` et calcule les ratios WCAG des
 couples que l'interface pose réellement, surface sombre comprise. « Ça se lit » n'est pas une
