@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
  * arrive après, à la taille d'un renseignement — ce qu'il est, à sept euros.
  *
  * **La colonne vendue est posée sur du papier, l'autre reste à plat sur
- * l'ombre.** Elle se désignait par un filet de lichen, qui était le seul accent
+ * l'ombre.** Elle se désignait par un filet d'accent, qui était le seul point de couleur
  * de la page ; le contraste de matière dit la même chose plus fort, sans dépenser
  * la couleur, et c'est la forme que ce produit donne partout à ce qui compte. Le
  * rembourrage est le même des deux côtés — sans quoi les deux colonnes ne se

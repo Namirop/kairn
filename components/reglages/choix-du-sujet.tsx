@@ -35,9 +35,9 @@ export function ChoixDuSujet({
         {ORDRE.map((sujet) => (
           <label
             key={sujet}
-            className={`rounded-champ px-pas-3 py-pas-2 text-petit has-[:focus-visible]:border-lichen cursor-pointer border transition-colors ${
+            className={`rounded-champ px-pas-3 py-pas-2 text-petit has-[:focus-visible]:border-glacier-profond cursor-pointer border transition-colors ${
               choisi === sujet
-                ? "border-lichen bg-lichen/10 text-stone-900"
+                ? "border-glacier-profond bg-glacier/10 text-stone-900"
                 : "border-stone-300 text-stone-500 hover:border-stone-500 hover:text-stone-900"
             }`}
           >

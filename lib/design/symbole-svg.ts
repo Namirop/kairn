@@ -1,4 +1,10 @@
-import { LICHEN, PIERRES_CLAIRES, PIERRES_SOMBRES, ROCHE } from "@/lib/design/couleurs-hors-css";
+import {
+  GLACIER,
+  GLACIER_PROFOND,
+  PIERRES_CLAIRES,
+  PIERRES_SOMBRES,
+  ROCHE,
+} from "@/lib/design/couleurs-hors-css";
 import { cadreDuSymbole, empilementDuLogo, nuanceDuRang } from "@/lib/design/marque";
 
 /**
@@ -22,8 +28,9 @@ function corps(pierres: number, clair: boolean): string {
 
   return empilement.pierres
     .map((pierre, rang) => {
+      const sommet = clair ? GLACIER : GLACIER_PROFOND;
       const teinte =
-        rang === dernier ? LICHEN : teintes[nuanceDuRang(rang, empilement.pierres.length)];
+        rang === dernier ? sommet : teintes[nuanceDuRang(rang, empilement.pierres.length)];
 
       return `<g transform="translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})"><path d="${pierre.chemin}" fill="${teinte}"/></g>`;
     })

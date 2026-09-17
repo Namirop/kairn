@@ -41,7 +41,7 @@ export const CORPS_MINIMAL_DE_LA_PIERRE = 40;
 const LARGEUR_EM = 0.14;
 const BASE_EM = 0.63;
 
-function PierreDuPoint() {
+function PierreDuPoint({ clair }: { clair: boolean }) {
   const cote = COTE_DU_POINT;
 
   return (
@@ -51,7 +51,7 @@ function PierreDuPoint() {
       style={{ width: `${LARGEUR_EM}em`, bottom: `${BASE_EM}em` }}
     >
       <svg viewBox={`${-cote / 2} ${-cote / 2} ${cote} ${cote}`} className="block h-auto w-full">
-        <path d={pierreDuPoint()} className="fill-lichen" />
+        <path d={pierreDuPoint()} className={clair ? "fill-glacier" : "fill-glacier-profond"} />
       </svg>
     </span>
   );
@@ -95,7 +95,7 @@ export function MotDeMarque({
       {pierre ? (
         <span className="relative inline-block">
           {"ı"}
-          <PierreDuPoint />
+          <PierreDuPoint clair={clair} />
         </span>
       ) : (
         "i"

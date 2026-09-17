@@ -1,7 +1,7 @@
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import React from "react";
 import { ImageResponse } from "next/og";
-import { LICHEN, PAPIER, ROCHE } from "@/lib/design/couleurs-hors-css";
+import { GLACIER, GLACIER_PROFOND, PAPIER, ROCHE } from "@/lib/design/couleurs-hors-css";
 import { CORPS_MINIMAL_DE_LA_PIERRE } from "@/components/coquille/mot-de-marque";
 import { PIERRES_DENSE, COTE_DU_POINT, pierreDuPoint } from "@/lib/design/marque";
 import { symboleSeul } from "@/lib/design/symbole-svg";
@@ -40,7 +40,7 @@ const DOSSIER = "public/marque";
 type Ton = { nom: string; clair: boolean; fond: string; encre: string };
 
 const TONS: Ton[] = [
-  { nom: "encre", clair: false, fond: PAPIER, encre: "#16191a" },
+  { nom: "encre", clair: false, fond: PAPIER, encre: "#141920" },
   { nom: "papier", clair: true, fond: ROCHE, encre: PAPIER },
 ];
 
@@ -64,13 +64,13 @@ function symboleEnImage(clair: boolean, hauteur: number): React.ReactElement {
   );
 }
 
-function pierreEnImage(corps: number): React.ReactElement {
+function pierreEnImage(corps: number, clair: boolean): React.ReactElement {
   const cote = COTE_DU_POINT;
   const largeur = Math.round(corps * LARGEUR_DE_LA_PIERRE_EM);
   // Les dimensions sont écrites dans le SVG **et** sur l'image : ce moteur ne
   // déduit pas de proportion intrinsèque d'une `viewBox`, et sans elles la pierre
   // s'étirait en une écharde verticale.
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${largeur}" height="${largeur}" viewBox="${-cote / 2} ${-cote / 2} ${cote} ${cote}"><path d="${pierreDuPoint()}" fill="${LICHEN}"/></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${largeur}" height="${largeur}" viewBox="${-cote / 2} ${-cote / 2} ${cote} ${cote}"><path d="${pierreDuPoint()}" fill="${clair ? GLACIER : GLACIER_PROFOND}"/></svg>`;
 
   return (
     // eslint-disable-next-line @next/next/no-img-element -- idem.
@@ -115,7 +115,7 @@ function mot(ton: Ton, avecPierre: boolean): React.ReactElement {
         <div style={{ ...corpsDuMot("transparent"), display: "flex" }}>Ka</div>
         <div style={{ position: "relative", display: "flex" }}>
           <div style={corpsDuMot("transparent")}>ı</div>
-          {pierreEnImage(CORPS)}
+          {pierreEnImage(CORPS, ton.clair)}
         </div>
       </div>
     </div>

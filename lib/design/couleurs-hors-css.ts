@@ -26,16 +26,23 @@ export const PAPIER = "#f2f2ef";
  */
 
 /** `--stone-900`, `--stone-800`, `--stone-700` — les pierres sur fond clair. */
-export const PIERRES_SOMBRES = ["#16191a", "#2a2e2c", "#3d4240"] as const;
+export const PIERRES_SOMBRES = ["#141920", "#282e34", "#3b4248"] as const;
 
 /** `--stone-50`, `--stone-100`, `--stone-300` — les pierres sur fond sombre. */
-export const PIERRES_CLAIRES = ["#f2f2ef", "#e4e4df", "#bfc0ba"] as const;
+export const PIERRES_CLAIRES = ["#f2f2ef", "#e4e4df", "#bdc0c2"] as const;
 
 /**
- * `--lichen`. Le sommet du cairn, et le seul point de couleur de l'identité.
- * Il ne s'inverse jamais : les pierres changent de gris, lui reste lui-même.
+ * `--glacier` et `--glacier-profond`. Le sommet du cairn, et le seul point de
+ * couleur de l'identité.
+ *
+ * Deux valeurs et non une, parce que le sommet s'inverse avec les pierres : le
+ * vif porte 6,94 sur la roche et 1,76 sur le papier, le profond 5,49 sur le
+ * papier. Aucune teinte unique ne passe les trois pour un d'un objet graphique
+ * sur les deux fonds. Une icône cuite sur le mauvais des deux est une marque
+ * qu'on ne voit pas, et personne ne la recuit avant qu'un utilisateur le dise.
  */
-export const LICHEN = "#7a8b4f";
+export const GLACIER = "#3fc9de";
+export const GLACIER_PROFOND = "#0e6b7c";
 
 /** `--surface-roche`. Le fond de la pastille d'application. */
-export const ROCHE = "#2a2e2c";
+export const ROCHE = "#282e34";

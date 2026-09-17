@@ -73,7 +73,7 @@ export function ReponseFermee({
               // n'a pas été choisie : sans elle, l'échec n'apprend rien.
               className={[
                 "gap-pas-3 h-auto w-full justify-start py-3 text-left font-normal whitespace-normal disabled:opacity-100",
-                repondu && estBonne ? "border-lichen bg-lichen/10 text-stone-900" : "",
+                repondu && estBonne ? "border-glacier-profond bg-glacier/10 text-stone-900" : "",
                 repondu && estChoisie && !estBonne ? "border-alerte bg-alerte-surface" : "",
                 repondu && !estBonne && !estChoisie ? "text-stone-500" : "",
               ]

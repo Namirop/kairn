@@ -19,7 +19,7 @@ import { avancementDuNiveau } from "@/lib/domain/progression";
  * l'ember — c'est la seule occurrence du produit, et elle est ici. **Le niveau**
  * est un chemin : il lui fallait sa part parcourue, parce que « Niveau 2 · 34 XP »
  * ne situe rien. La barre est en gris et jamais en accent : sur ce panneau, le
- * lichen appartient au sommet du cairn.
+ * glacier appartient au sommet du cairn.
  *
  * Rien n'est mis en carte. Deux cartes côte à côte auraient posé des contenants
  * sur le seul panneau du produit qui n'en porte aucun.

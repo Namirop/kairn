@@ -66,8 +66,13 @@ const COMBINAISONS: Combinaison[] = [
   { texte: "stone-500", fond: "surface-papier", role: "texte second sur papier", seuil: AA_TEXTE },
   { texte: "stone-900", fond: "surface-ombre", role: "encre sur ombre", seuil: AA_TEXTE },
   { texte: "stone-500", fond: "surface-ombre", role: "texte second sur ombre", seuil: AA_TEXTE },
-  { texte: "stone-900", fond: "surface-lichen", role: "encre sur lichen", seuil: AA_TEXTE },
-  { texte: "stone-500", fond: "surface-lichen", role: "texte second sur lichen", seuil: AA_TEXTE },
+  { texte: "stone-900", fond: "surface-glacier", role: "encre sur glacier", seuil: AA_TEXTE },
+  {
+    texte: "stone-500",
+    fond: "surface-glacier",
+    role: "texte second sur glacier",
+    seuil: AA_TEXTE,
+  },
   { texte: "stone-50", fond: "surface-roche", role: "encre sur roche", seuil: AA_TEXTE },
   { texte: "stone-300", fond: "surface-roche", role: "texte second sur roche", seuil: AA_TEXTE },
   { texte: "stone-400", fond: "surface-roche", role: "niveau et XP sur roche", seuil: AA_TEXTE },
@@ -79,7 +84,31 @@ const COMBINAISONS: Combinaison[] = [
   // avoir été mesuré.
   { texte: "alerte", fond: "alerte-surface", role: "erreur sur aplat d'alerte", seuil: AA_TEXTE },
   { texte: "stone-800", fond: "alerte-surface", role: "texte sur aplat d'alerte", seuil: AA_TEXTE },
-  { texte: "lichen", fond: "surface-papier", role: "accent sur papier", seuil: AA_LARGE },
+  // L'accent tient en deux registres, et c'est le seuil qui les sépare. Le
+  // profond porte du texte et des traits, donc AA plein ; le vif ne porte que
+  // des aplats et le sommet du cairn, qui sont des objets graphiques. Mesurer le
+  // vif sur le papier n'aurait pas de sens : rien ne l'y pose, et c'est la règle.
+  { texte: "glacier-profond", fond: "surface-papier", role: "signal sur papier", seuil: AA_TEXTE },
+  { texte: "glacier-profond", fond: "surface-ombre", role: "signal sur ombre", seuil: AA_TEXTE },
+  {
+    texte: "glacier-profond",
+    fond: "surface-glacier",
+    role: "signal sur le lavis",
+    seuil: AA_TEXTE,
+  },
+  { texte: "glacier", fond: "surface-roche", role: "sommet du cairn sur roche", seuil: AA_LARGE },
+  {
+    texte: "glacier-profond",
+    fond: "surface-papier",
+    role: "sommet du cairn sur papier",
+    seuil: AA_LARGE,
+  },
+  {
+    texte: "stone-50",
+    fond: "glacier-profond",
+    role: "curseur sur la piste cochée",
+    seuil: AA_LARGE,
+  },
   { texte: "ember", fond: "surface-papier", role: "série sur papier", seuil: AA_LARGE },
 ];
 

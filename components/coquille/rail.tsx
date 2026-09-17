@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
  *
  * L'accent a quitté la navigation. Il signale ce qui est dû et le sommet du
  * cairn ; un état de navigation se lit très bien sans lui, et chaque
- * occurrence de lichen en moins rend les autres plus fortes.
+ * occurrence d'accent en moins rend les autres plus fortes.
  */
 export function Rail({ administrateur }: { administrateur: boolean }) {
   const chemin = usePathname();

@@ -36,7 +36,7 @@ export function renderAlerteDeStreak(
   const body = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.ember};">${currentStreak}</p>
 <p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.ember};">${unite}</p>
 <p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">Rien n'a été revu aujourd'hui, et ${concepts(dueCount)} attendent. Une seule question suffit à tenir la série.</p>
-<a href="${links.sessionUrl}" style="display:inline-block;background:${S.lichen};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Commencer</a>`;
+<a href="${links.sessionUrl}" style="display:inline-block;background:${S.glacier};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Commencer</a>`;
 
   const text = `${currentStreak} ${unite}.\n\nRien n'a été revu aujourd'hui, et ${concepts(dueCount)} attendent. Une seule question suffit à tenir la série.\n\n${links.sessionUrl}\n\nNe plus recevoir cette alerte : ${links.unsubscribeUrl}`;
 

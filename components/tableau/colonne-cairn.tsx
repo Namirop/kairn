@@ -5,7 +5,7 @@ import { PierreAVenir } from "@/components/cairn/pierre-a-venir";
  * L'élément signature, et rien d'autre.
  *
  * Il vit sur le panneau de roche — l'un des deux de toute l'application. Les
- * pierres s'y inversent en gris clairs, et le sommet garde son lichen : c'est
+ * pierres s'y inversent en gris clairs, et le sommet passe au glacier vif : c'est
  * la constante de l'identité, et la seule occurrence d'accent sur ce panneau.
  *
  * La colonne ne porte plus que l'empilement. La série et le niveau sont

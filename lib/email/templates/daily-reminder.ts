@@ -41,7 +41,7 @@ export function renderDailyReminder(
   const body = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.ink};">${dueCount}</p>
 <p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">${concepts(dueCount)} arrivent à échéance aujourd'hui.</p>
 ${streak}
-<a href="${links.sessionUrl}" style="display:inline-block;background:${S.lichen};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Commencer</a>`;
+<a href="${links.sessionUrl}" style="display:inline-block;background:${S.glacier};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Commencer</a>`;
 
   const text = `${concepts(dueCount)} arrivent à échéance aujourd'hui.${
     currentStreak > 0 ? `\n${currentStreak} jours d'affilée.` : ""

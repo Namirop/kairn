@@ -16,36 +16,68 @@
     porte l'une d'elles — c'est le changement de fond qui sépare deux sujets,
     plus jamais un filet d'un pixel.
 
-    papier  la surface de lecture, par défaut
-    ombre   le panneau alterné, jamais deux d'affilée
-    lichen  un seul panneau dans toute l'application : celui où le produit tient
-            sa promesse. Il interdit tout autre usage du lichen sur cet écran,
-            sauf le sommet du cairn
-    roche   deux panneaux, pas trois. Le texte et les pierres s'y inversent en
-            gris clairs ; le sommet lichen reste lichen
+    papier   la surface de lecture, par défaut
+    ombre    le panneau alterné, jamais deux d'affilée
+    glacier  un seul panneau dans toute l'application : celui où le produit tient
+             sa promesse. Il interdit tout autre usage du glacier sur cet écran,
+             sauf le sommet du cairn
+    roche    deux panneaux, pas trois. Le texte et les pierres s'y inversent en
+             gris clairs, et le sommet du cairn s'inverse avec eux : il y passe
+             au glacier vif, qui ne tient que sur du sombre
   */
   --surface-papier: #f2f2ef;
   --surface-ombre: #e4e4df;
-  --surface-lichen: #e8eadf;
-  --surface-roche: #2a2e2c;
+  --surface-glacier: #dceef2;
+  --surface-roche: #282e34;
 
-  /* Pierre — neutres à température légèrement froide, côté lichen. */
+  /*
+    Pierre — neutres froids, côté ardoise.
+
+    Ils tiraient vers le vert : de `stone-300` à `stone-800`, le vert était le
+    canal dominant, réglé sur l'accent d'alors. Sous un accent froid, ces
+    gris-là virent à l'olive — c'est la moitié qu'on oublie quand on change une
+    palette, et elle se voit sur tout l'écran plutôt que sur les douze marques
+    de l'accent. Ils sont repris **à luminance identique** : la température
+    change, aucun contraste ne bouge.
+
+    Les deux plus clairs ne bougent pas. Le papier reste chaud, et c'est son
+    écart de température avec le glacier qui fait la qualité de l'ensemble : le
+    refroidir aussi rendrait la page uniformément froide, donc plate.
+  */
   --stone-50: #f2f2ef;
   --stone-100: #e4e4df;
-  --stone-300: #bfc0ba;
+  --stone-300: #bdc0c2;
   /* Texte secondaire sur surface sombre. `stone-500` y tombait à 2,88 pour 1 :
      un gris pensé pour du papier ne tient pas sur de la roche, et « Niveau 3 ·
-     564 XP » y était quasi illisible. Celui-ci donne 6,63 sur la roche et 5,16
-     sur l'ombre — AA franchi sur les deux, à température identique. */
-  --stone-400: #9aa09b;
-  --stone-500: #5e635f;
-  --stone-700: #3d4240;
-  --stone-800: #2a2e2c;
-  --stone-900: #16191a;
+     564 XP » y était quasi illisible. Celui-ci donne 5,15 pour 1 sur la roche,
+     AA franchi, et la re-températion ne l'a pas entamé. */
+  --stone-400: #97a0a4;
+  --stone-500: #5b6368;
+  --stone-700: #3b4248;
+  --stone-800: #282e34;
+  --stone-900: #141920;
 
-  /* Accent unique. Le lichen signale, il ne décore pas. */
-  --lichen: #7a8b4f;
-  --lichen-deep: #5f6e3b;
+  /*
+    Accent unique, en deux registres qui ne sont pas interchangeables.
+
+    `glacier` est la lumière : des surfaces, des lavis, des aplats. Il ne donne
+    que 1,76 sur le papier — **jamais un texte ni un trait avec lui sur du
+    clair**, il y disparaît, et c'est vrai d'un filet de deux pixels comme d'une
+    lettre. Sur la roche il donne 6,94 : c'est là qu'il est le plus vif sans
+    cesser d'être lisible, et c'est pour ça que le sommet du cairn s'y inverse.
+
+    `glacier-profond` est le signal : le focus, la bonne réponse, la sélection,
+    l'appel à l'action. 5,49 sur le papier, soit plus que l'accent d'avant, qui
+    y tombait à 3,32 et échouait au seuil AA du texte. C'est cette faiblesse-là
+    qui faisait paraître l'interface fade, pas les gris.
+
+    Le risque de la teinte est connu : le turquoise est ce qui sonne le plus
+    « SaaS ». Ce qui l'en garde, c'est l'emploi — généreux en lavis, discipliné
+    en signal — et le grain qui le dé-lisse. Un bouton plein de glacier vif
+    serait exactement la faute que cette palette essaie d'éviter.
+  */
+  --glacier: #3fc9de;
+  --glacier-profond: #0e6b7c;
 
   /* Réservé au streak, nulle part ailleurs. */
   --ember: #b4552f;
@@ -69,13 +101,13 @@
     peindrait des couleurs qui ne veulent rien dire, ce qui est le contresens le
     plus courant du genre.
 
-    C'est le lichen approfondi, pour tenir 4,7:1 sur le papier là où le lichen
-    d'origine tombe à 3,2 — une barre de trois pixels de large a besoin de plus
-    de contraste qu'un aplat. La barre à zéro garde une amorce grise : un jour
+    C'est le glacier profond, pour tenir 5,49 sur le papier là où le glacier vif
+    tombe à 1,76 — une barre de trois pixels de large a besoin de plus de
+    contraste qu'un aplat. La barre à zéro garde une amorce grise : un jour
     sans dépense doit se voir comme un zéro et non comme un trou dans la série.
   */
-  --data-mark: #5f6e3b;
-  --data-mark-zero: #cfd0ca;
+  --data-mark: #0e6b7c;
+  --data-mark-zero: #cdd0d2;
 
   /*
     Le jeton d'un terme de code cité dans une phrase.
@@ -346,8 +378,8 @@
   --color-stone-700: var(--stone-700);
   --color-stone-800: var(--stone-800);
   --color-stone-900: var(--stone-900);
-  --color-lichen: var(--lichen);
-  --color-lichen-deep: var(--lichen-deep);
+  --color-glacier: var(--glacier);
+  --color-glacier-profond: var(--glacier-profond);
   --color-ember: var(--ember);
   --color-ember-deep: var(--ember-deep);
   --color-ember-clair: var(--ember-clair);
@@ -391,7 +423,7 @@
 
   --color-surface-papier: var(--surface-papier);
   --color-surface-ombre: var(--surface-ombre);
-  --color-surface-lichen: var(--surface-lichen);
+  --color-surface-glacier: var(--surface-glacier);
   --color-surface-roche: var(--surface-roche);
 
   --radius-plein: var(--r-plein);
@@ -529,7 +561,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--lichen-deep);
+    outline: 2px solid var(--glacier-profond);
     outline-offset: 2px;
   }
 
@@ -588,7 +620,7 @@
    juste assez présent. Posé sur la roche, c'est l'inverse — un rail clair et
    large en travers d'un bloc sombre, qui devient l'objet le plus visible de la
    carte alors qu'il n'est qu'une indication. Le pouce y descend donc au gris de
-   lichen, et la barre à la moitié de son épaisseur par défaut.
+   pierre, et la barre à la moitié de son épaisseur par défaut.
 
    Il ne disparaît pas : c'est la seule chose qui dise qu'une ligne de code
    continue hors du cadre, et une ligne coupée sans le dire se lit comme une

@@ -8,7 +8,7 @@ type Etat = "attente" | "envoi" | "fait" | "echec";
 export function FormulaireDesinscription({ jeton }: { jeton: string }) {
   const [etat, setEtat] = useState<Etat>("attente");
 
-  // Un constat, et rien d'autre. Le filet de lichen qui le portait était une
+  // Un constat, et rien d'autre. Le filet d'accent qui le portait était une
   // citation dans une colonne alignée à gauche ; l'écran est maintenant une
   // halte centrée, où un trait à gauche d'une phrase centrée ne se rapporte à
   // rien. Ce qui reste est ce qu'on vient chercher : c'est fait.

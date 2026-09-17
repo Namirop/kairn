@@ -153,10 +153,10 @@ export function FinDeSession({
           centrée se lit moins bien, et c'est le seul texte de l'écran qui ne
           vient pas du produit.
 
-          Et il est posé, plutôt que bordé d'un filet de lichen. C'est la forme
+          Et il est posé, plutôt que bordé d'un filet d'accent. C'est la forme
           que ce produit donne à ce qui compte — la bande d'annulation de la
           session est la même chose —, et elle ne dépense pas l'accent : le
-          lichen ne signalait plus rien à force de border huit blocs qui
+          l'accent ne signalait plus rien à force de border huit blocs qui
           n'avaient ni statut ni urgence. Un bloc posé se distingue par sa
           matière. */}
       {carte ? (

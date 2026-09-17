@@ -30,7 +30,7 @@ import { useInstallation } from "./use-installation";
  * montre le résultat, et elle est le seul objet de ce bloc qui ne soit pas du
  * texte.
  *
- * Aucun accent. Le lichen de cet écran appartient au compteur du jour — c'est lui
+ * Aucun accent. Le glacier de cet écran appartient au compteur du jour — c'est lui
  * qui doit attirer l'œil en premier, et une seconde tache de couleur en ferait
  * deux qui se disputent.
  */

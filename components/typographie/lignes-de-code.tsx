@@ -7,7 +7,7 @@ import { debutDuCommentaire } from "@/lib/domain/commentaire-de-code";
  *
  * **Une seule nuance, et c'est le commentaire.** Un thème complet peindrait sept
  * couleurs là où le produit n'en porte qu'une, et cet accent-là appartient au
- * lichen et à l'ember. Le commentaire n'est pas une catégorie de plus : c'est la
+ * glacier et à l'ember. Le commentaire n'est pas une catégorie de plus : c'est la
  * seule partie d'une ligne qui ne s'exécute pas, et sur l'extrait qui a fait
  * écrire ce composant, c'était lui qui portait l'explication. Il s'écarte donc
  * d'un ton, et rien d'autre ne bouge.

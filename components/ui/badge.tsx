@@ -15,7 +15,7 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default: "text-stone-500",
-        du: "text-lichen-deep",
+        du: "text-glacier-profond",
         streak: "text-ember-deep",
         alerte: "bg-alerte-surface px-pas-2 py-0.5 text-alerte",
         pose: "bg-surface-ombre px-pas-2 py-0.5 text-stone-500",

@@ -2,7 +2,7 @@
   Pont entre les noms sémantiques de shadcn et la palette de pierre.
 
   Nos composants n'utilisent pas ces noms : ils écrivent directement
-  `bg-stone-900`, `text-lichen-deep`. Ce fichier existe pour la primitive
+  `bg-stone-900`, `text-glacier-profond`. Ce fichier existe pour la primitive
   suivante — celle qu'on ajoutera par la CLI et qui arrivera câblée sur
   `bg-primary` et `text-muted-foreground`. Sans ce remappage, elle sortirait
   sans couleurs du tout.
@@ -29,7 +29,7 @@
   --destructive: var(--alerte);
   --border: var(--stone-100);
   --input: var(--stone-300);
-  --ring: var(--lichen-deep);
+  --ring: var(--glacier-profond);
   --radius: var(--r-champ);
 }
 

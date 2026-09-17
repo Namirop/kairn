@@ -17,7 +17,7 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  * de fin de course sont parties avec le problème qu'elles réglaient.
  *
  * **Une règle en tête de chaque concept dit où il commence.** C'était un filet
- * de lichen le long de chacun, et six filets verts alignés font un peigne : une
+ * d'accent le long de chacun, et six filets alignés font un peigne : une
  * liste n'a pas besoin d'être distinguée du reste de la page, elle a besoin que
  * ses items se distinguent entre eux. La règle est horizontale, en gris de
  * pierre, et elle se répète assez pour qu'on compte sans lire.
