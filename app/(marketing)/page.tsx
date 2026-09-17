@@ -60,9 +60,9 @@ export default async function PageAccueil() {
         </>
       )}
 
-      <Strates de={connecte ? "ombre" : "papier"} vers="ombre" graine="accueil-sentier" />
+      <Strates de={connecte ? "ombre" : "papier"} vers="glacier" graine="accueil-sentier" />
       <Sentier />
-      <Strates de="ombre" vers="roche" graine="accueil-pas-ceci" />
+      <Strates de="glacier" vers="roche" graine="accueil-pas-ceci" />
       <PasCeci connecte={connecte} />
       <Strates de="roche" vers="papier" graine="accueil-pied" />
 

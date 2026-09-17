@@ -79,6 +79,26 @@
   --glacier: #3fc9de;
   --glacier-profond: #0e6b7c;
 
+  /*
+    Le ciel de l'ouverture, et de nulle part ailleurs.
+
+    C'est la seule surface dégradée du produit, et elle l'est parce qu'un ciel
+    l'est : dense au zénith, lavé à l'horizon. Un dégradé qui ne représente rien
+    est l'ornement le plus reconnaissable d'une interface générée — celui-ci est
+    borné en bas par une ligne de crête qui existe déjà dans le dessin, il ne
+    flotte pas, et il ne se pose sur aucun autre panneau. Le grain du panneau
+    passe par-dessus, ce qui lui retire le lissé d'un aplat de synthèse.
+
+    `--ciel-horizon` sert deux fois, et c'est le point important : c'est aussi
+    la couleur vers laquelle le paysage dilue ses lointains. La brume ne rend
+    pas les choses transparentes, elle les rapproche de la couleur du ciel. Un
+    cairn lointain est un cairn dont l'encre a viré **au ciel**, pas au papier —
+    sans ça, on aurait un dégradé posé derrière des dessins gris, c'est-à-dire
+    exactement l'ornement qu'on vient d'écarter.
+  */
+  --ciel-zenith: var(--glacier);
+  --ciel-horizon: var(--surface-glacier);
+
   /* Réservé au streak, nulle part ailleurs. */
   --ember: #b4552f;
   --ember-deep: #9e4526;
@@ -835,6 +855,36 @@
   Le repli sans `-webkit-text-stroke` garde une lettre pleine en gris moyen : là
   il n'y a pas de contour à tenir, donc pas de fenêtre à refermer.
 */
+/*
+  Les deux ciels de l'ouverture, parce qu'elle a deux compositions.
+
+  De bureau, le titre est à gauche et les crêtes occupent la bande haute : le
+  ciel descend donc du haut de la page jusqu'à elles, dense en haut.
+
+  Sur téléphone, il n'y a plus de « à côté » — le titre prend le haut, le
+  paysage se range en bas. Le ciel se loge entre les deux, au-dessus de la
+  crête, et se lave vers le haut pour ne jamais venir derrière la phrase :
+  `titre-creux` remplit ses lettres de la couleur de sa surface, et un titre
+  évidé posé sur du ciel redeviendrait un titre plein.
+*/
+@utility ciel-du-zenith {
+  background-image: linear-gradient(
+    to bottom,
+    var(--ciel-zenith) 0%,
+    var(--ciel-horizon) 70%,
+    var(--surface-papier) 100%
+  );
+}
+
+@utility ciel-de-crete {
+  background-image: linear-gradient(
+    to bottom,
+    var(--surface-papier) 0%,
+    var(--ciel-zenith) 42%,
+    var(--ciel-horizon) 100%
+  );
+}
+
 @utility titre-creux {
   color: var(--stone-500);
 

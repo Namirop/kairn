@@ -97,6 +97,10 @@ const COMBINAISONS: Combinaison[] = [
     seuil: AA_TEXTE,
   },
   { texte: "glacier", fond: "surface-roche", role: "sommet du cairn sur roche", seuil: AA_LARGE },
+  // Le ciel de l'ouverture porte les cairns du paysage, et sa valeur la plus
+  // dense est le zénith. C'est là qu'une silhouette a le moins de contraste.
+  { texte: "stone-900", fond: "glacier", role: "cairn sur le ciel", seuil: AA_TEXTE },
+  { texte: "stone-500", fond: "glacier", role: "cairn lointain sur le ciel", seuil: AA_LARGE },
   {
     texte: "glacier-profond",
     fond: "surface-papier",
