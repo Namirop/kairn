@@ -1,13 +1,43 @@
-# Kairn
+<h1 align="center">Kairn</h1>
 
-> Application de répétition espacée : on y dépose une information brute, elle est découpée en
-> concepts, transformée en questions, et reposée au moment où elle est sur le point d'être oubliée.
+<p align="center">
+  Application de répétition espacée : on y dépose une information brute, elle est découpée en
+  concepts, transformée en questions, et reposée au moment où elle est sur le point d'être oubliée.<br>
+  <a href="https://kairn.me">kairn.me</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-black?logo=nextdotjs&logoColor=white" alt="Next.js">
+  <img src="https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white" alt="React">
+  <img src="https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss&logoColor=white" alt="Tailwind">
+  <img src="https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma&logoColor=white" alt="Prisma">
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/OpenRouter-IA-6467F2" alt="OpenRouter">
+  <img src="https://img.shields.io/badge/Stripe-Checkout-635bff?logo=stripe&logoColor=white" alt="Stripe">
+</p>
+
+<p align="center">
+  <img src="docs/images/01-couverture.jpg" alt="Kairn : retenir ce qu'on lit, sans écrire de fiches" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/images/02-depot.jpg" alt="Essai sans compte : un texte découpé en concepts et questions" width="32%">
+  <img src="docs/images/03-revision.jpg" alt="Session de révision" width="32%">
+  <img src="docs/images/04-suivi.jpg" alt="Concepts du jour et dépôts" width="32%">
+</p>
+
+<p align="center">
+  <sub>Essai sans compte · Révision espacée · Au quotidien</sub>
+</p>
+
+---
 
 ## Aperçu
 
 Kairn prend un dépôt libre — une phrase, un pavé collé, une capture d'écran — et en tire des
-concepts unitaires (`Atom`). Chaque concept porte quatre formulations de question (`Variant`), une
-par facette : reconnaître, expliquer le mécanisme, délimiter, appliquer. La planification par
+concepts unitaires (`Atom`). Chaque concept porte jusqu'à quatre formulations de question (`Variant`),
+une par facette : reconnaître, expliquer le mécanisme, délimiter, appliquer. La planification par
 répétition espacée porte sur le concept, pas sur la formulation : les formulations tournent pour
 éviter de mémoriser une tournure plutôt qu'une idée, et c'est la facette qui fait tourner, pas le
 format.
@@ -28,36 +58,29 @@ avant qu'on demande quoi que ce soit (voir « Le dépôt avant compte »). La co
 à six chiffres envoyé à l'adresse, sans mot de passe nulle part. Un compte peut exporter ses données
 et se supprimer lui-même.
 
-Ce qui manque, et qui se voit :
-
-- **Le rappel quotidien n'envoie rien.** `GET /api/cron/rappels` sélectionne les comptes à l'heure,
-  écarte ceux déjà notifiés, journalise — et rend `envoyes: 0`. L'envoi reste à brancher sur
-  `sendNotification()`.
-- **Les réglages sont en lecture seule.** L'écran affiche fuseau, heure de rappel et état des
-  emails ; il ne les modifie pas. Le fuseau se réconcilie tout seul au premier affichage, et la
-  désinscription passe par le lien des emails.
-
 ## Stack
 
-| Domaine            | Choix                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------ |
-| Framework          | Next.js 15 (App Router, Turbopack), React 19, TypeScript strict                      |
-| Base de données    | PostgreSQL, Prisma 7 avec le driver adapter `@prisma/adapter-pg`                     |
-| Authentification   | better-auth : code à six chiffres par email, Google si configuré, aucun mot de passe |
-| Répétition espacée | `ts-fsrs`                                                                            |
-| Modèle             | SDK Anthropic, sorties structurées contraintes, validation Zod                       |
-| Interface          | Tailwind v4, primitives shadcn/ui retokenisées, Motion                               |
-| Email              | Resend                                                                               |
-| Mesure d'audience  | Vercel Web Analytics, sans cookie ni identifiant persistant                          |
+| Domaine            | Choix                                                                                                       |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| Framework          | Next.js 15 (App Router, Turbopack), React 19, TypeScript strict                                             |
+| Base de données    | PostgreSQL, Prisma 7 avec le driver adapter `@prisma/adapter-pg`                                            |
+| Authentification   | better-auth : code à six chiffres par email, Google si configuré, aucun mot de passe                        |
+| Répétition espacée | `ts-fsrs`                                                                                                   |
+| Modèle             | OpenRouter en primaire (`AI_FOURNISSEUR`), pont SDK Anthropic, repli automatique sur Sonnet, validation Zod |
+| Interface          | Tailwind v4, primitives shadcn/ui retokenisées, Motion                                                      |
+| Email              | Resend                                                                                                      |
+| Paiement           | Stripe : Checkout et portail hébergés, droits accordés par le webhook signé                                 |
+| Mesure d'audience  | Vercel Web Analytics, sans cookie ni identifiant persistant                                                 |
 
 ## Prérequis
 
-- Node.js 20 ou plus récent
+- Node.js 20.19+, 22.12+ ou 24+ — le plancher de Prisma 7
 - Une base PostgreSQL 16+ accessible (le projet est développé sur Neon)
-- Une clé API Anthropic est inutile tant que `MOCK_AI=true` : tout le pipeline se développe sur
-  fixtures
-- Un compte Resend **ou** des identifiants OAuth Google, en revanche, sont nécessaires pour entrer
-  dans un compte — voir la note sous l'installation
+- Aucune clé de fournisseur de modèle n'est utile tant que `MOCK_AI=true` : tout le pipeline se
+  développe sur fixtures. `MOCK_AI`, `AI_ENABLED` et les variables `AI_*` restent requises : la
+  configuration est validée à chaque appel, mock compris
+- Ni compte Resend ni identifiants OAuth Google ne sont nécessaires pour entrer dans un compte en
+  local — voir la note sous l'installation
 
 ## Installation
 
@@ -75,38 +98,51 @@ L'adresse du compte de démonstration est définie dans `prisma/seed/account.ts`
 par `SEED_USER_EMAIL`. Il n'a pas de mot de passe : on y entre en demandant un code depuis l'écran
 de connexion, comme sur n'importe quel compte.
 
-**Sans `RESEND_API_KEY`, le code se lit dans les journaux du serveur.** `sendEmail()` journalise
-l'objet du message et jamais son contenu, et l'objet du code de connexion porte le code — c'est ce
-qui permet d'entrer en local sans compte fournisseur. Ce chemin lève en production : une variable
-oubliée s'y voit comme une panne au lieu de fermer la porte en silence.
+**Sans `RESEND_API_KEY` ou sans `EMAIL_FROM`, le code se lit dans les journaux du serveur.**
+`sendEmail()` journalise l'objet du message et jamais son contenu, et l'objet du code de connexion
+porte le code — c'est ce qui permet d'entrer en local sans compte fournisseur. Ce chemin lève en
+production : une variable oubliée s'y voit comme une panne au lieu de fermer la porte en silence.
+
+`BETTER_AUTH_URL` fixe aussi le port : better-auth n'admet que l'origine qu'elle nomme, et un
+serveur de développement qui démarre sur un autre port voit ses connexions refusées en
+`Invalid origin` dès que le navigateur porte un cookie du site.
 
 ## Variables d'environnement
 
-| Nom                            | Requis | Description                                                                 |
-| ------------------------------ | ------ | --------------------------------------------------------------------------- |
-| `DATABASE_URL`                 | oui    | Connexion applicative. Sur Neon, l'endpoint poolé.                          |
-| `DIRECT_URL`                   | oui    | Connexion directe, sans pooler. Utilisée par Migrate et par le seed.        |
-| `BETTER_AUTH_SECRET`           | oui    | Signature des sessions, et des jetons de désinscription.                    |
-| `BETTER_AUTH_URL`              | oui    | URL publique de l'application, sans slash final.                            |
-| `GOOGLE_CLIENT_ID`             | non    | Sans lui et son secret, le fournisseur Google n'est simplement pas proposé. |
-| `GOOGLE_CLIENT_SECRET`         | non    | Voir ci-dessus.                                                             |
-| `ANTHROPIC_API_KEY`            | non    | Inutile tant que `MOCK_AI=true`. Ne sert plus qu'à la bascule manuelle.     |
-| `RESEND_API_KEY`               | non    | Sans elle, les emails sont journalisés en dev — et l'envoi lève en prod.    |
-| `EMAIL_FROM`                   | non    | Expéditeur des emails transactionnels.                                      |
-| `CRON_SECRET`                  | oui    | Jeton `Authorization: Bearer` des routes cron.                              |
-| `BATTEMENT_JOBS_URL`           | non    | Heartbeat Better Stack signalé par `/api/cron/jobs` quand il aboutit.       |
-| `BATTEMENT_RAPPELS_URL`        | non    | Idem pour `/api/cron/rappels`.                                              |
-| `MOCK_AI`                      | oui    | `true` sert des fixtures locales, sans aucune requête réseau.               |
-| `AI_ENABLED`                   | oui    | `false` fait échouer immédiatement tout appel modèle.                       |
-| `AI_DAILY_CALL_CAP`            | oui    | Plafond global d'appels réels par jour, vérifié avant émission.             |
-| `AI_DAILY_CALL_CAP_PAR_COMPTE` | oui    | Part d'un seul compte dans ce plafond, réservée avant lui.                  |
-| `AI_DAILY_CALL_CAP_ANONYME`    | oui    | Part du trafic sans compte dans ce plafond, tous visiteurs confondus.       |
-| `AI_MODEL`                     | oui    | Identifiant du modèle.                                                      |
-| `ADMIN_EMAILS`                 | non    | Adresses autorisées à ouvrir `/admin`. Vide n'autorise personne.            |
-| `AI_MAX_TOKENS`                | oui    | `max_tokens` par défaut, toujours envoyé ; une sortie coupée est un échec.  |
-| `SEED_USER_*`                  | non    | Adresse et fuseau du compte de démonstration.                               |
+| Nom                            | Requis | Description                                                                                                                |
+| ------------------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                 | oui    | Connexion applicative, seed compris. Sur Neon, l'endpoint poolé.                                                           |
+| `DIRECT_URL`                   | oui    | Connexion directe, sans pooler. Lue par `prisma.config.ts`, donc par la CLI Prisma : migrations, génération du client.     |
+| `BETTER_AUTH_SECRET`           | oui    | Signature des sessions, et des jetons de désinscription.                                                                   |
+| `BETTER_AUTH_URL`              | oui    | URL publique de l'application, sans slash final.                                                                           |
+| `GOOGLE_CLIENT_ID`             | non    | Sans lui et son secret, le fournisseur Google n'est simplement pas proposé.                                                |
+| `GOOGLE_CLIENT_SECRET`         | non    | Voir ci-dessus.                                                                                                            |
+| `AI_FOURNISSEUR`               | non    | La route des appels : `openrouter` ou `anthropic`. Absente, c'est `anthropic`.                                             |
+| `OPENROUTER_API_KEY`           | non    | Clé OpenRouter du produit, exigée avec `AI_FOURNISSEUR=openrouter`. Distincte de la clé du banc.                           |
+| `ANTHROPIC_API_KEY`            | non    | Clé du pont Anthropic, lue seulement avec `AI_FOURNISSEUR=anthropic`.                                                      |
+| `RESEND_API_KEY`               | non    | Sans elle, les emails sont journalisés en dev — et l'envoi lève en prod.                                                   |
+| `EMAIL_FROM`                   | non    | Expéditeur des emails transactionnels. Même règle que `RESEND_API_KEY`.                                                    |
+| `EMAIL_ALERTES`                | non    | Destinataire des alertes d'exploitation : plafonds, bascules, retours, webhook de paiement. Absente, elles ne partent pas. |
+| `CRON_SECRET`                  | non    | Jeton `Authorization: Bearer` des routes cron. Absent, elles refusent tout.                                                |
+| `BATTEMENT_JOBS_URL`           | non    | Heartbeat Better Stack signalé par `/api/cron/jobs` quand il aboutit.                                                      |
+| `BATTEMENT_RAPPELS_URL`        | non    | Idem pour `/api/cron/rappels`.                                                                                             |
+| `MOCK_AI`                      | oui    | `true` sert des fixtures locales, sans aucune requête réseau.                                                              |
+| `AI_ENABLED`                   | oui    | `false` fait échouer immédiatement tout appel modèle.                                                                      |
+| `AI_DAILY_CALL_CAP`            | oui    | Plafond global d'appels réels par jour, vérifié avant émission.                                                            |
+| `AI_DAILY_CALL_CAP_PAR_COMPTE` | oui    | Part d'un seul compte dans ce plafond, réservée avant lui.                                                                 |
+| `AI_DAILY_CALL_CAP_ANONYME`    | oui    | Part du trafic sans compte dans ce plafond, tous visiteurs confondus.                                                      |
+| `AI_MODEL`                     | oui    | Identifiant du modèle primaire, dans la forme qu'attend la route choisie. Le modèle de repli est fixé dans le code.        |
+| `ADMIN_EMAILS`                 | non    | Adresses autorisées à ouvrir `/admin`. Vide n'autorise personne.                                                           |
+| `AI_MAX_TOKENS`                | oui    | `max_tokens` par défaut, toujours envoyé ; une sortie coupée est un échec.                                                 |
+| `STRIPE_SECRET_KEY`            | non    | Clé Stripe. Sans elle et le secret du webhook, le paiement est fermé et l'écran le dit.                                    |
+| `STRIPE_WEBHOOK_SECRET`        | non    | Secret de signature de l'endpoint webhook.                                                                                 |
+| `PAIEMENT_LIVE`                | non    | Une clé `sk_live_` est refusée tant qu'elle ne vaut pas `true`.                                                            |
+| `ESSAI_ANONYME_SANS_LIMITE`    | non    | `true` lève les verrous de l'essai sans compte, le temps d'une vérification.                                               |
+| `SEED_USER_*`                  | non    | Adresse et fuseau du compte de démonstration.                                                                              |
 
-Les valeurs réelles vivent dans `.env`, qui n'est pas versionné. `.env.example` sert de référence.
+Les valeurs réelles vivent dans `.env`, qui n'est pas versionné. `.env.example` sert de référence ;
+il décrit aussi les variables du seul banc d'évaluation (`OPENROUTERAI_KEY`, `VOYAGE_IA_KEY`,
+`BANC_DAILY_CALL_CAP`), que le produit ne lit jamais.
 
 Ce que chacune vaut en production — et pourquoi certaines se régénèrent au lieu de se recopier —
 est dans `docs/environnements.md`.
@@ -117,31 +153,39 @@ droit, et où en est le dossier TVA.
 
 ## Scripts
 
-| Commande                       | Effet                                                       |
-| ------------------------------ | ----------------------------------------------------------- |
-| `npm run dev`                  | Serveur de développement                                    |
-| `npm run build`                | Build de production                                         |
-| `npm run typecheck`            | `tsc --noEmit`                                              |
-| `npm run lint`                 | ESLint, frontières d'architecture comprises                 |
-| `npm test`                     | Vitest sur `lib/domain/`, propriétés fast-check comprises   |
-| `npm run test:watch`           | Vitest en veille                                            |
-| `npm run format`               | Prettier en écriture                                        |
-| `npm run db:migrate`           | `prisma migrate dev`                                        |
-| `npm run db:deploy`            | `prisma migrate deploy`, pour un environnement déployé      |
-| `npm run db:seed`              | Remplit la base ; rejouable sans dupliquer                  |
-| `npm run db:studio`            | Prisma Studio                                               |
-| `npm run verifier:ai`          | Vérifie les garde-fous d'appel modèle à l'exécution         |
-| `npm run verifier:ingestion`   | Rejoue l'ingestion de bout en bout, en mode mock            |
-| `npm run verifier:session`     | Rejoue le moteur de révision et l'entraînement libre        |
-| `npm run verifier:abus`        | Passe d'audit : quotas, débit, propriété, cycle de vie      |
-| `npm run verifier:contrastes`  | Mesure les ratios WCAG des couples posés par l'interface    |
-| `npm run verifier:abonnement`  | Prouve qu'un abonnement ne remonte pas le temps             |
-| `npm run eprouver:paiement`    | Le parcours d'achat contre le vrai Stripe, en mode test     |
-| `npm run regenerer:questions`  | Remet en file les questions d'un prompt qui a changé        |
-| `npm run reparer:affirmations` | Retire les vrais ou faux sans verdict et redemande leur lot |
+| Commande                         | Effet                                                                                                            |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                    | Serveur de développement                                                                                         |
+| `npm run build`                  | `prisma migrate deploy`, puis le build de production : lancé en local, il migre la base que désigne `DIRECT_URL` |
+| `npm run typecheck`              | `tsc --noEmit`                                                                                                   |
+| `npm run lint`                   | ESLint, frontières d'architecture comprises                                                                      |
+| `npm test`                       | Vitest sur la logique pure, propriétés fast-check comprises                                                      |
+| `npm run test:watch`             | Vitest en veille                                                                                                 |
+| `npm run format`                 | Prettier en écriture                                                                                             |
+| `npm run format:check`           | Prettier en vérification                                                                                         |
+| `npm run db:migrate`             | `prisma migrate dev`                                                                                             |
+| `npm run db:deploy`              | `prisma migrate deploy`, pour un environnement déployé                                                           |
+| `npm run db:seed`                | Remplit la base ; rejouable sans dupliquer                                                                       |
+| `npm run db:studio`              | Prisma Studio                                                                                                    |
+| `npm run verifier:ai`            | Vérifie les garde-fous d'appel modèle à l'exécution                                                              |
+| `npm run verifier:ingestion`     | Rejoue l'ingestion de bout en bout, en mode mock                                                                 |
+| `npm run verifier:session`       | Rejoue le moteur de révision et l'entraînement libre                                                             |
+| `npm run verifier:abus`          | Passe d'audit : quotas, débit, propriété, cycle de vie                                                           |
+| `npm run verifier:contrastes`    | Mesure les ratios WCAG des couples posés par l'interface                                                         |
+| `npm run verifier:abonnement`    | Prouve qu'un abonnement ne remonte pas le temps                                                                  |
+| `npm run verifier:depot-anonyme` | Le chemin public du dépôt sans compte ; à sec sans `--emettre`                                                   |
+| `npm run verifier:openrouter`    | Vérifie les modèles du banc au catalogue d'OpenRouter ; `--lister` rend le catalogue                             |
+| `npm run eprouver:paiement`      | Le parcours d'achat contre le vrai Stripe, en mode test                                                          |
+| `npm run regenerer:questions`    | Remet en file les questions d'un prompt qui a changé                                                             |
+| `npm run reparer:affirmations`   | Retire les vrais ou faux sans verdict et redemande leur lot                                                      |
+| `npm run depot:code`             | Ajoute le dépôt de code du seed à un compte existant                                                             |
+| `npm run lire:cache`             | Lit le taux de cache et les bascules au registre `AiCall`                                                        |
+| `npm run exporter:assets`        | Régénère les icônes et le symbole SVG depuis la géométrie du cairn                                               |
+| `npm run exporter:marque`        | Exporte les variantes de la marque en images, dans `public/marque/`                                              |
 
-`npm run evaluer:generation` existe aussi : c'est le banc d'évaluation, décrit plus bas. C'est le
-seul script du dépôt qui émet de vrais appels, et il ne part pas sans qu'on le lui dise deux fois.
+Les commandes `evaluer:*` forment le banc d'évaluation, décrit plus bas. Avec
+`verifier:depot-anonyme`, ce sont les seules qui appellent le modèle pour de vrai, et aucune ne le
+fait sans `--emettre`.
 
 Ce tableau dit ce que font les commandes. **Le principe qui les gouverne est dans
 `docs/outillage.md`** : les trois registres à ne pas mélanger, la pyramide de vérification et ce
@@ -155,8 +199,8 @@ app/
                  confidentialité, désinscription
   (auth)/        Connexion, inscription
   (app)/         Application authentifiée
-  api/           Route handlers, dont les trois routes cron, l'export de
-                 compte et le réglage de fuseau
+  api/           Route handlers, dont les deux routes cron, le webhook de
+                 paiement, l'export de compte et le réglage de fuseau
 components/
   ui/            Primitives shadcn retokenisées, sans logique métier
   cairn/         L'empilement de pierres
@@ -166,10 +210,12 @@ lib/
   domain/        Logique pure : géométrie du cairn, échéances, jours locaux,
                  période de quota, contrôles automatiques sur une génération
   db/            Seul endroit qui importe le client Prisma
-  ai/            callAI(), prompts système, schémas Zod, fixtures
+  ai/            callAI(), ponts vers les fournisseurs, prompts système,
+                 schémas Zod, fixtures
   depots/        Le geste de dépôt côté serveur
   images/        Lecture et réduction d'une capture avant envoi au modèle
-  auth/  email/  jobs/  cron/
+  paiement/      Stripe : configuration, achat, portail, webhook
+  auth/  email/  jobs/  cron/  site/  design/  retours/
 prisma/
   schema/        Schéma multi-fichiers
   seed/          Corpus de démonstration
@@ -179,26 +225,36 @@ scripts/
 ```
 
 Le sens des dépendances est `app/` → `lib/db/` → `lib/domain/`, et il est vérifié par ESLint :
-`no-restricted-imports` interdit le SDK Anthropic hors de `lib/ai/client.ts`, le client Prisma hors
-de `lib/db/`, Resend hors de `lib/email/`, et tout accès à Next ou React depuis `lib/domain/`.
+`no-restricted-imports` interdit le SDK Anthropic hors de `lib/ai/client.ts` et de son pont
+`lib/ai/fournisseurs/anthropic.ts`, le client Prisma hors de `lib/db/`, Resend hors de
+`lib/email/`, et tout accès à Next ou React depuis `lib/domain/`.
 
 ### Appels au modèle
 
-`callAI()` est le seul chemin vers le modèle. Dans l'ordre : interrupteur `AI_ENABLED`, mode mock,
-réservation d'une place dans le plafond journalier, appel avec `max_tokens` explicite et
-`output_config.format` dérivé du schéma Zod, validation stricte de la réponse, puis écriture d'une
-ligne au registre `AiCall` — succès comme échec, avec tokens, coût et latence. Aucun retry.
+`callAI()` est le seul chemin du produit vers le modèle. Dans l'ordre : interrupteur `AI_ENABLED`,
+mode mock, réservation d'une place dans le plafond journalier, appel avec `max_tokens` explicite et
+un schéma de sortie dérivé du Zod, validation stricte de la réponse, puis écriture d'une ligne au
+registre `AiCall` — succès comme échec, avec tokens, coût et latence. Aucun retry.
+
+L'émission passe par un pont (`lib/ai/fournisseurs/`), choisi par `AI_FOURNISSEUR`. `openrouter`
+appelle l'API d'OpenRouter et y porte le schéma en `response_format` ; `anthropic`, le défaut quand
+la variable est absente, passe par le SDK natif et le porte en `output_config.format`. Les modèles
+`openai/…` refusent nos schémas en mode strict : le pont OpenRouter les leur envoie sans `strict`,
+recopiés en tête du prompt système, et c'est la validation Zod qui tient la forme.
+
+**Un repli, pas un retry.** Quand l'appel tombe — échec de la requête, sortie absente, invalide ou
+tronquée —, le même pont réémet une fois sur Sonnet, dont l'identifiant est fixé dans
+`lib/ai/client.ts` et non lu dans `AI_MODEL`. La ligne du repli porte `AiCall.basculee`, et au-delà
+de cinq bascules dans la journée une alerte part à `EMAIL_ALERTES`. Aucun repli quand le modèle
+primaire est déjà Sonnet, ni quand l'appelant impose son modèle. Les deux émissions tiennent sur la
+place réservée une seule fois : le plafond compte des appels à `callAI()`, et une bascule y fait
+deux appels réels pour une place.
 
 La forme envoyée n'est pas produite par l'assistant du SDK, qui rétrograde `enum` et `const` en
 simple description : `lib/ai/output-schema.ts` dérive le schéma JSON à la main pour les conserver,
 et lève plutôt que d'émettre si la forme porte un mot-clé structurel (`$ref`, `oneOf`, `if`…) que
 la grammaire ne compile pas. Une forme intraduisible est une erreur de développement, pas un appel
 raté : elle est détectée avant que le registre s'ouvre.
-
-L'écriture des questions passe par l'API de traitement par lot — moitié tarif, contre une latence de
-quelques minutes à quelques heures. `lib/ai/batch.ts` emprunte le client de `client.ts` sans
-importer le SDK, et porte les mêmes garde-fous : interrupteur, mode mock, plafond du jour compté par
-requête et réservé d'un bloc, une ligne d'`AiCall` par réponse, aucun retry.
 
 La réservation passe par la table `AiCallQuota`, une ligne par jour UTC, et tient dans une seule
 instruction qui incrémente et refuse dans le même mouvement. Compter les lignes d'`AiCall` avant
@@ -211,9 +267,10 @@ rien émis.
 
 La part dépend de la provenance. Un appel qui porte un utilisateur prend dans `AiUserQuota`
 (`AI_DAILY_CALL_CAP_PAR_COMPTE`) ; un essai sans compte prend dans `AiAnonymousQuota`
-(`AI_DAILY_CALL_CAP_ANONYME`), un seul seau pour tous les visiteurs ; un appel interne — reprise
-par le cron, outil, évaluation — ne passe que le plafond global, n'ayant personne derrière à
-protéger.
+(`AI_DAILY_CALL_CAP_ANONYME`), un seul seau pour tous les visiteurs ; un appel interne — outil,
+évaluation — ne passe que le plafond global, n'ayant personne derrière à protéger. Une reprise par
+le cron garde la provenance de son dépôt : elle prend sur la part du compte, ou sur celle du public
+pour un essai.
 
 Le plafond global protège le budget ; il ne protégeait personne de son voisin, et un seul compte
 pouvait fermer la journée de tous les autres. La part anonyme joue le même rôle entre le trafic
@@ -225,28 +282,26 @@ un travail en cours au lieu d'annoncer une panne.
 
 **Dimensionner ces deux plafonds.** Les deux se comptent en appels par jour UTC, mais ce n'est pas
 en appels qu'ils se règlent — c'est en dépense, et la dépense se mesure au registre `AiCall` plutôt
-qu'elle ne s'estime. Sur les appels enregistrés : une extraction coûte environ 0,011 $, une écriture
-de questions groupée environ 0,014 $, une lecture de capture environ 0,015 $. Un appel du chemin de
-production revient donc autour de **0,013 $**.
+qu'elle ne s'estime : chaque ligne porte son coût, calculé au tarif catalogue du modèle appelé
+(`lib/domain/tarifs.ts`).
 
 Le plafond **par compte** ne borne pas la dépense d'un compte — c'est le quota mensuel de concepts
-qui le fait. Il borne sa **vitesse** : un compte qui sature son mois consomme une vingtaine d'appels
-en tout, soit un quart de dollar, et la part journalière décide seulement s'il peut le faire en une
-heure ou en trois jours.
+qui le fait. Il borne sa **vitesse** : la part journalière décide seulement si un compte peut
+saturer son mois en une heure ou en trois jours.
 
 Le plafond **global** est un coupe-circuit, pas un rationnement. Il ne devrait jamais être atteint
 par un usage normal : quand il l'est, tout s'arrête pour tout le monde jusqu'au lendemain UTC — y
 compris l'essai sans compte de la page publique, si bien que la seule page qui convertit cesse de
 convertir sans que rien ne le signale. Le poser revient donc à choisir ce qu'on accepte de perdre sur
-une journée qui tourne mal, puis à diviser par le coût d'un appel : cinq dollars par jour font environ
-quatre cents appels.
+une journée qui tourne mal, puis à diviser par le coût moyen d'un appel relevé au registre.
 
 `npm run verifier:ai` pose un piège sur `fetch` et vérifie ces garde-fous à l'exécution plutôt que sur
 parole.
 
-Le raisonnement étendu reste coupé sur les trois appels : rien dans ces intentions n'a montré qu'il
-servait, et le rouvrir se décidera sur une mesure. Une réponse coupée par `max_tokens` est traitée
-comme un échec, jamais comme un résultat partiel — une sortie tronquée peut rester syntaxiquement
+Le raisonnement étendu n'est pas demandé sur les trois appels — coupé explicitement par le pont
+Anthropic, absent de la requête OpenRouter : rien dans ces intentions n'a montré qu'il servait, et
+le rouvrir se décidera sur une mesure. Une réponse coupée par `max_tokens` est traitée comme un
+échec, jamais comme un résultat partiel — une sortie tronquée peut rester syntaxiquement
 valide, et c'est l'échec qui ne se voit pas.
 
 ### Génération et banc d'évaluation
@@ -254,8 +309,11 @@ valide, et c'est l'échec qui ne se voit pas.
 Trois prompts système vivent dans `lib/ai/prompts/`, un par intention : découper un dépôt en
 concepts, écrire quatre questions sur chacun de trois concepts, lire une capture d'écran. Aucun ne
 demande de répondre en JSON — la forme est portée par le schéma dérivé du Zod, et les deux ne
-peuvent pas diverger. Les schémas refusent aussi les sorties qui se contredisent : un rejet sans
-motif, deux lots qui portent le même rang, un QCM sans options.
+peuvent pas diverger ; seul le pont OpenRouter ajoute cette consigne, schéma compris, pour les
+modèles qui refusent le mode strict. La relecture ne fait pas échouer un appel payé sur une sortie
+qui se contredit : un motif de rejet à côté de concepts extraits cède aux concepts, le premier de
+deux lots au même rang l'emporte, et un lot qui porte une question inexploitable — QCM sans
+options, texte à trou sans phrase, question vide — disparaît seul, son concept repartant en file.
 
 Les quatre questions d'un concept arrivent sous quatre clés nommées plutôt que dans un tableau :
 c'est la forme elle-même qui garantit une facette par question, sans avoir à la contrôler après
@@ -274,13 +332,17 @@ humain — renvoi hors du concept, facettes répétées ou servies dans le déso
 longueurs déséquilibrées, réponse recopiée dans l'énoncé. Le coût du passage se lit au registre
 `AiCall`. Le reste — est-ce que la question est bonne — se juge à l'œil.
 
-C'est le seul endroit du dépôt autorisé à dépenser. Il exige `MOCK_AI=false` explicitement, annonce
-le nombre d'appels qu'il va émettre, et ne part qu'à l'appel de `--emettre` :
+Le passage exige `MOCK_AI=false` explicitement, annonce le nombre d'appels qu'il va émettre, et ne
+part qu'à l'appel de `--emettre` :
 
 ```bash
 MOCK_AI=false npm run evaluer:generation             # affiche le plan et s'arrête
 MOCK_AI=false npm run evaluer:generation -- --emettre
 ```
+
+Les autres commandes du banc — `evaluer:rejeu`, `evaluer:completer`, `evaluer:mesures`,
+`evaluer:rejet` — n'appellent elles aussi le modèle qu'avec `--emettre`. Seule la passe de vecteurs
+d'`evaluer:mesures` part avant, chez Voyage AI, hors de `callAI()`.
 
 ### Ingestion
 
@@ -302,8 +364,9 @@ génération — lui écrire des questions riverait une erreur que personne n'a 
 d'être confirmé, réécrit ou supprimé.
 
 Trois limites bornent le geste. Deux se comptent **au mois**, sur une période ancrée au jour
-d'inscription et lue dans le calendrier de l'utilisateur : environ cinquante concepts, et cent
-dépôts en second rideau. La troisième est le débit, trois dépôts par minute, et elle reste courte —
+d'inscription et lue dans le calendrier de l'utilisateur : environ cinquante concepts sur le plan
+gratuit et cinq cents sur le plan payant, et en second rideau deux fois plus de dépôts que de
+concepts. La troisième est le débit, trois dépôts par minute, et elle reste courte —
 elle protège le serveur sur la minute, pas le budget sur le mois. Le plafond porte sur le concept
 parce que c'est lui qui coûte, et parce que déposer une phrase ne doit pas coûter autant que coller
 un article ; les places non consommées ne se reportent pas.
@@ -315,8 +378,9 @@ et entre dans la fenêtre de débit au même titre.
 
 Une place prise sur un dépôt qui s'arrête en **panne** — timeout, sortie illisible, plafond global —
 est rendue. Une place prise sur un dépôt **rejeté** ne l'est pas : la chaîne a tourné, l'appel est dû,
-et seuls les concepts, qui n'existent pas, ne sont pas comptés. Le plafond atteint propose une liste
-d'attente plutôt qu'un mur.
+et seuls les concepts, qui n'existent pas, ne sont pas comptés. Le plafond de concepts atteint sur
+le plan gratuit propose le plan payant quand le paiement est ouvert ; sinon, et contre le rideau des
+dépôts, il propose une liste d'attente plutôt qu'un mur.
 
 Réviser et s'entraîner ne coûtent aucun appel modèle, mais écrivent et lisent : les trois gestes
 correspondants passent par une fenêtre de cent vingt par minute et par compte, sur le même mécanisme.
@@ -378,8 +442,10 @@ quelqu'un qui veut sortir n'a pas à rentrer d'abord.
 Une ingestion écrit un `GenerationJob` et rend la main ; `after()` déclenche le traitement une fois
 la réponse envoyée. La route `GET /api/cron/jobs` reprend les travaux restés en attente et ceux dont
 le processus est mort en cours de route depuis plus de dix minutes, au plus trois fois. La route
-`GET /api/cron/rappels`, horaire, sélectionne les comptes dont l'heure locale correspond à leur
-heure de rappel. Les deux exigent `Authorization: Bearer $CRON_SECRET`.
+`GET /api/cron/rappels`, horaire, envoie le rappel quotidien aux comptes dont l'heure locale
+correspond à leur heure de rappel et qui ont au moins un concept dû, puis l'alerte de série à 21 h
+locales quand une série est en train d'être perdue ; chaque envoi passe une seule fois par compte,
+par type et par jour local (`EmailDelivery`). Les deux exigent `Authorization: Bearer $CRON_SECRET`.
 
 Quelle que soit l'étape qui échoue, un dépôt cesse d'annoncer un travail en cours : c'est la même
 fonction qui referme, et elle garde les concepts déjà écrits.
@@ -390,33 +456,34 @@ fonction qui referme, et elle garde les concepts déjà écrits.
 npm run typecheck && npm run lint && npm test && npm run build && npm run verifier:ai && npm run verifier:ingestion
 ```
 
-Les tests couvrent `lib/domain/` — logique pure, donc testable sans base ni réseau. Cinq propriétés
-fast-check y tournent : trois sur des instants et des fuseaux tirés au hasard parmi ceux que la
-plateforme connaît — le jour civil fait foi, `localDay` conserve l'ordre du temps, `joursAvant` est
-antisymétrique — et deux sur les contrôles de génération, qui ne doivent réagir ni aux accents ni à
-la ponctuation.
+Les tests couvrent `lib/domain/` — logique pure, donc testable sans base ni réseau — et, aux mêmes
+conditions, les schémas et l'alerte de plafond de `lib/ai/`, l'alerte de paiement et la géométrie
+du banc (`vitest.config.mts`). Les règles vraies pour toutes les entrées y sont écrites en propriétés
+fast-check : sur des instants et des fuseaux tirés au hasard parmi ceux que la plateforme connaît,
+le jour civil fait foi, `localDay` conserve l'ordre du temps, `joursAvant` est antisymétrique ; les
+contrôles de génération ne réagissent ni aux accents ni à la ponctuation.
 
 Le banc d'évaluation ne fait pas partie de cette commande : il dépense.
 
-`verify:ai` vérifie à l'exécution ce qu'un test unitaire ne peut pas prouver : qu'aucune requête ne
+`verifier:ai` vérifie à l'exécution ce qu'un test unitaire ne peut pas prouver : qu'aucune requête ne
 sort en mode mock, que le plafond du jour refuse avant d'émettre, et qu'il tient quand vingt-cinq
 réservations partent au même instant — cette garantie-là est dans
 l'atomicité d'une instruction Postgres, pas dans le code TypeScript.
 
-`verify:ingestion` rejoue le pipeline entier sur un compte de vérification créé puis effacé : dépôt
+`verifier:ingestion` rejoue le pipeline entier sur un compte de vérification créé puis effacé : dépôt
 texte et dépôt image jusqu'aux questions écrites, capture illisible, dépôt sans rien à retenir,
-concept douteux puis confirmé, concept réécrit, lot perdu, échec à mi-parcours, double envoi, débit,
-quota, liste d'attente. Il couvre aussi le dépôt sans compte : la visite consommée, le second essai
-ouvert par un premier resté vide, la limite par empreinte d'adresse, la reprise au compte et l'oubli
-de ce que personne n'a réclamé. Le même piège sur `fetch` y est armé : la vérification échoue si une
-requête part vers l'API.
+concept douteux puis confirmé, concept réécrit, dépôt de fiction, découpage ou lecture impossible,
+échec à mi-parcours, double envoi, débit, quota, rideau des dépôts, liste d'attente. Il couvre aussi
+le dépôt sans compte : la visite consommée, le second essai ouvert par un premier resté vide, la
+limite par empreinte d'adresse, la reprise au compte et l'oubli de ce que personne n'a réclamé. Le même piège sur `fetch` y est armé : la vérification échoue si une
+requête part vers l'API d'Anthropic.
 
-`verify:session` rejoue le moteur de révision et l'entraînement libre, la progression comptée, la
+`verifier:session` rejoue le moteur de révision et l'entraînement libre, la progression comptée, la
 série autour de minuit local, la trace qu'un signalement laisse quand le concept est supprimé, la
 fermeture de l'écran d'administration, et la suppression de compte — qui doit ne laisser aucune
 ligne derrière elle, dans aucune table.
 
-`verify:abus` est la passe d'audit : cycle de vie des concepts, vecteurs de régénération comptés en
+`verifier:abus` est la passe d'audit : cycle de vie des concepts, vecteurs de régénération comptés en
 appels réellement émis, atomicité des compteurs sous concurrence, remboursement d'une panne,
 propriété des ressources entre deux comptes, et part de compte face au plafond global. Chaque
 constat y est écrit comme la règle qu'on veut voir tenir, si bien qu'une ligne en échec est un trou
@@ -424,7 +491,12 @@ et non une panne de la vérification. Les cas qui comptent des appels coupent le
 réserve ni n'enregistre rien, donc ne peut rien compter — et émettent sans clé vers un port fermé :
 ce qui se compte est ce que le produit aurait facturé, sans qu'une requête sorte.
 
-`verify:contrastes` lit les jetons de couleur dans `app/globals.css` et calcule les ratios WCAG des
+Ces pièges et ce port fermé ne gardent que le pont Anthropic : ils ne reconnaissent que
+`anthropic.com`, et ne touchent ni `AI_FOURNISSEUR` ni `OPENROUTER_API_KEY`. Les vérifications
+supposent donc `AI_FOURNISSEUR` absente ou à `anthropic` ; avec `openrouter`, un cas qui coupe le
+mode mock partirait vers OpenRouter sans être vu.
+
+`verifier:contrastes` lit les jetons de couleur dans `app/globals.css` et calcule les ratios WCAG des
 couples que l'interface pose réellement, surface sombre comprise. « Ça se lit » n'est pas une
 vérification : deux gris passables sur un écran calibré deviennent illisibles au soleil, et le nom
 d'une surface suffit à s'y tromper — celle qui s'appelle « ombre » est claire, seule « roche » est

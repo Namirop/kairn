@@ -8,16 +8,16 @@ une nouvelle. Le README, lui, liste ce qu'elles font. Les principes ci-dessous n
 
 ## Les outils, et ce que chacun couvre
 
-| Outil                  | Ce qu'il vérifie                                                          |
-| ---------------------- | ------------------------------------------------------------------------- |
-| **TypeScript** (`tsc`) | Ce qui est vrai à la compilation : formes, exhaustivité des `switch`      |
-| **ESLint**             | Les règles qu'un type ne dit pas, dont les frontières entre dossiers      |
-| **Prettier**           | La forme du code, pour que les diffs ne portent que du sens               |
-| **Vitest**             | La logique pure de `lib/domain/`, sans base ni réseau                     |
-| **fast-check**         | Les règles vraies pour **toutes** les entrées, pas trois exemples choisis |
-| **tsx**                | Exécute un `.ts` directement, sans étape de build — tous les scripts      |
-| **Prisma CLI**         | Le schéma, les migrations, la console de base                             |
-| **Stripe CLI**         | Le tunnel de webhooks vers la machine locale, et le catalogue             |
+| Outil                  | Ce qu'il vérifie                                                                                                        |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **TypeScript** (`tsc`) | Ce qui est vrai à la compilation : formes, exhaustivité des `switch`                                                    |
+| **ESLint**             | Les règles qu'un type ne dit pas, dont les frontières entre dossiers                                                    |
+| **Prettier**           | La forme du code, pour que les diffs ne portent que du sens                                                             |
+| **Vitest**             | La logique pure de `lib/domain/` et quelques modules purs de `lib/ai/`, `lib/paiement/` et du banc, sans base ni réseau |
+| **fast-check**         | Les règles vraies pour **toutes** les entrées, pas trois exemples choisis                                               |
+| **tsx**                | Exécute un `.ts` directement, sans étape de build — tous les scripts                                                    |
+| **Prisma CLI**         | Le schéma, les migrations, la console de base                                                                           |
+| **Stripe CLI**         | Le tunnel de webhooks vers la machine locale, et le catalogue                                                           |
 
 `tsx` mérite un mot : c'est lui qui rend les scripts possibles. Sans lui, chaque vérification
 demanderait une compilation séparée ou un fichier JavaScript à part, et personne n'en écrirait.
@@ -36,8 +36,9 @@ projet, tout le monde les connaît, elles ne bougent jamais. Rien à décider.
 ### 2. Les vérifications durables
 
 Elles exercent des invariants que les tests unitaires **ne peuvent pas** atteindre, et elles
-restent tant que le sujet existe. Chez Kairn : `verify:ai`, `verify:ingestion`, `verify:session`,
-`verify:abus`, `verify:abonnement`, `verify:contrastes`, `eprouver:paiement`.
+restent tant que le sujet existe. Chez Kairn : `verifier:ai`, `verifier:ingestion`,
+`verifier:session`, `verifier:abus`, `verifier:abonnement`, `verifier:contrastes`,
+`verifier:depot-anonyme`, `verifier:openrouter`, `eprouver:paiement`.
 
 ### 3. Les chantiers ponctuels
 
@@ -94,7 +95,7 @@ pas. Le code était juste, les tests verts, et rien n'aurait signalé le problè
 client.
 
 Ces épreuves ne tournent pas seules et ne rejoignent pas la suite : elles demandent des clés, un
-tunnel ouvert, parfois un navigateur au milieu. **D'où leur nom : `eprouver:` et non `verify:`.**
+tunnel ouvert, parfois un navigateur au milieu. **D'où leur nom : `eprouver:` et non `verifier:`.**
 On les lance à la main, quand on touche au sujet.
 
 ---
@@ -119,22 +120,26 @@ On teste là où l'erreur coûte, pas au prorata d'un pourcentage de couverture.
 Le préfixe dit le registre, pas le sujet :
 
 - `db:` — tout ce qui parle au schéma ou à la base.
-- `verify:` — une vérification qui tourne seule, sans clé ni service tiers.
+- `verifier:` — une vérification qui tourne seule, sans clé ni service tiers.
 - `eprouver:` — une épreuve contre un vrai service, lancée à la main.
 
 - `evaluer:` — le banc d'évaluation de la génération, qui mesure et dépense.
 - `exporter:` — ce qui sort du dépôt : images, marque.
 
-Deux commandes restent sans préfixe parce qu'elles ne forment pas un registre à elles seules :
-`lire:cache` et `depot:code`.
+Deux commandes portent `verifier:` sans en suivre toute la règle : `verifier:openrouter` interroge
+le catalogue d'OpenRouter avec la clé du banc, sans rien dépenser, et `verifier:depot-anonyme`,
+à sec par défaut, appelle le modèle quand on lui passe `--emettre`.
+
+Quatre commandes restent hors de ces registres parce qu'elles n'en forment pas un à elles seules :
+`lire:cache`, `depot:code`, `regenerer:questions` et `reparer:affirmations`.
 
 ---
 
 ## Les commandes retirées
 
-Le 2 septembre 2026, huit commandes sont sorties du `package.json` en application de la règle
-ci-dessus. **Leurs fichiers sont restés dans `scripts/`**, chacun avec une note en tête qui renvoie
-ici. On les relance à la main :
+Huit commandes sont sorties du `package.json` en application de la règle ci-dessus. **Leurs
+fichiers sont restés dans `scripts/`**, chacun avec une note en tête qui renvoie ici. On les relance
+à la main :
 
 ```bash
 npx tsx scripts/<le-fichier>.ts
@@ -146,7 +151,7 @@ npx tsx scripts/<le-fichier>.ts
 | `planifier:campagne2`, `lancer:campagne2` | Campagne n°2, close — le modèle est arbitré   |
 | `valider:juge`                            | Le juge de ces campagnes                      |
 | `valider:staging`, `valider:bascule`      | Portage vers OpenRouter, livré                |
-| `eval:ablation`                           | Épreuve de l'instrument de mesure, concluante |
+| `eval:ablation` (`eprouver-la-mesure.ts`) | Épreuve de l'instrument de mesure, concluante |
 
 Ce ne sont pas des suppressions : une campagne suivante remettra ses deux lignes. Ce qui a été
 retiré, c'est leur présence dans une liste qu'on lit pour savoir ce qu'on peut faire aujourd'hui.

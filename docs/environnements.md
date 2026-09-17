@@ -220,8 +220,9 @@ Trois garde-fous vont avec, et ils ne sont pas décoratifs :
 Ce sont trois compteurs d'**appels au modèle**, remis à zéro chaque jour **UTC**,
 et ils ne défendent pas la même chose.
 
-**`AI_DAILY_CALL_CAP` protège ton budget.** C'est le nombre maximal d'appels réels
-que le produit entier peut émettre dans une journée, tous comptes confondus. Une
+**`AI_DAILY_CALL_CAP` protège ton budget.** C'est le nombre maximal d'appels que
+le produit entier peut réserver dans une journée, tous comptes confondus — une
+bascule vers le modèle de repli émet un second appel réel sur la même place. Une
 ligne par jour dans la table `AiCallQuota`, et la réservation tient dans une seule
 instruction SQL qui incrémente et refuse dans le même mouvement — compter les
 appels déjà passés avant d'émettre serait une course, et deux appels simultanés
@@ -250,9 +251,10 @@ visiteur devant une attente sans fin sur la seule page qui convertit — c'est l
 bon comportement pour un compte, qui reviendra demain, pas pour quelqu'un qui
 découvre le produit.
 
-**Un appel interne** — une reprise par le cron, un outil, une évaluation — ne
-passe que le plafond global. Il n'a personne derrière à protéger de qui que ce
-soit.
+**Un appel interne** — un outil, une évaluation — ne passe que le plafond global.
+Il n'a personne derrière à protéger de qui que ce soit. Une reprise par le cron,
+elle, garde la provenance de son dépôt : elle prend sur la part du compte, ou sur
+celle du public pour un essai.
 
 L'ordre dans lequel les deux places se prennent n'est pas indifférent. La part du
 compte se prend **en premier**, parce qu'elle se rend : tant que rien n'est parti,
@@ -260,39 +262,36 @@ elle ne doit rien. La place globale se prend ensuite et **ne se rend jamais** �
 appel qui part et échoue a pu consommer des tokens. Si le global refuse, la part
 du compte lui est rendue.
 
-Un appel qui n'appartient à personne — une reprise par le cron, un outil interne —
-ne passe que le plafond global. Il n'a pas de compte à qui prendre une part.
-
 **Le rapport entre les trois est le vrai réglage.** Une part qui approche du
-plafond global ne protège de rien : à 40 sur 50, un seul compte fermait la
-journée du produit, ce qui était exactement ce que la variable devait empêcher.
-Elle est descendue à 20, et la part du public à 15 sur ces mêmes 50.
+plafond global ne protège de rien : un seul compte fermerait la journée du
+produit, ce qui est exactement ce que la variable doit empêcher.
 
 Les parts n'ont aucune raison de faire la somme du global, et ce n'est pas un
-défaut : à 20 et 20, trois comptes qui saturent dépassent déjà 50, et le
-troisième se fait refuser par le global alors que sa part était libre. C'est le
-budget qui parle. Ça veut simplement dire que le global doit rester nettement
-au-dessus de la part multipliée par le nombre de comptes actifs attendus — le
-genre de nombre qu'on choisit pour la production plutôt que d'hériter de ses
-valeurs d'essai.
+défaut : dès que les parts des comptes qui saturent dépassent ensemble le global,
+le dernier arrivé se fait refuser par le global alors que sa part était libre.
+C'est le budget qui parle. Ça veut simplement dire que le global doit rester
+nettement au-dessus de la part multipliée par le nombre de comptes actifs
+attendus — le genre de nombre qu'on choisit pour la production plutôt que
+d'hériter de ses valeurs d'essai.
 
-**Oui, les trois doivent être posées sur l'hébergeur.** `readAiConfig()` les lit
-dans `process.env` et les valide par un schéma Zod à **chaque appel**. Absentes ou
-invalides, la validation échoue et _tout_ appel au modèle lève : plus d'ingestion,
-plus de génération de questions. Ce ne sont pas des réglages facultatifs de
-développement, ce sont des paramètres de fonctionnement.
+**Oui, les trois doivent être posées sur l'hébergeur.** `assemblerLaConfig()` les
+lit dans `process.env`, y applique les surcharges posées en base, et valide le
+tout par un schéma Zod à **chaque appel**. Absentes ou invalides, sans surcharge
+pour les remplacer, la validation échoue et _tout_ appel au modèle lève : plus
+d'ingestion, plus de génération de questions. Ce ne sont pas des réglages
+facultatifs de développement, ce sont des paramètres de fonctionnement.
 
-Elles restent quand même ajustables sans redéployer : ce sont deux des six
+Elles restent quand même ajustables sans redéployer : ce sont trois des sept
 réglages qui acceptent une surcharge en base, posée depuis l'écran
 d'administration. L'environnement donne la valeur de départ, la surcharge la
 corrige le jour où il faut aller vite.
 
 ### `ESSAI_ANONYME_SANS_LIMITE` — une variable qu'on pose et qu'on retire
 
-L'essai de la landing porte deux verrous, tous deux à deux : une visite ne dépose
-qu'une fois si elle a rendu des concepts, et une empreinte d'adresse n'ouvre que
-deux visites sur vingt-quatre heures **glissantes**. Ils tiennent le budget d'une
-page publique où personne n'a de compte à qui facturer.
+L'essai de la landing porte deux verrous, tous deux à deux : une visite porte
+deux essais, quel qu'en soit le résultat, et une empreinte d'adresse n'ouvre que
+deux visites — les deux sur vingt-quatre heures **glissantes**. Ils tiennent le
+budget d'une page publique où personne n'a de compte à qui facturer.
 
 Ils rendent aussi cette page intestable dès le troisième essai — et c'est la
 seule qu'on ne peut éprouver qu'en production, puisque le découpage n'y tourne
@@ -326,18 +325,23 @@ ni ne se régénèrent, elles **disparaissent**.
 | `DATABASE_URL`, `DIRECT_URL`                                                     | Adresses — celles du projet Neon de production                                                                                                   |
 | `BETTER_AUTH_SECRET`                                                             | Secret — **neuf**                                                                                                                                |
 | `CRON_SECRET`                                                                    | Secret — **neuf**                                                                                                                                |
-| `ANTHROPIC_API_KEY`, `RESEND_API_KEY`                                            | Secrets — clés distinctes de celles de développement                                                                                             |
+| `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, `RESEND_API_KEY`                      | Secrets — clés distinctes de celles de développement ; la clé OpenRouter du produit n'est pas celle du banc                                      |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`                                     | Secrets — la clé `sk_live_…` et le secret de l'endpoint de production, jamais ceux du mode test                                                  |
 | `BETTER_AUTH_URL`                                                                | Adresse — le domaine public, sans slash final                                                                                                    |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                                       | Réutilisables si l'URI de redirection de production est déclarée côté Google, et si l'écran de consentement est **publié** et non en « Testing » |
 | `MOCK_AI`                                                                        | Interrupteur — **`false`**                                                                                                                       |
 | `AI_ENABLED`                                                                     | Interrupteur — `true`                                                                                                                            |
+| `AI_FOURNISSEUR`                                                                 | Interrupteur — la route choisie pour la production ; absente, c'est `anthropic`                                                                  |
+| `PAIEMENT_LIVE`                                                                  | Interrupteur — `true` en production seulement ; sans elle, une clé `sk_live_` est refusée                                                        |
 | `AI_DAILY_CALL_CAP`, `AI_DAILY_CALL_CAP_PAR_COMPTE`, `AI_DAILY_CALL_CAP_ANONYME` | Réglages — à choisir pour la charge réelle, pas à hériter du développement                                                                       |
 | `AI_MODEL`, `AI_MAX_TOKENS`                                                      | Réglages — identiques                                                                                                                            |
 | `EMAIL_FROM`                                                                     | Réglage — sur le domaine vérifié chez le fournisseur d'emails                                                                                    |
+| `EMAIL_ALERTES`                                                                  | Réglage — l'adresse qui reçoit les alertes d'exploitation ; absente, elles ne partent pas                                                        |
 | `ADMIN_EMAILS`                                                                   | Réglage — identique                                                                                                                              |
 | `BATTEMENT_JOBS_URL`, `BATTEMENT_RAPPELS_URL`                                    | Adresses — les heartbeats Better Stack ; absentes, les crons tournent sans être surveillés                                                       |
 | `ESSAI_ANONYME_SANS_LIMITE`                                                      | **Absente**, sauf le temps d'une vérification en ligne                                                                                           |
 | `SEED_USER_EMAIL`, `SEED_USER_TIMEZONE`                                          | **Absentes**                                                                                                                                     |
+| `OPENROUTERAI_KEY`, `VOYAGE_IA_KEY`, `BANC_DAILY_CALL_CAP`                       | **Absentes** — elles ne servent qu'au banc d'évaluation                                                                                          |
 
 ## Comment le code arrive en production
 
@@ -380,11 +384,10 @@ Elles ne se posent plus à la main : la commande de build applique les migration
 en attente avant de compiler, et une migration qui échoue arrête le déploiement.
 Le code déployé ne peut donc pas interroger une colonne qui n'existe pas encore.
 
-C'est un changement du 18 août, et il a un prix : une prévisualisation branchée
-sur la base de production la migrerait sans qu'on l'ait demandé. La règle à tenir
-n'est pas « ne pas migrer au build », c'est **ne jamais faire pointer une
-prévisualisation sur la base de production**. Le raisonnement complet est dans
-`DEPLOIEMENT.md`.
+Ce choix a un prix : une prévisualisation branchée sur la base de production la
+migrerait sans qu'on l'ait demandé. La règle à tenir n'est pas « ne pas migrer au
+build », c'est **ne jamais faire pointer une prévisualisation sur la base de
+production**. Le raisonnement complet est dans `DEPLOIEMENT.md`.
 
 ### Revenir en arrière
 
