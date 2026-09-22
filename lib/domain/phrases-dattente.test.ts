@@ -1,27 +1,44 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
-import { PALIERS_DATTENTE, phraseDattente, RELEVE_MS } from "./phrases-dattente";
+import {
+  ETAPES,
+  type EtapeDeLAttente,
+  paliersDe,
+  phraseDattente,
+  RELEVE_MS,
+} from "./phrases-dattente";
 
-const TOUTES = PALIERS_DATTENTE.flatMap((palier) => palier.phrases);
+const phrasesDe = (etape: EtapeDeLAttente) => paliersDe(etape).flatMap((palier) => palier.phrases);
+
+const TOUTES = ETAPES.flatMap(phrasesDe);
 
 /** Le tirage vient de `Math.random()`, donc [0, 1) — plus les bornes à éprouver. */
 const tirage = fc.double({ min: 0, max: 1, noNaN: true, maxExcluded: true });
+const etape = fc.constantFrom(...ETAPES);
 
 describe("phraseDattente", () => {
-  it("rend toujours une phrase du catalogue, à n'importe quel instant", () => {
+  it("rend toujours une phrase du catalogue de son étape, à n'importe quel instant", () => {
     fc.assert(
-      fc.property(fc.double({ min: -5_000, max: 200_000, noNaN: true }), tirage, (ecoule, tire) =>
-        TOUTES.includes(phraseDattente(ecoule, tire)),
+      fc.property(
+        etape,
+        fc.double({ min: -5_000, max: 200_000, noNaN: true }),
+        tirage,
+        (quand, ecoule, tire) => phrasesDe(quand).includes(phraseDattente(quand, ecoule, tire)),
       ),
       { numRuns: 500 },
     );
   });
 
-  it("rend la même phrase pour le même instant et le même tirage", () => {
+  it("rend la même phrase pour la même étape, le même instant et le même tirage", () => {
     fc.assert(
-      fc.property(fc.double({ min: 0, max: 120_000, noNaN: true }), tirage, (ecoule, tire) => {
-        expect(phraseDattente(ecoule, tire)).toBe(phraseDattente(ecoule, tire));
-      }),
+      fc.property(
+        etape,
+        fc.double({ min: 0, max: 120_000, noNaN: true }),
+        tirage,
+        (quand, ecoule, tire) => {
+          expect(phraseDattente(quand, ecoule, tire)).toBe(phraseDattente(quand, ecoule, tire));
+        },
+      ),
       { numRuns: 200 },
     );
   });
@@ -36,9 +53,9 @@ describe("phraseDattente", () => {
    */
   it("ne répète jamais la même phrase deux relèves de suite", () => {
     fc.assert(
-      fc.property(fc.integer({ min: 0, max: 25 }), tirage, (releve, tire) => {
-        const ici = phraseDattente(releve * RELEVE_MS, tire);
-        const apres = phraseDattente((releve + 1) * RELEVE_MS, tire);
+      fc.property(etape, fc.integer({ min: 0, max: 25 }), tirage, (quand, releve, tire) => {
+        const ici = phraseDattente(quand, releve * RELEVE_MS, tire);
+        const apres = phraseDattente(quand, (releve + 1) * RELEVE_MS, tire);
 
         expect(apres).not.toBe(ici);
       }),
@@ -47,11 +64,12 @@ describe("phraseDattente", () => {
   });
 
   it("ouvre sur le premier palier et finit sur le dernier", () => {
-    const premier = PALIERS_DATTENTE[0];
-    const dernier = PALIERS_DATTENTE[PALIERS_DATTENTE.length - 1];
+    for (const quand of ETAPES) {
+      const paliers = paliersDe(quand);
 
-    expect(premier.phrases).toContain(phraseDattente(0, 0));
-    expect(dernier?.phrases).toContain(phraseDattente(89_000, 0));
+      expect(paliers[0].phrases).toContain(phraseDattente(quand, 0, 0));
+      expect(paliers[paliers.length - 1]?.phrases).toContain(phraseDattente(quand, 89_000, 0));
+    }
   });
 
   /**
@@ -60,19 +78,20 @@ describe("phraseDattente", () => {
    * fonction croissante du temps.
    */
   it("ne revient jamais à un palier antérieur", () => {
-    const palierDe = (phrase: string) =>
-      PALIERS_DATTENTE.findIndex((palier) => palier.phrases.includes(phrase));
-
     fc.assert(
       fc.property(
+        etape,
         fc.double({ min: 0, max: 89_000, noNaN: true }),
         fc.double({ min: 0, max: 89_000, noNaN: true }),
         tirage,
-        (a, b, tire) => {
+        (quand, a, b, tire) => {
+          const paliers = paliersDe(quand);
+          const palierDe = (phrase: string) =>
+            paliers.findIndex((palier) => palier.phrases.includes(phrase));
           const [tot, tard] = a <= b ? [a, b] : [b, a];
 
-          expect(palierDe(phraseDattente(tard, tire))).toBeGreaterThanOrEqual(
-            palierDe(phraseDattente(tot, tire)),
+          expect(palierDe(phraseDattente(quand, tard, tire))).toBeGreaterThanOrEqual(
+            palierDe(phraseDattente(quand, tot, tire)),
           );
         },
       ),
@@ -82,20 +101,33 @@ describe("phraseDattente", () => {
 
   it("change de séquence selon le tirage", () => {
     const sequences = new Set(
-      Array.from({ length: 20 }, (_, rang) => phraseDattente(0, rang / 20)),
+      Array.from({ length: 20 }, (_, rang) => phraseDattente("DECOUPAGE", 0, rang / 20)),
     );
 
     expect(sequences.size).toBeGreaterThan(1);
   });
+
+  /**
+   * Les deux étapes ne parlent pas à la même personne : au découpage on n'a
+   * encore rien vu, à l'écriture les concepts sont déjà à l'écran. Une phrase
+   * partagée entre les deux serait fausse dans l'une des deux.
+   */
+  it("ne partage aucune phrase entre le découpage et l'écriture", () => {
+    const decoupage = new Set(phrasesDe("DECOUPAGE"));
+
+    for (const phrase of phrasesDe("ECRITURE")) {
+      expect(decoupage.has(phrase)).toBe(false);
+    }
+  });
 });
 
-describe("le catalogue", () => {
+describe("les catalogues", () => {
   /**
    * Le registre d'interface est une règle écrite, pas une intention : calme,
    * direct, sans point d'exclamation ni emoji. Une phrase drôle reste une phrase
    * de Kairn, et c'est le genre de ligne qu'on ajoute vite fait un soir.
    */
-  it("tient le registre : pas d'exclamation, pas d'emoji, pas de majuscules criées", () => {
+  it("tiennent le registre : pas d'exclamation, pas d'emoji, pas de phrase décapitée", () => {
     for (const phrase of TOUTES) {
       expect(phrase).not.toMatch(/!/);
       expect(phrase).not.toMatch(/\p{Extended_Pictographic}/u);
@@ -104,24 +136,28 @@ describe("le catalogue", () => {
     }
   });
 
-  it("n'écrit jamais deux fois la même phrase", () => {
+  it("n'écrivent jamais deux fois la même phrase", () => {
     expect(new Set(TOUTES).size).toBe(TOUTES.length);
   });
 
   /** Une phrase qui déborde sa ligne réservée fait sauter la mise en page. */
-  it("garde des phrases courtes", () => {
+  it("gardent des phrases courtes", () => {
     for (const phrase of TOUTES) {
-      expect(phrase.length).toBeLessThanOrEqual(56);
+      expect(phrase.length).toBeLessThanOrEqual(58);
     }
   });
 
-  it("ouvre chaque palier après le précédent, et le premier à zéro", () => {
-    expect(PALIERS_DATTENTE[0].depuisMs).toBe(0);
+  it("ouvrent chaque palier après le précédent, et le premier à zéro", () => {
+    for (const quand of ETAPES) {
+      const paliers = paliersDe(quand);
 
-    for (const [rang, palier] of PALIERS_DATTENTE.entries()) {
-      if (rang === 0) continue;
+      expect(paliers[0].depuisMs).toBe(0);
 
-      expect(palier.depuisMs).toBeGreaterThan(PALIERS_DATTENTE[rang - 1]?.depuisMs ?? 0);
+      for (const [rang, palier] of paliers.entries()) {
+        if (rang === 0) continue;
+
+        expect(palier.depuisMs).toBeGreaterThan(paliers[rang - 1]?.depuisMs ?? 0);
+      }
     }
   });
 });

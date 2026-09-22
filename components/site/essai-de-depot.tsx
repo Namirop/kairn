@@ -1,15 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
-import { avancementDeLEssaiAction, essayerAction, type EtatEssai } from "@/app/(marketing)/actions";
+import { useActionState, useState } from "react";
+import { essayerAction, type EtatEssai } from "@/app/(marketing)/actions";
+import { EssaiRepris } from "@/components/site/essai-repris";
+import { FenetreDeLEssai } from "@/components/site/fenetre-de-lessai";
 import { FormulaireDEssai } from "@/components/site/formulaire-dessai";
+import { GarderLesConcepts } from "@/components/site/garder-les-concepts";
 import { ResultatDeLEssai } from "@/components/site/resultat-de-lessai";
-import {
-  etatDeLAttente,
-  type EtatDeLAttente,
-  pauseApres,
-  RYTHME_VIF_MS,
-} from "@/lib/depots/rythme-de-lattente";
+import { useAvancementDeLEssai } from "@/components/site/use-avancement-de-lessai";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
 /**
@@ -20,9 +18,24 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
  * l'onglet. Le compte n'est demandé qu'après, pour garder ce qu'on vient de voir
  * apparaître — à ce moment-là, on sait ce qu'on garde.
  *
- * Ce fichier n'est plus que l'aiguillage et l'attente : le formulaire vit dans
- * `FormulaireDEssai`, le résultat dans `ResultatDeLEssai`, et ce sont deux
- * écrans qui ne partagent ni composition ni largeur.
+ * **Ce fichier est l'aiguillage, l'attente, et depuis peu l'ouverture de la
+ * fenêtre.** La bande ne rend plus que deux choses — le formulaire, ou le rappel
+ * de ce qu'un essai a donné — et tout le reste se joue dans `FenetreDeLEssai`.
+ * La bande devait être quatre mises en page à elle seule, et aucune ne pouvait
+ * être bien composée ; elle n'en a plus qu'une par état, et les deux ont la même
+ * charpente.
+ *
+ * **La fenêtre s'ouvre sur le geste, pas sur un effet.** C'est le formulaire qui
+ * le dit, au moment où il envoie vraiment — après ses propres refus de longueur.
+ * Ouvrir depuis un effet monté sur `enCours` aurait demandé de retenir que le
+ * visiteur l'avait fermée, faute de quoi elle se serait rouverte au rendu
+ * suivant, pendant que le découpage tournait encore.
+ *
+ * **Elle s'ouvre aussi au chargement d'un découpage déjà en route**, et
+ * seulement dans ce cas. Quelqu'un qui recharge la page pendant l'extraction
+ * était au milieu d'un geste : le lui rendre n'est pas une interruption. Un
+ * essai déjà abouti, lui, n'ouvre rien — on trouve son rappel dans la bande, et
+ * on rouvre si on veut.
  *
  * L'extraction est asynchrone, donc l'écran redemande où elle en est. C'est le
  * seul endroit du produit qui interroge en boucle, et il s'arrête dès que la
@@ -37,18 +50,19 @@ export function EssaiDeDepot({
   essaiPrecedent: AvancementDeLEssai | null;
 }) {
   const [etat, action, enCours] = useActionState<EtatEssai, FormData>(essayerAction, {});
-  const [avancement, setAvancement] = useState<AvancementDeLEssai | null>(essaiPrecedent);
   // Rouvre le champ sur un essai déjà rendu. La base tranchera : elle accorde
   // deux essais par tranche de vingt-quatre heures, quoi qu'ils aient donné.
   const [recommence, setRecommence] = useState(false);
-  // Depuis combien de temps on attend, et si l'on cherche encore. Un état à
-  // part et non l'absence d'intervalle : c'est ce que l'écran doit dire, et il
-  // faut qu'il le sache. Trois valeurs et non un booléen, parce que « c'est
-  // long » et « on a arrêté » ne se disent pas de la même façon — le premier
-  // demande de patienter, le second demande un geste.
-  const [attente, setAttente] = useState<EtatDeLAttente>("NORMALE");
-  const [relance, setRelance] = useState(0);
   const [dernierEssai, setDernierEssai] = useState<string | null>(null);
+  // Ouverte d'emblée sur un découpage déjà en route, et sur rien d'autre.
+  const [fenetreOuverte, setFenetreOuverte] = useState(() => Boolean(essaiPrecedent?.enCours));
+  const [rendreLeFocus, setRendreLeFocus] = useState(false);
+
+  const { avancement, attente, repartirDeZero, verifierANouveau } = useAvancementDeLEssai({
+    essai: etat.inputId,
+    reprend: Boolean(essaiPrecedent?.enCours),
+    depart: essaiPrecedent,
+  });
 
   // Un essai vient de partir : l'écran repart de zéro.
   //
@@ -64,96 +78,77 @@ export function EssaiDeDepot({
   if (etat.inputId && etat.inputId !== dernierEssai) {
     setDernierEssai(etat.inputId);
     setRecommence(false);
-    setAttente("NORMALE");
-    setAvancement(null);
+    repartirDeZero();
   }
 
-  // On interroge aussi quand la page se charge sur un découpage déjà en route.
-  // Sans ça, un rechargement pendant l'extraction figeait l'écran sur l'attente :
-  // l'intervalle ne démarrait qu'au retour de l'action, et il n'y en avait pas.
-  const aPoursuivre = Boolean(etat.inputId) || Boolean(essaiPrecedent?.enCours);
-
-  useEffect(() => {
-    if (!aPoursuivre) return;
-
-    let vivant = true;
-    let ecoule = RYTHME_VIF_MS;
-    let minuteur: ReturnType<typeof setTimeout>;
-
-    // Un enchaînement de délais plutôt qu'un intervalle : le rythme change en
-    // cours de route, et un `setInterval` ne sait pas ralentir.
-    const tour = async () => {
-      const suite = await avancementDeLEssaiAction();
-
-      if (!vivant) return;
-
-      setAvancement(suite);
-
-      if (!suite?.enCours) return;
-
-      const ou = etatDeLAttente(ecoule);
-
-      setAttente(ou);
-
-      // On s'arrête là, et l'écran le dit : au-delà, ce n'est plus une
-      // extraction lente mais un job reporté que le cron reprendra.
-      if (ou === "ABANDONNEE") return;
-
-      const pause = pauseApres(ecoule);
-
-      ecoule += pause;
-      minuteur = setTimeout(tour, pause);
-    };
-
-    minuteur = setTimeout(tour, RYTHME_VIF_MS);
-
-    return () => {
-      vivant = false;
-      clearTimeout(minuteur);
-    };
-    // `etat.inputId` et non la session : deux essais d'une même visite portent
-    // la même session, la dépendance ne changeait donc pas de valeur et l'effet
-    // n'était jamais rejoué. L'écran restait sur l'avancement du premier.
-  }, [etat.inputId, aPoursuivre, relance]);
-
-  // Reprend l'interrogation pour un tour complet. La minute est repartie de
-  // zéro : c'est un geste volontaire, pas une reprise automatique.
-  const verifierANouveau = () => {
-    setAttente("NORMALE");
-    setRelance((tour) => tour + 1);
+  // Le rappel remplace la fenêtre qu'on vient de fermer, et le clavier le suit.
+  const fermerLaFenetre = () => {
+    setFenetreOuverte(false);
+    setRendreLeFocus(true);
   };
 
-  // L'attente commence au clic et non au retour de l'action : entre les deux
-  // il y a un aller-retour, et pendant cet aller-retour seul le libellé du
-  // bouton changeait — l'écran avait l'air de n'avoir rien reçu. `enCours` est
-  // donc en tête et hors du `!recommence` : un second essai part depuis le
-  // formulaire, et sans ça il n'aurait pas eu droit à cette attente-là.
-  //
-  // Un essai déjà fait se remontre plutôt que de laisser un champ vide : sinon
-  // le refus d'un essai de plus désigne des concepts que personne ne voit.
-  if (enCours || (!recommence && (etat.sessionId || essaiPrecedent))) {
-    return (
-      <ResultatDeLEssai
-        // Un dépôt en vol efface le verdict du précédent. Sans ça, le temps de
-        // l'aller-retour, l'écran affiche « ce texte n'a rien donné » à propos
-        // d'un texte qu'on vient d'envoyer.
-        avancement={enCours ? null : avancement}
-        setRecommence={setRecommence}
-        attente={attente}
-        onVerifier={verifierANouveau}
-      />
-    );
-  }
+  const redeposer = () => {
+    setFenetreOuverte(false);
+    setRendreLeFocus(false);
+    setRecommence(true);
+  };
+
+  /*
+    Un dépôt en vol efface le verdict du précédent. Sans ça, le temps de
+    l'aller-retour, la fenêtre affiche « ce texte n'a rien donné » à propos d'un
+    texte qu'on vient d'envoyer.
+  */
+  const montre = enCours ? null : avancement;
+  const concepts = montre?.concepts ?? [];
+  // Le rappel ne vaut que pour un essai qui a produit quelque chose. Un échec
+  // n'a rien à rappeler : ce qu'il faut offrir alors, c'est le champ.
+  const rappel = !recommence && concepts.length > 0;
 
   return (
-    <FormulaireDEssai
-      invite={invite}
-      action={action}
-      enCours={enCours}
-      erreurServeur={etat.erreur}
-      // Le champ se rouvre sur un découpage qui a abouti : on le dit, sinon on
-      // laisse croire qu'on remplace ce qu'on vient de montrer.
-      reprise={recommence && (avancement?.concepts.length ?? 0) > 0}
-    />
+    <>
+      {rappel ? (
+        <EssaiRepris
+          concepts={concepts.map((concept) => concept.id)}
+          peutRedeposer={montre?.peutRedeposer ?? false}
+          surRevoir={() => setFenetreOuverte(true)}
+          surRedepot={redeposer}
+          prendLeFocus={rendreLeFocus}
+        />
+      ) : (
+        <FormulaireDEssai
+          invite={invite}
+          action={action}
+          enCours={enCours}
+          erreurServeur={etat.erreur}
+          surDepot={() => {
+            setFenetreOuverte(true);
+            setRendreLeFocus(false);
+          }}
+          // Le champ se rouvre sur un découpage qui a abouti : on le dit, sinon on
+          // laisse croire qu'on remplace ce qu'on vient de montrer.
+          reprise={recommence && (avancement?.concepts.length ?? 0) > 0}
+        />
+      )}
+
+      <FenetreDeLEssai
+        ouverte={fenetreOuverte}
+        surFermeture={fermerLaFenetre}
+        pied={
+          concepts.length > 0 ? (
+            <GarderLesConcepts
+              peutRedeposer={montre?.peutRedeposer ?? false}
+              surRedepot={redeposer}
+            />
+          ) : undefined
+        }
+      >
+        <ResultatDeLEssai
+          avancement={montre}
+          surRedepot={redeposer}
+          attente={attente}
+          onVerifier={verifierANouveau}
+        />
+      </FenetreDeLEssai>
+    </>
   );
 }

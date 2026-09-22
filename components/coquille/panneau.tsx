@@ -90,6 +90,16 @@ export function Panneau({
   return (
     <section
       id={id}
+      /*
+        La surface est déclarée, pas seulement peinte.
+
+        L'anneau de focus en dépend : `lichen-deep` tombe à 2,48 pour 1 sur la
+        roche, sous le seuil d'un indicateur de focus, et la feuille de style le
+        relève en lichen sur cette surface-là. Lire la classe de fond aurait
+        marché, mais aurait lié une règle d'accessibilité au nom d'un utilitaire
+        Tailwind.
+      */
+      data-surface={surface}
       className={cn(
         "relative w-full overflow-hidden",
         /*

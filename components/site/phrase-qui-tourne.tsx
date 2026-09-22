@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { phraseDattente, RELEVE_MS } from "@/lib/domain/phrases-dattente";
+import { type EtapeDeLAttente, phraseDattente, RELEVE_MS } from "@/lib/domain/phrases-dattente";
 import { cn } from "@/lib/utils";
 
 /**
@@ -31,14 +31,16 @@ import { cn } from "@/lib/utils";
  * aucun sens.
  *
  * Le tirage est fixé une fois pour toutes au montage, comme l'invite du champ :
- * deux dépôts de même durée ne racontent pas la même séquence.
+ * deux dépôts de même durée ne racontent pas la même séquence. L'étape décide du
+ * catalogue — on ne dit pas la même chose à quelqu'un qui n'a encore rien vu et
+ * à quelqu'un dont les concepts sont déjà à l'écran.
  *
  * Le minuteur bat à la relève exactement, jamais plus vite. C'est ce qui fait
  * qu'une phrase n'est jamais remplacée une seconde après être apparue quand le
  * temps franchit une borne de palier — le changement de ton attend la relève
  * suivante, et le clignotement n'existe pas.
  */
-export function usePhraseQuiTourne(): string {
+export function usePhraseQuiTourne(etape: EtapeDeLAttente): string {
   const [tirage] = useState(() => Math.random());
   const [ecoule, setEcoule] = useState(0);
 
@@ -48,7 +50,7 @@ export function usePhraseQuiTourne(): string {
     return () => clearInterval(battement);
   }, []);
 
-  return phraseDattente(ecoule, tirage);
+  return phraseDattente(etape, ecoule, tirage);
 }
 
 /**

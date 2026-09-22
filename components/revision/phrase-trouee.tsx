@@ -22,15 +22,36 @@ import { TROU } from "@/lib/domain/reponse-cloze";
  * serait un trait perdu dans un cas et une barre dans l'autre.
  */
 
+/**
+ * Les surfaces sur lesquelles un trou peut se creuser.
+ *
+ * Un creux est une **ombre**, et une ombre ne va pas dans le même sens selon la
+ * lumière. Sur du clair, le trou est plus sombre que ce qui l'entoure ; sur la
+ * dalle sombre de la fenêtre de l'essai, il l'est encore — mais il lui faut
+ * descendre jusqu'à `stone-900`, sinon il remonte vers le clair et se lit comme
+ * un surlignage plutôt que comme un manque.
+ *
+ * `ombre` sert aussi de repli sur du papier quand le trou tombe dans un jeton de
+ * code : l'encre diluée du jeton mange le gris du papier, et il faut le cran de
+ * plus pour que le creux se voie.
+ */
+export type FondDuTrou = "papier" | "ombre" | "roche";
+
+const CREUX: Record<FondDuTrou, string> = {
+  papier: "bg-surface-ombre",
+  ombre: "bg-stone-300",
+  roche: "bg-stone-900",
+};
+
 /** L'emplacement vide, ou le terme qui l'a comblé. */
 function Trou({
   comble,
   dansDuCode,
-  surOmbre,
+  fond,
 }: {
   comble: string | null;
   dansDuCode: boolean;
-  surOmbre: boolean;
+  fond: FondDuTrou;
 }) {
   if (comble === null) {
     // Un emplacement, pas un soulignement : c'est le geste central de ce format,
@@ -49,9 +70,7 @@ function Trou({
         // une carte d'ombre — la vitrine de l'essai — il disparaîtrait dans son
         // propre fond : il lui faut alors le cran de plus qui sert déjà dans un
         // jeton, pour la même raison.
-        className={`rounded-champ mx-[0.14em] inline-block h-[0.96em] w-[2.9em] translate-y-[0.06em] align-baseline ${
-          dansDuCode || surOmbre ? "bg-stone-300" : "bg-surface-ombre"
-        }`}
+        className={`rounded-champ mx-[0.14em] inline-block h-[0.96em] w-[2.9em] translate-y-[0.06em] align-baseline ${CREUX[fond === "papier" && dansDuCode ? "ombre" : fond]}`}
       />
     );
   }
@@ -64,12 +83,12 @@ function Trou({
 export function PhraseTrouee({
   phrase,
   comble,
-  surOmbre = false,
+  fond = "papier",
 }: {
   phrase: string;
   comble: string | null;
-  /** La phrase est posée sur une surface d'ombre et non sur du papier. */
-  surOmbre?: boolean;
+  /** La surface qui porte la phrase. Le creux s'y creuse dans le bon sens. */
+  fond?: FondDuTrou;
 }) {
   return (
     <>
@@ -81,7 +100,7 @@ export function PhraseTrouee({
           ) : (
             <>
               {avant}
-              <Trou comble={comble} dansDuCode={segment.code} surOmbre={surOmbre} />
+              <Trou comble={comble} dansDuCode={segment.code} fond={fond} />
               {suite.join(TROU)}
             </>
           );

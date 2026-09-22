@@ -1,65 +1,55 @@
 "use client";
 
-import Link from "next/link";
+import { Cairn } from "@/components/cairn/cairn";
 import { AttenteAbandonnee, ConceptsEnAttente } from "@/components/site/concepts-en-attente";
 import { EchantillonDeQuestions } from "@/components/site/echantillon-de-questions";
 import { EssaiSansConcept } from "@/components/site/essai-sans-concept";
 import { PileDeConcepts } from "@/components/site/pile-de-concepts";
-import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/lib/auth/routes";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
 /**
  * Ce que l'essai a donné : l'attente, les concepts, ou aucun des deux.
  *
- * Séparé du formulaire parce que ce sont deux écrans, pas deux états d'un même —
- * l'un demande quelque chose, l'autre rend un verdict, et le second a trois fins
- * qui ne se disent pas de la même façon.
+ * **Tout ceci vit dans la fenêtre de l'essai, et plus dans la bande.** La bande
+ * devait être quatre mises en page à elle seule — le formulaire sur deux
+ * colonnes, l'attente pleine largeur, les concepts avec une seconde attente
+ * imbriquée dedans, le résultat entier. Aucune ne pouvait être bien composée.
+ * Voir `FenetreDeLEssai`, qui rend à la bande son unique travail.
  *
- * **Il prend le panneau entier, et c'est le changement qui porte tout le reste.**
- * Le résultat vivait dans la colonne de droite qui avait porté le champ : trente-
- * six rem pour la seule preuve du produit, pendant que la moitié gauche de
- * l'écran gardait un titre et du vide. Tout y était donc au même corps, dans la
- * même colonne, à la queue leu leu — le nombre de concepts en petites capitales,
- * les concepts en corps, la question en corps, le bouton sous les deux. Rien ne
- * ressortait parce que rien n'avait la place de ressortir.
+ * **Le compte de concepts n'est plus seul à porter le titre.** Il l'était, en
+ * display, au-dessus d'une liste de paragraphes au corps d'une légende : un
+ * grand nombre, puis plus rien qui ait d'échelle. Il est maintenant accompagné
+ * du cairn, monté à autant de pierres qu'il y a de concepts et dessiné à partir
+ * de leurs identifiants. Le chiffre et la figure disent la même chose, et c'est
+ * le seul endroit public où l'élément signature du produit porte du vrai
+ * contenu plutôt qu'une décoration.
  *
- * Ce qui change, dans l'ordre : le nombre de concepts devient le titre de la
- * bande, en display, à la place de « Dépose quelque chose. » — la consigne a été
- * suivie, elle n'a plus à occuper la moitié de l'écran ; les concepts s'étalent
- * sur deux colonnes sans rien couper ; les questions deviennent un objet à part,
- * avec ses formats et sa carte ; l'appel à garder ferme la descente.
+ * **La descente a trois temps de même forme** : un titre, une phrase qui
+ * l'explique, puis l'objet. Les concepts, puis les questions. Ce qui les sépare
+ * est du vide et non un filet — deux sujets ne se séparent jamais par une ligne
+ * dans ce système.
  *
- * La bande dépasse alors le pli, et c'est assumé : elle raconte maintenant une
- * suite — ton texte, tes concepts, ta question, garde-les — et une suite se
- * descend. Ce qu'on gagne à la déplier vaut mieux que ce qu'on perdait à tout
- * tasser au-dessus de la ligne de flottaison.
+ * **L'appel à garder n'est plus au bout de la descente**, il est dans le pied
+ * de la fenêtre, qui ne défile pas. Sur un téléphone, un appel posé à la fin
+ * d'une liste de huit concepts se trouve à deux écrans du pouce, et c'est la
+ * seule conversion de la page. Voir `GarderLesConcepts`.
  *
  * **Le jeu d'attente est parti.** Il occupait un panneau de dix-huit rem à
- * droite de l'attente : on empilait des pierres à la souris pendant que le
- * découpage tournait. Il tenait techniquement — monté ici, au même rang dans
- * l'arbre quelle que soit la branche, il survivait au passage du découpage à
- * l'écriture des questions — mais il réglait mal le problème qu'il visait. Ce
- * qui manque pendant l'attente n'est pas une occupation : c'est un signe que
- * quelqu'un travaille, et une raison de rester. Un jeu demande au visiteur de
- * faire l'effort à la place du produit, au moment précis où le produit doit
- * faire ses preuves — et il coûtait un panneau latéral qui, sur téléphone,
- * repoussait le résultat sous le pli.
- *
- * Ce qui le remplace tient en une ligne qui tourne, dans `ConceptsEnAttente`.
- * Voir `phrases-dattente.ts` pour ce qu'elle dit et pourquoi elle change de ton
- * avec le temps.
+ * droite : on empilait des pierres à la souris pendant que le découpage
+ * tournait. Ce qui manque pendant une attente n'est pas une occupation, c'est un
+ * signe que quelqu'un travaille — et c'est ce que fait la phrase qui tourne,
+ * pour rien et sans rien demander.
  */
-
 export function ResultatDeLEssai({
   avancement,
-  setRecommence,
+  surRedepot,
   attente,
   onVerifier,
 }: {
   avancement: AvancementDeLEssai | null;
-  setRecommence: (valeur: boolean) => void;
+  /** Repartir d'un champ vide. Ferme la fenêtre au passage. */
+  surRedepot: () => void;
   /** Depuis combien de temps on attend, et si l'on cherche encore. */
   attente: EtatDeLAttente;
   onVerifier: () => void;
@@ -75,10 +65,8 @@ export function ResultatDeLEssai({
   */
   const rienEncore = !avancement || avancement.concepts.length === 0;
 
-  const abandonne = attente === "ABANDONNEE";
-
   if (rienEncore && (!avancement || avancement.enCours)) {
-    return abandonne ? (
+    return attente === "ABANDONNEE" ? (
       <AttenteAbandonnee onVerifier={onVerifier} />
     ) : (
       <ConceptsEnAttente attente={attente} />
@@ -86,25 +74,35 @@ export function ResultatDeLEssai({
   }
 
   if (!avancement || avancement.concepts.length === 0) {
-    return avancement ? (
-      <EssaiSansConcept avancement={avancement} setRecommence={setRecommence} />
-    ) : null;
+    return avancement ? <EssaiSansConcept avancement={avancement} surRedepot={surRedepot} /> : null;
   }
 
   const combien = avancement.concepts.length;
 
   return (
     <div className="gap-pas-8 md:gap-pas-12 flex flex-col" role="status">
-      <header className="gap-pas-3 flex flex-col">
-        <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-900 tabular-nums">
-          {combien} {combien === 1 ? "concept." : "concepts."}
-        </h2>
+      <header className="gap-pas-4 md:gap-pas-8 flex items-start justify-between">
+        <div className="gap-pas-3 flex min-w-0 flex-col">
+          <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-50 tabular-nums">
+            {combien} {combien === 1 ? "concept." : "concepts."}
+          </h2>
 
-        <p className="text-corps max-w-xl text-stone-500">
-          {combien === 1
-            ? "Il te sera reposé seul, au moment où tu allais l'oublier."
-            : "Chacun sera reposé séparément, au moment où tu allais l'oublier."}
-        </p>
+          <p className="text-corps max-w-xl text-stone-300">
+            {combien === 1
+              ? "Il te sera reposé seul, au moment où tu allais l'oublier."
+              : "Chacun sera reposé séparément, au moment où tu allais l'oublier."}
+          </p>
+        </div>
+
+        {/* Une pierre par concept, dessinée à partir de leurs identifiants :
+            l'empilement est propre à ce dépôt-là et stable dans le temps. La
+            dernière se pose en arrivant, et c'est elle qui porte le lichen. */}
+        <Cairn
+          nombre={combien}
+          graines={avancement.concepts.map((concept) => concept.id)}
+          clair
+          className="h-20 w-auto shrink-0 md:h-28"
+        />
       </header>
 
       <PileDeConcepts concepts={avancement.concepts} />
@@ -118,56 +116,6 @@ export function ResultatDeLEssai({
         attente={attente}
         onVerifier={onVerifier}
       />
-
-      <GarderLesConcepts peutRedeposer={avancement.peutRedeposer} setRecommence={setRecommence} />
-    </div>
-  );
-}
-
-/**
- * La fin de la descente : garder ce qu'on vient de voir, ou déposer autre chose.
- *
- * Le second geste n'existait pas, parce qu'il n'y avait rien derrière : un essai
- * qui avait abouti fermait la visite pour les sept jours du cookie. Il ne
- * s'affiche que lorsque la base l'accorde vraiment — deux essais par tranche de
- * vingt-quatre heures —, faute de quoi on proposerait un geste que le serveur
- * refuserait à l'arrivée.
- *
- * Il est discret et il le reste. C'est une porte de sortie posée juste sous
- * l'appel qu'on cherche à provoquer : lui donner le même poids qu'à « Les
- * garder » reviendrait à proposer de recommencer à quelqu'un qu'on vient de
- * convaincre.
- */
-function GarderLesConcepts({
-  peutRedeposer,
-  setRecommence,
-}: {
-  peutRedeposer: boolean;
-  setRecommence: (valeur: boolean) => void;
-}) {
-  return (
-    <div className="gap-pas-4 flex flex-col">
-      <div className="gap-pas-4 flex flex-wrap items-center">
-        <Button asChild size="lg">
-          <Link href={ROUTES.connexion}>Les garder</Link>
-        </Button>
-
-        <span className="text-petit max-w-2xl text-stone-500">
-          Ton adresse suffit. On te les repose au bon moment, et tu récupères ceux-ci.
-        </span>
-      </div>
-
-      {peutRedeposer ? (
-        <Button
-          type="button"
-          variant="link"
-          size="sm"
-          className="self-start px-0"
-          onClick={() => setRecommence(true)}
-        >
-          Déposer autre chose
-        </Button>
-      ) : null}
     </div>
   );
 }

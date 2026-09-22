@@ -81,6 +81,17 @@ const COMBINAISONS: Combinaison[] = [
   { texte: "stone-800", fond: "alerte-surface", role: "texte sur aplat d'alerte", seuil: AA_TEXTE },
   { texte: "lichen", fond: "surface-papier", role: "accent sur papier", seuil: AA_LARGE },
   { texte: "ember", fond: "surface-papier", role: "série sur papier", seuil: AA_LARGE },
+  // La dalle posée sur la roche : celle d'un concept dans la fenêtre de l'essai.
+  // `stone-800` y servait de surface d'objet et vaut exactement `surface-roche`
+  // — une dalle invisible sur son propre fond. C'est `stone-700` qui porte, et
+  // ce sont ses textes qu'il faut mesurer.
+  { texte: "stone-50", fond: "stone-700", role: "encre sur dalle de roche", seuil: AA_TEXTE },
+  { texte: "stone-300", fond: "stone-700", role: "texte second sur dalle", seuil: AA_TEXTE },
+  // L'anneau de focus doit se voir sur ce qu'il entoure. `lichen-deep` est réglé
+  // pour le papier ; sur la roche, il fallait mesurer avant d'y poser le seul
+  // parcours de conversion du produit.
+  { texte: "lichen", fond: "surface-roche", role: "focus sur roche", seuil: AA_LARGE },
+  { texte: "lichen-deep", fond: "surface-papier", role: "focus sur papier", seuil: AA_LARGE },
 ];
 
 function main(): void {

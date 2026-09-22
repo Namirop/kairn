@@ -59,6 +59,22 @@ import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
  * implémenté, il retire au clavier ce que la souris garde. Quatre boutons
  * `aria-pressed` disent la même chose, se tabulent tout seuls, et ne mentent
  * pas sur ce qu'ils sont.
+ *
+ * **Ce n'est plus une étiquette, c'est une étape.** Le bloc s'annonçait par un
+ * libellé mono de douze pixels en capitales grises — le même traitement que
+ * « CE QUE TU VEUX RETENIR » au-dessus du champ et que « EN ATTENDANT » à côté
+ * du jeu. Trois étiquettes identiques sur un même écran ne hiérarchisent plus
+ * rien : elles font un gabarit. Ce qui arrive ici est le second temps de la
+ * démonstration, après les concepts, et il porte donc un titre comme eux.
+ *
+ * Ce qui l'en sépare est du **vide**, pas un filet : deux sujets ne se séparent
+ * jamais par une ligne dans ce système. L'écart est celui de deux temps d'un
+ * même écran, et il suffit à dire qu'on change de sujet.
+ *
+ * La phrase qui explique la rotation est passée **au-dessus** des formats.
+ * Posée sous la carte, elle expliquait après coup ce que les boutons venaient
+ * de faire ; posée avant, elle dit à quoi ils servent — et les deux temps de la
+ * fenêtre prennent la même forme, titre puis sous-titre puis contenu.
  */
 
 export function EchantillonDeQuestions({
@@ -88,11 +104,18 @@ export function EchantillonDeQuestions({
 
   return (
     <section className="gap-pas-3 flex flex-col">
-      <h3 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-        {montrables.length > 1
-          ? `${montrables.length} questions sur l'un de ces concepts`
-          : "Une question sur l'un de ces concepts"}
-      </h3>
+      <header className="gap-pas-2 flex flex-col">
+        <h3 className="font-display text-h1-app leading-tight font-bold tracking-[-0.02em] text-stone-50 tabular-nums">
+          {montrables.length > 1
+            ? `${montrables.length} questions sur l'un d'eux.`
+            : "Une question sur l'un d'eux."}
+        </h3>
+
+        <p className="text-petit max-w-xl text-stone-300">
+          Elles tournent d&apos;un passage à l&apos;autre. C&apos;est le concept qui doit tenir, pas
+          une phrase apprise par cœur.
+        </p>
+      </header>
 
       {montree ? (
         <>
@@ -112,8 +135,8 @@ export function EchantillonDeQuestions({
                   onClick={() => setRang(position)}
                   className={`rounded-galet px-pas-3 text-mono h-8 font-mono tracking-[0.14em] uppercase transition-colors ${
                     position === rang
-                      ? "bg-surface-ombre text-stone-900"
-                      : "hover:bg-surface-ombre/60 text-stone-500 hover:text-stone-900"
+                      ? "bg-stone-700 text-stone-50"
+                      : "text-stone-300 hover:bg-stone-700/60 hover:text-stone-50"
                   }`}
                 >
                   {LIBELLE_FORMAT[question.format]}
@@ -123,14 +146,6 @@ export function EchantillonDeQuestions({
           ) : null}
 
           <CarteDeLEchantillon question={montree.question} options={montree.options} />
-
-          {/* La mesure est celle d'une ligne pour cette phrase-là, pas celle
-              d'un paragraphe : à `max-w-xl` elle se coupait en deux au milieu
-              d'une idée, alors qu'elle en tient une seule. */}
-          <p className="text-petit max-w-4xl text-stone-500">
-            Elles tournent d&apos;un passage à l&apos;autre. C&apos;est le concept qui doit tenir,
-            pas une phrase apprise par cœur.
-          </p>
         </>
       ) : null}
     </section>

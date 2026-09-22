@@ -53,7 +53,19 @@ export const SURFACES: Record<Surface, Habillage> = {
     encre: "text-stone-50",
     second: "text-stone-300",
     grain: "grain grain-clair",
-    objet: "bg-stone-800",
+    /*
+      `stone-800` a vécu ici, et il ne pouvait pas marcher : il vaut exactement
+      `#2a2e2c`, c'est-à-dire la roche elle-même. Une dalle posée dessus était
+      invisible sur son propre fond. Le défaut n'a jamais crevé les yeux parce
+      que personne n'avait encore posé d'objet sur un panneau sombre.
+
+      `stone-700` monte d'un cran au lieu de descendre : sur une surface sombre,
+      un objet posé capte la lumière, il ne creuse pas. L'écart mesuré est de
+      1,34 contre 1,14 entre le papier et l'ombre — la dalle de roche se
+      détache donc un peu mieux que la carte de papier, ce qui est exactement ce
+      qu'il faut quand l'œil dispose de moins de lumière pour trancher.
+    */
+    objet: "bg-stone-700",
     sombre: true,
   },
 };

@@ -1,32 +1,36 @@
+"use client";
+
+import { PhraseQuiTourne, usePhraseQuiTourne } from "@/components/site/phrase-qui-tourne";
 import { Button } from "@/components/ui/button";
 
 /**
  * L'échantillon de questions tant qu'il n'existe pas encore.
  *
- * Deux états, et ils ne disent pas la même chose. Tant qu'on interroge, on
- * montre la forme de ce qui arrive — les emplacements des quatre formats et
- * celui de la carte, aux mesures de ce qui va les remplacer. Une phrase
- * immobile sous une liste de concepts qui vient d'apparaître se lit comme une
- * fin, pas comme une suite.
+ * **C'était le second système de squelettes de l'écran, et il a disparu.** Quatre
+ * emplacements de format qui battaient, plus deux barres grises dans une carte,
+ * sous une liste de concepts qui venait d'apparaître : on livrait le résultat et
+ * on montrait en même temps une page en train de charger. Deux jeux de barres
+ * grises sur un même écran, c'est ce qui faisait le désordre — pas la quantité
+ * d'information.
  *
- * Quand l'interrogation s'arrête, à quatre-vingt-dix secondes, les emplacements
- * doivent s'arrêter avec elle. Ils battaient pour toujours sous des concepts
- * déjà affichés, sans que rien n'indique qu'il fallait un geste pour aller voir
- * la suite : c'est le mensonge qu'on venait de corriger à l'autre bout de la
+ * À leur place, **la carte est déjà là, et elle parle**. C'est la forme finale de
+ * l'objet, à sa taille finale, avec dedans la voix de l'attente plutôt qu'une
+ * question. Rien ne clignote, rien ne saute au remplacement, et l'écran dit ce
+ * qu'il fait au lieu de mimer un chargement.
+ *
+ * Les phrases sont **celles de l'écriture, pas celles du découpage**. À cette
+ * étape les concepts sont à l'écran : « on lit ce que tu as déposé » serait faux
+ * au mot près, et le mot est tout ce qu'on a ici. Voir `phrases-dattente.ts`.
+ *
+ * Quand l'interrogation s'arrête, à quatre-vingt-dix secondes, la carte doit
+ * s'arrêter avec elle. Elle battait pour toujours sous des concepts déjà
+ * affichés, sans que rien n'indique qu'il fallait un geste pour aller voir la
+ * suite : c'est le mensonge qu'on venait de corriger à l'autre bout de la
  * chaîne, et il vivait encore ici.
  *
  * Séparé de l'échantillon lui-même parce que ce sont deux sujets — celui-ci
  * n'affiche aucune question, il occupe leur place.
  */
-
-/**
- * Les largeurs des quatre emplacements de format.
- *
- * Celles des libellés qui viendront — « QCM » est court, « Texte à trou » ne
- * l'est pas — pour que la rangée ne change pas de dessin en se remplissant.
- */
-const EMPLACEMENTS = ["w-16", "w-28", "w-32", "w-24"] as const;
-
 export function EnEcriture({
   abandonnee,
   onVerifier,
@@ -34,39 +38,30 @@ export function EnEcriture({
   abandonnee: boolean;
   onVerifier: () => void;
 }) {
+  const phrase = usePhraseQuiTourne("ECRITURE");
+
   if (abandonnee) return <EcritureAbandonnee onVerifier={onVerifier} />;
 
   return (
     <section className="gap-pas-3 flex flex-col" role="status" aria-live="polite">
-      <h3 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-        On écrit les questions
-      </h3>
+      <header className="gap-pas-2 flex flex-col">
+        <h3 className="font-display text-h1-app leading-tight font-bold tracking-[-0.02em] text-stone-50">
+          On écrit les questions.
+        </h3>
 
-      <div className="gap-pas-1 flex flex-wrap" aria-hidden>
-        {EMPLACEMENTS.map((largeur, rang) => (
-          <span
-            key={largeur}
-            className={`rounded-galet block h-8 bg-stone-300/60 motion-safe:animate-pulse ${largeur}`}
-            style={{ animationDelay: `${rang * 160}ms` }}
-          />
-        ))}
+        {/* La seule ligne stable du bloc, et donc la seule que les lecteurs
+            d'écran entendent : la phrase qui tourne leur est masquée. */}
+        <p className="text-petit max-w-xl text-stone-300">
+          Quatre formulations sur le même concept, de formats différents. Une vingtaine de secondes.
+        </p>
+      </header>
+
+      {/* La carte que la question viendra remplir, à sa place et à sa taille.
+          C'est la même surface et le même arrondi que `CarteDeLEchantillon` :
+          ce qui change à l'arrivée, c'est ce qu'il y a dedans, pas l'objet. */}
+      <div className="rounded-carte p-pas-dedans bg-stone-700">
+        <PhraseQuiTourne phrase={phrase} className="text-stone-300" />
       </div>
-
-      {/* Les deux barres ont la hauteur d'une ligne d'énoncé : la carte ne
-          changera pas de taille en recevant sa question. */}
-      <div className="rounded-carte bg-surface-ombre p-pas-dedans" aria-hidden>
-        <span className="block h-6 w-full rounded-xs bg-stone-300/70 motion-safe:animate-pulse" />
-        <span
-          className="mt-pas-3 block h-6 w-3/5 rounded-xs bg-stone-300/50 motion-safe:animate-pulse"
-          style={{ animationDelay: "200ms" }}
-        />
-      </div>
-
-      {/* La mesure est celle d'une légende et non d'un paragraphe : serrée à
-          `xl`, cette phrase-là tombait sur deux lignes pour trois mots. */}
-      <p className="text-petit max-w-2xl text-stone-500">
-        Quatre formulations sur le même concept, de formats différents. Une vingtaine de secondes.
-      </p>
     </section>
   );
 }
@@ -82,17 +77,17 @@ export function EnEcriture({
 function EcritureAbandonnee({ onVerifier }: { onVerifier: () => void }) {
   return (
     <section className="gap-pas-3 flex flex-col">
-      <h3 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-        Les questions prennent leur temps
+      <h3 className="font-display text-h1-app leading-tight font-bold tracking-[-0.02em] text-stone-50">
+        Les questions prennent leur temps.
       </h3>
 
-      <p className="text-petit max-w-2xl text-stone-500">
+      <p className="text-petit max-w-xl text-stone-300">
         Tes concepts sont déjà là, c’est l’échantillon qui manque. Il s’écrit toujours, et il
         s’affichera ici la prochaine fois que tu passes.
       </p>
 
       <div className="mt-pas-1">
-        <Button type="button" variant="outline" size="sm" onClick={onVerifier}>
+        <Button type="button" variant="outlineClair" size="sm" onClick={onVerifier}>
           Vérifier maintenant
         </Button>
       </div>

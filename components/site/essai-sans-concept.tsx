@@ -31,8 +31,12 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
  * et elle est valable — et on propose le compte sans prétendre qu'il y a quoi
  * que ce soit à récupérer.
  *
+ * **Il se rend dans la fenêtre de l'essai**, comme l'attente et les concepts :
+ * c'est un verdict, et les trois verdicts possibles se rendent au même endroit.
+ * Ses encres sont donc celles de la roche.
+ *
  * **Le titre est à nous, le constat est au modèle.** Depuis que le résultat
- * occupe le panneau entier, cet écran doit porter un titre comme les autres — et
+ * occupe la fenêtre entière, cet écran doit porter un titre comme les autres — et
  * y poser `motifDechec` serait poser une phrase écrite par un modèle, de
  * longueur inconnue, dans un display de soixante pixels. Quatre mots fixes
  * titrent ; la phrase du modèle garde le corps, où sa longueur ne casse rien.
@@ -83,31 +87,31 @@ function situationDeLEchec(
 
 export function EssaiSansConcept({
   avancement,
-  setRecommence,
+  surRedepot,
 }: {
   avancement: AvancementDeLEssai;
-  setRecommence: (valeur: boolean) => void;
+  surRedepot: () => void;
 }) {
   const { panne, peutRedeposer, motifDechec } = avancement;
   const situation = situationDeLEchec(panne, peutRedeposer, motifDechec);
 
   return (
     <div className="gap-pas-4 flex flex-col" role="status">
-      <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-900">
+      <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-50">
         {situation.titre}
       </h2>
 
-      <p className="text-corps max-w-xl text-stone-900">{situation.constat}</p>
+      <p className="text-corps max-w-xl text-stone-50">{situation.constat}</p>
 
-      <p className="text-petit max-w-xl text-stone-500">{situation.explication}</p>
+      <p className="text-petit max-w-xl text-stone-300">{situation.explication}</p>
 
       <div className="mt-pas-2">
         {peutRedeposer ? (
-          <Button type="button" size="lg" variant="outline" onClick={() => setRecommence(true)}>
+          <Button type="button" size="lg" variant="outlineClair" onClick={surRedepot}>
             Réessayer
           </Button>
         ) : (
-          <Button asChild size="lg">
+          <Button asChild size="lg" variant="clair">
             <Link href={ROUTES.connexion}>Créer un compte</Link>
           </Button>
         )}

@@ -533,6 +533,29 @@
     outline-offset: 2px;
   }
 
+  /*
+    L'anneau de focus sur la roche, et c'est une correction d'accessibilité.
+
+    `lichen-deep` est réglé pour le papier, où il donne 4,95 pour 1. Sur la
+    roche, mesuré, il tombe à **2,48** — sous le seuil de trois exigé d'un
+    indicateur de focus, et donc invisible pour qui navigue au clavier sur un
+    panneau sombre. Le défaut existait sur tous les panneaux de roche du
+    produit ; il devenait intenable au moment de poser la fenêtre de l'essai
+    dessus, qui est le seul parcours de conversion.
+
+    Le lichen d'origine remonte à 3,69. C'est le même accent, pas une couleur de
+    plus : sur un fond sombre, un accent doit s'éclaircir pour dire la même
+    chose — exactement ce que font déjà `ember-clair` et les pierres claires du
+    cairn.
+
+    Le crochet est un attribut et non une classe de fond : `Panneau` et la
+    fenêtre de l'essai posent `data-surface`, et la règle suit la surface
+    déclarée plutôt que la classe Tailwind qui la peint.
+  */
+  [data-surface="roche"] :focus-visible {
+    outline-color: var(--lichen);
+  }
+
   /* L'encre autant que le fond. Sans elle, la sélection héritait de la couleur
      du texte : sur la roche, du texte clair se posait sur un fond clair et
      disparaissait au moment précis où on le sélectionnait. Un fond de sélection

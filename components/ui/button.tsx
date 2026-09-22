@@ -26,6 +26,21 @@ const buttonVariants = cva(
         ghost: "text-stone-500 hover:bg-surface-ombre hover:text-stone-900",
         link: "text-stone-900 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900",
         destructive: "bg-alerte-surface text-alerte hover:bg-alerte-surface/70",
+        /*
+          Les trois variantes de la roche.
+
+          Un bouton plein vaut `stone-900` sur `stone-50` : posé sur la roche,
+          qui est `#2a2e2c`, il disparaît dans son propre fond. Ce n'est pas un
+          réglage de plus, c'est la même figure retournée — sur une surface
+          sombre, ce qui appelle à l'action est ce qui capte la lumière.
+
+          `clair` suit la convention des pierres du cairn : le mot dit la couleur
+          de l'objet, pas celle du fond qui le porte.
+        */
+        clair: "bg-stone-50 text-stone-900 hover:bg-stone-100",
+        outlineClair: "border-stone-700 text-stone-50 hover:border-stone-500 hover:bg-stone-700",
+        linkClair:
+          "text-stone-300 underline decoration-stone-700 underline-offset-4 hover:text-stone-50 hover:decoration-stone-300",
       },
       size: {
         default: "h-10 px-pas-6 text-petit",

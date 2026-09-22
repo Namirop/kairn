@@ -14,8 +14,10 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  * pas trois traits de soulignement. Les trois traits étaient le marqueur brut de
  * la génération arrivé jusqu'à l'écran sans être lu par personne — le même défaut
  * que les accents graves autour d'un terme de code, corrigé au même endroit. La
- * carte d'ici est d'ombre là où celle de la révision est de papier : le creux
- * prend le cran de contraste qu'il faut pour ne pas se fondre dedans.
+ * carte d'ici est une dalle de roche là où celle de la révision est de papier :
+ * la fenêtre de l'essai est sombre, et un objet posé dessus capte la lumière au
+ * lieu de creuser. Le trou, lui, descend jusqu'à l'encre — un creux reste un
+ * creux, quelle que soit la lumière, et c'est ce que dit `FondDuTrou`.
  */
 export function CarteDeLEchantillon({
   question,
@@ -26,9 +28,12 @@ export function CarteDeLEchantillon({
   options: string[] | null;
 }) {
   return (
-    <div className="rounded-carte bg-surface-ombre p-pas-dedans" aria-live="polite">
-      <p className="text-enonce leading-tight font-bold text-pretty break-words text-stone-900">
-        <PhraseTrouee phrase={question} comble={null} surOmbre />
+    <div
+      className="rounded-carte p-pas-dedans [&_code]:bg-jeton-clair [&_code]:border-jeton-bord-clair bg-stone-700"
+      aria-live="polite"
+    >
+      <p className="text-enonce leading-tight font-bold text-pretty break-words text-stone-50">
+        <PhraseTrouee phrase={question} comble={null} fond="roche" />
       </p>
 
       {/* Les propositions, sous l'énoncé et côte à côte.
@@ -43,9 +48,9 @@ export function CarteDeLEchantillon({
           La bonne n'est pas marquée, et elle n'est même pas descendue jusqu'ici :
           voir `optionsDUnQCM`. */}
       {options ? (
-        <ul className="gap-x-pas-4 gap-y-pas-1 mt-pas-4 text-petit flex flex-wrap text-stone-500">
+        <ul className="gap-x-pas-4 gap-y-pas-1 mt-pas-4 text-petit flex flex-wrap text-stone-300">
           {options.map((option) => (
-            <li key={option} className="before:mr-pas-2 before:text-stone-300 before:content-['—']">
+            <li key={option} className="before:mr-pas-2 before:text-stone-500 before:content-['—']">
               <TexteTechnique>{option}</TexteTechnique>
             </li>
           ))}

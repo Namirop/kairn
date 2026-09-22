@@ -42,6 +42,7 @@ export function FormulaireDEssai({
   action,
   enCours,
   erreurServeur,
+  surDepot,
   reprise,
 }: {
   invite: string;
@@ -49,6 +50,15 @@ export function FormulaireDEssai({
   enCours: boolean;
   /** Le refus rendu par l'action, quand il a fallu aller jusqu'au serveur. */
   erreurServeur?: string;
+  /**
+   * Le dépôt part vraiment : c'est là que la fenêtre de l'essai s'ouvre.
+   *
+   * Ici et pas dans un effet monté sur l'envoi en cours, parce que c'est le seul
+   * endroit qui connaisse la différence entre « on envoie » et « on a refusé sur
+   * place ». Un texte vide n'ouvre donc aucune fenêtre, là où un effet aurait
+   * fait clignoter l'attente pour un dépôt qui n'existait pas.
+   */
+  surDepot: () => void;
   /** Un découpage a déjà abouti pendant cette visite, et on en redépose un. */
   reprise: boolean;
 }) {
@@ -74,7 +84,11 @@ export function FormulaireDEssai({
   const verifierAvantDenvoyer = (evenement: FormEvent<HTMLFormElement>) => {
     const motif = motifDeLongueur(texte);
 
-    if (!motif) return;
+    if (!motif) {
+      surDepot();
+
+      return;
+    }
 
     evenement.preventDefault();
     setErreurLocale(motif);
