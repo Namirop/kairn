@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { PileEnConstruction } from "@/components/cairn/pile-en-construction";
+import { PhraseQuiTourne, usePhraseQuiTourne } from "@/components/site/phrase-qui-tourne";
 import { Button } from "@/components/ui/button";
 import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
@@ -26,13 +26,25 @@ import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
  * concepts qui vont les remplacer, dans la grille où ils s'afficheront. Rien ne
  * saute au moment du remplacement.
  *
- * Ce qui occupe vraiment l'attente n'est plus ici. Une question de démonstration
- * y a vécu, posée au bout de trois secondes dans une attente qui en dure six :
- * elle avait donc trois secondes pour être lue et répondue, ce qui n'est le
- * temps de rien. Et elle disparaissait au passage à l'écriture des questions,
- * qui est l'attente longue — vingt secondes de médiane. Le jeu qui l'a
- * remplacée est monté par `ResultatDeLEssai`, au-dessus des deux étapes, parce
- * que c'est le seul endroit d'où l'on peut les traverser.
+ * Ce qui occupe vraiment l'attente n'est plus un objet à côté. Une question de
+ * démonstration y a vécu, posée au bout de trois secondes dans une attente qui
+ * en dure six : elle avait donc trois secondes pour être lue et répondue, ce qui
+ * n'est le temps de rien. Un jeu d'empilement l'a remplacée, dans un panneau
+ * latéral, et il demandait au visiteur de faire l'effort à la place du produit —
+ * au moment précis où le produit doit faire ses preuves.
+ *
+ * **Ce qui occupe l'attente, maintenant, c'est une voix.** Une phrase qui change
+ * toutes les trois secondes et demie, et dont le ton descend avec le temps :
+ * factuel au début, puis on reconnaît que ça dure, puis on en rit à ses propres
+ * dépens, puis on dit la seule chose utile qui reste — fermer l'onglet ne coûte
+ * rien. Elle ne demande rien, elle se lit sans effort, et elle prouve que
+ * quelqu'un est là. Voir `phrases-dattente.ts` pour le catalogue et les paliers.
+ *
+ * Elle est **hors de la zone annoncée aux lecteurs d'écran**. Une ligne qui
+ * change toutes les trois secondes dans une région `aria-live` se ferait lire à
+ * voix haute toutes les trois secondes : on transformerait une attente en
+ * harcèlement. La région annonce donc la phrase stable du bas, qui dit
+ * l'essentiel une fois pour toutes.
  *
  * La progression n'est pas racontée par étapes. On ne connaît pas l'avancement
  * réel d'une extraction — il n'y a qu'un appel, et il rend ou il ne rend pas —,
@@ -40,13 +52,14 @@ import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
  * qui ne mesure rien. Ce qui est honnête, c'est de dire que ça travaille, de
  * montrer ce qui se prépare, et de le reconnaître quand c'est long.
  *
- * **Cet écran tient jusqu'à ce qu'on cesse vraiment de chercher.** Il change de
- * mots deux fois — à neuf secondes on reconnaît que c'est plus long, à quinze on
- * dit qu'on cherche encore —, mais il garde ses emplacements qui battent, parce
- * que l'interrogation continue derrière. Ce qui le remplaçait à quinze secondes,
- * c'était l'écran d'abandon : plus de squelette, plus de jeu, et « reviens plus
- * tard » alors qu'on interrogeait toujours. L'abandon a maintenant son propre
- * état, et il n'arrive qu'à quatre-vingt-dix secondes.
+ * **Cet écran tient jusqu'à ce qu'on cesse vraiment de chercher**, et son titre
+ * ne bouge plus. Il basculait sur « Le découpage prend son temps. » à quinze
+ * secondes ; c'est maintenant la phrase qui porte cet aveu-là, et bien plus
+ * finement. Un titre qui change pendant qu'on le lit coûte plus qu'il ne dit.
+ * Ce qui le remplaçait à quinze secondes, c'était l'écran d'abandon : plus de
+ * squelette et « reviens plus tard » alors qu'on interrogeait toujours.
+ * L'abandon a maintenant son propre état, et il n'arrive qu'à quatre-vingt-dix
+ * secondes.
  */
 
 /** Trois emplacements : le découpage moyen en rend trois à cinq. */
@@ -56,17 +69,8 @@ const EMPLACEMENTS = [
   ["w-full", "w-1/2"],
 ] as const;
 
-/** Au-delà, on le reconnaît. Se taire plus longtemps ferait douter. */
-const SECONDES_AVANT_EXCUSE = 9;
-
 export function ConceptsEnAttente({ attente }: { attente: EtatDeLAttente }) {
-  const [long, setLong] = useState(false);
-
-  useEffect(() => {
-    const excuse = setTimeout(() => setLong(true), SECONDES_AVANT_EXCUSE * 1000);
-
-    return () => clearTimeout(excuse);
-  }, []);
+  const phrase = usePhraseQuiTourne();
 
   return (
     <div className="gap-pas-6 md:gap-pas-8 flex flex-col" role="status" aria-live="polite">
@@ -74,9 +78,11 @@ export function ConceptsEnAttente({ attente }: { attente: EtatDeLAttente }) {
         <PileEnConstruction className="w-10 shrink-0 md:w-14" />
 
         <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-900">
-          {attente === "LONGUE" ? "Le découpage prend son temps." : "On découpe ton texte."}
+          On découpe ton texte.
         </h2>
       </div>
+
+      <PhraseQuiTourne phrase={phrase} className="text-stone-900" />
 
       <ul className="gap-pas-4 md:gap-x-pas-8 grid md:grid-cols-2" aria-hidden>
         {EMPLACEMENTS.map(([longue, courte], rang) => (
@@ -99,18 +105,17 @@ export function ConceptsEnAttente({ attente }: { attente: EtatDeLAttente }) {
         ))}
       </ul>
 
-      {/* La place est réservée : la phrase apparaît sans pousser ce qui suit.
+      {/* La seule phrase stable de l'écran, et donc la seule que les lecteurs
+          d'écran entendent. Elle dit ce qui ne change pas avec le temps : les
+          concepts arrivent ici même, et il n'y a rien à faire pour ça.
 
-          Trois paliers, du plus discret au plus explicite. Le dernier est le
-          seul qui compte vraiment : il dit qu'on cherche toujours et qu'il n'y a
-          rien à faire, ce qui est exactement ce que l'écran d'abandon laissait
-          croire du contraire. */}
+          Elle porte encore un palier, mais un seul, et c'est celui qui compte :
+          passé quinze secondes on cherche toujours, et le dire évite de laisser
+          croire que l'écran s'est arrêté. */}
       <p className="text-petit min-h-5 max-w-2xl text-stone-500">
         {attente === "LONGUE"
           ? "On cherche encore. Tes concepts s'afficheront ici dès qu'ils arrivent, tu n'as rien à faire."
-          : long
-            ? "C'est plus long que d'habitude. Ça arrive, laisse-lui encore un instant."
-            : "Quelques secondes. Tes concepts s'affichent ici même, pas dans un écran d'inscription."}
+          : "Tes concepts s'affichent ici même, pas dans un écran d'inscription."}
       </p>
     </div>
   );
