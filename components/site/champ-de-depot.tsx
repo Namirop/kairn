@@ -28,6 +28,13 @@ import type { RefObject } from "react";
  * indicateur de focus. C'est lui, et non un anneau, qui signale le focus — un
  * anneau redessinerait la boîte qu'on vient de creuser.
  *
+ * **Le creux n'est arrondi qu'en haut, et c'est le trait qui l'impose.** Un trait
+ * posé au bas d'une boîte arrondie sur ses quatre angles s'interrompt au moment
+ * où la courbe commence : il reste deux crochets dans les coins, et la ligne
+ * qu'on voulait droite ne l'est plus. Les angles du bas sont donc vifs, la ligne
+ * les traverse d'un bord à l'autre — et le creux a l'air posé au sol plutôt que
+ * de flotter, ce qui est exactement ce qu'on lui demande de dire.
+ *
  * **L'invite passe de `stone-400` à `stone-500`**, et c'était un défaut
  * d'accessibilité. Sur le creux, `stone-400` ne donnait que 2,09 pour un ; sur
  * le papier d'avant, à peine mieux. Or cette phrase-là est la seule qui dise
@@ -71,7 +78,7 @@ export function ChampDeDepot({
         Ce que tu veux retenir
       </label>
 
-      <div className="mt-pas-2 rounded-champ bg-surface-ombre p-pas-4 md:p-pas-6 focus-within:border-lichen-deep border-b-2 border-stone-300 transition-colors">
+      <div className="mt-pas-2 rounded-t-champ bg-surface-ombre p-pas-4 md:p-pas-6 focus-within:border-lichen-deep border-b-2 border-stone-300 transition-colors">
         <textarea
           ref={champ}
           id="essai"
