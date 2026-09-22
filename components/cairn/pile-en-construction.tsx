@@ -15,11 +15,24 @@ import { cn } from "@/lib/utils";
  * La géométrie vient de `empiler`, comme le cairn et le compteur de session.
  * Sous `prefers-reduced-motion`, les pierres restent posées : une attente
  * immobile vaut mieux qu'une animation qu'on n'a pas demandée.
+ *
+ * `clair` existe parce que l'attente a gagné un fond sombre : dans la fenêtre de
+ * l'essai, les pierres par défaut — des gris de `stone-700` à `stone-900` —
+ * disparaissaient dans la roche. C'est la même bascule que partout ailleurs dans
+ * le cairn, et elle manquait ici seulement parce qu'aucune attente sombre
+ * n'existait encore.
  */
 
 const PIERRES = 3;
 
-export function PileEnConstruction({ className }: { className?: string }) {
+export function PileEnConstruction({
+  className,
+  clair = false,
+}: {
+  className?: string;
+  /** Sur un panneau de roche, les pierres s'inversent en gris clairs. */
+  clair?: boolean;
+}) {
   const immobile = useReducedMotion() ?? false;
   const { pierres, hauteur, ySol } = empiler(
     PIERRES,
@@ -53,7 +66,7 @@ export function PileEnConstruction({ className }: { className?: string }) {
                 }
           }
         >
-          <ArêtesDePierre pierre={pierre} derniere={false} />
+          <ArêtesDePierre pierre={pierre} derniere={false} clair={clair} />
         </motion.g>
       ))}
     </svg>

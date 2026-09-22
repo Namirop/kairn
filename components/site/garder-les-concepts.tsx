@@ -16,35 +16,27 @@ import { ROUTES } from "@/lib/auth/routes";
  * `stone-900` sur `stone-50` ; posé sur la roche, il disparaîtrait dans son
  * propre fond. C'est la même figure retournée, pas un réglage de plus.
  *
- * Le second geste est discret et il le reste. C'est une porte de sortie posée
- * juste sous l'appel qu'on cherche à provoquer : lui donner le même poids
- * reviendrait à proposer de recommencer à quelqu'un qu'on vient de convaincre.
- * Il ne s'affiche que lorsque la base l'accorde vraiment — deux essais par
- * tranche de vingt-quatre heures —, faute de quoi on proposerait un geste que le
- * serveur refuserait à l'arrivée.
+ * **Il n'y a que deux choses ici, et il y en avait trois.** « Déposer autre
+ * chose » y tenait la droite : à trois cent quatre-vingt-dix points, la mention
+ * du milieu se retrouvait serrée dans une colonne de soixante pixels et tombait
+ * à un mot par ligne. Le geste de sortie est parti au bas du corps, où il a la
+ * place — et où il cesse de disputer sa ligne à l'appel qu'on cherche à
+ * provoquer.
+ *
+ * **Il s'empile sur téléphone.** Le bouton prend la largeur, la mention passe
+ * dessous : sur un pied qui ne défile pas, une ligne qui se casse mal coûte la
+ * moitié de la hauteur de la feuille.
  */
-export function GarderLesConcepts({
-  peutRedeposer,
-  surRedepot,
-}: {
-  peutRedeposer: boolean;
-  surRedepot: () => void;
-}) {
+export function GarderLesConcepts() {
   return (
-    <div className="gap-pas-3 md:gap-pas-4 flex flex-wrap items-center">
-      <Button asChild size="lg" variant="clair">
+    <div className="gap-pas-2 md:gap-pas-4 flex flex-col md:flex-row md:items-center">
+      <Button asChild size="lg" variant="clair" className="w-full md:w-auto">
         <Link href={ROUTES.connexion}>Les garder</Link>
       </Button>
 
-      <span className="text-petit min-w-0 flex-1 text-stone-300">
+      <span className="text-petit text-stone-300">
         Ton adresse suffit. On te les repose au bon moment, et tu récupères ceux-ci.
       </span>
-
-      {peutRedeposer ? (
-        <Button type="button" variant="linkClair" size="sm" className="px-0" onClick={surRedepot}>
-          Déposer autre chose
-        </Button>
-      ) : null}
     </div>
   );
 }

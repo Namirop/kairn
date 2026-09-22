@@ -1,6 +1,3 @@
-"use client";
-
-import { motion, useReducedMotion } from "motion/react";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
@@ -31,6 +28,16 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  * comme une page qui finit de charger. C'est le geste du produit, une pierre
  * puis une autre, et c'est le seul endroit public où il porte du vrai contenu.
  *
+ * **L'entrée est en CSS, et non en JavaScript, et c'est une question de panne.**
+ * Une animation pilotée par `motion` pose l'opacité à zéro en style en ligne et
+ * compte sur une image suivante pour la remonter. Quand cette image ne vient
+ * pas — onglet en arrière-plan, `requestAnimationFrame` gelé, librairie qui n'a
+ * pas chargé —, les concepts restent à zéro : **le seul contenu qui convertisse
+ * de tout le site devient invisible**. Observé pour de vrai, à 0,59 d'opacité,
+ * sur une fenêtre qui n'avait pas le focus. Une animation CSS ne dépend de rien :
+ * le navigateur la tient de bout en bout, et son état final est l'état normal de
+ * l'élément. Elle passe au compositeur, en prime.
+ *
  * Les squelettes qui annonçaient leur forme sont partis avec la grille. Ils
  * existaient pour qu'aucun texte ne saute au moment du remplacement, ce qui est
  * la bonne règle dans une page ; dans une fenêtre, le changement de hauteur
@@ -40,29 +47,21 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
 type Concept = { id: string; concept: string; tags: string[] };
 
 /** Assez pour qu'on voie les dalles se poser, trop peu pour qu'on attende. */
-const ECART_S = 0.07;
+const ECART_MS = 70;
 
 export function PileDeConcepts({ concepts }: { concepts: Concept[] }) {
-  const immobile = useReducedMotion() ?? false;
-
   return (
     <ul className="gap-pas-3 flex flex-col">
       {concepts.map((concept, rang) => (
-        <motion.li
+        <li
           key={concept.id}
-          className="rounded-carte p-pas-dedans [&_code]:bg-jeton-clair [&_code]:border-jeton-bord-clair bg-stone-700"
-          initial={immobile ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={
-            immobile
-              ? undefined
-              : { duration: 0.45, delay: rang * ECART_S, ease: [0.2, 0.8, 0.2, 1] }
-          }
+          className="rounded-carte p-pas-dedans [&_code]:bg-jeton-clair [&_code]:border-jeton-bord-clair motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:fill-mode-backwards bg-stone-700"
+          style={{ animationDelay: `${rang * ECART_MS}ms` }}
         >
           <p className="text-h2-app leading-relaxed text-stone-50">
             <TexteTechnique>{concept.concept}</TexteTechnique>
           </p>
-        </motion.li>
+        </li>
       ))}
     </ul>
   );

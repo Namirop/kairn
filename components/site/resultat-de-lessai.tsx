@@ -5,6 +5,7 @@ import { AttenteAbandonnee, ConceptsEnAttente } from "@/components/site/concepts
 import { EchantillonDeQuestions } from "@/components/site/echantillon-de-questions";
 import { EssaiSansConcept } from "@/components/site/essai-sans-concept";
 import { PileDeConcepts } from "@/components/site/pile-de-concepts";
+import { Button } from "@/components/ui/button";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
@@ -96,12 +97,19 @@ export function ResultatDeLEssai({
 
         {/* Une pierre par concept, dessinée à partir de leurs identifiants :
             l'empilement est propre à ce dépôt-là et stable dans le temps. La
-            dernière se pose en arrivant, et c'est elle qui porte le lichen. */}
+            dernière se pose en arrivant, et c'est elle qui porte le lichen.
+
+            **Il se mesure en largeur.** Sa vue est aussi large qu'un cairn et
+            aussi haute qu'il a de pierres : bornée en hauteur, une pile d'une
+            seule pierre devient un galet de deux cents pixels de large qui
+            écrase le titre d'à côté — ce qui est exactement ce qui s'est passé.
+            Bornée en largeur, elle grandit vers le haut à mesure que les
+            concepts s'ajoutent, ce qui est le geste du produit. */}
         <Cairn
           nombre={combien}
           graines={avancement.concepts.map((concept) => concept.id)}
           clair
-          className="h-20 w-auto shrink-0 md:h-28"
+          className="h-auto w-20 shrink-0 md:w-28"
         />
       </header>
 
@@ -116,6 +124,26 @@ export function ResultatDeLEssai({
         attente={attente}
         onVerifier={onVerifier}
       />
+
+      {/* La porte de sortie, et elle est discrète à dessein.
+
+          Elle a vécu dans le pied, à droite de l'appel à garder, où elle serrait
+          la mention jusqu'à un mot par ligne sur un téléphone. Ici elle ferme la
+          descente, après tout ce qu'il y avait à voir — c'est le seul endroit où
+          proposer de recommencer à quelqu'un qu'on vient de convaincre ne coûte
+          rien, parce qu'il a déjà tout lu. Elle ne s'affiche que lorsque la base
+          l'accorde vraiment : deux essais par tranche de vingt-quatre heures. */}
+      {avancement.peutRedeposer ? (
+        <Button
+          type="button"
+          variant="linkClair"
+          size="sm"
+          className="self-start px-0"
+          onClick={surRedepot}
+        >
+          Déposer autre chose
+        </Button>
+      ) : null}
     </div>
   );
 }

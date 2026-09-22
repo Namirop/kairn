@@ -59,7 +59,7 @@ export function ConceptsEnAttente({ attente }: { attente: EtatDeLAttente }) {
   return (
     <div className="gap-pas-6 flex flex-col" role="status" aria-live="polite">
       <div className="gap-pas-4 flex items-center">
-        <PileEnConstruction className="w-10 shrink-0 md:w-14" />
+        <PileEnConstruction clair className="w-10 shrink-0 md:w-14" />
 
         <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-50">
           On découpe ton texte.

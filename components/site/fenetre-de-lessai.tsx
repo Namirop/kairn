@@ -85,7 +85,7 @@ export function FenetreDeLEssai({
         */}
         <div className="md:p-pas-8 fixed inset-0 z-50 flex md:items-center md:justify-center">
           <DialogPrimitive.Content
-            className="grain grain-clair md:rounded-carte data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 bg-surface-roche relative flex w-full flex-col overflow-hidden text-stone-50 outline-none md:max-h-[88svh] md:w-full md:max-w-3xl"
+            className="grain grain-clair md:rounded-carte data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 bg-surface-roche relative flex w-full flex-col overflow-hidden text-stone-50 outline-none md:max-h-[88svh] md:w-full md:max-w-4xl"
             aria-describedby={undefined}
           >
             <DialogPrimitive.Title className="sr-only">
@@ -93,12 +93,31 @@ export function FenetreDeLEssai({
             </DialogPrimitive.Title>
 
             {/*
+              La croix vit dans une barre, et pas en absolu par-dessus.
+
+              Posée en absolu dans le coin, elle se retrouvait sous le cairn de
+              l'en-tête du résultat — deux objets clairs au même endroit —, et
+              chaque écran de la fenêtre aurait dû réserver sa place dans son
+              propre coin. Une barre la met hors du chemin une fois pour toutes,
+              quel que soit ce qui suit ; sur la roche, elle ne se voit pas : il
+              n'y a que la croix.
+            */}
+            <div className="px-pas-3 pt-pas-3 md:px-pas-6 md:pt-pas-6 relative z-20 flex shrink-0 justify-end">
+              <DialogPrimitive.Close
+                className="inline-flex size-10 items-center justify-center rounded-xs text-stone-400 transition-colors hover:bg-stone-700 hover:text-stone-50"
+                aria-label="Fermer"
+              >
+                <X className="size-5" />
+              </DialogPrimitive.Close>
+            </div>
+
+            {/*
               Le contenu défile, la fenêtre non. C'est ce qui permet au grain de
               couvrir toute la surface — posé sur l'élément qui défile, il
               s'arrêterait au premier écran et laisserait la roche nue en
               dessous — et au pied de rester sous le pouce.
             */}
-            <div className="px-pas-6 py-pas-8 md:px-pas-12 md:py-pas-12 relative z-10 flex-1 overflow-y-auto">
+            <div className="px-pas-6 pb-pas-8 md:px-pas-12 md:pb-pas-12 relative z-10 flex-1 overflow-y-auto">
               {children}
             </div>
 
@@ -107,13 +126,6 @@ export function FenetreDeLEssai({
                 {pied}
               </div>
             ) : null}
-
-            <DialogPrimitive.Close
-              className="top-pas-4 right-pas-4 md:top-pas-6 md:right-pas-6 absolute z-20 inline-flex size-10 items-center justify-center rounded-xs text-stone-400 transition-colors hover:bg-stone-800 hover:text-stone-50"
-              aria-label="Fermer"
-            >
-              <X className="size-5" />
-            </DialogPrimitive.Close>
           </DialogPrimitive.Content>
         </div>
       </DialogPrimitive.Portal>

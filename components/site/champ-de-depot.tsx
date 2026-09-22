@@ -35,6 +35,13 @@ import type { RefObject } from "react";
  * texte sous le seuil. Elle se lit maintenant, et c'est la dalle qui l'empêche
  * de passer pour du texte de page — pas sa pâleur.
  *
+ * **Le rembourrage est sur le creux, pas sur le champ.** Le champ défile dans
+ * une hauteur fixe, donc son texte se coupe à son propre bord : posé à ras du
+ * creux, le rembourrage n'empêchait rien et la ligne coupée venait mourir dans
+ * l'angle arrondi de la dalle — on lisait un texte cassé plutôt qu'un texte qui
+ * continue. Le creux garde ses quatre marges, le champ se coupe à l'intérieur,
+ * et la coupure a de l'air en dessous d'elle.
+ *
  * **Sa hauteur est fixe, et c'est le champ qui défile.** Il grandissait avec son
  * contenu jusqu'à un plafond : à cette taille de corps, coller un article
  * faisait pousser un mur de lettres qui repoussait le bouton hors de l'écran, et
@@ -64,7 +71,7 @@ export function ChampDeDepot({
         Ce que tu veux retenir
       </label>
 
-      <div className="mt-pas-2 rounded-champ bg-surface-ombre px-pas-4 pt-pas-4 md:px-pas-6 md:pt-pas-6 focus-within:border-lichen-deep border-b-2 border-stone-300 transition-colors">
+      <div className="mt-pas-2 rounded-champ bg-surface-ombre p-pas-4 md:p-pas-6 focus-within:border-lichen-deep border-b-2 border-stone-300 transition-colors">
         <textarea
           ref={champ}
           id="essai"
@@ -74,7 +81,7 @@ export function ChampDeDepot({
           onChange={(evenement) => surTexte(evenement.target.value)}
           placeholder={invite}
           aria-invalid={enErreur}
-          className="pb-pas-4 md:pb-pas-6 font-display text-h1-app ascenseur-discret h-[clamp(7rem,22vh,13rem)] w-full resize-none overflow-y-auto border-0 bg-transparent leading-[1.12] font-bold tracking-[-0.02em] text-stone-900 outline-none placeholder:font-normal placeholder:tracking-normal placeholder:text-stone-500 focus-visible:outline-none"
+          className="font-display text-h1-app ascenseur-discret h-[clamp(7rem,22vh,13rem)] w-full resize-none overflow-y-auto border-0 bg-transparent leading-[1.12] font-bold tracking-[-0.02em] text-stone-900 outline-none placeholder:font-normal placeholder:tracking-normal placeholder:text-stone-500 focus-visible:outline-none"
         />
       </div>
     </div>

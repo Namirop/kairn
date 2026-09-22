@@ -60,12 +60,12 @@ export function EssaiRepris({
           <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] tabular-nums">
             {combien} {combien === 1 ? "concept" : "concepts"}
             <br />
-            t&apos;attendent.
+            {combien === 1 ? "t'attend." : "t'attendent."}
           </h2>
         </Temps>
 
         <Temps className="mt-pas-6">
-          <Cairn nombre={combien} graines={concepts} className="h-24 w-auto md:h-32" />
+          <Cairn nombre={combien} graines={concepts} className="h-auto w-20 md:w-28" />
         </Temps>
       </Apparition>
 
