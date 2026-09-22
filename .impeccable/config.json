@@ -11,6 +11,15 @@
         ],
         "createdAt": "2026-09-13T17:36:57.740Z",
         "reason": "Gabarit d'email HTML : les tailles sont en px en ligne, comme les six autres gabarits de lib/email/templates — un email ne peut pas lire les jetons du site."
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "components/site/champ-de-depot.tsx"
+        ],
+        "createdAt": "2026-09-22T21:02:45.749Z",
+        "reason": "Faux positif verifie au navigateur : rayon en haut (rounded-t-champ) et trait en bas (border-b-2) sont disjoints. borderBottomLeftRadius mesure 0px, le trait de 2px traverse d'un bord a l'autre sans rencontrer de courbe. Les angles du bas ont ete rendus vifs en 352144c precisement pour supprimer ce defaut."
       }
     ]
   }
