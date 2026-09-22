@@ -92,6 +92,24 @@ const COMBINAISONS: Combinaison[] = [
   // parcours de conversion du produit.
   { texte: "lichen", fond: "surface-roche", role: "focus sur roche", seuil: AA_LARGE },
   { texte: "lichen-deep", fond: "surface-papier", role: "focus sur papier", seuil: AA_LARGE },
+  // L'invite du champ de dépôt, posée sur le creux qui le dessine. Elle était en
+  // `stone-400`, qui n'y donne que 2,09 — et guère mieux sur le papier d'avant.
+  // C'est pourtant la seule phrase qui dise quoi mettre dans le champ : le pire
+  // endroit du produit où laisser du texte sous le seuil.
+  {
+    texte: "stone-500",
+    fond: "surface-ombre",
+    role: "invite du champ sur le creux",
+    seuil: AA_TEXTE,
+  },
+  // Le trait sous le champ, au repos puis au focus. Ce qu'un indicateur de focus
+  // doit franchir, ce n'est pas le fond : c'est **l'état d'avant**.
+  {
+    texte: "lichen-deep",
+    fond: "stone-300",
+    role: "focus du champ contre son repos",
+    seuil: AA_LARGE,
+  },
 ];
 
 function main(): void {

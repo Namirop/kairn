@@ -331,7 +331,10 @@ que personne n'écrit à côté.
 **Plat avec ombres réservées au cairn.** Aucun composant de l'interface ne
 porte d'ombre : la profondeur se joue via les quatre surfaces (papier → ombre
 → lichen → roche, du plus clair au plus foncé) et le grain overlay qui donne
-de la matière. **Une seule exception documentée** : les pierres du cairn
+de la matière. Sur les surfaces claires, un objet posé **descend** d'un cran
+(`--surface-ombre` sur du papier) ; sur la roche, il **monte** (`--stone-700`),
+parce qu'un objet posé y capte la lumière au lieu de creuser. `--stone-800` ne
+peut pas servir d'objet sur la roche : les deux valent le même `#2a2e2c`. **Une seule exception documentée** : les pierres du cairn
 peuvent acquérir une ombre légère au sol pour renforcer leur présence
 sculptée. Cette ombre-là n'est pas encore implémentée — c'est la direction, à
 poser quand le cairn signature entrera en scène en full plein écran.
@@ -402,16 +405,31 @@ autre radius n'est légitime.
 - **Primary** : fond `--stone-900`, texte `--stone-50`. Padding
   `0.75rem 2rem`. Hauteur minimum 44 px (cible tactile).
 - **Hover** : léger décalage vertical ou variation de teinte (pas d'ombre).
-- **Focus** : outline `--lichen-deep` 2 px, offset 2 px.
+- **Focus** : outline `--lichen-deep` 2 px, offset 2 px — et `--lichen` sur les
+  surfaces de roche, où le premier tombe à 2,48:1, sous le seuil d'un
+  indicateur de focus. Le crochet est `[data-surface="roche"]`, posé par
+  `Panneau` et par la fenêtre de l'essai.
 - **Character** : sobre, ferme, sans ornementation.
 
 ### Inputs
 
-- **Style** : **aucun fond, aucune bordure.** Un trait de 2 px sous le champ,
-  en `--stone-500`. Le champ s'écrit à même le papier.
+- **Style** : **aucune bordure, aucun contour.** Un trait de 2 px sous le
+  champ, visible au repos. Le champ s'écrit à même la surface.
 - **Focus** : le trait passe en `--lichen-deep`. Pas de changement d'épaisseur
-  (le bouton ne doit pas se décaler d'un pixel à chaque entrée).
-- **Character** : « un sol, pas une boîte ».
+  (le bouton ne doit pas se décaler d'un pixel à chaque entrée). Le changement
+  mesure 3,03:1 contre l'état de repos — au-dessus du seuil exigé d'un
+  indicateur de focus.
+- **Le creux, et lui seul** : un champ de **conversion** — celui de l'essai
+  public, où personne ne sait encore ce qu'on attend de lui — est creusé dans
+  sa surface (`--surface-ombre` dans du papier, `--r-champ`, le trait au bas du
+  creux). C'est un **creux, pas un contour** : un contour fait une boîte posée
+  sur la page, un creux est du terrain, et on dépose dans un creux. La règle du
+  sol survit intacte. Dans l'application, l'utilisateur sait déjà où il est :
+  le champ y reste nu — registre marketing contre registre interne.
+- **Texte d'invite** : `--stone-500` au minimum. `--stone-400` ne donne que
+  2,09:1 sur le creux, et c'est la seule phrase qui dise quoi mettre dans le
+  champ.
+- **Character** : « un sol, pas une boîte » — creusé là où il faut le montrer.
 
 ### Cartes (shadcn primitive retokenisée)
 
@@ -473,8 +491,9 @@ autre radius n'est légitime.
   une séquence.
 - **Don't** construire un hero avec grand titre centré + illustration
   abstraite décorative + trois cartes-features en dessous.
-- **Don't** enrober un champ de saisie dans une boîte. Un trait sous le champ
-  suffit.
+- **Don't** enrober un champ de saisie dans une boîte à contour. Un trait sous
+  le champ suffit dans l'application ; sur un champ de conversion, c'est un
+  creux de surface qui le signale, jamais une bordure.
 - **Don't** ajouter d'ombres à un composant. Seul le cairn en porte au sol.
 - **Don't** utiliser `--lichen` ou `--ember` en dehors de leurs emplois
   réservés — même « juste pour cette fois ».
