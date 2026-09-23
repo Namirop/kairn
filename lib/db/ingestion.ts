@@ -81,7 +81,7 @@ export async function lireDepot(inputId: string): Promise<Input | null> {
  */
 export async function enregistrerLExtraction(
   inputId: string,
-  lecture: { nature: InputNature; conceptsTronques: boolean },
+  lecture: { nature: InputNature; conceptsTronques: boolean; texteRetenu: string | null },
 ): Promise<void> {
   await prisma.input.update({ where: { id: inputId }, data: lecture });
 }

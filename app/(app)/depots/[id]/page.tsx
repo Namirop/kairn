@@ -60,7 +60,22 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
   // Lu seulement une fois la chaîne finie : c'est le seul état où le compte de
   // la journée tient compte de ce dépôt.
   const duJour = etat === "pret" ? await lireChargeDuJour(utilisateur.id) : null;
-  const texte = depot.rawContent.trim() || depot.extractedText || "";
+  const depose = depot.rawContent.trim() || depot.extractedText || "";
+  /*
+    Ce qu'on montre, c'est ce sur quoi on sera questionné.
+
+    Une consigne qui écarte une partie du dépôt — « ignore la barre latérale »,
+    « garde seulement ce qui concerne la syntaxe » — laissait quand même le
+    texte entier à l'écran, juste au-dessus des concepts tirés d'autre chose.
+    On y relit un passage dont rien ne sera jamais reposé, en croyant qu'il
+    compte.
+
+    Le dépôt, lui, n'a pas bougé d'un caractère : `rawContent` reste ce qui a
+    été posé, c'est lui qui repartirait au modèle, et la mention sous la carte
+    dit qu'une partie n'est pas montrée. Voir `lib/domain/texte-retenu.ts` pour
+    ce que la vue a dû prouver pour être gardée.
+  */
+  const texte = depot.texteRetenu ?? depose;
   // Les concepts que le modèle a marqués douteux, dans l'ordre de la liste :
   // c'est le premier qui porte l'ancre, et c'est vers lui que le chapeau mène.
   const aVerifier = depot.concepts.filter((concept) => concept.uncertain);
@@ -133,6 +148,13 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
             <div className="mt-pas-3 p-pas-4 text-petit rounded-carte bg-surface-ombre text-stone-700">
               <TexteRiche>{texte}</TexteRiche>
             </div>
+            {depot.texteRetenu ? (
+              <p className="mt-pas-2 text-petit text-stone-500">
+                Ta consigne écartait une partie de ce dépôt : elle n&apos;est pas montrée ici. Le
+                texte d&apos;origine, lui, est conservé tel que tu l&apos;as posé.
+              </p>
+            ) : null}
+
             {depot.texteTronque ? (
               <p className="mt-pas-2 text-petit text-stone-500">
                 La capture portait plus de texte qu&apos;un dépôt n&apos;en accepte. La lecture

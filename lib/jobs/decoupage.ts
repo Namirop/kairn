@@ -1,9 +1,10 @@
 import { callAI } from "@/lib/ai/client";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import { depotADecouper } from "@/lib/ai/prompts/depot-a-decouper";
-import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
+import { contratDExtraction } from "@/lib/ai/schemas";
 import { enregistrerConcepts, enregistrerLExtraction, lireDepot } from "@/lib/db/ingestion";
 import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
+import { texteRetenu } from "@/lib/domain/texte-retenu";
 import { marquerPretSiPlusRienEnAttente, marquerRejet } from "@/lib/db/fin-de-depot";
 import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { compterConceptsRetenus } from "@/lib/db/comptage-de-la-periode";
@@ -35,8 +36,14 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
     return;
   }
 
+  const consigne = depot.instruction?.trim() ?? "";
+
   const extraction = await callAI({
-    contract: EXTRACT_ATOMS,
+    // La consigne décide de la forme de la sortie comme elle décide de celle du
+    // message : sans elle, on ne demande pas au modèle de recopier la part
+    // gardée — il n'y a rien d'écarté, et le champ ferait écrire le dépôt une
+    // seconde fois pour rien. Voir `contratDExtraction`.
+    contract: contratDExtraction(consigne.length > 0),
     system: SYSTEM_PROMPTS.extract_atoms,
     jobId: job.id,
     userId: depot.userId ?? undefined,
@@ -52,6 +59,11 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
   await enregistrerLExtraction(depot.id, {
     nature: extraction.nature,
     conceptsTronques: extraction.tronque,
+    // Ce que la consigne a laissé, et seulement s'il en reste un extrait fidèle
+    // : `texteRetenu` refuse une paraphrase, un résumé, ou le dépôt entier
+    // rendu à l'identique. Un rendu infidèle ne casse rien — l'écran retombe
+    // sur le texte d'origine, qui est la vérité.
+    texteRetenu: texteRetenu(texte, extraction.retenu),
   });
 
   // Le compte rendu par le modèle, à chaque découpage : c'est la seule façon de

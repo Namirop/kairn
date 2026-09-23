@@ -75,6 +75,10 @@ const sortieLue = z.object({
     .string()
     .nullish()
     .describe("Une phrase à la deuxième personne. À omettre dès qu'un concept est extrait."),
+  retenu: z
+    .string()
+    .nullish()
+    .describe("Le dépôt débarrassé de ce que la consigne écartait, recopié mot pour mot."),
 });
 
 /**
@@ -84,7 +88,7 @@ const sortieLue = z.object({
  * objets jumeaux finiraient par diverger d'un champ, et c'est la validation qui
  * s'en apercevrait la première, après la dépense.
  */
-export const extractAtomsForme = sortieLue.extend({
+export const extractAtomsForme = sortieLue.omit({ retenu: true }).extend({
   atoms: z
     .array(
       atomeLu.extend({
@@ -124,6 +128,15 @@ const extractAtomsValidation = sortieLue.transform((sortie) => {
     // désaccord jetait l'extraction entière. Le compte tranche : s'il reste des
     // concepts, il n'y a pas de rejet, quoi que le modèle ait écrit.
     rejected: gardes.length === 0 ? (sortie.rejected ?? null) : null,
+    /**
+     * Ce que la consigne a laissé du dépôt, tel que le modèle l'a recopié.
+     *
+     * Brut ici, et vérifié ailleurs : c'est `texteRetenu` qui décide s'il est
+     * fidèle, et lui seul a le dépôt d'origine sous la main pour le dire. Un
+     * contrat ne peut pas valider une sortie contre une entrée qu'il ne voit
+     * pas.
+     */
+    retenu: sortie.retenu ?? null,
     /** Ce que le modèle avait rendu, avant le plafond. Pour le journal. */
     rendus: sortie.atoms.length,
     /** Combien se déclarent découler d'un voisin. Mesuré, jamais appliqué. */
@@ -134,8 +147,39 @@ const extractAtomsValidation = sortieLue.transform((sortie) => {
 
 export type ExtractAtomsOutput = z.infer<typeof extractAtomsValidation>;
 
-export const EXTRACT_ATOMS: AiContract<ExtractAtomsOutput> = {
-  purpose: "extract_atoms",
-  forme: extractAtomsForme,
-  validation: extractAtomsValidation,
-};
+/**
+ * La forme demandée quand le dépôt porte une consigne, et seulement alors.
+ *
+ * Le champ de plus coûte ce qu'il fait écrire : sur un dépôt de six mille
+ * signes, recopier la part gardée double la sortie de l'appel. Le montrer à
+ * chaque découpage ferait payer ce champ à tout le monde pour un cas sur vingt —
+ * et inviterait le modèle à le remplir là où il n'a rien à écarter. La consigne
+ * est déjà ce qui décide de la forme du **message** (voir `depotADecouper`) :
+ * elle décide aussi de celle de la sortie.
+ */
+const formeAvecConsigne = extractAtomsForme.extend({
+  retenu: z
+    .string()
+    .nullish()
+    .describe(
+      "Le dépôt recopié mot pour mot, débarrassé des seuls passages que la consigne écarte. À omettre si la consigne n'écarte aucun passage.",
+    ),
+});
+
+/**
+ * Le contrat du découpage, dans sa forme avec ou sans consigne.
+ *
+ * Même intention, donc même prompt système, même fixture et même ligne de
+ * registre : seule la forme montrée au modèle change. C'est le même geste que
+ * `contratDeGeneration`, pour la même raison — une variante de sortie ne
+ * justifie pas une seconde intention dans les comptes.
+ */
+export function contratDExtraction(avecConsigne: boolean): AiContract<ExtractAtomsOutput> {
+  return {
+    purpose: "extract_atoms",
+    forme: avecConsigne ? formeAvecConsigne : extractAtomsForme,
+    validation: extractAtomsValidation,
+  };
+}
+
+export const EXTRACT_ATOMS: AiContract<ExtractAtomsOutput> = contratDExtraction(false);

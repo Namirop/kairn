@@ -35,6 +35,14 @@ export type DepotDetaille = {
   extractedText: string | null;
   /** La consigne jointe au dépôt, ou rien. Relue pour être montrée, pas pour agir. */
   instruction: string | null;
+  /**
+   * Ce que la consigne a laissé du dépôt, quand elle en a écarté une part.
+   *
+   * Une vue vérifiée fidèle au dépôt, jamais une réécriture : voir
+   * `lib/domain/texte-retenu.ts`. Nulle sans consigne, et nulle quand la
+   * consigne oriente sans retrancher.
+   */
+  texteRetenu: string | null;
   status: InputStatus;
   failureReason: string | null;
   /** Le dépôt portait plus de concepts que le plafond ; on a gardé la tête. */
@@ -60,6 +68,7 @@ export async function lireDepotDetaille(
       rawContent: true,
       extractedText: true,
       instruction: true,
+      texteRetenu: true,
       status: true,
       failureReason: true,
       conceptsTronques: true,

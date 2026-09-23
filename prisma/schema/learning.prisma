@@ -68,6 +68,20 @@ model Input {
   /// les mêmes termes, et à l'écran du dépôt de montrer ce qu'on avait demandé.
   instruction String?
 
+  /// Ce que la consigne a laissé du dépôt, recopié mot pour mot par l'extraction.
+  ///
+  /// Une **vue**, jamais une réécriture : `rawContent` reste ce qui a été posé,
+  /// et c'est lui qui repart au modèle si l'on redécoupe un jour. Celle-ci ne
+  /// sert qu'à l'écran du dépôt, qui montrait le texte entier — barre latérale
+  /// comprise — juste au-dessus des concepts tirés de tout autre chose.
+  ///
+  /// Nulle presque partout : sans consigne, on ne la demande même pas au modèle
+  /// (voir `contratDExtraction`), et une consigne qui oriente sans retrancher
+  /// n'en produit aucune. Nulle aussi quand le rendu n'a pas passé la garde de
+  /// fidélité — voir `texteRetenu`, qui vérifie que chaque ligne vient bien du
+  /// dépôt.
+  texteRetenu String? @db.Text
+
   /// Clé d'un envoi, émise par le formulaire. Deux envois du même geste — double
   /// clic, reprise réseau — portent la même et ne créent qu'un dépôt.
   submissionKey String?

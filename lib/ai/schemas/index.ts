@@ -13,7 +13,12 @@ export {
   type AiPurposeBanc,
   type AiPurposeProduit,
 } from "./contract";
-export { EXTRACT_ATOMS, extractAtomsForme, type ExtractAtomsOutput } from "./extract-atoms";
+export {
+  contratDExtraction,
+  EXTRACT_ATOMS,
+  extractAtomsForme,
+  type ExtractAtomsOutput,
+} from "./extract-atoms";
 export {
   CONCEPTS_PAR_APPEL,
   contratDeGeneration,
