@@ -83,8 +83,41 @@ export function ResultatDeLEssai({
 
   return (
     <div className="gap-pas-8 md:gap-pas-12 flex flex-col" role="status">
-      <header className="gap-pas-4 md:gap-pas-8 flex items-start justify-between">
-        <div className="gap-pas-3 flex min-w-0 flex-col">
+      <header className="gap-pas-4 md:gap-pas-6 flex items-center">
+        {/* Une pierre par concept, dessinée à partir de leurs identifiants :
+            l'empilement est propre à ce dépôt-là et stable dans le temps. La
+            dernière se pose en arrivant, et c'est elle qui porte le lichen.
+
+            **Il se mesure en largeur.** Sa vue est aussi large qu'un cairn et
+            aussi haute qu'il a de pierres : bornée en hauteur, une pile d'une
+            seule pierre devient un galet de deux cents pixels de large qui
+            écrase le titre d'à côté — ce qui est exactement ce qui s'est passé.
+            Bornée en largeur, elle grandit vers le haut à mesure que les
+            concepts s'ajoutent, ce qui est le geste du produit.
+
+            **Il est passé à gauche du titre, centré sur sa hauteur.** Il tenait
+            le coin haut droit, où deux choses claires se disputaient la même
+            zone que la croix de fermeture, et où une pierre unique n'était plus
+            qu'un trait lumineux flottant au-dessus du vide. À gauche du nombre
+            qu'il dessine, les deux disent la même chose au même endroit — et le
+            centrage tient quel que soit le nombre de pierres, puisque c'est la
+            ligne qui centre et non une marge calculée.
+
+            **Et il attend d'avoir deux pierres.** Une pierre seule n'est pas un
+            empilement : la vue est large de cent unités pour une pierre haute de
+            quinze, donc à un concept la figure est une barre claire posée sur un
+            trait, qu'on lit comme une coquille plutôt que comme un cairn.
+            L'élargir ne fait qu'allonger la barre. */}
+        {combien > 1 ? (
+          <Cairn
+            nombre={combien}
+            graines={avancement.concepts.map((concept) => concept.id)}
+            clair
+            className="h-auto w-16 shrink-0 md:w-20"
+          />
+        ) : null}
+
+        <div className="gap-pas-2 flex min-w-0 flex-col">
           <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-50 tabular-nums">
             {combien} {combien === 1 ? "concept." : "concepts."}
           </h2>
@@ -95,23 +128,6 @@ export function ResultatDeLEssai({
               : "Chacun sera reposé séparément, au moment où tu allais l'oublier."}
           </p>
         </div>
-
-        {/* Une pierre par concept, dessinée à partir de leurs identifiants :
-            l'empilement est propre à ce dépôt-là et stable dans le temps. La
-            dernière se pose en arrivant, et c'est elle qui porte le lichen.
-
-            **Il se mesure en largeur.** Sa vue est aussi large qu'un cairn et
-            aussi haute qu'il a de pierres : bornée en hauteur, une pile d'une
-            seule pierre devient un galet de deux cents pixels de large qui
-            écrase le titre d'à côté — ce qui est exactement ce qui s'est passé.
-            Bornée en largeur, elle grandit vers le haut à mesure que les
-            concepts s'ajoutent, ce qui est le geste du produit. */}
-        <Cairn
-          nombre={combien}
-          graines={avancement.concepts.map((concept) => concept.id)}
-          clair
-          className="h-auto w-20 shrink-0 md:w-28"
-        />
       </header>
 
       <PileDeConcepts concepts={avancement.concepts} />
@@ -125,7 +141,6 @@ export function ResultatDeLEssai({
         attente={attente}
         onVerifier={onVerifier}
       />
-
     </div>
   );
 }
