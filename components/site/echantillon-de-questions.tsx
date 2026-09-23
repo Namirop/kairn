@@ -122,10 +122,20 @@ export function EchantillonDeQuestions({
           {/* Le bouton actif partage la surface de la carte qu'il commande :
               c'est ce qui les relie sans qu'aucune bordure ait à le dire. */}
           {montrables.length > 1 ? (
+            /* Quatre formats tiennent sur une ligne dans la fenêtre, et sur
+               aucun téléphone : « QCM TEXTE À TROU RÉPONSE COURTE CODE » fait
+               le double de la largeur disponible. Plié en `flex-wrap`, il
+               donnait trois noms puis un seul en dessous — la ligne orpheline
+               qu'on lit comme un oubli plutôt que comme une suite.
+
+               Deux colonnes de la largeur de leur contenu rendent le pli
+               régulier : deux et deux, chaque colonne réglée sur son nom le
+               plus long, et le bloc entier serré à gauche. Le même geste sert
+               aux propositions d'un QCM, pour la même raison. */
             <div
               role="group"
               aria-label="Format de la question"
-              className="gap-pas-1 flex flex-wrap"
+              className="gap-pas-1 grid grid-cols-[repeat(2,max-content)] justify-items-start md:flex md:flex-wrap"
             >
               {montrables.map((question, position) => (
                 <button

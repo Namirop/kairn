@@ -45,10 +45,15 @@ export function CarteDeLEchantillon({
           ligne, elles disent ce qu'elles sont — le choix qu'on aura — sans se
           donner pour cliquables.
 
+          Elles tiennent sur une ligne dans la fenêtre, et jamais sur un
+          téléphone : pliées au fil du texte, quatre propositions de longueurs
+          inégales donnaient trois puis une. Deux colonnes de la largeur de leur
+          contenu les rendent deux et deux, comme les noms de format au-dessus.
+
           La bonne n'est pas marquée, et elle n'est même pas descendue jusqu'ici :
           voir `optionsDUnQCM`. */}
       {options ? (
-        <ul className="gap-x-pas-4 gap-y-pas-1 mt-pas-4 text-petit flex flex-wrap text-stone-300">
+        <ul className="gap-x-pas-4 gap-y-pas-1 mt-pas-4 text-petit grid grid-cols-[repeat(2,max-content)] text-stone-300 md:flex md:flex-wrap">
           {options.map((option) => (
             <li key={option} className="before:mr-pas-2 before:text-stone-500 before:content-['—']">
               <TexteTechnique>{option}</TexteTechnique>

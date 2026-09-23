@@ -26,6 +26,17 @@ export type ExempleDeDepot = {
  * Trois, et de trois natures qui ne se recouvrent pas. Deux exemples techniques
  * diraient « c'est un outil pour développeurs » ; cinq exemples feraient une
  * liste qu'on lit au lieu d'un choix qu'on fait.
+ *
+ * **Les trois tiennent sur une ligne, et c'est une contrainte de mesure.** Sous
+ * le champ de l'essai, la colonne fait cinq cent soixante-seize points ; les
+ * étiquettes d'origine en demandaient cinq cent quatre-vingt-dix-neuf, donc la
+ * troisième passait seule à la ligne. Une puce orpheline se lit comme un ajout
+ * de dernière minute et non comme le troisième d'un choix de trois — la
+ * démonstration passe par le contraste des trois natures, et on ne la voit que
+ * si on les voit ensemble. « Un mot d'une autre langue » est donc devenu « Un
+ * mot étranger » : même nature, soixante-sept points de moins, et la ligne tient
+ * avec de la marge. Avant d'allonger l'une d'elles, vérifier qu'elles tiennent
+ * encore.
  */
 export const EXEMPLES_DE_DEPOT: readonly ExempleDeDepot[] = [
   {
@@ -34,7 +45,7 @@ export const EXEMPLES_DE_DEPOT: readonly ExempleDeDepot[] = [
       "Pour qu'une pâte à crêpes ne fasse pas de grumeaux, verser le lait froid en une fois sur la farine et fouetter depuis le centre. Le repos d'une heure n'a rien à voir avec les grumeaux : il détend le gluten, ce qui rend les crêpes souples plutôt que caoutchouteuses.",
   },
   {
-    etiquette: "Un mot d'une autre langue",
+    etiquette: "Un mot étranger",
     texte:
       "« Doch », en allemand, sert à contredire une phrase négative. À « Du kommst nicht mit? », on répond « Doch » pour dire « si, je viens ». Le français n'a que « si » pour ça, et l'anglais n'a rien.",
   },
