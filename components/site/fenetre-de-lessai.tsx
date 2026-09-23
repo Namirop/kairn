@@ -116,8 +116,15 @@ export function FenetreDeLEssai({
               couvrir toute la surface — posé sur l'élément qui défile, il
               s'arrêterait au premier écran et laisserait la roche nue en
               dessous — et au pied de rester sous le pouce.
+
+              Il défile avec l'ascenseur de la roche, et pas celui du système.
+              Sous Windows, celui-ci pose un rail gris clair sur toute la hauteur
+              du bord droit : sur une fenêtre sombre, c'est l'objet le plus
+              lumineux de l'écran, et le seul qui vienne d'un autre dessin que le
+              nôtre. Il ne disparaît pas pour autant — c'est la seule chose qui
+              dise qu'il reste des concepts sous le pli.
             */}
-            <div className="px-pas-6 pb-pas-8 md:px-pas-12 md:pb-pas-12 relative z-10 flex-1 overflow-y-auto">
+            <div className="px-pas-6 pb-pas-8 md:px-pas-12 md:pb-pas-12 ascenseur-sur-roche relative z-10 flex-1 overflow-y-auto">
               {children}
             </div>
 

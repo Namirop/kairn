@@ -425,6 +425,18 @@
 
     Il devient donc mince, sans rail, avec un pouce en gris de sol. Il dit encore
     où l'on est, il ne dit plus qui l'a dessiné.
+
+    **Et il faut deux écritures pour l'obtenir, pas une.** `scrollbar-width` et
+    `scrollbar-color` sont les propriétés standard, et c'est par elles qu'il faut
+    passer sur Firefox. Mais Chrome applique une règle d'exclusion : dès que
+    l'une des deux est posée, il ignore **toutes** les règles `::-webkit-` de
+    l'élément. Celles qui suivaient ici étaient donc mortes, et la barre restait
+    celle de Windows — rail compris, et surtout **les deux boutons fléchés** que
+    Chrome dessine depuis ses ascenseurs « Fluent », lesquels ne connaissent pas
+    `thin`. On repasse donc en `auto` là où `::-webkit-scrollbar` existe, ce qui
+    rend la main au chemin webkit ; Firefox, qui ne connaît pas le sélecteur,
+    garde les propriétés standard. Les deux ascenseurs du produit suivent la même
+    manœuvre, pour la même raison.
   */
   html {
     -webkit-text-size-adjust: 100%;
@@ -433,8 +445,19 @@
     scrollbar-color: var(--stone-300) transparent;
   }
 
+  @supports selector(::-webkit-scrollbar) {
+    html {
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+    }
+  }
+
   html::-webkit-scrollbar {
     width: 10px;
+  }
+
+  html::-webkit-scrollbar-button {
+    display: none;
   }
 
   html::-webkit-scrollbar-track {
@@ -591,8 +614,19 @@
   scrollbar-width: thin;
   scrollbar-color: var(--stone-300) transparent;
 
+  /* Voir l'ascenseur de la page : sans ce retour en `auto`, Chrome ignore tout
+     ce qui suit et garde ses boutons fléchés. */
+  @supports selector(::-webkit-scrollbar) {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+
   &::-webkit-scrollbar {
     width: 6px;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
   }
 
   &::-webkit-scrollbar-track {
@@ -620,9 +654,21 @@
   scrollbar-width: thin;
   scrollbar-color: var(--stone-500) transparent;
 
+  /* Voir l'ascenseur de la page : sans ce retour en `auto`, Chrome ignore tout
+     ce qui suit et garde ses boutons fléchés. C'est ce rail à flèches qui
+     traversait la fenêtre de l'essai sur toute sa hauteur. */
+  @supports selector(::-webkit-scrollbar) {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+
   &::-webkit-scrollbar {
     height: 6px;
     width: 6px;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
   }
 
   &::-webkit-scrollbar-track {
