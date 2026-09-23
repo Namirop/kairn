@@ -120,6 +120,13 @@ export function EssaiRepris({
           </p>
         </Temps>
 
+        {/* Les trois gestes sur une seule ligne, comme dans le pied de la
+            fenêtre. « Déposer autre chose » vivait en dessous, seul sur sa
+            ligne : un lien isolé sous deux boutons se lit comme un quatrième
+            niveau de hiérarchie alors que c'est la porte de sortie du même
+            groupe. Les trois font cinq cent dix points dans une colonne qui en
+            offre cinq cent soixante-seize, et le `flex-wrap` les replie sur un
+            téléphone. */}
         <Temps className="mt-pas-6 md:mt-pas-8">
           <div className="gap-pas-3 md:gap-pas-4 flex flex-wrap items-center">
             <Button asChild size="lg">
@@ -129,16 +136,14 @@ export function EssaiRepris({
             <Button type="button" variant="outline" onClick={surRevoir} autoFocus={prendLeFocus}>
               Revoir les concepts
             </Button>
+
+            {peutRedeposer ? (
+              <Button type="button" variant="link" size="sm" className="px-0" onClick={surRedepot}>
+                Déposer autre chose
+              </Button>
+            ) : null}
           </div>
         </Temps>
-
-        {peutRedeposer ? (
-          <Temps className="mt-pas-4">
-            <Button type="button" variant="link" size="sm" className="px-0" onClick={surRedepot}>
-              Déposer autre chose
-            </Button>
-          </Temps>
-        ) : null}
       </Apparition>
     </div>
   );
