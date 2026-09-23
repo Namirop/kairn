@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
@@ -16,18 +18,36 @@ import { ROUTES } from "@/lib/auth/routes";
  * `stone-900` sur `stone-50` ; posé sur la roche, il disparaîtrait dans son
  * propre fond. C'est la même figure retournée, pas un réglage de plus.
  *
- * **Il n'y a que deux choses ici, et il y en avait trois.** « Déposer autre
- * chose » y tenait la droite : à trois cent quatre-vingt-dix points, la mention
- * du milieu se retrouvait serrée dans une colonne de soixante pixels et tombait
- * à un mot par ligne. Le geste de sortie est parti au bas du corps, où il a la
- * place — et où il cesse de disputer sa ligne à l'appel qu'on cherche à
- * provoquer.
+ * **Le geste de sortie revient ici, et il s'empile au lieu de se serrer.** Il y
+ * a tenu la droite une première fois, en `flex-wrap` sur une seule ligne : à
+ * trois cent quatre-vingt-dix points, la mention du milieu se retrouvait coincée
+ * dans une colonne de soixante pixels et tombait à un mot par ligne. Il est
+ * alors parti au bas du corps, où il avait la place — mais où il flottait sous
+ * l'échantillon, seul objet cliquable d'un bas de page qui n'appelait rien.
  *
- * **Il s'empile sur téléphone.** Le bouton prend la largeur, la mention passe
- * dessous : sur un pied qui ne défile pas, une ligne qui se casse mal coûte la
- * moitié de la hauteur de la feuille.
+ * Les deux défauts ont la même origine : trois choses sur une ligne de
+ * téléphone. Le pied s'empile donc sur téléphone — le bouton prend la largeur,
+ * la mention passe dessous, la sortie en dernier — et ne redevient une ligne
+ * qu'à partir de `md`, où la sortie tient la droite sans serrer personne. Les
+ * trois gestes qui ferment l'essai sont au même endroit, et c'est là qu'on les
+ * cherche.
+ *
+ * **La mention a perdu sa clause du milieu.** Elle disait « Ton adresse suffit.
+ * On te les repose au bon moment, et tu récupères ceux-ci. » — et le titre de la
+ * fenêtre, trois lignes plus haut, dit déjà « Il te sera reposé seul, au moment
+ * où tu allais l'oublier. » On promettait deux fois la même chose dans le même
+ * écran, et c'est la seconde fois qui faisait passer le pied à trois lignes sur
+ * un téléphone et à deux sur le bureau. Ce qu'il reste est ce que le titre ne
+ * dit pas : ce qu'on demande, et ce qu'on garde.
  */
-export function GarderLesConcepts() {
+export function GarderLesConcepts({
+  peutRedeposer,
+  surRedepot,
+}: {
+  /** La base n'accorde que deux essais par tranche de vingt-quatre heures. */
+  peutRedeposer: boolean;
+  surRedepot: () => void;
+}) {
   return (
     <div className="gap-pas-2 md:gap-pas-4 flex flex-col md:flex-row md:items-center">
       <Button asChild size="lg" variant="clair" className="w-full md:w-auto">
@@ -35,8 +55,20 @@ export function GarderLesConcepts() {
       </Button>
 
       <span className="text-petit text-stone-300">
-        Ton adresse suffit. On te les repose au bon moment, et tu récupères ceux-ci.
+        Ton adresse suffit, et tu récupères ceux-ci.
       </span>
+
+      {peutRedeposer ? (
+        <Button
+          type="button"
+          variant="linkClair"
+          size="sm"
+          className="px-0 md:ml-auto shrink-0 self-start md:self-auto"
+          onClick={surRedepot}
+        >
+          Déposer autre chose
+        </Button>
+      ) : null}
     </div>
   );
 }

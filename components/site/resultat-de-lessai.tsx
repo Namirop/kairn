@@ -5,7 +5,6 @@ import { AttenteAbandonnee, ConceptsEnAttente } from "@/components/site/concepts
 import { EchantillonDeQuestions } from "@/components/site/echantillon-de-questions";
 import { EssaiSansConcept } from "@/components/site/essai-sans-concept";
 import { PileDeConcepts } from "@/components/site/pile-de-concepts";
-import { Button } from "@/components/ui/button";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
@@ -34,7 +33,9 @@ import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
  * **L'appel à garder n'est plus au bout de la descente**, il est dans le pied
  * de la fenêtre, qui ne défile pas. Sur un téléphone, un appel posé à la fin
  * d'une liste de huit concepts se trouve à deux écrans du pouce, et c'est la
- * seule conversion de la page. Voir `GarderLesConcepts`.
+ * seule conversion de la page. Voir `GarderLesConcepts` — qui porte aussi,
+ * depuis, la porte de sortie : elle fermait la descente, où elle flottait seule
+ * sous l'échantillon. Les gestes qui terminent l'essai sont au même endroit.
  *
  * **Le jeu d'attente est parti.** Il occupait un panneau de dix-huit rem à
  * droite : on empilait des pierres à la souris pendant que le découpage
@@ -125,25 +126,6 @@ export function ResultatDeLEssai({
         onVerifier={onVerifier}
       />
 
-      {/* La porte de sortie, et elle est discrète à dessein.
-
-          Elle a vécu dans le pied, à droite de l'appel à garder, où elle serrait
-          la mention jusqu'à un mot par ligne sur un téléphone. Ici elle ferme la
-          descente, après tout ce qu'il y avait à voir — c'est le seul endroit où
-          proposer de recommencer à quelqu'un qu'on vient de convaincre ne coûte
-          rien, parce qu'il a déjà tout lu. Elle ne s'affiche que lorsque la base
-          l'accorde vraiment : deux essais par tranche de vingt-quatre heures. */}
-      {avancement.peutRedeposer ? (
-        <Button
-          type="button"
-          variant="linkClair"
-          size="sm"
-          className="self-start px-0"
-          onClick={surRedepot}
-        >
-          Déposer autre chose
-        </Button>
-      ) : null}
     </div>
   );
 }

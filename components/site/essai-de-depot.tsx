@@ -133,7 +133,14 @@ export function EssaiDeDepot({
       <FenetreDeLEssai
         ouverte={fenetreOuverte}
         surFermeture={fermerLaFenetre}
-        pied={concepts.length > 0 ? <GarderLesConcepts /> : undefined}
+        pied={
+          concepts.length > 0 ? (
+            <GarderLesConcepts
+              peutRedeposer={montre?.peutRedeposer ?? false}
+              surRedepot={redeposer}
+            />
+          ) : undefined
+        }
       >
         <ResultatDeLEssai
           avancement={montre}
