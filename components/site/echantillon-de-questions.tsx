@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useArriveeDesQuestions } from "@/components/site/use-arrivee-des-questions";
 import { CarteDeLEchantillon } from "@/components/site/carte-de-lechantillon";
 import { LIBELLE_FORMAT } from "@/components/depots/libelle-format";
 import { parOrdreDeFormat } from "@/components/depots/ordre-des-formats";
@@ -93,6 +94,9 @@ export function EchantillonDeQuestions({
   const [rang, setRang] = useState(0);
 
   const montrables = parOrdreDeFormat(unParFormat(questions));
+  // Les questions arrivent après les concepts, donc sous le pli : on va les
+  // chercher. Voir `useArriveeDesQuestions`.
+  const ancre = useArriveeDesQuestions(montrables.length);
 
   if (montrables.length === 0) {
     return enCours ? (
@@ -103,7 +107,7 @@ export function EchantillonDeQuestions({
   const montree = montrables[Math.min(rang, montrables.length - 1)];
 
   return (
-    <section className="gap-pas-3 flex flex-col">
+    <section ref={ancre} className="gap-pas-3 scroll-mt-pas-6 flex flex-col">
       <header className="gap-pas-2 flex flex-col">
         <h3 className="font-display text-h1-app leading-tight font-bold tracking-[-0.02em] text-stone-50 tabular-nums">
           {montrables.length > 1
@@ -111,7 +115,15 @@ export function EchantillonDeQuestions({
             : "Une question sur l'un d'eux."}
         </h3>
 
-        <p className="text-petit max-w-xl text-stone-300">
+        {/* Sans mesure maximale, et c'est le seul texte de la fenêtre dans ce
+            cas. La règle du produit borne une colonne de lecture à une
+            soixantaine de signes ; celle-ci en fait cent quatre, mais c'est une
+            phrase unique sous un titre, pas un paragraphe — pliée en deux, elle
+            fabrique un bloc de texte là où il n'y a qu'une légende, et pousse
+            les formats d'une ligne vers le bas. Elle tient dans la fenêtre
+            (sept cent dix-sept points pour huit cents) et se plie d'elle-même
+            sur un téléphone. */}
+        <p className="text-petit text-stone-300">
           Elles tournent d&apos;un passage à l&apos;autre. C&apos;est le concept qui doit tenir, pas
           une phrase apprise par cœur.
         </p>
