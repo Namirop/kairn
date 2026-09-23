@@ -43,7 +43,7 @@ export default async function CoquilleApplication({ children }: { children: Reac
       <div className="bg-surface-papier flex min-h-dvh flex-col">
         <Rail administrateur={administrateur} />
         <div className="flex flex-1 flex-col md:pl-28">
-          <EnTete utilisateur={utilisateur} />
+          <EnTete />
           {/* Aucune mesure ici, et aucun rembourrage : chaque écran est une
               pile de panneaux qui porte les siens. Un conteneur à cet endroit
               empêcherait un fond d'aller d'un bord à l'autre, et une marge
