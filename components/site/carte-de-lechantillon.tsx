@@ -45,15 +45,21 @@ export function CarteDeLEchantillon({
           ligne, elles disent ce qu'elles sont — le choix qu'on aura — sans se
           donner pour cliquables.
 
-          Elles tiennent sur une ligne dans la fenêtre, et jamais sur un
-          téléphone : pliées au fil du texte, quatre propositions de longueurs
-          inégales donnaient trois puis une. Deux colonnes de la largeur de leur
-          contenu les rendent deux et deux, comme les noms de format au-dessus.
+          Elles tiennent sur une ligne dans la fenêtre, et **une par ligne** sur
+          un téléphone. Deux colonnes de la largeur de leur contenu ont été
+          essayées d'abord, pour le pli régulier des noms de format au-dessus —
+          mais un format a quatre libellés connus d'avance, une proposition de
+          QCM n'a aucune longueur maximale. « Pour saluer quelqu'un avec
+          insistance » et « Pour contredire une phrase négative » côte à côte
+          faisaient quatre cent cinquante points dans une fenêtre qui en offre
+          trois cent trente : les propositions sortaient de la carte et rendaient
+          toute la fenêtre défilable en largeur, ce qu'aucun écran du produit ne
+          doit être. Une colonne ne peut pas déborder : le texte s'y plie.
 
           La bonne n'est pas marquée, et elle n'est même pas descendue jusqu'ici :
           voir `optionsDUnQCM`. */}
       {options ? (
-        <ul className="gap-x-pas-4 gap-y-pas-1 mt-pas-4 text-petit grid grid-cols-[repeat(2,max-content)] text-stone-300 md:flex md:flex-wrap">
+        <ul className="gap-x-pas-4 gap-y-pas-1 mt-pas-4 text-petit grid grid-cols-1 text-stone-300 md:flex md:flex-wrap">
           {options.map((option) => (
             <li key={option} className="before:mr-pas-2 before:text-stone-500 before:content-['—']">
               <TexteTechnique>{option}</TexteTechnique>
