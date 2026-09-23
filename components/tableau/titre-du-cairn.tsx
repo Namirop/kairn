@@ -15,6 +15,17 @@ import { IndiceTactile, Infobulle } from "@/components/ui/infobulle";
  *
  * Le compte reste dit sans toucher à rien pour qui ne touche à rien : `Cairn`
  * porte son `aria-label`, et il énonce le nombre de pierres.
+ *
+ * **Les capitales se posent sur le déclencheur, et pas seulement sur le titre.**
+ * `Infobulle` rend un `<button>`, et la feuille de style par défaut des
+ * navigateurs y écrit `text-transform: none` — c'est une coupure d'héritage
+ * volontaire, faite pour que les commandes de formulaire ne subissent pas la
+ * casse de leur page. La `preflight` de Tailwind rétablit la police, la graisse,
+ * l'interlettrage et la couleur sur les boutons, mais pas la casse. « TON
+ * CAIRN » retombait donc en « Ton cairn » à côté de « SÉRIE » et « NIVEAU »,
+ * dont les étiquettes, elles, vivent **dans** le bouton et non autour. Deux
+ * étiquettes de même rôle sur le même panneau, dont l'une seule en capitales,
+ * se lisent comme deux polices.
  */
 
 /**
@@ -32,7 +43,7 @@ export function TitreDuCairn({ retenus }: { retenus: number }) {
   return (
     <h2 className="text-mono font-mono tracking-[0.14em] text-stone-300 uppercase">
       <Infobulle
-        className="rounded-galet gap-pas-1 inline-flex items-center"
+        className="rounded-galet gap-pas-1 inline-flex items-center uppercase"
         contenu={legende(retenus)}
       >
         Ton cairn
