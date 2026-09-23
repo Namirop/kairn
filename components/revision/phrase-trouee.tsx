@@ -106,15 +106,21 @@ export function PhraseTrouee({
           );
 
         return segment.code ? (
-          // Un jeton qui porte le trou ne se coupe pas en bout de ligne : la
-          // moitié du terme restait au-dessus de son emplacement, avec un fond de
-          // jeton fendu en deux. Les jetons courts non plus, pour la raison que
-          // dit `jetonInsecable` — deux cadres pleins se lisent comme deux termes.
+          // Un jeton court ne se coupe pas en bout de ligne, qu'il porte un trou
+          // ou non : deux cadres pleins se lisent comme deux termes, et la moitié
+          // d'un terme troué se retrouve au-dessus de son emplacement. Voir
+          // `jetonInsecable`.
+          //
+          // **Un jeton long se coupe, même troué.** Il ne l'a pas toujours fait,
+          // et c'est le seul extrait de plusieurs mots du produit qui en a
+          // souffert : `function dernier(valeurs) { return ___; }` tenait sur une
+          // ligne insécable de quarante signes, donc il sortait de la carte par la
+          // droite sur un téléphone — on lisait la moitié d'une question. Un trou
+          // qui ouvre la ligne suivante est un défaut de composition ; un énoncé
+          // coupé au milieu n'est plus un énoncé.
           <code
             key={rang}
-            className={`${JETON} ${
-              suite.length === 0 && !jetonInsecable(segment.texte) ? "" : "whitespace-nowrap"
-            }`}
+            className={`${JETON} ${jetonInsecable(segment.texte) ? "whitespace-nowrap" : ""}`}
           >
             {contenu}
           </code>
