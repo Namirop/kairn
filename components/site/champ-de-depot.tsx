@@ -1,6 +1,8 @@
 "use client";
 
-import type { RefObject } from "react";
+import { useState, type RefObject } from "react";
+import { Maximize2 } from "lucide-react";
+import { ChampEnGrand } from "@/components/site/champ-en-grand";
 import { VoileDeFin } from "@/components/site/voile-de-fin";
 
 /**
@@ -72,6 +74,13 @@ import { VoileDeFin } from "@/components/site/voile-de-fin";
  * `VoileDeFin`. Le clavier, lui, n'a jamais eu besoin de la barre : le curseur
  * emmène la vue avec lui.
  *
+ * **Et pour le reste, il y a la loupe.** Un fondu dit qu'il y a une suite, il ne
+ * la montre pas : sur un texte collé de deux mille signes, la relecture par une
+ * meurtrière de quatre lignes reste une corvée. Le bouton d'agrandissement ouvre
+ * la même zone au milieu de l'écran — voir `ChampEnGrand`. Il vit dans la ligne
+ * de l'intitulé plutôt que dans le coin du creux : posé sur la dalle, il aurait
+ * fallu réserver sa place sur chaque ligne du texte pour qu'aucune ne passe
+ * dessous.
  */
 export function ChampDeDepot({
   champ,
@@ -86,16 +95,31 @@ export function ChampDeDepot({
   surTexte: (valeur: string) => void;
   enErreur: boolean;
 }) {
+  const [enGrand, setEnGrand] = useState(false);
+
   return (
     <div>
       {/* L'intitulé est collé à sa dalle et détaché du reste : la proximité fait
-          le groupe, et c'est elle qui dit où commence et où finit la zone. */}
-      <label
-        htmlFor="essai"
-        className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase"
-      >
-        Ce que tu veux retenir
-      </label>
+          le groupe, et c'est elle qui dit où commence et où finit la zone. La
+          loupe tient l'autre bout de cette ligne — c'est le seul geste qui porte
+          sur la zone entière, et il n'a donc pas à vivre dedans. */}
+      <div className="gap-pas-3 flex items-center justify-between">
+        <label
+          htmlFor="essai"
+          className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase"
+        >
+          Ce que tu veux retenir
+        </label>
+
+        <button
+          type="button"
+          onClick={() => setEnGrand(true)}
+          aria-label="Écrire en grand"
+          className="-my-pas-2 rounded-xs px-pas-2 py-pas-2 inline-flex items-center text-stone-500 transition-colors hover:text-stone-900"
+        >
+          <Maximize2 className="size-4" />
+        </button>
+      </div>
 
       <div className="mt-pas-2 rounded-t-champ bg-surface-ombre p-pas-4 md:p-pas-6 focus-within:border-lichen-deep relative border-b-2 border-stone-300 transition-colors">
         <textarea
@@ -112,6 +136,14 @@ export function ChampDeDepot({
 
         <VoileDeFin zone={champ} contenu={texte} />
       </div>
+
+      <ChampEnGrand
+        ouvert={enGrand}
+        surFermeture={() => setEnGrand(false)}
+        invite={invite}
+        texte={texte}
+        surTexte={surTexte}
+      />
     </div>
   );
 }
