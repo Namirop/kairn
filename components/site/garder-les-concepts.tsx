@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PorteDeSortie } from "@/components/site/porte-de-sortie";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
@@ -42,10 +43,13 @@ import { ROUTES } from "@/lib/auth/routes";
  */
 export function GarderLesConcepts({
   peutRedeposer,
+  chaineFinie,
   surRedepot,
 }: {
   /** La base n'accorde que deux essais par tranche de vingt-quatre heures. */
   peutRedeposer: boolean;
+  /** L'extraction est allée au bout : avant, il n'y a rien à dire de la suite. */
+  chaineFinie: boolean;
   surRedepot: () => void;
 }) {
   return (
@@ -58,17 +62,14 @@ export function GarderLesConcepts({
         Ton adresse suffit, et tu récupères ceux-ci.
       </span>
 
-      {peutRedeposer ? (
-        <Button
-          type="button"
-          variant="linkClair"
-          size="sm"
-          className="px-0 md:ml-auto shrink-0 self-start md:self-auto"
-          onClick={surRedepot}
-        >
-          Déposer autre chose
-        </Button>
-      ) : null}
+      <span className="md:ml-auto shrink-0 self-start md:self-auto">
+        <PorteDeSortie
+          peutRedeposer={peutRedeposer}
+          chaineFinie={chaineFinie}
+          surRedepot={surRedepot}
+          clair
+        />
+      </span>
     </div>
   );
 }

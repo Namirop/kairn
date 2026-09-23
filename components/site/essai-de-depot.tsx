@@ -110,6 +110,7 @@ export function EssaiDeDepot({
         <EssaiRepris
           concepts={concepts.map((concept) => concept.id)}
           peutRedeposer={montre?.peutRedeposer ?? false}
+          chaineFinie={montre !== null && !montre.enCours}
           surRevoir={() => setFenetreOuverte(true)}
           surRedepot={redeposer}
           prendLeFocus={rendreLeFocus}
@@ -137,6 +138,7 @@ export function EssaiDeDepot({
           concepts.length > 0 ? (
             <GarderLesConcepts
               peutRedeposer={montre?.peutRedeposer ?? false}
+              chaineFinie={montre !== null && !montre.enCours}
               surRedepot={redeposer}
             />
           ) : undefined

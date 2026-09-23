@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Cairn } from "@/components/cairn/cairn";
 import { Apparition, Temps } from "@/components/site/apparition";
+import { PorteDeSortie } from "@/components/site/porte-de-sortie";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
@@ -71,6 +72,7 @@ import { ROUTES } from "@/lib/auth/routes";
 export function EssaiRepris({
   concepts,
   peutRedeposer,
+  chaineFinie,
   surRevoir,
   surRedepot,
   prendLeFocus,
@@ -78,6 +80,8 @@ export function EssaiRepris({
   /** Les identifiants des concepts : le cairn s'en sert pour ses formes. */
   concepts: string[];
   peutRedeposer: boolean;
+  /** L'extraction est allée au bout : avant, il n'y a rien à dire de la suite. */
+  chaineFinie: boolean;
   surRevoir: () => void;
   surRedepot: () => void;
   /**
@@ -137,11 +141,11 @@ export function EssaiRepris({
               Revoir les concepts
             </Button>
 
-            {peutRedeposer ? (
-              <Button type="button" variant="link" size="sm" className="px-0" onClick={surRedepot}>
-                Déposer autre chose
-              </Button>
-            ) : null}
+            <PorteDeSortie
+              peutRedeposer={peutRedeposer}
+              chaineFinie={chaineFinie}
+              surRedepot={surRedepot}
+            />
           </div>
         </Temps>
       </Apparition>
