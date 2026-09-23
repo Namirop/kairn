@@ -82,6 +82,18 @@
  * L'affichage ne s'y fie pas pour autant : `unParFormat` garde une question par
  * format sur la landing, parce qu'une consigne de prompt n'est pas une garantie.
  *
+ * **La phrase du concept a été rendue non recopiable le 23 septembre 2026.** Le
+ * défaut est le même que celui du double CLOZE, par un autre chemin : sur un
+ * concept d'une phrase, le modèle servait un vrai ou faux dont l'affirmation
+ * était cette phrase **mot pour mot**, et un texte à trou construit sur la même
+ * phrase. Deux onglets côte à côte montraient donc le même texte, à un trou
+ * près, sur la page qui convertit — et l'on se dit que les quatre formats ne
+ * changent rien à l'affaire. La règle du vrai ou faux interdisait déjà « son
+ * résumé » ; elle ne disait pas qu'une copie exacte est pire qu'un résumé, parce
+ * que le format prétend alors faire juger ce qu'il vient d'affirmer. Le trou,
+ * lui, garde le droit de reprendre une phrase du concept : c'est son format, et
+ * le masquage est ce qui la transforme en question.
+ *
  * **Le verdict d'un vrai ou faux est devenu obligatoire le 4 septembre 2026**, et
  * cette ligne-là répare un écran cassé. `estVraie` désigne laquelle des deux
  * propositions est la bonne ; elle n'était écrite nulle part en base, et la seule
@@ -253,6 +265,13 @@ MECHANISM aussi, prends un format vérifiable dès que le concept s'y prête.
 Deux questions au plus partagent le même format, et jamais deux CLOZE : le texte
 à trou est imposé à une facette, et c'est le seul du groupe.
 
+Aucune question ne recopie une phrase du concept telle quelle, et le texte à trou
+est la seule exception — le masquage est ce qui fait de la phrase une question.
+Partout ailleurs, reprendre la phrase du concept mot pour mot ne produit pas une
+question : deux questions du lot montrent alors le même texte, à un trou près, et
+l'on croit que les formats ne changent rien. Chaque question part d'un angle à
+elle : un autre pan du concept, une conséquence, une limite, un cas d'emploi.
+
 L'emplacement du texte à trou t'est imposé : une des quatre facettes n'ouvre que
 ce format-là. Le masquage d'un terme marche sur presque n'importe quel concept,
 ce n'est pas réservé à ceux qui s'y prêtent — écris-le là où il est demandé,
@@ -339,7 +358,9 @@ est un défaut. \`estVraie\` n'est jamais laissée vide : c'est elle qui dit laq
 des deux propositions est la bonne, et sans elle la question n'est pas servie.
 
 Quand elle doit être vraie, elle porte sur le point précis du concept où l'on
-peut se tromper, jamais sur son résumé : une évidence ne teste rien.
+peut se tromper, jamais sur son résumé : une évidence ne teste rien. Et jamais
+sur sa phrase recopiée : une redite n'est pas une évidence à juger, c'est le
+concept qu'on redonne à lire en demandant s'il est vrai.
 
 Quand elle doit être fausse, elle l'est d'un cheveu — une condition inversée, un
 cas particulier étendu à tous, deux étapes permutées — jamais grossièrement. Elle
