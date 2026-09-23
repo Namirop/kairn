@@ -1,6 +1,7 @@
 "use client";
 
 import type { RefObject } from "react";
+import { VoileDeFin } from "@/components/site/voile-de-fin";
 
 /**
  * L'endroit où l'on dépose : une dalle creusée dans le papier.
@@ -53,6 +54,24 @@ import type { RefObject } from "react";
  * contenu jusqu'à un plafond : à cette taille de corps, coller un article
  * faisait pousser un mur de lettres qui repoussait le bouton hors de l'écran, et
  * la page entière se réorganisait à chaque paragraphe collé.
+ *
+ * **Le texte déposé n'est plus en display, et il n'est plus gras.** Il l'était —
+ * quarante pixels de Bricolage en gras —, et à cette échelle une recette de
+ * crêpes prenait la forme d'un titre de campagne : quatre mots par ligne, un
+ * pavé d'encre, et la sensation d'écrire dans une affiche plutôt que dans un
+ * champ. La règle du système le disait déjà : la display est réservée aux titres
+ * et aux grands nombres, et ce qu'on colle ici n'est ni l'un ni l'autre. Il garde
+ * le corps d'un énoncé, qui est le rôle exact de ce qu'il porte — le contenu
+ * qu'on aura à relire —, dans la police de texte et à graisse normale. C'est
+ * toujours le champ héros du formulaire ; il ne crie plus.
+ *
+ * **Son ascenseur est parti, et un fondu le remplace.** Une barre système en
+ * travers d'un creux de papier était le seul objet de la page dessiné par
+ * quelqu'un d'autre. Le texte qui continue se dit maintenant par l'encre qui
+ * s'efface au bas de la dalle, et seulement quand il continue vraiment — voir
+ * `VoileDeFin`. Le clavier, lui, n'a jamais eu besoin de la barre : le curseur
+ * emmène la vue avec lui.
+ *
  */
 export function ChampDeDepot({
   champ,
@@ -78,7 +97,7 @@ export function ChampDeDepot({
         Ce que tu veux retenir
       </label>
 
-      <div className="mt-pas-2 rounded-t-champ bg-surface-ombre p-pas-4 md:p-pas-6 focus-within:border-lichen-deep border-b-2 border-stone-300 transition-colors">
+      <div className="mt-pas-2 rounded-t-champ bg-surface-ombre p-pas-4 md:p-pas-6 focus-within:border-lichen-deep relative border-b-2 border-stone-300 transition-colors">
         <textarea
           ref={champ}
           id="essai"
@@ -88,8 +107,10 @@ export function ChampDeDepot({
           onChange={(evenement) => surTexte(evenement.target.value)}
           placeholder={invite}
           aria-invalid={enErreur}
-          className="font-display text-h1-app ascenseur-discret h-[clamp(7rem,22vh,13rem)] w-full resize-none overflow-y-auto border-0 bg-transparent leading-[1.12] font-bold tracking-[-0.02em] text-stone-900 outline-none placeholder:font-normal placeholder:tracking-normal placeholder:text-stone-500 focus-visible:outline-none"
+          className="text-enonce sans-ascenseur h-[clamp(7rem,22vh,13rem)] w-full resize-none overflow-y-auto border-0 bg-transparent leading-[1.35] text-stone-900 outline-none placeholder:text-stone-500 focus-visible:outline-none"
         />
+
+        <VoileDeFin zone={champ} contenu={texte} />
       </div>
     </div>
   );
