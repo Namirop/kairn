@@ -182,7 +182,11 @@ export function FormulaireDepot({
           déjà à deux boutons ; à trois, elle rendait sur un téléphone trois
           petits boutons empilés au fer à gauche dont le dernier était le seul
           qui compte. Il prend donc la largeur, comme tous les gestes principaux
-          du produit en mobile. */}
+          du produit en mobile.
+
+          Les deux facultatifs, eux, tiennent maintenant leur ligne sur un
+          téléphone : c'est leur libellé qui se raccourcit, pas la rangée qui
+          s'enroule. Voir `libelle-qui-se-raccourcit.tsx`. */}
       <div className="gap-pas-4 flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between">
         <div className="gap-pas-3 flex flex-wrap items-center">
           <PieceJointe fichier={capture} onChoisir={choisirLaCapture} />

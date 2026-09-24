@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Paperclip, X } from "lucide-react";
+import { LibelleQuiSeRaccourcit } from "@/components/depots/libelle-qui-se-raccourcit";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -68,7 +69,10 @@ export function PieceJointe({
       />
       <Button type="button" variant="outline" size="sm" onClick={() => champ.current?.click()}>
         <Paperclip aria-hidden />
-        {fichier ? "Changer la capture" : "Joindre une capture"}
+        <LibelleQuiSeRaccourcit
+          complet={fichier ? "Changer la capture" : "Joindre une capture"}
+          court={fichier ? "Changer" : "Capture"}
+        />
       </Button>
 
       {fichier ? (

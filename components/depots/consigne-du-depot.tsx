@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { PenLine, X } from "lucide-react";
+import { LibelleQuiSeRaccourcit } from "@/components/depots/libelle-qui-se-raccourcit";
 import { Button } from "@/components/ui/button";
 import { CONSIGNE_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 
@@ -29,7 +30,7 @@ export function BoutonDeConsigne({ onOuvrir }: { onOuvrir: () => void }) {
   return (
     <Button type="button" variant="outline" size="sm" onClick={onOuvrir}>
       <PenLine aria-hidden />
-      Ajouter une consigne
+      <LibelleQuiSeRaccourcit complet="Ajouter une consigne" court="Consigne" />
     </Button>
   );
 }
