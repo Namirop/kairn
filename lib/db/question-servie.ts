@@ -4,6 +4,7 @@ import { trouSansRedite } from "@/lib/domain/bord-du-trou";
 import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
 import { joursEntre, localDay } from "@/lib/domain/local-day";
 import { tagsSansReponse } from "@/lib/domain/tags-sans-reponse";
+import { phraseSansDevoilement } from "@/lib/domain/trou-devoile";
 
 /**
  * Une question telle qu'un écran la reçoit, quel que soit le mode.
@@ -140,16 +141,25 @@ export function optionsDUnQCM(format: VariantFormat, payload: unknown): string[]
  * illisible, auquel cas la question repart en format ouvert plutôt que de poser
  * un champ de saisie que rien ne pourra vérifier.
  *
- * Le terme attendu est rendu à sa juste longueur au passage : quand il redit un
- * mot posé contre le trou, la phrase l'affiche deux fois et la comparaison
- * refuse la bonne réponse. Voir `trouSansRedite`.
+ * Deux réparations à la lecture, dans cet ordre — c'est le seul endroit qui
+ * rattrape aussi les questions déjà écrites : le terme est rendu à sa juste
+ * longueur quand il redit un mot posé contre le trou (`trouSansRedite`), puis
+ * ce qu'il en reste est masqué partout où la phrase le réécrit en clair, sans
+ * quoi il n'y a plus qu'à recopier (`phraseSansDevoilement`).
+ *
+ * **Exporté parce que la vitrine de l'essai lit les mêmes questions**, et qu'une
+ * seconde lecture du même `payload` finirait par diverger de celle-ci.
  */
-function lireTrou(format: VariantFormat, payload: unknown): QuestionServie["cloze"] {
+export function texteATrouServi(format: VariantFormat, payload: unknown): QuestionServie["cloze"] {
   if (format !== "CLOZE") return null;
 
   const lu = PAYLOAD_CLOZE.safeParse(payload);
 
-  return lu.success ? trouSansRedite(lu.data) : null;
+  if (!lu.success) return null;
+
+  const rogne = trouSansRedite(lu.data);
+
+  return { ...rogne, sentence: phraseSansDevoilement(rogne.sentence, rogne.accepted[0] ?? "") };
 }
 
 export function questionServie(
@@ -159,7 +169,7 @@ export function questionServie(
   repere?: { maintenant: Date; fuseau: string },
 ): QuestionServie {
   const choix = lireChoix(variante.format, variante.payload, variante.answerKey);
-  const trou = lireTrou(variante.format, variante.payload);
+  const trou = texteATrouServi(variante.format, variante.payload);
 
   return {
     atomId: concept.id,

@@ -93,17 +93,21 @@ export function PhraseTrouee({
   return (
     <>
       {segmentsDeCode(phrase).map((segment, rang) => {
-        const [avant = "", ...suite] = segment.texte.split(TROU);
+        // Un segment porte d'ordinaire un seul trou — mais la lecture en creuse
+        // un second quand la phrase réécrivait le terme en clair, et c'est alors
+        // le même mot à retrouver deux fois. Voir `phraseSansDevoilement`.
+        const morceaux = segment.texte.split(TROU);
         const contenu: ReactNode =
-          suite.length === 0 ? (
-            segment.texte
-          ) : (
-            <>
-              {avant}
-              <Trou comble={comble} dansDuCode={segment.code} fond={fond} />
-              {suite.join(TROU)}
-            </>
-          );
+          morceaux.length === 1
+            ? segment.texte
+            : morceaux.map((morceau, place) => (
+                <Fragment key={place}>
+                  {place > 0 ? (
+                    <Trou comble={comble} dansDuCode={segment.code} fond={fond} />
+                  ) : null}
+                  {morceau}
+                </Fragment>
+              ));
 
         return segment.code ? (
           // Un jeton court ne se coupe pas en bout de ligne, qu'il porte un trou

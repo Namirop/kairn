@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import { optionsDUnQCM } from "@/lib/db/question-servie";
+import { optionsDUnQCM, texteATrouServi } from "@/lib/db/question-servie";
 import type { VariantFormat } from "@/lib/db/types";
 
 /**
@@ -120,7 +120,11 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
     concepts: depot.atoms.map(({ id, concept, tags }) => ({ id, concept, tags })),
     questions: depot.atoms.flatMap((atome) =>
       atome.variants.map((variante) => ({
-        question: variante.question,
+        // Un texte à trou se montre réparé, comme il le sera en session : le
+        // terme rogné de ce qui borde le trou, et masqué là où la phrase le
+        // réécrit en clair. La vitrine promet la question telle qu'elle sera
+        // posée — voir `texteATrouServi`.
+        question: texteATrouServi(variante.format, variante.payload)?.sentence ?? variante.question,
         format: variante.format,
         options: optionsDUnQCM(variante.format, variante.payload),
       })),

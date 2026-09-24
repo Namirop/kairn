@@ -157,6 +157,20 @@
  * masque indifféremment la forme ou la glose ; masquer la glose française d'un
  * mot anglais fait réviser du français à quelqu'un qui apprend l'anglais.
  *
+ * **Le terme masqué a été interdit d'apparaître ailleurs dans sa phrase, le
+ * 24 septembre 2026.** La consigne existait — « vérifie qu'on ne pourrait pas le
+ * retrouver en lisant seulement le reste de la phrase » — et `trouDevoileSaReponse`
+ * mesurait sans couper. Deux textes à trou servis en session le 23/09 sur un même
+ * dépôt Android l'ont enfreinte de la même manière, par répétition littérale :
+ * « \_\_\_ et Java utilisent la même plateforme, mais Kotlin n'est pas le même
+ * langage que Java », « Google recommande \_\_\_ pour Android depuis 2019 avec
+ * l'approche « Kotlin first » ». La consigne générale parlait de paraphrase et de
+ * grammaire prévisible ; elle ne disait pas qu'un mot recopié tel quel est le cas
+ * le plus simple et le plus fréquent. Elle le dit maintenant.
+ *
+ * La lecture répare le stock de son côté, et masque les autres occurrences à leur
+ * tour plutôt que de jeter la question — voir `phraseSansDevoilement`.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -305,6 +319,11 @@ mot masqué est… ». Commence par ce qu'il fallait avoir compris pour le trouv
 Quand le concept apparie un terme étranger et son sens en français, le trou tombe sur
 le terme étranger. C'est lui qu'il s'agit de savoir produire ; le sens, lui, est déjà
 dans la phrase qui entoure le trou.
+
+Le terme masqué n'est écrit nulle part ailleurs dans la phrase — pas même dans
+une expression citée entre guillemets, ni dans une tournure qui l'oppose à autre
+chose. « Google recommande \_\_\_ pour Android avec l'approche « Kotlin first » »
+ne demande rien : la réponse est six mots plus loin.
 
 Avant de choisir le mot à masquer, vérifie qu'on ne pourrait pas le retrouver en
 lisant seulement le reste de la phrase. Si la grammaire le rend prévisible, ou

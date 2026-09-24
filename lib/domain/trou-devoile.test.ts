@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { trouDevoileSaReponse } from "./trou-devoile";
+import { phraseSansDevoilement, trouDevoileSaReponse } from "./trou-devoile";
 
 describe("trouDevoileSaReponse", () => {
   it("relève le terme recopié plus loin dans la phrase", () => {
@@ -21,9 +21,9 @@ describe("trouDevoileSaReponse", () => {
   });
 
   it("ignore les accents, la casse et la ponctuation, comme la notation", () => {
-    expect(trouDevoileSaReponse("La ___ dure, car l'Extraction ! reste courte.", "extraction")).toBe(
-      true,
-    );
+    expect(
+      trouDevoileSaReponse("La ___ dure, car l'Extraction ! reste courte.", "extraction"),
+    ).toBe(true);
   });
 
   it("rapproche le trait d'union de l'espace, comme la notation", () => {
@@ -46,7 +46,9 @@ describe("trouDevoileSaReponse", () => {
   });
 
   it("ne relève pas les mêmes mots pris dans le désordre", () => {
-    expect(trouDevoileSaReponse("Le ___ suit le profond lent sommeil.", "sommeil lent")).toBe(false);
+    expect(trouDevoileSaReponse("Le ___ suit le profond lent sommeil.", "sommeil lent")).toBe(
+      false,
+    );
   });
 
   it("ne dit rien d'une phrase sans trou : il n'y a rien à deviner", () => {
@@ -65,8 +67,92 @@ describe("trouDevoileSaReponse", () => {
     expect(trouDevoileSaReponse("L'extraction s'arrête si la ___ est grossière.", "mouture")).toBe(
       false,
     );
-    expect(trouDevoileSaReponse("La mouture décide, donc une ___ fine extrait plus.", "mouture")).toBe(
-      true,
+    expect(
+      trouDevoileSaReponse("La mouture décide, donc une ___ fine extrait plus.", "mouture"),
+    ).toBe(true);
+  });
+});
+
+describe("phraseSansDevoilement", () => {
+  it("masque l'occurrence recopiée plus loin dans la phrase", () => {
+    // Servie en session le 23/09/2026, sur un dépôt Android.
+    const phrase =
+      "___ et Java utilisent la même plateforme, mais Kotlin n'est pas le même langage que Java.";
+
+    expect(phraseSansDevoilement(phrase, "Kotlin")).toBe(
+      "___ et Java utilisent la même plateforme, mais ___ n'est pas le même langage que Java.",
     );
+  });
+
+  it("masque le terme jusque dans une expression citée", () => {
+    const phrase =
+      "Google recommande ___ pour Android depuis 2019 avec l'approche « Kotlin first ».";
+
+    expect(phraseSansDevoilement(phrase, "Kotlin")).toBe(
+      "Google recommande ___ pour Android depuis 2019 avec l'approche « ___ first ».",
+    );
+  });
+
+  it("laisse la phrase intacte quand le terme ne s'y lit nulle part", () => {
+    const phrase = "Le verbe « estar » exprime un état ___ ou situationnel.";
+
+    expect(phraseSansDevoilement(phrase, "temporaire")).toBe(phrase);
+  });
+
+  it("rend une phrase que le contrôle ne signale plus", () => {
+    const phrase = "La ___ décide, donc une mouture fine extrait plus.";
+    const repare = phraseSansDevoilement(phrase, "mouture");
+
+    expect(trouDevoileSaReponse(repare, "mouture")).toBe(false);
+  });
+
+  it("ignore les accents, la casse et la ponctuation, comme la notation", () => {
+    expect(
+      phraseSansDevoilement("La ___ dure, car l'Extraction ! reste courte.", "extraction"),
+    ).toBe("La ___ dure, car l'___ ! reste courte.");
+  });
+
+  it("masque toutes les occurrences, pas seulement la première", () => {
+    const phrase = "Le ___ tient : le lichen pousse, le lichen s'accroche.";
+
+    expect(phraseSansDevoilement(phrase, "lichen")).toBe(
+      "Le ___ tient : le ___ pousse, le ___ s'accroche.",
+    );
+  });
+
+  it("masque un terme de plusieurs mots d'un seul tenant", () => {
+    const phrase = "Le ___ domine les deux premiers cycles, et le sommeil lent profond décroît.";
+
+    expect(phraseSansDevoilement(phrase, "sommeil lent profond")).toBe(
+      "Le ___ domine les deux premiers cycles, et le ___ décroît.",
+    );
+  });
+
+  it("ne touche pas à un seul mot du terme pris isolément", () => {
+    const phrase = "Le ___ occupe une part croissante des derniers cycles de sommeil.";
+
+    expect(phraseSansDevoilement(phrase, "sommeil paradoxal")).toBe(phrase);
+  });
+
+  it("ne touche pas au trou lui-même", () => {
+    expect(phraseSansDevoilement("___ accélère la balle.", "Le gazon")).toBe(
+      "___ accélère la balle.",
+    );
+  });
+
+  it("laisse une phrase sans trou telle quelle", () => {
+    expect(phraseSansDevoilement("La sopa está fría.", "fría")).toBe("La sopa está fría.");
+  });
+
+  it("laisse tranquille un terme vide", () => {
+    expect(phraseSansDevoilement("Une phrase avec un ___ dedans.", "  ")).toBe(
+      "Une phrase avec un ___ dedans.",
+    );
+  });
+
+  it("renonce plutôt que de ne laisser aucun mot à lire", () => {
+    const phrase = "___ Kotlin";
+
+    expect(phraseSansDevoilement(phrase, "Kotlin")).toBe(phrase);
   });
 });
