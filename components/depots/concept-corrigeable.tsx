@@ -65,7 +65,8 @@ export function ConceptCorrigeable({
             rows={4}
             value={texte}
             onChange={(evenement) => setTexte(evenement.target.value)}
-            className="p-pas-3 text-petit rounded-champ bg-surface-ombre w-full resize-y border border-stone-300 leading-relaxed"
+            // 16 px sur mobile : en deçà, Safari zoome à la mise au point.
+            className="p-pas-3 md:text-petit rounded-champ bg-surface-ombre w-full resize-y border border-stone-300 text-base leading-relaxed"
           />
           <p className="text-petit text-stone-500">
             Les questions écrites sur l&apos;ancienne formulation seront remplacées, et la

@@ -164,7 +164,8 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
             rows={2}
             maxLength={500}
             disabled={envoi}
-            className="rounded-champ mt-pas-2 px-pas-3 py-pas-2 text-petit focus-visible:border-lichen w-full resize-none border border-stone-300 bg-transparent text-stone-900 outline-none disabled:opacity-45"
+            // 16 px sur mobile : en deçà, Safari zoome à la mise au point.
+            className="rounded-champ mt-pas-2 px-pas-3 py-pas-2 md:text-petit focus-visible:border-lichen w-full resize-none border border-stone-300 bg-transparent text-base text-stone-900 outline-none disabled:opacity-45"
           />
         </div>
 

@@ -78,7 +78,8 @@ export function ChampDeConsigne({
         value={valeur}
         onChange={(evenement) => onChange(evenement.target.value)}
         placeholder="N'inclus pas la partie sur les prix"
-        className="p-pas-3 text-petit rounded-champ mt-pas-2 field-sizing-content w-full resize-y border border-stone-300 bg-stone-50 leading-relaxed text-stone-900 placeholder:text-stone-500"
+        // 16 px sur mobile : en deçà, Safari zoome à la mise au point.
+        className="p-pas-3 md:text-petit rounded-champ mt-pas-2 field-sizing-content w-full resize-y border border-stone-300 bg-stone-50 text-base leading-relaxed text-stone-900 placeholder:text-stone-500"
       />
 
       {/* Une seule ligne sous le champ, et elle change de sujet quand la borne

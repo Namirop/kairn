@@ -62,7 +62,8 @@ export function MesDonnees() {
               id="confirmation"
               name="confirmation"
               autoComplete="off"
-              className="rounded-galet mt-pas-2 px-pas-3 py-pas-2 text-petit focus-visible:border-alerte w-full max-w-64 border border-stone-300 bg-transparent text-stone-900 outline-none"
+              // 16 px sur mobile : en deçà, Safari zoome à la mise au point.
+              className="rounded-galet mt-pas-2 px-pas-3 py-pas-2 md:text-petit focus-visible:border-alerte w-full max-w-64 border border-stone-300 bg-transparent text-base text-stone-900 outline-none"
             />
 
             {/* L'espace du message est réservé : l'erreur ne décale pas les boutons. */}
