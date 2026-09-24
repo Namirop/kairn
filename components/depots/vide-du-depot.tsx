@@ -1,5 +1,6 @@
+import { AttenteDuDepot } from "@/components/depots/attente-du-depot";
 import { EtatVide } from "@/components/etats/etat-vide";
-import type { EtatDepot } from "@/lib/domain/etat-depot";
+import { etapeDuTravail, type EtatDepot } from "@/lib/domain/etat-depot";
 
 /**
  * Pourquoi ce dépôt ne montre aucun concept.
@@ -14,6 +15,11 @@ import type { EtatDepot } from "@/lib/domain/etat-depot";
  * phrase écrite à la deuxième personne qui dit ce qui manquait à ce texte-là :
  * bien plus utile qu'une formule générique, et c'est ce qui apprend à mieux
  * déposer la fois suivante.
+ *
+ * **Deux des quatre raisons ne sont pas un vide, mais une attente**, et elles ne
+ * se rendent pas pareil : un dépôt qui travaille prend la voix de l'attente,
+ * celle de l'essai, plutôt qu'un constat immobile. Voir `AttenteDuDepot`. Seul
+ * le contexte reste écrit ici — c'est ce qui arrive ensuite, et ça ne bouge pas.
  */
 function raison(etat: EtatDepot, motif: string | null): { constat: string; contexte: string } {
   if (etat === "rejete") {
@@ -46,7 +52,7 @@ function raison(etat: EtatDepot, motif: string | null): { constat: string; conte
 
   return {
     constat: "Aucun concept pour l'instant.",
-    contexte: "Le découpage est en cours. Les concepts apparaissent dès qu'il a fini.",
+    contexte: "Les concepts apparaissent ici dès que le découpage a fini.",
   };
 }
 
@@ -60,6 +66,9 @@ export function VideDuDepot({
   graine: string;
 }) {
   const { constat, contexte } = raison(etat, motif);
+  const etape = etapeDuTravail(etat);
+
+  if (etape) return <AttenteDuDepot etape={etape} contexte={contexte} graine={graine} />;
 
   return <EtatVide graine={graine} constat={constat} contexte={contexte} />;
 }

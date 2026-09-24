@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { type EtapeDeLAttente, phraseDattente, RELEVE_MS } from "@/lib/domain/phrases-dattente";
+import type { EtapeDeLAttente } from "@/lib/domain/catalogue-dattente";
+import { phraseDattente, RELEVE_MS } from "@/lib/domain/phrases-dattente";
 import { cn } from "@/lib/utils";
 
 /**

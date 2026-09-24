@@ -1,3 +1,5 @@
+import type { EtapeDeLAttente } from "./catalogue-dattente";
+
 /**
  * Où en est un dépôt, du point de vue de celui qui l'a déposé.
  *
@@ -86,6 +88,34 @@ const LIBELLES: Record<EtatDepot, string> = {
 
 export function libelleEtat(etat: EtatDepot): string {
   return LIBELLES[etat];
+}
+
+/**
+ * Un dépôt dont la chaîne tourne en ce moment.
+ *
+ * Trois états et pas quatre : `questions-differees` n'en est pas — la demande
+ * attend sa date, parfois six jours, et rien ne tourne pendant ce temps. C'est
+ * ce qui décide si l'écran redemande tout seul, et si son étiquette porte le
+ * point qui bat.
+ */
+export function travailEnCours(etat: EtatDepot): boolean {
+  return etat === "lecture" || etat === "decoupage" || etat === "questions";
+}
+
+/**
+ * Ce qu'on raconte pendant que ce dépôt travaille, ou rien s'il ne travaille pas.
+ *
+ * Les trois étapes de l'attente ont chacune leur catalogue, parce qu'elles ne
+ * parlent pas à la même personne — voir `catalogue-dattente.ts`. La
+ * correspondance est ici plutôt que dans l'écran : c'est une propriété de
+ * l'état, et deux écrans l'auraient écrite deux fois.
+ */
+export function etapeDuTravail(etat: EtatDepot): EtapeDeLAttente | null {
+  if (etat === "lecture") return "LECTURE";
+  if (etat === "decoupage") return "DECOUPAGE";
+  if (etat === "questions") return "ECRITURE";
+
+  return null;
 }
 
 /** Un dépôt dont les concepts sont déjà lisibles, même s'il travaille encore. */

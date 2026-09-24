@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Image as Capture } from "lucide-react";
+import { PointDeTravail } from "@/components/depots/point-de-travail";
 import { EtatVide } from "@/components/etats/etat-vide";
 import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/lib/auth/routes";
@@ -8,7 +9,7 @@ import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";
 import { cn } from "@/lib/utils";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
-import { conceptsLisibles, libelleEtat } from "@/lib/domain/etat-depot";
+import { conceptsLisibles, libelleEtat, travailEnCours } from "@/lib/domain/etat-depot";
 
 /**
  * Ce que l'utilisateur a déposé. L'étape n'apparaît que tant qu'elle a quelque
@@ -53,7 +54,10 @@ function Avancement({ depot }: { depot: DepotListe }) {
       {conceptsLisibles(depot.etat) ? (
         <span className="font-mono tabular-nums">{concepts}</span>
       ) : null}
-      <Badge variant="pose">{libelleEtat(depot.etat)}</Badge>
+      <Badge variant="pose">
+        {travailEnCours(depot.etat) ? <PointDeTravail /> : null}
+        {libelleEtat(depot.etat)}
+      </Badge>
     </>
   );
 }

@@ -755,6 +755,34 @@
   }
 }
 
+/* Le point qui dit qu'une chaîne tourne.
+
+   Une étiquette d'étape — « Lecture de la capture » — ne dit pas si quelque
+   chose se passe ou si l'écran est resté bloqué là. Elle se lit exactement pareil
+   dans les deux cas, et on finit par recharger la page pour en avoir le cœur net.
+   Le point est le seul objet de cette étiquette qui prouve que ça tourne.
+
+   La respiration est lente et sans cran : une pulsation rapide se lit comme une
+   alerte, et un clignotement franc comme un défaut d'affichage. L'accent lichen
+   la porte parce qu'elle signale — c'est exactement ce à quoi cette couleur sert.
+
+   Mouvement refusé : la coupure générale en fin de fichier ramène la durée à
+   rien et l'itération à une, donc le point s'arrête sur son état plein. Un point
+   opaque reste lisible ; c'est l'animation qu'on perd, pas l'information. */
+@utility point-qui-respire {
+  animation: respiration 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes respiration {
+  from {
+    opacity: 0.25;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 /* La pierre qui vient de se poser dans le jeu d'attente.
 
    Elle tombe de quelques unités et s'arrête net : c'est le contact qui rend le

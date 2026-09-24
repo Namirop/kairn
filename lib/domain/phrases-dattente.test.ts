@@ -1,12 +1,7 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
-import {
-  ETAPES,
-  type EtapeDeLAttente,
-  paliersDe,
-  phraseDattente,
-  RELEVE_MS,
-} from "./phrases-dattente";
+import { ETAPES, type EtapeDeLAttente } from "./catalogue-dattente";
+import { paliersDe, phraseDattente, RELEVE_MS } from "./phrases-dattente";
 
 const phrasesDe = (etape: EtapeDeLAttente) => paliersDe(etape).flatMap((palier) => palier.phrases);
 
@@ -108,15 +103,19 @@ describe("phraseDattente", () => {
   });
 
   /**
-   * Les deux étapes ne parlent pas à la même personne : au découpage on n'a
-   * encore rien vu, à l'écriture les concepts sont déjà à l'écran. Une phrase
-   * partagée entre les deux serait fausse dans l'une des deux.
+   * Les trois étapes ne parlent pas à la même personne : à la lecture le texte
+   * n'existe pas encore, au découpage on n'a rien vu, à l'écriture les concepts
+   * sont déjà à l'écran. Une phrase partagée serait fausse dans l'une des trois.
    */
-  it("ne partage aucune phrase entre le découpage et l'écriture", () => {
-    const decoupage = new Set(phrasesDe("DECOUPAGE"));
+  it("ne partage aucune phrase entre deux étapes", () => {
+    for (const ici of ETAPES) {
+      const siennes = new Set(phrasesDe(ici));
 
-    for (const phrase of phrasesDe("ECRITURE")) {
-      expect(decoupage.has(phrase)).toBe(false);
+      for (const ailleurs of ETAPES) {
+        if (ailleurs === ici) continue;
+
+        for (const phrase of phrasesDe(ailleurs)) expect(siennes.has(phrase)).toBe(false);
+      }
     }
   });
 });

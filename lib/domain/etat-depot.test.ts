@@ -1,11 +1,26 @@
 import { describe, expect, it } from "vitest";
+import { ETAPES } from "./catalogue-dattente";
 import {
   conceptsLisibles,
+  etapeDuTravail,
   etatDuDepot,
   libelleEtat,
   redecoupable,
+  travailEnCours,
   type AvancementDepot,
+  type EtatDepot,
 } from "./etat-depot";
+
+const TOUS: EtatDepot[] = [
+  "lecture",
+  "decoupage",
+  "questions",
+  "questions-differees",
+  "pret",
+  "vide",
+  "rejete",
+  "echec",
+];
 
 function avancement(reglages: Partial<AvancementDepot> = {}): AvancementDepot {
   return { status: "PROCESSING", travaux: [], concepts: 0, ...reglages };
@@ -110,5 +125,50 @@ describe("redecoupable", () => {
   it("ne propose rien tant que le dépôt travaille ou porte ses concepts", () => {
     expect(redecoupable("decoupage")).toBe(false);
     expect(redecoupable("pret")).toBe(false);
+  });
+});
+
+describe("travailEnCours", () => {
+  it("reconnaît les trois états où la chaîne tourne", () => {
+    expect(travailEnCours("lecture")).toBe(true);
+    expect(travailEnCours("decoupage")).toBe(true);
+    expect(travailEnCours("questions")).toBe(true);
+  });
+
+  it("ne compte pas une demande qui attend sa date : rien ne tourne", () => {
+    expect(travailEnCours("questions-differees")).toBe(false);
+  });
+
+  it("ne compte aucune fin, qu'elle soit heureuse ou non", () => {
+    expect(travailEnCours("pret")).toBe(false);
+    expect(travailEnCours("vide")).toBe(false);
+    expect(travailEnCours("rejete")).toBe(false);
+    expect(travailEnCours("echec")).toBe(false);
+  });
+});
+
+describe("etapeDuTravail", () => {
+  it("donne à chaque étape le catalogue de phrases qui lui parle", () => {
+    expect(etapeDuTravail("lecture")).toBe("LECTURE");
+    expect(etapeDuTravail("decoupage")).toBe("DECOUPAGE");
+    expect(etapeDuTravail("questions")).toBe("ECRITURE");
+  });
+
+  /**
+   * Les deux fonctions décrivent le même fait sous deux angles. Les laisser
+   * diverger donnerait une étiquette qui bat sans rien à raconter, ou l'inverse.
+   */
+  it("parle exactement des états qui travaillent, et d'aucun autre", () => {
+    for (const etat of TOUS) {
+      expect(etapeDuTravail(etat) !== null).toBe(travailEnCours(etat));
+    }
+  });
+
+  it("ne nomme que des étapes qui existent", () => {
+    for (const etat of TOUS) {
+      const etape = etapeDuTravail(etat);
+
+      if (etape) expect(ETAPES).toContain(etape);
+    }
   });
 });
