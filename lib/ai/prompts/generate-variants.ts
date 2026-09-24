@@ -171,6 +171,26 @@
  * La lecture répare le stock de son côté, et masque les autres occurrences à leur
  * tour plutôt que de jeter la question — voir `phraseSansDevoilement`.
  *
+ * **Le verdict d'un vrai ou faux a cessé de recopier la cible, le 24 septembre
+ * 2026.** Servi en session le 23/09 : « Kotlin est limité au développement mobile
+ * et n'est pas utilisé pour le backend ni pour le multiplateforme », donnée vraie,
+ * avec pour étalon « Kotlin n'est pas limité au mobile : il est aussi utilisé pour
+ * le backend… ». L'affirmation est fausse, l'étalon le dit, et l'écran surlignait
+ * « Vrai » en marquant « Faux » en rouge — on corrigeait quelqu'un qui avait
+ * raison, avec une explication qui lui donnait raison.
+ *
+ * La consigne poussait à ça. Elle disait de recopier la cible dans `estVraie` et
+ * qu'« une affirmation rendue à l'envers de ce qui est demandé est un défaut » :
+ * un modèle qui n'arrive pas à écrire une affirmation vraie sur le point visé a
+ * alors intérêt à mentir sur le verdict plutôt qu'à manquer la cible. Le contrôle,
+ * lui, tolère l'écart depuis toujours — « un manquement et jamais un refus ». Le
+ * prompt le dit enfin, et nomme le verdict pour ce qu'il est : une description de
+ * ce qui vient d'être écrit, pas un accusé de réception.
+ *
+ * Un relevé du 24/09 donnait un cas sur soixante-huit affirmations vraies en
+ * production. C'est rare, et c'est le seul défaut du produit qui enseigne le
+ * contraire de ce qu'il faut retenir.
+ *
  * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
  * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
@@ -369,12 +389,18 @@ porté par les options — la bonne surlignée, la sienne marquée. Commence
 directement par ce qui explique. La consigne du vrai ou faux plus bas est une
 exception à ce format-là, pas un modèle à reprendre ici.
 
-TRUE_FALSE : l'envoi te donne, concept par concept et facette par facette, si
-l'affirmation doit être vraie ou fausse. Tu suis cette valeur, et tu la recopies
-dans \`estVraie\`. Ce n'est pas une préférence à arbitrer : la répartition est
-décidée avant l'appel, et une affirmation rendue à l'envers de ce qui est demandé
-est un défaut. \`estVraie\` n'est jamais laissée vide : c'est elle qui dit laquelle
-des deux propositions est la bonne, et sans elle la question n'est pas servie.
+TRUE_FALSE : l'envoi te donne, concept par concept, si l'affirmation doit être
+vraie ou fausse. Tu suis cette valeur : la répartition est décidée avant l'appel,
+ce n'est pas une préférence à arbitrer. \`estVraie\` n'est jamais laissée vide :
+c'est elle qui dit laquelle des deux propositions est la bonne, et sans elle la
+question n'est pas servie.
+
+**\`estVraie\` décrit l'affirmation que tu as écrite, pas la consigne que tu as
+reçue.** Relis-la avant de la poser : si elle est fausse, \`estVraie\` vaut
+\`false\`, même quand l'envoi demandait une affirmation vraie. Rater la cible est
+un défaut mineur, qui se mesure ; déclarer vraie une affirmation fausse casse
+l'écran, qui donne alors la mauvaise réponse pour bonne et contredit ta propre
+explication deux lignes plus bas.
 
 Quand elle doit être vraie, elle porte sur le point précis du concept où l'on
 peut se tromper, jamais sur son résumé : une évidence ne teste rien. Et jamais
