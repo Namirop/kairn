@@ -41,7 +41,8 @@
     "depot:code": "tsx scripts/ajouter-depot-de-code.ts",
     "exporter:assets": "tsx scripts/exporter-les-assets.ts",
     "exporter:marque": "tsx scripts/exporter-la-marque.tsx",
-    "prepare": "husky"
+    "prepare": "husky",
+    "assets:figer": "tsx scripts/assets/figer-les-sujets.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",

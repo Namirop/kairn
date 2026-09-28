@@ -1,0 +1,9 @@
+Article de presse — pourquoi le ciel est bleu, et rouge au couchant
+
+La couleur du ciel tient à un phénomène nommé diffusion de Rayleigh, du nom du physicien britannique qui l'a décrit à la fin du XIXe siècle. La lumière du Soleil paraît blanche, mais elle est composée de toutes les couleurs de l'arc-en-ciel, chacune correspondant à une longueur d'onde différente.
+
+Quand cette lumière traverse l'atmosphère, elle rencontre les molécules d'air, bien plus petites que sa longueur d'onde. Ces molécules dispersent la lumière dans toutes les directions, et d'autant plus fortement que la longueur d'onde est courte. Le bleu, dont la longueur d'onde est courte, est diffusé environ dix fois plus que le rouge. Le ciel nous apparaît donc bleu parce que cette couleur est renvoyée vers nos yeux depuis toutes les portions du ciel.
+
+Au lever et au coucher du Soleil, la lumière arrive de biais et traverse une épaisseur d'atmosphère bien plus grande. Le bleu est alors diffusé au loin avant de nous atteindre, et il ne reste que les longueurs d'onde longues — le rouge et l'orange — pour colorer l'horizon.
+
+Le même mécanisme explique pourquoi le Soleil lui-même semble jaunâtre vu du sol : il a perdu une partie de son bleu en chemin. Sur la Lune, sans atmosphère pour diffuser la lumière, le ciel reste noir même en plein jour.
