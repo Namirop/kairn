@@ -44,7 +44,8 @@
     "prepare": "husky",
     "assets:figer": "tsx scripts/assets/figer-les-sujets.ts",
     "assets:seed": "tsx scripts/assets/seed-demo.ts",
-    "assets:captures": "tsx scripts/assets/capturer.ts"
+    "assets:captures": "tsx scripts/assets/capturer.ts",
+    "assets:videos": "tsx scripts/assets/enregistrer.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",

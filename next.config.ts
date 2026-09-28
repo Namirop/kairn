@@ -42,6 +42,14 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/depots/**": ["./node_modules/@img/**"],
   },
+
+  /**
+   * Pendant les captures d'assets (`ASSETS_PREVIEW=1`), on éteint l'indicateur de
+   * dev de Next : sa pastille se retrouverait sinon dans un coin de chaque
+   * capture. C'est un réglage de développement uniquement — il n'a aucun effet en
+   * production —, et il ne s'applique qu'au serveur lancé pour les captures.
+   */
+  ...(process.env.ASSETS_PREVIEW === "1" ? { devIndicators: false as const } : {}),
 };
 
 export default avecLesLangues(nextConfig);
