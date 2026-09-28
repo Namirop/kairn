@@ -1,0 +1,3244 @@
+{
+  "genereLe": "2026-09-28T10:45:29.873Z",
+  "modele": "claude-sonnet-5",
+  "depots": [
+    {
+      "cle": "vocabulaire-anglais",
+      "titre": "Vocabulaire anglais",
+      "nom": "vocabulaire-anglais",
+      "texte": "Vocabulaire anglais — mots que je confonds toujours\n\nTo thrive : ne veut pas dire seulement « survivre » mais prospérer, se développer avec vigueur. Une plante thrives dans un sol riche ; une entreprise thrives quand elle croît sainement. À ne pas confondre avec to survive, qui n'implique aucune réussite.\n\nCumbersome : encombrant, lourd à manier — au sens propre (a cumbersome suitcase) comme au figuré (a cumbersome process, une procédure pénible et lente). Le mot insiste sur la gêne causée par la taille ou la complexité, pas sur le poids seul.\n\nTo overlook : a deux sens presque opposés selon le contexte. Il signifie « ne pas remarquer, laisser passer » (I overlooked a typo) mais aussi « donner sur, surplomber » (the terrace overlooks the sea). C'est le contexte, jamais la forme, qui tranche.\n\nThorough : minutieux, complet, qui ne laisse rien de côté. A thorough investigation examine tout. L'adverbe thoroughly signifie « à fond ». On le confond avec through (à travers) et though (bien que), qui se prononcent différemment.\n\nTo afford : pouvoir se permettre, financièrement ou non. I can't afford a new car (argent) ; we can't afford to lose (on ne peut pas se permettre de perdre). Presque toujours précédé de can, could ou be able to.\n\nAwkward : gênant, maladroit, mal à l'aise. An awkward silence est un silence gênant ; an awkward gesture, un geste maladroit. Le mot couvre à la fois la situation et la personne qui la vit.",
+      "estImage": false,
+      "lecture": null,
+      "nature": "FACTUEL",
+      "rejet": null,
+      "echec": null,
+      "concepts": [
+        {
+          "concept": "« To thrive » signifie prospérer, se développer avec vigueur (une plante, une entreprise), et non simplement survivre. Il se distingue de « to survive », qui n'implique aucune réussite, juste la persistance.",
+          "tags": [
+            "vocabulaire-anglais",
+            "faux-amis"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Une entreprise qui « thrives » après une période difficile : que peut-on dire d'elle ?",
+              "answerKey": "Elle prospère et se développe avec vigueur, ce qui va au-delà de la simple persistance.",
+              "estVraie": null,
+              "options": [
+                "Elle réussit tout juste à ne pas fermer",
+                "Elle réduit ses activités pour tenir le coup",
+                "Elle prospère et se développe avec vigueur",
+                "Elle persiste sans progresser ni régresser"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "« To thrive » implique une réussite, contrairement à « to ___ », qui n'implique aucune réussite, juste la persistance.",
+              "answerKey": "« To thrive » implique une réussite, une vigueur dans le développement, alors que l'autre verbe se limite à la persistance sans aucune notion de succès.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "« To thrive » implique une réussite, contrairement à « to ___ », qui n'implique aucune réussite, juste la persistance.",
+                "accepted": [
+                  "survive"
+                ],
+                "leurres": [
+                  "succeed",
+                  "endure",
+                  "progress"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "« To thrive » et « to survive » ne sont pas synonymes, car le second n'implique aucune réussite, seulement la persistance.",
+              "answerKey": "« To thrive » signifie prospérer avec vigueur tandis que « to survive » désigne seulement le fait de persister, sans notion de réussite.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Une plante placée dans un environnement idéal pousse vite, développe de nombreuses feuilles et fleurit abondamment. Quel verbe anglais décrit le mieux cette situation ?",
+              "answerKey": "« To thrive » décrit une plante qui se développe avec vigueur, une réussite qui va au-delà de la simple survie.",
+              "estVraie": null,
+              "options": [
+                "It overlooks",
+                "It thrives",
+                "It endures merely",
+                "It survives"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "« Cumbersome » signifie encombrant, lourd à manier, au sens propre (« a cumbersome suitcase ») comme au figuré (« a cumbersome process », une procédure pénible et lente). Le mot insiste sur la gêne causée par la taille ou la complexité, pas sur le poids seul.",
+          "tags": [
+            "vocabulaire-anglais"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que signifie l'adjectif anglais « cumbersome » ?",
+              "answerKey": "Encombrant, lourd à manier, que ce soit au sens propre ou au sens figuré.",
+              "estVraie": null,
+              "options": [
+                "Encombrant, lourd à manier",
+                "Rapide et efficace",
+                "Silencieux et discret",
+                "Léger et facile à transporter"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "« Cumbersome » insiste sur la gêne causée par la taille ou la complexité, pas sur le ___ seul.",
+              "answerKey": "Le mot insiste sur la gêne causée par la taille ou la complexité d'une chose, non sur son poids en tant que tel.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "« Cumbersome » insiste sur la gêne causée par la taille ou la complexité, pas sur le ___ seul.",
+                "accepted": [
+                  "poids"
+                ],
+                "leurres": [
+                  "prix",
+                  "bruit",
+                  "volume"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "« Cumbersome » décrit uniquement des objets lourds, jamais des procédures ou des processus abstraits.",
+              "answerKey": "« Cumbersome » s'applique aussi bien à un objet physique, comme une valise encombrante, qu'à une procédure pénible et lente, au sens figuré.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Une administration impose une démarche avec de nombreux formulaires, des délais longs et des étapes redondantes. Quel adjectif anglais qualifie le mieux cette démarche ?",
+              "answerKey": "« Cumbersome » qualifie une procédure pénible et lente, marquée par la gêne causée par sa complexité.",
+              "estVraie": null,
+              "options": [
+                "Lightweight",
+                "Swift",
+                "Effortless",
+                "Cumbersome"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "« To overlook » a deux sens presque opposés selon le contexte : « ne pas remarquer, laisser passer » (« I overlooked a typo ») ou « donner sur, surplomber » (« the terrace overlooks the sea »). C'est le contexte, jamais la forme, qui tranche entre les deux.",
+          "tags": [
+            "vocabulaire-anglais"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Dans la phrase « the terrace overlooks the sea », que signifie « overlooks » ?",
+              "answerKey": "Ici, « overlook » signifie donner sur, surplomber, l'un des deux sens presque opposés du verbe selon le contexte.",
+              "estVraie": null,
+              "options": [
+                "Donne sur, surplombe",
+                "Ignore volontairement",
+                "Domine par la force",
+                "Ne remarque pas, laisse passer"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "C'est le ___, jamais la forme, qui tranche entre les deux sens de « to overlook ».",
+              "answerKey": "C'est le contexte de la phrase, et non la forme du verbe, qui indique lequel des deux sens presque opposés s'applique.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "C'est le ___, jamais la forme, qui tranche entre les deux sens de « to overlook ».",
+                "accepted": [
+                  "contexte"
+                ],
+                "leurres": [
+                  "sujet",
+                  "temps",
+                  "ton"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Dans « I overlooked a typo », « overlooked » signifie que la faute de frappe n'a pas été remarquée, et non qu'elle a été surplombée.",
+              "answerKey": "Dans ce contexte, « overlooked » prend le sens de ne pas remarquer, laisser passer, l'un des deux sens presque opposés que porte ce verbe selon la situation.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Un correcteur relit un texte mais ne remarque pas une erreur de grammaire. Quelle phrase anglaise décrit correctement cette situation avec le verbe « to overlook » ?",
+              "answerKey": "Dans ce cas, « overlook » prend le sens de ne pas remarquer, laisser passer, l'un des deux sens presque opposés que le contexte permet de trancher.",
+              "estVraie": null,
+              "options": [
+                "The proofreader's desk overlooks a grammar mistake",
+                "The proofreader's office overlooks the mistake's origin",
+                "The proofreader thrives on a grammar mistake",
+                "The proofreader overlooked a grammar mistake"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "« Thorough » signifie minutieux, complet, qui ne laisse rien de côté (« a thorough investigation »). L'adverbe « thoroughly » signifie « à fond ». On le confond avec « through » (à travers) et « though » (bien que), qui se prononcent différemment.",
+          "tags": [
+            "vocabulaire-anglais",
+            "faux-amis"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que signifie l'adjectif anglais « thorough » ?",
+              "answerKey": "Minutieux, complet, qui ne laisse rien de côté.",
+              "estVraie": null,
+              "options": [
+                "Minutieux, complet, qui ne laisse rien de côté",
+                "À travers, d'un bout à l'autre",
+                "Rapide et superficiel",
+                "Bien que, malgré le fait que"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "L'adverbe « ___ » signifie « à fond ».",
+              "answerKey": "Il s'agit de l'adverbe dérivé de « thorough » par l'ajout du suffixe -ly, qui porte le sens « à fond ».",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "L'adverbe « ___ » signifie « à fond ».",
+                "accepted": [
+                  "thoroughly"
+                ],
+                "leurres": [
+                  "throughly",
+                  "thoughly",
+                  "thorougly"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "« Through » et « though » se prononcent de la même façon que « thorough », ce qui explique la confusion fréquente entre ces mots.",
+              "answerKey": "Ces trois mots se prononcent différemment ; c'est justement leur ressemblance à l'écrit, malgré des prononciations distinctes, qui cause la confusion.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Dans la phrase « a thorough investigation », comment traduire au mieux « thorough » ?",
+              "answerKey": "Minutieuse, complète, qui ne néglige rien.",
+              "estVraie": null,
+              "options": [
+                "Rapide, menée sans grand soin",
+                "Minutieuse, complète, qui ne néglige rien",
+                "Menée à travers plusieurs pays",
+                "Menée bien que difficile"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "« To afford » signifie pouvoir se permettre, financièrement ou non : « I can't afford a new car » (argent) ; « we can't afford to lose » (on ne peut pas se permettre de perdre). Il est presque toujours précédé de « can », « could » ou « be able to ».",
+          "tags": [
+            "vocabulaire-anglais"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que signifie le verbe « to afford » ?",
+              "answerKey": "Pouvoir se permettre quelque chose, financièrement ou non.",
+              "estVraie": null,
+              "options": [
+                "Pouvoir se permettre quelque chose, financièrement ou non",
+                "Emprunter de l'argent à une banque",
+                "Éviter une dépense inutile",
+                "Offrir un cadeau à quelqu'un"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "« we can't ___ to lose » signifie « on ne peut pas se permettre de perdre ».",
+              "answerKey": "Le verbe employé ici exprime l'idée de pouvoir se permettre quelque chose, appliquée ici à une situation non financière.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "« we can't ___ to lose » signifie « on ne peut pas se permettre de perdre ».",
+                "accepted": [
+                  "afford"
+                ],
+                "leurres": [
+                  "accept",
+                  "allow",
+                  "admit"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "« To afford » s'emploie seul, sans être accompagné de « can », « could » ou « be able to ».",
+              "answerKey": "Il est presque toujours précédé de « can », « could » ou « be able to », et non employé seul.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Comment traduire « I can't afford a new car » ?",
+              "answerKey": "Je ne peux pas me permettre (financièrement) une nouvelle voiture.",
+              "estVraie": null,
+              "options": [
+                "Je ne peux pas me permettre une nouvelle voiture",
+                "Je ne veux pas offrir une nouvelle voiture",
+                "Je ne peux pas emprunter une nouvelle voiture",
+                "Je ne peux pas conduire une nouvelle voiture"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "« Awkward » signifie gênant, maladroit, mal à l'aise : « an awkward silence » est un silence gênant, « an awkward gesture » un geste maladroit. Le mot couvre à la fois la situation et la personne qui la vit.",
+          "tags": [
+            "vocabulaire-anglais"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que signifie l'adjectif « awkward » ?",
+              "answerKey": "Gênant, maladroit, mal à l'aise.",
+              "estVraie": null,
+              "options": [
+                "Gênant, maladroit, mal à l'aise",
+                "Rapide et efficace",
+                "Bruyant et agité",
+                "Calme et détendu"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "« an ___ silence » est un silence gênant.",
+              "answerKey": "L'adjectif qui qualifie ce silence est celui qui exprime la gêne, le malaise, aussi bien pour une situation que pour une personne.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "« an ___ silence » est un silence gênant.",
+                "accepted": [
+                  "awkward"
+                ],
+                "leurres": [
+                  "akward",
+                  "awkard",
+                  "awful"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "« Awkward » ne peut décrire qu'une situation, jamais une personne mal à l'aise.",
+              "answerKey": "Le mot couvre à la fois la situation et la personne qui la vit, il peut donc décrire l'une comme l'autre.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Comment traduire « an awkward gesture » ?",
+              "answerKey": "Un geste maladroit.",
+              "estVraie": null,
+              "options": [
+                "Un geste gênant pour autrui uniquement",
+                "Un geste rapide et précis",
+                "Un geste calme et assuré",
+                "Un geste maladroit"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cle": "repliques-series",
+      "titre": "Répliques de séries en anglais",
+      "nom": "repliques-series",
+      "texte": "Expressions anglaises repérées dans des séries\n\n« It's not rocket science » : se dit de quelque chose qui n'est pas si compliqué, qu'on devrait comprendre sans effort. L'expression est ironique et sert souvent à reprocher gentiment à quelqu'un de compliquer une tâche simple.\n\n« To get cold feet » : ne signifie pas avoir froid aux pieds, mais se dégonfler, prendre peur au dernier moment, surtout avant un engagement important — un mariage, une décision, un saut. On dit he got cold feet before the wedding.\n\n« To be on the same page » : être d'accord, avoir la même compréhension d'une situation. Let's make sure we're on the same page veut dire « assurons-nous qu'on a bien compris la même chose ». Rien à voir avec une page de livre.\n\n« To bite the bullet » : se résoudre à faire une chose désagréable mais nécessaire, en serrant les dents. L'image vient des blessés de guerre qui mordaient une balle en plomb pendant une opération sans anesthésie.\n\n« To spill the beans » : révéler un secret, souvent par maladresse. Who spilled the beans ? demande qui a vendu la mèche. L'expression est familière et suppose que le secret n'aurait pas dû sortir.\n\n« A blessing in disguise » : un mal pour un bien, une chose qui paraît mauvaise sur le moment mais se révèle bénéfique. Losing that job was a blessing in disguise.",
+      "estImage": false,
+      "lecture": null,
+      "nature": "FACTUEL",
+      "rejet": null,
+      "echec": null,
+      "concepts": [
+        {
+          "concept": "L'expression anglaise « It's not rocket science » se dit de quelque chose qui n'est pas si compliqué et qu'on devrait comprendre sans effort ; elle est ironique et sert souvent à reprocher gentiment à quelqu'un de compliquer une tâche simple.",
+          "tags": [
+            "expressions-anglaises"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que signifie l'expression anglaise « It's not rocket science » ?",
+              "answerKey": "Elle qualifie quelque chose qui n'est pas si compliqué et qu'on devrait comprendre sans effort.",
+              "estVraie": null,
+              "options": [
+                "Quelque chose qui demande des connaissances scientifiques très avancées",
+                "Quelque chose qui relève strictement du domaine de l'aérospatiale",
+                "Quelque chose qui n'est pas si compliqué et qu'on devrait comprendre sans effort",
+                "Quelque chose d'impossible à réaliser même avec de l'entraînement"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Dans quel esprit utilise-t-on typiquement « It's not rocket science » envers quelqu'un, et pourquoi peut-on parler de reproche ?",
+              "answerKey": "On l'emploie de façon ironique, souvent pour reprocher gentiment à quelqu'un de compliquer une tâche qui est en réalité simple.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "L'expression « It's not rocket science » est ironique et sert souvent à reprocher gentiment à quelqu'un de compliquer une tâche simple.",
+              "answerKey": "Cette expression se dit de quelque chose qui n'est pas si compliqué et qu'on devrait comprendre sans effort ; elle est effectivement ironique et sert à ce reproche léger.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "« It's not ___ science, » lui dit-elle en riant.",
+              "answerKey": "L'expression indique qu'une tâche n'est pas si compliquée et devrait se comprendre sans effort, employée ici avec une pointe d'ironie amicale.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "« It's not ___ science, » lui dit-elle en riant.",
+                "accepted": [
+                  "rocket"
+                ],
+                "leurres": [
+                  "brain",
+                  "space",
+                  "nuclear"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "L'expression anglaise « To get cold feet » ne signifie pas avoir froid aux pieds mais se dégonfler, prendre peur au dernier moment, surtout avant un engagement important comme un mariage, une décision ou un saut. On dit « he got cold feet before the wedding ».",
+          "tags": [
+            "expressions-anglaises"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "« To get ___ feet » signifie se dégonfler, prendre peur au dernier moment.",
+              "answerKey": "Il s'agit de l'expression qui désigne le fait de perdre courage juste avant un événement important, comme un mariage.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "« To get ___ feet » signifie se dégonfler, prendre peur au dernier moment.",
+                "accepted": [
+                  "cold"
+                ],
+                "leurres": [
+                  "warm",
+                  "tired",
+                  "heavy"
+                ]
+              }
+            },
+            {
+              "format": "MCQ",
+              "facet": "MECHANISM",
+              "question": "Dans quel type de contexte utilise-t-on typiquement « to get cold feet » selon l'exemple donné ?",
+              "answerKey": "Elle s'utilise surtout avant un engagement important, comme un mariage, une décision ou un saut, comme dans « he got cold feet before the wedding ».",
+              "estVraie": null,
+              "options": [
+                "Pendant une longue marche en plein hiver",
+                "Avant un engagement important comme un mariage, une décision ou un saut",
+                "En parlant d'une simple sensation physique de froid",
+                "Après avoir remporté une compétition sportive"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "« To get cold feet » ne signifie pas avoir froid aux pieds mais se dégonfler ou prendre peur au dernier moment.",
+              "answerKey": "L'expression ne décrit pas une sensation physique de froid mais le fait de se dégonfler, de prendre peur juste avant un engagement important.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "He got ___ feet right before the jump.",
+              "answerKey": "L'expression désigne le fait de prendre peur ou de se dégonfler juste avant un engagement ou une action importante, ici un saut.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "He got ___ feet right before the jump.",
+                "accepted": [
+                  "cold"
+                ],
+                "leurres": [
+                  "warm",
+                  "numb",
+                  "heavy"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "L'expression anglaise « To be on the same page » signifie être d'accord, avoir la même compréhension d'une situation ; « Let's make sure we're on the same page » veut dire « assurons-nous qu'on a bien compris la même chose », sans rapport avec une page de livre.",
+          "tags": [
+            "expressions-anglaises"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que signifie l'expression anglaise « To be on the same page » ?",
+              "answerKey": "Elle signifie être d'accord, avoir la même compréhension d'une situation.",
+              "estVraie": null,
+              "options": [
+                "Écrire un document ensemble sur un support papier",
+                "Se trouver au même endroit physique qu'une autre personne",
+                "Lire le même livre au même moment que quelqu'un d'autre",
+                "Être d'accord, avoir la même compréhension d'une situation"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Que veut-on dire concrètement en anglais quand on dit « Let's make sure we're on the same page », et cela a-t-il un rapport avec une page de livre ?",
+              "answerKey": "Cela veut dire « assurons-nous qu'on a bien compris la même chose », sans rapport avec une page de livre.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "« To be on the same page » fait référence au fait de lire la même page d'un livre en même temps que quelqu'un.",
+              "answerKey": "L'expression signifie être d'accord et avoir la même compréhension d'une situation, sans aucun rapport avec une page de livre.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "Let's make sure we're on the same ___.",
+              "answerKey": "L'expression sert à vérifier que tout le monde a la même compréhension d'une situation, sans lien avec une page de livre.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Let's make sure we're on the same ___.",
+                "accepted": [
+                  "page"
+                ],
+                "leurres": [
+                  "team",
+                  "plan",
+                  "level"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "L'expression anglaise « To bite the bullet » signifie se résoudre à faire une chose désagréable mais nécessaire, en serrant les dents ; l'image vient des blessés de guerre qui mordaient une balle en plomb pendant une opération sans anesthésie.",
+          "tags": [
+            "expressions-anglaises"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "« To bite the ___ » signifie se résoudre à faire une chose désagréable mais nécessaire, en serrant les dents.",
+              "answerKey": "Il s'agit de l'expression qui évoque l'action de mordre un objet en métal pour endurer une épreuve.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "« To bite the ___ » signifie se résoudre à faire une chose désagréable mais nécessaire, en serrant les dents.",
+                "accepted": [
+                  "bullet"
+                ],
+                "leurres": [
+                  "blanket",
+                  "pillow",
+                  "hammer"
+                ]
+              }
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "D'où vient l'image utilisée par l'expression « To bite the bullet », et que raconte-t-elle sur la façon d'endurer une épreuve ?",
+              "answerKey": "L'image vient des blessés de guerre qui mordaient une balle en plomb pendant une opération sans anesthésie ; elle représente le fait de serrer les dents pour supporter quelque chose de désagréable mais nécessaire, sans échapper à l'épreuve.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "« To bite the bullet » désigne le fait de se résoudre à une chose désagréable mais nécessaire, et non le fait de l'éviter ou de la refuser.",
+              "answerKey": "L'expression signifie se résoudre à faire une chose désagréable mais nécessaire, en serrant les dents, image tirée des blessés de guerre qui mordaient une balle en plomb pendant une opération sans anesthésie — elle ne décrit donc pas un refus ou un évitement.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Une personne redoute depuis des mois d'aller chez le dentiste pour un soin douloureux mais indispensable, et finit par prendre rendez-vous en se disant qu'il faut en finir. Quelle expression décrit le mieux son attitude ?",
+              "answerKey": "Elle se résout à faire une chose désagréable mais nécessaire, en serrant les dents, ce que décrit « to bite the bullet ».",
+              "estVraie": null,
+              "options": [
+                "To bite the bullet",
+                "To spill the beans",
+                "A blessing in disguise",
+                "To beat around the bush"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "L'expression anglaise « To spill the beans » signifie révéler un secret, souvent par maladresse ; « Who spilled the beans? » demande qui a vendu la mèche. L'expression est familière et suppose que le secret n'aurait pas dû sortir.",
+          "tags": [
+            "expressions-anglaises"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "« To spill the ___ » signifie révéler un secret, souvent par maladresse.",
+              "answerKey": "Il s'agit de l'expression qui évoque le fait de laisser échapper des légumineuses, image du secret qui s'écoule sans le vouloir.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "« To spill the ___ » signifie révéler un secret, souvent par maladresse.",
+                "accepted": [
+                  "beans"
+                ],
+                "leurres": [
+                  "cards",
+                  "dishes",
+                  "papers"
+                ]
+              }
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Dans « Who spilled the beans? », qu'est-ce que cette question cherche à savoir, et que suppose-t-elle sur le secret en question ?",
+              "answerKey": "Elle demande qui a révélé le secret, souvent par maladresse ; elle suppose que ce secret n'aurait pas dû sortir.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "« To spill the beans » suppose que le secret révélé n'aurait pas dû être dévoilé.",
+              "answerKey": "L'expression signifie révéler un secret, souvent par maladresse, et suppose justement que ce secret n'aurait pas dû sortir.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Lors d'une fête surprise, un ami laisse échapper le nom du destinataire du cadeau avant l'heure prévue, sans le vouloir. Quelle expression décrit ce qu'il vient de faire ?",
+              "answerKey": "Il révèle un secret par maladresse, ce que décrit « to spill the beans ».",
+              "estVraie": null,
+              "options": [
+                "A blessing in disguise",
+                "To spill the beans",
+                "To beat around the bush",
+                "To bite the bullet"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "L'expression anglaise « A blessing in disguise » désigne un mal pour un bien, une chose qui paraît mauvaise sur le moment mais se révèle bénéfique, comme dans « Losing that job was a blessing in disguise ».",
+          "tags": [
+            "expressions-anglaises"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "« A blessing in ___ » désigne un mal pour un bien, une chose qui paraît mauvaise sur le moment mais se révèle bénéfique.",
+              "answerKey": "Il s'agit de l'expression qui évoque une bénédiction cachée sous une apparence trompeuse.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "« A blessing in ___ » désigne un mal pour un bien, une chose qui paraît mauvaise sur le moment mais se révèle bénéfique.",
+                "accepted": [
+                  "disguise"
+                ],
+                "leurres": [
+                  "shadow",
+                  "secret",
+                  "silence"
+                ]
+              }
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Dans « Losing that job was a blessing in disguise », qu'est-ce que cette phrase raconte sur la relation entre l'apparence de l'événement au moment où il survient et son effet final ?",
+              "answerKey": "La perte de l'emploi paraît mauvaise sur le moment, mais elle se révèle en réalité bénéfique par la suite, ce qui correspond au sens d'un mal pour un bien.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "« A blessing in disguise » décrit une chose qui paraît mauvaise au moment où elle survient mais se révèle ensuite bénéfique.",
+              "answerKey": "L'expression désigne bien un mal pour un bien : une chose qui paraît mauvaise sur le moment mais se révèle bénéfique, comme dans « Losing that job was a blessing in disguise ».",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Une personne rate son train, ce qui semble catastrophique, mais elle rencontre par hasard sur le quai suivant un ancien collègue qui lui propose un emploi bien plus intéressant. Quelle expression décrit cette situation ?",
+              "answerKey": "L'événement paraît mauvais sur le moment mais se révèle bénéfique, ce que décrit « a blessing in disguise ».",
+              "estVraie": null,
+              "options": [
+                "To beat around the bush",
+                "To bite the bullet",
+                "A blessing in disguise",
+                "To spill the beans"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cle": "notes-lecture",
+      "titre": "Notes de lecture — développement personnel",
+      "nom": "notes-lecture",
+      "texte": "Notes de lecture — un livre sur les habitudes\n\nUne habitude se construit sur une boucle en quatre temps : le signal, l'envie, la réponse, la récompense. Le signal déclenche le cerveau, l'envie le motive, la réponse est le geste accompli, et la récompense apprend au cerveau si la boucle vaut la peine d'être retenue. Retirer un seul de ces temps et l'habitude ne se forme pas.\n\nLe progrès de 1 % par jour n'a l'air de rien sur le moment, mais il compose. S'améliorer de 1 % chaque jour pendant un an rend environ trente-sept fois meilleur ; régresser de 1 % par jour ramène presque à zéro. Ce sont les petits écarts répétés, jamais les grands gestes ponctuels, qui décident du résultat.\n\nL'empilement d'habitudes consiste à accrocher une nouvelle habitude à une habitude déjà solide. La formule est : « Après [habitude actuelle], je ferai [nouvelle habitude]. » L'ancienne sert de signal à la nouvelle, ce qui évite d'avoir à trouver un déclencheur de toutes pièces.\n\nOn ne s'élève pas au niveau de ses objectifs, on tombe au niveau de ses systèmes. Se fixer un but donne une direction, mais c'est le système — la routine quotidienne qui y mène — qui produit les résultats. Deux personnes qui visent la même chose divergent par leurs systèmes, pas par leurs intentions.\n\nRendre une habitude évidente, attrayante, facile et satisfaisante augmente les chances de la tenir. À l'inverse, pour rompre une mauvaise habitude, on la rend invisible, rebutante, difficile et insatisfaisante.",
+      "estImage": false,
+      "lecture": null,
+      "nature": "FACTUEL",
+      "rejet": null,
+      "echec": null,
+      "concepts": [
+        {
+          "concept": "Une habitude se construit sur une boucle en quatre temps : le signal déclenche le cerveau, l'envie le motive, la réponse est le geste accompli, et la récompense apprend au cerveau si la boucle vaut la peine d'être retenue. Retirer un seul de ces temps empêche l'habitude de se former.",
+          "tags": [
+            "habitudes",
+            "boucle-habitude"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "La réponse est le ___ accompli, et la récompense apprend au cerveau si la boucle vaut la peine d'être retenue.",
+              "answerKey": "C'est l'étape où l'action physique ou mentale est réellement exécutée, après le signal et l'envie.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "La réponse est le ___ accompli, et la récompense apprend au cerveau si la boucle vaut la peine d'être retenue.",
+                "accepted": [
+                  "geste",
+                  "action"
+                ],
+                "leurres": [
+                  "signal",
+                  "désir",
+                  "souvenir"
+                ]
+              }
+            },
+            {
+              "format": "MCQ",
+              "facet": "MECHANISM",
+              "question": "Que se passe-t-il si l'on retire un seul des quatre temps de la boucle (signal, envie, réponse, récompense) ?",
+              "answerKey": "Retirer un seul de ces temps empêche l'habitude de se former, car les quatre temps sont nécessaires ensemble.",
+              "estVraie": null,
+              "options": [
+                "L'habitude se forme uniquement si c'est la récompense qui manque",
+                "L'habitude se forme quand même, mais plus lentement",
+                "L'habitude se forme à condition que le signal reste présent",
+                "L'habitude ne peut pas se former du tout"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Une habitude peut se former correctement même si l'un des quatre temps de la boucle (signal, envie, réponse, récompense) est absent, tant que les trois autres sont bien présents.",
+              "answerKey": "Retirer un seul de ces temps empêche l'habitude de se former : les quatre temps sont tous nécessaires, aucun n'est facultatif.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Une personne sent l'odeur du café le matin (signal), a envie de se réveiller (envie), et prépare sa tasse (réponse), mais ne ressent ensuite aucun effet ni satisfaction particulière. D'après la boucle en quatre temps, que devrait-il se passer ?",
+              "answerKey": "Sans récompense, le cerveau n'apprend pas si la boucle vaut la peine d'être retenue, donc l'habitude ne se forme pas.",
+              "estVraie": null,
+              "options": [
+                "Le signal suffit à lui seul à ancrer l'habitude",
+                "L'habitude se forme normalement grâce aux trois premiers temps",
+                "L'habitude se forme mais plus faiblement",
+                "L'habitude ne se forme pas, faute de récompense pour apprendre au cerveau que la boucle vaut la peine d'être retenue"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "S'améliorer de 1 % chaque jour pendant un an rend environ trente-sept fois meilleur, tandis que régresser de 1 % par jour ramène presque à zéro. Ce sont les petits écarts répétés, jamais les grands gestes ponctuels, qui décident du résultat.",
+          "tags": [
+            "habitudes",
+            "progres"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "S'améliorer de 1 % chaque jour pendant un an rend environ ___ fois meilleur.",
+              "answerKey": "C'est le résultat cumulé d'une amélioration quotidienne de 1 % répétée sur une année entière.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "S'améliorer de 1 % chaque jour pendant un an rend environ ___ fois meilleur.",
+                "accepted": [
+                  "trente-sept",
+                  "37"
+                ],
+                "leurres": [
+                  "dix",
+                  "cent",
+                  "quinze"
+                ]
+              }
+            },
+            {
+              "format": "EXPLAIN",
+              "facet": "MECHANISM",
+              "question": "Explique pourquoi s'améliorer de 1 % par jour pendant un an produit un résultat aussi important (environ trente-sept fois meilleur), alors que régresser de 1 % par jour ramène presque à zéro.",
+              "answerKey": "Ce sont les petits écarts répétés chaque jour, et non les grands gestes ponctuels, qui décident du résultat final : accumulés jour après jour pendant un an, un léger progrès quotidien de 1 % conduit à être environ trente-sept fois meilleur, tandis qu'une légère régression quotidienne de 1 % ramène presque à zéro.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Ce sont les petits écarts répétés chaque jour, plutôt que les grands gestes ponctuels, qui décident du résultat.",
+              "answerKey": "C'est bien ce que dit le concept : les petits écarts répétés, jamais les grands gestes ponctuels, décident du résultat.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Deux personnes veulent progresser : l'une fait un effort exceptionnel une seule fois dans l'année, l'autre s'améliore de 1 % chaque jour pendant un an. D'après le concept, laquelle obtient le meilleur résultat ?",
+              "answerKey": "Ce sont les petits écarts répétés, jamais les grands gestes ponctuels, qui décident du résultat, donc l'amélioration quotidienne de 1 % l'emporte.",
+              "estVraie": null,
+              "options": [
+                "Les deux obtiennent un résultat équivalent",
+                "Celle qui s'améliore de 1 % chaque jour",
+                "Aucune des deux, seul le hasard décide",
+                "Celle qui fait l'effort exceptionnel ponctuel"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "L'empilement d'habitudes consiste à accrocher une nouvelle habitude à une habitude déjà solide, selon la formule « Après [habitude actuelle], je ferai [nouvelle habitude] ». L'ancienne habitude sert de signal à la nouvelle, ce qui évite d'avoir à trouver un déclencheur de toutes pièces.",
+          "tags": [
+            "habitudes",
+            "empilement"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "« Après [habitude actuelle], je ferai [___] »",
+              "answerKey": "C'est la nouvelle habitude que l'on souhaite ancrer, accrochée à une habitude déjà existante.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "« Après [habitude actuelle], je ferai [___] »",
+                "accepted": [
+                  "nouvelle habitude",
+                  "nouvelle",
+                  "habitude nouvelle"
+                ],
+                "leurres": [
+                  "ancienne habitude",
+                  "récompense finale",
+                  "signal externe"
+                ]
+              }
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Explique comment l'ancienne habitude permet à la nouvelle habitude de s'ancrer, dans le principe de l'empilement d'habitudes.",
+              "answerKey": "L'ancienne habitude, déjà solide, sert de signal à la nouvelle habitude, ce qui évite d'avoir à trouver un déclencheur de toutes pièces pour cette nouvelle habitude.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Dans l'empilement d'habitudes, l'ancienne habitude sert de signal à la nouvelle, ce qui évite d'avoir à trouver un déclencheur de toutes pièces.",
+              "answerKey": "C'est exactement le principe énoncé : l'ancienne habitude sert de signal à la nouvelle, évitant de devoir inventer un déclencheur.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Une personne se brosse déjà les dents chaque soir sans y penser et veut en plus prendre l'habitude de faire dix pompes. Selon la formule de l'empilement d'habitudes, comment devrait-elle formuler cela ?",
+              "answerKey": "L'ancienne habitude sert de signal à la nouvelle, donc la formule est « Après [habitude actuelle], je ferai [nouvelle habitude] », appliquée ici au brossage de dents suivi des pompes.",
+              "estVraie": null,
+              "options": [
+                "« Je me brosserai les dents en pensant à faire des pompes »",
+                "« Après m'être brossé les dents, je ferai dix pompes »",
+                "« Je ferai dix pompes si je pense à me brosser les dents »",
+                "« Après avoir fait dix pompes, je me brosserai les dents »"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "On ne s'élève pas au niveau de ses objectifs, on tombe au niveau de ses systèmes : se fixer un but donne une direction, mais c'est le système — la routine quotidienne qui y mène — qui produit les résultats. Deux personnes qui visent la même chose divergent par leurs systèmes, pas par leurs intentions.",
+          "tags": [
+            "habitudes",
+            "systemes"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Deux personnes visent exactement le même objectif mais obtiennent des résultats très différents. Selon cette idée, qu'est-ce qui explique le plus probablement cet écart ?",
+              "answerKey": "Ce qui distingue deux personnes visant la même chose, ce sont leurs systèmes, pas leurs intentions.",
+              "estVraie": null,
+              "options": [
+                "Leurs objectifs sont en réalité différents malgré les apparences",
+                "Leur niveau d'intention ou de motivation diffère",
+                "Leurs systèmes, c'est-à-dire leurs routines quotidiennes, diffèrent",
+                "Leurs résultats ne dépendent d'aucun facteur identifiable"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "On ne s'élève pas au niveau de ses objectifs, on tombe au niveau de ses ___.",
+              "answerKey": "C'est la routine quotidienne qui mène vers le but, et non le but lui-même, qui produit réellement les résultats obtenus.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "On ne s'élève pas au niveau de ses objectifs, on tombe au niveau de ses ___.",
+                "accepted": [
+                  "systèmes",
+                  "système"
+                ],
+                "leurres": [
+                  "ambitions",
+                  "habitudes",
+                  "principes"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Se fixer un objectif est ce qui produit directement les résultats obtenus, selon cette idée.",
+              "answerKey": "L'objectif donne une direction, mais ce sont les systèmes, c'est-à-dire les routines quotidiennes qui y mènent, qui produisent les résultats.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Deux collègues veulent tous deux progresser en anglais d'ici un an. L'un y arrive, l'autre non. D'après cette idée, quelle explication est la plus cohérente ?",
+              "answerKey": "L'écart s'explique par une différence dans leurs routines quotidiennes, c'est-à-dire leurs systèmes, et non par une différence dans leur objectif ou leur envie de réussir.",
+              "estVraie": null,
+              "options": [
+                "Celui qui progresse a mis en place une routine quotidienne différente de l'autre",
+                "Celui qui progresse avait un objectif légèrement différent au départ",
+                "Celui qui progresse voulait vraiment plus atteindre son objectif",
+                "Celui qui progresse a eu plus de chance, indépendamment de ses actions"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Rendre une habitude évidente, attrayante, facile et satisfaisante augmente les chances de la tenir ; pour rompre une mauvaise habitude, on la rend au contraire invisible, rebutante, difficile et insatisfaisante.",
+          "tags": [
+            "habitudes",
+            "formation"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "D'après cette idée, quelles sont les quatre qualités à donner à une habitude pour augmenter les chances de la tenir ?",
+              "answerKey": "Rendre l'habitude évidente, attrayante, facile et satisfaisante augmente les chances de la tenir.",
+              "estVraie": null,
+              "options": [
+                "Visible, plaisante, rapide et récompensée",
+                "Claire, agréable, courte et valorisante",
+                "Simple, motivante, régulière et mesurable",
+                "Évidente, attrayante, facile et satisfaisante"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "Pour rompre une mauvaise habitude, on la rend invisible, rebutante, difficile et ___.",
+              "answerKey": "Rompre une mauvaise habitude consiste à inverser les quatre leviers qui renforcent une bonne habitude : là où l'évidence, l'attrait, la facilité et la satisfaction consolident une habitude, leurs contraires la défont.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Pour rompre une mauvaise habitude, on la rend invisible, rebutante, difficile et ___.",
+                "accepted": [
+                  "insatisfaisante"
+                ],
+                "leurres": [
+                  "inutile",
+                  "ennuyeuse",
+                  "coûteuse"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Pour se défaire d'une mauvaise habitude, on applique les mêmes quatre leviers que pour installer une bonne habitude, de la même manière.",
+              "answerKey": "Les quatre leviers sont inversés pour rompre une mauvaise habitude : on la rend invisible, rebutante, difficile et insatisfaisante, au lieu de évidente, attrayante, facile et satisfaisante.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Quelqu'un veut arrêter de grignoter des chips le soir devant la télévision. Laquelle de ces actions correspond à ce que cette idée recommande ?",
+              "answerKey": "Ranger les chips hors de vue et dans un placard difficile d'accès rend l'habitude invisible et difficile, ce qui correspond aux leviers utilisés pour rompre une mauvaise habitude.",
+              "estVraie": null,
+              "options": [
+                "Manger les chips plus tôt dans la journée au même endroit",
+                "Acheter des chips encore plus savoureuses pour se récompenser",
+                "Laisser les chips bien en évidence sur la table basse",
+                "Ranger les chips hors de vue, dans un placard difficile d'accès"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cle": "cours-histoire",
+      "titre": "Cours d'histoire",
+      "nom": "cours-histoire",
+      "texte": "Cours d'histoire — les causes de la Première Guerre mondiale\n\nL'attentat de Sarajevo, le 28 juin 1914, où l'archiduc François-Ferdinand d'Autriche est assassiné par Gavrilo Princip, est le déclencheur immédiat du conflit. Mais un attentat ne suffit pas à embraser un continent : il a mis le feu à des tensions accumulées depuis des décennies.\n\nLe jeu des alliances a transformé une querelle régionale en guerre générale. D'un côté la Triple-Entente réunissait la France, le Royaume-Uni et la Russie ; de l'autre la Triple-Alliance liait l'Allemagne, l'Autriche-Hongrie et l'Italie. Chaque puissance était tenue de soutenir ses alliés, si bien qu'une déclaration de guerre en entraînait mécaniquement d'autres.\n\nLa course aux armements avait préparé les esprits et les arsenaux. Depuis les années 1890, l'Allemagne et le Royaume-Uni rivalisaient sur mer, notamment autour des cuirassés Dreadnought, tandis que les armées de terre gonflaient leurs effectifs. Une puissance militaire prête à servir rend la guerre plus probable, faute de la rendre inévitable.\n\nLe nationalisme exacerbé nourrissait les rivalités. La France n'avait pas digéré la perte de l'Alsace-Lorraine en 1871, et les nationalismes des Balkans fragilisaient l'Autriche-Hongrie, un empire multinational qui craignait son propre morcellement.\n\nL'enchaînement des déclarations de guerre est fulgurant : entre le 28 juillet et le 4 août 1914, l'Europe bascule. Ce que chacun imaginait comme une guerre courte durera plus de quatre ans.",
+      "estImage": false,
+      "lecture": null,
+      "nature": "FACTUEL",
+      "rejet": null,
+      "echec": null,
+      "concepts": [
+        {
+          "concept": "L'attentat de Sarajevo, le 28 juin 1914, où l'archiduc François-Ferdinand d'Autriche est assassiné par Gavrilo Princip, est le déclencheur immédiat de la Première Guerre mondiale.",
+          "tags": [
+            "premiere-guerre-mondiale",
+            "sarajevo"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Quel événement est présenté comme le déclencheur immédiat de la Première Guerre mondiale ?",
+              "answerKey": "L'assassinat de l'archiduc François-Ferdinand d'Autriche à Sarajevo, le 28 juin 1914.",
+              "estVraie": null,
+              "options": [
+                "La mobilisation générale russe",
+                "Le naufrage du Lusitania",
+                "L'assassinat de l'archiduc François-Ferdinand d'Autriche à Sarajevo",
+                "L'invasion de la Belgique par l'Allemagne"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "L'attentat de Sarajevo, le 28 juin 1914, où l'archiduc François-Ferdinand d'Autriche est assassiné par ___, est le déclencheur immédiat de la Première Guerre mondiale.",
+              "answerKey": "C'est le nom de l'auteur de l'attentat de Sarajevo, cité comme l'assassin de l'archiduc.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "L'attentat de Sarajevo, le 28 juin 1914, où l'archiduc François-Ferdinand d'Autriche est assassiné par ___, est le déclencheur immédiat de la Première Guerre mondiale.",
+                "accepted": [
+                  "Gavrilo Princip",
+                  "Princip"
+                ],
+                "leurres": [
+                  "Gavrilo Draskovic",
+                  "Milan Obrenovic",
+                  "Nikola Pasic"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "L'attentat de Sarajevo est la cause profonde qui explique à elle seule le déclenchement de la Première Guerre mondiale.",
+              "answerKey": "L'attentat de Sarajevo, où l'archiduc François-Ferdinand d'Autriche est assassiné par Gavrilo Princip, est qualifié de déclencheur immédiat de la guerre, ce qui le distingue d'une cause qui suffirait à elle seule à l'expliquer.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Un historien qui écrit que la Première Guerre mondiale a commencé le 28 juin 1914 avec la mort de François-Ferdinand désigne cette date comme :",
+              "answerKey": "Le déclencheur immédiat de la guerre, tel que le concept qualifie l'attentat de Sarajevo.",
+              "estVraie": null,
+              "options": [
+                "Le déclencheur immédiat de la guerre",
+                "La fin des hostilités",
+                "Le traité qui met fin au conflit",
+                "La cause unique et suffisante de la guerre"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Un attentat isolé ne suffit pas à expliquer une guerre générale : celui de Sarajevo a mis le feu à des tensions accumulées depuis des décennies.",
+          "tags": [
+            "premiere-guerre-mondiale"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Selon ce concept, qu'est-ce qui ne suffit pas, à lui seul, à expliquer une guerre générale ?",
+              "answerKey": "Un attentat isolé ne suffit pas à expliquer une guerre générale.",
+              "estVraie": null,
+              "options": [
+                "Un attentat isolé",
+                "Un traité d'alliance",
+                "Une mobilisation générale",
+                "Une crise économique"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "Un attentat isolé ne suffit pas à expliquer une guerre générale : celui de Sarajevo a mis le feu à des tensions accumulées depuis des ___.",
+              "answerKey": "Il s'agit de la durée sur laquelle les tensions se sont accumulées avant l'attentat, selon ce concept.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Un attentat isolé ne suffit pas à expliquer une guerre générale : celui de Sarajevo a mis le feu à des tensions accumulées depuis des ___.",
+                "accepted": [
+                  "décennies",
+                  "décennie"
+                ],
+                "leurres": [
+                  "semaines",
+                  "mois",
+                  "années"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "L'attentat de Sarajevo a agi comme un déclencheur sur des tensions déjà accumulées depuis longtemps, plutôt que comme une cause suffisante en elle-même.",
+              "answerKey": "L'attentat de Sarajevo a mis le feu à des tensions accumulées depuis des décennies, ce qui montre qu'un attentat isolé ne suffit pas à expliquer une guerre générale.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Un élève affirme que la Première Guerre mondiale s'explique uniquement par l'attentat de Sarajevo, sans rien d'autre. D'après ce concept, cette affirmation est :",
+              "answerKey": "Insuffisante, puisqu'un attentat isolé ne suffit pas à expliquer une guerre générale : il faut aussi les tensions accumulées depuis des décennies.",
+              "estVraie": null,
+              "options": [
+                "Hors sujet, car l'attentat n'a aucun rapport avec la guerre",
+                "Complète, car l'attentat est la seule cause nécessaire",
+                "Insuffisante, car un attentat isolé ne suffit pas à lui seul",
+                "Anachronique, car l'attentat est postérieur à la guerre"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Le système des alliances a transformé une querelle régionale en guerre générale : la Triple-Entente réunissait la France, le Royaume-Uni et la Russie, tandis que la Triple-Alliance liait l'Allemagne, l'Autriche-Hongrie et l'Italie.",
+          "tags": [
+            "premiere-guerre-mondiale",
+            "alliances"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Comment ce concept nomme-t-il le mécanisme qui a transformé une querelle régionale en guerre générale ?",
+              "answerKey": "Le système des alliances.",
+              "estVraie": null,
+              "options": [
+                "Le système monétaire international",
+                "Le système parlementaire européen",
+                "Le système des alliances",
+                "Le système économique colonial"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "Le système des alliances a transformé une querelle régionale en guerre générale : la Triple-Entente réunissait la France, le Royaume-Uni et la Russie, tandis que la Triple-Alliance liait l'Allemagne, l'Autriche-Hongrie et ___.",
+              "answerKey": "C'est le troisième pays lié à l'Allemagne et à l'Autriche-Hongrie au sein de la Triple-Alliance, selon ce concept.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Le système des alliances a transformé une querelle régionale en guerre générale : la Triple-Entente réunissait la France, le Royaume-Uni et la Russie, tandis que la Triple-Alliance liait l'Allemagne, l'Autriche-Hongrie et ___.",
+                "accepted": [
+                  "l'Italie",
+                  "Italie"
+                ],
+                "leurres": [
+                  "l'Espagne",
+                  "la Roumanie",
+                  "la Bulgarie"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "La Triple-Entente réunissait l'Allemagne, l'Autriche-Hongrie et l'Italie, tandis que la Triple-Alliance liait la France, le Royaume-Uni et la Russie.",
+              "answerKey": "Selon ce concept, la Triple-Entente réunissait la France, le Royaume-Uni et la Russie, tandis que la Triple-Alliance liait l'Allemagne, l'Autriche-Hongrie et l'Italie : les deux camps sont ici inversés.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "D'après ce concept, si la Russie entre en guerre aux côtés de la France et du Royaume-Uni, c'est en tant que membre de :",
+              "answerKey": "La Triple-Entente, qui réunissait la France, le Royaume-Uni et la Russie.",
+              "estVraie": null,
+              "options": [
+                "Le système colonial",
+                "La Triple-Entente",
+                "La confédération germanique",
+                "La Triple-Alliance"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Chaque puissance étant tenue de soutenir ses alliés, une déclaration de guerre en entraînait mécaniquement d'autres.",
+          "tags": [
+            "premiere-guerre-mondiale",
+            "alliances"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que décrit l'idée selon laquelle une déclaration de guerre en entraînait mécaniquement d'autres ?",
+              "answerKey": "Chaque puissance étant tenue de soutenir ses alliés, la déclaration de guerre se propage mécaniquement entre puissances alliées.",
+              "estVraie": null,
+              "options": [
+                "Une négociation diplomatique destinée à éviter tout conflit",
+                "Un système d'alliances qui transforme une déclaration de guerre isolée en engagement généralisé",
+                "Une course aux armements navals entre deux puissances rivales",
+                "Une décision prise par une seule puissance sans consultation de ses alliés"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "Chaque puissance étant tenue de soutenir ses ___, une déclaration de guerre en entraînait mécaniquement d'autres.",
+              "answerKey": "Chaque puissance devait honorer ses engagements envers ses alliés, ce qui faisait qu'un conflit déclaré se propageait automatiquement à d'autres puissances.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Chaque puissance étant tenue de soutenir ses ___, une déclaration de guerre en entraînait mécaniquement d'autres.",
+                "accepted": [
+                  "alliés",
+                  "allié"
+                ],
+                "leurres": [
+                  "voisins",
+                  "rivaux",
+                  "créanciers"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Une déclaration de guerre entre deux puissances restait un événement isolé, sans effet sur les autres puissances alliées.",
+              "answerKey": "Le système d'alliances impose à chaque puissance de soutenir ses alliés, si bien qu'une déclaration de guerre en entraîne mécaniquement d'autres plutôt que de rester isolée.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Selon ce mécanisme, si la puissance A déclare la guerre à la puissance B, et que la puissance C est alliée de B, que se passe-t-il le plus probablement ?",
+              "answerKey": "La puissance C est tenue de soutenir son allié B, ce qui entraîne mécaniquement son entrée en guerre.",
+              "estVraie": null,
+              "options": [
+                "C reste neutre car aucune règle ne l'y oblige",
+                "C négocie une paix séparée entre A et B",
+                "C déclare la guerre à B par erreur",
+                "C est entraînée à son tour dans la guerre pour soutenir B"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "La course aux armements, depuis les années 1890, opposait notamment l'Allemagne et le Royaume-Uni sur mer autour des cuirassés Dreadnought, tandis que les armées de terre gonflaient leurs effectifs.",
+          "tags": [
+            "premiere-guerre-mondiale",
+            "armement"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Quel élément caractérise la course aux armements décrite, opposant l'Allemagne et le Royaume-Uni depuis les années 1890 ?",
+              "answerKey": "Une rivalité navale autour des cuirassés Dreadnought, accompagnée d'un gonflement des effectifs des armées de terre.",
+              "estVraie": null,
+              "options": [
+                "Une réduction progressive des budgets militaires des deux pays",
+                "Une rivalité navale sur les cuirassés Dreadnought accompagnée d'une hausse des effectifs terrestres",
+                "Un traité limitant la construction de navires de guerre entre les deux puissances",
+                "Une alliance militaire entre l'Allemagne et le Royaume-Uni contre une troisième puissance"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "La course aux armements, depuis les années 1890, opposait notamment l'Allemagne et le Royaume-Uni sur mer autour des cuirassés ___, tandis que les armées de terre gonflaient leurs effectifs.",
+              "answerKey": "Sur mer, la rivalité entre l'Allemagne et le Royaume-Uni se concentrait sur la construction de ces cuirassés.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "La course aux armements, depuis les années 1890, opposait notamment l'Allemagne et le Royaume-Uni sur mer autour des cuirassés ___, tandis que les armées de terre gonflaient leurs effectifs.",
+                "accepted": [
+                  "Dreadnought",
+                  "Dreadnoughts"
+                ],
+                "leurres": [
+                  "Bismarck",
+                  "Trafalgar",
+                  "Nautilus"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Cette course aux armements touchait à la fois les forces navales, avec la rivalité autour des cuirassés Dreadnought, et les effectifs des armées de terre.",
+              "answerKey": "La rivalité navale entre l'Allemagne et le Royaume-Uni portait sur les cuirassés Dreadnought, tandis que parallèlement les armées de terre augmentaient leurs effectifs.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Un pays qui, à cette époque, aurait à la fois construit massivement des cuirassés et augmenté ses effectifs terrestres illustrerait quel phénomène ?",
+              "answerKey": "La course aux armements, qui opposait les puissances à la fois sur mer autour des cuirassés Dreadnought et sur terre par le gonflement des effectifs.",
+              "estVraie": null,
+              "options": [
+                "Un traité de paix naval",
+                "Un désarmement unilatéral",
+                "La course aux armements de l'époque",
+                "Une neutralité militaire stricte"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Une puissance militaire prête à servir rend la guerre plus probable, sans pour autant la rendre inévitable.",
+          "tags": [
+            "premiere-guerre-mondiale",
+            "armement"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "TRUE_FALSE",
+              "facet": "RECOGNITION",
+              "question": "Une puissance militaire prête à servir rend la guerre plus probable, sans pour autant la rendre inévitable.",
+              "answerKey": "Une capacité militaire prête à l'emploi augmente la probabilité du conflit, mais le concept précise que cela n'en fait pas une issue certaine.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "Une puissance militaire prête à servir rend la guerre plus probable, sans pour autant la rendre ___.",
+              "answerKey": "Le concept relie la disponibilité d'une puissance militaire à une hausse de la probabilité du conflit, tout en écartant l'idée que la guerre en devienne certaine.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Une puissance militaire prête à servir rend la guerre plus probable, sans pour autant la rendre ___.",
+                "accepted": [
+                  "inévitable"
+                ],
+                "leurres": [
+                  "improbable",
+                  "tardive",
+                  "légitime"
+                ]
+              }
+            },
+            {
+              "format": "MCQ",
+              "facet": "BOUNDARY",
+              "question": "Que faut-il éviter de conclure à partir de l'idée qu'une puissance militaire prête à servir rend la guerre plus probable ?",
+              "answerKey": "Il ne faut pas en conclure que la guerre devient inévitable, seulement plus probable.",
+              "estVraie": null,
+              "options": [
+                "Qu'une puissance militaire prête à servir est un facteur parmi d'autres",
+                "Que la guerre devient inévitable dès qu'une telle puissance existe",
+                "Que la probabilité de guerre augmente sans certitude",
+                "Que la guerre devient plus probable en présence d'une telle puissance"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Un pays maintient une armée mobilisable en permanence mais aucun conflit n'éclate finalement dans la région. Cette situation illustre quoi par rapport au concept ?",
+              "answerKey": "Le concept énonce que la puissance militaire prête à servir rend la guerre plus probable, sans la rendre inévitable, ce qui est cohérent avec l'absence de conflit malgré cette disponibilité.",
+              "estVraie": null,
+              "options": [
+                "Une contradiction du concept, puisque la guerre aurait dû éclater",
+                "La preuve que seule la mobilisation garantit la paix",
+                "Une confirmation que la probabilité accrue de guerre ne signifie pas son caractère inévitable",
+                "La preuve que la puissance militaire n'a aucun effet sur la probabilité de guerre"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Le nationalisme exacerbé nourrissait les rivalités européennes avant 1914.",
+          "tags": [
+            "premiere-guerre-mondiale",
+            "nationalisme"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Comment qualifie-t-on le sentiment national qui nourrissait les rivalités entre puissances européennes avant 1914 ?",
+              "answerKey": "Il s'agit du nationalisme exacerbé, présenté comme un facteur alimentant les rivalités européennes de cette période.",
+              "estVraie": null,
+              "options": [
+                "Un nationalisme exacerbé",
+                "Un fédéralisme naissant",
+                "Un cosmopolitisme croissant",
+                "Un pacifisme généralisé"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Explique le rôle que jouait le nationalisme exacerbé dans les relations entre puissances européennes avant 1914.",
+              "answerKey": "Le nationalisme exacerbé nourrissait les rivalités européennes avant 1914, c'est-à-dire qu'il entretenait et renforçait les tensions entre les nations du continent durant cette période.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Le nationalisme exacerbé nourrissait les rivalités européennes avant 1914.",
+              "answerKey": "Cette exacerbation des sentiments nationaux est bien présentée comme une source d'alimentation des rivalités entre puissances européennes à cette époque.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "Le nationalisme ___ nourrissait les rivalités européennes avant 1914.",
+              "answerKey": "Le sentiment national poussé à l'extrême, plutôt qu'apaisé ou modéré, est ce qui alimentait les tensions entre nations européennes.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Le nationalisme ___ nourrissait les rivalités européennes avant 1914.",
+                "accepted": [
+                  "exacerbé",
+                  "exacerbés",
+                  "exacerbée"
+                ],
+                "leurres": [
+                  "modéré",
+                  "naissant",
+                  "tempéré"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "La France n'avait pas digéré la perte de l'Alsace-Lorraine en 1871.",
+          "tags": [
+            "premiere-guerre-mondiale",
+            "nationalisme"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "TRUE_FALSE",
+              "facet": "RECOGNITION",
+              "question": "En 1871, la France avait perdu l'Alsace-Lorraine, une perte qu'elle n'avait pas digérée.",
+              "answerKey": "Cette perte territoriale de 1871 est bien décrite comme un événement que la France n'avait pas accepté ou surmonté.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Explique ce que signifie l'idée que la France n'avait pas digéré la perte de l'Alsace-Lorraine.",
+              "answerKey": "Cela signifie que la France gardait un ressentiment persistant vis-à-vis de la perte de ce territoire survenue en 1871, sans être parvenue à l'accepter ou à en faire le deuil.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "BOUNDARY",
+              "question": "Quel territoire la France n'avait-elle pas digéré d'avoir perdu en 1871 ?",
+              "answerKey": "C'est l'Alsace-Lorraine dont la perte en 1871 n'avait pas été digérée par la France.",
+              "estVraie": null,
+              "options": [
+                "Le Nord-Pas-de-Calais",
+                "La Savoie",
+                "La Bourgogne",
+                "L'Alsace-Lorraine"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "La France n'avait pas digéré la perte de l'Alsace-Lorraine en ___.",
+              "answerKey": "C'est en 1871 que la France a perdu ce territoire, une perte qu'elle n'avait toujours pas acceptée.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "La France n'avait pas digéré la perte de l'Alsace-Lorraine en ___.",
+                "accepted": [
+                  "1871"
+                ],
+                "leurres": [
+                  "1870",
+                  "1875",
+                  "1890"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "Les nationalismes des Balkans fragilisaient l'Autriche-Hongrie, un empire multinational qui craignait son propre morcellement.",
+          "tags": [
+            "premiere-guerre-mondiale",
+            "nationalisme"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Quel empire multinational était fragilisé par les nationalismes des Balkans ?",
+              "answerKey": "C'est l'Autriche-Hongrie qui était fragilisée par ces nationalismes balkaniques.",
+              "estVraie": null,
+              "options": [
+                "L'Empire ottoman",
+                "L'Autriche-Hongrie",
+                "L'Empire russe",
+                "L'Empire allemand"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Explique pourquoi les nationalismes des Balkans représentaient une menace particulière pour l'Autriche-Hongrie.",
+              "answerKey": "L'Autriche-Hongrie était un empire multinational qui craignait son propre morcellement, si bien que les nationalismes des Balkans, en encourageant les aspirations des différents peuples à l'autonomie, fragilisaient cet empire en menaçant son unité interne.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "L'Autriche-Hongrie était un empire multinational qui ne craignait aucunement son propre morcellement face aux nationalismes des Balkans.",
+              "answerKey": "L'empire craignait au contraire son propre morcellement, ce qui rend cette affirmation fausse : les nationalismes des Balkans fragilisaient bien cet empire multinational.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "Les nationalismes des Balkans fragilisaient l'Autriche-Hongrie, un empire ___ qui craignait son propre morcellement.",
+              "answerKey": "L'Autriche-Hongrie regroupait plusieurs nationalités en son sein, une composition qui la rendait vulnérable à l'éclatement sous la pression des nationalismes balkaniques.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Les nationalismes des Balkans fragilisaient l'Autriche-Hongrie, un empire ___ qui craignait son propre morcellement.",
+                "accepted": [
+                  "multinational",
+                  "multinationale"
+                ],
+                "leurres": [
+                  "centralisé",
+                  "unitaire",
+                  "industrialisé"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "L'enchaînement des déclarations de guerre entre le 28 juillet et le 4 août 1914 fait basculer l'Europe dans un conflit que chacun imaginait court et qui durera plus de quatre ans.",
+          "tags": [
+            "premiere-guerre-mondiale"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Quel est l'intervalle de dates durant lequel s'enchaînent les déclarations de guerre qui font basculer l'Europe dans le conflit de 1914 ?",
+              "answerKey": "Cet enchaînement se produit entre le 28 juillet et le 4 août 1914.",
+              "estVraie": null,
+              "options": [
+                "Du 28 juillet au 4 août 1914",
+                "Du 1er août au 28 août 1914",
+                "Du 4 août au 28 août 1914",
+                "Du 28 juin au 4 juillet 1914"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "L'enchaînement des déclarations de guerre entre le 28 juillet et le 4 août 1914 fait basculer l'Europe dans un conflit que chacun imaginait ___ et qui durera plus de quatre ans.",
+              "answerKey": "Le conflit était perçu au moment de son déclenchement comme devant être bref, alors qu'il s'est prolongé plus de quatre ans.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "L'enchaînement des déclarations de guerre entre le 28 juillet et le 4 août 1914 fait basculer l'Europe dans un conflit que chacun imaginait ___ et qui durera plus de quatre ans.",
+                "accepted": [
+                  "court",
+                  "bref"
+                ],
+                "leurres": [
+                  "long",
+                  "inévitable",
+                  "décisif"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "L'enchaînement des déclarations de guerre entre le 28 juillet et le 4 août 1914 a débouché sur un conflit que l'on prévoyait dès le départ comme devant durer plusieurs années.",
+              "answerKey": "Chacun imaginait au contraire un conflit court, alors qu'il a fini par durer plus de quatre ans.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Un historien souhaite illustrer l'idée que les contemporains de 1914 se trompaient sur la durée du conflit qui s'annonçait. Quel constat du concept lui sert d'appui ?",
+              "answerKey": "Chacun imaginait un conflit court, alors qu'il a duré plus de quatre ans.",
+              "estVraie": null,
+              "options": [
+                "L'Europe a évité de basculer dans le conflit malgré les tensions",
+                "Le conflit imaginé court a finalement duré plus de quatre ans",
+                "Le conflit imaginé long a finalement été très bref",
+                "Les déclarations de guerre se sont étalées sur plusieurs années"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cle": "reponse-assistant",
+      "titre": "Réponse d'assistant collée",
+      "nom": "reponse-assistant",
+      "texte": "Réponse collée depuis un assistant — async/await en JavaScript\n\nEn JavaScript, async et await servent à écrire du code asynchrone qui se lit comme du code synchrone, sans empiler les .then().\n\nUne fonction déclarée avec async renvoie toujours une promesse, même si son corps retourne une valeur ordinaire. À l'intérieur, le mot-clé await suspend l'exécution de la fonction jusqu'à ce que la promesse attendue soit résolue, puis reprend avec la valeur résolue. await ne bloque pas le fil principal : il rend la main à la boucle d'événements le temps de l'attente.\n\nExemple :\n\n  async function chargerUtilisateur(id) {\n    const reponse = await fetch(`/api/users/${id}`);\n    const donnees = await reponse.json();\n    return donnees;\n  }\n\nIci, chaque await attend la résolution avant de passer à la ligne suivante. La fonction renvoie une promesse ; on la consomme avec await à son tour, ou avec .then().\n\nPour gérer les erreurs, on entoure les await d'un bloc try/catch. Une promesse rejetée fait que await lève une exception, attrapée par le catch — c'est l'équivalent asynchrone du try/catch classique.\n\nAttention : deux await placés l'un après l'autre s'exécutent en série, l'un après l'autre. Si les deux opérations sont indépendantes, il vaut mieux les lancer ensemble avec Promise.all pour qu'elles tournent en parallèle et gagner du temps.",
+      "estImage": false,
+      "lecture": null,
+      "nature": "FACTUEL",
+      "rejet": null,
+      "echec": null,
+      "concepts": [
+        {
+          "concept": "En JavaScript, « async » et « await » servent à écrire du code asynchrone qui se lit comme du code synchrone, sans empiler les « .then() ».",
+          "tags": [
+            "javascript",
+            "async-await"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que permettent d'obtenir « async » et « await » en JavaScript, selon leur usage principal ?",
+              "answerKey": "Ils permettent d'écrire du code asynchrone qui se lit comme du code synchrone, sans empiler les « .then() ».",
+              "estVraie": null,
+              "options": [
+                "Une exécution du code plus rapide grâce à des threads séparés",
+                "Une conversion automatique de toutes les fonctions en promesses natives",
+                "Une suppression totale du besoin de gérer les erreurs asynchrones",
+                "Du code asynchrone qui se lit comme du code synchrone, sans empiler les « .then() »"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            },
+            {
+              "format": "CODE",
+              "facet": "MECHANISM",
+              "question": "Dans un extrait de code, une fonction utilise plusieurs `.then()` enchaînés pour traiter des opérations asynchrones successives. Explique ce que permettrait de faire « async » et « await » à la place de cet enchaînement, d'après ce que le concept énonce.",
+              "answerKey": "Ils permettraient d'écrire ce même enchaînement de code asynchrone sous une forme qui se lit comme du code synchrone, sans empiler les « .then() ».",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "« async » et « await » servent à écrire du code asynchrone qui se lit comme du code synchrone, en empilant davantage de « .then() » pour plus de clarté.",
+              "answerKey": "Le concept énonce que ces mots-clés servent au contraire à écrire du code asynchrone sans empiler les « .then() », pas à en empiler davantage.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "Un développeur remplace une chaîne de « .then() » par « async » et « await » pour que son code ressemble à du code ___.",
+              "answerKey": "Le concept énonce que ces mots-clés permettent au code asynchrone de se lire comme du code de ce type, sans empiler les « .then() ».",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Un développeur remplace une chaîne de « .then() » par « async » et « await » pour que son code ressemble à du code ___.",
+                "accepted": [
+                  "synchrone",
+                  "synchrones"
+                ],
+                "leurres": [
+                  "asynchrone",
+                  "parallèle",
+                  "compilé"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "Une fonction déclarée avec « async » renvoie toujours une promesse, même si son corps retourne une valeur ordinaire.",
+          "tags": [
+            "javascript",
+            "async-await"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "TRUE_FALSE",
+              "facet": "RECOGNITION",
+              "question": "Une fonction déclarée avec « async » renvoie toujours une promesse, même si son corps retourne une valeur ordinaire.",
+              "answerKey": "Le concept énonce précisément que la fonction renvoie toujours une promesse, quel que soit le type de valeur retourné dans son corps.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Une fonction « async » a dans son corps une instruction qui retourne le nombre 42. Explique ce que reçoit réellement l'appelant de cette fonction, d'après ce que le concept énonce.",
+              "answerKey": "L'appelant reçoit toujours une promesse, même si le corps de la fonction retourne une valeur ordinaire comme un nombre.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "BOUNDARY",
+              "question": "Une fonction « async » a un corps qui retourne simplement une chaîne de caractères. Que renvoie la fonction elle-même, selon le concept ?",
+              "answerKey": "La fonction renvoie toujours une promesse, même si son corps retourne une valeur ordinaire.",
+              "estVraie": null,
+              "options": [
+                "Une erreur, car « async » exige un retour de type promesse explicite",
+                "La chaîne de caractères directement, sans enveloppe supplémentaire",
+                "Toujours une promesse, même si le corps retourne une valeur ordinaire",
+                "Undefined, car les fonctions « async » ignorent les retours simples"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "Une fonction « async function getValue() { return 10; } » ne renvoie pas directement le nombre 10 à l'appelant, mais une ___.",
+              "answerKey": "Le concept énonce que la fonction déclarée avec « async » renvoie toujours cet objet, même si son corps retourne une valeur ordinaire.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Une fonction « async function getValue() { return 10; } » ne renvoie pas directement le nombre 10 à l'appelant, mais une ___.",
+                "accepted": [
+                  "promesse",
+                  "promise"
+                ],
+                "leurres": [
+                  "exception",
+                  "référence",
+                  "fonction"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "À l'intérieur d'une fonction « async », le mot-clé « await » suspend l'exécution de la fonction jusqu'à ce que la promesse attendue soit résolue, puis reprend avec la valeur résolue.",
+          "tags": [
+            "javascript",
+            "async-await"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que fait le mot-clé « await » à l'intérieur d'une fonction « async », selon le concept ?",
+              "answerKey": "Il suspend l'exécution de la fonction jusqu'à ce que la promesse attendue soit résolue, puis reprend avec la valeur résolue.",
+              "estVraie": null,
+              "options": [
+                "Il arrête définitivement l'exécution de la fonction dès que la promesse est créée",
+                "Il exécute la promesse dans un thread séparé sans suspendre la fonction",
+                "Il transforme la promesse en valeur synchrone avant même sa résolution",
+                "Il suspend l'exécution de la fonction jusqu'à ce que la promesse attendue soit résolue, puis reprend avec la valeur résolue"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "Après avoir utilisé « await » sur une promesse, l'exécution de la fonction « async » reprend avec la ___.",
+              "answerKey": "Le concept énonce que l'exécution reprend avec ce que la promesse attendue a fourni une fois résolue, après la suspension.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Après avoir utilisé « await » sur une promesse, l'exécution de la fonction « async » reprend avec la ___.",
+                "accepted": [
+                  "valeur résolue",
+                  "valeur"
+                ],
+                "leurres": [
+                  "fonction appelante",
+                  "erreur levée",
+                  "promesse initiale"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "À l'intérieur d'une fonction « async », le mot-clé « await » continue l'exécution de la fonction sans attendre, et reprend ensuite avec la valeur résolue une fois la promesse terminée en arrière-plan.",
+              "answerKey": "Le concept énonce au contraire que « await » suspend l'exécution de la fonction jusqu'à la résolution de la promesse, avant de reprendre avec la valeur résolue.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "Dans une fonction « async », l'instruction « const data = await fetchData(); » ___ l'exécution de la fonction jusqu'à ce que « fetchData() » soit résolue.",
+              "answerKey": "Le concept énonce que « await » fait cela à l'exécution de la fonction, avant de reprendre avec la valeur résolue.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Dans une fonction « async », l'instruction « const data = await fetchData(); » ___ l'exécution de la fonction jusqu'à ce que « fetchData() » soit résolue.",
+                "accepted": [
+                  "suspend",
+                  "suspende"
+                ],
+                "leurres": [
+                  "accélère",
+                  "duplique",
+                  "ignore"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "« await » ne bloque pas le fil principal : il rend la main à la boucle d'événements le temps de l'attente.",
+          "tags": [
+            "javascript",
+            "boucle-evenements"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que fait concrètement « await » pendant l'attente d'une opération asynchrone ?",
+              "answerKey": "Il rend la main à la boucle d'événements le temps de l'attente, sans bloquer le fil principal.",
+              "estVraie": null,
+              "options": [
+                "Il bloque le fil principal jusqu'à la fin de l'opération",
+                "Il arrête complètement la boucle d'événements",
+                "Il rend la main à la boucle d'événements le temps de l'attente",
+                "Il crée un nouveau fil d'exécution pour attendre"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Explique pourquoi l'usage de « await » ne bloque pas le fil principal du programme.",
+              "answerKey": "Parce qu'« await » rend la main à la boucle d'événements pendant le temps de l'attente, au lieu d'immobiliser le fil principal jusqu'à la fin de l'opération.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Puisque « await » suspend l'exécution de la fonction dans laquelle il apparaît, il bloque également le fil principal pendant toute la durée de l'attente.",
+              "answerKey": "Cette affirmation confond la suspension de la fonction avec un blocage du fil principal : « await » rend la main à la boucle d'événements le temps de l'attente, le fil principal reste donc libre.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "L'interface reste réactive parce que « await » rend la main à la boucle d'événements plutôt que de ___ le fil principal.",
+              "answerKey": "« await » rend la main à la boucle d'événements plutôt que d'immobiliser le fil principal pendant l'attente.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "L'interface reste réactive parce que « await » rend la main à la boucle d'événements plutôt que de ___ le fil principal.",
+                "accepted": [
+                  "bloquer",
+                  "bloque"
+                ],
+                "leurres": [
+                  "accélérer",
+                  "dupliquer",
+                  "interrompre"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "Exemple JavaScript illustrant async/await : « async function chargerUtilisateur(id) { const reponse = await fetch(`/api/users/${id}`); const donnees = await reponse.json(); return donnees; } ». La fonction renvoie une promesse, qu'on consomme avec « await » à son tour, ou avec « .then() ».",
+          "tags": [
+            "javascript",
+            "async-await"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CODE",
+              "facet": "RECOGNITION",
+              "question": "Dans la fonction « chargerUtilisateur », que produit l'expression « await fetch(`/api/users/${id}`) » avant que « await reponse.json() » ne soit exécuté ?",
+              "answerKey": "Elle produit la réponse à la requête réseau, une fois la promesse renvoyée par « fetch » résolue.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "EXPLAIN",
+              "facet": "MECHANISM",
+              "question": "Explique ce que renvoie la fonction « chargerUtilisateur » et comment on peut consommer ce résultat une fois la fonction appelée.",
+              "answerKey": "La fonction renvoie une promesse, qu'on consomme avec « await » à son tour, ou avec « .then() ».",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Puisque « chargerUtilisateur » est déclarée avec « async », l'appeler renvoie directement les données de l'utilisateur, sans passer par une promesse.",
+              "answerKey": "Une fonction déclarée « async » renvoie toujours une promesse, y compris « chargerUtilisateur » : ses données ne sont accessibles qu'en consommant cette promesse, avec « await » ou avec « .then() ».",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "Un autre code qui veut récupérer le résultat de « chargerUtilisateur(id) » sans utiliser « await » doit appeler ___() sur la promesse renvoyée.",
+              "answerKey": "La fonction renvoie une promesse, qu'on peut consommer avec « await » ou, alternativement, avec « .then() ».",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Un autre code qui veut récupérer le résultat de « chargerUtilisateur(id) » sans utiliser « await » doit appeler ___() sur la promesse renvoyée.",
+                "accepted": [
+                  ".then",
+                  ".then()",
+                  "then"
+                ],
+                "leurres": [
+                  ".catch()",
+                  ".resolve()",
+                  ".map()"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "Pour gérer les erreurs avec async/await en JavaScript, on entoure les « await » d'un bloc « try/catch » : une promesse rejetée fait que « await » lève une exception, attrapée par le « catch » — c'est l'équivalent asynchrone du try/catch classique.",
+          "tags": [
+            "javascript",
+            "gestion-erreurs"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que fait un bloc « try/catch » entourant des « await » quand une promesse est rejetée ?",
+              "answerKey": "L'exception levée par « await » lors du rejet de la promesse est attrapée par le « catch ».",
+              "estVraie": null,
+              "options": [
+                "Il empêche la promesse d'être rejetée",
+                "Il transforme la promesse rejetée en promesse résolue",
+                "Il relance automatiquement l'opération asynchrone",
+                "Il attrape l'exception levée par « await » lors du rejet de la promesse"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Explique ce qui se passe, étape par étape, quand une promesse attendue par « await » est rejetée à l'intérieur d'un bloc « try/catch ».",
+              "answerKey": "La promesse rejetée fait que « await » lève une exception, qui est alors attrapée par le « catch » entourant le « try » — c'est l'équivalent asynchrone du try/catch classique.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Gérer les erreurs d'un « await » avec « try/catch » constitue une mécanique entièrement nouvelle, sans rapport avec le try/catch classique utilisé ailleurs.",
+              "answerKey": "Le « try/catch » entourant des « await » est présenté comme l'équivalent asynchrone du try/catch classique : une promesse rejetée fait lever une exception par « await », attrapée par le « catch », de la même manière qu'une exception classique.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "Pour gérer les erreurs avec async/await en JavaScript, on entoure les « await » d'un bloc « try/___ ».",
+              "answerKey": "Une promesse rejetée fait que « await » lève une exception, attrapée par ce bloc — l'équivalent asynchrone du try/catch classique.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Pour gérer les erreurs avec async/await en JavaScript, on entoure les « await » d'un bloc « try/___ ».",
+                "accepted": [
+                  "catch"
+                ],
+                "leurres": [
+                  "finally",
+                  "throw",
+                  "resolve"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "En JavaScript, deux « await » placés l'un après l'autre s'exécutent en série, l'un après l'autre. Si les deux opérations sont indépendantes, il vaut mieux les lancer ensemble avec « Promise.all » pour qu'elles tournent en parallèle et gagner du temps.",
+          "tags": [
+            "javascript",
+            "promise-all"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que se passe-t-il quand on écrit deux instructions « await » l'une après l'autre en JavaScript ?",
+              "answerKey": "Elles s'exécutent en série, l'une après l'autre.",
+              "estVraie": null,
+              "options": [
+                "Elles s'exécutent en série, l'une après l'autre",
+                "Elles provoquent une erreur de syntaxe",
+                "Elles s'annulent mutuellement",
+                "Elles s'exécutent en parallèle automatiquement"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "Si deux opérations sont indépendantes, il vaut mieux les lancer ensemble avec « ___ » pour qu'elles tournent en parallèle et gagner du temps.",
+              "answerKey": "Il s'agit de reconnaître l'outil qui permet de lancer plusieurs promesses simultanément plutôt que de les attendre l'une après l'autre avec deux « await » successifs.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Si deux opérations sont indépendantes, il vaut mieux les lancer ensemble avec « ___ » pour qu'elles tournent en parallèle et gagner du temps.",
+                "accepted": [
+                  "Promise.all",
+                  "Promise.all()"
+                ],
+                "leurres": [
+                  "Promise.race",
+                  "Promise.any",
+                  "Promise.resolve"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Deux « await » placés l'un après l'autre en JavaScript exécutent les deux opérations en série, et non en parallèle.",
+              "answerKey": "Deux « await » successifs exécutent bien les opérations l'une après l'autre, en série.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Un développeur doit récupérer les données de deux appels réseau indépendants l'un de l'autre. Selon ce principe, que devrait-il faire pour gagner du temps ?",
+              "answerKey": "Lancer les deux appels ensemble avec Promise.all plutôt que d'utiliser deux await l'un après l'autre.",
+              "estVraie": null,
+              "options": [
+                "Répéter le premier appel deux fois",
+                "Appeler les deux fonctions sans await du tout",
+                "Lancer les deux appels ensemble avec Promise.all",
+                "Utiliser deux await l'un après l'autre"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cle": "article-presse",
+      "titre": "Article de presse",
+      "nom": "article-presse",
+      "texte": "Article de presse — pourquoi le ciel est bleu, et rouge au couchant\n\nLa couleur du ciel tient à un phénomène nommé diffusion de Rayleigh, du nom du physicien britannique qui l'a décrit à la fin du XIXe siècle. La lumière du Soleil paraît blanche, mais elle est composée de toutes les couleurs de l'arc-en-ciel, chacune correspondant à une longueur d'onde différente.\n\nQuand cette lumière traverse l'atmosphère, elle rencontre les molécules d'air, bien plus petites que sa longueur d'onde. Ces molécules dispersent la lumière dans toutes les directions, et d'autant plus fortement que la longueur d'onde est courte. Le bleu, dont la longueur d'onde est courte, est diffusé environ dix fois plus que le rouge. Le ciel nous apparaît donc bleu parce que cette couleur est renvoyée vers nos yeux depuis toutes les portions du ciel.\n\nAu lever et au coucher du Soleil, la lumière arrive de biais et traverse une épaisseur d'atmosphère bien plus grande. Le bleu est alors diffusé au loin avant de nous atteindre, et il ne reste que les longueurs d'onde longues — le rouge et l'orange — pour colorer l'horizon.\n\nLe même mécanisme explique pourquoi le Soleil lui-même semble jaunâtre vu du sol : il a perdu une partie de son bleu en chemin. Sur la Lune, sans atmosphère pour diffuser la lumière, le ciel reste noir même en plein jour.",
+      "estImage": false,
+      "lecture": null,
+      "nature": "FACTUEL",
+      "rejet": null,
+      "echec": null,
+      "concepts": [
+        {
+          "concept": "La diffusion de Rayleigh est le phénomène physique qui explique la couleur du ciel ; il a été décrit par un physicien britannique à la fin du XIXe siècle.",
+          "tags": [
+            "diffusion-rayleigh",
+            "optique"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "La diffusion de ___ est le phénomène physique qui explique la couleur du ciel.",
+              "answerKey": "Il s'agit du nom donné au phénomène physique responsable de la couleur du ciel, décrit par un physicien britannique à la fin du XIXe siècle.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "La diffusion de ___ est le phénomène physique qui explique la couleur du ciel.",
+                "accepted": [
+                  "Rayleigh"
+                ],
+                "leurres": [
+                  "Newton",
+                  "Faraday",
+                  "Maxwell"
+                ]
+              }
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Que désigne l'expression « diffusion de Rayleigh », et par qui a-t-elle été décrite ?",
+              "answerKey": "C'est le phénomène physique qui explique la couleur du ciel ; il a été décrit par un physicien britannique à la fin du XIXe siècle.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "La diffusion de Rayleigh a été décrite par un physicien britannique à la fin du XIXe siècle.",
+              "answerKey": "C'est bien un physicien britannique qui a décrit ce phénomène, à la fin du XIXe siècle.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Un physicien cherche à nommer le phénomène qui explique pourquoi le ciel est coloré. Comment doit-il l'appeler ?",
+              "answerKey": "C'est le nom du phénomène physique qui explique la couleur du ciel, décrit par un physicien britannique à la fin du XIXe siècle.",
+              "estVraie": null,
+              "options": [
+                "L'effet Doppler",
+                "La diffusion de Rayleigh",
+                "La polarisation de Fresnel",
+                "La réfraction de Snell"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "La lumière du Soleil paraît blanche mais elle est en réalité composée de toutes les couleurs de l'arc-en-ciel, chacune correspondant à une longueur d'onde différente.",
+          "tags": [
+            "lumiere",
+            "spectre"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "La lumière du Soleil paraît blanche mais elle est en réalité composée de toutes les couleurs de l'___.",
+              "answerKey": "La lumière solaire, bien que perçue blanche, est en fait un mélange de toutes les couleurs visibles, comme celles qu'on observe dans ce phénomène météorologique coloré.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "La lumière du Soleil paraît blanche mais elle est en réalité composée de toutes les couleurs de l'___.",
+                "accepted": [
+                  "arc-en-ciel"
+                ],
+                "leurres": [
+                  "éclipse",
+                  "crépuscule",
+                  "aurore boréale"
+                ]
+              }
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Explique pourquoi on dit que la lumière blanche du Soleil est en réalité composée de plusieurs couleurs.",
+              "answerKey": "Elle paraît blanche mais est en réalité composée de toutes les couleurs de l'arc-en-ciel, chacune correspondant à une longueur d'onde différente.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Chaque couleur composant la lumière blanche du Soleil correspond à une longueur d'onde différente.",
+              "answerKey": "C'est exact : la lumière blanche est composée de toutes les couleurs de l'arc-en-ciel, chacune ayant sa propre longueur d'onde.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "On décompose la lumière blanche du Soleil avec un prisme et on observe plusieurs couleurs séparées. Que représente cette observation d'après ce qui compose cette lumière ?",
+              "answerKey": "Chaque couleur observée correspond à une longueur d'onde différente, toutes présentes dans la lumière blanche du Soleil.",
+              "estVraie": null,
+              "options": [
+                "Les différentes longueurs d'onde qui composent la lumière blanche",
+                "Un phénomène propre au prisme et absent de la lumière initiale",
+                "Une seule longueur d'onde réfléchie plusieurs fois",
+                "Une pollution lumineuse ajoutée par le prisme"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Les molécules d'air, plus petites que la longueur d'onde de la lumière, dispersent celle-ci dans toutes les directions, d'autant plus fortement que la longueur d'onde est courte.",
+          "tags": [
+            "diffusion-rayleigh",
+            "atmosphere"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "Les molécules d'air dispersent la lumière dans toutes les directions, d'autant plus fortement que la longueur d'onde est ___.",
+              "answerKey": "Il s'agit du qualificatif qui décrit les longueurs d'onde les plus fortement dispersées par les molécules d'air, à savoir les plus petites.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Les molécules d'air dispersent la lumière dans toutes les directions, d'autant plus fortement que la longueur d'onde est ___.",
+                "accepted": [
+                  "courte"
+                ],
+                "leurres": [
+                  "longue",
+                  "intense",
+                  "stable"
+                ]
+              }
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Explique pourquoi les molécules d'air sont capables de disperser la lumière dans toutes les directions.",
+              "answerKey": "Les molécules d'air sont plus petites que la longueur d'onde de la lumière, ce qui leur permet de disperser celle-ci dans toutes les directions, d'autant plus fortement que la longueur d'onde est courte.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Les molécules d'air dispersent la lumière d'autant plus fortement que la longueur d'onde est longue.",
+              "answerKey": "C'est l'inverse : les molécules d'air dispersent la lumière d'autant plus fortement que la longueur d'onde est courte.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Entre une lumière de courte longueur d'onde et une de longue longueur d'onde traversant l'air, laquelle est dispersée le plus fortement par les molécules d'air ?",
+              "answerKey": "Les molécules d'air, plus petites que la longueur d'onde de la lumière, dispersent celle-ci d'autant plus fortement que la longueur d'onde est courte.",
+              "estVraie": null,
+              "options": [
+                "Aucune des deux n'est dispersée",
+                "Celle de courte longueur d'onde",
+                "Celle de longue longueur d'onde",
+                "Les deux sont dispersées de façon identique"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Le bleu, dont la longueur d'onde est courte, est diffusé environ dix fois plus que le rouge, dont la longueur d'onde est longue.",
+          "tags": [
+            "diffusion-rayleigh",
+            "couleurs"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Comment la diffusion de la lumière par l'atmosphère traite-t-elle le bleu par rapport au rouge ?",
+              "answerKey": "Le bleu, de longueur d'onde courte, est diffusé environ dix fois plus que le rouge, dont la longueur d'onde est longue.",
+              "estVraie": null,
+              "options": [
+                "Le rouge est diffusé environ dix fois plus que le bleu",
+                "Le bleu n'est pas diffusé du tout, contrairement au rouge",
+                "Le bleu est diffusé environ dix fois plus que le rouge",
+                "Le bleu et le rouge sont diffusés à peu près également"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Quel lien y a-t-il entre la longueur d'onde d'une couleur et l'intensité avec laquelle elle est diffusée ?",
+              "answerKey": "Plus la longueur d'onde est courte, comme pour le bleu, plus la diffusion est forte ; le bleu est ainsi diffusé environ dix fois plus que le rouge, dont la longueur d'onde est longue.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "BOUNDARY",
+              "question": "Le bleu, dont la longueur d'onde est courte, est diffusé environ dix fois plus que le rouge, dont la longueur d'onde est ___.",
+              "answerKey": "Le rouge se distingue du bleu par une longueur d'onde plus grande, ce qui explique qu'il soit beaucoup moins diffusé.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Le bleu, dont la longueur d'onde est courte, est diffusé environ dix fois plus que le rouge, dont la longueur d'onde est ___.",
+                "accepted": [
+                  "longue",
+                  "grande",
+                  "élevée"
+                ],
+                "leurres": [
+                  "courte",
+                  "nulle",
+                  "variable"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "APPLICATION",
+              "question": "Si l'on comparait la diffusion du bleu à celle du rouge, le bleu serait diffusé environ dix fois plus que le rouge.",
+              "answerKey": "Le bleu, dont la longueur d'onde est courte, est diffusé environ dix fois plus que le rouge, dont la longueur d'onde est longue.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Le ciel apparaît bleu parce que cette couleur est diffusée depuis toutes les portions du ciel et renvoyée vers nos yeux.",
+          "tags": [
+            "ciel-bleu",
+            "diffusion-rayleigh"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Pourquoi le ciel apparaît-il bleu ?",
+              "answerKey": "Parce que le bleu est diffusé depuis toutes les portions du ciel et renvoyé vers nos yeux.",
+              "estVraie": null,
+              "options": [
+                "Parce que les nuages réfléchissent la couleur bleue du sol",
+                "Parce que le rouge est absorbé entièrement par l'atmosphère",
+                "Parce que le bleu est diffusé depuis toutes les portions du ciel et renvoyé vers nos yeux",
+                "Parce que le Soleil émet uniquement de la lumière bleue"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "EXPLAIN",
+              "facet": "MECHANISM",
+              "question": "Explique le mécanisme par lequel la couleur du ciel nous apparaît bleue.",
+              "answerKey": "Le bleu est diffusé depuis toutes les portions du ciel et renvoyé vers nos yeux, ce qui fait que le ciel apparaît bleu.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "BOUNDARY",
+              "question": "Le ciel apparaît bleu parce que cette couleur est diffusée depuis toutes les portions du ciel et ___ vers nos yeux.",
+              "answerKey": "Il fallait retenir ce que devient la lumière bleue diffusée depuis le ciel avant qu'elle n'atteigne l'œil.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Le ciel apparaît bleu parce que cette couleur est diffusée depuis toutes les portions du ciel et ___ vers nos yeux.",
+                "accepted": [
+                  "renvoyée",
+                  "renvoyé"
+                ],
+                "leurres": [
+                  "absorbée",
+                  "projetée",
+                  "réfléchie"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "APPLICATION",
+              "question": "Le bleu du ciel proviendrait de sa diffusion depuis toutes les portions du ciel, renvoyée ensuite vers nos yeux.",
+              "answerKey": "Le ciel apparaît bleu parce que cette couleur est diffusée depuis toutes les portions du ciel et renvoyée vers nos yeux.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Au lever et au coucher du Soleil, la lumière traverse une épaisseur d'atmosphère bien plus grande car elle arrive de biais ; le bleu est alors diffusé au loin avant d'atteindre l'observateur, ne laissant que le rouge et l'orange pour colorer l'horizon.",
+          "tags": [
+            "couchant",
+            "diffusion-rayleigh"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Que devient la lumière bleue au lever ou au coucher du Soleil, quand la lumière traverse une épaisseur d'atmosphère bien plus grande ?",
+              "answerKey": "Le bleu est diffusé au loin avant d'atteindre l'observateur, ne laissant que le rouge et l'orange pour colorer l'horizon.",
+              "estVraie": null,
+              "options": [
+                "Le bleu est absorbé entièrement par le sol",
+                "Le bleu est diffusé au loin avant d'atteindre l'observateur",
+                "Le bleu se transforme en rouge en traversant l'atmosphère",
+                "Le bleu traverse l'atmosphère sans être diffusé"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            },
+            {
+              "format": "EXPLAIN",
+              "facet": "MECHANISM",
+              "question": "Explique pourquoi l'horizon apparaît rouge et orange au lever et au coucher du Soleil, en partant du trajet que suit alors la lumière.",
+              "answerKey": "La lumière traverse une épaisseur d'atmosphère bien plus grande car elle arrive de biais ; le bleu est alors diffusé au loin avant d'atteindre l'observateur, ne laissant que le rouge et l'orange pour colorer l'horizon.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "BOUNDARY",
+              "question": "Au lever et au coucher du Soleil, la lumière traverse une épaisseur d'atmosphère bien plus grande car elle arrive de ___.",
+              "answerKey": "Il fallait avoir retenu la raison géométrique pour laquelle la lumière traverse une épaisseur d'atmosphère bien plus grande à ces moments-là.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Au lever et au coucher du Soleil, la lumière traverse une épaisseur d'atmosphère bien plus grande car elle arrive de ___.",
+                "accepted": [
+                  "biais"
+                ],
+                "leurres": [
+                  "face",
+                  "haut",
+                  "loin"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "APPLICATION",
+              "question": "Au lever et au coucher du Soleil, la lumière traverserait une épaisseur d'atmosphère plus faible qu'en pleine journée, ce qui laisserait le bleu dominer l'horizon.",
+              "answerKey": "À ces moments-là, la lumière arrive de biais et traverse au contraire une épaisseur d'atmosphère bien plus grande ; le bleu est alors diffusé au loin avant d'atteindre l'observateur, ne laissant que le rouge et l'orange colorer l'horizon.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Le Soleil semble jaunâtre vu du sol parce qu'il a perdu une partie de sa lumière bleue en traversant l'atmosphère.",
+          "tags": [
+            "soleil",
+            "diffusion-rayleigh"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Vu depuis le sol, quelle couleur prend le Soleil ?",
+              "answerKey": "Le Soleil paraît jaunâtre.",
+              "estVraie": null,
+              "options": [
+                "Bleuâtre",
+                "Verdâtre",
+                "Blanc pur",
+                "Jaunâtre"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "Le Soleil semble jaunâtre vu du sol parce qu'il a perdu une partie de sa lumière ___ en traversant l'atmosphère.",
+              "answerKey": "C'est la perte d'une partie de la lumière bleue lors de la traversée de l'atmosphère qui explique cette teinte.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Le Soleil semble jaunâtre vu du sol parce qu'il a perdu une partie de sa lumière ___ en traversant l'atmosphère.",
+                "accepted": [
+                  "bleue",
+                  "bleu"
+                ],
+                "leurres": [
+                  "rouge",
+                  "verte",
+                  "violette"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Le Soleil perd une partie de sa lumière bleue en traversant l'atmosphère, ce qui le fait paraître jaunâtre vu du sol.",
+              "answerKey": "C'est en traversant l'atmosphère que le Soleil perd une partie de sa lumière bleue, ce qui donne cette teinte jaunâtre vue du sol.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Un astronaute observe le Soleil depuis un lieu totalement dépourvu d'atmosphère. D'après ce qui explique la teinte jaunâtre vue du sol, quelle couleur devrait-il voir ?",
+              "answerKey": "Sans atmosphère à traverser, la lumière bleue n'est pas perdue, donc le Soleil ne devrait pas paraître jaunâtre.",
+              "estVraie": null,
+              "options": [
+                "Rougeâtre, plus prononcée que depuis le sol",
+                "Jaunâtre, comme depuis le sol",
+                "Blanche, sans perte de lumière bleue",
+                "Verdâtre, à cause du vide spatial"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Sur la Lune, en l'absence d'atmosphère pour diffuser la lumière, le ciel reste noir même en plein jour.",
+          "tags": [
+            "lune",
+            "atmosphere"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Quelle est la couleur du ciel lunaire en plein jour ?",
+              "answerKey": "Le ciel reste noir même en plein jour.",
+              "estVraie": null,
+              "options": [
+                "Noir",
+                "Orangé",
+                "Gris clair",
+                "Bleu pâle"
+              ],
+              "correctIndex": 0,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "Sur la Lune, en l'absence d'___ pour diffuser la lumière, le ciel reste noir même en plein jour.",
+              "answerKey": "C'est l'absence d'atmosphère capable de diffuser la lumière qui explique que le ciel reste noir.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Sur la Lune, en l'absence d'___ pour diffuser la lumière, le ciel reste noir même en plein jour.",
+                "accepted": [
+                  "atmosphère"
+                ],
+                "leurres": [
+                  "gravité",
+                  "magnétisme",
+                  "relief"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Sur la Lune, l'absence d'atmosphère empêche la diffusion de la lumière, si bien que le ciel reste noir même en plein jour.",
+              "answerKey": "Sans atmosphère pour diffuser la lumière, le ciel lunaire reste noir même en plein jour.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Une planète possède une atmosphère épaisse capable de diffuser la lumière, contrairement à la Lune. D'après ce qui explique le ciel noir lunaire, quel devrait être l'aspect de son ciel en plein jour ?",
+              "answerKey": "La diffusion de la lumière par l'atmosphère, absente sur la Lune, devrait au contraire donner un ciel diurne éclairci et non noir.",
+              "estVraie": null,
+              "options": [
+                "Un ciel identique à celui de la Lune la nuit",
+                "Un ciel qui reste noir malgré l'atmosphère",
+                "Un ciel éclairci par la diffusion de la lumière",
+                "Un ciel noir, comme sur la Lune"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cle": "capture-assistant",
+      "titre": "Capture d'écran jointe",
+      "nom": "capture-assistant",
+      "texte": "Bonnes questions, on va clarifier tout ça point par point.\n\n1. Domaine public vs Private Networking\n\n**Private Networking** = réseau interne Railway. Tes services (backend + DB) communiquent entre eux via des noms genre `postgres.railway.internal`. Personne d'extérieur ne peut y accéder. C'est ce que tu utilises pour `DATABASE_URL` dans ton backend.\n\n**Domaine public** = expose ton service à Internet. Tu en as besoin parce que ton **app mobile / frontend** doit pouvoir appeler ton backend depuis l'extérieur de Railway.\n\nConcrètement :\n- Ton app Flutter sur le tel d'un user → fait `GET https://ton-backend.up.railway.app/api/...` → besoin du domaine public\n- Ton backend → fait `query` sur la DB → passe par private networking, pas besoin de domaine public sur la DB\n\nDonc :\n- Backend : génère un domaine public ✅\n- Postgres : **ne génère PAS** de domaine public (laisse-la en privé, c'est plus safe)\n\nL'URL te sert à appeler ton API depuis ton app, Postman, ton frontend, etc.",
+      "estImage": true,
+      "lecture": {
+        "langue": "fr",
+        "exploitable": true
+      },
+      "nature": "FACTUEL",
+      "rejet": null,
+      "echec": null,
+      "concepts": [
+        {
+          "concept": "Sur Railway, le « Private Networking » est un réseau interne qui permet aux services (backend, base de données) de communiquer entre eux via des noms d'hôte internes comme « postgres.railway.internal », sans être accessible depuis l'extérieur.",
+          "tags": [
+            "railway",
+            "private-networking"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Sur Railway, comment un service backend désigne-t-il la base de données pour la joindre via le réseau interne ?",
+              "answerKey": "Par un nom d'hôte interne, comme « postgres.railway.internal ».",
+              "estVraie": null,
+              "options": [
+                "Par le nom d'utilisateur configuré sur Railway",
+                "Par le domaine public « up.railway.app »",
+                "Par un nom d'hôte interne comme « postgres.railway.internal »",
+                "Par l'adresse IP publique du serveur"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "Le « Private Networking » est un réseau interne qui permet aux services de communiquer entre eux via des noms d'hôte internes, sans être accessible depuis ___.",
+              "answerKey": "C'est ce qui distingue ce réseau d'un accès ouvert au monde extérieur : il reste confiné à l'intérieur de Railway.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Le « Private Networking » est un réseau interne qui permet aux services de communiquer entre eux via des noms d'hôte internes, sans être accessible depuis ___.",
+                "accepted": [
+                  "l'extérieur",
+                  "l'exterieur"
+                ],
+                "leurres": [
+                  "le backend",
+                  "la base de données",
+                  "le navigateur"
+                ]
+              }
+            },
+            {
+              "format": "CLOZE",
+              "facet": "BOUNDARY",
+              "question": "Ce réseau interne rend les services (backend, base de données) accessibles ___ Railway grâce aux noms d'hôte internes.",
+              "answerKey": "Le concept précise au contraire que ce réseau n'est pas accessible depuis l'extérieur : les noms d'hôte internes servent la communication entre services à l'intérieur de Railway, pas leur exposition au dehors.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Ce réseau interne rend les services (backend, base de données) accessibles ___ Railway grâce aux noms d'hôte internes.",
+                "accepted": [
+                  "depuis l'extérieur de",
+                  "depuis l'exterieur de"
+                ],
+                "leurres": [
+                  "uniquement à l'intérieur de",
+                  "seulement via un domaine public de",
+                  "exclusivement par mot de passe sur"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "APPLICATION",
+              "question": "Un service qui utilise « postgres.railway.internal » pour communiquer avec la base de données peut être atteint directement depuis Internet grâce à ce nom d'hôte.",
+              "answerKey": "Le nom d'hôte interne sert à la communication entre services sur le réseau interne, sans être accessible depuis l'extérieur.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Le backend utilise le private networking de Railway pour se connecter à la base de données via la variable « DATABASE_URL », sans passer par un domaine public.",
+          "tags": [
+            "railway",
+            "private-networking"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Quelle variable le backend utilise-t-il pour se connecter à la base de données via le private networking de Railway ?",
+              "answerKey": "La variable « DATABASE_URL ».",
+              "estVraie": null,
+              "options": [
+                "« PUBLIC_URL »",
+                "« API_ENDPOINT »",
+                "« DATABASE_URL »",
+                "« RAILWAY_TOKEN »"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Explique comment le backend accède à la base de données sur Railway sans passer par un domaine public.",
+              "answerKey": "Le backend utilise le private networking de Railway pour se connecter à la base de données via la variable « DATABASE_URL », sans passer par un domaine public.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "BOUNDARY",
+              "question": "Le backend utilise le private networking de Railway pour se connecter à la base de données via la variable « DATABASE_URL », sans passer par un ___ public.",
+              "answerKey": "La connexion se fait sur le réseau interne de Railway, ce qui évite de passer par une exposition ouverte sur Internet.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Le backend utilise le private networking de Railway pour se connecter à la base de données via la variable « DATABASE_URL », sans passer par un ___ public.",
+                "accepted": [
+                  "domaine",
+                  "domaine public"
+                ],
+                "leurres": [
+                  "port",
+                  "token",
+                  "protocole"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "APPLICATION",
+              "question": "Sur Railway, le backend peut se connecter à sa base de données en utilisant la variable « DATABASE_URL » sans que cette connexion passe par un domaine public.",
+              "answerKey": "Le backend utilise le private networking de Railway pour se connecter à la base de données via la variable « DATABASE_URL », sans passer par un domaine public.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Un « domaine public » sur Railway expose un service à Internet, ce qui est nécessaire quand une app mobile ou un frontend doit appeler le backend depuis l'extérieur de Railway, par exemple via « GET https://ton-backend.up.railway.app/api/... ».",
+          "tags": [
+            "railway",
+            "domaine-public"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Qu'est-ce qu'un « domaine public » sur Railway ?",
+              "answerKey": "Ce qui expose un service à Internet.",
+              "estVraie": null,
+              "options": [
+                "Ce qui chiffre les communications entre services internes",
+                "Ce qui restreint un service au réseau interne de Railway",
+                "Ce qui expose un service à Internet",
+                "Ce qui stocke les variables d'environnement d'un service"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "MECHANISM",
+              "question": "Un domaine public est nécessaire quand une app mobile ou un frontend doit appeler le backend depuis ___ Railway.",
+              "answerKey": "Quelque chose qui n'est pas à l'intérieur de l'infrastructure Railway a besoin d'un point d'accès exposé à Internet pour joindre le backend.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Un domaine public est nécessaire quand une app mobile ou un frontend doit appeler le backend depuis ___ Railway.",
+                "accepted": [
+                  "l'extérieur de",
+                  "l'exterieur de"
+                ],
+                "leurres": [
+                  "l'intérieur de",
+                  "le réseau interne de",
+                  "la base de données de"
+                ]
+              }
+            },
+            {
+              "format": "CLOZE",
+              "facet": "BOUNDARY",
+              "question": "Un domaine public sur Railway expose un service à Internet, ce qui est ___ quand une app mobile ou un frontend doit appeler le backend depuis l'extérieur de Railway.",
+              "answerKey": "Dans ce cas d'appel externe, le concept présente le domaine public comme une condition qu'il faut remplir, pas comme une option facultative.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Un domaine public sur Railway expose un service à Internet, ce qui est ___ quand une app mobile ou un frontend doit appeler le backend depuis l'extérieur de Railway.",
+                "accepted": [
+                  "nécessaire"
+                ],
+                "leurres": [
+                  "facultatif",
+                  "interdit",
+                  "déconseillé"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "APPLICATION",
+              "question": "Si une app mobile doit appeler le backend via « GET https://ton-backend.up.railway.app/api/... » depuis l'extérieur de Railway, il faut qu'un domaine public expose ce backend à Internet.",
+              "answerKey": "Un domaine public sur Railway expose un service à Internet, ce qui est nécessaire quand une app mobile ou un frontend doit appeler le backend depuis l'extérieur de Railway, par exemple via « GET https://ton-backend.up.railway.app/api/... ».",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Sur Railway, il faut générer un domaine public pour le service backend, mais pas pour le service Postgres, qui doit rester en privé car c'est plus sûr et il n'en a pas besoin.",
+          "tags": [
+            "railway",
+            "domaine-public"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "Sur Railway, il faut générer un domaine public pour le service backend, mais pas pour le service ___, qui doit rester en privé.",
+              "answerKey": "C'est le service de base de données mentionné dans le déploiement Railway qui doit rester privé, à la différence du backend.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Sur Railway, il faut générer un domaine public pour le service backend, mais pas pour le service ___, qui doit rester en privé.",
+                "accepted": [
+                  "Postgres",
+                  "PostgreSQL"
+                ],
+                "leurres": [
+                  "Redis",
+                  "MongoDB",
+                  "MySQL"
+                ]
+              }
+            },
+            {
+              "format": "MCQ",
+              "facet": "MECHANISM",
+              "question": "Pourquoi le service backend a-t-il besoin d'un domaine public sur Railway, à la différence du service Postgres ?",
+              "answerKey": "Le backend doit être accessible depuis l'extérieur, alors que Postgres n'en a pas besoin et reste plus sûr en restant privé.",
+              "estVraie": null,
+              "options": [
+                "Parce que le backend est plus lent sans domaine public dédié",
+                "Parce que le backend doit être accessible de l'extérieur, alors que Postgres n'en a pas besoin et reste plus sûr en privé",
+                "Parce que Railway impose un domaine public à tous les services sauf aux bases de données",
+                "Parce que Postgres consomme trop de ressources pour supporter un domaine public"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Sur Railway, le service Postgres ne doit pas recevoir de domaine public, car il n'en a pas besoin et rester privé est plus sûr.",
+              "answerKey": "Le service backend nécessite un domaine public, tandis que Postgres reste privé, ce qui est plus sûr et suffisant pour son fonctionnement.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "Tu déploies sur Railway un service backend et un service Postgres. Comment configures-tu leurs domaines respectifs ?",
+              "answerKey": "Le backend reçoit un domaine public car il doit être accessible, tandis que Postgres reste privé, ce qui est plus sûr et répond à son besoin.",
+              "estVraie": null,
+              "options": [
+                "Domaine privé pour les deux services",
+                "Domaine public pour les deux services",
+                "Domaine public pour Postgres, domaine privé pour le backend",
+                "Domaine public pour le backend, domaine privé pour Postgres"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
