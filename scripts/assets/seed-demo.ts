@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db/client";
 import { ETATS_QUI_POSENT_UNE_PIERRE } from "@/lib/domain/etat-maitrise";
 import { createSeedAccount, resetSeedAccount, SEED_EMAIL, SEED_TIMEZONE } from "@/prisma/seed/account";
 import { writeCorpus } from "@/prisma/seed/corpus-writer";
-import { writeDailyUsage, writeFailedInput } from "@/prisma/seed/ledger";
+import { writeDailyUsage } from "@/prisma/seed/ledger";
 import { construireLeCorpus } from "@/scripts/assets/fige-vers-seed";
 import { lireFigeDAssets } from "@/scripts/assets/fige";
 import { statsDeDemo } from "@/scripts/assets/stats-de-demo";
@@ -32,7 +32,6 @@ async function main(): Promise<void> {
 
   const corpus = construireLeCorpus(depots, now);
   const { reviewedAt } = await writeCorpus(userId, corpus, now);
-  await writeFailedInput(userId, now);
   await writeDailyUsage(userId, SEED_TIMEZONE, reviewedAt);
 
   // Le cairn compte CONSOLIDATED et ARCHIVED : on recompte en base plutôt que de

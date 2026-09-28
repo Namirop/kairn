@@ -43,7 +43,8 @@
     "exporter:marque": "tsx scripts/exporter-la-marque.tsx",
     "prepare": "husky",
     "assets:figer": "tsx scripts/assets/figer-les-sujets.ts",
-    "assets:seed": "tsx scripts/assets/seed-demo.ts"
+    "assets:seed": "tsx scripts/assets/seed-demo.ts",
+    "assets:captures": "tsx scripts/assets/capturer.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",
