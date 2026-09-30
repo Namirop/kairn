@@ -31,6 +31,7 @@
     "regenerer:questions": "tsx scripts/regenerer-les-questions.ts",
     "reparer:affirmations": "tsx scripts/reparer-les-affirmations-muettes.ts",
     "redresser:verdicts": "tsx scripts/redresser-les-verdicts-inverses.ts",
+    "reparer:creuses": "tsx scripts/reparer-les-questions-creuses.ts",
     "evaluer:generation": "tsx scripts/evaluer-generation.ts",
     "evaluer:rejeu": "tsx scripts/evaluer-generation.ts --rejeu",
     "evaluer:completer": "tsx scripts/completer-le-fige.ts",
