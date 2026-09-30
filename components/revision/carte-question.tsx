@@ -56,7 +56,7 @@ export function CarteQuestion({
   /** Le compte de la session. L'entraînement ne tient pas de longueur. */
   chiffree?: boolean;
   tags: string[];
-  /** L'énoncé, composé par le format : un texte, ou une phrase à trou. */
+  /** L'énoncé, composé par le format : son titre, et ce qu'il descend dessous. */
   enonce: ReactNode;
   /** L'intervalle tenu depuis le dernier passage, quand il y en a eu un. */
   vuIlYaJours?: number | null;
@@ -99,22 +99,12 @@ export function CarteQuestion({
           Sur grand écran il n'y a rien à reprendre : la place ne manque pas, et
           c'est ce rythme-là qui donne à la carte sa présence d'objet posé. */}
       <div className="rounded-carte bg-surface-papier mt-pas-3 p-pas-4 md:p-pas-dedans">
-        {/* Les lignes se touchent presque : un titre est une unité, et l'écart du
-            corps de texte le faisait lire comme un paragraphe en gras. `text-enonce`
-            est un cran sous le titre de page — assez pour dominer l'écran, pas
-            assez pour l'occuper — et `break-words` retient les saisies absurdes
-            à l'intérieur de la carte.
-
-            **Centré sur téléphone.** Une colonne étroite laisse une dernière
-            ligne courte flotter contre le bord gauche, avec le vide de trois
-            mots à sa droite : la carte avait alors un côté plein et un côté
-            creux, et l'écran penchait. Centré, l'énoncé occupe sa carte comme
-            un objet posé au milieu — il est ce qu'on regarde, pas un paragraphe
-            qu'on parcourt. Dès `md` la mesure est assez longue pour que le
-            drapeau à gauche redevienne le bon réglage. */}
-        <h1 className="text-enonce leading-tight font-bold text-pretty break-words text-stone-900 max-md:text-center">
-          {enonce}
-        </h1>
+        {/* L'énoncé porte son propre titre, et parfois davantage : une question
+            `CODE` y descend un extrait cité en bloc, qui ne peut pas vivre dans
+            un `h1` — ni comme balise, ni comme mise en forme. La carte ne décide
+            donc plus de sa composition ; elle lui donne sa place. Voir
+            `EnonceDeQuestion`. */}
+        {enonce}
 
         {vuIlYaJours === null ? null : (
           <p className="mt-pas-6 text-petit text-stone-500 max-md:text-center">
