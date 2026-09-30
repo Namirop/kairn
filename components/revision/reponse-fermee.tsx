@@ -72,7 +72,14 @@ export function ReponseFermee({
               // La bonne réponse se montre toujours après coup, même quand elle
               // n'a pas été choisie : sans elle, l'échec n'apprend rien.
               className={[
-                "gap-pas-3 h-auto w-full justify-start py-3 text-left font-normal whitespace-normal disabled:opacity-100",
+                // Une option n'est pas une pilule. Le galet est la forme d'un
+                // geste — un bouton d'une ligne, dont la hauteur est la sienne.
+                // Une option tient deux ou trois lignes de texte, et sa hauteur
+                // lui vient de ce qu'elle contient : le même rayon y dessine
+                // deux demi-cercles de vingt-cinq pixels qui mangent le premier
+                // et le dernier mot. C'est la forme du champ qui convient — ce
+                // qu'une option est, quelque chose qu'on désigne.
+                "rounded-champ gap-pas-3 h-auto w-full justify-start py-3 text-left font-normal whitespace-normal disabled:opacity-100",
                 repondu && estBonne ? "border-lichen bg-lichen/10 text-stone-900" : "",
                 repondu && estChoisie && !estBonne ? "border-alerte bg-alerte-surface" : "",
                 repondu && !estBonne && !estChoisie ? "text-stone-500" : "",
