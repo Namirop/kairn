@@ -252,7 +252,119 @@
     entre la phrase et le bord — la ligne remplit sa colonne, elle ne la touche
     pas.
   */
+  /*
+    Le ciel de l'ouverture.
+
+    Il vaut le papier, donc l'ouverture est exactement ce qu'elle était : c'est
+    une variable, pas un changement. Elle existe parce qu'une palette peut vouloir
+    y poser autre chose qu'un aplat — un lavis vertical, par exemple — et parce
+    que le paysage y mêle ses lointains : la brume ne rend pas une pierre pâle,
+    elle la rapproche de la couleur du ciel, quelle qu'elle soit.
+  */
+  --ciel: var(--surface-papier);
+  /*
+    La même chose, mais toujours une couleur plate.
+
+    `--ciel` peut être un dégradé ; `color-mix` n'en accepte pas. Le paysage a
+    besoin d'une teinte vers laquelle faire virer ses lointains — c'est ça, la
+    brume — et c'est celle-ci. Sur un ciel uni, les deux sont égales.
+  */
+  --ciel-teinte: var(--surface-papier);
+  /*
+    La terre du premier plan de l'ouverture.
+
+    Elle vaut l'ombre, donc rien ne change. Elle existe parce qu'un sol doit
+    appartenir à son ciel : sous un ciel coloré, une butte restée au beige de
+    l'ombre coupe l'image en deux moitiés qui n'ont rien à voir l'une avec
+    l'autre — ce n'est plus un paysage, ce sont deux aplats superposés.
+  */
+  --terre: var(--surface-ombre);
+
   --t-ouverture: clamp(2.25rem, calc((100vw - 4rem) / 7.4), 3.75rem);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LES PALETTES À L'ESSAI — branche `couleur-peinte`, rien de définitif.
+
+   Elles ne s'appliquent que si `data-palette` est posé sur la racine, ce
+   que seul le sélecteur d'aperçu fait. Sans attribut, le produit sert
+   exactement la palette de production : aucune de ces lignes ne s'active.
+
+   Les deux ne changent que des **surfaces**. C'est la leçon du 17/09 : un
+   accent mieux réglé ne répond jamais à « c'est fade », ce sont les aplats
+   qui font qu'un écran est coloré ou non.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/*
+  Le versant. Deux couleurs sur toute la page : le glacier et la neige.
+  Le ciel est un aplat plein, les terrasses en descendent, le cairn s'y
+  inverse en pierres claires.
+*/
+:root[data-palette="versant"] {
+  --ciel: #1b4fc4;
+  --ciel-teinte: #1b4fc4;
+  --terre: #dfe7f7;
+  --surface-roche: #1b2230;
+  --lichen: #8faf3c;
+  --lichen-deep: #546a22;
+  --stone-800: #1b2230;
+}
+
+/*
+  Le lavis. Le ciel seul porte la couleur, en un dégradé d'une seule teinte
+  du bleu profond au cyan — c'est un ciel, pas un dégradé décoratif, et
+  c'est la nuance qui le sépare de ce que le skill interdit. Le reste de la
+  page reste neige et granit.
+*/
+:root[data-palette="lavis"] {
+  --ciel: linear-gradient(177deg, #10306f 0%, #1b4fc4 38%, #4aa6d6 76%, #b6e3ef 100%);
+  --ciel-teinte: #4aa6d6;
+  --terre: #dcecf2;
+  --surface-roche: #1b2230;
+  --lichen: #8faf3c;
+  --lichen-deep: #546a22;
+  --stone-800: #1b2230;
+}
+
+/*
+  La peinture d'un aplat coloré : un lavis lent, puis du grain.
+
+  Le grain de `.grain` est réglé pour du presque-blanc, où il doit se sentir
+  sans se voir. Sur une couleur saturée il disparaît : un aplat plein s'y lit
+  comme une valeur CSS, pas comme un pigment. Celui-ci monte, et il passe en
+  `overlay` — il éclaircit *et* assombrit, comme une encre qui a séché en
+  grains, là où `multiply` ne fait que salir.
+
+  Le lavis est la variation lente par-dessus. Une seule teinte : c'est ce qui
+  le sépare du dégradé entre deux couleurs, qui reste interdit.
+*/
+.ciel {
+  background: var(--ciel);
+  position: relative;
+  isolation: isolate;
+}
+
+:root[data-palette] .ciel::before,
+:root[data-palette] .ciel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+:root[data-palette] .ciel::before {
+  z-index: 0;
+  background:
+    radial-gradient(135% 105% at 12% -5%, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0) 58%),
+    radial-gradient(105% 85% at 92% 105%, rgb(0 0 0 / 0.22), rgb(0 0 0 / 0) 60%);
+}
+
+:root[data-palette] .ciel::after {
+  z-index: 1;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  background-size: 128px 128px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /*

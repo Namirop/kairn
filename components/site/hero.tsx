@@ -66,6 +66,10 @@ export function Hero({ connecte }: { connecte: boolean }) {
   return (
     <Panneau
       surface="papier"
+      /* L'ouverture est le seul panneau qui dessine un dehors : elle porte le
+         ciel plutôt que sa surface. Sans palette à l'essai, `--ciel` vaut le
+         papier et rien ne bouge. */
+      ciel
       aere
       mesure="large"
       /* Sur téléphone, l'ouverture démarre peu sous l'en-tête. Le rythme de

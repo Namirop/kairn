@@ -21,6 +21,13 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
  * dernier par-dessus l'ensemble : il devient le plan le plus proche et mord à
  * son tour la base de ce qui est derrière lui.
  *
+ * **Le papier est devenu le ciel, et c'est une variable.** La brume ne rend pas
+ * une pierre pâle, elle la rapproche de la couleur du ciel : tout ce fichier
+ * mêlait donc déjà vers `--surface-papier`, qui *était* le ciel. Il mêle
+ * maintenant vers `--ciel-teinte`, qui vaut le papier tant qu'aucune palette
+ * n'en décide autrement — le dessin ne change pas d'un pixel, il cesse
+ * seulement de supposer que le ciel est blanc.
+ *
  * **Trois. Le recul se joue en contraste, pas en transparence.** La brume ne
  * rend pas les choses transparentes, elle les rapproche de la couleur du ciel :
  * un cairn lointain n'est pas un cairn pâle posé sur du papier, c'est un cairn
@@ -43,7 +50,7 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 
 /** L'encre d'une pierre, diluée dans le papier à mesure qu'elle s'éloigne. */
 const encre = (part: number) =>
-  `color-mix(in oklab, var(--stone-500) ${part.toFixed(1)}%, var(--surface-papier))`;
+  `color-mix(in oklab, var(--stone-500) ${part.toFixed(1)}%, var(--ciel-teinte))`;
 
 /** Les trois nuances d'un cairn, dérivées de sa part d'encre. */
 const teintesDe = (part: number): [string, string, string] => [
@@ -54,7 +61,7 @@ const teintesDe = (part: number): [string, string, string] => [
 
 /** La terre d'un plan, entre l'ombre et le papier. */
 const terre = (part: number) =>
-  `color-mix(in oklab, var(--surface-ombre) ${part.toFixed(0)}%, var(--surface-papier))`;
+  `color-mix(in oklab, var(--terre) ${part.toFixed(0)}%, var(--ciel-teinte))`;
 
 /**
  * Une ligne de crête, tracée dans l'espace commun aux deux plans.

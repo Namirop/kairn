@@ -40,12 +40,25 @@ function contraste(texte: string, fond: string): number {
   return ((clair ?? 0) + 0.05) / ((sombre ?? 0) + 0.05);
 }
 
-/** Les jetons tels que la feuille de style les définit, pas tels qu'on croit. */
+/**
+ * Les jetons tels que la feuille de style les définit, pas tels qu'on croit.
+ *
+ * **Bornés au premier bloc `:root`, et c'est une correction.** La feuille porte
+ * aussi des surcharges sous `:root[data-palette=…]` — les palettes à l'essai —
+ * et une lecture du fichier entier gardait la dernière valeur rencontrée : le
+ * script mesurait alors le lichen d'une maquette au lieu de celui que la
+ * production sert. Il rendait un échec sur un produit intact, ce qui est la
+ * pire sortie possible pour un filet.
+ *
+ * Le premier bloc est la palette par défaut, celle qui s'applique quand aucun
+ * attribut n'est posé — c'est-à-dire toujours, en production.
+ */
 function jetons(): Record<string, string> {
   const css = readFileSync("app/globals.css", "utf8");
+  const defaut = /:root\s*\{([\s\S]*?)\n\}/.exec(css)?.[1] ?? "";
   const trouves: Record<string, string> = {};
 
-  for (const [, nom, valeur] of css.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-f]{6})\s*;/gi)) {
+  for (const [, nom, valeur] of defaut.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-f]{6})\s*;/gi)) {
     if (nom && valeur) trouves[nom] = valeur;
   }
 
