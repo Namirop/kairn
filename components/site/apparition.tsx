@@ -36,6 +36,9 @@ const ECART_S = 0.09;
 /** Sortie douce, sans retour : ça se pose, ça ne rebondit pas. */
 const COURBE: Transition["ease"] = [0.2, 0.8, 0.2, 1];
 
+/** La même, mais qui s'arrête plus franchement : une pierre qu'on cale. */
+const COURBE_PIERRE: Transition["ease"] = [0.16, 0.9, 0.2, 1];
+
 const TEMPS = {
   cache: { opacity: 0, y: MONTEE_PX },
   visible: { opacity: 1, y: 0, transition: { duration: DUREE_S, ease: COURBE } },
@@ -58,7 +61,7 @@ const PIERRE = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.16, 0.9, 0.2, 1] as Transition["ease"] },
+    transition: { duration: 0.5, ease: COURBE_PIERRE },
   },
 };
 
