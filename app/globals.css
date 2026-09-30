@@ -101,8 +101,17 @@
     dessus, la pilule est un geste. L'angle vif ne survit que sur les pleines
     largeurs : ailleurs, une interface faite d'angles droits et de traits fins
     se lit comme un document, pas comme une application.
+
+    `pierre` s'est ajoutée pour une chose qu'aucune des autres ne décrivait :
+    une **cible qu'on désigne dans une liste**, haute de trois lignes de texte.
+    Le galet en faisait une gélule dont les deux bouts mangeaient un mot ; le
+    champ, taillé pour une ligne de saisie, l'arrondissait encore trop pour une
+    boîte de cette taille. Six pixels, c'est un angle droit dont on a usé
+    l'arête — presque carré, jamais coupant. C'est la forme des pierres du
+    cairn, et c'est la seule raison pour laquelle il en fallait une quatrième.
   */
   --r-plein: 0;
+  --r-pierre: 6px;
   --r-champ: 10px;
   --r-carte: 20px;
   --r-galet: 999px;
@@ -395,6 +404,7 @@
   --color-surface-roche: var(--surface-roche);
 
   --radius-plein: var(--r-plein);
+  --radius-pierre: var(--r-pierre);
   --radius-champ: var(--r-champ);
   --radius-carte: var(--r-carte);
   --radius-galet: var(--r-galet);
