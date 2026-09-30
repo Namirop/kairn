@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { blocsDeTexte, porteDuCodeEnBloc } from "@/lib/domain/blocs-de-texte";
 import { releverLeCodeCite } from "@/lib/domain/code-sous-guillemets";
 import { segmentsDeCode } from "@/lib/domain/texte-code";
+import { segmentsEnGras } from "@/lib/domain/texte-en-gras";
 
 /**
  * Un texte dont les termes de code sont relevés.
@@ -77,6 +78,28 @@ export function jetonInsecable(terme: string): boolean {
   return terme.trim().length <= SIGNES_INSECABLES;
 }
 
+/**
+ * Ce qu'un dépôt a voulu mettre en avant, entre deux paires d'astérisques.
+ *
+ * Le gras se lit **dans** la prose et jamais dans un jeton : deux astérisques au
+ * milieu d'un extrait de code sont du code, pas une emphase.
+ */
+function Emphases({ texte }: { texte: string }) {
+  return (
+    <>
+      {segmentsEnGras(texte).map((segment, rang) =>
+        segment.gras ? (
+          <strong key={rang} className="font-semibold text-stone-900">
+            {segment.texte}
+          </strong>
+        ) : (
+          <Fragment key={rang}>{segment.texte}</Fragment>
+        ),
+      )}
+    </>
+  );
+}
+
 function Segments({ texte }: { texte: string }) {
   return (
     <>
@@ -94,7 +117,7 @@ function Segments({ texte }: { texte: string }) {
             {segment.texte}
           </code>
         ) : (
-          <Fragment key={rang}>{segment.texte}</Fragment>
+          <Emphases key={rang} texte={segment.texte} />
         ),
       )}
     </>

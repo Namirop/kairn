@@ -96,3 +96,26 @@ describe("lignesRecollees", () => {
     );
   });
 });
+
+describe("les marques de markdown d'un dépôt", () => {
+  /** Le tableau du dépôt de production : huit rangées pleines, donc recollées. */
+  it("ne recolle pas les rangées d'un tableau", () => {
+    const tableau = [
+      "| fichier | rôle | en une phrase |",
+      "|---|---|---|",
+      "| gradle/wrapper/gradle-wrapper.properties | version de Gradle | téléchargée toute seule |",
+      "| settings.gradle.kts | plan du projet | trouve le SDK Flutter et inclut le module |",
+    ].join("\n");
+
+    expect(lignesRecollees(tableau)).toBe(tableau);
+  });
+
+  it("ne recolle pas un sous-titre à la fin du paragraphe qui le précède", () => {
+    const texte = [
+      "Le dossier android d'un projet Flutter est un projet Android natif minimal,",
+      "## 2.1 Gradle, manifeste, du code Dart à l'APK",
+    ].join("\n");
+
+    expect(lignesRecollees(texte)).toBe(texte);
+  });
+});

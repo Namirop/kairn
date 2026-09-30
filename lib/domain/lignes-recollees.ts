@@ -60,8 +60,20 @@ const PART_PLEINE = 0.8;
  * première était pleine. Mesuré sur la production : elle l'était à moins d'un
  * signe près, et rien d'autre que la chance ne l'a sauvée. Une ligne qui
  * commence par deux barres n'est jamais la suite de la précédente.
+ *
+ * **La barre verticale y est depuis qu'un tableau se rend comme un tableau.**
+ * Une rangée de markdown est longue par nature — trois colonnes de prose — donc
+ * pleine, donc recollée à la suivante : le dépôt de la production affichait ses
+ * huit rangées en un seul pavé où les barres servaient de ponctuation. Elle ne
+ * demande pas d'espace derrière elle, contrairement aux autres marques : une
+ * rangée s'écrit aussi bien `|fichier|rôle|`, et la ligne qui sépare l'en-tête
+ * du corps n'en porte jamais.
+ *
+ * **Le dièse compte jusqu'à six**, et il n'en comptait qu'un : `## 2.1 Gradle`
+ * ne s'ouvrait pas, seul `# Titre` le faisait. Un sous-titre collé à la fin du
+ * paragraphe qui le précède est le même défaut que la rangée, en plus discret.
  */
-const OUVRE_UNE_ENTREE = /^\s*(?:\/\/|[-*•–—>#]|\d{1,3}[.)])\s/;
+const OUVRE_UNE_ENTREE = /^\s*(?:\||#{1,6}\s|(?:\/\/|[-*•–—>]|\d{1,3}[.)])\s)/;
 
 function normaliser(texte: string): string {
   return texte.replace(/\r\n?/g, "\n");
