@@ -196,6 +196,13 @@
  * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
  * trop long, et la première hypothèse à éprouver sera celle-là — avant d'ajouter
  * encore des lignes pour se faire mieux comprendre.
+ *
+ * **Le code cité a quitté les guillemets le 30 septembre 2026**, ici comme à
+ * l'extraction, et pour la même raison : le rendu en jetons ne voit que les
+ * accents graves, et soixante questions vivantes de la production citaient un
+ * terme de code entre guillemets contre vingt qui l'écrivaient comme il faut.
+ * La règle est posée dans LA LANGUE, où vit déjà ce qui se recopie tel quel ;
+ * la lecture relève le stock de son côté — voir `releverLeCodeCite`.
  */
 export const GENERATE_VARIANTS_PROMPT = `On te donne un ou plusieurs concepts issus d'un même dépôt. Tu écris quatre questions
 pour chacun, indépendamment.
@@ -216,6 +223,15 @@ option de QCM peut donc être une forme étrangère, et un texte à trou peut ma
 mot dans la phrase d'exemple citée telle quelle.
 
 Une question qui s'adresse au lecteur le tutoie : « Explique », jamais « Expliquez ».
+
+**Un terme de code s'écrit entre accents graves, jamais entre guillemets.** Un nom de
+variable ou de méthode, un identifiant, un nom de fichier, un chemin, un paquet, un
+module, une commande, une valeur littérale : \`minSdk\`, \`libapp.so\`,
+\`app/build.gradle.kts\`, \`:app\`. Cela vaut dans l'énoncé, dans les options, dans la
+phrase trouée et dans la réponse-étalon. L'application les relève en jetons, et elle
+ne relève que ça — sous des guillemets, ils se lisent comme de la ponctuation. Les
+guillemets restent pour ce qu'ils disent : une citation en langue étrangère, une
+expression rapportée, un titre.
 
 LA RÈGLE QUI COMPTE
 

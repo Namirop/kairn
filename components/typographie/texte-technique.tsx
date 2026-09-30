@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import { blocsDeTexte, porteDuCodeEnBloc } from "@/lib/domain/blocs-de-texte";
+import { releverLeCodeCite } from "@/lib/domain/code-sous-guillemets";
 import { segmentsDeCode } from "@/lib/domain/texte-code";
 
 /**
@@ -79,7 +80,12 @@ export function jetonInsecable(terme: string): boolean {
 function Segments({ texte }: { texte: string }) {
   return (
     <>
-      {segmentsDeCode(texte).map((segment, rang) =>
+      {/*
+        Le relevé passe avant le découpage, et jamais dans un extrait en bloc :
+        ce qu'un dépôt écrit entre trois accents graves est recopié tel quel,
+        guillemets compris. Voir `releverLeCodeCite`.
+      */}
+      {segmentsDeCode(releverLeCodeCite(texte)).map((segment, rang) =>
         segment.code ? (
           <code
             key={rang}

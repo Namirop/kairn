@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import { JETON, jetonInsecable } from "@/components/typographie/texte-technique";
+import { releverLeCodeCite } from "@/lib/domain/code-sous-guillemets";
 import { segmentsDeCode } from "@/lib/domain/texte-code";
 import { TROU } from "@/lib/domain/reponse-cloze";
 
@@ -92,7 +93,12 @@ export function PhraseTrouee({
 }) {
   return (
     <>
-      {segmentsDeCode(phrase).map((segment, rang) => {
+      {/*
+        Le relevé passe avant le découpage, comme dans `TexteTechnique` : une
+        phrase trouée cite les mêmes termes que l'énoncé qui l'entoure, et le
+        modèle les écrit entre guillemets. Voir `releverLeCodeCite`.
+      */}
+      {segmentsDeCode(releverLeCodeCite(phrase)).map((segment, rang) => {
         // Un segment porte d'ordinaire un seul trou — mais la lecture en creuse
         // un second quand la phrase réécrivait le terme en clair, et c'est alors
         // le même mot à retrouver deux fois. Voir `phraseSansDevoilement`.

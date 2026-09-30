@@ -147,6 +147,19 @@
  * L'ironie du corpus : `18-anglais.txt` a été ajouté parce qu'il rendait des
  * concepts français là où on en voulait des anglais. C'est désormais le
  * comportement attendu, et le fichier devient un témoin de conformité.
+ *
+ * **Le code cité a quitté les guillemets le 30 septembre 2026.** « Tu les
+ * recopies tels quels, entre guillemets » vise un mot étranger — « ser », « soy
+ * francés » — et c'est la bonne façon de l'écrire. Elle attrapait aussi les
+ * identifiants : sur les 531 questions vivantes de la production, soixante
+ * citaient un terme de code entre guillemets contre vingt en accents graves.
+ * Le rendu en jetons existe depuis longtemps, il ne voyait que les accents
+ * graves, et trois citations de code sur quatre passaient donc à l'écran comme
+ * de la ponctuation au milieu d'une phrase.
+ *
+ * La lecture répare le stock de son côté, et relève à sa place ce qui est cité
+ * sans espace et porte un signe qu'aucun mot de prose ne porte — voir
+ * `releverLeCodeCite`. La consigne, elle, vaut pour ce qui s'écrira.
  */
 export const EXTRACT_ATOMS_PROMPT = `Tu découpes ce qu'une personne vient d'apprendre en concepts unitaires, pour qu'ils
 lui soient reposés plus tard.
@@ -169,6 +182,14 @@ qui dit : Le verbe espagnol « ser » exprime l'identité, l'origine et la profe
 
 Quand le sens d'un terme cité fait partie de ce qu'il y a à retenir, le concept porte
 les deux : la forme dans sa langue, le sens en français.
+
+**Un terme de code s'écrit entre accents graves, jamais entre guillemets.** Un nom de
+variable ou de méthode, un identifiant, un nom de fichier, un chemin, un paquet, un
+module, une commande, un en-tête, une valeur littérale : \`minSdk\`, \`libapp.so\`,
+\`app/build.gradle.kts\`, \`:app\`. L'application les relève en jetons, et elle ne relève
+que ça — sous des guillemets, ils se lisent comme de la ponctuation au milieu d'une
+phrase. Les guillemets restent pour ce qu'ils disent : une citation en langue
+étrangère, une expression rapportée, un titre.
 
 CE QU'EST UN CONCEPT
 
