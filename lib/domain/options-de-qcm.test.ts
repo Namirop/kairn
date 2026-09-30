@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
-import { normaliserLesOptions, OPTIONS_PAR_QCM } from "./options-de-qcm";
+import { normaliserLesOptions, OPTIONS_PAR_QCM, optionsDistinguables } from "./options-de-qcm";
 
 const options = fc.array(fc.string({ minLength: 1 }), { minLength: 1, maxLength: 9 });
 
@@ -62,5 +62,41 @@ describe("normaliserLesOptions", () => {
 
     expect(normalise?.options).toEqual(["bonne", "b", "c", "d"]);
     expect(normalise?.correctIndex).toBe(0);
+  });
+});
+
+describe("optionsDistinguables", () => {
+  it("accepte quatre options différentes", () => {
+    expect(optionsDistinguables(["a", "b", "c", "d"])).toBe(true);
+  });
+
+  /** Le QCM servi le 23/09 : quatre fois le même signe, rien à choisir. */
+  it("refuse quatre options identiques", () => {
+    expect(optionsDistinguables(["...", "...", "...", "..."])).toBe(false);
+  });
+
+  it("ne voit qu'une option derrière deux espacements", () => {
+    expect(optionsDistinguables([" acide", "acide  ", "acide"])).toBe(false);
+    expect(optionsDistinguables(["l'acide", "l'acide", "la base"])).toBe(true);
+  });
+
+  it("refuse une liste qui ne propose rien", () => {
+    expect(optionsDistinguables([])).toBe(false);
+    expect(optionsDistinguables(["acide"])).toBe(false);
+  });
+
+  /** Deux appels de méthode se ressemblent et restent deux réponses. */
+  it("ne rapproche pas deux termes voisins", () => {
+    expect(optionsDistinguables(["at(-1)", "at(1)"])).toBe(true);
+  });
+
+  it("est vrai dès que deux options s'affichent différemment", () => {
+    fc.assert(
+      fc.property(fc.array(fc.string(), { maxLength: 6 }), (liste) => {
+        const vues = new Set(liste.map((option) => option.trim().replace(/\s+/g, " ")));
+
+        expect(optionsDistinguables(liste)).toBe(vues.size >= 2);
+      }),
+    );
   });
 });

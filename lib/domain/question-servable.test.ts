@@ -1,6 +1,31 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
-import { questionServable } from "./question-servable";
+import { porteDuTexte, questionServable } from "./question-servable";
+
+describe("porteDuTexte", () => {
+  it("accepte une lettre, accentuée ou non", () => {
+    expect(porteDuTexte("a")).toBe(true);
+    expect(porteDuTexte("é")).toBe(true);
+  });
+
+  /** Une réponse de texte à trou peut n'être qu'un nombre : « 52 semaines ». */
+  it("accepte un chiffre seul", () => {
+    expect(porteDuTexte("52")).toBe(true);
+  });
+
+  /** Le cas servi le 23/09 : le modèle a abrégé le lot en trois points. */
+  it("refuse une suite de ponctuation", () => {
+    expect(porteDuTexte("...")).toBe(false);
+    expect(porteDuTexte("…")).toBe(false);
+    expect(porteDuTexte("— ?!")).toBe(false);
+    expect(porteDuTexte("___")).toBe(false);
+  });
+
+  it("refuse le vide et les blancs", () => {
+    expect(porteDuTexte("")).toBe(false);
+    expect(porteDuTexte("   \n\t ")).toBe(false);
+  });
+});
 
 describe("questionServable", () => {
   it("accepte une formulation qui porte un texte et une réponse", () => {
@@ -24,14 +49,20 @@ describe("questionServable", () => {
     expect(questionServable({ question: "Que fait `at(-1)` ?", answerKey: " " })).toBe(false);
   });
 
-  it("ne rend vrai que si les deux champs portent quelque chose", () => {
+  /** Le lot abrégé : l'énoncé et l'étalon disent la même absence. */
+  it("refuse une question abrégée en trois points", () => {
+    expect(questionServable({ question: "...", answerKey: "..." })).toBe(false);
+    expect(questionServable({ question: "...", answerKey: "Le dernier." })).toBe(false);
+  });
+
+  it("ne rend vrai que si les deux champs portent quelque chose à lire", () => {
     fc.assert(
       fc.property(
         fc.string(),
         fc.string(),
         (question, answerKey) =>
           questionServable({ question, answerKey }) ===
-          (question.trim().length > 0 && answerKey.trim().length > 0),
+          (porteDuTexte(question) && porteDuTexte(answerKey)),
       ),
       { numRuns: 500 },
     );

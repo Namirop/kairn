@@ -229,6 +229,44 @@ describe("forme de sortie de generate_variants", () => {
     expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansReponse)).lots).toHaveLength(2);
   });
 
+  /**
+   * Le lot abrégé du 23/09 : la première question écrite, puis « ... » partout
+   * ailleurs. Rien n'était vide, la grammaire était satisfaite, l'appel n'avait
+   * pas été tronqué — et une carte portant « ... » a été servie en session.
+   */
+  it("fait disparaître le lot d'une question abrégée en trois points", () => {
+    const abrege = {
+      ...lot(1),
+      mechanism: { format: "EXPLAIN", question: "...", answerKey: "..." },
+    };
+
+    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(abrege)).lots).toHaveLength(2);
+  });
+
+  it("fait disparaître le lot d'un QCM dont les options ne se distinguent pas", () => {
+    const memes = {
+      ...lot(1),
+      application: {
+        ...question("MCQ"),
+        mcq: { options: ["...", "...", "...", "..."], correctIndex: 1 },
+      },
+    };
+
+    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(memes)).lots).toHaveLength(2);
+  });
+
+  it("fait disparaître le lot d'un texte à trou dont la phrase n'a pas de trou", () => {
+    const sansTrou = {
+      ...lot(1),
+      boundary: {
+        ...question("CLOZE"),
+        cloze: { sentence: "Le lichen est une symbiose.", accepted: ["symbiose"] },
+      },
+    };
+
+    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansTrou)).lots).toHaveLength(2);
+  });
+
   /** Les questions écrites avant que l'aide existe n'ont pas de leurres. */
   it("garde un texte à trou sans leurres, écrit avant que l'aide existe", () => {
     const cloze = { sentence: "Le lichen est une ___ entre deux espèces.", accepted: ["symbiose"] };

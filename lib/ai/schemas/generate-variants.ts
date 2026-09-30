@@ -1,6 +1,8 @@
 import { z } from "zod";
 import type { FacetteDuLot } from "@/lib/domain/emplacement-du-trou";
-import { normaliserLesOptions } from "@/lib/domain/options-de-qcm";
+import { normaliserLesOptions, optionsDistinguables } from "@/lib/domain/options-de-qcm";
+import { questionServable } from "@/lib/domain/question-servable";
+import { TROU } from "@/lib/domain/reponse-cloze";
 import type { AiContract } from "./contract";
 import {
   FORMATS_DU_MECANISME,
@@ -163,6 +165,16 @@ function chargesDe(posee: QuestionLue) {
  * le range donc ici, avec le QCM sans options, et non dans les bornes qu'on a
  * eu raison de retirer.
  *
+ * **Et le blanc n'est pas le seul vide : le 23/09, un lot est arrivé abrégé.**
+ * Le modèle a écrit la première question du concept, puis posé « ... » partout
+ * ailleurs — énoncé, étalon, phrase trouée, quatre options. Trois points ne
+ * sont pas une chaîne vide, l'appel n'a pas été tronqué (3 194 jetons de sortie
+ * sur 10 000 autorisés) et la grammaire était satisfaite : le lot est passé, et
+ * une carte portant « ... » a été servie en session. Les trois conditions
+ * ajoutées disent la même chose que le blanc, sous les trois formes où le vide
+ * peut se présenter — un texte sans lettre ni chiffre, une phrase à trou sans
+ * trou, des options qu'on ne peut pas distinguer les unes des autres.
+ *
  * Ça ne fait pas tomber l'envoi pour autant : c'est le **lot** qui disparaît,
  * et son rang manquant est rapporté par l'appelant. Les deux autres concepts du
  * même appel sont écrits.
@@ -170,13 +182,17 @@ function chargesDe(posee: QuestionLue) {
 function inexploitable(posee: QuestionLue): boolean {
   const { mcq, cloze } = chargesDe(posee);
 
-  if (posee.question.trim().length === 0 || posee.answerKey.trim().length === 0) return true;
+  if (!questionServable(posee)) return true;
 
   if (posee.format === "MCQ") {
-    return mcq === null || normaliserLesOptions(mcq.options, mcq.correctIndex) === null;
+    return (
+      mcq === null ||
+      !optionsDistinguables(mcq.options) ||
+      normaliserLesOptions(mcq.options, mcq.correctIndex) === null
+    );
   }
 
-  return posee.format === "CLOZE" && cloze === null;
+  return posee.format === "CLOZE" && (cloze === null || !cloze.sentence.includes(TROU));
 }
 
 /** Les options d'un QCM, ramenées à un jeu utilisable. */

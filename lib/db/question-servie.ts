@@ -3,6 +3,8 @@ import type { VariantFacet, VariantFormat } from "@/lib/db/types";
 import { trouSansRedite } from "@/lib/domain/bord-du-trou";
 import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
 import { joursEntre, localDay } from "@/lib/domain/local-day";
+import { optionsDistinguables } from "@/lib/domain/options-de-qcm";
+import { TROU } from "@/lib/domain/reponse-cloze";
 import { tagsSansReponse } from "@/lib/domain/tags-sans-reponse";
 import { phraseSansDevoilement } from "@/lib/domain/trou-devoile";
 
@@ -113,6 +115,10 @@ function lireChoix(
   // Un index hors des options viendrait d'une génération abîmée : mieux vaut
   // servir la question sans ses choix que proposer une bonne réponse fausse.
   if (lu.data.correctIndex >= lu.data.options.length) return null;
+  // Quatre fois la même proposition ne se choisissent pas : trois clics sur
+  // quatre comptent faux sans que personne puisse faire mieux. Un lot écrit le
+  // 23/09 en portait un, abrégé en « ... ». Voir `optionsDistinguables`.
+  if (!optionsDistinguables(lu.data.options)) return null;
 
   return lu.data;
 }
@@ -156,6 +162,9 @@ export function texteATrouServi(format: VariantFormat, payload: unknown): Questi
   const lu = PAYLOAD_CLOZE.safeParse(payload);
 
   if (!lu.success) return null;
+  // Une phrase sans trou n'est pas un texte à trou : l'écran poserait un champ
+  // de saisie sous une phrase entière, et rien n'y manquerait.
+  if (!lu.data.sentence.includes(TROU)) return null;
 
   const rogne = trouSansRedite(lu.data);
 

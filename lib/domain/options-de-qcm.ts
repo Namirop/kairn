@@ -22,6 +22,29 @@ export const OPTIONS_PAR_QCM = 4;
 
 export type OptionsNormalisees = { options: string[]; correctIndex: number };
 
+/** Ce qu'on lit à l'écran, une fois les espaces ramenés à ce qu'ils valent. */
+function telQuAffiche(option: string): string {
+  return option.trim().replace(/\s+/g, " ");
+}
+
+/**
+ * Peut-on distinguer ces options les unes des autres ?
+ *
+ * Un QCM servi le 23 septembre 2026 posait quatre fois « ... » : le modèle
+ * avait écrit la question, puis abrégé ses options. Rien n'était vide, l'index
+ * désignait bien une option — et on demandait pourtant de choisir entre quatre
+ * propositions identiques, où trois clics sur quatre comptent faux sans que
+ * personne puisse faire mieux.
+ *
+ * Deux options qui ne diffèrent que par leurs espaces sont la même option : ce
+ * qui compte est ce qui s'affiche, pas ce qui est stocké. On ne va pas plus
+ * loin dans la normalisation — `at(-1)` et `at(1)` se ressemblent beaucoup et
+ * restent deux réponses différentes.
+ */
+export function optionsDistinguables(options: readonly string[]): boolean {
+  return new Set(options.map(telQuAffiche)).size >= 2;
+}
+
 export function normaliserLesOptions(
   options: readonly string[],
   correctIndex: number,

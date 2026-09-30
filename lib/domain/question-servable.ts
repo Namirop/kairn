@@ -22,6 +22,25 @@
  */
 export type FormulationLisible = { question: string; answerKey: string };
 
+/**
+ * Le texte porte-t-il quelque chose à lire ?
+ *
+ * **Le blanc n'est pas le seul vide.** Une carte servie le 23 septembre 2026
+ * posait « ... » en énoncé, « ... » en phrase trouée, « ... » dans les quatre
+ * options de son QCM et « ... » en réponse : le modèle avait écrit la première
+ * question du lot, puis abrégé le reste comme on écrit « etc. ». Trois points
+ * passaient tous les filets — ils ne sont pas vides, ils font trois caractères.
+ *
+ * Une lettre ou un chiffre, c'est le minimum pour qu'il y ait une chose plutôt
+ * que sa ponctuation. Le chiffre compte : une réponse peut être « 52 », et la
+ * refuser casserait un texte à trou qui marche. Ce n'est pas une borne de
+ * longueur — celles-là ont été retirées à raison —, c'est la présence de la
+ * chose, au même titre que la chaîne vide.
+ */
+export function porteDuTexte(texte: string): boolean {
+  return /[\p{L}\p{N}]/u.test(texte);
+}
+
 export function questionServable(variante: FormulationLisible): boolean {
-  return variante.question.trim().length > 0 && variante.answerKey.trim().length > 0;
+  return porteDuTexte(variante.question) && porteDuTexte(variante.answerKey);
 }
