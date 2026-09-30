@@ -302,12 +302,21 @@
 */
 :root[data-palette="versant"] {
   --ciel: #1b4fc4;
-  --ciel-teinte: #1b4fc4;
-  --terre: #dfe7f7;
+  /* La brume tire vers un bleu à peine plus clair que le ciel : c'est ce qui
+     éloigne le premier plan sans l'effacer. */
+  --ciel-teinte: #2559cf;
+  --terre: #143f9f;
   --surface-roche: #1b2230;
   --lichen: #8faf3c;
   --lichen-deep: #546a22;
   --stone-800: #1b2230;
+}
+
+/* L'ouverture passe en encre claire : son sol est saturé, le noir n'y tient
+   pas. Réglé sur le panneau du ciel seulement — le reste de la page garde
+   l'encre du papier. */
+:root[data-palette="versant"] .ciel {
+  color: var(--stone-50);
 }
 
 /*
@@ -317,9 +326,9 @@
   page reste neige et granit.
 */
 :root[data-palette="lavis"] {
-  --ciel: linear-gradient(177deg, #10306f 0%, #1b4fc4 38%, #4aa6d6 76%, #b6e3ef 100%);
-  --ciel-teinte: #4aa6d6;
-  --terre: #dcecf2;
+  --ciel: linear-gradient(177deg, #10306f 0%, #1b4fc4 34%, #4aa6d6 72%, #a8d8e8 100%);
+  --ciel-teinte: #a8d8e8;
+  --terre: #5cb8d6;
   --surface-roche: #1b2230;
   --lichen: #8faf3c;
   --lichen-deep: #546a22;

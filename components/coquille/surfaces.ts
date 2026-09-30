@@ -10,14 +10,7 @@
  * qu'on ne voit qu'en production.
  */
 
-/**
- * Le type vit dans le domaine, avec la valeur de clarté de chaque surface :
- * `fondu-de-passage.ts` en a besoin, et `lib/domain/` ne peut pas importer un
- * composant. Il est réexporté ici pour que rien n'ait à le savoir.
- */
-export type { Surface } from "@/lib/domain/valeur-de-surface";
-
-import type { Surface } from "@/lib/domain/valeur-de-surface";
+export type Surface = "papier" | "ombre" | "lichen" | "roche";
 
 type Habillage = {
   fond: string;
