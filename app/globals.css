@@ -317,48 +317,64 @@
 */
 :root[data-palette="versant"] {
   /*
-    Le versant. Le ciel est un aplat plein, et tout le reste en descend :
-    la rampe de pierre entière vire au bleu de nuit, parce que c'est elle qui
-    peint les cairns, les arêtes, l'encre et le pied de page. Surcharger les
-    surfaces sans la toucher laissait un cairn gris-vert sur un ciel bleu —
-    c'est ce qui manquait à la première tentative.
+    Le versant. Le ciel est un aplat qui respire — une seule teinte, éclaircie
+    vers l'horizon — et toute la rampe de pierre vire au bleu de nuit : c'est
+    elle qui peint les cairns, les arêtes, l'encre et le pied de page.
   */
-  --ciel: #1b4fc4;
-  --ciel-teinte: #cfe4f6;
-  --terre: #5f96e0;
+  --ciel: linear-gradient(177deg, #113479 0%, #143b8d 42%, #1a52b8 100%);
 
-  --surface-papier: #eef2f8;
-  --surface-ombre: #dce4f0;
-  --surface-lichen: #e4ecf4;
-  --surface-roche: #16233b;
+  /* ── Relevés à la pipette sur la maquette validée, pas réinventés ──
+     niveau 1, le ciel haut      #143b8d
+     niveau 2, la bande de glace #94cee2
+     niveau 3, le sol            #47a2cb
+     La teinte de brume est calculée pour que le lointain, mêlé à 18 %, tombe
+     exactement sur le niveau 2. */
+  --ciel-teinte: #a5d8e7;
+  --terre: #47a2cb;
 
-  --stone-50: #f2f6fb;
-  --stone-100: #dce4f0;
-  --stone-300: #b3c4dc;
-  --stone-400: #8ba3c4;
-  --stone-500: #5b7295;
-  --stone-700: #2b4570;
-  --stone-800: #1d3157;
-  --stone-900: #12203c;
+  --surface-papier: #eef5f7;
+  --surface-ombre: #dcebf0;
+  --surface-lichen: #e4eff2;
+  --surface-roche: #17293c;
+
+  --stone-50: #f4f9fb;
+  --stone-100: #dcebf0;
+  --stone-300: #b8d4e0;
+  --stone-400: #8fb2c4;
+  --stone-500: #4d738c;
+  --stone-700: #1f4360;
+  --stone-800: #143049;
+  --stone-900: #0d2236;
 
   --lichen: #9fc22e;
   --lichen-deep: #5c7418;
+
+  /* Les cairns du lointain sont presque blancs — la brume les mange —, ceux du
+     plan proche sont de la même pierre que le grand, et leur sommet est lichen. */
+  --pierre-loin-1: #b3d4e1;
+  --pierre-loin-2: #c2dde8;
+  --pierre-loin-3: #cfe6ee;
+  --pierre-proche-1: #1b3d58;
+  --pierre-proche-2: #24506f;
+  --pierre-proche-3: #2e6285;
+  --pierre-proche-sommet: #9fc22e;
 
   /* L'arête se tait : sur un aplat, elle dessine un liseré qui coupe. */
   --arete-loin: transparent;
   --arete-proche: transparent;
 
-  /* L'en-tête prend le ciel, et le geste prend l'encre de la nuit. */
-  --entete: #1b4fc4;
-  --geste-ciel: #12203c;
-  --geste-ciel-encre: #f2f6fb;
-}
+  /* Le creux se remplit du sol et se trace en blanc. */
+  --creux-fond: #47a2cb;
+  --creux-trait: #ffffff;
 
-/* L'ouverture passe en encre claire : son sol est saturé, le noir n'y tient
-   pas. Réglé sur le panneau du ciel seulement. */
-:root[data-palette="versant"] .ciel,
-:root[data-palette="versant"] .entete-du-site {
-  color: var(--stone-50);
+  /* Le geste de l'ouverture : l'encre de la nuit, et plus de hauteur. */
+  --geste-ciel: #14202e;
+  --geste-ciel-encre: #f4f9fb;
+
+  /* L'en-tête est du niveau 1, avec la variation de gauche à droite de la
+     maquette, et un filet clair qui le sépare du ciel. */
+  --entete: linear-gradient(100deg, #10306f 0%, #143b8d 62%, #17439c 100%);
+  --entete-filet: rgb(255 255 255 / 0.22);
 }
 
 /*
@@ -369,43 +385,61 @@
 */
 :root[data-palette="lavis"] {
   /*
-    Le lavis. Le ciel descend du bleu de nuit au cyan de l'horizon, une seule
-    teinte qui s'éclaircit. Même principe qu'au-dessus : la rampe entière suit,
-    sinon le cairn reste gris sur une plaine cyan.
+    Le lavis. Le même ciel, mais qui descend plus bas et s'ouvre vers la glace :
+    une seule teinte du bleu de nuit au bleu clair, jamais deux couleurs.
   */
-  --ciel: linear-gradient(177deg, #0e2a5e 0%, #1b4fc4 32%, #4aa6d6 70%, #cfe9f2 100%);
-  --ciel-teinte: #cfe9f2;
-  --terre: #5cb8d6;
+  --ciel: linear-gradient(177deg, #0f2f72 0%, #143b8d 34%, #1e5cc4 74%, #3a86c9 100%);
+
+  /* ── Relevés à la pipette sur la maquette validée, pas réinventés ──
+     niveau 1, le ciel haut      #143b8d
+     niveau 2, la bande de glace #94cee2
+     niveau 3, le sol            #47a2cb
+     La teinte de brume est calculée pour que le lointain, mêlé à 18 %, tombe
+     exactement sur le niveau 2. */
+  --ciel-teinte: #a5d8e7;
+  --terre: #47a2cb;
 
   --surface-papier: #eef5f7;
   --surface-ombre: #dcebf0;
   --surface-lichen: #e4eff2;
-  --surface-roche: #1a2a3c;
+  --surface-roche: #17293c;
 
-  --stone-50: #f2f8fa;
+  --stone-50: #f4f9fb;
   --stone-100: #dcebf0;
   --stone-300: #b8d4e0;
   --stone-400: #8fb2c4;
-  --stone-500: #55798f;
-  --stone-700: #274a66;
-  --stone-800: #1a344c;
-  --stone-900: #10253a;
+  --stone-500: #4d738c;
+  --stone-700: #1f4360;
+  --stone-800: #143049;
+  --stone-900: #0d2236;
 
   --lichen: #9fc22e;
   --lichen-deep: #5c7418;
 
+  /* Les cairns du lointain sont presque blancs — la brume les mange —, ceux du
+     plan proche sont de la même pierre que le grand, et leur sommet est lichen. */
+  --pierre-loin-1: #b3d4e1;
+  --pierre-loin-2: #c2dde8;
+  --pierre-loin-3: #cfe6ee;
+  --pierre-proche-1: #1b3d58;
+  --pierre-proche-2: #24506f;
+  --pierre-proche-3: #2e6285;
+  --pierre-proche-sommet: #9fc22e;
+
+  /* L'arête se tait : sur un aplat, elle dessine un liseré qui coupe. */
   --arete-loin: transparent;
   --arete-proche: transparent;
 
-  --entete: #0e2a5e;
-  --geste-ciel: #10253a;
-  --geste-ciel-encre: #f2f8fa;
-}
+  /* Le creux se remplit du sol et se trace en blanc. */
+  --creux-fond: #47a2cb;
+  --creux-trait: #ffffff;
 
-/* Le titre et l'en-tête passent en clair : le sol du lavis est un cyan franc. */
-:root[data-palette="lavis"] .ciel,
-:root[data-palette="lavis"] .entete-du-site {
-  color: var(--stone-50);
+  /* Le geste de l'ouverture : l'encre de la nuit, et plus de hauteur. */
+  --geste-ciel: #14202e;
+  --geste-ciel-encre: #f4f9fb;
+
+  --entete: linear-gradient(100deg, #0d2b66 0%, #143b8d 62%, #17439c 100%);
+  --entete-filet: rgb(255 255 255 / 0.22);
 }
 
 /*
@@ -422,6 +456,47 @@
 */
 .entete-du-site {
   background: var(--entete);
+  /* Le filet qui sépare l'en-tête du ciel. Transparent par défaut : en
+     production, les deux sont du même papier et un trait y serait une couture. */
+  box-shadow: inset 0 -1px 0 var(--entete-filet, transparent);
+}
+
+/*
+  Sous une palette, l'ouverture et l'en-tête passent en encre claire — leur fond
+  est saturé. La marque suit : ses pierres et son mot sont peints par des
+  utilitaires Tailwind, qu'on repeint ici plutôt que de passer un ton depuis un
+  composant serveur qui ne peut pas lire l'attribut.
+*/
+:root[data-palette] .ciel,
+:root[data-palette] .entete-du-site {
+  color: var(--stone-50);
+}
+
+:root[data-palette] .entete-du-site a {
+  color: var(--stone-50);
+}
+
+:root[data-palette] .entete-du-site .fill-stone-900 {
+  fill: var(--stone-50);
+}
+
+:root[data-palette] .entete-du-site .fill-stone-800 {
+  fill: var(--stone-100);
+}
+
+:root[data-palette] .entete-du-site .fill-stone-700 {
+  fill: var(--stone-300);
+}
+
+:root[data-palette] .entete-du-site .text-stone-900 {
+  color: var(--stone-50);
+}
+
+/* Le geste de l'ouverture s'élargit : sur un aplat, une pilule fine se perd. */
+:root[data-palette] .geste-du-ciel {
+  height: auto;
+  padding-block: 0.9rem;
+  padding-inline: 1.9rem;
 }
 
 .geste-du-ciel {
@@ -444,16 +519,30 @@
   pointer-events: none;
 }
 
+/*
+  Le lavis, et le fondu du bas.
+
+  **Au-dessus du paysage, et c'est l'ordre de peinture qui l'impose.** Les plans
+  du relief sont positionnés : à z-index nul, ils se peignent par-dessus cette
+  couche, qui ne servait alors à rien. Un cran plus haut, le lavis unifie toute
+  l'ouverture — ciel, crêtes et butte — au lieu de ne teinter que le ciel.
+
+  Le fondu du bas répond au reproche de la coupe nette : la strate ne peut pas
+  absorber seule l'écart entre un sol saturé et une surface de lecture. La
+  couleur tourne donc avant elle, sur la moitié basse de l'ouverture, et la
+  strate redevient une ligne de crête.
+*/
 :root[data-palette] .ciel::before {
-  z-index: 0;
+  z-index: 1;
   background:
+    linear-gradient(to bottom, rgb(0 0 0 / 0) 76%, var(--surface-papier) 100%),
     radial-gradient(135% 105% at 12% -5%, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0) 58%),
     radial-gradient(105% 85% at 92% 105%, rgb(0 0 0 / 0.22), rgb(0 0 0 / 0) 60%);
 }
 
 :root[data-palette] .ciel::after {
-  z-index: 1;
-  opacity: 0.5;
+  z-index: 2;
+  opacity: 0.72;
   mix-blend-mode: overlay;
   background-size: 128px 128px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -1118,8 +1207,12 @@
   color: var(--stone-500);
 
   @supports (-webkit-text-stroke: 1px currentColor) {
-    color: var(--surface-papier);
-    -webkit-text-stroke: max(1.6px, 0.021em) var(--stone-700);
+    /* Les lettres se remplissent de la surface qui les porte, et le trait est
+       l'encre. Les deux passent par une variable : sur un ciel coloré, le creux
+       doit se remplir du sol et se tracer en clair, sinon on lit une ligne
+       grise posée sur du bleu. */
+    color: var(--creux-fond, var(--surface-papier));
+    -webkit-text-stroke: max(1.6px, 0.021em) var(--creux-trait, var(--stone-700));
   }
 }
 
