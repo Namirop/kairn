@@ -280,6 +280,21 @@
   */
   --terre: var(--surface-ombre);
 
+  /*
+    Les arêtes des deux plans du paysage, et les deux habillages de l'ouverture.
+
+    Chacune vaut ce qu'elle valait : ce sont des variables, pas un changement.
+    Elles existent parce qu'une palette doit pouvoir taire un trait — sur un
+    aplat coloré, l'arête grise du relief dessine un liseré qui casse la
+    couleur — et parce que l'en-tête et le geste de l'ouverture doivent pouvoir
+    suivre le ciel au lieu de rester sur du papier.
+  */
+  --arete-loin: var(--stone-300);
+  --arete-proche: var(--stone-400);
+  --entete: var(--surface-papier);
+  --geste-ciel: var(--surface-papier);
+  --geste-ciel-encre: var(--stone-900);
+
   --t-ouverture: clamp(2.25rem, calc((100vw - 4rem) / 7.4), 3.75rem);
 }
 
@@ -301,21 +316,48 @@
   inverse en pierres claires.
 */
 :root[data-palette="versant"] {
+  /*
+    Le versant. Le ciel est un aplat plein, et tout le reste en descend :
+    la rampe de pierre entière vire au bleu de nuit, parce que c'est elle qui
+    peint les cairns, les arêtes, l'encre et le pied de page. Surcharger les
+    surfaces sans la toucher laissait un cairn gris-vert sur un ciel bleu —
+    c'est ce qui manquait à la première tentative.
+  */
   --ciel: #1b4fc4;
-  /* La brume tire vers un bleu à peine plus clair que le ciel : c'est ce qui
-     éloigne le premier plan sans l'effacer. */
-  --ciel-teinte: #2559cf;
-  --terre: #143f9f;
-  --surface-roche: #1b2230;
-  --lichen: #8faf3c;
-  --lichen-deep: #546a22;
-  --stone-800: #1b2230;
+  --ciel-teinte: #cfe4f6;
+  --terre: #5f96e0;
+
+  --surface-papier: #eef2f8;
+  --surface-ombre: #dce4f0;
+  --surface-lichen: #e4ecf4;
+  --surface-roche: #16233b;
+
+  --stone-50: #f2f6fb;
+  --stone-100: #dce4f0;
+  --stone-300: #b3c4dc;
+  --stone-400: #8ba3c4;
+  --stone-500: #5b7295;
+  --stone-700: #2b4570;
+  --stone-800: #1d3157;
+  --stone-900: #12203c;
+
+  --lichen: #9fc22e;
+  --lichen-deep: #5c7418;
+
+  /* L'arête se tait : sur un aplat, elle dessine un liseré qui coupe. */
+  --arete-loin: transparent;
+  --arete-proche: transparent;
+
+  /* L'en-tête prend le ciel, et le geste prend l'encre de la nuit. */
+  --entete: #1b4fc4;
+  --geste-ciel: #12203c;
+  --geste-ciel-encre: #f2f6fb;
 }
 
 /* L'ouverture passe en encre claire : son sol est saturé, le noir n'y tient
-   pas. Réglé sur le panneau du ciel seulement — le reste de la page garde
-   l'encre du papier. */
-:root[data-palette="versant"] .ciel {
+   pas. Réglé sur le panneau du ciel seulement. */
+:root[data-palette="versant"] .ciel,
+:root[data-palette="versant"] .entete-du-site {
   color: var(--stone-50);
 }
 
@@ -326,13 +368,44 @@
   page reste neige et granit.
 */
 :root[data-palette="lavis"] {
-  --ciel: linear-gradient(177deg, #10306f 0%, #1b4fc4 34%, #4aa6d6 72%, #a8d8e8 100%);
-  --ciel-teinte: #a8d8e8;
+  /*
+    Le lavis. Le ciel descend du bleu de nuit au cyan de l'horizon, une seule
+    teinte qui s'éclaircit. Même principe qu'au-dessus : la rampe entière suit,
+    sinon le cairn reste gris sur une plaine cyan.
+  */
+  --ciel: linear-gradient(177deg, #0e2a5e 0%, #1b4fc4 32%, #4aa6d6 70%, #cfe9f2 100%);
+  --ciel-teinte: #cfe9f2;
   --terre: #5cb8d6;
-  --surface-roche: #1b2230;
-  --lichen: #8faf3c;
-  --lichen-deep: #546a22;
-  --stone-800: #1b2230;
+
+  --surface-papier: #eef5f7;
+  --surface-ombre: #dcebf0;
+  --surface-lichen: #e4eff2;
+  --surface-roche: #1a2a3c;
+
+  --stone-50: #f2f8fa;
+  --stone-100: #dcebf0;
+  --stone-300: #b8d4e0;
+  --stone-400: #8fb2c4;
+  --stone-500: #55798f;
+  --stone-700: #274a66;
+  --stone-800: #1a344c;
+  --stone-900: #10253a;
+
+  --lichen: #9fc22e;
+  --lichen-deep: #5c7418;
+
+  --arete-loin: transparent;
+  --arete-proche: transparent;
+
+  --entete: #0e2a5e;
+  --geste-ciel: #10253a;
+  --geste-ciel-encre: #f2f8fa;
+}
+
+/* Le titre et l'en-tête passent en clair : le sol du lavis est un cyan franc. */
+:root[data-palette="lavis"] .ciel,
+:root[data-palette="lavis"] .entete-du-site {
+  color: var(--stone-50);
 }
 
 /*
@@ -347,6 +420,16 @@
   Le lavis est la variation lente par-dessus. Une seule teinte : c'est ce qui
   le sépare du dégradé entre deux couleurs, qui reste interdit.
 */
+.entete-du-site {
+  background: var(--entete);
+}
+
+.geste-du-ciel {
+  background: var(--geste-ciel);
+  color: var(--geste-ciel-encre);
+  border-color: transparent;
+}
+
 .ciel {
   background: var(--ciel);
   position: relative;

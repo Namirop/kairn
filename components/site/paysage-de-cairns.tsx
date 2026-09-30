@@ -158,7 +158,7 @@ const PLANS: Plan[] = [
     appuis: [0, -18, 8, -26, 4, -14, 6],
     sol: 18,
     pierre: 26,
-    arete: "var(--stone-300)",
+    arete: "var(--arete-loin)",
     arrivee: 340,
     cairns: [
       { gauche: "4%", haut: "3.5%", pierres: 3 },
@@ -176,7 +176,7 @@ const PLANS: Plan[] = [
     appuis: [10, 22, -12, 16, -20, 10, -6],
     sol: 100,
     pierre: 46,
-    arete: "var(--stone-400)",
+    arete: "var(--arete-proche)",
     arrivee: 100,
     cairns: [
       { gauche: "8%", haut: "6%", pierres: 4 },
@@ -221,7 +221,7 @@ const PLANS_TELEPHONE: Plan[] = [
     appuis: [0, -30, 12, -22],
     sol: 18,
     pierre: 26,
-    arete: "var(--stone-300)",
+    arete: "var(--arete-loin)",
     arrivee: 340,
     cairns: [
       { gauche: "4%", haut: "4.5%", pierres: 3 },
@@ -235,7 +235,7 @@ const PLANS_TELEPHONE: Plan[] = [
     appuis: [14, -18, 26, -10],
     sol: 100,
     pierre: 46,
-    arete: "var(--stone-400)",
+    arete: "var(--arete-proche)",
     arrivee: 100,
     cairns: [
       { gauche: "6%", haut: "7.5%", pierres: 4 },

@@ -162,7 +162,7 @@ export function Hero({ connecte }: { connecte: boolean }) {
                bouton était le second objet le plus haut de l'écran après le
                titre, pour une action secondaire — le sujet de l'ouverture est
                la phrase, pas le geste. Il reprend sa pleine taille dès `md`. */
-            className="mt-pas-4 md:mt-pas-6 bg-surface-papier max-md:px-pas-6 max-md:text-petit max-md:h-10"
+            className="mt-pas-4 md:mt-pas-6 geste-du-ciel max-md:px-pas-6 max-md:text-petit max-md:h-10"
           >
             {connecte ? (
               <Link href={ROUTES.aujourdhui}>Aujourd&apos;hui</Link>
