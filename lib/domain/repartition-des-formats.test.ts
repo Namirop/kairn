@@ -30,8 +30,24 @@ describe("repartirLesFormats", () => {
     }
 
     expect([...comptes.keys()].sort()).toEqual(["CLOZE", "EXPLAIN", "MCQ", "TRUE_FALSE"]);
-    // Douze concepts, quatre formats : trois chacun, à l'unité près.
-    expect(Math.max(...comptes.values())).toBeLessThanOrEqual(3);
+    // Douze concepts, quatre formats dont un qui compte double : aucun ne prend
+    // la moitié de la session, et aucun ne disparaît.
+    expect(Math.max(...comptes.values())).toBeLessThanOrEqual(4);
+    expect(Math.min(...comptes.values())).toBeGreaterThanOrEqual(2);
+  });
+
+  /**
+   * Le défaut mesuré le 30/09 : l'explication faisait 14,7 % des questions
+   * écrites et 22,8 % des questions servies. Égaliser les formats la promouvait
+   * au quart de la session, et trois questions à s'auto-noter sur douze se
+   * sentent — on les expédie sans les lire.
+   */
+  it("ne promeut plus la question qu'on se note soi-même au quart de la session", () => {
+    const retenues = repartirLesFormats(Array.from({ length: 20 }, (_, rang) => lot(rang)));
+    const libres = formats(retenues).filter((format) => format === "EXPLAIN").length;
+
+    expect(libres).toBeLessThanOrEqual(4);
+    expect(libres).toBeGreaterThanOrEqual(2);
   });
 
   it("fait tourner les quatre formats dans l'ordre du moins servi", () => {

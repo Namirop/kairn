@@ -29,6 +29,39 @@
  * si on la recharge.
  */
 
+import { gesteDeReponse, type GesteDeReponse } from "./geste-de-reponse";
+
+/**
+ * Ce que coûte une question, compté en questions.
+ *
+ * **Égaliser les formats revenait à promouvoir le plus lourd.** Sur les trois
+ * semaines qui précèdent le 30 septembre 2026, l'explication faisait 14,7 % des
+ * questions vivantes de la production et 22,8 % de celles réellement servies en
+ * session. Le mécanisme est ici : sur un concept neuf les quatre facettes sont à
+ * égalité, ce module a donc les quatre formats sous la main à chaque tour, et il
+ * les tire vers le quart chacun — ce qui remonte l'explication de 15 % à 25 % et
+ * fait redescendre le QCM d'autant. Personne n'avait demandé cette promotion :
+ * elle tombait de « le moins servi gagne », appliqué à des formats qui ne
+ * demandent pas le même effort.
+ *
+ * Or trois explications dans une session de douze, ce n'est pas trois questions
+ * de plus : c'est trois fois formuler de tête, révéler l'étalon, et se noter
+ * soi-même. Le produit le sait déjà ailleurs — un lot de quatre questions ne
+ * porte qu'une seule question à s'auto-noter, et l'écran de session alterne les
+ * gestes plutôt que les formats.
+ *
+ * Une question qu'on se note soi-même compte donc double. À l'équilibre, elle
+ * retombe autour de 14 % : la répartition cesse de la promouvoir, sans jamais la
+ * supprimer. C'est la part qu'elle occupe dans ce qui a été écrit, et c'est la
+ * bonne cible — ce module répartit ce qui existe, il ne décide pas de ce qui
+ * s'écrit.
+ */
+const COUT: Record<GesteDeReponse, number> = { CHOISIR: 1, SAISIR: 1, FORMULER: 2 };
+
+function coutDe(format: string): number {
+  return COUT[gesteDeReponse(format)];
+}
+
 /** Le strict nécessaire pour répartir : ce qui se voit, et ce qui se compte. */
 export type VarianteRepartissable = {
   id: string;
@@ -87,7 +120,9 @@ export function repartirLesFormats<T extends VarianteRepartissable>(
 
     if (!retenue) return undefined;
 
-    formats.set(retenue.format, (formats.get(retenue.format) ?? 0) + 1);
+    // Le format se compte en effort, la facette à l'unité : une facette n'est ni
+    // plus ni moins fatigante qu'une autre, c'est un angle.
+    formats.set(retenue.format, (formats.get(retenue.format) ?? 0) + coutDe(retenue.format));
     facettes.set(retenue.facet, (facettes.get(retenue.facet) ?? 0) + 1);
 
     return retenue;
