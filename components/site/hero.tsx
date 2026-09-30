@@ -190,7 +190,15 @@ export function Hero({ connecte }: { connecte: boolean }) {
         <div className="relative aspect-[100/93] w-[min(62vw,17rem)] md:aspect-auto md:h-[var(--hauteur-cairn)] md:w-full">
           <span
             aria-hidden
-            className="rounded-galet absolute bottom-[1%] left-1/2 h-[5%] w-[56%] -translate-x-1/2 bg-stone-900 opacity-[0.15] blur-[9px]"
+            /* L'ombre portée du cairn. Elle passe par des variables : sur un
+               sol coloré, une ombre réglée pour du papier disparaît, et c'est
+               elle qui dit que la pierre touche terre — surtout quand le trait
+               de sol se tait. */
+            className="rounded-galet absolute bottom-[1%] left-1/2 h-[6%] w-[54%] -translate-x-1/2 blur-[12px]"
+            style={{
+              background: "var(--ombre-du-cairn)",
+              opacity: "var(--ombre-du-cairn-part)",
+            }}
           />
           <CairnRenversable nombre={7} />
         </div>

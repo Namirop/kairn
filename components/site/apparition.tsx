@@ -42,6 +42,27 @@ const TEMPS = {
 };
 
 /**
+ * Le temps d'une ligne de titre : une pierre qu'on pose.
+ *
+ * Deux fois la course du temps ordinaire, et une courbe qui s'arrête plus net.
+ * C'est la seule chose qui sépare les deux : une ligne qui descend de vingt-huit
+ * pixels et s'immobilise se lit comme un bloc qu'on vient de caler, là où
+ * quatorze pixels et une sortie molle se lisent comme un fondu. Les lignes
+ * s'enchaînent alors dans l'ordre de lecture et le titre s'empile, comme le
+ * cairn qu'il accompagne.
+ */
+const MONTEE_PIERRE_PX = 28;
+
+const PIERRE = {
+  cache: { opacity: 0, y: MONTEE_PIERRE_PX },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.16, 0.9, 0.2, 1] as Transition["ease"] },
+  },
+};
+
+/**
  * La suite : elle ne bouge pas elle-même, elle cadence ses `Temps`.
  *
  * `attente` retarde le premier temps. Elle sert quand deux suites se répondent
@@ -85,10 +106,13 @@ export function Apparition({
  */
 export function Temps({
   balise = "div",
+  pierre = false,
   className,
   children,
 }: {
   balise?: "div" | "span";
+  /** Le temps d'une ligne de titre : elle se pose au lieu d'apparaître. */
+  pierre?: boolean;
   className?: string;
   children: ReactNode;
 }) {
@@ -104,7 +128,7 @@ export function Temps({
   }
 
   return (
-    <Bloc className={className} variants={TEMPS}>
+    <Bloc className={className} variants={pierre ? PIERRE : TEMPS}>
       {children}
     </Bloc>
   );

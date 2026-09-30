@@ -190,7 +190,10 @@
   */
   --t-enonce: 1.5rem;
   --t-nombre: 3.5rem;
-  --t-h2-site: 2.5rem;
+  /* Les titres de section étaient timides face à l'ouverture : deux rems et
+     demi contre presque quatre, sur une page où ils portent chacun un temps du
+     récit. Un demi-rem de plus les remet au niveau de ce qu'ils annoncent. */
+  --t-h2-site: 3rem;
   /*
     Le titre de campagne, calé sur ce qu'il a à écrire.
 
@@ -295,6 +298,18 @@
   --geste-ciel: var(--surface-papier);
   --geste-ciel-encre: var(--stone-900);
 
+  /*
+    Le trait de sol sous le cairn, et l'ombre qu'il porte.
+
+    Le trait est le sol sur lequel l'empilement repose. Sur du papier il se lit
+    comme une ligne d'horizon ; sur un aplat coloré il devient une barre claire
+    en travers de la couleur, et c'est laid. Une palette peut donc le taire, et
+    laisser la seule ombre dire que la pierre touche terre.
+  */
+  --sol-du-cairn: var(--stone-300);
+  --ombre-du-cairn: var(--stone-900);
+  --ombre-du-cairn-part: 0.15;
+
   --t-ouverture: clamp(2.25rem, calc((100vw - 4rem) / 7.4), 3.75rem);
 }
 
@@ -335,7 +350,9 @@
   --surface-papier: #eef5f7;
   --surface-ombre: #dcebf0;
   --surface-lichen: #e4eff2;
-  --surface-roche: #17293c;
+  /* Relevée sur la maquette. L'autre essai, plus froid et plus sombre, était
+     #17293c — gardé ici au cas où celui-ci paraîtrait trop clair. */
+  --surface-roche: #1e2b3c;
 
   --stone-50: #f4f9fb;
   --stone-100: #dcebf0;
@@ -362,6 +379,9 @@
   /* L'arête se tait : sur un aplat, elle dessine un liseré qui coupe. */
   --arete-loin: transparent;
   --arete-proche: transparent;
+  --sol-du-cairn: transparent;
+  --ombre-du-cairn: #0b1c2c;
+  --ombre-du-cairn-part: 0.3;
 
   /* Le creux se remplit du sol et se trace en blanc. */
   --creux-fond: #47a2cb;
@@ -373,8 +393,8 @@
 
   /* L'en-tête est du niveau 1, avec la variation de gauche à droite de la
      maquette, et un filet clair qui le sépare du ciel. */
-  --entete: linear-gradient(100deg, #10306f 0%, #143b8d 62%, #17439c 100%);
-  --entete-filet: rgb(255 255 255 / 0.22);
+  --entete: linear-gradient(100deg, #143b8d 0%, #0e2c6b 100%);
+  --entete-filet: rgb(255 255 255 / 0.34);
 }
 
 /*
@@ -402,7 +422,9 @@
   --surface-papier: #eef5f7;
   --surface-ombre: #dcebf0;
   --surface-lichen: #e4eff2;
-  --surface-roche: #17293c;
+  /* Relevée sur la maquette. L'autre essai, plus froid et plus sombre, était
+     #17293c — gardé ici au cas où celui-ci paraîtrait trop clair. */
+  --surface-roche: #1e2b3c;
 
   --stone-50: #f4f9fb;
   --stone-100: #dcebf0;
@@ -429,6 +451,9 @@
   /* L'arête se tait : sur un aplat, elle dessine un liseré qui coupe. */
   --arete-loin: transparent;
   --arete-proche: transparent;
+  --sol-du-cairn: transparent;
+  --ombre-du-cairn: #0b1c2c;
+  --ombre-du-cairn-part: 0.3;
 
   /* Le creux se remplit du sol et se trace en blanc. */
   --creux-fond: #47a2cb;
@@ -438,8 +463,8 @@
   --geste-ciel: #14202e;
   --geste-ciel-encre: #f4f9fb;
 
-  --entete: linear-gradient(100deg, #0d2b66 0%, #143b8d 62%, #17439c 100%);
-  --entete-filet: rgb(255 255 255 / 0.22);
+  --entete: linear-gradient(100deg, #143b8d 0%, #0e2c6b 100%);
+  --entete-filet: rgb(255 255 255 / 0.34);
 }
 
 /*
@@ -458,7 +483,7 @@
   background: var(--entete);
   /* Le filet qui sépare l'en-tête du ciel. Transparent par défaut : en
      production, les deux sont du même papier et un trait y serait une couture. */
-  box-shadow: inset 0 -1px 0 var(--entete-filet, transparent);
+  border-bottom: 1px solid var(--entete-filet, transparent);
 }
 
 /*
@@ -470,6 +495,25 @@
 :root[data-palette] .ciel,
 :root[data-palette] .entete-du-site {
   color: var(--stone-50);
+}
+
+:root[data-palette] .entete-du-site {
+  position: relative;
+  isolation: isolate;
+}
+
+/* La même matière que le ciel : sans elle, l'en-tête est le seul aplat lisse de
+   la page et la couture se voit à ça, pas à la teinte. */
+:root[data-palette] .entete-du-site::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.72;
+  mix-blend-mode: overlay;
+  background-size: 128px 128px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 :root[data-palette] .entete-du-site a {
@@ -490,6 +534,32 @@
 
 :root[data-palette] .entete-du-site .text-stone-900 {
   color: var(--stone-50);
+}
+
+/*
+  Le pied rejoint la dalle qui le précède.
+
+  Sur la maquette, le pied de page vit **dans** le bloc sombre : c'est la même
+  masse, et la page se ferme dessus. En production il est sur du papier, séparé
+  par une strate — ce qui va tant que les deux surfaces sont deux gris, et se
+  voit comme un ressaut dès que l'une est un aplat. La jointure disparaît donc,
+  et le pied prend la surface de la dalle.
+
+  Ciblé par la structure plutôt que par une classe : la page publique est la
+  seule à finir ainsi, et un attribut posé exprès pour une palette d'essai
+  survivrait à l'essai.
+*/
+:root[data-palette] main > div:has(+ section[data-surface="papier"]:last-of-type) {
+  display: none;
+}
+
+:root[data-palette] main > section[data-surface="papier"]:last-of-type {
+  background: var(--surface-roche);
+  color: var(--stone-300);
+}
+
+:root[data-palette] main > section[data-surface="papier"]:last-of-type .text-stone-500 {
+  color: var(--stone-300);
 }
 
 /* Le geste de l'ouverture s'élargit : sur un aplat, une pilule fine se perd. */

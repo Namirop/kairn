@@ -42,13 +42,14 @@ export function PasCeci({ connecte }: { connecte: boolean }) {
       }
     >
       <Apparition>
-        <Temps>
-          <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
+        <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
+          <Temps balise="span" pierre className="block">
             Ce que ce
-            <br />
+          </Temps>
+          <Temps balise="span" pierre className="block">
             n&apos;est pas.
-          </h2>
-        </Temps>
+          </Temps>
+        </h2>
       </Apparition>
 
       <Apparition className="text-stone-300">
