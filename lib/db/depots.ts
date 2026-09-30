@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import type { InputSourceType } from "@/lib/db/types";
+import { apercuDeProse } from "@/lib/domain/apercu-de-prose";
 import { etatDuDepot, type EtatDepot } from "@/lib/domain/etat-depot";
 
 /** Ce que l'utilisateur a déposé, du plus récent au plus ancien. */
@@ -42,7 +43,11 @@ export async function listerDepots(userId: string, limite = 50): Promise<DepotLi
     id: ligne.id,
     // Une capture n'a souvent pas de texte déposé : c'est ce qu'on y a lu qui
     // la décrit, et rien tant qu'elle n'est pas lue.
-    apercu: (ligne.rawContent.trim() || ligne.extractedText || "").slice(0, APERCU).trim(),
+    //
+    // Mis à plat, parce qu'une ligne de liste ne peut pas porter une structure :
+    // l'écran du dépôt lit ses titres et ses tableaux, ici on n'a que les mots.
+    // Voir `apercuDeProse`.
+    apercu: apercuDeProse(ligne.rawContent.trim() || ligne.extractedText || "", APERCU),
     sourceType: ligne.sourceType,
     etat: etatDuDepot({
       status: ligne.status,
