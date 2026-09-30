@@ -11,11 +11,25 @@
  * apparaît seul dans des expressions et des formules, et le confondre abîmerait
  * un texte déposé. Le gras, lui, ne s'écrit pas par accident.
  *
+ * **Le gras se lit avant le code, et il enjambe les termes cités.** Servi le
+ * 30/09 : `**Du code Dart à l'APK (\`flutter build apk\`)**` affichait ses quatre
+ * astérisques. Le découpage passait d'abord par les accents graves, ce qui
+ * laissait la marque ouvrante dans un morceau et la fermante dans un autre —
+ * aucun des deux ne voyait sa paire. C'est l'ordre qui était faux : un passage
+ * en gras **contient** des termes de code, l'inverse n'arrive pas. Ce module
+ * tranche donc en premier, et le découpage des jetons se fait à l'intérieur de
+ * ce qu'il rend.
+ *
+ * Une conséquence, et c'est pourquoi les accents graves sont connus ici : un
+ * `**` écrit **dans** un terme cité est du code, pas une emphase. `\`2 ** 3\``
+ * reste ce qu'il est.
+ *
  * Fonction pure : elle ne décide de rien du rendu, elle dit seulement ce qui est
  * mis en avant et ce qui ne l'est pas.
  */
 
 const MARQUEUR = "**";
+const ACCENT = "`";
 
 export type SegmentDeTexte = {
   /** Vrai pour une partie mise en avant, faux pour le reste. */
@@ -41,6 +55,43 @@ function empiler(segments: SegmentDeTexte[], texte: string, gras: boolean): void
 }
 
 /**
+ * Les termes cités entre accents graves, par leurs bornes.
+ *
+ * Même règle qu'ailleurs : un accent ouvre, le suivant ferme, et ce qui n'est
+ * pas refermé n'est pas un terme.
+ */
+function termesCites(texte: string): { debut: number; fin: number }[] {
+  const places: { debut: number; fin: number }[] = [];
+  let ouverture = texte.indexOf(ACCENT);
+
+  while (ouverture !== -1) {
+    const fermeture = texte.indexOf(ACCENT, ouverture + 1);
+
+    if (fermeture === -1) break;
+
+    places.push({ debut: ouverture, fin: fermeture });
+    ouverture = texte.indexOf(ACCENT, fermeture + 1);
+  }
+
+  return places;
+}
+
+/** La marque suivante qui ne tombe pas dans un terme cité. */
+function marqueSuivante(
+  texte: string,
+  depuis: number,
+  cites: readonly { debut: number; fin: number }[],
+): number {
+  let place = texte.indexOf(MARQUEUR, depuis);
+
+  while (place !== -1 && cites.some((cite) => place > cite.debut && place < cite.fin)) {
+    place = texte.indexOf(MARQUEUR, place + MARQUEUR.length);
+  }
+
+  return place;
+}
+
+/**
  * Une paire ouvre, la suivante ferme.
  *
  * Ce qui n'est pas refermé reste du texte, tel qu'il a été écrit : une paire
@@ -49,27 +100,28 @@ function empiler(segments: SegmentDeTexte[], texte: string, gras: boolean): void
  * reste littérale pour la même raison.
  */
 export function segmentsEnGras(texte: string): SegmentDeTexte[] {
+  const cites = termesCites(texte);
   const segments: SegmentDeTexte[] = [];
-  let reste = texte;
+  let curseur = 0;
 
-  while (reste.length > 0) {
-    const ouverture = reste.indexOf(MARQUEUR);
-    const fermeture = ouverture === -1 ? -1 : reste.indexOf(MARQUEUR, ouverture + MARQUEUR.length);
+  while (curseur < texte.length) {
+    const ouverture = marqueSuivante(texte, curseur, cites);
+    const fermeture =
+      ouverture === -1 ? -1 : marqueSuivante(texte, ouverture + MARQUEUR.length, cites);
 
-    if (fermeture === -1) {
-      empiler(segments, reste, false);
-      break;
-    }
+    if (fermeture === -1) break;
 
-    const dedans = reste.slice(ouverture + MARQUEUR.length, fermeture);
+    const dedans = texte.slice(ouverture + MARQUEUR.length, fermeture);
 
-    empiler(segments, reste.slice(0, ouverture), false);
+    empiler(segments, texte.slice(curseur, ouverture), false);
 
     if (dedans.trim().length === 0) empiler(segments, `${MARQUEUR}${dedans}${MARQUEUR}`, false);
     else empiler(segments, dedans, true);
 
-    reste = reste.slice(fermeture + MARQUEUR.length);
+    curseur = fermeture + MARQUEUR.length;
   }
+
+  empiler(segments, texte.slice(curseur), false);
 
   return segments;
 }

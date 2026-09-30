@@ -41,6 +41,31 @@ describe("segmentsEnGras", () => {
     ]);
   });
 
+  /**
+   * Servi le 30/09 : les quatre astérisques s'affichaient, parce que le
+   * découpage passait d'abord par les accents graves et séparait la paire.
+   */
+  it("enjambe un terme cité au milieu du passage en gras", () => {
+    expect(segmentsEnGras("**Du code Dart à l'APK (`flutter build apk`)**")).toEqual([
+      { gras: true, texte: "Du code Dart à l'APK (`flutter build apk`)" },
+    ]);
+  });
+
+  /** Dans un terme cité, deux astérisques sont du code : une puissance. */
+  it("ne relève pas une marque écrite dans un terme cité", () => {
+    expect(segmentsEnGras("Le calcul `2 ** 3` vaut huit.")).toEqual([
+      { gras: false, texte: "Le calcul `2 ** 3` vaut huit." },
+    ]);
+  });
+
+  it("relève autour d'un terme cité sans le confondre avec lui", () => {
+    expect(segmentsEnGras("Vois `a ** b`, puis **le reste**.")).toEqual([
+      { gras: false, texte: "Vois `a ** b`, puis " },
+      { gras: true, texte: "le reste" },
+      { gras: false, texte: "." },
+    ]);
+  });
+
   it("rend exactement le texte reçu, marqueurs relevés retirés", () => {
     fc.assert(
       fc.property(fc.string(), (texte) => {

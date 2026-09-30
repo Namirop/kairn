@@ -78,29 +78,8 @@ export function jetonInsecable(terme: string): boolean {
   return terme.trim().length <= SIGNES_INSECABLES;
 }
 
-/**
- * Ce qu'un dépôt a voulu mettre en avant, entre deux paires d'astérisques.
- *
- * Le gras se lit **dans** la prose et jamais dans un jeton : deux astérisques au
- * milieu d'un extrait de code sont du code, pas une emphase.
- */
-function Emphases({ texte }: { texte: string }) {
-  return (
-    <>
-      {segmentsEnGras(texte).map((segment, rang) =>
-        segment.gras ? (
-          <strong key={rang} className="font-semibold text-stone-900">
-            {segment.texte}
-          </strong>
-        ) : (
-          <Fragment key={rang}>{segment.texte}</Fragment>
-        ),
-      )}
-    </>
-  );
-}
-
-function Segments({ texte }: { texte: string }) {
+/** Les termes de code d'un morceau de texte, relevés en jetons. */
+function Jetons({ texte }: { texte: string }) {
   return (
     <>
       {/*
@@ -117,7 +96,37 @@ function Segments({ texte }: { texte: string }) {
             {segment.texte}
           </code>
         ) : (
-          <Emphases key={rang} texte={segment.texte} />
+          <Fragment key={rang}>{segment.texte}</Fragment>
+        ),
+      )}
+    </>
+  );
+}
+
+/**
+ * Ce qu'un dépôt a voulu mettre en avant, et les jetons qui vivent dedans.
+ *
+ * **Le gras se découpe en premier, les jetons à l'intérieur.** L'ordre inverse
+ * a été servi le 30/09 : `**Du code Dart à l'APK (`flutter build apk`)**`
+ * affichait ses quatre astérisques, parce que la marque ouvrante et la
+ * fermante tombaient dans deux morceaux différents et qu'aucune ne voyait sa
+ * paire. Un passage en gras **contient** des termes de code ; l'inverse
+ * n'arrive pas, et `segmentsEnGras` sait déjà ignorer une marque écrite dans un
+ * terme cité.
+ *
+ * Le poids du jeton est fixé et non hérité, donc un terme cité dans du gras
+ * reste lisible — voir `JETON`.
+ */
+function Segments({ texte }: { texte: string }) {
+  return (
+    <>
+      {segmentsEnGras(texte).map((segment, rang) =>
+        segment.gras ? (
+          <strong key={rang} className="font-semibold text-stone-900">
+            <Jetons texte={segment.texte} />
+          </strong>
+        ) : (
+          <Jetons key={rang} texte={segment.texte} />
         ),
       )}
     </>
