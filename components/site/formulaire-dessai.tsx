@@ -99,7 +99,7 @@ export function FormulaireDEssai({
 
   return (
     <div className="gap-pas-8 md:gap-pas-12 grid md:grid-cols-[1fr_minmax(0,36rem)]">
-      <Apparition>
+      <Apparition ecart={0.26}>
         <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
           <Temps balise="span" pierre className="block">
             Dépose

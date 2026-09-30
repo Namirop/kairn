@@ -57,7 +57,7 @@ const ETAPES: EtapeDuSentier[] = [
 export function Sentier() {
   return (
     <Panneau surface="ombre" aere className="gap-pas-12 grid md:grid-cols-[1fr_minmax(0,36rem)]">
-      <Apparition>
+      <Apparition ecart={0.26}>
         {/* Une ligne, un temps : le titre s'empile au lieu d'apparaître d'un
             bloc. C'est le geste du produit, et il ne coûte rien à la lecture —
             l'ordre des lignes ne change pas. */}

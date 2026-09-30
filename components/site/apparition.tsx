@@ -47,21 +47,26 @@ const TEMPS = {
 /**
  * Le temps d'une ligne de titre : une pierre qu'on pose.
  *
- * Deux fois la course du temps ordinaire, et une courbe qui s'arrête plus net.
- * C'est la seule chose qui sépare les deux : une ligne qui descend de vingt-huit
- * pixels et s'immobilise se lit comme un bloc qu'on vient de caler, là où
- * quatorze pixels et une sortie molle se lisent comme un fondu. Les lignes
- * s'enchaînent alors dans l'ordre de lecture et le titre s'empile, comme le
- * cairn qu'il accompagne.
+ * **Elle vient d'en haut, et c'est ce qui fait l'empilement.** Le reste de la
+ * page monte de quatorze pixels — un contenu qui arrive. Une pierre, elle,
+ * descend sur celle d'en dessous : c'est le geste du cairn, et l'inverser
+ * suffisait à ce qu'on ne le reconnaisse pas. Elle tombe de cinquante-six
+ * pixels, quatre fois la course ordinaire, et s'arrête franchement — sans
+ * rebond, parce qu'une pierre calée ne rebondit pas.
+ *
+ * **Et elle prend son temps.** À un dixième de seconde d'écart, les deux lignes
+ * arrivaient presque ensemble et l'effet passait sans se voir. L'écart des
+ * titres est donc réglé à part, dans `Apparition` : c'est le seul endroit de la
+ * page où l'on veut voir le geste plutôt que le subir.
  */
-const MONTEE_PIERRE_PX = 28;
+const CHUTE_PIERRE_PX = 56;
 
 const PIERRE = {
-  cache: { opacity: 0, y: MONTEE_PIERRE_PX },
+  cache: { opacity: 0, y: -CHUTE_PIERRE_PX },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: COURBE_PIERRE },
+    transition: { duration: 0.66, ease: COURBE_PIERRE },
   },
 };
 
@@ -74,10 +79,13 @@ const PIERRE = {
  */
 export function Apparition({
   attente = 0,
+  ecart = ECART_S,
   className,
   children,
 }: {
   attente?: number;
+  /** L'écart entre deux temps. Les titres qui s'empilent le veulent plus long. */
+  ecart?: number;
   className?: string;
   children: ReactNode;
 }) {
@@ -91,7 +99,7 @@ export function Apparition({
       initial="cache"
       whileInView="visible"
       viewport={{ once: true, amount: 0.2 }}
-      variants={{ visible: { transition: { staggerChildren: ECART_S, delayChildren: attente } } }}
+      variants={{ visible: { transition: { staggerChildren: ecart, delayChildren: attente } } }}
     >
       {children}
     </motion.div>

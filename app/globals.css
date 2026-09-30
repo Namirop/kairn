@@ -192,8 +192,10 @@
   --t-nombre: 3.5rem;
   /* Les titres de section étaient timides face à l'ouverture : deux rems et
      demi contre presque quatre, sur une page où ils portent chacun un temps du
-     récit. Un demi-rem de plus les remet au niveau de ce qu'ils annoncent. */
-  --t-h2-site: 3rem;
+     récit. Ils passent à trois et demi — l'écart avec l'ouverture se referme
+     sans se combler, ce qui est exactement le rapport qu'on veut entre une
+     phrase qui ouvre et les trois qui la déroulent. */
+  --t-h2-site: 3.5rem;
   /*
     Le titre de campagne, calé sur ce qu'il a à écrire.
 
