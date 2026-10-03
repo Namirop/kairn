@@ -29,6 +29,24 @@
         ],
         "createdAt": "2026-09-23T13:07:35.660Z",
         "reason": "Faux positif mesure au navigateur sur ce creux-la : borderTopLeftRadius et borderTopRightRadius valent 10px, borderBottomLeftRadius et borderBottomRightRadius valent 0px, et le trait de 2px est uniquement en bas (borderTopWidth et borderLeftWidth a 0). Aucun angle ne porte a la fois la courbe et le trait. C'est le meme creux que components/site/champ-de-depot.tsx, ou le meme ignore est pose depuis deb9869."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#ffffff",
+        "createdAt": "2026-10-03T21:19:36.083Z",
+        "reason": "Libelle du bouton sur fond lichen : valeur deja utilisee telle quelle dans lib/email/templates/daily-reminder.ts. Les clients mail ne lisent pas les variables CSS (voir l'en-tete de shell.ts)."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "44px",
+        "createdAt": "2026-10-03T21:19:36.186Z",
+        "reason": "Grand nombre des emails : valeur deja utilisee dans lib/email/templates/daily-reminder.ts, rampe propre a la couche email."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "17px",
+        "createdAt": "2026-10-03T21:19:36.284Z",
+        "reason": "Taille du bloc-marque dans lib/email/templates/shell.ts, reprise comme ligne d'attaque. Rampe email : 12/13/15/17/44."
       }
     ]
   }

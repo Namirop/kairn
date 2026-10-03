@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { emailOTP } from "better-auth/plugins";
 import { TIMEZONE_HEADER } from "@/lib/auth/en-tetes";
+import { envoyerLAccueil } from "@/lib/auth/email-d-accueil";
 import { reprendreLaVisite } from "@/lib/auth/reprise-de-visite";
 import { provisionAccount } from "@/lib/db/account-provisioning";
 import { prisma } from "@/lib/db/client";
@@ -92,6 +93,14 @@ export const auth = betterAuth({
           // partent dans la foulée — c'est le moment où la dépense reprend, et
           // il coïncide avec celui où quelqu'un s'engage.
           await reprendreLaVisite(user.id);
+
+          // L'accueil part en dernier, et il part d'ici plutôt que d'un passage
+          // horaire : c'est le seul endroit où l'on sait que le compte vient
+          // d'être créé. Il se lit après la reprise, parce que son contenu
+          // dépend de ce que le compte porte déjà — un essai repris n'a pas à
+          // s'entendre dire de déposer sa première chose. Son échec ne remonte
+          // pas : une inscription ne se perd pas pour un email.
+          await envoyerLAccueil(user.id);
         },
       },
     },
