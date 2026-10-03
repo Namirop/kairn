@@ -12,6 +12,10 @@ import {
   type DailyReminderPayload,
   type RenderedEmail,
 } from "./templates/daily-reminder";
+import {
+  renderRelanceDuCompteVide,
+  type RelanceDuCompteVidePayload,
+} from "./templates/relance-du-compte-vide";
 import { createUnsubscribeToken } from "./unsubscribe";
 
 /**
@@ -19,10 +23,14 @@ import { createUnsubscribeToken } from "./unsubscribe";
  * l'utilisateur est vérifié ici, pas chez l'appelant : aucun chemin ne peut le
  * contourner.
  *
- * Deux types partent du passage horaire — le rappel et l'alerte de série. Le
- * troisième, l'accueil, part du hook d'inscription : même enveloppe, même
- * vérification du refus, même trace dans `EmailDelivery`, mais déclenché par un
- * geste et non par une heure.
+ * Trois types partent du passage horaire — le rappel, l'alerte de série et la
+ * relance d'un compte vide. Le quatrième, l'accueil, part du hook d'inscription :
+ * même enveloppe, même vérification du refus, même trace dans `EmailDelivery`,
+ * mais déclenché par un geste et non par une heure.
+ *
+ * L'accueil et la relance n'ont pas d'interrupteur : on les reçoit une fois. Ce
+ * qui garantit cette unicité n'est pas ici mais chez l'appelant — pour la
+ * relance, une lecture d'`EmailDelivery` sur le type, sans condition de jour.
  *
  * Le lien de connexion, lui, ne passe pas par ici — c'est un envoi
  * transactionnel qui doit partir même à quelqu'un qui a coupé ses emails. Voir
@@ -36,7 +44,8 @@ import { createUnsubscribeToken } from "./unsubscribe";
 export type Notification =
   | { type: "DAILY_REMINDER"; payload: DailyReminderPayload }
   | { type: "STREAK_ALERT"; payload: AlerteDeStreakPayload }
-  | { type: "ACCUEIL"; payload: AccueilPayload };
+  | { type: "ACCUEIL"; payload: AccueilPayload }
+  | { type: "RELANCE_COMPTE_VIDE"; payload: RelanceDuCompteVidePayload };
 
 export type NotificationType = Notification["type"];
 
@@ -54,9 +63,9 @@ type Liens = { sessionUrl: string; depotUrl: string; unsubscribeUrl: string };
  * interrupteur qui ne le concerne pas, sans que rien ne le signale. Ici, un type
  * ajouté sans sa ligne ne compile pas.
  *
- * L'accueil n'a pas d'interrupteur : on le reçoit une fois, à l'inscription, et
- * il n'y a pas d'instant où l'on aurait pu le refuser à l'avance. Le refus
- * global, lui, l'arrête comme les autres — il est vérifié avant cette table.
+ * L'accueil et la relance n'ont pas d'interrupteur : on les reçoit une fois, et
+ * il n'y a pas d'instant où l'on aurait pu les refuser à l'avance. Le refus
+ * global, lui, les arrête comme les autres — il est vérifié avant cette table.
  */
 function estActive(
   type: NotificationType,
@@ -66,6 +75,7 @@ function estActive(
     DAILY_REMINDER: reglages.dailyReminderEnabled,
     STREAK_ALERT: reglages.streakAlertEnabled,
     ACCUEIL: true,
+    RELANCE_COMPTE_VIDE: true,
   };
 
   return gouverne[type];
@@ -79,6 +89,8 @@ function composer(notification: Notification, liens: Liens): RenderedEmail {
       return renderAlerteDeStreak(notification.payload, liens);
     case "ACCUEIL":
       return renderAccueil(notification.payload, liens);
+    case "RELANCE_COMPTE_VIDE":
+      return renderRelanceDuCompteVide(notification.payload, liens);
   }
 }
 

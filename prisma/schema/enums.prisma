@@ -122,13 +122,16 @@ enum JobStatus {
 /// ne part que si une série est en train d'être perdue — elle est rare par
 /// construction, et c'est ce qui fait qu'on la lit.
 ///
-/// L'accueil part une fois, à l'inscription. Il n'a pas d'interrupteur dans les
-/// réglages : un message qu'on reçoit une seule fois dans sa vie n'a pas besoin
-/// qu'on puisse le couper à l'avance, et le refus global suffit à l'arrêter.
+/// L'accueil part une fois, à l'inscription. La relance part une fois aussi, au
+/// bout de quelques jours, et seulement vers un compte resté vide. Ni l'un ni
+/// l'autre n'a d'interrupteur dans les réglages : un message qu'on reçoit une
+/// seule fois dans sa vie n'a pas besoin qu'on puisse le couper à l'avance, et
+/// le refus global suffit à l'arrêter.
 enum NotificationType {
   DAILY_REMINDER
   STREAK_ALERT
   ACCUEIL
+  RELANCE_COMPTE_VIDE
 }
 
 /// Cycle de vie d'une soumission groupée.
