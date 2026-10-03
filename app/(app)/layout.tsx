@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AccordFuseau } from "@/components/compte/accord-fuseau";
 import { BarreBasse } from "@/components/coquille/barre-basse";
+import { ChoixDePalette } from "@/components/site/choix-de-palette";
 import { EnTete } from "@/components/coquille/en-tete";
 import { Rail } from "@/components/coquille/rail";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -53,6 +54,10 @@ export default async function CoquilleApplication({ children }: { children: Reac
         </div>
         <BarreBasse administrateur={administrateur} />
         <AccordFuseau enregistre={fuseau} />
+
+        {/* Branche `couleur-peinte` seulement : le sélecteur des deux pistes,
+            ici comme sur la page publique. Il part avec elles. */}
+        <ChoixDePalette />
       </div>
     </TooltipProvider>
   );

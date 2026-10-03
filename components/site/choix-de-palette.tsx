@@ -15,9 +15,14 @@ import { useEffect, useState } from "react";
  * sont que des surcharges de variables, et tout le produit lit ses surfaces
  * depuis ces variables-là. Rien d'autre n'a à savoir qu'elles existent.
  *
- * Le choix tient dans l'URL plutôt que dans un état : c'est ce qui permet
- * d'envoyer un lien qui montre exactement ce qu'on vient de regarder.
+ * Le choix tient dans l'URL **et** survit à la navigation : le paramètre permet
+ * d'envoyer un lien qui montre exactement ce qu'on regarde, le stockage local le
+ * garde d'un écran à l'autre. Sans lui, l'application perdait la palette au
+ * premier lien cliqué, ce qui rend toute comparaison impossible là où il y a
+ * justement le plus d'écrans à comparer.
  */
+
+const CLE = "kairn-palette-essai";
 
 const PALETTES = [
   { cle: "", nom: "Production" },
@@ -25,12 +30,30 @@ const PALETTES = [
   { cle: "lavis", nom: "C · Lavis" },
 ] as const;
 
+/** Une valeur connue, ou rien. Une clé rangée à la main ne fait pas foi. */
+function connue(valeur: string | null): string {
+  return PALETTES.some((palette) => palette.cle === (valeur ?? "")) ? (valeur ?? "") : "";
+}
+
+/**
+ * Ce que l'écran doit porter : l'URL d'abord, la mémoire ensuite.
+ *
+ * L'URL gagne parce qu'un lien doit montrer ce qu'il promet, y compris quand
+ * elle demande la production alors que la mémoire tient une palette.
+ */
 function palettePosee(): string {
   if (typeof window === "undefined") return "";
 
-  const voulue = new URLSearchParams(window.location.search).get("couleur") ?? "";
+  const parametres = new URLSearchParams(window.location.search);
 
-  return PALETTES.some((palette) => palette.cle === voulue) ? voulue : "";
+  if (parametres.has("couleur")) return connue(parametres.get("couleur"));
+
+  try {
+    return connue(window.localStorage.getItem(CLE));
+  } catch {
+    // Navigation privée, stockage refusé : on retombe sur la production.
+    return "";
+  }
 }
 
 export function ChoixDePalette() {
@@ -43,9 +66,21 @@ export function ChoixDePalette() {
 
     if (posee) document.documentElement.dataset.palette = posee;
     else delete document.documentElement.dataset.palette;
+
+    try {
+      window.localStorage.setItem(CLE, posee);
+    } catch {
+      // Sans stockage, le choix ne suit pas la navigation. Il reste dans l'URL.
+    }
   }, []);
 
   const changer = (cle: string) => {
+    try {
+      window.localStorage.setItem(CLE, cle);
+    } catch {
+      // Voir plus haut : l'URL suffit à cette navigation-ci.
+    }
+
     const url = new URL(window.location.href);
 
     if (cle) url.searchParams.set("couleur", cle);
