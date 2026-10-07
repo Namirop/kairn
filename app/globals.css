@@ -466,6 +466,9 @@
   --accent-profond: #143b8d;
   --accent-clair: #86b7f0;
 
+  /* Le trait qui dit que le rail est devant la page. Voir sa règle plus bas. */
+  --filet-du-rail: #7fb3c8;
+
   /* L'en-tête est le haut du ciel sous le même versant d'ombre — voir le même
      jeton sous `lavis`, où la démonstration est écrite. */
   --entete: var(--ombre-du-versant), linear-gradient(90deg, #17439c 0%, #17439c 100%);
@@ -574,6 +577,9 @@
   --accent: #1b4fc4;
   --accent-profond: #143b8d;
   --accent-clair: #86b7f0;
+
+  /* Le trait qui dit que le rail est devant la page. Voir sa règle plus bas. */
+  --filet-du-rail: #7fb3c8;
 
   /*
     L'en-tête est le haut du ciel, pas une bande posée dessus : la couleur de
@@ -754,6 +760,74 @@
 form:has(> .sortie-de-secours) + .sortie-de-secours,
 .sortie-de-secours + .sortie-de-secours {
   margin-top: var(--pas-2);
+}
+
+/*
+  Un passage prend l'écran, et la coquille se retire.
+
+  Une session n'est pas une page de plus : c'est le seul moment où l'on ne
+  navigue pas. L'en-tête s'effaçait déjà sur téléphone pour cette raison, et le
+  rail n'y a jamais existé — mais au-delà de `md`, les deux restaient. La
+  décision d'alors est écrite : « une fenêtre de bureau sans sa barre
+  supérieure a l'air d'avoir perdu quelque chose. » Elle valait tant que tout
+  était gris.
+
+  Ce qui a changé, c'est que les surfaces portent maintenant des valeurs
+  distinctes. L'écran de session en montre quatre d'un coup — le rail,
+  l'en-tête, le sol, la bande d'état — et aucune ne commence là où la
+  précédente s'arrête : le rail descend du haut de la fenêtre, l'en-tête
+  traverse par-dessus, la bande d'état part sous lui. Ce ne sont pas quatre
+  couleurs de trop, c'est **deux cadres pour un travail qui n'en demandait
+  aucun**.
+
+  La scène se déclare donc passage, et la coquille lit cette déclaration. Il
+  reste le sol et la bande d'état, deux plans, une frontière. La sortie est
+  celle qui a toujours été écrite, en haut à droite : « Arrêter là ».
+
+  Sur téléphone, rien ne change : le rail n'y est pas, l'en-tête s'y effaçait
+  déjà, et la barre basse reste — c'est la seule navigation de cette largeur.
+*/
+body:has([data-passage]) [data-coquille] {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  body:has([data-passage]) [data-colonne] {
+    padding-left: 0;
+  }
+}
+
+/*
+  La prise du cairn, sur le ciel.
+
+  Elle est au gris de second plan, réglé pour du papier. Le cairn de
+  l'ouverture n'est pas sur du papier : il est planté dans un paysage, et sous
+  une palette ce paysage est un ciel saturé — la commande y tombe à 1,5 pour 1,
+  c'est-à-dire qu'elle n'existe plus, au moment précis où elle invite à jouer.
+
+  Sur un fond sombre, le second plan s'éclaircit : c'est la même règle que
+  l'anneau de focus et que les pierres claires du cairn, et elle rend 3,6 ici.
+*/
+:root[data-palette] .ciel .prise-du-cairn {
+  color: var(--stone-300);
+}
+
+/*
+  Le filet du rail, et c'est un cas où le trait est juste.
+
+  La règle du produit dit qu'un changement de fond sépare deux sujets, plus
+  jamais un filet d'un pixel. Elle porte sur des **panneaux** — deux sections
+  empilées d'une même page. Le rail n'est pas une section : c'est un autre
+  plan, posé devant la page, et il tombe régulièrement sur une surface de la
+  même valeur que la sienne — l'ombre du rail contre l'ombre d'un panneau de
+  liste, où les deux se fondent sans qu'aucune des deux soit en tort.
+
+  Un trait entre deux plans ne remplace donc pas une surface, il dit lequel est
+  devant. Il reste transparent en production, où le chantier de couleur n'a pas
+  encore tranché.
+*/
+[data-coquille="rail"] {
+  border-right: 1px solid var(--filet-du-rail, transparent);
 }
 
 /* Le geste de l'ouverture s'élargit : sur un aplat, une pilule fine se perd. */

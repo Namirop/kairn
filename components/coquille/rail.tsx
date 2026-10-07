@@ -23,7 +23,17 @@ export function Rail({ administrateur }: { administrateur: boolean }) {
   return (
     <nav
       aria-label="Navigation principale"
-      className="pt-pas-16 px-pas-2 gap-pas-1 bg-surface-ombre fixed inset-y-0 left-0 z-30 hidden w-28 flex-col items-center md:flex"
+      /* `data-coquille` dit que ce plan appartient à la coquille et non à la
+         page : c'est ce que lit la règle qui l'efface pendant un passage, et
+         c'est aussi par là qu'il reçoit son filet — voir `globals.css`. */
+      data-coquille="rail"
+      /* Les icônes commencent en haut. Le rembourrage valait la hauteur de
+         l'en-tête, pour que la première s'aligne sous lui ; mais le rail
+         traverse toute la fenêtre et l'en-tête, lui, vit dans la colonne à
+         droite. L'alignement se faisait donc avec une ligne qui n'est pas en
+         face, au prix de soixante-quatre pixels de rail vides en haut de
+         l'écran. */
+      className="pt-pas-4 px-pas-2 gap-pas-1 bg-surface-ombre fixed inset-y-0 left-0 z-30 hidden w-28 flex-col items-center md:flex"
     >
       {destinationsPour(chemin, administrateur).map((destination) => {
         const { href, libelle, icone: Icone } = destination;
