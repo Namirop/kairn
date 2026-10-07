@@ -721,6 +721,30 @@
     radial-gradient(96% 86% at 4% 112%, rgb(4 12 26 / 0.46), rgb(4 12 26 / 0) 58%);
 }
 
+/*
+  Deux sorties de secours qui se suivent forment un groupe.
+
+  Sous la carte, l'écran enchaîne quatre natures de gestes : répondre, se faire
+  aider, renoncer, agir sur le concept. Le trait sépare déjà les deux
+  dernières ; au-dessus de lui, les deux sorties se présentaient avec le même
+  écart que celui qui les sépare de la réponse, donc rien ne disait qu'elles
+  vont ensemble.
+
+  Elles se serrent. Le crochet passe par le parent parce que les deux ne sont
+  pas sœurs dans le balisage — « Je sèche » appartient au formulaire, qu'il
+  aide à remplir, « Je jette la pierre » au déroulé, qui l'abandonne —, et
+  c'est très bien ainsi : ce sont deux moments différents du même renoncement.
+  Seul leur voisinage à l'écran fait le groupe, et c'est exactement ce que
+  cette règle décrit.
+
+  Quand la première n'est pas là — un QCM n'a pas de coup de pouce —, rien ne
+  s'applique et la seconde garde son écart plein.
+*/
+form:has(> .sortie-de-secours) + .sortie-de-secours,
+.sortie-de-secours + .sortie-de-secours {
+  margin-top: var(--pas-2);
+}
+
 /* Le geste de l'ouverture s'élargit : sur un aplat, une pilule fine se perd. */
 :root[data-palette] .geste-du-ciel {
   height: auto;
