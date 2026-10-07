@@ -47,6 +47,24 @@
         "value": "17px",
         "createdAt": "2026-10-03T21:19:36.284Z",
         "reason": "Taille du bloc-marque dans lib/email/templates/shell.ts, reprise comme ligne d'attaque. Rampe email : 12/13/15/17/44."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgb(255 255 255 / 0.12)",
+        "createdAt": "2026-10-07T22:17:22.800Z",
+        "reason": "Voile de survol du lien d'en-tete sur le ciel : une opacite qui module une surface, pas une couleur du systeme. Une pastille opaque y rendait le mot illisible (corrige le 07/10)."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgb(58 122 190 / 0.4)",
+        "createdAt": "2026-10-07T22:17:33.005Z",
+        "reason": "Lumiere du lavis sur les panneaux de roche de l'application : une matiere translucide, pas une couleur nommee. Eclairee par la droite comme le ciel."
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgb(4 12 26 / 0.46)",
+        "createdAt": "2026-10-07T22:17:33.164Z",
+        "reason": "Creux du meme lavis, coin bas-gauche. Meme raison : une opacite qui module la roche, pas une entree de palette."
       }
     ]
   }
