@@ -221,6 +221,17 @@
   */
   --t-enonce: 1.5rem;
   --t-nombre: 3.5rem;
+  /*
+    Le compteur du jour, et lui seul.
+
+    `nombre` sert aux chiffres posés dans une composition — un prix, une pierre
+    comptée. Celui-ci n'est pas un chiffre dans une page : **c'est le titre de
+    l'écran**. « 11 » est ce qu'on vient lire en ouvrant Kairn, et il se
+    présentait à la taille d'une statistique, dans une colonne trois fois plus
+    large que lui. Un écran auquel il manque quelque chose demande d'abord un
+    titre à sa taille, pas un ornement de plus.
+  */
+  --t-compteur: 4.5rem;
   /* Les titres de section étaient timides face à l'ouverture : deux rems et
      demi contre presque quatre, sur une page où ils portent chacun un temps du
      récit. Ils passent à trois et demi — l'écart avec l'ouverture se referme
@@ -408,7 +419,7 @@
   --surface-lichen: #e4eff2;
   /* Le niveau 2 de la maquette, la bande de glace. Relevé, pas inventé : c'est
      la couleur que le paysage porte déjà sous la crête. */
-  --surface-session: #9fd3e6;
+  --surface-session: #b3cfda;
   /* Relevée sur la maquette. L'autre essai, plus froid et plus sombre, était
      #17293c — gardé ici au cas où celui-ci paraîtrait trop clair. */
   --surface-roche: #1e2b3c;
@@ -517,7 +528,7 @@
   --surface-papier: #eef5f7;
   --surface-ombre: #cfe3ec;
   --surface-lichen: #e4eff2;
-  --surface-session: #9fd3e6;
+  --surface-session: #b3cfda;
   /* Relevée sur la maquette. L'autre essai, plus froid et plus sombre, était
      #17293c — gardé ici au cas où celui-ci paraîtrait trop clair. */
   --surface-roche: #1e2b3c;
@@ -846,6 +857,7 @@ form:has(> .sortie-de-secours) + .sortie-de-secours,
     --t-h1-app: clamp(1.75rem, min(3vw, 4.4vh), 2.5rem);
     --t-enonce: clamp(1.375rem, min(2.6vw, 3.2vh), 2rem);
     --t-nombre: clamp(3.5rem, min(6vw, 9vh), 5.75rem);
+    --t-compteur: clamp(4.5rem, min(10vw, 16vh), 10.5rem);
 
     --pas-dedans: clamp(1.25rem, 3.6vh, 3rem);
     --pas-scene: clamp(2rem, 5vh, 4rem);
@@ -931,6 +943,7 @@ form:has(> .sortie-de-secours) + .sortie-de-secours,
   --text-h1-app: var(--t-h1-app);
   --text-enonce: var(--t-enonce);
   --text-nombre: var(--t-nombre);
+  --text-compteur: var(--t-compteur);
   --text-h2-site: var(--t-h2-site);
   --text-h1-site: var(--t-h1-site);
   --text-ouverture: var(--t-ouverture);

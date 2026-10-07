@@ -43,11 +43,26 @@ export function EnTete() {
 
   return (
     <header
-      className={`px-pas-4 md:px-pas-8 bg-surface-papier/85 sticky top-0 z-20 flex h-14 items-center justify-center backdrop-blur-sm md:h-16 ${
+      /*
+        Opaque, et de la même matière que ce qu'il coiffe.
+
+        Deux défauts tenaient dans la même ligne. Le fond à 85 % laissait passer
+        le texte qui défile dessous — quatre pixels de flou n'effacent pas des
+        capitales à chasse fixe —, si bien que la marque se lisait par-dessus un
+        titre de section. Et le grain, lui, n'y était pas : l'en-tête portait la
+        même teinte que le panneau sans porter son bruit, donc il paraissait
+        plus clair, et l'écran montrait trois valeurs là où il n'y a que deux
+        plans. C'est exactement la couture déjà corrigée sur la page publique,
+        et pour la même raison.
+      */
+      className={`px-pas-4 md:px-pas-8 bg-surface-papier grain sticky top-0 z-30 flex h-14 items-center justify-center md:h-16 ${
         passage ? "max-md:hidden" : ""
       }`}
     >
-      <Link href={ROUTES.aujourdhui} className="rounded-galet">
+      {/* Au-dessus du grain, qui se peint en pseudo-élément positionné et
+          passerait sinon par-dessus la marque. Même rang que le contenu d'un
+          panneau, pour la même raison. */}
+      <Link href={ROUTES.aujourdhui} className="rounded-galet relative z-10">
         <Marque taille={TAILLE_DE_LA_MARQUE} />
       </Link>
     </header>
