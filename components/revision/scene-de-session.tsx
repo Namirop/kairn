@@ -58,7 +58,7 @@ export function SceneDeSession({
   children: ReactNode;
 }) {
   return (
-    <PileDePanneaux sol="ombre">
+    <PileDePanneaux sol="session">
       <div className="flex flex-1 flex-col lg:flex-row">
         {rail ? (
           // En bande, elle suit le défilement. C'est la seule chose de l'écran

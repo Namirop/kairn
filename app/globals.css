@@ -28,6 +28,16 @@
   --surface-ombre: #e4e4df;
   --surface-lichen: #e8eadf;
   --surface-roche: #2a2e2c;
+  /*
+    Le sol de la session, et d'elle seule.
+
+    Il vaut l'ombre ici, au pixel près : en gris, poser la carte sur un terrain
+    ou sur un panneau alterné revient au même, et rien ne bouge. Sous une
+    palette il prend la couleur, et c'est le seul écran qui la prenne — la
+    carte de la question redevient alors la pierre claire posée sur le sentier,
+    ce que l'alternance papier/ombre ne sait pas dire.
+  */
+  --surface-session: var(--surface-ombre);
 
   /* Pierre — neutres à température légèrement froide, côté lichen. */
   --stone-50: #f2f2ef;
@@ -396,15 +406,18 @@
   --surface-papier: #eef5f7;
   --surface-ombre: #cfe3ec;
   --surface-lichen: #e4eff2;
+  /* Le niveau 2 de la maquette, la bande de glace. Relevé, pas inventé : c'est
+     la couleur que le paysage porte déjà sous la crête. */
+  --surface-session: #9fd3e6;
   /* Relevée sur la maquette. L'autre essai, plus froid et plus sombre, était
      #17293c — gardé ici au cas où celui-ci paraîtrait trop clair. */
   --surface-roche: #1e2b3c;
 
   --stone-50: #f4f9fb;
   --stone-100: #dcebf0;
-  --stone-300: #b8d4e0;
+  --stone-300: #7fb3c8;
   --stone-400: #8fb2c4;
-  --stone-500: #3d6480;
+  --stone-500: #345770;
   --stone-700: #1f4360;
   --stone-800: #143049;
   --stone-900: #0d2236;
@@ -504,15 +517,16 @@
   --surface-papier: #eef5f7;
   --surface-ombre: #cfe3ec;
   --surface-lichen: #e4eff2;
+  --surface-session: #9fd3e6;
   /* Relevée sur la maquette. L'autre essai, plus froid et plus sombre, était
      #17293c — gardé ici au cas où celui-ci paraîtrait trop clair. */
   --surface-roche: #1e2b3c;
 
   --stone-50: #f4f9fb;
   --stone-100: #dcebf0;
-  --stone-300: #b8d4e0;
+  --stone-300: #7fb3c8;
   --stone-400: #8fb2c4;
-  --stone-500: #3d6480;
+  --stone-500: #345770;
   --stone-700: #1f4360;
   --stone-800: #143049;
   --stone-900: #0d2236;
@@ -916,6 +930,7 @@
   --color-surface-papier: var(--surface-papier);
   --color-surface-ombre: var(--surface-ombre);
   --color-surface-lichen: var(--surface-lichen);
+  --color-surface-session: var(--surface-session);
   --color-surface-roche: var(--surface-roche);
 
   --radius-plein: var(--r-plein);

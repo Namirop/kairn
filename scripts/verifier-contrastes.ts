@@ -54,6 +54,22 @@ const COMBINAISONS: Combinaison[] = [
   { texte: "stone-500", fond: "surface-papier", role: "texte second sur papier", seuil: AA_TEXTE },
   { texte: "stone-900", fond: "surface-ombre", role: "encre sur ombre", seuil: AA_TEXTE },
   { texte: "stone-500", fond: "surface-ombre", role: "texte second sur ombre", seuil: AA_TEXTE },
+  // Le sol de la session, le seul écran qui le prenne. Ce qui s'y pose
+  // directement est du texte second — les tags du concept, la consigne de
+  // réponse —, et c'est `stone-700` qui le porte : sur un aplat teinté, le gris
+  // du papier passe sous le seuil.
+  {
+    texte: "stone-900",
+    fond: "surface-session",
+    role: "encre sur le sol de session",
+    seuil: AA_TEXTE,
+  },
+  {
+    texte: "stone-700",
+    fond: "surface-session",
+    role: "texte second sur le sol de session",
+    seuil: AA_TEXTE,
+  },
   { texte: "stone-900", fond: "surface-lichen", role: "encre sur lichen", seuil: AA_TEXTE },
   { texte: "stone-500", fond: "surface-lichen", role: "texte second sur lichen", seuil: AA_TEXTE },
   { texte: "stone-50", fond: "surface-roche", role: "encre sur roche", seuil: AA_TEXTE },
