@@ -10,12 +10,21 @@
  * papier posée dessus. Le blanc pur n'existe nulle part dans Kairn.
  */
 const PALETTE = {
-  paper: "#E4E4DF",
-  surface: "#F2F2EF",
-  border: "#BFC0BA",
-  muted: "#5E635F",
-  ink: "#16191A",
-  lichen: "#7A8B4F",
+  paper: "#CFE3EC",
+  surface: "#EEF5F7",
+  border: "#7FB3C8",
+  muted: "#345770",
+  ink: "#0D2236",
+  /**
+   * L'accent du produit, et c'est bien lui que portent les boutons.
+   *
+   * Il s'appelait `lichen`, et il peignait le seul geste de chaque email. Le
+   * lichen ne tient plus que la maîtrise : un bouton n'est pas une maîtrise,
+   * c'est ce que le produit demande. Le nom suit le métier — et au passage,
+   * du blanc sur le lichen saturé donnait 1,9 pour 1, c'est-à-dire un libellé
+   * illisible sur le seul lien qui compte.
+   */
+  accent: "#1B4FC4",
   ember: "#B4552F",
   /// Sémantique, et pas la couleur du produit : un échec n'est pas un accent.
   alerte: "#9A3B2C",

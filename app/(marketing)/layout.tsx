@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Marque } from "@/components/coquille/marque";
-import { ChoixDePalette } from "@/components/site/choix-de-palette";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 
@@ -56,10 +55,6 @@ export default async function CoquilleSite({ children }: { children: React.React
       </header>
 
       <main className="flex flex-1 flex-col">{children}</main>
-
-      {/* Branche `couleur-peinte` seulement : le sélecteur des deux pistes.
-          Il part avec elles le jour où l'une est retenue. */}
-      <ChoixDePalette />
     </div>
   );
 }

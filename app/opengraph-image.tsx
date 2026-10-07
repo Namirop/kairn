@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
-import { LICHEN, PAPIER } from "@/lib/design/couleurs-hors-css";
+import { ACCENT, PAPIER } from "@/lib/design/couleurs-hors-css";
 import { PIERRES_DENSE } from "@/lib/design/marque";
 import { symboleSeul } from "@/lib/design/symbole-svg";
 
@@ -36,8 +36,8 @@ const PHRASE =
   "Dépose ce que tu apprends. Kairn le découpe en concepts et te les repose au bon moment.";
 
 /** L'encre et le gris second du papier, écrits ici pour la même raison que le reste. */
-const ENCRE = "#16191a";
-const GRIS = "#5e635f";
+const ENCRE = "#0d2236";
+const GRIS = "#345770";
 
 export default async function Image() {
   const display = await readFile(join(process.cwd(), "app/fonts/BricolageGrotesque-600.ttf"));
@@ -88,9 +88,11 @@ export default async function Image() {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {/* Le seul trait de l'image, et il porte le lichen : le même accent
-              qu'au sommet du cairn. */}
-        <div style={{ width: 96, height: 6, background: LICHEN, marginBottom: 28 }} />
+        {/* Le seul trait de l'image, et il porte l'accent du produit. Pas le
+              lichen, qui ne tient plus que la maîtrise et que le sommet du
+              cairn porte déjà deux centimètres plus haut : deux marques vertes
+              sur une carte de partage, dont une illisible. */}
+        <div style={{ width: 96, height: 6, background: ACCENT, marginBottom: 28 }} />
         <div style={{ fontSize: 32, lineHeight: 1.35, color: GRIS, maxWidth: 780 }}>{PHRASE}</div>
       </div>
     </div>,

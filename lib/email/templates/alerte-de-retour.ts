@@ -62,7 +62,7 @@ export function renderAlerteDeRetour(payload: AlerteDeRetourPayload): RenderedEm
   const body = `<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:${S.muted};">${echapper(entete)}</p>
 <p style="margin:0 0 24px;font-size:17px;line-height:26px;color:${S.ink};white-space:pre-wrap;">${echapper(court)}</p>
 ${pied ? `<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.muted};">${echapper(pied)}</p>` : ""}
-<a href="${lien}" style="display:inline-block;background:${S.lichen};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Ouvrir les retours</a>`;
+<a href="${lien}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Ouvrir les retours</a>`;
 
   const text = [entete, "", court, ...(pied ? ["", pied] : []), "", `Les retours : ${lien}`].join(
     "\n",

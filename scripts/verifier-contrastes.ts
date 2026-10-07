@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { jeuxDeJetons } from "./verification/jetons-de-la-feuille";
+import { jetonsDeLaFeuille } from "./verification/jetons-de-la-feuille";
 import { conclure, record } from "./verification/journal";
 
 /**
@@ -122,25 +122,24 @@ const COMBINAISONS: Combinaison[] = [
 ];
 
 function main(): void {
-  for (const jeu of jeuxDeJetons()) {
-    for (const combinaison of COMBINAISONS) {
-      const texte = jeu.jetons[combinaison.texte];
-      const fond = jeu.jetons[combinaison.fond];
-      const role = `${jeu.nom} — ${combinaison.role}`;
+  const jetons = jetonsDeLaFeuille();
 
-      if (!texte || !fond) {
-        record(`Contraste — ${role}`, false, "jeton introuvable dans globals.css");
-        continue;
-      }
+  for (const combinaison of COMBINAISONS) {
+    const texte = jetons[combinaison.texte];
+    const fond = jetons[combinaison.fond];
 
-      const ratio = contraste(texte, fond);
-
-      record(
-        `Contraste — ${role}`,
-        ratio >= combinaison.seuil,
-        `${ratio.toFixed(2)} pour 1 (seuil ${combinaison.seuil})`,
-      );
+    if (!texte || !fond) {
+      record(`Contraste — ${combinaison.role}`, false, "jeton introuvable dans globals.css");
+      continue;
     }
+
+    const ratio = contraste(texte, fond);
+
+    record(
+      `Contraste — ${combinaison.role}`,
+      ratio >= combinaison.seuil,
+      `${ratio.toFixed(2)} pour 1 (seuil ${combinaison.seuil})`,
+    );
   }
 }
 
