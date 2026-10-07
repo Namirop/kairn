@@ -46,7 +46,34 @@ export const isGoogleEnabled = Object.keys(socialProviders()).length > 0;
 function trustedOrigins(): string[] {
   const deploiement = process.env.VERCEL_URL;
 
-  return deploiement ? [`https://${deploiement}`] : [];
+  return [
+    ...(deploiement ? [`https://${deploiement}`] : []),
+    ...originesDuReseauLocal(),
+  ];
+}
+
+/**
+ * Les adresses du réseau local, **en développement seulement**.
+ *
+ * Le serveur de dev écoute aussi sur l'adresse LAN de la machine, et c'est le
+ * seul moyen de regarder un écran depuis un téléphone ou un autre poste. Sans
+ * cette ligne, better-auth y refuse toute connexion en 403 — « Invalid origin »
+ * dans les journaux, « Le code n'a pas pu partir » à l'écran, et on cherche la
+ * panne du côté de l'email alors qu'aucun email n'a jamais été demandé.
+ *
+ * `NODE_ENV` vaut `production` sur Vercel comme dans un build local : la liste
+ * y reste donc exactement celle d'avant, et un poste voisin ne peut pas se
+ * présenter comme une origine de confiance.
+ *
+ * `AUTH_ORIGINE_LOCALE` porte l'adresse du moment — elle change avec le réseau,
+ * donc elle n'a rien à faire en dur. Absente, rien ne s'ouvre.
+ */
+function originesDuReseauLocal(): string[] {
+  if (process.env.NODE_ENV === "production") return [];
+
+  const locale = process.env.AUTH_ORIGINE_LOCALE?.trim();
+
+  return locale ? [locale] : [];
 }
 
 export const auth = betterAuth({

@@ -27,7 +27,7 @@ export default async function CoquilleSite({ children }: { children: React.React
           qui n'en est pas un, était resté au papier nu. Sur un téléphone, où le
           hero commence à deux centimètres sous la marque, la couture se voyait
           en travers de l'écran. */}
-      <header className="bg-surface-papier grain relative z-20">
+      <header className="entete-du-site grain relative z-20">
         {/* La même mesure que la mesure « page » d'un Panneau, aux mêmes
             gouttières : sur un grand écran, un en-tête plus étroit que ce qu'il
             coiffe posait la marque en retrait du titre qu'elle surplombe, et le

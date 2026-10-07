@@ -32,7 +32,7 @@ function concepts(count: number): string {
 
 /** Le bouton porte le mot de l'interface, et le même dans tout le flux. */
 function bouton(href: string, libelle: string): string {
-  return `<a href="${href}" style="display:inline-block;background:${S.lichen};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${libelle}</a>`;
+  return `<a href="${href}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${libelle}</a>`;
 }
 
 function corpsAvecConcepts(count: number, sessionUrl: string): string {

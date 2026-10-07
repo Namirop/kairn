@@ -12,40 +12,105 @@
 
 :root {
   /*
-    Les quatre surfaces. Une page est une pile de panneaux, et chaque panneau
+    Les cinq surfaces. Une page est une pile de panneaux, et chaque panneau
     porte l'une d'elles — c'est le changement de fond qui sépare deux sujets,
     plus jamais un filet d'un pixel.
 
-    papier  la surface de lecture, par défaut
-    ombre   le panneau alterné, jamais deux d'affilée
-    lichen  un seul panneau dans toute l'application : celui où le produit tient
-            sa promesse. Il interdit tout autre usage du lichen sur cet écran,
-            sauf le sommet du cairn
-    roche   deux panneaux, pas trois. Le texte et les pierres s'y inversent en
-            gris clairs ; le sommet lichen reste lichen
+    papier   la surface de lecture, par défaut
+    ombre    le panneau alterné, jamais deux d'affilée
+    lichen   un seul panneau dans toute l'application : celui où le produit
+             tient sa promesse
+    session  le sol d'un seul écran, celui de la session, et d'aucun autre —
+             voir plus bas
+    roche    deux panneaux, pas trois. Le texte et les pierres s'y inversent en
+             clairs ; le sommet lichen reste lichen
+
+    **Elles portent une température, et c'est la glace.** Relevées à la pipette
+    sur la maquette validée, pas réinventées : le produit raconte un sentier de
+    montagne, et un sentier de montagne n'est pas gris. L'écart entre le papier
+    et l'ombre est de 1,22 pour 1 — c'est peu, c'est volontaire, et c'est
+    exactement celui que la roche se donne avec la dalle qu'elle porte. En
+    dessous, une carte posée sur un panneau ne se détache plus ; au-dessus, la
+    bande alternée devient un aplat de couleur à part entière, ce qui est une
+    autre décision que celle-ci.
   */
-  --surface-papier: #f2f2ef;
-  --surface-ombre: #e4e4df;
-  --surface-lichen: #e8eadf;
-  --surface-roche: #2a2e2c;
+  --surface-papier: #eef5f7;
+  --surface-ombre: #cfe3ec;
+  --surface-lichen: #e4eff2;
+  --surface-roche: #1e2b3c;
+  /*
+    Le sol de la session, et d'elle seule.
 
-  /* Pierre — neutres à température légèrement froide, côté lichen. */
-  --stone-50: #f2f2ef;
-  --stone-100: #e4e4df;
-  --stone-300: #bfc0ba;
-  /* Texte secondaire sur surface sombre. `stone-500` y tombait à 2,88 pour 1 :
-     un gris pensé pour du papier ne tient pas sur de la roche, et « Niveau 3 ·
-     564 XP » y était quasi illisible. Celui-ci donne 6,63 sur la roche et 5,16
-     sur l'ombre — AA franchi sur les deux, à température identique. */
-  --stone-400: #9aa09b;
-  --stone-500: #5e635f;
-  --stone-700: #3d4240;
-  --stone-800: #2a2e2c;
-  --stone-900: #16191a;
+    La session ne pose pas un panneau de lecture avec un encart : elle pose un
+    objet dans un terrain. C'est la seule métaphore que ce produit raconte
+    depuis le début — une pierre posée sur le sentier —, et l'alternance
+    papier/ombre ne sait pas la dire. Le sol prend donc la bande de glace du
+    paysage, et la carte de la question redevient le papier clair posé dessus :
+    1,47 pour 1 entre les deux.
 
-  /* Accent unique. Le lichen signale, il ne décore pas. */
-  --lichen: #7a8b4f;
-  --lichen-deep: #5f6e3b;
+    Sa chroma est tombée, pas sa valeur. Le niveau 2 de la maquette se lit
+    « glace » sur cent pixels de haut entre un ciel profond et des pierres
+    sombres ; le même ton étendu à un écran entier se lit « piscine ». Une
+    saturation qui tient à petite taille devient du plastique en aplat.
+
+    Aucun autre écran ne la prend. C'est la règle qui l'empêche de devenir une
+    surface de plus à dépenser.
+  */
+  --surface-session: #b3cfda;
+
+  /*
+    Pierre — la rampe entière, retempérée vers le bleu de nuit.
+
+    Ce n'est pas une nuance : c'est elle qui peint les cairns, les arêtes du
+    relief, l'encre et le pied de page. Surcharger les surfaces sans y toucher
+    laissait un cairn gris-vert sur un ciel bleu.
+  */
+  --stone-50: #f4f9fb;
+  --stone-100: #dcebf0;
+  /* Les filets. Ils doivent se voir sur le papier **et** sur le sol de la
+     session, qui est plus dense : réglés pour le seul papier, le trait qui
+     sépare la réponse des gestes avait exactement la valeur du sol et
+     n'existait plus. */
+  --stone-300: #7fb3c8;
+  /* Texte secondaire sur surface sombre. Un gris pensé pour du papier ne tient
+     pas sur de la roche, et « Niveau 3 · 564 XP » y était quasi illisible. */
+  --stone-400: #8fb2c4;
+  /* Le texte second, et il descend avec les surfaces : à la valeur d'avant il
+     tombait à 4,14 sur l'ombre et 3,88 sur le sol de la session, sous le
+     seuil, pour ce qui est justement le plus répandu de l'interface. */
+  --stone-500: #345770;
+  --stone-700: #1f4360;
+  --stone-800: #143049;
+  --stone-900: #0d2236;
+
+  /*
+    Le lichen, et il ne garde qu'un métier.
+
+    Il en tenait deux : il disait ce qu'on maîtrise — le sommet du cairn, la
+    pierre tenue, la bonne réponse — et il peignait en même temps tout ce que
+    le produit demande, un champ qui prend le focus, un choix retenu, un
+    interrupteur. Les deux cohabitaient sans qu'on le remarque, parce qu'ils
+    avaient la même couleur. Sous un ciel bleu, ça saute aux yeux.
+
+    Il ne lui reste donc que **la maîtrise**, et il est saturé pour ça : c'est
+    la couleur du lichen sur le granit, et elle se pose sur des pierres
+    sombres. Sur une surface claire, c'est `deep` qui porte — 4,8 contre 1,9.
+  */
+  --lichen: #9fc22e;
+  --lichen-deep: #5c7418;
+
+  /*
+    L'accent du produit, et il descend du ciel.
+
+    Tout ce que le produit demande : un champ qui prend le focus, un choix
+    retenu, un interrupteur, l'anneau de focus, le trait du compteur du jour.
+    `clair` est la variante des surfaces sombres, où un accent réglé pour du
+    papier passe sous le seuil de l'anneau de focus — même règle que
+    `ember-clair` et que les pierres claires du cairn.
+  */
+  --accent: #1b4fc4;
+  --accent-profond: #143b8d;
+  --accent-clair: #86b7f0;
 
   /* Réservé au streak, nulle part ailleurs. */
   --ember: #b4552f;
@@ -53,7 +118,7 @@
   /* Le même accent, éclairci pour les surfaces sombres. Un accent chaud réglé
      sur du clair ne tient pas sur du sombre : l'ember d'origine y donnait 3,60,
      assez pour un grand titre et pas pour la ligne de série, qui est petite et
-     en capitales. Celui-ci donne 6,54 et 5,09. */
+     en capitales. Celui-ci donne 5,30 sur la roche. */
   --ember-clair: #d98a63;
 
   /* Sémantique : un échec n'est pas la couleur du produit. */
@@ -69,13 +134,13 @@
     peindrait des couleurs qui ne veulent rien dire, ce qui est le contresens le
     plus courant du genre.
 
-    C'est le lichen approfondi, pour tenir 4,7:1 sur le papier là où le lichen
-    d'origine tombe à 3,2 — une barre de trois pixels de large a besoin de plus
-    de contraste qu'un aplat. La barre à zéro garde une amorce grise : un jour
-    sans dépense doit se voir comme un zéro et non comme un trou dans la série.
+    C'est l'accent approfondi : une barre de trois pixels de large a besoin de
+    plus de contraste qu'un aplat. La barre à zéro garde une amorce grise : un
+    jour sans dépense doit se voir comme un zéro et non comme un trou dans la
+    série.
   */
-  --data-mark: #5f6e3b;
-  --data-mark-zero: #cfd0ca;
+  --data-mark: #143b8d;
+  --data-mark-zero: #c3d7e1;
 
   /*
     Le jeton d'un terme de code cité dans une phrase.
@@ -190,7 +255,23 @@
   */
   --t-enonce: 1.5rem;
   --t-nombre: 3.5rem;
-  --t-h2-site: 2.5rem;
+  /*
+    Le compteur du jour, et lui seul.
+
+    `nombre` sert aux chiffres posés dans une composition — un prix, une pierre
+    comptée. Celui-ci n'est pas un chiffre dans une page : **c'est le titre de
+    l'écran**. « 11 » est ce qu'on vient lire en ouvrant Kairn, et il se
+    présentait à la taille d'une statistique, dans une colonne trois fois plus
+    large que lui. Un écran auquel il manque quelque chose demande d'abord un
+    titre à sa taille, pas un ornement de plus.
+  */
+  --t-compteur: 4.5rem;
+  /* Les titres de section étaient timides face à l'ouverture : deux rems et
+     demi contre presque quatre, sur une page où ils portent chacun un temps du
+     récit. Ils passent à trois et demi — l'écart avec l'ouverture se referme
+     sans se combler, ce qui est exactement le rapport qu'on veut entre une
+     phrase qui ouvre et les trois qui la déroulent. */
+  --t-h2-site: 3.5rem;
   /*
     Le titre de campagne, calé sur ce qu'il a à écrire.
 
@@ -252,7 +333,399 @@
     entre la phrase et le bord — la ligne remplit sa colonne, elle ne la touche
     pas.
   */
+  /*
+    Le ciel de l'ouverture, et il penche dans les deux sens.
+
+    De haut en bas, un lavis d'une seule teinte, du bleu de nuit au bleu clair
+    vers l'horizon : c'est un ciel, pas un dégradé décoratif, et c'est la
+    nuance qui le sépare de ce qui est interdit ailleurs.
+
+    De gauche à droite, le versant d'ombre. L'inclinaison de trois degrés
+    suffisait à poser le plus sombre à gauche mais pas à ce qu'on le voie : les
+    deux bords du haut étaient à la même valeur à un pour cent près. Le matin
+    éclaire la droite de la vallée, la gauche reste dans la nuit.
+
+    L'ombre est sortie en jeton parce que **l'en-tête porte la même fonction de
+    x** : deux dégradés à quatre-vingt-dix degrés sur deux éléments pleine
+    largeur se rejoignent exactement à chaque colonne. C'est ce qui permet
+    d'avoir un écart franc entre les deux bords *et* une couture invisible, là
+    où faire suivre l'en-tête à la main oblige à choisir.
+  */
+  --ombre-du-versant: linear-gradient(
+    90deg,
+    rgb(6 21 60 / 0.6) 0%,
+    rgb(6 21 60 / 0.26) 46%,
+    rgb(6 21 60 / 0) 84%
+  );
+  --ciel:
+    var(--ombre-du-versant),
+    linear-gradient(177deg, #163f96 0%, #1a4aa6 26%, #1e5cc4 66%, #3a86c9 100%);
+  /*
+    La même chose, mais toujours une couleur plate.
+
+    `--ciel` est un dégradé ; `color-mix` n'en accepte pas. Le paysage a besoin
+    d'une teinte vers laquelle faire virer ses lointains — c'est ça, la brume.
+    Elle est calculée pour que le lointain, mêlé à 18 %, tombe exactement sur
+    la bande de glace de la maquette.
+  */
+  --ciel-teinte: #a5d8e7;
+  /*
+    La terre du premier plan de l'ouverture.
+
+    Un sol appartient à son ciel : sous un ciel coloré, une butte restée au
+    beige de l'ombre coupe l'image en deux moitiés qui n'ont rien à voir l'une
+    avec l'autre — ce n'est plus un paysage, ce sont deux aplats superposés.
+    C'est le niveau 3 de la maquette.
+  */
+  --terre: #47a2cb;
+
+  /*
+    Les pierres du paysage, et elles ne sont pas celles du grand cairn.
+
+    Les cairns du lointain sont presque blancs : la brume les mange. Ceux du
+    plan proche sont de la même pierre que le grand, et leur sommet porte le
+    lichen — c'est la seule marque de maîtrise qu'on voie de loin.
+  */
+  --pierre-loin-1: #b3d4e1;
+  --pierre-loin-2: #c2dde8;
+  --pierre-loin-3: #cfe6ee;
+  --pierre-proche-1: #1b3d58;
+  --pierre-proche-2: #24506f;
+  --pierre-proche-3: #2e6285;
+  --pierre-proche-sommet: #9fc22e;
+
+  /*
+    Les arêtes des deux plans du paysage, et les deux habillages de l'ouverture.
+
+    **Les arêtes se taisent.** Sur un aplat coloré, le trait gris du relief
+    dessine un liseré qui coupe la couleur au lieu de la dessiner. C'est le
+    changement de valeur entre deux terrasses qui fait la crête, pas un trait.
+
+    L'en-tête, lui, est le haut du ciel : sa couleur de départ, sous le même
+    versant d'ombre. Il n'a donc rien à savoir de la hauteur du hero ni de
+    l'inclinaison du ciel, et la couture ne peut pas exister. Le filet se tait
+    pour la même raison — une ligne claire entre deux surfaces continues est
+    une couture qu'on dessine exprès.
+  */
+  --arete-loin: transparent;
+  --arete-proche: transparent;
+  --entete: var(--ombre-du-versant), linear-gradient(90deg, #163f96 0%, #163f96 100%);
+  --entete-filet: transparent;
+  /* Le geste de l'ouverture : l'encre de la nuit sur le ciel, et plus de
+     hauteur — sur un aplat, une pilule fine se perd. */
+  --geste-ciel: #14202e;
+  --geste-ciel-encre: #f4f9fb;
+  /* Le creux du titre se remplit du sol et se trace en blanc. */
+  --creux-fond: #47a2cb;
+  --creux-trait: #ffffff;
+  /* Le trait qui dit que le rail est devant la page, et non à côté — voir sa
+     règle plus bas. */
+  --filet-du-rail: #7fb3c8;
+
+  /*
+    Le trait de sol sous le cairn, et l'ombre qu'il porte.
+
+    Le trait se tait pour la raison des arêtes : sur un aplat coloré, c'est une
+    barre claire en travers de la couleur. Reste l'ombre, et c'est elle seule
+    qui dit que la pierre touche terre — elle est donc plus dense qu'elle ne
+    l'était sur du papier.
+  */
+  --sol-du-cairn: transparent;
+  --ombre-du-cairn: #0b1c2c;
+  --ombre-du-cairn-part: 0.3;
+
   --t-ouverture: clamp(2.25rem, calc((100vw - 4rem) / 7.4), 3.75rem);
+}
+
+/*
+  La peinture d'un aplat coloré : un lavis lent, puis du grain.
+
+  Le grain de `.grain` est réglé pour du presque-blanc, où il doit se sentir
+  sans se voir. Sur une couleur saturée il disparaît : un aplat plein s'y lit
+  comme une valeur CSS, pas comme un pigment. Celui-ci monte, et il passe en
+  `overlay` — il éclaircit *et* assombrit, comme une encre qui a séché en
+  grains, là où `multiply` ne fait que salir.
+
+  Le lavis est la variation lente par-dessus. Une seule teinte : c'est ce qui
+  le sépare du dégradé entre deux couleurs, qui reste interdit.
+*/
+.entete-du-site {
+  background: var(--entete);
+  /* Le filet qui sépare l'en-tête du ciel. Il se tait : les deux sont la même
+     couleur à la même colonne, et un trait y serait une couture qu'on dessine
+     exprès. Le jeton reste pour qu'une surface puisse le rallumer. */
+  border-bottom: 1px solid var(--entete-filet, transparent);
+}
+
+/*
+  L'ouverture et l'en-tête sont en encre claire : leur fond est le ciel.
+
+  La marque suit. Ses pierres et son mot sont peints par des utilitaires
+  Tailwind, qu'on repeint ici plutôt que de passer un ton depuis un composant
+  serveur — la marque ne sait pas sur quoi elle est posée, et c'est très bien :
+  c'est la surface qui décide de l'encre, partout ailleurs dans ce fichier.
+*/
+.ciel,
+.entete-du-site {
+  color: var(--stone-50);
+}
+
+.entete-du-site {
+  position: relative;
+  isolation: isolate;
+}
+
+/* La même matière que le ciel : sans elle, l'en-tête est le seul aplat lisse de
+   la page et la couture se voit à ça, pas à la teinte. */
+.entete-du-site::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.72;
+  mix-blend-mode: overlay;
+  background-size: 128px 128px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.entete-du-site a {
+  color: var(--stone-50);
+}
+
+/*
+  Le survol du lien de l'en-tête, et c'est une correction d'illisibilité.
+
+  Il prend `surface-ombre`, réglée pour poser un panneau clair sur un autre
+  panneau clair. Sur le ciel, cette même surface devient une pastille presque
+  blanche en travers de la bande — l'objet le plus lumineux de la page pour un
+  survol —, et le mot qu'elle porte reste en encre claire puisque le fond est
+  sombre : on allume une lampe et on efface le texte au même instant.
+
+  Sur un aplat sombre, un survol se dit en voile, pas en pastille : la même
+  couleur un peu plus présente, assez pour qu'on sache que c'est cliquable.
+*/
+.entete-du-site a:hover {
+  background-color: rgb(255 255 255 / 0.12);
+  color: var(--stone-50);
+}
+
+.entete-du-site .fill-stone-900 {
+  fill: var(--stone-50);
+}
+
+.entete-du-site .fill-stone-800 {
+  fill: var(--stone-100);
+}
+
+.entete-du-site .fill-stone-700 {
+  fill: var(--stone-300);
+}
+
+.entete-du-site .text-stone-900 {
+  color: var(--stone-50);
+}
+
+/*
+  Le pied rejoint la dalle qui le précède.
+
+  Sur la maquette, le pied de page vit **dans** le bloc sombre : c'est la même
+  masse, et la page se ferme dessus. En production il est sur du papier, séparé
+  par une strate — ce qui va tant que les deux surfaces sont deux gris, et se
+  voit comme un ressaut dès que l'une est un aplat. La jointure disparaît donc,
+  et le pied prend la surface de la dalle.
+
+  Ciblé par la structure plutôt que par une classe : la page publique est la
+  seule à finir ainsi, et un attribut posé exprès pour ce seul cas serait un
+  jeton de plus à retenir pour une règle qui se lit déjà dans la pile.
+*/
+main > div:has(+ section[data-surface="papier"]:last-of-type) {
+  display: none;
+}
+
+main > section[data-surface="papier"]:last-of-type {
+  background: var(--surface-roche);
+  color: var(--stone-300);
+}
+
+main > section[data-surface="papier"]:last-of-type .text-stone-500 {
+  color: var(--stone-300);
+}
+
+/*
+  La matière descend sur les panneaux de roche de l'application.
+
+  Le « peint » s'arrêtait à la landing : passé la connexion, toutes les
+  surfaces redeviennent des aplats CSS, et c'est là qu'on passe ses journées.
+  Il ne peut pas se poser n'importe où pour autant — sur une surface de
+  lecture, une variation lente sous un paragraphe est du bruit.
+
+  La roche est le bon endroit, et le seul : c'est une masse, pas une page ;
+  elle est déjà la surface des deux panneaux par écran qui portent le cairn et
+  la progression ; et la lumière y vient de la droite, comme sur le ciel, donc
+  les deux se lisent comme le même temps du même paysage.
+
+  Posé sous le contenu, qui vit à `z-10` dans `Panneau` — le grain y est déjà
+  depuis toujours, par le même chemin.
+*/
+[data-surface="roche"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(118% 104% at 96% -14%, rgb(58 122 190 / 0.4), rgb(58 122 190 / 0) 60%),
+    radial-gradient(96% 86% at 4% 112%, rgb(4 12 26 / 0.46), rgb(4 12 26 / 0) 58%);
+}
+
+/*
+  Deux sorties de secours qui se suivent forment un groupe.
+
+  Sous la carte, l'écran enchaîne quatre natures de gestes : répondre, se faire
+  aider, renoncer, agir sur le concept. Le trait sépare déjà les deux
+  dernières ; au-dessus de lui, les deux sorties se présentaient avec le même
+  écart que celui qui les sépare de la réponse, donc rien ne disait qu'elles
+  vont ensemble.
+
+  Elles se serrent. Le crochet passe par le parent parce que les deux ne sont
+  pas sœurs dans le balisage — « Je sèche » appartient au formulaire, qu'il
+  aide à remplir, « Je jette la pierre » au déroulé, qui l'abandonne —, et
+  c'est très bien ainsi : ce sont deux moments différents du même renoncement.
+  Seul leur voisinage à l'écran fait le groupe, et c'est exactement ce que
+  cette règle décrit.
+
+  Quand la première n'est pas là — un QCM n'a pas de coup de pouce —, rien ne
+  s'applique et la seconde garde son écart plein.
+*/
+form:has(> .sortie-de-secours) + .sortie-de-secours,
+.sortie-de-secours + .sortie-de-secours {
+  margin-top: var(--pas-2);
+}
+
+/*
+  Un passage prend l'écran, et la coquille se retire.
+
+  Une session n'est pas une page de plus : c'est le seul moment où l'on ne
+  navigue pas. L'en-tête s'effaçait déjà sur téléphone pour cette raison, et le
+  rail n'y a jamais existé — mais au-delà de `md`, les deux restaient. La
+  décision d'alors est écrite : « une fenêtre de bureau sans sa barre
+  supérieure a l'air d'avoir perdu quelque chose. » Elle valait tant que tout
+  était gris.
+
+  Ce qui a changé, c'est que les surfaces portent maintenant des valeurs
+  distinctes. L'écran de session en montre quatre d'un coup — le rail,
+  l'en-tête, le sol, la bande d'état — et aucune ne commence là où la
+  précédente s'arrête : le rail descend du haut de la fenêtre, l'en-tête
+  traverse par-dessus, la bande d'état part sous lui. Ce ne sont pas quatre
+  couleurs de trop, c'est **deux cadres pour un travail qui n'en demandait
+  aucun**.
+
+  La scène se déclare donc passage, et la coquille lit cette déclaration. Il
+  reste le sol et la bande d'état, deux plans, une frontière. La sortie est
+  celle qui a toujours été écrite, en haut à droite : « Arrêter là ».
+
+  Sur téléphone, rien ne change : le rail n'y est pas, l'en-tête s'y effaçait
+  déjà, et la barre basse reste — c'est la seule navigation de cette largeur.
+*/
+body:has([data-passage]) [data-coquille] {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  body:has([data-passage]) [data-colonne] {
+    padding-left: 0;
+  }
+}
+
+/*
+  La prise du cairn, sur le ciel.
+
+  Elle est au gris de second plan, réglé pour du papier. Le cairn de
+  l'ouverture n'est pas sur du papier : il est planté dans un paysage, et ce
+  paysage est un ciel — la commande y tombait à 1,5 pour 1, c'est-à-dire
+  qu'elle n'existait plus, au moment précis où elle invite à jouer.
+
+  Sur un fond sombre, le second plan s'éclaircit : c'est la même règle que
+  l'anneau de focus et que les pierres claires du cairn, et elle rend 3,6 ici.
+*/
+.ciel .prise-du-cairn {
+  color: var(--stone-300);
+}
+
+/*
+  Le filet du rail, et c'est un cas où le trait est juste.
+
+  La règle du produit dit qu'un changement de fond sépare deux sujets, plus
+  jamais un filet d'un pixel. Elle porte sur des **panneaux** — deux sections
+  empilées d'une même page. Le rail n'est pas une section : c'est un autre
+  plan, posé devant la page, et il tombe régulièrement sur une surface de la
+  même valeur que la sienne — l'ombre du rail contre l'ombre d'un panneau de
+  liste, où les deux se fondent sans qu'aucune des deux soit en tort.
+
+  Un trait entre deux plans ne remplace donc pas une surface, il dit lequel est
+  devant.
+*/
+[data-coquille="rail"] {
+  border-right: 1px solid var(--filet-du-rail, transparent);
+}
+
+/* Le geste de l'ouverture s'élargit : sur un aplat, une pilule fine se perd. */
+.geste-du-ciel {
+  height: auto;
+  padding-block: 0.9rem;
+  padding-inline: 1.9rem;
+}
+
+.geste-du-ciel {
+  background: var(--geste-ciel);
+  color: var(--geste-ciel-encre);
+  border-color: transparent;
+}
+
+.ciel {
+  background: var(--ciel);
+  position: relative;
+  isolation: isolate;
+}
+
+.ciel::before,
+.ciel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/*
+  Le lavis, et le fondu du bas.
+
+  **Au-dessus du paysage, et c'est l'ordre de peinture qui l'impose.** Les plans
+  du relief sont positionnés : à z-index nul, ils se peignent par-dessus cette
+  couche, qui ne servait alors à rien. Un cran plus haut, le lavis unifie toute
+  l'ouverture — ciel, crêtes et butte — au lieu de ne teinter que le ciel.
+
+  Le fondu du bas répond au reproche de la coupe nette : la strate ne peut pas
+  absorber seule l'écart entre un sol saturé et une surface de lecture. La
+  couleur tourne donc avant elle, sur la moitié basse de l'ouverture, et la
+  strate redevient une ligne de crête.
+
+  **Aucun lavis radial par-dessus**, et c'est une chose essayée puis retirée :
+  le ciel porte déjà sa lumière dans son propre dégradé, et une tache claire
+  posée dessus éclaircissait justement le coin haut-gauche — celui qui doit se
+  fondre dans l'en-tête.
+*/
+.ciel::before {
+  z-index: 1;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0) 76%, var(--surface-papier) 100%);
+}
+
+.ciel::after {
+  z-index: 2;
+  opacity: 0.72;
+  mix-blend-mode: overlay;
+  background-size: 128px 128px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /*
@@ -296,6 +769,7 @@
     --t-h1-app: clamp(1.75rem, min(3vw, 4.4vh), 2.5rem);
     --t-enonce: clamp(1.375rem, min(2.6vw, 3.2vh), 2rem);
     --t-nombre: clamp(3.5rem, min(6vw, 9vh), 5.75rem);
+    --t-compteur: clamp(4.5rem, min(10vw, 16vh), 10.5rem);
 
     --pas-dedans: clamp(1.25rem, 3.6vh, 3rem);
     --pas-scene: clamp(2rem, 5vh, 4rem);
@@ -357,6 +831,9 @@
   --color-stone-900: var(--stone-900);
   --color-lichen: var(--lichen);
   --color-lichen-deep: var(--lichen-deep);
+  --color-accent: var(--accent);
+  --color-accent-profond: var(--accent-profond);
+  --color-accent-clair: var(--accent-clair);
   --color-ember: var(--ember);
   --color-ember-deep: var(--ember-deep);
   --color-ember-clair: var(--ember-clair);
@@ -378,6 +855,7 @@
   --text-h1-app: var(--t-h1-app);
   --text-enonce: var(--t-enonce);
   --text-nombre: var(--t-nombre);
+  --text-compteur: var(--t-compteur);
   --text-h2-site: var(--t-h2-site);
   --text-h1-site: var(--t-h1-site);
   --text-ouverture: var(--t-ouverture);
@@ -401,6 +879,7 @@
   --color-surface-papier: var(--surface-papier);
   --color-surface-ombre: var(--surface-ombre);
   --color-surface-lichen: var(--surface-lichen);
+  --color-surface-session: var(--surface-session);
   --color-surface-roche: var(--surface-roche);
 
   --radius-plein: var(--r-plein);
@@ -562,21 +1041,21 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--lichen-deep);
+    outline: 2px solid var(--accent-profond);
     outline-offset: 2px;
   }
 
   /*
     L'anneau de focus sur la roche, et c'est une correction d'accessibilité.
 
-    `lichen-deep` est réglé pour le papier, où il donne 4,95 pour 1. Sur la
+    `accent-profond` est réglé pour le papier, où il donne 4,95 pour 1. Sur la
     roche, mesuré, il tombe à **2,48** — sous le seuil de trois exigé d'un
     indicateur de focus, et donc invisible pour qui navigue au clavier sur un
     panneau sombre. Le défaut existait sur tous les panneaux de roche du
     produit ; il devenait intenable au moment de poser la fenêtre de l'essai
     dessus, qui est le seul parcours de conversion.
 
-    Le lichen d'origine remonte à 3,69. C'est le même accent, pas une couleur de
+    `accent-clair` remonte à 6,85. C'est le même accent, pas une couleur de
     plus : sur un fond sombre, un accent doit s'éclaircir pour dire la même
     chose — exactement ce que font déjà `ember-clair` et les pierres claires du
     cairn.
@@ -586,7 +1065,7 @@
     déclarée plutôt que la classe Tailwind qui la peint.
   */
   [data-surface="roche"] :focus-visible {
-    outline-color: var(--lichen);
+    outline-color: var(--accent-clair);
   }
 
   /* L'encre autant que le fond. Sans elle, la sélection héritait de la couleur
@@ -773,7 +1252,7 @@
    Le point est le seul objet de cette étiquette qui prouve que ça tourne.
 
    La respiration est lente et sans cran : une pulsation rapide se lit comme une
-   alerte, et un clignotement franc comme un défaut d'affichage. L'accent lichen
+   alerte, et un clignotement franc comme un défaut d'affichage. L'accent du produit
    la porte parce qu'elle signale — c'est exactement ce à quoi cette couleur sert.
 
    Mouvement refusé : la coupure générale en fin de fichier ramène la durée à
@@ -914,8 +1393,12 @@
   color: var(--stone-500);
 
   @supports (-webkit-text-stroke: 1px currentColor) {
-    color: var(--surface-papier);
-    -webkit-text-stroke: max(1.6px, 0.021em) var(--stone-700);
+    /* Les lettres se remplissent de la surface qui les porte, et le trait est
+       l'encre. Les deux passent par une variable : sur un ciel coloré, le creux
+       doit se remplir du sol et se tracer en clair, sinon on lit une ligne
+       grise posée sur du bleu. */
+    color: var(--creux-fond, var(--surface-papier));
+    -webkit-text-stroke: max(1.6px, 0.021em) var(--creux-trait, var(--stone-700));
   }
 }
 

@@ -38,11 +38,18 @@ export function PriseDuCairn({ tenu, surBascule }: { tenu: boolean; surBascule: 
            d'une pile qui s'affine en montant : le coin est vide, et il l'est
            encore quand l'empilement s'écroule — les pierres tombent, elles ne
            montent pas. */
-        "rounded-galet absolute top-0 right-0 hidden h-11 w-11 touch-manipulation items-center justify-center transition-colors duration-200 [@media(pointer:coarse)]:flex",
+        "prise-du-cairn rounded-galet absolute top-0 right-0 hidden h-11 w-11 touch-manipulation items-center justify-center transition-colors duration-200 [@media(pointer:coarse)]:flex",
         /* Le repos est au gris de second plan, pas en dessous : une commande qui
            passe sous le contraste AA pour rester discrète n'est plus discrète,
            elle est invisible. La prise armée se dit deux fois — le glyphe passe
-           au lichen, et un disque très pâle le pose sur le sentier. */
+           au lichen, et un disque très pâle le pose sur le sentier.
+
+           Ce gris est celui du papier, et le cairn de l'ouverture ne se tient
+           pas sur du papier : il est planté dans un paysage, et sous une
+           palette ce paysage est un ciel. La commande y tombait à un et demi
+           pour un — invisible, exactement ce que ce commentaire dit de ne pas
+           faire. La classe `prise-du-cairn` permet à la feuille de style de
+           lui donner l'encre de la surface où elle se trouve vraiment. */
         tenu ? "bg-lichen/20 text-lichen-deep" : "text-stone-500",
       )}
     >

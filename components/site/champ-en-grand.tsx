@@ -60,7 +60,7 @@ export function ChampEnGrand({
         {/* Le creux de la bande, aux mêmes mesures : c'est la même zone, et elle
             doit se reconnaître. Seule la hauteur change, puisque c'est la seule
             chose qu'on est venu chercher. */}
-        <div className="rounded-t-champ bg-surface-ombre p-pas-4 md:p-pas-6 focus-within:border-lichen-deep border-b-2 border-stone-300 transition-colors">
+        <div className="rounded-t-champ bg-surface-ombre p-pas-4 md:p-pas-6 focus-within:border-accent-profond border-b-2 border-stone-300 transition-colors">
           <textarea
             id="essai-en-grand"
             value={texte}

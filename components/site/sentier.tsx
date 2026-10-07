@@ -57,14 +57,18 @@ const ETAPES: EtapeDuSentier[] = [
 export function Sentier() {
   return (
     <Panneau surface="ombre" aere className="gap-pas-12 grid md:grid-cols-[1fr_minmax(0,36rem)]">
-      <Apparition>
-        <Temps>
-          <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
+      <Apparition ecart={0.26}>
+        {/* Une ligne, un temps : le titre s'empile au lieu d'apparaître d'un
+            bloc. C'est le geste du produit, et il ne coûte rien à la lecture —
+            l'ordre des lignes ne change pas. */}
+        <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
+          <Temps balise="span" pierre className="block">
             Trois gestes,
-            <br />
+          </Temps>
+          <Temps balise="span" pierre className="block">
             et c&apos;est tout.
-          </h2>
-        </Temps>
+          </Temps>
+        </h2>
       </Apparition>
 
       <TraceDuSentier etapes={ETAPES} />

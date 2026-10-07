@@ -41,20 +41,5 @@ export const PROTECTED_PATHS = [
   ROUTES.signalements,
 ] as const;
 
-/**
- * Les écrans où l'on répond à des questions.
- *
- * Ils se passent de l'en-tête de l'application sur téléphone. Une session est
- * une tâche, pas une page qu'on parcourt : la marque et la pastille du compte
- * n'y servent à rien, elles prennent la hauteur qui manque au bas de l'écran, et
- * elles proposent de partir au moment précis où l'on demande de rester. Ce qui
- * nomme le passage et la porte pour en sortir tiennent déjà cette ligne, en
- * mieux — ils disent où l'on est et ce qu'on quitte.
- *
- * Au-delà de `md`, l'en-tête reste : la hauteur ne manque pas, et une fenêtre
- * de bureau sans sa barre supérieure a l'air d'avoir perdu quelque chose.
- */
-export const ROUTES_DE_PASSAGE = [ROUTES.reviser, ROUTES.entrainement] as const;
-
 /** Paramètre qui mémorise où l'utilisateur voulait aller avant la connexion. */
 export const RETURN_TO_PARAM = "suite";

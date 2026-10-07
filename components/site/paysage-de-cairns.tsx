@@ -21,6 +21,13 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
  * dernier par-dessus l'ensemble : il devient le plan le plus proche et mord à
  * son tour la base de ce qui est derrière lui.
  *
+ * **Le papier est devenu le ciel, et c'est une variable.** La brume ne rend pas
+ * une pierre pâle, elle la rapproche de la couleur du ciel : tout ce fichier
+ * mêlait donc déjà vers `--surface-papier`, qui *était* le ciel. Il mêle
+ * maintenant vers `--ciel-teinte`, qui vaut le papier tant qu'aucune palette
+ * n'en décide autrement — le dessin ne change pas d'un pixel, il cesse
+ * seulement de supposer que le ciel est blanc.
+ *
  * **Trois. Le recul se joue en contraste, pas en transparence.** La brume ne
  * rend pas les choses transparentes, elle les rapproche de la couleur du ciel :
  * un cairn lointain n'est pas un cairn pâle posé sur du papier, c'est un cairn
@@ -43,18 +50,28 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 
 /** L'encre d'une pierre, diluée dans le papier à mesure qu'elle s'éloigne. */
 const encre = (part: number) =>
-  `color-mix(in oklab, var(--stone-500) ${part.toFixed(1)}%, var(--surface-papier))`;
+  `color-mix(in oklab, var(--stone-500) ${part.toFixed(1)}%, var(--ciel-teinte))`;
 
-/** Les trois nuances d'un cairn, dérivées de sa part d'encre. */
-const teintesDe = (part: number): [string, string, string] => [
-  encre(part),
-  encre(part * 0.84),
-  encre(part * 0.7),
+/**
+ * Les trois nuances d'un cairn, dérivées de sa part d'encre.
+ *
+ * **Chacune passe par une variable dont la valeur de repli est le calcul
+ * d'origine.** Sans palette, `var()` retombe donc sur exactement ce qui était
+ * peint hier, au centième près ; avec, une palette peut poser ses propres
+ * pierres. La dérivation ne suffisait plus : la brume rapproche un cairn de la
+ * couleur du ciel, ce qui est juste pour le lointain et faux pour le plan
+ * proche, qu'une palette peut vouloir sombre sur un sol clair. Un mélange ne
+ * sait pas descendre plus bas que ce qu'on lui donne.
+ */
+const teintesDe = (part: number, variable: string): [string, string, string] => [
+  `var(${variable}-1, ${encre(part)})`,
+  `var(${variable}-2, ${encre(part * 0.84)})`,
+  `var(${variable}-3, ${encre(part * 0.7)})`,
 ];
 
 /** La terre d'un plan, entre l'ombre et le papier. */
 const terre = (part: number) =>
-  `color-mix(in oklab, var(--surface-ombre) ${part.toFixed(0)}%, var(--surface-papier))`;
+  `color-mix(in oklab, var(--terre) ${part.toFixed(0)}%, var(--ciel-teinte))`;
 
 /**
  * Une ligne de crête, tracée dans l'espace commun aux deux plans.
@@ -97,6 +114,8 @@ type Plan = {
   pierre: number;
   /** La teinte de l'arête : elle se fonce quand le plan se rapproche. */
   arete: string;
+  /** Le préfixe des variables de pierre de ce plan. */
+  pierres: string;
   /** Son retard à l'arrivée, en millisecondes. Le proche se pose en premier. */
   arrivee: number;
   cairns: { gauche: string; haut: string; pierres: number }[];
@@ -151,7 +170,8 @@ const PLANS: Plan[] = [
     appuis: [0, -18, 8, -26, 4, -14, 6],
     sol: 18,
     pierre: 26,
-    arete: "var(--stone-300)",
+    arete: "var(--arete-loin)",
+    pierres: "--pierre-loin",
     arrivee: 340,
     cairns: [
       { gauche: "4%", haut: "3.5%", pierres: 3 },
@@ -169,7 +189,8 @@ const PLANS: Plan[] = [
     appuis: [10, 22, -12, 16, -20, 10, -6],
     sol: 100,
     pierre: 46,
-    arete: "var(--stone-400)",
+    arete: "var(--arete-proche)",
+    pierres: "--pierre-proche",
     arrivee: 100,
     cairns: [
       { gauche: "8%", haut: "6%", pierres: 4 },
@@ -214,7 +235,8 @@ const PLANS_TELEPHONE: Plan[] = [
     appuis: [0, -30, 12, -22],
     sol: 18,
     pierre: 26,
-    arete: "var(--stone-300)",
+    arete: "var(--arete-loin)",
+    pierres: "--pierre-loin",
     arrivee: 340,
     cairns: [
       { gauche: "4%", haut: "4.5%", pierres: 3 },
@@ -228,7 +250,8 @@ const PLANS_TELEPHONE: Plan[] = [
     appuis: [14, -18, 26, -10],
     sol: 100,
     pierre: 46,
-    arete: "var(--stone-400)",
+    arete: "var(--arete-proche)",
+    pierres: "--pierre-proche",
     arrivee: 100,
     cairns: [
       { gauche: "6%", haut: "7.5%", pierres: 4 },
@@ -252,10 +275,13 @@ function CairnDuPaysage({
   graine,
   pierres,
   teintes,
+  sommet,
 }: {
   graine: string;
   pierres: number;
   teintes: [string, string, string];
+  /** La variable qui peint la pierre du sommet, par plan. */
+  sommet: string;
 }) {
   const empilement = empiler(
     pierres,
@@ -268,12 +294,22 @@ function CairnDuPaysage({
       className="h-full w-auto"
       aria-hidden
     >
-      {empilement.pierres.map((pierre) => (
+      {empilement.pierres.map((pierre, rang) => (
         <g
           key={pierre.cle}
           transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}
         >
-          <path d={pierre.chemin} fill={teintes[pierre.nuance]} />
+          {/* La dernière pierre est celle du sommet. Elle peut porter le lichen
+              comme le grand cairn — `--sommet-paysage` est vide par défaut, donc
+              elle reste de la couleur de son empilement. */}
+          <path
+            d={pierre.chemin}
+            fill={
+              rang === empilement.pierres.length - 1
+                ? `var(${sommet}, ${teintes[pierre.nuance]})`
+                : teintes[pierre.nuance]
+            }
+          />
         </g>
       ))}
     </svg>
@@ -310,7 +346,8 @@ function PlanDuPaysage({ plan, graine }: { plan: Plan; graine: string }) {
           <CairnDuPaysage
             graine={`${graine}-${index}`}
             pierres={cairn.pierres}
-            teintes={teintesDe(plan.pierre)}
+            teintes={teintesDe(plan.pierre, plan.pierres)}
+            sommet={`${plan.pierres}-sommet`}
           />
         </div>
       ))}

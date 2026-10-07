@@ -82,7 +82,27 @@ export function ReponseFermee({
                 // l'arête usée —, et elle sert au QCM comme au vrai ou faux :
                 // les deux passent par ici.
                 "rounded-pierre gap-pas-3 h-auto w-full justify-start py-3 text-left font-normal whitespace-normal disabled:opacity-100",
-                repondu && estBonne ? "border-lichen bg-lichen/10 text-stone-900" : "",
+                // Une option est un objet posé sur le sol, pas un cadre vide.
+                //
+                // Le contour n'a pas de fond : il prenait donc la surface de
+                // l'écran, quelle qu'elle soit. Sur du papier ça passait —
+                // deux valeurs proches, un trait pour les séparer. Sur le sol
+                // de la session, qui est un aplat, l'option devenait un
+                // rectangle de la couleur du sol cerné d'un cheveu, et il n'y
+                // avait plus rien à cliquer du regard. Elle prend le papier de
+                // la carte : la question et ses réponses sont la même matière,
+                // posée sur le même terrain.
+                //
+                // **Et seulement tant qu'elle compte.** Une fois la réponse
+                // donnée, celles qui ne sont ni la bonne ni celle qu'on a
+                // choisie n'ont plus rien à dire : elles rendent leur papier
+                // et redescendent dans le sol. C'est l'inverse d'un grisage —
+                // on ne les éteint pas, on cesse de les poser devant.
+                // Un fond par état, et jamais deux : deux classes `bg-*` sur le
+                // même élément laissent l'ordre de la feuille décider, et cet
+                // ordre ne se lit pas dans ce fichier.
+                !repondu ? "bg-surface-papier" : "",
+                repondu && estBonne ? "border-lichen-deep bg-surface-papier text-stone-900" : "",
                 repondu && estChoisie && !estBonne ? "border-alerte bg-alerte-surface" : "",
                 repondu && !estBonne && !estChoisie ? "text-stone-500" : "",
               ]

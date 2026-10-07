@@ -41,14 +41,15 @@ export function PasCeci({ connecte }: { connecte: boolean }) {
         <SilhouetteDeCairn className="absolute -right-8 bottom-0 h-[130%] md:right-8 md:h-[150%]" />
       }
     >
-      <Apparition>
-        <Temps>
-          <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
+      <Apparition ecart={0.26}>
+        <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
+          <Temps balise="span" pierre className="block">
             Ce que ce
-            <br />
+          </Temps>
+          <Temps balise="span" pierre className="block">
             n&apos;est pas.
-          </h2>
-        </Temps>
+          </Temps>
+        </h2>
       </Apparition>
 
       <Apparition className="text-stone-300">

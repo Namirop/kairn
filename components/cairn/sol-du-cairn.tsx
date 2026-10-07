@@ -21,7 +21,11 @@ export function SolDuCairn({
       y1={0}
       x2={largeur - LARGEUR_VUE * 0.12}
       y2={0}
-      className={clair ? "stroke-stone-700" : "stroke-stone-300"}
+      stroke={
+        clair
+          ? "var(--sol-du-cairn-clair, var(--stone-700))"
+          : "var(--sol-du-cairn, var(--stone-300))"
+      }
       strokeWidth={1}
     />
   );

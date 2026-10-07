@@ -145,12 +145,24 @@ export function CompteurDu({
         Aujourd&apos;hui
       </h1>
 
-      <p className="mt-pas-4 font-display text-nombre leading-none font-medium tabular-nums">
+      {/* Le nombre est le titre de l'écran, et il se présentait comme une
+          statistique. Son échelle est à lui — voir `--t-compteur` —, son poids
+          est celui des grands titres du site, et son interlignage se resserre
+          sous un : des chiffres n'ont pas de jambage, la boîte d'une ligne
+          pleine leur laissait un vide au-dessus et au-dessous qui éloignait
+          l'étiquette de ce qu'elle nomme.
+
+          L'étiquette se rapproche d'un cran pour la même raison : elle
+          appartient au nombre, le trait et la phrase appartiennent à ce qui
+          suit. C'est l'écart qui dit lequel va avec lequel. */}
+      <p className="mt-pas-2 font-display text-compteur leading-[0.8] font-bold tabular-nums">
         {aujourdhui}
       </p>
-      <span aria-hidden className="mt-pas-3 bg-lichen mx-auto block h-0.5 w-10 md:mx-0" />
+      {/* Le trait grandit avec le nombre : sous des chiffres de dix rems, il
+          faisait une miette. */}
+      <span aria-hidden className="mt-pas-4 bg-accent mx-auto block h-1 w-20 md:mx-0 md:w-28" />
 
-      <p className="mt-pas-3 mx-auto text-stone-500 md:mx-0">
+      <p className="mt-pas-4 mx-auto text-stone-500 md:mx-0">
         {aujourdhui === 0 ? (
           <PhraseDuJour
             aDesAtoms={aDesAtoms}

@@ -170,12 +170,19 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
 
   if (!trou.aide) {
     return (
-      <div className="mt-pas-4">
+      /* Le même registre que l'autre sortie, et la même verticale.
+
+         Elle était en lien souligné, à l'encre du corps : la plus douce des
+         deux sorties se présentait donc plus fort que celle qui renonce pour
+         de bon, et deux pixels d'indentation les séparaient en plus. Un geste
+         de secours se dit en gris, et deux gestes de même nature partent du
+         même bord. */
+      <div className="sortie-de-secours mt-pas-6">
         <Button
           type="button"
-          variant="link"
+          variant="ghost"
           size="sm"
-          className="px-0"
+          className="-ml-pas-4 max-sm:h-11"
           onClick={trou.demanderDeLaide}
         >
           Je sèche

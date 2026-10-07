@@ -1,8 +1,17 @@
 /**
- * Les quatre surfaces, et ce qu'elles emportent.
+ * Les surfaces, et ce qu'elles emportent.
  *
  * Une page est une pile de panneaux, et chaque panneau porte l'une d'elles :
  * c'est le changement de fond qui sépare deux sujets, plus jamais un filet.
+ *
+ * Elles étaient quatre et sont cinq. La cinquième n'est pas une nuance de plus
+ * dans la liste : c'est **le sol d'un seul écran**, celui de la session, et
+ * elle existe parce que cet écran-là ne pose pas un panneau de lecture mais un
+ * objet dans un terrain. Tant que tout le produit est en gris, elle vaut
+ * l'ombre et personne ne la distingue ; dès qu'une palette est posée, c'est
+ * elle qui prend la couleur, et la carte de la question redevient la pierre
+ * claire posée dessus. Aucun autre écran ne la prend, et c'est la règle qui
+ * l'empêche de devenir une surface de plus à dépenser.
  *
  * Le tableau dit aussi la couleur de l'encre et celle du texte second, pour que
  * personne n'ait à se demander comment écrire sur la roche. Un panneau sombre
@@ -10,7 +19,7 @@
  * qu'on ne voit qu'en production.
  */
 
-export type Surface = "papier" | "ombre" | "lichen" | "roche";
+export type Surface = "papier" | "ombre" | "lichen" | "roche" | "session";
 
 type Habillage = {
   fond: string;
@@ -44,6 +53,23 @@ export const SURFACES: Record<Surface, Habillage> = {
     fond: "bg-surface-lichen",
     encre: "text-stone-900",
     second: "text-stone-500",
+    grain: "grain",
+    objet: "bg-surface-papier",
+    sombre: false,
+  },
+  /*
+    Le sol de la session.
+
+    Son texte second descend d'un cran : sur un aplat teinté, le gris réglé
+    pour du papier passe sous le seuil, et ce qui se pose ici — les tags du
+    concept, la consigne de réponse, l'intervalle tenu — est précisément du
+    texte second. L'objet qu'elle porte est du papier : c'est tout le sujet de
+    cette surface.
+  */
+  session: {
+    fond: "bg-surface-session",
+    encre: "text-stone-900",
+    second: "text-stone-700",
     grain: "grain",
     objet: "bg-surface-papier",
     sombre: false,

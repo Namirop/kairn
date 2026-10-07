@@ -47,6 +47,7 @@ export function Panneau({
   centre = false,
   remplit = false,
   fond: matiere,
+  ciel = false,
   className,
   children,
 }: {
@@ -71,6 +72,16 @@ export function Panneau({
    * une ironie coûteuse.
    */
   centre?: boolean;
+  /**
+   * Le panneau porte le ciel au lieu de sa surface.
+   *
+   * Réservé à l'ouverture, qui est le seul panneau du produit à dessiner un
+   * dehors. `--ciel` vaut le papier par défaut : sans palette à l'essai, ce
+   * drapeau ne change rien du tout. Avec, il peut recevoir un aplat coloré ou
+   * un lavis vertical — et la peinture qui va avec, que la feuille de style
+   * n'ouvre que dans ce cas.
+   */
+  ciel?: boolean;
   /**
    * Le panneau prend toute la hauteur qui reste dans la pile.
    *
@@ -119,9 +130,10 @@ export function Panneau({
         id && "scroll-mt-pas-16 md:scroll-mt-[22svh]",
         remplit ? "flex-1" : "shrink-0",
         centre && "flex flex-col justify-center",
-        fond,
+        ciel ? "ciel" : fond,
         encre,
-        grain,
+        // Le ciel porte sa propre matière, plus dense que le grain d'un panneau.
+        ciel ? undefined : grain,
       )}
     >
       {matiere ? <div aria-hidden>{matiere}</div> : null}

@@ -24,7 +24,7 @@ export function renderRelanceDuCompteVide(
   const body = `<p style="margin:0 0 16px;font-size:17px;line-height:25px;font-weight:600;letter-spacing:-0.01em;color:${S.ink};">Rien n'est encore déposé.</p>
 <p style="margin:0 0 12px;font-size:15px;line-height:23px;color:${S.muted};">Kairn marche avec ce qui te passe sous les yeux : une recommandation qu'on t'a faite, un raccourci que tu réapprends tous les mois, trois lignes d'un article. Une seule chose suffit à commencer.</p>
 <p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">Elle devient quelques concepts, et ils te reviennent espacés dans le temps, juste avant le moment où tu les aurais oubliés.</p>
-<a href="${links.depotUrl}" style="display:inline-block;background:${S.lichen};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Déposer</a>`;
+<a href="${links.depotUrl}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Déposer</a>`;
 
   const text = `Rien n'est encore déposé.
 

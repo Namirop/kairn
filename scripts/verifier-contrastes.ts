@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { readFileSync } from "node:fs";
+import { jetonsDeLaFeuille } from "./verification/jetons-de-la-feuille";
 import { conclure, record } from "./verification/journal";
 
 /**
@@ -40,18 +40,6 @@ function contraste(texte: string, fond: string): number {
   return ((clair ?? 0) + 0.05) / ((sombre ?? 0) + 0.05);
 }
 
-/** Les jetons tels que la feuille de style les définit, pas tels qu'on croit. */
-function jetons(): Record<string, string> {
-  const css = readFileSync("app/globals.css", "utf8");
-  const trouves: Record<string, string> = {};
-
-  for (const [, nom, valeur] of css.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-f]{6})\s*;/gi)) {
-    if (nom && valeur) trouves[nom] = valeur;
-  }
-
-  return trouves;
-}
-
 type Combinaison = { texte: string; fond: string; role: string; seuil: number };
 
 /**
@@ -66,6 +54,22 @@ const COMBINAISONS: Combinaison[] = [
   { texte: "stone-500", fond: "surface-papier", role: "texte second sur papier", seuil: AA_TEXTE },
   { texte: "stone-900", fond: "surface-ombre", role: "encre sur ombre", seuil: AA_TEXTE },
   { texte: "stone-500", fond: "surface-ombre", role: "texte second sur ombre", seuil: AA_TEXTE },
+  // Le sol de la session, le seul écran qui le prenne. Ce qui s'y pose
+  // directement est du texte second — les tags du concept, la consigne de
+  // réponse —, et c'est `stone-700` qui le porte : sur un aplat teinté, le gris
+  // du papier passe sous le seuil.
+  {
+    texte: "stone-900",
+    fond: "surface-session",
+    role: "encre sur le sol de session",
+    seuil: AA_TEXTE,
+  },
+  {
+    texte: "stone-700",
+    fond: "surface-session",
+    role: "texte second sur le sol de session",
+    seuil: AA_TEXTE,
+  },
   { texte: "stone-900", fond: "surface-lichen", role: "encre sur lichen", seuil: AA_TEXTE },
   { texte: "stone-500", fond: "surface-lichen", role: "texte second sur lichen", seuil: AA_TEXTE },
   { texte: "stone-50", fond: "surface-roche", role: "encre sur roche", seuil: AA_TEXTE },
@@ -79,7 +83,12 @@ const COMBINAISONS: Combinaison[] = [
   // avoir été mesuré.
   { texte: "alerte", fond: "alerte-surface", role: "erreur sur aplat d'alerte", seuil: AA_TEXTE },
   { texte: "stone-800", fond: "alerte-surface", role: "texte sur aplat d'alerte", seuil: AA_TEXTE },
-  { texte: "lichen", fond: "surface-papier", role: "accent sur papier", seuil: AA_LARGE },
+  { texte: "accent", fond: "surface-papier", role: "accent sur papier", seuil: AA_LARGE },
+  // La maîtrise est l'autre métier du lichen, et elle se pose sur du clair :
+  // le mot qui comble un trou, la bonne réponse. En production c'est la même
+  // couleur que l'accent ; sous une palette, c'est la seule qui reste verte,
+  // et rien ne garantissait plus qu'elle s'y voie.
+  { texte: "lichen-deep", fond: "surface-papier", role: "maîtrise sur papier", seuil: AA_LARGE },
   { texte: "ember", fond: "surface-papier", role: "série sur papier", seuil: AA_LARGE },
   // La dalle posée sur la roche : celle d'un concept dans la fenêtre de l'essai.
   // `stone-800` y servait de surface d'objet et vaut exactement `surface-roche`
@@ -90,8 +99,8 @@ const COMBINAISONS: Combinaison[] = [
   // L'anneau de focus doit se voir sur ce qu'il entoure. `lichen-deep` est réglé
   // pour le papier ; sur la roche, il fallait mesurer avant d'y poser le seul
   // parcours de conversion du produit.
-  { texte: "lichen", fond: "surface-roche", role: "focus sur roche", seuil: AA_LARGE },
-  { texte: "lichen-deep", fond: "surface-papier", role: "focus sur papier", seuil: AA_LARGE },
+  { texte: "accent-clair", fond: "surface-roche", role: "focus sur roche", seuil: AA_LARGE },
+  { texte: "accent-profond", fond: "surface-papier", role: "focus sur papier", seuil: AA_LARGE },
   // L'invite du champ de dépôt, posée sur le creux qui le dessine. Elle était en
   // `stone-400`, qui n'y donne que 2,09 — et guère mieux sur le papier d'avant.
   // C'est pourtant la seule phrase qui dise quoi mettre dans le champ : le pire
@@ -105,7 +114,7 @@ const COMBINAISONS: Combinaison[] = [
   // Le trait sous le champ, au repos puis au focus. Ce qu'un indicateur de focus
   // doit franchir, ce n'est pas le fond : c'est **l'état d'avant**.
   {
-    texte: "lichen-deep",
+    texte: "accent-profond",
     fond: "stone-300",
     role: "focus du champ contre son repos",
     seuil: AA_LARGE,
@@ -113,11 +122,11 @@ const COMBINAISONS: Combinaison[] = [
 ];
 
 function main(): void {
-  const palette = jetons();
+  const jetons = jetonsDeLaFeuille();
 
   for (const combinaison of COMBINAISONS) {
-    const texte = palette[combinaison.texte];
-    const fond = palette[combinaison.fond];
+    const texte = jetons[combinaison.texte];
+    const fond = jetons[combinaison.fond];
 
     if (!texte || !fond) {
       record(`Contraste — ${combinaison.role}`, false, "jeton introuvable dans globals.css");

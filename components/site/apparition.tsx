@@ -36,9 +36,38 @@ const ECART_S = 0.09;
 /** Sortie douce, sans retour : ça se pose, ça ne rebondit pas. */
 const COURBE: Transition["ease"] = [0.2, 0.8, 0.2, 1];
 
+/** La même, mais qui s'arrête plus franchement : une pierre qu'on cale. */
+const COURBE_PIERRE: Transition["ease"] = [0.16, 0.9, 0.2, 1];
+
 const TEMPS = {
   cache: { opacity: 0, y: MONTEE_PX },
   visible: { opacity: 1, y: 0, transition: { duration: DUREE_S, ease: COURBE } },
+};
+
+/**
+ * Le temps d'une ligne de titre : une pierre qu'on pose.
+ *
+ * **Elle vient d'en haut, et c'est ce qui fait l'empilement.** Le reste de la
+ * page monte de quatorze pixels — un contenu qui arrive. Une pierre, elle,
+ * descend sur celle d'en dessous : c'est le geste du cairn, et l'inverser
+ * suffisait à ce qu'on ne le reconnaisse pas. Elle tombe de cinquante-six
+ * pixels, quatre fois la course ordinaire, et s'arrête franchement — sans
+ * rebond, parce qu'une pierre calée ne rebondit pas.
+ *
+ * **Et elle prend son temps.** À un dixième de seconde d'écart, les deux lignes
+ * arrivaient presque ensemble et l'effet passait sans se voir. L'écart des
+ * titres est donc réglé à part, dans `Apparition` : c'est le seul endroit de la
+ * page où l'on veut voir le geste plutôt que le subir.
+ */
+const CHUTE_PIERRE_PX = 56;
+
+const PIERRE = {
+  cache: { opacity: 0, y: -CHUTE_PIERRE_PX },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.66, ease: COURBE_PIERRE },
+  },
 };
 
 /**
@@ -50,10 +79,13 @@ const TEMPS = {
  */
 export function Apparition({
   attente = 0,
+  ecart = ECART_S,
   className,
   children,
 }: {
   attente?: number;
+  /** L'écart entre deux temps. Les titres qui s'empilent le veulent plus long. */
+  ecart?: number;
   className?: string;
   children: ReactNode;
 }) {
@@ -67,7 +99,7 @@ export function Apparition({
       initial="cache"
       whileInView="visible"
       viewport={{ once: true, amount: 0.2 }}
-      variants={{ visible: { transition: { staggerChildren: ECART_S, delayChildren: attente } } }}
+      variants={{ visible: { transition: { staggerChildren: ecart, delayChildren: attente } } }}
     >
       {children}
     </motion.div>
@@ -85,10 +117,13 @@ export function Apparition({
  */
 export function Temps({
   balise = "div",
+  pierre = false,
   className,
   children,
 }: {
   balise?: "div" | "span";
+  /** Le temps d'une ligne de titre : elle se pose au lieu d'apparaître. */
+  pierre?: boolean;
   className?: string;
   children: ReactNode;
 }) {
@@ -104,7 +139,7 @@ export function Temps({
   }
 
   return (
-    <Bloc className={className} variants={TEMPS}>
+    <Bloc className={className} variants={pierre ? PIERRE : TEMPS}>
       {children}
     </Bloc>
   );

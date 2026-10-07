@@ -66,6 +66,10 @@ export function Hero({ connecte }: { connecte: boolean }) {
   return (
     <Panneau
       surface="papier"
+      /* L'ouverture est le seul panneau qui dessine un dehors : elle porte le
+         ciel plutôt que sa surface. Sans palette à l'essai, `--ciel` vaut le
+         papier et rien ne bouge. */
+      ciel
       aere
       mesure="large"
       /* Sur téléphone, l'ouverture démarre peu sous l'en-tête. Le rythme de
@@ -158,7 +162,7 @@ export function Hero({ connecte }: { connecte: boolean }) {
                bouton était le second objet le plus haut de l'écran après le
                titre, pour une action secondaire — le sujet de l'ouverture est
                la phrase, pas le geste. Il reprend sa pleine taille dès `md`. */
-            className="mt-pas-4 md:mt-pas-6 bg-surface-papier max-md:px-pas-6 max-md:text-petit max-md:h-10"
+            className="mt-pas-4 md:mt-pas-6 geste-du-ciel max-md:px-pas-6 max-md:text-petit max-md:h-10"
           >
             {connecte ? (
               <Link href={ROUTES.aujourdhui}>Aujourd&apos;hui</Link>
@@ -186,7 +190,15 @@ export function Hero({ connecte }: { connecte: boolean }) {
         <div className="relative aspect-[100/93] w-[min(62vw,17rem)] md:aspect-auto md:h-[var(--hauteur-cairn)] md:w-full">
           <span
             aria-hidden
-            className="rounded-galet absolute bottom-[1%] left-1/2 h-[5%] w-[56%] -translate-x-1/2 bg-stone-900 opacity-[0.15] blur-[9px]"
+            /* L'ombre portée du cairn. Elle passe par des variables : sur un
+               sol coloré, une ombre réglée pour du papier disparaît, et c'est
+               elle qui dit que la pierre touche terre — surtout quand le trait
+               de sol se tait. */
+            className="rounded-galet absolute bottom-[1%] left-1/2 h-[6%] w-[54%] -translate-x-1/2 blur-[12px]"
+            style={{
+              background: "var(--ombre-du-cairn)",
+              opacity: "var(--ombre-du-cairn-part)",
+            }}
           />
           <CairnRenversable nombre={7} />
         </div>

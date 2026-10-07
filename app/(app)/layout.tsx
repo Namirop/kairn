@@ -42,7 +42,9 @@ export default async function CoquilleApplication({ children }: { children: Reac
           soit, et rien si l'en-tête n'est pas là. */}
       <div className="bg-surface-papier flex min-h-dvh flex-col">
         <Rail administrateur={administrateur} />
-        <div className="flex flex-1 flex-col md:pl-28">
+        {/* Le décalage du rail vit ici, et la règle de passage le reprend à
+            zéro quand le rail s'efface — voir `globals.css`. */}
+        <div data-colonne className="flex flex-1 flex-col md:pl-28">
           <EnTete />
           {/* Aucune mesure ici, et aucun rembourrage : chaque écran est une
               pile de panneaux qui porte les siens. Un conteneur à cet endroit
