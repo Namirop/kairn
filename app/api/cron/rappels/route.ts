@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isAuthorizedCron } from "@/lib/cron/authorization";
 import { signalerLeBattement } from "@/lib/cron/battement";
 import { envoyerLesAlertesDeStreak, envoyerLesRappels } from "@/lib/jobs/rappels";
+import { relancerLesComptesVides } from "@/lib/jobs/relance-des-comptes-vides";
 
 /**
  * Les envois du jour, passage horaire.
@@ -13,6 +14,11 @@ import { envoyerLesAlertesDeStreak, envoyerLesRappels } from "@/lib/jobs/rappels
  * Le rappel part à l'heure choisie, quand il y a quelque chose à revoir.
  * L'alerte de série part le soir, et seulement si une série est en train d'être
  * perdue. Les deux sont idempotents par compte, par type et par jour local.
+ *
+ * La relance, elle, vise les comptes qui n'ont jamais rien déposé — les seuls
+ * que les deux premiers n'atteignent jamais, faute d'échéance. Elle part une
+ * fois dans la vie d'un compte, et c'est la lecture des candidats qui le
+ * garantit, pas le jour local.
  *
  * Les journaux ne portent que des identifiants, jamais d'adresse ni de contenu.
  */
@@ -35,8 +41,9 @@ export async function GET(request: Request) {
   const maintenant = new Date();
   const rappels = await envoyerLesRappels(maintenant);
   const alertes = await envoyerLesAlertesDeStreak(maintenant);
+  const relances = await relancerLesComptesVides(maintenant);
 
   await signalerLeBattement("rappels");
 
-  return NextResponse.json({ rappels, alertes });
+  return NextResponse.json({ rappels, alertes, relances });
 }

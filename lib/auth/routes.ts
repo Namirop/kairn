@@ -14,6 +14,7 @@ export const ROUTES = {
   reviser: "/reviser",
   entrainement: "/entrainement",
   depots: "/depots",
+  depotNouveau: "/depots/nouveau",
   reglages: "/reglages",
   commentCaMarche: "/comment-ca-marche",
   admin: "/admin",

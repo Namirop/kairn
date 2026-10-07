@@ -1,7 +1,8 @@
 import { compterDusAujourdhui } from "@/lib/db/session-du-jour";
-import { findAlreadyNotified, findReminderCandidates } from "@/lib/db/reminder-audience";
+import { findReminderCandidates } from "@/lib/db/reminder-audience";
 import { findUserStats } from "@/lib/db/user-settings";
-import { sendNotification, type NotificationType } from "@/lib/email/notifications";
+import { sendNotification } from "@/lib/email/notifications";
+import { aNotifier, journaliser, passage, type Passage } from "./passage-de-notification";
 import { estLHeureDeLAlerte, serieEnSursis } from "@/lib/domain/alerte-de-streak";
 import { localDay } from "@/lib/domain/local-day";
 import { selectDueForReminder } from "@/lib/domain/reminder-selection";
@@ -21,37 +22,6 @@ import { selectDueForReminder } from "@/lib/domain/reminder-selection";
  * Les journaux ne portent que des identifiants et des comptes, jamais une adresse
  * ni un contenu.
  */
-
-export type Passage = {
-  candidats: number;
-  retenus: number;
-  dejaEnvoyes: number;
-  envoyes: number;
-  ignores: number;
-};
-
-/** Ce qui n'a rien à envoyer se compte quand même : un zéro est une information. */
-function passage(candidats: number, retenus: number, dejaEnvoyes: number): Passage {
-  return { candidats, retenus, dejaEnvoyes, envoyes: 0, ignores: 0 };
-}
-
-/**
- * Écarte ceux qu'on a déjà notifiés dans leur journée à eux.
- *
- * Le jour se lit chez la personne, pas sur le serveur : deux comptes notifiés à
- * la même seconde peuvent ne pas être le même jour.
- */
-async function aNotifier<T extends { userId: string }>(
-  type: NotificationType,
-  retenus: { cible: T; jour: string }[],
-): Promise<{ restants: { cible: T; jour: string }[]; deja: number }> {
-  const deja = await findAlreadyNotified(
-    type,
-    retenus.map((entree) => ({ userId: entree.cible.userId, day: entree.jour })),
-  );
-
-  return { restants: retenus.filter((entree) => !deja.has(entree.cible.userId)), deja: deja.size };
-}
 
 /**
  * Le rappel quotidien, pour ceux dont l'heure locale est arrivée.
@@ -89,10 +59,7 @@ export async function envoyerLesRappels(maintenant: Date = new Date()): Promise<
     else resultat.ignores += 1;
   }
 
-  console.info(
-    `Rappel quotidien — ${resultat.candidats} candidats, ${resultat.retenus} à l'heure, ` +
-      `${resultat.dejaEnvoyes} déjà notifiés, ${resultat.envoyes} envoyés, ${resultat.ignores} sans envoi.`,
-  );
+  journaliser("Rappel quotidien", resultat);
 
   return resultat;
 }
@@ -148,10 +115,7 @@ export async function envoyerLesAlertesDeStreak(maintenant: Date = new Date()): 
     else resultat.ignores += 1;
   }
 
-  console.info(
-    `Alerte de série — ${resultat.candidats} candidats, ${resultat.retenus} à l'heure, ` +
-      `${resultat.dejaEnvoyes} déjà notifiés, ${resultat.envoyes} envoyés, ${resultat.ignores} sans envoi.`,
-  );
+  journaliser("Alerte de série", resultat);
 
   return resultat;
 }
