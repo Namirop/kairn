@@ -47,6 +47,27 @@
   --lichen: #7a8b4f;
   --lichen-deep: #5f6e3b;
 
+  /*
+    L'accent du produit, et il ne se sépare du lichen que sous une palette.
+
+    Le lichen tient aujourd'hui deux métiers d'un coup. Il dit ce qu'on
+    maîtrise — le sommet du cairn, la pierre tenue, la bonne réponse — et il
+    peint en même temps tout ce que le produit demande : un champ qui prend le
+    focus, un choix retenu, un interrupteur, l'anneau de focus. Les deux
+    cohabitent sans qu'on le remarque, parce qu'ils ont la même couleur.
+
+    Dès que le ciel est bleu, ils se séparent : la maîtrise reste verte, elle
+    est la couleur du lichen sur le granit ; l'accent du produit, lui, descend
+    du ciel. D'où deux jeux de jetons plutôt qu'un seul repeint en bloc.
+
+    Ici les deux valent le lichen, au pixel près : la production ne bouge pas.
+    `clair` est la variante des surfaces sombres, où un accent réglé pour du
+    papier tombe sous le seuil de l'anneau de focus.
+  */
+  --accent: var(--lichen);
+  --accent-profond: var(--lichen-deep);
+  --accent-clair: var(--lichen);
+
   /* Réservé au streak, nulle part ailleurs. */
   --ember: #b4552f;
   --ember-deep: #9e4526;
@@ -393,10 +414,23 @@
   --geste-ciel: #14202e;
   --geste-ciel-encre: #f4f9fb;
 
-  /* L'en-tête est du niveau 1, avec la variation de gauche à droite de la
-     maquette, et un filet clair qui le sépare du ciel. */
-  --entete: linear-gradient(100deg, #143b8d 0%, #0e2c6b 100%);
-  --entete-filet: rgb(255 255 255 / 0.34);
+  /* Le lichen ne garde que la maîtrise ; l'accent du produit descend du ciel. */
+  --accent: #1b4fc4;
+  --accent-profond: #143b8d;
+  --accent-clair: #86b7f0;
+
+  /* L'en-tête est la ligne du haut du ciel, aux deux bords — voir le même
+     jeton sous `lavis`, où la démonstration est écrite. Le plus sombre est à
+     gauche, et la couture disparaît. */
+  --entete: linear-gradient(100deg, #113479 0%, #123681 100%);
+  --entete-filet: transparent;
+
+  /* Le ciel du versant est presque un aplat : il a besoin du lavis. La lumière
+     descend seulement sous l'en-tête, au lieu de se poser sur le coin qui doit
+     se fondre avec lui. */
+  --lavis-du-ciel:
+    radial-gradient(118% 92% at 14% 44%, rgb(255 255 255 / 0.24), rgb(255 255 255 / 0) 62%),
+    radial-gradient(105% 85% at 92% 105%, rgb(0 0 0 / 0.22), rgb(0 0 0 / 0) 60%);
 }
 
 /*
@@ -465,8 +499,33 @@
   --geste-ciel: #14202e;
   --geste-ciel-encre: #f4f9fb;
 
-  --entete: linear-gradient(100deg, #143b8d 0%, #0e2c6b 100%);
-  --entete-filet: rgb(255 255 255 / 0.34);
+  /* Le lichen ne garde que la maîtrise ; l'accent du produit descend du ciel. */
+  --accent: #1b4fc4;
+  --accent-profond: #143b8d;
+  --accent-clair: #86b7f0;
+
+  /*
+    L'en-tête est le haut du ciel, pas une bande posée dessus.
+
+    Il prenait la variation de la maquette à l'envers — clair à gauche, sombre
+    à droite —, si bien que la seule arête où les deux se rejoignaient sans
+    marche était la droite, et que le coin gauche, celui qu'on regarde en
+    premier, portait une marche nette. Il reprend donc les deux couleurs que le
+    ciel a sur sa propre ligne du haut : son départ à gauche, et le point où ce
+    départ en est arrivé à l'autre bord — le ciel penche de trois degrés, il a
+    déjà un peu tourné quand il atteint la droite. La couture disparaît sur
+    toute la largeur, et le plus sombre est à gauche.
+
+    Le filet se tait pour la même raison : une ligne claire entre deux surfaces
+    continues est une couture qu'on dessine exprès.
+  */
+  --entete: linear-gradient(100deg, #0f2f72 0%, #12357f 100%);
+  --entete-filet: transparent;
+
+  /* Un ciel déjà dégradé porte sa propre lumière. Le lavis radial par-dessus
+     éclaircissait justement le coin haut-gauche, celui qui doit se fondre dans
+     l'en-tête — il ne reste que le grain, comme sur la maquette retenue. */
+  --lavis-du-ciel: none;
 }
 
 /*
@@ -603,13 +662,17 @@
   absorber seule l'écart entre un sol saturé et une surface de lecture. La
   couleur tourne donc avant elle, sur la moitié basse de l'ouverture, et la
   strate redevient une ligne de crête.
+
+  **Le lavis, lui, appartient à la palette** (`--lavis-du-ciel`). Un ciel déjà
+  dégradé n'en veut pas : il porte sa lumière dans son propre dégradé, et une
+  tache claire par-dessus ne ferait que contrarier la lecture verticale. Un
+  ciel en aplat, si.
 */
 :root[data-palette] .ciel::before {
   z-index: 1;
   background:
     linear-gradient(to bottom, rgb(0 0 0 / 0) 76%, var(--surface-papier) 100%),
-    radial-gradient(135% 105% at 12% -5%, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0) 58%),
-    radial-gradient(105% 85% at 92% 105%, rgb(0 0 0 / 0.22), rgb(0 0 0 / 0) 60%);
+    var(--lavis-du-ciel, none);
 }
 
 :root[data-palette] .ciel::after {
@@ -722,6 +785,9 @@
   --color-stone-900: var(--stone-900);
   --color-lichen: var(--lichen);
   --color-lichen-deep: var(--lichen-deep);
+  --color-accent: var(--accent);
+  --color-accent-profond: var(--accent-profond);
+  --color-accent-clair: var(--accent-clair);
   --color-ember: var(--ember);
   --color-ember-deep: var(--ember-deep);
   --color-ember-clair: var(--ember-clair);
@@ -927,31 +993,32 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--lichen-deep);
+    outline: 2px solid var(--accent-profond);
     outline-offset: 2px;
   }
 
   /*
     L'anneau de focus sur la roche, et c'est une correction d'accessibilité.
 
-    `lichen-deep` est réglé pour le papier, où il donne 4,95 pour 1. Sur la
+    `accent-profond` est réglé pour le papier, où il donne 4,95 pour 1. Sur la
     roche, mesuré, il tombe à **2,48** — sous le seuil de trois exigé d'un
     indicateur de focus, et donc invisible pour qui navigue au clavier sur un
     panneau sombre. Le défaut existait sur tous les panneaux de roche du
     produit ; il devenait intenable au moment de poser la fenêtre de l'essai
     dessus, qui est le seul parcours de conversion.
 
-    Le lichen d'origine remonte à 3,69. C'est le même accent, pas une couleur de
+    `accent-clair` remonte à 3,69. C'est le même accent, pas une couleur de
     plus : sur un fond sombre, un accent doit s'éclaircir pour dire la même
     chose — exactement ce que font déjà `ember-clair` et les pierres claires du
-    cairn.
+    cairn. En production il vaut le lichen, et le chiffre est celui-là ; sous
+    une palette il vaut le glacier éclairci, qui tient 6,7 sur sa roche.
 
     Le crochet est un attribut et non une classe de fond : `Panneau` et la
     fenêtre de l'essai posent `data-surface`, et la règle suit la surface
     déclarée plutôt que la classe Tailwind qui la peint.
   */
   [data-surface="roche"] :focus-visible {
-    outline-color: var(--lichen);
+    outline-color: var(--accent-clair);
   }
 
   /* L'encre autant que le fond. Sans elle, la sélection héritait de la couleur
@@ -1138,7 +1205,7 @@
    Le point est le seul objet de cette étiquette qui prouve que ça tourne.
 
    La respiration est lente et sans cran : une pulsation rapide se lit comme une
-   alerte, et un clignotement franc comme un défaut d'affichage. L'accent lichen
+   alerte, et un clignotement franc comme un défaut d'affichage. L'accent du produit
    la porte parce qu'elle signale — c'est exactement ce à quoi cette couleur sert.
 
    Mouvement refusé : la coupure générale en fin de fichier ramène la durée à

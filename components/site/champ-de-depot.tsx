@@ -121,7 +121,7 @@ export function ChampDeDepot({
         </button>
       </div>
 
-      <div className="mt-pas-2 rounded-t-champ bg-surface-ombre p-pas-4 md:p-pas-6 focus-within:border-lichen-deep relative border-b-2 border-stone-300 transition-colors">
+      <div className="mt-pas-2 rounded-t-champ bg-surface-ombre p-pas-4 md:p-pas-6 focus-within:border-accent-profond relative border-b-2 border-stone-300 transition-colors">
         <textarea
           ref={champ}
           id="essai"

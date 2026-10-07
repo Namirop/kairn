@@ -148,7 +148,7 @@ export function CompteurDu({
       <p className="mt-pas-4 font-display text-nombre leading-none font-medium tabular-nums">
         {aujourdhui}
       </p>
-      <span aria-hidden className="mt-pas-3 bg-lichen mx-auto block h-0.5 w-10 md:mx-0" />
+      <span aria-hidden className="mt-pas-3 bg-accent mx-auto block h-0.5 w-10 md:mx-0" />
 
       <p className="mt-pas-3 mx-auto text-stone-500 md:mx-0">
         {aujourdhui === 0 ? (

@@ -131,9 +131,9 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
           {MOTIFS.map((choix) => (
             <li key={choix.valeur}>
               <label
-                className={`rounded-carte px-pas-4 py-pas-3 has-[:focus-visible]:border-lichen block cursor-pointer border transition-colors ${
+                className={`rounded-carte px-pas-4 py-pas-3 has-[:focus-visible]:border-accent block cursor-pointer border transition-colors ${
                   motif === choix.valeur
-                    ? "border-lichen bg-lichen/10"
+                    ? "border-accent bg-accent/10"
                     : "border-transparent hover:bg-stone-100"
                 }`}
               >
@@ -165,7 +165,7 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
             maxLength={500}
             disabled={envoi}
             // 16 px sur mobile : en deçà, Safari zoome à la mise au point.
-            className="rounded-champ mt-pas-2 px-pas-3 py-pas-2 md:text-petit focus-visible:border-lichen w-full resize-none border border-stone-300 bg-transparent text-base text-stone-900 outline-none disabled:opacity-45"
+            className="rounded-champ mt-pas-2 px-pas-3 py-pas-2 md:text-petit focus-visible:border-accent w-full resize-none border border-stone-300 bg-transparent text-base text-stone-900 outline-none disabled:opacity-45"
           />
         </div>
 

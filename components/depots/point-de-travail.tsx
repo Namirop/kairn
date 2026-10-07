@@ -18,7 +18,7 @@ export function PointDeTravail() {
   return (
     <span
       aria-hidden
-      className="point-qui-respire bg-lichen inline-block size-1.5 shrink-0 rounded-full"
+      className="point-qui-respire bg-accent inline-block size-1.5 shrink-0 rounded-full"
     />
   );
 }
