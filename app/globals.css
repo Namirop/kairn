@@ -359,7 +359,16 @@
     vers l'horizon — et toute la rampe de pierre vire au bleu de nuit : c'est
     elle qui peint les cairns, les arêtes, l'encre et le pied de page.
   */
-  --ciel: linear-gradient(177deg, #113479 0%, #143b8d 42%, #1a52b8 100%);
+  /* Le versant d'ombre, et il est le même que sous `lavis` — voir là-bas pour
+     la raison. Le ciel du versant étant presque un aplat, c'est lui qui porte
+     à peu près toute la variation de l'ouverture. */
+  --ombre-du-versant: linear-gradient(
+    90deg,
+    rgb(6 21 60 / 0.6) 0%,
+    rgb(6 21 60 / 0.26) 46%,
+    rgb(6 21 60 / 0) 84%
+  );
+  --ciel: var(--ombre-du-versant), linear-gradient(177deg, #17439c 0%, #1a4aa6 44%, #2059c2 100%);
 
   /* ── Relevés à la pipette sur la maquette validée, pas réinventés ──
      niveau 1, le ciel haut      #143b8d
@@ -370,8 +379,22 @@
   --ciel-teinte: #a5d8e7;
   --terre: #47a2cb;
 
+  /*
+    Les trois surfaces claires, écartées.
+
+    Elles tenaient dans un mouchoir : 1,10 pour 1 entre le papier et l'ombre,
+    c'est-à-dire rien. Une carte posée sur un panneau, un item de liste, une
+    bande alternée — tout se peignait d'une valeur que l'œil ne sépare pas, et
+    la page entière se lisait comme un seul lavis pâle. C'est ce que « ça ne
+    ressort pas » désigne, et ce n'est pas une affaire de teinte : c'est un
+    écart de valeur qui manque.
+
+    L'ombre descend donc à 1,22, l'écart que le produit se donne déjà entre la
+    roche et la dalle qu'elle porte. Un cran de plus ferait de la bande un
+    aplat de couleur à part entière, ce qui est une autre décision.
+  */
   --surface-papier: #eef5f7;
-  --surface-ombre: #dcebf0;
+  --surface-ombre: #cfe3ec;
   --surface-lichen: #e4eff2;
   /* Relevée sur la maquette. L'autre essai, plus froid et plus sombre, était
      #17293c — gardé ici au cas où celui-ci paraîtrait trop clair. */
@@ -381,7 +404,7 @@
   --stone-100: #dcebf0;
   --stone-300: #b8d4e0;
   --stone-400: #8fb2c4;
-  --stone-500: #4d738c;
+  --stone-500: #3d6480;
   --stone-700: #1f4360;
   --stone-800: #143049;
   --stone-900: #0d2236;
@@ -419,10 +442,9 @@
   --accent-profond: #143b8d;
   --accent-clair: #86b7f0;
 
-  /* L'en-tête est la ligne du haut du ciel, aux deux bords — voir le même
-     jeton sous `lavis`, où la démonstration est écrite. Le plus sombre est à
-     gauche, et la couture disparaît. */
-  --entete: linear-gradient(100deg, #113479 0%, #123681 100%);
+  /* L'en-tête est le haut du ciel sous le même versant d'ombre — voir le même
+     jeton sous `lavis`, où la démonstration est écrite. */
+  --entete: var(--ombre-du-versant), linear-gradient(90deg, #17439c 0%, #17439c 100%);
   --entete-filet: transparent;
 
   /* Le ciel du versant est presque un aplat : il a besoin du lavis. La lumière
@@ -444,7 +466,29 @@
     Le lavis. Le même ciel, mais qui descend plus bas et s'ouvre vers la glace :
     une seule teinte du bleu de nuit au bleu clair, jamais deux couleurs.
   */
-  --ciel: linear-gradient(177deg, #0f2f72 0%, #143b8d 34%, #1e5cc4 74%, #3a86c9 100%);
+  /*
+    Le ciel penche aussi de gauche à droite, et plus seulement de haut en bas.
+
+    Le dégradé de trois degrés suffisait à poser le plus sombre à gauche, mais
+    pas à ce qu'on le voie : les deux bords du haut étaient à la même valeur à
+    un pour cent près. Le versant d'ombre règle ça — le matin éclaire la droite
+    de la vallée, la gauche reste dans la nuit.
+
+    Il est posé par-dessus le lavis vertical, et c'est **la même fonction de x**
+    que l'en-tête porte : deux dégradés à quatre-vingt-dix degrés sur deux
+    éléments pleine largeur se rejoignent exactement à chaque colonne. C'est ce
+    qui permet d'avoir une couture invisible *et* un écart franc entre les deux
+    bords, là où faire suivre l'en-tête à la main oblige à choisir.
+  */
+  --ombre-du-versant: linear-gradient(
+    90deg,
+    rgb(6 21 60 / 0.6) 0%,
+    rgb(6 21 60 / 0.26) 46%,
+    rgb(6 21 60 / 0) 84%
+  );
+  --ciel:
+    var(--ombre-du-versant),
+    linear-gradient(177deg, #163f96 0%, #1a4aa6 26%, #1e5cc4 66%, #3a86c9 100%);
 
   /* ── Relevés à la pipette sur la maquette validée, pas réinventés ──
      niveau 1, le ciel haut      #143b8d
@@ -455,8 +499,10 @@
   --ciel-teinte: #a5d8e7;
   --terre: #47a2cb;
 
+  /* Les mêmes surfaces écartées que sous `versant` — la démonstration est
+     écrite là-bas. */
   --surface-papier: #eef5f7;
-  --surface-ombre: #dcebf0;
+  --surface-ombre: #cfe3ec;
   --surface-lichen: #e4eff2;
   /* Relevée sur la maquette. L'autre essai, plus froid et plus sombre, était
      #17293c — gardé ici au cas où celui-ci paraîtrait trop clair. */
@@ -466,7 +512,7 @@
   --stone-100: #dcebf0;
   --stone-300: #b8d4e0;
   --stone-400: #8fb2c4;
-  --stone-500: #4d738c;
+  --stone-500: #3d6480;
   --stone-700: #1f4360;
   --stone-800: #143049;
   --stone-900: #0d2236;
@@ -505,21 +551,15 @@
   --accent-clair: #86b7f0;
 
   /*
-    L'en-tête est le haut du ciel, pas une bande posée dessus.
-
-    Il prenait la variation de la maquette à l'envers — clair à gauche, sombre
-    à droite —, si bien que la seule arête où les deux se rejoignaient sans
-    marche était la droite, et que le coin gauche, celui qu'on regarde en
-    premier, portait une marche nette. Il reprend donc les deux couleurs que le
-    ciel a sur sa propre ligne du haut : son départ à gauche, et le point où ce
-    départ en est arrivé à l'autre bord — le ciel penche de trois degrés, il a
-    déjà un peu tourné quand il atteint la droite. La couture disparaît sur
-    toute la largeur, et le plus sombre est à gauche.
+    L'en-tête est le haut du ciel, pas une bande posée dessus : la couleur de
+    départ du lavis, sous le même versant d'ombre. Il n'a donc rien à savoir de
+    la hauteur du hero ni de l'inclinaison du ciel — il porte la même fonction
+    de x, et la couture ne peut pas exister.
 
     Le filet se tait pour la même raison : une ligne claire entre deux surfaces
     continues est une couture qu'on dessine exprès.
   */
-  --entete: linear-gradient(100deg, #0f2f72 0%, #12357f 100%);
+  --entete: var(--ombre-du-versant), linear-gradient(90deg, #163f96 0%, #163f96 100%);
   --entete-filet: transparent;
 
   /* Un ciel déjà dégradé porte sa propre lumière. Le lavis radial par-dessus
@@ -581,6 +621,23 @@
   color: var(--stone-50);
 }
 
+/*
+  Le survol du lien de l'en-tête, et c'est une correction d'illisibilité.
+
+  Il prend `surface-ombre`, réglée pour poser un panneau clair sur un autre
+  panneau clair. Sur le ciel, cette même surface devient une pastille presque
+  blanche en travers de la bande — l'objet le plus lumineux de la page pour un
+  survol —, et le mot qu'elle porte reste en encre claire puisque le fond est
+  sombre : on allume une lampe et on efface le texte au même instant.
+
+  Sur un aplat sombre, un survol se dit en voile, pas en pastille : la même
+  couleur un peu plus présente, assez pour qu'on sache que c'est cliquable.
+*/
+:root[data-palette] .entete-du-site a:hover {
+  background-color: rgb(255 255 255 / 0.12);
+  color: var(--stone-50);
+}
+
 :root[data-palette] .entete-du-site .fill-stone-900 {
   fill: var(--stone-50);
 }
@@ -621,6 +678,33 @@
 
 :root[data-palette] main > section[data-surface="papier"]:last-of-type .text-stone-500 {
   color: var(--stone-300);
+}
+
+/*
+  La matière descend sur les panneaux de roche de l'application.
+
+  Le « peint » s'arrêtait à la landing : passé la connexion, toutes les
+  surfaces redeviennent des aplats CSS, et c'est là qu'on passe ses journées.
+  Il ne peut pas se poser n'importe où pour autant — sur une surface de
+  lecture, une variation lente sous un paragraphe est du bruit.
+
+  La roche est le bon endroit, et le seul : c'est une masse, pas une page ;
+  elle est déjà la surface des deux panneaux par écran qui portent le cairn et
+  la progression ; et la lumière y vient de la droite, comme sur le ciel, donc
+  les deux se lisent comme le même temps du même paysage.
+
+  Posé sous le contenu, qui vit à `z-10` dans `Panneau` — le grain y est déjà
+  depuis toujours, par le même chemin.
+*/
+:root[data-palette] [data-surface="roche"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(118% 104% at 96% -14%, rgb(58 122 190 / 0.4), rgb(58 122 190 / 0) 60%),
+    radial-gradient(96% 86% at 4% 112%, rgb(4 12 26 / 0.46), rgb(4 12 26 / 0) 58%);
 }
 
 /* Le geste de l'ouverture s'élargit : sur un aplat, une pilule fine se perd. */

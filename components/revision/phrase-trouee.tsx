@@ -78,7 +78,7 @@ function Trou({
 
   // Le terme prend la place du trou, souligné de lichen : c'est le mot qu'on est
   // venu chercher, et l'accent est là pour le signaler.
-  return <span className="border-lichen mx-[0.06em] border-b-2 px-[0.1em]">{comble}</span>;
+  return <span className="border-lichen-deep mx-[0.06em] border-b-2 px-[0.1em]">{comble}</span>;
 }
 
 export function PhraseTrouee({
