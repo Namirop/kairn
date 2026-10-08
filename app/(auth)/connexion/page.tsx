@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { BoutonGoogle } from "@/components/compte/bouton-google";
 import { FormulaireConnexion } from "@/components/compte/formulaire-connexion";
 import { isGoogleEnabled } from "@/lib/auth/config";
 import { RETURN_TO_PARAM, ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
+import { adressePublique } from "@/lib/i18n/adresses";
+import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 
-export const metadata: Metadata = { title: "Connexion" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("compte.connexion");
+
+  return { title: t("metaTitre") };
+}
 
 /** Ne suit que les chemins internes : un `suite` venant de l'URL est du client. */
 function destination(valeur: string | undefined): string {
@@ -28,6 +35,10 @@ export default async function PageConnexion({
   // session qu'il a déjà. On le mène là où il allait.
   if (await getCurrentUser()) redirect(suite);
 
+  const t = await getTranslations("compte.connexion");
+  // La politique de confidentialité a sa version anglaise : on mène à celle qu'on lit.
+  const confidentialite = adressePublique(ROUTES.confidentialite, await langueDeLaRequete());
+
   return (
     <div className="gap-pas-6 md:gap-pas-8 flex flex-col">
       {/* Le titre est seul. Une ligne sous lui disait « ton adresse suffit : un
@@ -36,13 +47,15 @@ export default async function PageConnexion({
           expliqué deux fois sur un écran qui, lui, ne tenait pas dans un
           téléphone. Il est dit une fois, sous le champ, là où la question se
           pose. */}
-      <h1 className="text-h1-app leading-tight font-bold">Entrer dans Kairn</h1>
+      <h1 className="text-h1-app leading-tight font-bold">{t("titre")}</h1>
 
       <FormulaireConnexion suite={suite} />
 
       {isGoogleEnabled ? (
         <div className="gap-pas-4 flex flex-col">
-          <span className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">ou</span>
+          <span className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
+            {t("ou")}
+          </span>
           <BoutonGoogle suite={suite} />
         </div>
       ) : null}
@@ -52,14 +65,16 @@ export default async function PageConnexion({
           faut-il le dire **au moment où l'on s'engage** — un réglage qu'on
           découvre en recevant le premier email n'a rien annoncé. */}
       <p className="text-petit text-stone-500">
-        En continuant, tu acceptes la{" "}
-        <Link
-          href={ROUTES.confidentialite}
-          className="rounded-xs text-stone-900 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900"
-        >
-          politique de confidentialité
-        </Link>
-        . Kairn t&apos;écrit les jours où quelque chose est à revoir, et se coupe d&apos;un clic.
+        {t.rich("consentement", {
+          lien: (morceau) => (
+            <Link
+              href={confidentialite}
+              className="rounded-xs text-stone-900 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900"
+            >
+              {morceau}
+            </Link>
+          ),
+        })}
       </p>
     </div>
   );

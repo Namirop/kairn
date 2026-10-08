@@ -14,6 +14,7 @@ import { isSupportedTimeZone } from "@/lib/domain/local-day";
 
 const bodySchema = z.object({
   timezone: z.string().min(1).max(64).refine(isSupportedTimeZone, {
+    // i18n-ignore — réponse technique d'API, lue par du code et jamais rendue par un écran
     message: "Fuseau horaire inconnu.",
   }),
 });
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
     userId = (await requireUser()).id;
   } catch (error) {
     if (error instanceof UnauthenticatedError) {
+      // i18n-ignore — réponse technique d'API, lue par du code et jamais rendue par un écran
       return NextResponse.json({ erreur: "Session absente." }, { status: 401 });
     }
     throw error;
@@ -33,6 +35,7 @@ export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
 
   if (!parsed.success) {
+    // i18n-ignore — réponse technique d'API, lue par du code et jamais rendue par un écran
     return NextResponse.json({ erreur: "Fuseau horaire invalide." }, { status: 400 });
   }
 

@@ -2,6 +2,7 @@
 
 import { Paperclip, X } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { envoyerUnRetourAction, type EtatDuRetour } from "@/app/(app)/reglages/retour-action";
 import { ChoixDuSujet } from "@/components/reglages/choix-du-sujet";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ export function UnRetour() {
   const [capture, setCapture] = useState<string | null>(null);
   const [fenetre, setFenetre] = useState({ largeur: 0, hauteur: 0, agent: "" });
   const fichier = useRef<HTMLInputElement>(null);
+  const t = useTranslations("compte.retour");
 
   // Lu après le montage : ces trois valeurs n'existent pas au rendu serveur, et
   // les y chercher ferait diverger le balisage des deux côtés.
@@ -54,8 +56,7 @@ export function UnRetour() {
   if (etat.envoye) {
     return (
       <p className="text-corps text-stone-900" role="status">
-        C&apos;est envoyé, et c&apos;est lu. Tu n&apos;auras pas de réponse — mais ce que tu viens
-        d&apos;écrire finira corrigé.
+        {t("envoye")}
       </p>
     );
   }
@@ -66,7 +67,7 @@ export function UnRetour() {
 
       <div>
         <label htmlFor="retour-message" className="text-petit block text-stone-500">
-          Ce que tu as rencontré
+          {t("message")}
         </label>
         <textarea
           id="retour-message"
@@ -78,7 +79,7 @@ export function UnRetour() {
           rows={4}
           maxLength={MESSAGE_MAX}
           disabled={enCours}
-          placeholder="Ce que tu faisais, ce à quoi tu t'attendais, ce qui s'est passé."
+          placeholder={t("messageExemple")}
           // 16 px sur mobile : en deçà, Safari zoome à la mise au point.
           className="rounded-champ mt-pas-2 px-pas-3 py-pas-2 md:text-petit focus-visible:border-accent w-full resize-none border border-stone-300 bg-transparent text-base text-stone-900 outline-none disabled:opacity-45"
         />
@@ -86,14 +87,14 @@ export function UnRetour() {
 
       <div>
         <label htmlFor="retour-ecran" className="text-petit block text-stone-500">
-          Sur quel écran, si tu t&apos;en souviens
+          {t("ecran")}
         </label>
         <Input
           id="retour-ecran"
           name="ecran"
           autoComplete="off"
           disabled={enCours}
-          placeholder="La session, le dépôt, la page d'accueil…"
+          placeholder={t("ecranExemple")}
           className="mt-pas-2 max-w-sm"
         />
       </div>
@@ -106,7 +107,7 @@ export function UnRetour() {
 
       <div className="gap-pas-4 flex flex-wrap items-center">
         <Button type="submit" disabled={enCours}>
-          {enCours ? "Un instant" : "Envoyer"}
+          {enCours ? t("unInstant") : t("envoyer")}
         </Button>
 
         <p className="text-petit min-h-5" role="status" aria-live="polite">
@@ -135,6 +136,8 @@ function PieceJointe({
   fichier: React.RefObject<HTMLInputElement | null>;
   enCours: boolean;
 }) {
+  const t = useTranslations("compte.retour");
+
   return (
     <div className="gap-pas-3 flex flex-wrap items-center">
       <input
@@ -157,7 +160,7 @@ function PieceJointe({
         onClick={() => fichier.current?.click()}
       >
         <Paperclip aria-hidden />
-        {capture ? "Changer la capture" : "Joindre une capture"}
+        {capture ? t("changerCapture") : t("joindreCapture")}
       </Button>
 
       {capture ? (
@@ -165,7 +168,7 @@ function PieceJointe({
           <span className="max-w-48 truncate">{capture}</span>
           <button
             type="button"
-            aria-label="Retirer la capture"
+            aria-label={t("retirerCapture")}
             className="rounded-xs text-stone-500 transition-colors hover:text-stone-900"
             onClick={() => {
               onCapture(null);

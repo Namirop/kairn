@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { requireUser, UnauthenticatedError } from "@/lib/auth/session";
 import { exporterLeCompte } from "@/lib/db/compte";
 
@@ -15,8 +16,11 @@ import { exporterLeCompte } from "@/lib/db/compte";
  */
 export const dynamic = "force-dynamic";
 
-function nomDuFichier(): string {
-  return `kairn-mes-donnees-${new Date().toISOString().slice(0, 10)}.json`;
+/** Le nom du fichier se lit dans le dossier de téléchargement : il suit la langue. */
+async function nomDuFichier(): Promise<string> {
+  const t = await getTranslations("compte.donnees");
+
+  return t("fichier", { date: new Date().toISOString().slice(0, 10) });
 }
 
 export async function GET() {
@@ -26,6 +30,7 @@ export async function GET() {
     userId = (await requireUser()).id;
   } catch (error) {
     if (error instanceof UnauthenticatedError) {
+      // i18n-ignore — réponse technique d'API, lue par du code et jamais rendue par un écran
       return NextResponse.json({ erreur: "Session absente." }, { status: 401 });
     }
     throw error;
@@ -34,13 +39,16 @@ export async function GET() {
   const donnees = await exporterLeCompte(userId);
 
   if (!donnees) {
+    // i18n-ignore — réponse technique d'API, lue par du code et jamais rendue par un écran
     return NextResponse.json({ erreur: "Ce compte est introuvable." }, { status: 404 });
   }
+
+  const fichier = await nomDuFichier();
 
   return new NextResponse(JSON.stringify(donnees, null, 2), {
     headers: {
       "content-type": "application/json; charset=utf-8",
-      "content-disposition": `attachment; filename="${nomDuFichier()}"`,
+      "content-disposition": `attachment; filename="${fichier}"`,
       "cache-control": "no-store",
     },
   });

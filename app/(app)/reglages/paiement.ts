@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -29,36 +30,38 @@ const cadenceSchema = z.enum(CADENCES);
 
 export type EtatDuPaiement = { erreur?: string };
 
-/** Ce qu'on dit quand la limite de débit refuse. Personne ne la verra à la main. */
-const TROP_VITE = "Trop de demandes coup sur coup. Laisse passer quelques secondes.";
-
-const SESSION_EXPIREE = "Ta session a expiré. Reconnecte-toi.";
-
 /**
- * Ce qu'on dit d'un échec côté Stripe.
+ * Les textes de ces gestes vivent dans `compte.offre.erreurs`, dans la langue de
+ * la personne ; les commentaires qui suivent gardent le pourquoi de chacun, sous
+ * la clé qui le désigne.
+ */
+const erreurs = () => getTranslations("compte.offre.erreurs");
+
+/* `tropVite` — ce qu'on dit quand la limite de débit refuse. Personne ne la
+   verra à la main. */
+
+/*
+ * `echec` — ce qu'on dit d'un échec côté Stripe.
  *
  * Le détail part au journal et pas à l'écran : il nomme des clés, des
  * identifiants de prix et des montants, et il ne dit rien d'actionnable à qui
  * voulait simplement payer.
  */
-const ECHEC = "Le paiement n'a pas pu s'ouvrir. Réessaie dans un instant.";
 
-/**
- * Ce qu'on dit à qui paie une seconde fois.
+/*
+ * `dejaAbonne` — ce qu'on dit à qui paie une seconde fois.
  *
  * Ça n'arrive pas en cliquant : l'écran ne montre le bouton qu'à un compte sans
  * abonnement. Ça arrive avec un onglet resté ouvert sur l'état d'avant — et la
  * bonne réponse est alors de le rafraîchir, pas de réessayer.
  */
-const DEJA_ABONNE = "Ton abonnement est déjà ouvert. Recharge la page pour voir où il en est.";
 
-/**
- * Ce qu'on dit quand le portail ne s'ouvre pas.
+/*
+ * `portailFerme` — ce qu'on dit quand le portail ne s'ouvre pas.
  *
  * Le portail ne change aucun droit — on y consulte des factures et on y met une
  * carte à jour — donc son échec n'a rien d'urgent à annoncer. Il se réessaie.
  */
-const PORTAIL_FERME = "Tes factures ne s'ouvrent pas pour l'instant. Réessaie dans un instant.";
 
 /**
  * Ouvre la page de paiement et y envoie.
@@ -72,15 +75,16 @@ export async function payerAction(
   donnees: FormData,
 ): Promise<EtatDuPaiement> {
   const utilisateur = await getCurrentUser();
+  const t = await erreurs();
 
-  if (!utilisateur) return { erreur: SESSION_EXPIREE };
+  if (!utilisateur) return { erreur: t("sessionExpiree") };
 
   const cadence = cadenceSchema.safeParse(donnees.get("cadence"));
 
-  if (!cadence.success) return { erreur: "Cette offre n'existe pas." };
+  if (!cadence.success) return { erreur: t("offreInconnue") };
 
   if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
-    return { erreur: TROP_VITE };
+    return { erreur: t("tropVite") };
   }
 
   let adresse: string;
@@ -94,7 +98,7 @@ export async function payerAction(
       erreur,
     });
 
-    return { erreur: erreur instanceof AbonnementDejaOuvertError ? DEJA_ABONNE : ECHEC };
+    return { erreur: erreur instanceof AbonnementDejaOuvertError ? t("dejaAbonne") : t("echec") };
   }
 
   redirect(adresse);
@@ -109,11 +113,12 @@ export async function payerAction(
  */
 export async function portailAction(): Promise<EtatDuPaiement> {
   const utilisateur = await getCurrentUser();
+  const t = await erreurs();
 
-  if (!utilisateur) return { erreur: SESSION_EXPIREE };
+  if (!utilisateur) return { erreur: t("sessionExpiree") };
 
   if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
-    return { erreur: TROP_VITE };
+    return { erreur: t("tropVite") };
   }
 
   let adresse: string;
@@ -127,7 +132,7 @@ export async function portailAction(): Promise<EtatDuPaiement> {
       erreur,
     });
 
-    return { erreur: PORTAIL_FERME };
+    return { erreur: t("portailFerme") };
   }
 
   redirect(adresse);
@@ -148,12 +153,13 @@ export async function renouvellementAction(
   donnees: FormData,
 ): Promise<EtatDuPaiement> {
   const geste = gesteSchema.safeParse(donnees.get("geste"));
+  const t = await erreurs();
 
-  if (!geste.success) return { erreur: "Ce geste n'existe pas." };
+  if (!geste.success) return { erreur: t("gesteInconnu") };
 
   return geste.data === "arreter"
-    ? basculer(arreterLAbonnement, "L'arrêt n'a pas pu être enregistré.")
-    : basculer(reprendreLAbonnement, "La reprise n'a pas pu être enregistrée.");
+    ? basculer(arreterLAbonnement, t("arretEchoue"))
+    : basculer(reprendreLAbonnement, t("repriseEchouee"));
 }
 
 async function basculer(
@@ -161,11 +167,12 @@ async function basculer(
   echec: string,
 ): Promise<EtatDuPaiement> {
   const utilisateur = await getCurrentUser();
+  const t = await erreurs();
 
-  if (!utilisateur) return { erreur: SESSION_EXPIREE };
+  if (!utilisateur) return { erreur: t("sessionExpiree") };
 
   if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
-    return { erreur: TROP_VITE };
+    return { erreur: t("tropVite") };
   }
 
   try {

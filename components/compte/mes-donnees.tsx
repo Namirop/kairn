@@ -1,9 +1,11 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import { supprimerMonCompteAction, type EtatSuppression } from "@/app/(app)/reglages/actions";
 import { Button } from "@/components/ui/button";
 import { MOT_DE_CONFIRMATION } from "@/lib/domain/confirmation-de-suppression";
+import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
  * Emporter ses données, ou les effacer.
@@ -22,17 +24,16 @@ export function MesDonnees() {
     supprimerMonCompteAction,
     {},
   );
+  const t = useTranslations("compte.donnees");
+  const mot = MOT_DE_CONFIRMATION[useLangue()];
 
   return (
     <section className="mt-pas-12">
       <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-        Tes données
+        {t("titre")}
       </h2>
 
-      <p className="mt-pas-4 text-petit max-w-prose text-stone-500">
-        Tu peux emporter ce que tu as déposé à tout moment : un fichier avec tes dépôts, les
-        concepts qui en ont été tirés, leurs questions et tes passages.
-      </p>
+      <p className="mt-pas-4 text-petit max-w-prose text-stone-500">{t("texte")}</p>
 
       <div className="mt-pas-4">
         {/* Un lien et non un bouton : c'est une navigation vers un fichier, et
@@ -42,21 +43,17 @@ export function MesDonnees() {
           download
           className="rounded-galet text-petit text-stone-900 underline decoration-stone-300 underline-offset-4 hover:decoration-stone-900"
         >
-          Télécharger mes données
+          {t("telecharger")}
         </a>
       </div>
 
       <div className="mt-pas-8 pt-pas-6 border-t border-stone-300">
         {ouvert ? (
           <form action={action} noValidate className="max-w-prose">
-            <p className="text-petit text-stone-500">
-              Ça efface le compte, tes dépôts, tes concepts, leurs questions et tous tes passages.
-              C&apos;est immédiat et il n&apos;y a pas de retour en arrière. Pense à télécharger tes
-              données avant.
-            </p>
+            <p className="text-petit text-stone-500">{t("avertissement")}</p>
 
             <label htmlFor="confirmation" className="mt-pas-4 text-petit block text-stone-500">
-              Recopie « {MOT_DE_CONFIRMATION} » pour confirmer
+              {t("recopie", { mot })}
             </label>
             <input
               id="confirmation"
@@ -73,10 +70,10 @@ export function MesDonnees() {
 
             <div className="gap-pas-3 mt-pas-4 flex flex-wrap">
               <Button type="submit" variant="destructive" size="sm" disabled={enCours}>
-                {enCours ? "Suppression…" : "Supprimer définitivement"}
+                {enCours ? t("suppression") : t("supprimer")}
               </Button>
               <Button type="button" variant="ghost" size="sm" onClick={() => setOuvert(false)}>
-                Annuler
+                {t("annuler")}
               </Button>
             </div>
           </form>
@@ -86,7 +83,7 @@ export function MesDonnees() {
             onClick={() => setOuvert(true)}
             className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
           >
-            Supprimer mon compte
+            {t("ouvrir")}
           </button>
         )}
       </div>

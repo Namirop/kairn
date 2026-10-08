@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,8 @@ export function BarreDEnregistrement({
   message?: string;
   erreur?: string;
 }) {
+  const t = useTranslations("compte.reglages.formulaire");
+
   return (
     // La place du bouton reste prise quand il s'en va. Sans ce creux, le bas du
     // formulaire remonterait d'un cran au moment même où l'on touche à une
@@ -78,7 +81,7 @@ export function BarreDEnregistrement({
                 modifie ? (erreur ? "text-alerte-surface" : "text-stone-300") : "sr-only",
               )}
             >
-              {erreur ?? "Modifié, pas encore enregistré"}
+              {erreur ?? t("modifie")}
             </p>
 
             <Button
@@ -89,7 +92,7 @@ export function BarreDEnregistrement({
                 modifie && "bg-stone-50 text-stone-900 hover:bg-stone-300",
               )}
             >
-              {enCours ? "Un instant" : "Enregistrer"}
+              {enCours ? t("unInstant") : t("enregistrer")}
             </Button>
           </div>
         </div>

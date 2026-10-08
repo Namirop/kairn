@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { BoutonDeconnexion } from "@/components/compte/bouton-deconnexion";
 import { MesDonnees } from "@/components/compte/mes-donnees";
 import { Panneau } from "@/components/coquille/panneau";
@@ -21,7 +22,11 @@ import { PARAMETRE_DE_RETOUR, RETOUR_ACCEPTE } from "@/lib/paiement/achat";
 import { lireDossierStripe } from "@/lib/db/ecriture-de-labonnement";
 import { paiementOuvert } from "@/lib/paiement/config";
 
-export const metadata: Metadata = { title: "Réglages" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("compte.reglages");
+
+  return { title: t("metaTitre") };
+}
 
 /**
  * La page est recalculée à chaque visite : les réglages viennent d'être écrits,
@@ -81,14 +86,13 @@ export default async function PageReglages({ searchParams }: Parametres) {
    * Rien n'est retiré à personne d'autre : un compte ordinaire garde les trois.
    */
   const administrateur = estAdministrateur(utilisateur.email);
+  const t = await getTranslations("compte.reglages");
 
   return (
     <PileDePanneaux sol="ombre">
       <Panneau surface="papier" mesure="colonne">
-        <h1 className="text-h1-app leading-tight font-bold">Réglages</h1>
-        <p className="mt-pas-2 text-petit text-stone-500">
-          Ce que tu fais dans Kairn, et ce que Kairn fait sans toi.
-        </p>
+        <h1 className="text-h1-app leading-tight font-bold">{t("titre")}</h1>
+        <p className="mt-pas-2 text-petit text-stone-500">{t("chapo")}</p>
       </Panneau>
 
       <Strates de="papier" vers="ombre" graine="reglages-liste" />
@@ -104,14 +108,14 @@ export default async function PageReglages({ searchParams }: Parametres) {
 
         <dl className="gap-pas-2 mt-pas-12 flex flex-col">
           <Ligne
-            intitule="Adresse"
+            intitule={t("adresse.intitule")}
             valeur={utilisateur.email}
-            raison="C'est l'identité du compte : elle sert à s'y connecter, puisqu'il n'y a pas de mot de passe. La changer demande de vérifier la nouvelle avant de basculer."
+            raison={t("adresse.raison")}
           />
           <Ligne
-            intitule="Fuseau horaire"
+            intitule={t("fuseau.intitule")}
             valeur={reglages.timezone}
-            raison="Détecté depuis ton navigateur à chaque visite, et corrigé tout seul si tu changes de pays. Il décide quel jour il est pour toi, et à quelle heure part ton rappel."
+            raison={t("fuseau.raison")}
           />
         </dl>
 
@@ -154,13 +158,10 @@ export default async function PageReglages({ searchParams }: Parametres) {
             ensemble. Ce n'est pas le contenu qui manquait de poids, c'est la
             surface qui manquait dessous. */}
         <section className="mt-pas-12">
-          <h2 className={GROUPE}>Un problème, une remarque</h2>
+          <h2 className={GROUPE}>{t("probleme.titre")}</h2>
 
           <div className="p-pas-4 md:p-pas-6 rounded-champ bg-surface-papier mt-pas-3">
-            <p className="text-petit text-stone-500">
-              Une logique qui surprend, un mot de travers, un écran qui déborde. Ça arrive à une
-              personne, jamais aux chiffres — sans toi, personne ne le saura.
-            </p>
+            <p className="text-petit text-stone-500">{t("probleme.texte")}</p>
 
             <div className="mt-pas-6">
               <UnRetour />
@@ -177,7 +178,7 @@ export default async function PageReglages({ searchParams }: Parametres) {
               href={ROUTES.commentCaMarche}
               className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
             >
-              Comment ça marche
+              {t("commentCaMarche")}
             </Link>
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -10,6 +11,7 @@ import { enregistrerLesReglages, optOutOfEmails, reprendreLesEmails } from "@/li
 import { confirmationValide, MOT_DE_CONFIRMATION } from "@/lib/domain/confirmation-de-suppression";
 import { lireHeureDeRappel } from "@/lib/domain/heure-de-rappel";
 import { lirePlafondDeSession, PLAFOND_MAX, PLAFOND_MIN } from "@/lib/domain/selection-session";
+import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 import { PaiementError } from "@/lib/paiement/erreurs";
 import { fermerLAbonnementDuCompte } from "@/lib/paiement/fermeture-du-compte";
 
@@ -21,10 +23,6 @@ import { fermerLAbonnementDuCompte } from "@/lib/paiement/fermeture-du-compte";
  * mélanger les deux ferait qu'une erreur d'import mette la suppression à portée
  * d'un écran qui ne la demande pas.
  */
-
-const confirmationSchema = z.object({
-  confirmation: z.string().refine(confirmationValide),
-});
 
 export type EtatSuppression = { erreur?: string };
 
@@ -43,12 +41,15 @@ export async function supprimerMonCompteAction(
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
-  const valide = confirmationSchema.safeParse({
-    confirmation: (donnees.get("confirmation") ?? "").toString(),
-  });
+  const t = await getTranslations("compte.donnees.erreurs");
+  // Le mot à recopier est celui que l'écran a demandé, donc celui de sa langue.
+  const langue = await langueDeLaRequete();
+  const valide = z
+    .object({ confirmation: z.string().refine((saisie) => confirmationValide(saisie, langue)) })
+    .safeParse({ confirmation: (donnees.get("confirmation") ?? "").toString() });
 
   if (!valide.success) {
-    return { erreur: `Recopie « ${MOT_DE_CONFIRMATION} » pour confirmer.` };
+    return { erreur: t("confirmation", { mot: MOT_DE_CONFIRMATION[langue] }) };
   }
 
   // **L'abonnement se coupe avant le compte, et jamais l'inverse.** La ligne
@@ -69,15 +70,12 @@ export async function supprimerMonCompteAction(
       erreur,
     });
 
-    return {
-      erreur:
-        "Ton abonnement n'a pas pu être arrêté, et on ne supprime pas un compte qui paie encore. Réessaie dans un instant.",
-    };
+    return { erreur: t("abonnement") };
   }
 
   const efface = await supprimerLeCompte(utilisateur.id);
 
-  if (!efface) return { erreur: "Ce compte est introuvable." };
+  if (!efface) return { erreur: t("introuvable") };
 
   // Rien à révoquer : la ligne `Session` est partie avec le compte, dans la même
   // cascade. Le cookie que le navigateur garde ne désigne plus rien — la
@@ -121,6 +119,8 @@ export async function enregistrerLesReglagesAction(
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
+  const t = await getTranslations("compte.reglages.reponses");
+
   // Les deux lectures d'abord : rien ne s'écrit tant qu'une saisie est illisible,
   // sinon un plafond mal tapé aurait quand même coupé les emails.
   const saisieDuPlafond = (donnees.get("plafond") ?? "").toString();
@@ -128,7 +128,7 @@ export async function enregistrerLesReglagesAction(
 
   if (plafond === null) {
     return {
-      erreur: `La session porte de ${PLAFOND_MIN} à ${PLAFOND_MAX} concepts. Ce qui déborde revient le lendemain.`,
+      erreur: t("plafond", { min: PLAFOND_MIN, max: PLAFOND_MAX }),
       plafond: saisieDuPlafond,
     };
   }
@@ -139,7 +139,7 @@ export async function enregistrerLesReglagesAction(
 
   if (heure === null) {
     return {
-      erreur: "L'heure du rappel est une heure pile, de 0 à 23. Par exemple 19 h.",
+      erreur: t("heure"),
       heure: saisieDeLHeure,
       plafond: saisieDuPlafond,
     };
@@ -158,9 +158,9 @@ export async function enregistrerLesReglagesAction(
     streakAlertEnabled: emailsActifs && donnees.get("alerte") !== null,
   });
 
-  if (!ecrit) return { erreur: "Ces réglages n'ont pas pu être enregistrés. Réessaie." };
+  if (!ecrit) return { erreur: t("echec") };
 
   revalidatePath(ROUTES.reglages);
 
-  return { message: emailsActifs ? "Enregistré." : "Enregistré. Emails coupés." };
+  return { message: emailsActifs ? t("enregistre") : t("enregistreSansEmails") };
 }

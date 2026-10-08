@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Champ } from "@/components/compte/champ";
 import { SaisieDuCode } from "@/components/compte/saisie-du-code";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
   const [envoyeA, setEnvoyeA] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const t = useTranslations("compte.connexion");
 
   async function demanderLeCode(evenement: React.FormEvent) {
     evenement.preventDefault();
@@ -42,7 +44,7 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
     setEnCours(false);
 
     if (error) {
-      setErreur("Le code n'a pas pu partir. Réessaie dans un instant.");
+      setErreur(t("echecEnvoi"));
       return;
     }
 
@@ -59,7 +61,7 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
           onClick={() => setEnvoyeA(null)}
           className="rounded-galet text-petit self-start text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
         >
-          Changer d&apos;adresse
+          {t("changerDAdresse")}
         </button>
       </div>
     );
@@ -71,7 +73,7 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
         id="email"
         name="email"
         type="email"
-        intitule="Adresse email"
+        intitule={t("adresse")}
         autoComplete="email"
         required
         value={adresse}
@@ -84,14 +86,12 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
       </p>
 
       <Button type="submit" disabled={enCours || adresse.trim().length === 0}>
-        {enCours ? "Envoi…" : "Recevoir mon code"}
+        {enCours ? t("envoi") : t("recevoir")}
       </Button>
 
       {/* Le mécanisme du code, dit une fois et ici : c'est sous le champ que la
           question se pose, et le titre de la page le répétait plus haut. */}
-      <p className="text-petit text-stone-500">
-        Le code reçu par email ouvre ta session, et crée ton compte si tu n&apos;en as pas.
-      </p>
+      <p className="text-petit text-stone-500">{t("mecanisme")}</p>
     </form>
   );
 }

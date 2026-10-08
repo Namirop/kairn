@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { emailOtp, signIn } from "@/lib/auth/client";
 import { TIMEZONE_HEADER } from "@/lib/auth/en-tetes";
 import { codeComplet, lireLeCode } from "@/lib/domain/code-de-connexion";
@@ -31,6 +32,7 @@ export type ConnexionParCode = {
 
 export function useConnexionParCode(adresse: string, suite: string): ConnexionParCode {
   const router = useRouter();
+  const t = useTranslations("compte.connexion.code");
   const [code, setCode] = useState("");
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -57,11 +59,7 @@ export function useConnexionParCode(adresse: string, suite: string): ConnexionPa
 
       if (error) {
         setEnCours(false);
-        setErreur(
-          error.code === "TOO_MANY_ATTEMPTS"
-            ? "Trop d'essais sur ce code. Demandes-en un nouveau."
-            : "Ce code ne correspond pas, ou il a expiré.",
-        );
+        setErreur(error.code === "TOO_MANY_ATTEMPTS" ? t("tropDEssais") : t("invalide"));
         return;
       }
 
@@ -70,7 +68,7 @@ export function useConnexionParCode(adresse: string, suite: string): ConnexionPa
       router.push(suite);
       router.refresh();
     },
-    [adresse, router, suite],
+    [adresse, router, suite, t],
   );
 
   useEffect(() => {
@@ -90,12 +88,12 @@ export function useConnexionParCode(adresse: string, suite: string): ConnexionPa
     setCode("");
 
     if (error) {
-      setErreur("Le code n'a pas pu repartir. Réessaie dans un instant.");
+      setErreur(t("echecRenvoi"));
       return;
     }
 
     setRenvoye(true);
-  }, [adresse]);
+  }, [adresse, t]);
 
   return {
     code,

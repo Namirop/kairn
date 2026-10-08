@@ -16,10 +16,18 @@ import type { SujetDeRetour } from "@/lib/db/types";
  * énumération du schéma. Le domaine est du TypeScript pur, et une table de
  * libellés n'y a rien à faire : ce n'est pas une règle du produit, c'est ce
  * qu'on écrit à l'écran.
+ *
+ * **Il ne sert plus le formulaire**, qui lit ses libellés dans les messages
+ * (`compte.retour.sujets`) pour parler la langue de qui écrit. Restent l'écran
+ * interne et l'email d'alerte, qui sont lus par l'exploitant, en français.
  */
 export const LIBELLE_DE_SUJET: Record<SujetDeRetour, string> = {
+  // i18n-ignore — lu par l'écran interne et l'email d'alerte, en français ; le formulaire lit `compte.retour.sujets`
   BUG: "Ça ne marche pas",
+  // i18n-ignore — lu par l'écran interne et l'email d'alerte, en français ; le formulaire lit `compte.retour.sujets`
   COMPORTEMENT: "Ça me surprend",
+  // i18n-ignore — lu par l'écran interne et l'email d'alerte, en français ; le formulaire lit `compte.retour.sujets`
   TEXTE: "Un mot de travers",
+  // i18n-ignore — lu par l'écran interne et l'email d'alerte, en français ; le formulaire lit `compte.retour.sujets`
   AUTRE: "Autre chose",
 };

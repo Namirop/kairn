@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { enregistrerLesReglagesAction, type EtatDesReglages } from "@/app/(app)/reglages/actions";
 import { BarreDEnregistrement } from "@/components/reglages/barre-denregistrement";
 import { Reglage } from "@/components/reglages/reglage";
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ecrireHeureDeRappel } from "@/lib/domain/heure-de-rappel";
 import { PLAFOND_MAX, PLAFOND_MIN } from "@/lib/domain/selection-session";
+import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
  * Ce qu'un compte peut décider : la longueur de sa session, et ce qu'on lui
@@ -52,6 +54,9 @@ export function FormulaireDeReglages({
   const [rappel, setRappel] = useState(rappelActif);
   const [alerte, setAlerte] = useState(alerteActive);
   const [modifie, setModifie] = useState(false);
+  const t = useTranslations("compte.reglages.formulaire");
+  // L'heure se relit dans la langue de l'écran : « 19 h » en français, « 7 pm » en anglais.
+  const heureEcrite = ecrireHeureDeRappel(heureDuRappel, useLangue());
 
   /*
     Une écriture réussie remet le formulaire au repos, un refus non.
@@ -71,12 +76,12 @@ export function FormulaireDeReglages({
   return (
     <form action={envoyer} onInput={() => setModifie(true)} className="gap-pas-8 flex flex-col">
       <fieldset className="gap-pas-2 flex flex-col border-0 p-0">
-        <legend className={`${GROUPE} mb-pas-3`}>La session</legend>
+        <legend className={`${GROUPE} mb-pas-3`}>{t("session")}</legend>
 
         <Reglage
           nom="plafond"
-          intitule="Concepts par jour"
-          explication={`De ${PLAFOND_MIN} à ${PLAFOND_MAX}. Au-delà, une session devient une corvée qu'on abandonne au milieu, et ce qui déborde n'est pas perdu : il reste dû, et revient en tête le lendemain.`}
+          intitule={t("plafond.intitule")}
+          explication={t("plafond.explication", { min: PLAFOND_MIN, max: PLAFOND_MAX })}
           controle={
             <Input
               id="plafond"
@@ -95,12 +100,12 @@ export function FormulaireDeReglages({
       </fieldset>
 
       <fieldset className="gap-pas-2 flex flex-col border-0 p-0">
-        <legend className={`${GROUPE} mb-pas-3`}>Ce qu&apos;on t&apos;envoie</legend>
+        <legend className={`${GROUPE} mb-pas-3`}>{t("envois")}</legend>
 
         <Reglage
           nom="rappel"
-          intitule="Rappel quotidien"
-          explication="Un email à l'heure que tu choisis, les jours où quelque chose est dû. Rien à revoir, rien n'est envoyé."
+          intitule={t("rappel.intitule")}
+          explication={t("rappel.explication")}
           controle={
             <Switch
               id="rappel"
@@ -117,29 +122,29 @@ export function FormulaireDeReglages({
           {rappel && emails ? (
             <div className="gap-pas-3 mt-pas-3 flex flex-wrap items-center">
               <Label htmlFor="heure" className="text-petit">
-                À
+                {t("rappel.a")}
               </Label>
               <Input
                 id="heure"
                 name="heure"
-                defaultValue={etat.heure ?? ecrireHeureDeRappel(heureDuRappel)}
+                defaultValue={etat.heure ?? heureEcrite}
                 key={etat.heure ?? "heure"}
                 inputMode="numeric"
                 autoComplete="off"
                 className="max-w-24"
                 aria-invalid={etat.heure ? true : undefined}
               />
-              <p className="text-petit text-stone-500">dans ton fuseau.</p>
+              <p className="text-petit text-stone-500">{t("rappel.fuseau")}</p>
             </div>
           ) : (
-            <input type="hidden" name="heure" value={ecrireHeureDeRappel(heureDuRappel)} />
+            <input type="hidden" name="heure" value={heureEcrite} />
           )}
         </Reglage>
 
         <Reglage
           nom="alerte"
-          intitule="Alerte de série"
-          explication="Le soir, seulement si ta série est en cours, que rien n'a été revu et qu'il reste quelque chose à faire. La plupart des jours, elle ne part pas."
+          intitule={t("alerte.intitule")}
+          explication={t("alerte.explication")}
           controle={
             <Switch
               id="alerte"
@@ -156,8 +161,8 @@ export function FormulaireDeReglages({
 
         <Reglage
           nom="emails"
-          intitule="Emails"
-          explication="Coupé, plus rien ne part sauf le code de connexion — sans lui, personne ne pourrait plus entrer dans son compte."
+          intitule={t("emails.intitule")}
+          explication={t("emails.explication")}
           controle={
             <Switch
               id="emails"

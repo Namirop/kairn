@@ -55,6 +55,7 @@ export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
 
   if (!signature) {
+    // i18n-ignore — réponse à Stripe, jamais lue par une personne
     return NextResponse.json({ erreur: "Requête non signée." }, { status: 400 });
   }
 
@@ -75,12 +76,14 @@ export async function POST(request: Request) {
       // Alerter dessus noierait le canal, et un canal noyé ne se lit plus.
       console.warn("[paiement] signature refusée");
 
+      // i18n-ignore — réponse à Stripe, jamais lue par une personne
       return NextResponse.json({ erreur: "Signature invalide." }, { status: 400 });
     }
 
     console.error("[paiement] webhook en échec", erreur);
     signalerLePaiementEnEchec({ type: typeAnnonce(corps), erreur });
 
+    // i18n-ignore — réponse à Stripe, jamais lue par une personne
     return NextResponse.json({ erreur: "Traitement impossible." }, { status: 500 });
   }
 }

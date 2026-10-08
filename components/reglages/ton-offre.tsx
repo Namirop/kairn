@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { AttenteDuPaiement } from "@/components/reglages/attente-du-paiement";
 import { Portail, Renouvellement } from "@/components/reglages/gestes-de-loffre";
 import { OffreComplete } from "@/components/reglages/offre-complete";
 import { ROUTES } from "@/lib/auth/routes";
 import { type Plan } from "@/lib/domain/plafond-du-plan";
+import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
  * L'offre du compte, et le geste qui la change.
@@ -32,6 +34,12 @@ import { type Plan } from "@/lib/domain/plafond-du-plan";
  * fabriqués par la place que chaque bouton réservait à un message d'erreur qui
  * n'arrive jamais. Ils appartiennent au même sujet — ce que je fais de mon
  * abonnement —, ils se lisent ensemble.
+ *
+ * **En anglais, rien ne se vend.** Premium n'est pas ouvert dans cette langue
+ * (décision du 08/10/2026) : ni offre à prendre, ni lien vers les tarifs, ni
+ * portail pour qui n'a jamais payé — la limite du plan gratuit est dite, et le
+ * fait que Premium n'existe pas encore en anglais aussi. Un compte qui paie déjà
+ * garde ses gestes et son portail : ce sont les siens, pas une vente.
  */
 
 type Props = {
@@ -64,18 +72,23 @@ export function TonOffre({
   retourDePaiement,
   dossier,
 }: Props) {
+  const t = useTranslations("compte.offre");
   const paye = plan !== "GRATUIT";
+  // Rien ne mène vers une caisse en euros depuis l'interface anglaise.
+  const vend = useLangue() === "FR";
 
   return (
     <section className="mt-pas-12">
-      <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">Ton offre</h2>
+      <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
+        {t("titre")}
+      </h2>
 
       <div className="p-pas-4 md:p-pas-6 rounded-champ bg-surface-papier mt-pas-3">
         <p className="text-h2-app leading-none font-semibold text-stone-900">
-          {paye ? "Complet" : "Gratuit"}
+          {paye ? t("complet") : t("gratuit")}
         </p>
         <p className="mt-pas-2 text-petit font-mono text-stone-500 tabular-nums">
-          {plafond} concepts par mois
+          {t("parMois", { plafond })}
         </p>
 
         <p className="mt-pas-4 pt-pas-4 text-petit max-w-prose border-t border-stone-300/70 text-stone-500">
@@ -84,6 +97,7 @@ export function TonOffre({
             terme={terme}
             resilieALaFin={resilieALaFin}
             ouvert={ouvert}
+            vend={vend}
             retourDePaiement={retourDePaiement}
           />
         </p>
@@ -94,21 +108,25 @@ export function TonOffre({
           </div>
         ) : null}
 
-        {!paye && !ouvert ? (
+        {!paye && !vend ? (
+          <p className="mt-pas-3 text-petit max-w-prose text-stone-500">{t("indisponible")}</p>
+        ) : null}
+
+        {!paye && !ouvert && vend ? (
           <p className="mt-pas-4">
             <Link
               href={ROUTES.tarifs}
               className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
             >
-              Voir les tarifs
+              {t("voirTarifs")}
             </Link>
           </p>
         ) : null}
 
-        {paye || (dossier && ouvert) ? (
+        {paye || (dossier && ouvert && vend) ? (
           <div className="gap-pas-4 mt-pas-6 flex flex-wrap items-center">
             {paye ? <Renouvellement resilieALaFin={resilieALaFin} /> : null}
-            {dossier && ouvert ? <Portail /> : null}
+            {dossier && ouvert && (vend || paye) ? <Portail /> : null}
           </div>
         ) : null}
       </div>
@@ -120,7 +138,7 @@ export function TonOffre({
           qui ne se séparent que de quelques centièmes de luminance : le bloc qui
           devait ressortir se fondait dans celui qui le contenait. Sur l'ombre du
           panneau, le lichen tranche. */}
-      {!paye && ouvert ? <OffreComplete /> : null}
+      {!paye && ouvert && vend ? <OffreComplete /> : null}
     </section>
   );
 }
@@ -131,36 +149,25 @@ function Etat({
   terme,
   resilieALaFin,
   ouvert,
+  vend,
   retourDePaiement,
-}: Omit<Props, "plan" | "plafond" | "dossier"> & { paye: boolean }) {
-  if (paye && resilieALaFin) {
-    return (
-      <>
-        Ton abonnement est arrêté. L&apos;accès court jusqu&apos;au {terme}, puis tu retrouves{" "}
-        l&apos;offre gratuite. Rien n&apos;est supprimé, jamais.
-      </>
-    );
-  }
+}: Omit<Props, "plan" | "plafond" | "dossier"> & { paye: boolean; vend: boolean }) {
+  const t = useTranslations("compte.offre.etat");
 
-  if (paye && retourDePaiement) {
-    return <>Ton paiement est passé. Ton offre court jusqu&apos;au {terme}.</>;
-  }
+  if (paye && resilieALaFin) return <>{t("arrete", { terme: terme ?? "" })}</>;
 
-  if (paye) return <>Renouvelé le {terme}. Tu peux arrêter quand tu veux.</>;
+  if (paye && retourDePaiement) return <>{t("paye", { terme: terme ?? "" })}</>;
+
+  if (paye) return <>{t("renouvele", { terme: terme ?? "" })}</>;
 
   // Le retour de Stripe et l'arrivée du webhook sont deux chemins distincts, et
   // le navigateur gagne souvent la course. Sans cette phrase, quelqu'un qui
   // vient de payer lit « Gratuit » et croit son paiement perdu.
-  if (retourDePaiement) {
-    return (
-      <>
-        Ton paiement est passé. Il faut quelques secondes pour qu&apos;il arrive jusqu&apos;ici —
-        cet écran se met à jour tout seul.
-      </>
-    );
-  }
+  if (retourDePaiement) return <>{t("enRoute")}</>;
 
-  if (!ouvert) return <>Le paiement n&apos;est pas encore ouvert.</>;
+  // En anglais, la fermeture du paiement ne se dit pas : il n'y a rien à
+  // attendre, et la phrase qui suit la limite le dit déjà.
+  if (!ouvert && vend) return <>{t("ferme")}</>;
 
-  return <>Tout ce que le produit sait faire est ouvert. C&apos;est le volume qui est borné.</>;
+  return <>{t("gratuit")}</>;
 }

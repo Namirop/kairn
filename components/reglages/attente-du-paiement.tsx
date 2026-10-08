@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 /**
  * L'écran qui se met à jour tout seul, le temps que le webhook arrive.
@@ -24,6 +25,7 @@ const ESSAIS = 15;
 export function AttenteDuPaiement() {
   const router = useRouter();
   const [restants, setRestants] = useState(ESSAIS);
+  const t = useTranslations("compte.offre");
 
   useEffect(() => {
     if (restants <= 0) return;
@@ -42,8 +44,7 @@ export function AttenteDuPaiement() {
 
   return (
     <p className="text-petit text-pretty text-stone-500" role="status">
-      Le retour de Stripe tarde plus que d&apos;habitude. Ton paiement n&apos;est pas perdu :
-      recharge la page dans un moment, ou écris-nous si l&apos;offre n&apos;a pas changé demain.
+      {t("attente")}
     </p>
   );
 }

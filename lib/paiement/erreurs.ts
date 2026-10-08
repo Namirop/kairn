@@ -21,6 +21,7 @@ export class PaiementConfigError extends PaiementError {
     readonly variable: string,
     detail: string,
   ) {
+    // i18n-ignore — message d'Error interne, destiné au journal
     super(`Configuration du paiement invalide — ${variable} : ${detail}`);
   }
 }
@@ -38,7 +39,9 @@ export class PaiementLiveNonAutoriseError extends PaiementError {
 
   constructor() {
     super(
+      // i18n-ignore — message d'Error interne, destiné au journal
       "STRIPE_SECRET_KEY est une clé de production alors que PAIEMENT_LIVE n'est pas à true. " +
+        // i18n-ignore — message d'Error interne, destiné au journal
         "Le mode test est le défaut : poser une clé live demande de le dire.",
     );
   }
@@ -49,6 +52,7 @@ export class SignatureInvalideError extends PaiementError {
   readonly code = "PAIEMENT_SIGNATURE";
 
   constructor(options?: { cause?: unknown }) {
+    // i18n-ignore — message d'Error interne, destiné au journal
     super("La signature de ce webhook ne correspond pas au secret configuré.", options);
   }
 }
@@ -58,6 +62,7 @@ export class RapportIllisibleError extends PaiementError {
   readonly code = "PAIEMENT_RAPPORT_ILLISIBLE";
 
   constructor(detail: string) {
+    // i18n-ignore — message d'Error interne, destiné au journal
     super(`Cet abonnement Stripe ne se lit pas : ${detail}`);
   }
 }
@@ -73,6 +78,7 @@ export class AucunAbonnementError extends PaiementError {
   readonly code = "PAIEMENT_AUCUN_ABONNEMENT";
 
   constructor() {
+    // i18n-ignore — message d'Error interne, destiné au journal
     super("Ce compte n'a pas d'abonnement en cours.");
   }
 }
@@ -89,6 +95,7 @@ export class AbonnementDejaOuvertError extends PaiementError {
   readonly code = "PAIEMENT_ABONNEMENT_DEJA_OUVERT";
 
   constructor(abonnementId: string) {
+    // i18n-ignore — message d'Error interne, destiné au journal
     super(`Ce compte a déjà l'abonnement ${abonnementId}.`);
   }
 }
@@ -104,6 +111,7 @@ export class AucunDossierStripeError extends PaiementError {
   readonly code = "PAIEMENT_AUCUN_DOSSIER";
 
   constructor() {
+    // i18n-ignore — message d'Error interne, destiné au journal
     super("Ce compte n'a pas de dossier chez Stripe.");
   }
 }

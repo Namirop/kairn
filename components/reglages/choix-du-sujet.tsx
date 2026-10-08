@@ -1,5 +1,5 @@
+import { useTranslations } from "next-intl";
 import type { SujetDeRetour } from "@/lib/db/types";
-import { LIBELLE_DE_SUJET } from "@/lib/retours/libelle-du-sujet";
 
 /**
  * De quoi le retour parle : quatre choix, en un coup d'œil.
@@ -15,7 +15,7 @@ import { LIBELLE_DE_SUJET } from "@/lib/retours/libelle-du-sujet";
  * pilule est un geste, et ceci est une saisie.
  */
 
-/** L'ordre de lecture, du plus concret au plus vague. La table dit les mots. */
+/** L'ordre de lecture, du plus concret au plus vague. Les messages disent les mots. */
 const ORDRE: SujetDeRetour[] = ["BUG", "COMPORTEMENT", "TEXTE", "AUTRE"];
 
 export function ChoixDuSujet({
@@ -27,9 +27,11 @@ export function ChoixDuSujet({
   onChoisir: (sujet: SujetDeRetour) => void;
   fige: boolean;
 }) {
+  const t = useTranslations("compte.retour");
+
   return (
     <fieldset className="border-0 p-0">
-      <legend className="text-petit mb-pas-2 text-stone-500">De quoi s&apos;agit-il</legend>
+      <legend className="text-petit mb-pas-2 text-stone-500">{t("sujet")}</legend>
 
       <div className="gap-pas-2 flex flex-wrap">
         {ORDRE.map((sujet) => (
@@ -50,7 +52,7 @@ export function ChoixDuSujet({
               disabled={fige}
               className="sr-only"
             />
-            {LIBELLE_DE_SUJET[sujet]}
+            {t(`sujets.${sujet}`)}
           </label>
         ))}
       </div>

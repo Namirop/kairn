@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { signIn } from "@/lib/auth/client";
 
@@ -9,6 +10,8 @@ import { signIn } from "@/lib/auth/client";
  * premier affichage.
  */
 export function BoutonGoogle({ suite }: { suite: string }) {
+  const t = useTranslations("compte.connexion");
+
   return (
     <Button
       type="button"
@@ -20,7 +23,7 @@ export function BoutonGoogle({ suite }: { suite: string }) {
         });
       }}
     >
-      Continuer avec Google
+      {t("google")}
     </Button>
   );
 }

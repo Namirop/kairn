@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 import { signOut } from "@/lib/auth/client";
@@ -22,6 +23,7 @@ import { signOut } from "@/lib/auth/client";
 export function BoutonDeconnexion() {
   const router = useRouter();
   const [enCours, setEnCours] = useState(false);
+  const t = useTranslations("compte.connexion.deconnexion");
 
   return (
     <div>
@@ -42,7 +44,7 @@ export function BoutonDeconnexion() {
           );
         }}
       >
-        {enCours ? "Déconnexion…" : "Se déconnecter"}
+        {enCours ? t("enCours") : t("bouton")}
       </Button>
     </div>
   );

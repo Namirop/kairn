@@ -22,6 +22,7 @@ export class UnauthenticatedError extends Error {
   readonly code = "UNAUTHENTICATED";
 
   constructor() {
+    // i18n-ignore — message d'Error interne, destiné au journal
     super("Aucune session valide.");
     this.name = "UnauthenticatedError";
   }

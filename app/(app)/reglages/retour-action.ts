@@ -1,5 +1,6 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -58,6 +59,7 @@ export async function envoyerUnRetourAction(
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
+  const t = await getTranslations("compte.retour.erreurs");
   const champs = CHAMPS.safeParse({
     sujet: donnees.get("sujet"),
     message: (donnees.get("message") ?? "").toString(),
@@ -68,14 +70,14 @@ export async function envoyerUnRetourAction(
   });
 
   if (!champs.success) {
-    return { erreur: "Choisis de quoi il s'agit avant d'envoyer." };
+    return { erreur: t("sujet") };
   }
 
   const message = lireLeMessage(champs.data.message);
 
   if (message === null) {
     return {
-      erreur: `Écris entre ${MESSAGE_MIN} et ${MESSAGE_MAX} signes. Même une phrase suffit.`,
+      erreur: t("longueur", { min: MESSAGE_MIN, max: MESSAGE_MAX }),
       message: champs.data.message,
     };
   }
@@ -88,7 +90,7 @@ export async function envoyerUnRetourAction(
 
   if (jointe && jointe.size > TAILLE_MAXIMALE_OCTETS) {
     return {
-      erreur: "Cette image dépasse 5 Mo. Recadre-la, ou envoie le retour sans elle.",
+      erreur: t("image"),
       message: champs.data.message,
     };
   }
@@ -110,7 +112,7 @@ export async function envoyerUnRetourAction(
 
   if (!ecrit.ok) {
     return {
-      erreur: `Tu as envoyé ${RETOURS_PAR_JOUR} retours aujourd'hui. Reviens demain — ils sont lus.`,
+      erreur: t("plafond", { nombre: RETOURS_PAR_JOUR }),
       message: champs.data.message,
     };
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import {
   type EtatDuPaiement,
   payerAction,
@@ -30,6 +31,7 @@ import { PRIX_ANNUEL, PRIX_MENSUEL } from "@/lib/domain/prix";
  */
 export function Achat({ ouvert }: { ouvert: boolean }) {
   const [etat, action, enCours] = useActionState<EtatDuPaiement, FormData>(payerAction, {});
+  const t = useTranslations("compte.offre.achat");
 
   if (!ouvert) return null;
 
@@ -37,16 +39,14 @@ export function Achat({ ouvert }: { ouvert: boolean }) {
     <>
       <div className="gap-pas-3 flex flex-wrap">
         <Cadence action={action} cadence="month" enCours={enCours} variante="default">
-          Payer {PRIX_MENSUEL} € par mois
+          {t("mensuel", { prix: PRIX_MENSUEL })}
         </Cadence>
         <Cadence action={action} cadence="year" enCours={enCours} variante="outline">
-          Payer {PRIX_ANNUEL} € par an
+          {t("annuel", { prix: PRIX_ANNUEL })}
         </Cadence>
       </div>
 
-      <p className="mt-pas-3 text-petit text-stone-500">
-        L&apos;année revient à dix mois payés pour douze. La carte se saisit chez Stripe.
-      </p>
+      <p className="mt-pas-3 text-petit text-stone-500">{t("note")}</p>
 
       <Message erreur={etat.erreur} />
     </>
@@ -82,6 +82,7 @@ export function Renouvellement({ resilieALaFin }: { resilieALaFin: boolean }) {
     renouvellementAction,
     {},
   );
+  const t = useTranslations("compte.offre");
 
   return (
     <form action={action}>
@@ -96,7 +97,7 @@ export function Renouvellement({ resilieALaFin }: { resilieALaFin: boolean }) {
         size="sm"
         disabled={enCours}
       >
-        {resilieALaFin ? "Reprendre l'abonnement" : "Arrêter le renouvellement"}
+        {resilieALaFin ? t("reprendre") : t("arreter")}
       </Button>
 
       <Message erreur={etat.erreur} />
@@ -116,6 +117,7 @@ export function Renouvellement({ resilieALaFin }: { resilieALaFin: boolean }) {
  */
 export function Portail() {
   const [etat, action, enCours] = useActionState<EtatDuPaiement, FormData>(portailAction, {});
+  const t = useTranslations("compte.offre");
 
   return (
     <form action={action}>
@@ -124,7 +126,7 @@ export function Portail() {
         disabled={enCours}
         className="rounded-galet text-petit text-stone-500 underline-offset-4 transition-colors hover:text-stone-900 hover:underline focus-visible:underline disabled:opacity-60"
       >
-        Factures et moyen de paiement
+        {t("portail")}
       </button>
 
       <Message erreur={etat.erreur} />

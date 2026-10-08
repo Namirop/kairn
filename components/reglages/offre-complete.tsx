@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Achat } from "@/components/reglages/gestes-de-loffre";
 import { PLAFOND_PAYANT } from "@/lib/domain/plafond-du-plan";
 
@@ -23,19 +24,18 @@ import { PLAFOND_PAYANT } from "@/lib/domain/plafond-du-plan";
  * redemanderait un arbitrage qu'on ne vient pas rendre.
  */
 export function OffreComplete() {
+  const t = useTranslations("compte.offre");
+
   return (
     <div className="p-pas-4 md:p-pas-6 rounded-champ bg-surface-lichen mt-pas-3">
       <div className="gap-pas-3 flex flex-wrap items-baseline justify-between">
-        <p className="text-corps font-semibold text-stone-900">L&apos;offre complète</p>
+        <p className="text-corps font-semibold text-stone-900">{t("complete.titre")}</p>
         <p className="text-petit font-mono text-stone-700 tabular-nums">
-          {PLAFOND_PAYANT} concepts par mois
+          {t("parMois", { plafond: PLAFOND_PAYANT })}
         </p>
       </div>
 
-      <p className="mt-pas-2 text-petit max-w-prose text-stone-500">
-        Sur la même période que la tienne. Le reste ne change pas : ce que tu as déposé, ta série,
-        ton cairn.
-      </p>
+      <p className="mt-pas-2 text-petit max-w-prose text-stone-500">{t("complete.texte")}</p>
 
       <div className="mt-pas-4">
         <Achat ouvert />
