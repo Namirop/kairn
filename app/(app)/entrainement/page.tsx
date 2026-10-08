@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { TourDentrainement } from "@/components/entrainement/tour-dentrainement";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireTourDentrainement } from "@/lib/db/entrainement";
 import { lireReglages } from "@/lib/db/user-settings";
 
-export const metadata: Metadata = { title: "Entraînement" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("revision.pages");
+
+  return { title: t("entrainement") };
+}
 
 /**
  * L'entraînement libre.

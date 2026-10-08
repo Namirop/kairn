@@ -64,6 +64,7 @@ export function PileDeSession({
       // sans plafond de largeur, une session d'une question posait un galet de
       // deux cents pixels. Le calage par le bas garde les pierres sur la ligne
       // du texte qui les accompagne quand la largeur contraint.
+      // i18n-ignore — une valeur d'attribut SVG, jamais lue.
       preserveAspectRatio="xMidYMax meet"
       style={{ height: `${Math.max(HAUTEUR_MINIMALE, nombre * HAUTEUR_PAR_PIERRE)}rem` }}
       className="w-auto max-w-52"

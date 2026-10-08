@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { RienAReviser } from "@/components/revision/rien-a-reviser";
@@ -9,8 +10,14 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
 import { findUserStats, lireReglages } from "@/lib/db/user-settings";
 import { prochainRappel } from "@/lib/domain/prochain-rappel";
+import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
+import { ETIQUETTE_INTL } from "@/lib/i18n/langues";
 
-export const metadata: Metadata = { title: "Réviser" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("revision.pages");
+
+  return { title: t("reviser") };
+}
 
 /**
  * La session du jour.
@@ -72,7 +79,7 @@ export default async function PageReviser() {
           </Panneau>
         </PileDePanneaux>
       }
-      jour={jourDeLaSession(maintenant, session.fuseau)}
+      jour={jourDeLaSession(maintenant, session.fuseau, ETIQUETTE_INTL[await langueDeLaRequete()])}
       serie={compteurs?.currentStreak ?? 0}
       rappel={
         rappelActif ? prochainRappel(maintenant, reglages.dailyReminderHour, session.fuseau) : null
@@ -88,8 +95,8 @@ export default async function PageReviser() {
  * Le fuseau est passé explicitement : sans lui, le serveur écrirait sa propre
  * date, et quelqu'un qui révise à 00 h 30 à Sydney verrait la veille.
  */
-function jourDeLaSession(maintenant: Date, fuseau: string): string {
-  return new Intl.DateTimeFormat("fr-BE", {
+function jourDeLaSession(maintenant: Date, fuseau: string, etiquette: string): string {
+  return new Intl.DateTimeFormat(etiquette, {
     day: "numeric",
     month: "long",
     timeZone: fuseau,

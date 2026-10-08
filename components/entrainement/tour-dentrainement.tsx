@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import {
   principeVuAction,
   sentrainerAction,
@@ -49,6 +50,7 @@ export function TourDentrainement({
   premierTour: QuestionServie[];
   principeVu: boolean;
 }) {
+  const t = useTranslations("revision.entrainement");
   const [explique, setExplique] = useState(principeVu);
   const [questions, setQuestions] = useState(premierTour);
   const [tourFini, setTourFini] = useState(false);
@@ -94,22 +96,20 @@ export function TourDentrainement({
     return (
       <Cadre centre>
         <Palier
-          intitule="Entraînement"
-          titre={vide ? "Rien à travailler pour l'instant" : "Tour terminé"}
-          explication={
-            vide
-              ? "L'entraînement pioche dans les questions de tes concepts. Dépose quelque chose, et il aura de quoi te reposer."
-              : "Ton planning n'a pas bougé. Tu peux enchaîner, ou revenir plus tard."
-          }
+          intitule={t("intitule")}
+          titre={vide ? t("fin.videTitre") : t("fin.titre")}
+          explication={vide ? t("fin.vide") : t("fin.texte")}
           bouton={
             vide ? undefined : (
               <Button type="button" disabled={charge} onClick={() => void encore()}>
-                {charge ? "Un instant" : "Encore un tour"}
+                {charge ? t("fin.unInstant") : t("fin.encore")}
               </Button>
             )
           }
-          action={vide ? { libelle: "Déposer", href: `${ROUTES.depots}/nouveau` } : undefined}
-          secondaire={{ libelle: "Retour à aujourd'hui", href: ROUTES.aujourdhui }}
+          action={
+            vide ? { libelle: t("fin.deposer"), href: `${ROUTES.depots}/nouveau` } : undefined
+          }
+          secondaire={{ libelle: t("fin.retourAujourdhui"), href: ROUTES.aujourdhui }}
         />
       </Cadre>
     );
@@ -122,16 +122,16 @@ export function TourDentrainement({
     <SceneDeSession
       enTete={
         <EnTeteDeScene
-          intitule="Entraînement"
-          precision="Ça ne change pas ton planning"
+          intitule={t("intitule")}
+          precision={t("precision")}
           intituleEnMarge
           sortie={{
-            titre: "Arrêter l'entraînement ?",
-            consequence: "Un tour ne compte pas : il n'y a rien à enregistrer, et rien à perdre.",
+            titre: t("arreterTitre"),
+            consequence: t("consequence"),
           }}
         />
       }
-      mention="Entraînement"
+      mention={t("intitule")}
     >
       <DerouleQuestions
         key={questions.map((question) => question.variantId).join()}

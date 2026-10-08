@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { compterDemainAction, relireLeTableauAction } from "@/app/(app)/reviser/actions";
 import { ENTRAINEMENT_LIBRE } from "@/components/revision/entrainement-libre";
+import { heureLue } from "@/components/revision/heure-lue";
 import { Palier } from "@/components/revision/palier";
 import { PileDeSession } from "@/components/revision/pile-de-session";
 import { PrincipeDeLEspacement } from "@/components/revision/principe-de-lespacement";
 import { ROUTES } from "@/lib/auth/routes";
+import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
  * La fin d'une session.
@@ -47,20 +50,30 @@ import { ROUTES } from "@/lib/auth/routes";
  * et on nomme ce qui fait la suite, sans répéter le libellé du bouton juste
  * dessous.
  */
-function phraseDemain(nombre: number | null, heureDuRappel: number | null): string {
+function PhraseDemain({
+  nombre,
+  heureDuRappel,
+}: {
+  nombre: number | null;
+  heureDuRappel: number | null;
+}) {
+  const t = useTranslations("revision.paliers.fin");
+  const langue = useLangue();
+
   if (nombre === null) return "";
 
-  if (nombre === 0) {
-    return "Rien ne revient demain : tu es à jour. Ce que tu déposeras reviendra à son tour.";
-  }
-
-  const combien =
-    nombre === 1 ? "Un concept revient demain" : `${nombre} concepts reviennent demain`;
+  if (nombre === 0) return t("demainRien");
 
   // Deux phrases devenaient trois lignes sur un téléphone, dont la dernière ne
   // portait que le « h ». Une seule phrase, et l'heure insécable : « 19 h » est
   // un nombre et son unité, il ne se coupe pas.
-  return heureDuRappel === null ? `${combien}.` : `${combien}, rappel à ${heureDuRappel} h.`;
+  return heureDuRappel === null
+    ? t("demain", { nombre })
+    : t("demainAvecRappel", {
+        nombre,
+        heure: heureDuRappel,
+        heureLue: heureLue(heureDuRappel, langue),
+      });
 }
 
 export function FinDeSession({
@@ -77,6 +90,7 @@ export function FinDeSession({
   expliquerLEspacement?: boolean;
 }) {
   const [demain, setDemain] = useState<number | null>(null);
+  const t = useTranslations("revision.paliers");
 
   useEffect(() => {
     let vivant = true;
@@ -117,29 +131,29 @@ export function FinDeSession({
       // Muette pour un lecteur d'écran : le titre juste dessous dit le même
       // compte en toutes lettres, et l'entendre deux fois n'apprend rien.
       embleme={revus > 0 ? <PileDeSession rang={revus} total={revus} /> : undefined}
-      titre={
-        revus === 0
-          ? "Rien n'a été revu"
-          : `${revus} ${revus === 1 ? "concept revu" : "concepts revus"}`
-      }
+      titre={t("fin.titre", { revus })}
       // L'espace est réservé : la phrase arrive après un aller-retour, elle ne
       // doit pas pousser le bouton vers le bas en apparaissant. Deux lignes,
       // parce que c'est ce que fait la version longue à la mesure de ce palier.
       // Elle en faisait trois avant d'être raccourcie, et l'écran débordait
       // alors du pli d'un téléphone.
-      explication={<span className="block min-h-12">{phraseDemain(demain, heureDuRappel)}</span>}
-      action={{ libelle: "Déposer autre chose", href: `${ROUTES.depots}/nouveau` }}
+      explication={
+        <span className="block min-h-12">
+          <PhraseDemain nombre={demain} heureDuRappel={heureDuRappel} />
+        </span>
+      }
+      action={{ libelle: t("deposerAutreChose"), href: `${ROUTES.depots}/nouveau` }}
       secondaire={{
-        libelle: "S'entraîner",
+        libelle: t("sentrainer"),
         href: ROUTES.entrainement,
-        precision: ENTRAINEMENT_LIBRE,
+        precision: t(ENTRAINEMENT_LIBRE),
       }}
       pied={
         <Link
           href={ROUTES.aujourdhui}
           className="text-petit text-stone-500 underline-offset-4 hover:underline focus-visible:underline"
         >
-          Retour à aujourd&apos;hui
+          {t("retourAujourdhui")}
         </Link>
       }
     >
@@ -162,12 +176,10 @@ export function FinDeSession({
       {carte ? (
         <div className="mt-pas-12 p-pas-4 md:p-pas-6 rounded-carte bg-surface-ombre max-w-lg text-left">
           <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
-            Tu maîtrises ça
+            {t("fin.maitrise")}
           </p>
           <p className="mt-pas-2 text-corps leading-relaxed text-stone-900">{carte.concept}</p>
-          <p className="mt-pas-2 text-petit text-stone-500">
-            Trois passages justes, de plus en plus rapides. Tu ne le reconstruis plus, tu le sais.
-          </p>
+          <p className="mt-pas-2 text-petit text-stone-500">{t("fin.maitrisePourquoi")}</p>
         </div>
       ) : null}
     </Palier>

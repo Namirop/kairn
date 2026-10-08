@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -24,6 +25,8 @@ export function SortieDuCycleAction({
   enCours: boolean;
   onSortir: () => void;
 }) {
+  const t = useTranslations("revision.question.maitrise");
+
   return (
     <div className="gap-pas-3 flex flex-col sm:flex-row sm:items-center">
       <Button
@@ -37,7 +40,7 @@ export function SortieDuCycleAction({
            liens qui l'entourent, et rien ne le distinguait d'eux. */
         className="max-sm:px-pas-6 self-start max-sm:h-11 sm:self-auto"
       >
-        Je maîtrise ça
+        {t("geste")}
       </Button>
 
       {/* Ce que le geste fait vraiment : il repousse, il ne supprime pas, et il
@@ -51,9 +54,7 @@ export function SortieDuCycleAction({
           Sans mesure : la phrase tient sur une ligne dès qu'il y a la largeur, et
           la colonne l'a. Bornée à trois cents pixels au milieu d'un écran vide,
           elle se cassait en deux sans raison lisible. */}
-      <p className="text-petit text-stone-500">
-        Le concept revient dans trois mois pour vérifier, et ça se défait.
-      </p>
+      <p className="text-petit text-stone-500">{t("precision")}</p>
     </div>
   );
 }

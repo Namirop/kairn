@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -11,6 +12,7 @@ import { compterDusDemain } from "@/lib/db/session-du-jour";
 import { signalerUneQuestion } from "@/lib/db/signalement";
 import { lireFuseauUtilisateur, marquerEspacementVu } from "@/lib/db/user-settings";
 import type { SignalDeMaitrise } from "@/lib/domain/signal-maitrise";
+import type { Messages } from "@/lib/i18n/messages";
 
 /**
  * Les gestes d'une session.
@@ -38,7 +40,7 @@ const TEMPS_MAXIMUM_MS = 15 * 60 * 1000;
  * ce qu'un humain produit. Elle existe pour ce qui n'est pas humain, et elle
  * doit quand même savoir se dire.
  */
-const TROP_VITE = "Trop de réponses coup sur coup. Laisse passer quelques secondes.";
+const TROP_VITE = "tropVite" satisfies keyof Messages["revision"]["session"]["serveur"];
 
 const reponseSchema = z.object({
   atomId: z.string().min(1),
@@ -55,23 +57,24 @@ export type ResultatReponse =
 
 export async function repondreAction(donnees: ReponseDonnee): Promise<ResultatReponse> {
   const utilisateur = await getCurrentUser();
+  const t = await getTranslations("revision.session.serveur");
 
-  if (!utilisateur) return { ok: false, motif: "Ta session a expiré. Reconnecte-toi." };
+  if (!utilisateur) return { ok: false, motif: t("expiree") };
 
   const valide = reponseSchema.safeParse(donnees);
 
   if (!valide.success) {
-    return { ok: false, motif: "Cette réponse n'a pas pu être enregistrée." };
+    return { ok: false, motif: t("invalide") };
   }
 
   if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
-    return { ok: false, motif: TROP_VITE };
+    return { ok: false, motif: t(TROP_VITE) };
   }
 
   const resultat = await enregistrerRevision({ userId: utilisateur.id, ...valide.data });
 
   if (!resultat) {
-    return { ok: false, motif: "Ce concept est introuvable." };
+    return { ok: false, motif: t("introuvable") };
   }
 
   /*

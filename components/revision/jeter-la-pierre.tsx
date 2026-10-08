@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -15,6 +16,8 @@ import { Button } from "@/components/ui/button";
  * réponse existe — à ce moment-là il n'y a plus à abandonner, il y a à se juger.
  */
 export function JeterLaPierre({ enCours, onJeter }: { enCours: boolean; onJeter: () => void }) {
+  const t = useTranslations("revision.question");
+
   return (
     <div className="sortie-de-secours mt-pas-6">
       <Button
@@ -34,7 +37,7 @@ export function JeterLaPierre({ enCours, onJeter }: { enCours: boolean; onJeter:
            l'air de dépendre de la première. */
         className="max-sm:px-pas-4 -ml-pas-4 max-sm:h-11"
       >
-        Je jette la pierre
+        {t("jeterLaPierre")}
       </Button>
     </div>
   );

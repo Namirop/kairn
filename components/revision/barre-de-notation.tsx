@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import type { ReviewRating } from "@/lib/db/types";
 
@@ -27,12 +28,7 @@ import type { ReviewRating } from "@/lib/db/types";
  * Aucun n'est une note ni un compliment : « J'y étais » constate, « Sans
  * hésiter » constate aussi. La récompense est la progression, pas l'étiquette.
  */
-export const NIVEAUX: { note: ReviewRating; libelle: string }[] = [
-  { note: "AGAIN", libelle: "Je ne l'avais pas" },
-  { note: "HARD", libelle: "Approchant" },
-  { note: "GOOD", libelle: "J'y étais" },
-  { note: "EASY", libelle: "Sans hésiter" },
-];
+export const NIVEAUX: ReviewRating[] = ["AGAIN", "HARD", "GOOD", "EASY"];
 
 export function BarreDeNotation({
   enCours,
@@ -41,23 +37,25 @@ export function BarreDeNotation({
   enCours: boolean;
   onNoter: (note: ReviewRating) => void;
 }) {
+  const t = useTranslations("revision.question.notation");
+
   return (
     <div>
       {/* La décision de l'écran : elle porte le poids du corps, pas celui d'une
           légende. C'est ce qu'on demande, pas ce qu'on précise. */}
-      <p className="text-corps text-stone-900">Où en étais-tu ?</p>
+      <p className="text-corps text-stone-900">{t("question")}</p>
 
       <div className="gap-pas-2 mt-pas-3 grid grid-cols-2 sm:grid-cols-4">
-        {NIVEAUX.map((niveau) => (
+        {NIVEAUX.map((note) => (
           <Button
-            key={niveau.note}
+            key={note}
             type="button"
             variant="outline"
             disabled={enCours}
-            onClick={() => onNoter(niveau.note)}
+            onClick={() => onNoter(note)}
             className="h-auto w-full py-3 text-center font-normal whitespace-normal"
           >
-            {niveau.libelle}
+            {t(note)}
           </Button>
         ))}
       </div>
@@ -69,8 +67,8 @@ export function BarreDeNotation({
         aria-hidden
         className="mt-pas-2 text-mono hidden justify-between font-mono text-stone-500 sm:flex"
       >
-        <span>Oublié</span>
-        <span>Immédiat</span>
+        <span>{t("oublie")}</span>
+        <span>{t("immediat")}</span>
       </div>
     </div>
   );

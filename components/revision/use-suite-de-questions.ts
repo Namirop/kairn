@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useChronometre } from "@/components/revision/use-chronometre";
 import type { QuestionServie } from "@/lib/db/question-servie";
 import type { ReviewRating } from "@/lib/db/types";
@@ -90,6 +91,7 @@ export function useSuiteDeQuestions({
   const [ecrit, setEcrit] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [revus, setRevus] = useState(0);
+  const t = useTranslations("revision.question");
 
   const question = questions[rang];
   const chronometre = useChronometre(rang);
@@ -113,7 +115,7 @@ export function useSuiteDeQuestions({
       setEnCours(false);
 
       if (!ok) {
-        setErreur("Ce passage n'a pas pu être enregistré. Réessaie.");
+        setErreur(t("erreurPassage"));
         return false;
       }
 
@@ -122,7 +124,7 @@ export function useSuiteDeQuestions({
 
       return true;
     },
-    [arreter, chronometre, enCours, onRepondre, question],
+    [arreter, chronometre, enCours, onRepondre, question, t],
   );
 
   const avancer = useCallback(

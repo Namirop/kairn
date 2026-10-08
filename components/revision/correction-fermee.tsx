@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { BlocReponse } from "@/components/revision/bloc-reponse";
 import { SuiteDeLaQuestion } from "@/components/revision/suite-de-la-question";
 import { etalonUtile } from "@/lib/domain/etalon-utile";
@@ -44,16 +45,17 @@ export function CorrectionFermee({
 }) {
   const complete = etalonUtile(answerKey, bonneOption);
   const lu = useDelaiDeLecture(!juste);
+  const t = useTranslations("revision.question");
 
   return (
     <SuiteDeLaQuestion>
       <p className="sr-only" role="status">
-        {juste ? "Réponse juste." : "Réponse fausse."}
+        {juste ? t("verdict.juste") : t("verdict.faux")}
       </p>
 
       {!juste && complete ? (
         <div className="mb-pas-8">
-          <BlocReponse intitule="Pourquoi">
+          <BlocReponse intitule={t("pourquoi")}>
             <TexteTechnique>{etalonLisible(answerKey)}</TexteTechnique>
           </BlocReponse>
         </div>
@@ -61,12 +63,12 @@ export function CorrectionFermee({
 
       <div className="gap-pas-4 flex flex-wrap items-center">
         <Button type="button" disabled={enCours || !lu} onClick={onSuite}>
-          {dernier ? "Terminer" : "Continuer"}
+          {dernier ? t("terminer") : t("continuer")}
         </Button>
 
         {/* La place est tenue : la ligne s'efface sans faire remonter la carte. */}
         <p className="text-petit min-h-5 text-stone-500" aria-hidden>
-          {lu ? "" : "Le temps de la lire."}
+          {lu ? "" : t("tempsDeLire")}
         </p>
       </div>
     </SuiteDeLaQuestion>

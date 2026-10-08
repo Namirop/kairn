@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { espacementVuAction } from "@/app/(app)/reviser/actions";
 
 /**
@@ -21,6 +22,8 @@ import { espacementVuAction } from "@/app/(app)/reviser/actions";
  * qui revient tant qu'on ne l'accuse pas est une fenêtre modale déguisée.
  */
 export function PrincipeDeLEspacement() {
+  const t = useTranslations("revision.paliers.fin");
+
   useEffect(() => {
     void espacementVuAction();
   }, []);
@@ -30,11 +33,7 @@ export function PrincipeDeLEspacement() {
     // l'annoncer, et c'est le seul cas où le blanc ne suffit pas à le détacher
     // du palier qui l'entoure.
     <div className="p-pas-4 md:p-pas-6 rounded-carte bg-surface-ombre">
-      <p className="text-corps leading-relaxed text-stone-900">
-        Une session s&apos;arrête quand elle a servi ce qui était dû. Chaque concept retrouvé
-        revient de plus loin — deux jours, puis une semaine, puis un mois. C&apos;est l&apos;écart
-        qui fait tenir, pas la répétition.
-      </p>
+      <p className="text-corps leading-relaxed text-stone-900">{t("espacement")}</p>
     </div>
   );
 }

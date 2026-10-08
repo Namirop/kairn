@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { BarreDeNotation } from "@/components/revision/barre-de-notation";
 import { BlocReponse } from "@/components/revision/bloc-reponse";
 import { SuiteDeLaQuestion } from "@/components/revision/suite-de-la-question";
@@ -39,19 +40,19 @@ export function ReponseOuverte({
   onSeJuger: (note: ReviewRating) => void;
   enCours: boolean;
 }) {
+  const t = useTranslations("revision.question.ouverte");
+
   if (!revelee) {
     return (
       <div className="mt-pas-scene">
-        <p className="text-corps text-stone-900">Formule ta réponse d&apos;abord, même de tête.</p>
+        <p className="text-corps text-stone-900">{t("consigne")}</p>
 
         <div className="gap-pas-4 mt-pas-3 flex flex-col sm:flex-row sm:items-center">
           <Button type="button" onClick={onReveler} className="w-full shrink-0 sm:w-auto">
-            Voir la réponse
+            {t("voir")}
           </Button>
 
-          <p className="text-petit text-stone-500">
-            C&apos;est l&apos;effort de la retrouver qui la fixe.
-          </p>
+          <p className="text-petit text-stone-500">{t("raison")}</p>
         </div>
       </div>
     );

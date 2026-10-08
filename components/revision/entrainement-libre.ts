@@ -1,3 +1,5 @@
+import type { Messages } from "@/lib/i18n/messages";
+
 /**
  * Ce que l'entraînement fait, dit une fois pour toutes les portes qui y mènent.
  *
@@ -14,4 +16,4 @@
  * sous l'ensemble plutôt que collée à un seul bouton.
  */
 export const ENTRAINEMENT_LIBRE =
-  "S'entraîner pose d'autres questions sur les mêmes concepts, sans rien changer à ton planning.";
+  "entrainementLibre" satisfies keyof Messages["revision"]["paliers"];

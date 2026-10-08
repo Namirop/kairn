@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
@@ -23,11 +24,11 @@ const TOUCHES = ["1", "2", "3", "4", "5", "6"];
  * À l'écran, la couleur suffit et l'écrit ferait doublon. Sans elle, il ne
  * resterait rien : le sort de chaque option se lit dans sa bordure et son fond.
  */
-function marqueLue(estBonne: boolean, estChoisie: boolean): string {
-  if (estBonne) return "Bonne réponse.";
-  if (estChoisie) return "Ton choix, faux.";
+function marqueLue(estBonne: boolean, estChoisie: boolean): "bonneOption" | "choixFaux" | null {
+  if (estBonne) return "bonneOption";
+  if (estChoisie) return "choixFaux";
 
-  return "";
+  return null;
 }
 
 export function ReponseFermee({
@@ -42,6 +43,7 @@ export function ReponseFermee({
   onChoisir: (index: number) => void;
 }) {
   const repondu = choisi !== null;
+  const t = useTranslations("revision.question.verdict");
 
   useEffect(() => {
     if (repondu) return;
@@ -61,6 +63,7 @@ export function ReponseFermee({
       {options.map((option, rang) => {
         const estBonne = rang === correctIndex;
         const estChoisie = rang === choisi;
+        const marque = marqueLue(estBonne, estChoisie);
 
         return (
           <li key={option}>
@@ -115,7 +118,7 @@ export function ReponseFermee({
               <span className="text-corps">
                 <TexteTechnique>{option}</TexteTechnique>
               </span>
-              {repondu ? <span className="sr-only">{marqueLue(estBonne, estChoisie)}</span> : null}
+              {repondu ? <span className="sr-only">{marque ? t(marque) : ""}</span> : null}
             </Button>
           </li>
         );

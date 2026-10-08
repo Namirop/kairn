@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { SuiteDeLaQuestion } from "@/components/revision/suite-de-la-question";
 import { useVenirEnVue } from "@/components/revision/use-venir-en-vue";
 import { Button } from "@/components/ui/button";
@@ -49,23 +50,20 @@ export function ReponseCloze({
   onVerifier: () => void;
 }) {
   const propre = trou.saisie.trim();
+  const t = useTranslations("revision.question");
 
   if (trou.verdict === "JUSTE") {
     return (
       <SuiteDeLaQuestion>
         {/* Un constat, pas un compliment : la récompense est l'espacement qui
             s'allonge, et le terme qui vient de se poser dans la phrase. */}
-        <p className="text-corps text-stone-900">C&apos;est le terme attendu.</p>
+        <p className="text-corps text-stone-900">{t("cloze.termeAttendu")}</p>
 
-        {trou.aide ? (
-          <p className="mt-pas-2 text-petit text-stone-500">
-            Retrouvé avec un coup de pouce : le concept revient un peu plus tôt.
-          </p>
-        ) : null}
+        {trou.aide ? <p className="mt-pas-2 text-petit text-stone-500">{t("cloze.aide")}</p> : null}
 
         <div className="mt-pas-6">
           <Button type="button" disabled={enCours} onClick={() => trou.juger("GOOD")}>
-            {dernier ? "Terminer" : "Continuer"}
+            {dernier ? t("terminer") : t("continuer")}
           </Button>
         </div>
       </SuiteDeLaQuestion>
@@ -76,7 +74,10 @@ export function ReponseCloze({
     return (
       <SuiteDeLaQuestion>
         <p className="text-corps text-stone-500">
-          Tu as écrit <span className="font-mono text-stone-900">{propre}</span>.
+          {t.rich("cloze.tuAsEcrit", {
+            saisie: propre,
+            terme: (morceau) => <span className="font-mono text-stone-900">{morceau}</span>,
+          })}
         </p>
 
         {/* Deux issues nommées comme la graduation des formats ouverts : c'est la
@@ -89,10 +90,10 @@ export function ReponseCloze({
             disabled={enCours}
             onClick={() => trou.juger("HARD")}
           >
-            Je l&apos;avais
+            {t("cloze.jeLAvais")}
           </Button>
           <Button type="button" disabled={enCours} onClick={() => trou.juger("AGAIN")}>
-            Je ne l&apos;avais pas
+            {t("cloze.jeNeLAvaisPas")}
           </Button>
         </div>
       </SuiteDeLaQuestion>
@@ -110,7 +111,7 @@ export function ReponseCloze({
       {/* La consigne est ce qu'on demande, pas une légende du champ : elle porte
           le poids du corps, comme « Où en étais-tu ? » sur les autres formats. */}
       <label htmlFor="trou" className="text-corps block text-stone-900">
-        Complète avec le terme qui manque
+        {t("cloze.consigne")}
       </label>
 
       <div className="gap-pas-3 mt-pas-3 flex max-w-xl flex-col sm:flex-row sm:items-center">
@@ -135,7 +136,7 @@ export function ReponseCloze({
         />
 
         <Button type="submit" disabled={enCours || propre.length === 0} className="max-sm:h-12">
-          Vérifier
+          {t("cloze.verifier")}
         </Button>
       </div>
 
@@ -165,6 +166,7 @@ export function ReponseCloze({
  */
 function CoupDePouce({ trou }: { trou: TexteATrou }) {
   const pistes = useVenirEnVue<HTMLDivElement>(trou.aide);
+  const t = useTranslations("revision.question.cloze");
 
   if (trou.pistes.length === 0) return null;
 
@@ -185,7 +187,7 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
           className="-ml-pas-4 max-sm:h-11"
           onClick={trou.demanderDeLaide}
         >
-          Je sèche
+          {t("jeSeche")}
         </Button>
       </div>
     );
@@ -212,7 +214,7 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
       role="status"
     >
       <p className="text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
-        L&apos;un de ces termes
+        {t("pistes")}
       </p>
 
       {/* La taille du jeton est en `em` : c'est la liste qui la fixe, pas le
@@ -230,9 +232,7 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
         ))}
       </ul>
 
-      <p className="mt-pas-3 text-petit text-stone-500">
-        Compté comme un rappel aidé : le concept revient un peu plus tôt.
-      </p>
+      <p className="mt-pas-3 text-petit text-stone-500">{t("rappelAide")}</p>
     </div>
   );
 }

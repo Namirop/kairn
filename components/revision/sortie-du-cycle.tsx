@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { annulerMaitriseAction } from "@/app/(app)/depots/actions";
 import { Button } from "@/components/ui/button";
 
@@ -43,6 +44,7 @@ export function SortiDuCycle({
   onAnnule: () => void;
 }) {
   const [enCours, setEnCours] = useState(false);
+  const t = useTranslations("revision.question.maitrise");
 
   async function annuler() {
     setEnCours(true);
@@ -69,8 +71,9 @@ export function SortiDuCycle({
           ensemble sur une ligne et le geste revient contre son mot. */}
       <div className="gap-pas-4 md:gap-pas-2 flex items-baseline justify-between md:flex-wrap md:justify-start">
         <p className="text-petit min-w-0 text-stone-500">
-          <span className="font-semibold text-stone-900">Sorti du cycle</span>, il reviendra dans
-          trois mois.
+          {t.rich("sorti", {
+            fort: (morceau) => <span className="font-semibold text-stone-900">{morceau}</span>,
+          })}
         </p>
 
         {/* Le seul geste de la bande. En pilule, il pesait plus lourd que la
@@ -89,7 +92,7 @@ export function SortiDuCycle({
           disabled={enCours}
           onClick={() => void annuler()}
         >
-          Annuler
+          {t("annuler")}
         </Button>
       </div>
 

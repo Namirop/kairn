@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { relireLeTableauAction } from "@/app/(app)/reviser/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,6 +59,7 @@ export function ArreterLa({
   rafraichirLeTableau?: boolean;
 }) {
   const router = useRouter();
+  const t = useTranslations("revision.session.sortie");
   const [ouvert, setOuvert] = useState(false);
   const [sortie, setSortie] = useState(false);
 
@@ -82,7 +84,7 @@ export function ArreterLa({
           plus d'en-tête au-dessus, et il n'y a rien à côté d'elle à toucher par
           erreur. La marge négative la ramène sur l'alignement de la colonne. */}
       <DialogTrigger className="text-petit rounded-galet px-pas-2 py-pas-2 -mr-pas-2 -my-pas-2 shrink-0 text-stone-900 underline-offset-4 hover:underline focus-visible:underline">
-        Arrêter là
+        {t("arreterLa")}
       </DialogTrigger>
 
       <DialogContent>
@@ -93,10 +95,10 @@ export function ArreterLa({
 
         <DialogFooter className="mt-pas-4">
           <Button type="button" variant="ghost" disabled={sortie} onClick={() => setOuvert(false)}>
-            Reprendre
+            {t("reprendre")}
           </Button>
           <Button type="button" disabled={sortie} onClick={() => void partir()}>
-            Arrêter
+            {t("arreter")}
           </Button>
         </DialogFooter>
       </DialogContent>

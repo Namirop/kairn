@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { reclamerMaitriseAction, repondreAction } from "@/app/(app)/reviser/actions";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
@@ -68,6 +69,7 @@ export function SessionDeRevision({
     depuis le serveur, ce qui est le comportement voulu.
   */
   const [liste] = useState(questions);
+  const t = useTranslations("revision.session");
   const [termine, setTermine] = useState(false);
   const [faites, setFaites] = useState(0);
   const [revus, setRevus] = useState(0);
@@ -158,11 +160,11 @@ export function SessionDeRevision({
     <SceneDeSession
       enTete={
         <EnTeteDeScene
-          intitule="Session"
+          intitule={t("intitule")}
           precision={jour}
           intituleEnMarge
           sortie={{
-            titre: "Arrêter la session ?",
+            titre: t("arreterTitre"),
             /*
               Ce qu'on quitte, et ce qu'il en coûte quand une réponse est déjà
               sous les yeux.
@@ -173,9 +175,7 @@ export function SessionDeRevision({
               produit qui permette de gagner du temps sans rien savoir. On
               l'écrit donc comme un échec, et on le dit avant, pas après.
             */
-            consequence: enSuspens
-              ? "Ce que tu viens de revoir est enregistré. La question en cours compte comme non sue : tu as vu sa réponse sans te noter."
-              : "Ce que tu viens de revoir est enregistré. Le reste revient plus tard, à son échéance.",
+            consequence: enSuspens ? t("consequenceEnSuspens") : t("consequence"),
             avantDeSortir: enSuspens
               ? () => viderLeSuspens.current?.() ?? Promise.resolve()
               : undefined,
@@ -183,7 +183,7 @@ export function SessionDeRevision({
           }}
         />
       }
-      mention="Session"
+      mention={t("intitule")}
       rail={<EtatDeSession faites={faites} total={liste.length} serie={serie} rappel={rappel} />}
     >
       {sorti ? <SortiDuCycle concept={sorti} onAnnule={() => setSorti(null)} /> : null}

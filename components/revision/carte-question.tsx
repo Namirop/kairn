@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { SignalerLaQuestion } from "@/components/revision/signaler-la-question";
 
 /**
@@ -27,19 +28,6 @@ import { SignalerLaQuestion } from "@/components/revision/signaler-la-question";
  * de trois mois ne peut pas se présenter comme un signalement.
  */
 
-/**
- * Depuis quand le concept dormait, dit du point de vue de la personne.
- *
- * C'est l'intervalle qu'elle vient de tenir, et il explique l'effort qu'on lui
- * demande : sept jours sans y penser, c'est normal de chercher.
- */
-function dernierPassage(jours: number): string {
-  if (jours === 0) return "Tu l'as vu aujourd'hui.";
-  if (jours === 1) return "Tu l'as vu hier.";
-
-  return `Tu l'as vu il y a ${jours} jours.`;
-}
-
 export function CarteQuestion({
   rang,
   total,
@@ -65,6 +53,8 @@ export function CarteQuestion({
   actions?: ReactNode;
   children: ReactNode;
 }) {
+  const t = useTranslations("revision.question");
+
   return (
     <section className="flex w-full flex-col">
       <div className="gap-pas-4 flex items-baseline justify-between">
@@ -106,9 +96,14 @@ export function CarteQuestion({
             `EnonceDeQuestion`. */}
         {enonce}
 
+        {/* Depuis quand le concept dormait, dit du point de vue de la personne.
+
+            C'est l'intervalle qu'elle vient de tenir, et il explique l'effort
+            qu'on lui demande : sept jours sans y penser, c'est normal de
+            chercher. */}
         {vuIlYaJours === null ? null : (
           <p className="mt-pas-6 text-petit text-stone-500 max-md:text-center">
-            {dernierPassage(vuIlYaJours)}
+            {t("dernierPassage", { jours: vuIlYaJours })}
           </p>
         )}
       </div>

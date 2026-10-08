@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { BlocReponse } from "@/components/revision/bloc-reponse";
 import { SuiteDeLaQuestion } from "@/components/revision/suite-de-la-question";
 import { useDelaiDeLecture } from "@/components/revision/use-delai-de-lecture";
@@ -36,6 +37,7 @@ export function PierreJetee({
   onSuite: () => void;
 }) {
   const lu = useDelaiDeLecture(true);
+  const t = useTranslations("revision.question");
 
   return (
     <SuiteDeLaQuestion>
@@ -52,15 +54,15 @@ export function PierreJetee({
       {/* Ce qui est écrit, pas ce que ça déclenche : en entraînement rien ne se
           replanifie, et « compte » aurait dit le contraire de la ligne qui vit
           sous la carte. */}
-      <p className="mt-pas-6 text-petit text-stone-500">Noté comme non retrouvé.</p>
+      <p className="mt-pas-6 text-petit text-stone-500">{t("nonRetrouve")}</p>
 
       <div className="gap-pas-4 mt-pas-3 flex flex-wrap items-center">
         <Button type="button" disabled={enCours || !lu} onClick={onSuite}>
-          {dernier ? "Terminer" : "Continuer"}
+          {dernier ? t("terminer") : t("continuer")}
         </Button>
 
         <p className="text-petit min-h-5 text-stone-500" aria-hidden>
-          {lu ? "" : "Le temps de la lire."}
+          {lu ? "" : t("tempsDeLire")}
         </p>
       </div>
     </SuiteDeLaQuestion>

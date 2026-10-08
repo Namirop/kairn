@@ -2,7 +2,6 @@ import { ENTRAINEMENT_LIBRE } from "@/components/revision/entrainement-libre";
 import { Palier } from "@/components/revision/palier";
 import { useTranslations } from "next-intl";
 import { ROUTES } from "@/lib/auth/routes";
-import { compte } from "@/lib/domain/accord";
 import { delaiAvantLeJour } from "@/lib/domain/echeance";
 
 /**
@@ -40,6 +39,7 @@ export function RienAReviser({
   maintenant,
 }: Props) {
   const tTemps = useTranslations("temps");
+  const t = useTranslations("revision.paliers");
 
   // Le plafond du jour est atteint, et il reste des concepts dus. C'est le seul
   // écran vide qui annonce du travail : il le dit, puis il ouvre la seule porte
@@ -47,13 +47,13 @@ export function RienAReviser({
   if (reporteAuLendemain > 0) {
     return (
       <Palier
-        intitule="Session"
-        titre="Tu as fait ta journée"
-        explication={`${compte(reporteAuLendemain, "concept", "concepts")} ${reporteAuLendemain === 1 ? "attend" : "attendent"} demain. Le plafond de ta session tient à ça : ce qui reste est encore dû, et il passera en tête.`}
+        intitule={t("intituleSession")}
+        titre={t("rien.journeeFaiteTitre")}
+        explication={t("rien.journeeFaite", { nombre: reporteAuLendemain })}
         action={{
-          libelle: "S'entraîner",
+          libelle: t("sentrainer"),
           href: ROUTES.entrainement,
-          precision: ENTRAINEMENT_LIBRE,
+          precision: t(ENTRAINEMENT_LIBRE),
         }}
       />
     );
@@ -62,9 +62,9 @@ export function RienAReviser({
   if (totalConcepts === 0) {
     return (
       <Palier
-        titre="Rien à revoir pour l'instant"
-        explication="Kairn repose ce que tu lui donnes. Dépose une première chose que tu veux garder, et elle reviendra d'elle-même."
-        action={{ libelle: "Déposer", href: `${ROUTES.depots}/nouveau` }}
+        titre={t("rien.videTitre")}
+        explication={t("rien.vide")}
+        action={{ libelle: t("deposer"), href: `${ROUTES.depots}/nouveau` }}
       />
     );
   }
@@ -74,9 +74,9 @@ export function RienAReviser({
   if (!prochainJourServi && conceptsEnAttenteDeQuestions > 0) {
     return (
       <Palier
-        titre="Les questions arrivent"
-        explication="Tes concepts sont découpés, leurs questions sont en cours d'écriture. Elles seront là à ta prochaine visite."
-        action={{ libelle: "Voir ce que tu as déposé", href: ROUTES.depots }}
+        titre={t("rien.attenteTitre")}
+        explication={t("rien.attente")}
+        action={{ libelle: t("rien.voirDepots"), href: ROUTES.depots }}
       />
     );
   }
@@ -86,17 +86,19 @@ export function RienAReviser({
   // d'abord — c'est ce qui fait avancer —, s'entraîner ensuite.
   return (
     <Palier
-      titre="Tu es à jour"
+      titre={t("rien.aJourTitre")}
       explication={
         prochainJourServi
-          ? `Rien à revoir aujourd'hui. Le prochain concept revient ${tTemps("delai", delaiAvantLeJour(prochainJourServi, maintenant, fuseau))}.`
-          : "Rien à revoir aujourd'hui."
+          ? t("rien.aJourProchain", {
+              delai: tTemps("delai", delaiAvantLeJour(prochainJourServi, maintenant, fuseau)),
+            })
+          : t("rien.aJour")
       }
-      action={{ libelle: "Déposer autre chose", href: `${ROUTES.depots}/nouveau` }}
+      action={{ libelle: t("deposerAutreChose"), href: `${ROUTES.depots}/nouveau` }}
       secondaire={{
-        libelle: "S'entraîner",
+        libelle: t("sentrainer"),
         href: ROUTES.entrainement,
-        precision: ENTRAINEMENT_LIBRE,
+        precision: t(ENTRAINEMENT_LIBRE),
       }}
     />
   );
