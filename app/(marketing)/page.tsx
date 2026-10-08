@@ -4,12 +4,14 @@ import { Panneau } from "@/components/coquille/panneau";
 import { Strates } from "@/components/coquille/strates";
 import { Essai } from "@/components/site/essai";
 import { Hero } from "@/components/site/hero";
+import { LienDeLangue } from "@/components/site/lien-de-langue";
 import { PasCeci } from "@/components/site/pas-ceci";
 import { Sentier } from "@/components/site/sentier";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireLEssaiEnCours } from "@/lib/depots/essai-en-cours";
 import { inviteDeDepot } from "@/lib/domain/invites-de-depot";
+import { adressePublique } from "@/lib/i18n/adresses";
 import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 
 /**
@@ -23,6 +25,7 @@ import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 export const dynamic = "force-dynamic";
 
 export default async function PageAccueil() {
+  const langue = await langueDeLaRequete();
   // Lu ici et non dans le composant : quelqu'un qui revient doit retrouver ses
   // concepts au premier rendu, pas après un aller-retour.
   const essaiPrecedent = await lireLEssaiEnCours();
@@ -59,10 +62,7 @@ export default async function PageAccueil() {
       {connecte ? null : (
         <>
           <Strates de="ombre" vers="papier" graine="accueil-essai" />
-          <Essai
-            invite={inviteDeDepot(Math.random(), await langueDeLaRequete())}
-            essaiPrecedent={essaiPrecedent}
-          />
+          <Essai invite={inviteDeDepot(Math.random(), langue)} essaiPrecedent={essaiPrecedent} />
         </>
       )}
 
@@ -82,23 +82,24 @@ export default async function PageAccueil() {
               lire avant de s'engager, sans avoir à s'engager pour le lire. */}
           <nav className="gap-pas-4 text-mono flex flex-wrap">
             <Link
-              href={ROUTES.tarifs}
+              href={adressePublique(ROUTES.tarifs, langue)}
               className="rounded-galet text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
             >
               {t("tarifs")}
             </Link>
             <Link
-              href={ROUTES.mentionsLegales}
+              href={adressePublique(ROUTES.mentionsLegales, langue)}
               className="rounded-galet text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
             >
               {t("mentionsLegales")}
             </Link>
             <Link
-              href={ROUTES.confidentialite}
+              href={adressePublique(ROUTES.confidentialite, langue)}
               className="rounded-galet text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
             >
               {t("confidentialite")}
             </Link>
+            <LienDeLangue />
           </nav>
         </div>
       </Panneau>

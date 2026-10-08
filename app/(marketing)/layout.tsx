@@ -3,10 +3,13 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Marque } from "@/components/coquille/marque";
-import { LienDeLangue } from "@/components/site/lien-de-langue";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
+import { langueDepuisCode } from "@/lib/domain/langue-devinee";
 import { EN_TETE_DU_CHEMIN, versionsDeLaPage } from "@/lib/i18n/adresses";
+import { EN_TETE_DE_LANGUE } from "@/lib/i18n/langues";
+import { MESSAGES } from "@/lib/i18n/messages";
+import { TAILLE_DE_PARTAGE } from "@/lib/site/dessin-de-partage";
 
 /**
  * La coquille publique.
@@ -21,11 +24,40 @@ import { EN_TETE_DU_CHEMIN, versionsDeLaPage } from "@/lib/i18n/adresses";
  * pages légales cessent d'être statiques — elles lisent une session comme le
  * reste de la coquille.
  */
-/** Chaque page publique désigne sa version dans l'autre langue. */
+/**
+ * Chaque page publique désigne sa version dans l'autre langue, et celles de
+ * `/en` désignent leur carte de partage anglaise.
+ *
+ * Un `openGraph` posé ici remplace celui de la racine en entier, image du
+ * fichier comprise : il reprend donc ce que la racine y mettait.
+ */
 export async function generateMetadata(): Promise<Metadata> {
-  const chemin = (await headers()).get(EN_TETE_DU_CHEMIN);
+  const enTetes = await headers();
+  const chemin = enTetes.get(EN_TETE_DU_CHEMIN);
+  const alternates = chemin ? { languages: versionsDeLaPage(chemin) } : undefined;
 
-  return chemin ? { alternates: { languages: versionsDeLaPage(chemin) } } : {};
+  if (langueDepuisCode(enTetes.get(EN_TETE_DE_LANGUE)) !== "EN") return { alternates };
+
+  const t = await getTranslations("racine");
+  const image = { url: "/partage/en", ...TAILLE_DE_PARTAGE, alt: MESSAGES.EN.site.partage.alt };
+
+  return {
+    alternates,
+    openGraph: {
+      type: "website",
+      siteName: "Kairn",
+      title: "Kairn",
+      description: t("description"),
+      locale: t("localeOpenGraph"),
+      images: [image],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Kairn",
+      description: t("description"),
+      images: [image.url],
+    },
+  };
 }
 
 export default async function CoquilleSite({ children }: { children: React.ReactNode }) {
@@ -58,15 +90,12 @@ export default async function CoquilleSite({ children }: { children: React.React
           <Link href={ROUTES.accueil} className="rounded-galet">
             <Marque taille={30} />
           </Link>
-          <div className="gap-pas-2 flex items-center">
-            <LienDeLangue />
-            <Link
-              href={utilisateur ? ROUTES.aujourdhui : ROUTES.connexion}
-              className="text-h2-app rounded-galet px-pas-6 py-pas-3 hover:bg-surface-ombre text-stone-500 transition-colors hover:text-stone-900"
-            >
-              {utilisateur ? t("aujourdhui") : t("seConnecter")}
-            </Link>
-          </div>
+          <Link
+            href={utilisateur ? ROUTES.aujourdhui : ROUTES.connexion}
+            className="text-h2-app rounded-galet px-pas-6 py-pas-3 hover:bg-surface-ombre text-stone-500 transition-colors hover:text-stone-900"
+          >
+            {utilisateur ? t("aujourdhui") : t("seConnecter")}
+          </Link>
         </div>
       </header>
 
