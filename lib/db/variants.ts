@@ -1,4 +1,4 @@
-import { PROMPT_VERSIONS } from "@/lib/ai/prompts";
+import { versionsDesPrompts } from "@/lib/ai/prompts";
 import { prisma } from "@/lib/db/client";
 import type { VariantFacet, VariantFormat } from "@/lib/db/types";
 import { ordonnerLesOptions } from "@/lib/domain/ordre-des-options";
@@ -85,6 +85,14 @@ export async function ecrireQuestions(
   // régénération qui ne rend rien laisserait le concept sans aucune question.
   if (questions.length === 0) return 0;
 
+  // La consigne sous laquelle elles ont été écrites dépend de la langue du
+  // dépôt, et ce module est le seul à savoir de quel concept il s'agit.
+  const { input } = await prisma.atom.findUniqueOrThrow({
+    where: { id: atomId },
+    select: { input: { select: { langue: true } } },
+  });
+  const promptVersion = versionsDesPrompts(input.langue).generate_variants;
+
   const [, ecrites] = await prisma.$transaction([
     // Les anciennes formulations sortent du tirage à l'instant où les nouvelles
     // arrivent, jamais avant : entre la mise en file et la relève il peut se
@@ -104,7 +112,7 @@ export async function ecrireQuestions(
         payload: payloadDe(question, atomId),
         // Le réglage sous lequel cette question a été écrite. Posé ici, à la
         // création, parce qu'il n'y a pas d'autre moment où on le connaisse.
-        promptVersion: PROMPT_VERSIONS.generate_variants,
+        promptVersion,
         model,
       })),
     }),

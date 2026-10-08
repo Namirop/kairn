@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import type { UserSettings, UserStats } from "@/lib/db/types";
+import type { Langue, UserSettings, UserStats } from "@/lib/db/types";
 
 /** Réglages et compteurs d'un compte. Toujours lus par l'id de session. */
 
@@ -166,4 +166,19 @@ export async function marquerEspacementVu(userId: string, at: Date = new Date())
     where: { userId, spacingIntroSeenAt: null },
     data: { spacingIntroSeenAt: at },
   });
+}
+
+/**
+ * La langue de la personne, sans repli — même raison que pour le fuseau : un
+ * dépôt écrit dans une langue inventée ne se rattrape plus, il est figé.
+ */
+export async function lireLangueUtilisateur(userId: string): Promise<Langue> {
+  const reglages = await prisma.userSettings.findUnique({
+    where: { userId },
+    select: { langue: true },
+  });
+
+  if (!reglages) throw new ReglagesIntrouvablesError(userId);
+
+  return reglages.langue;
 }

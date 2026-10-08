@@ -1,3 +1,15 @@
+/// La langue dans laquelle le produit parle à quelqu'un et écrit ce qu'il découpe.
+///
+/// Une propriété de la personne, devinée sur `Accept-Language` à l'arrivée et
+/// jamais sur le pays : on parle anglais à Lisbonne comme à Bruxelles. La
+/// consigne au modèle reste inconditionnelle — « tu écris toujours en … » — : la
+/// langue n'est jamais une décision qu'on lui laisse, c'est ce qui cassait avant
+/// le 09/09.
+enum Langue {
+  FR
+  EN
+}
+
 /// Forme sous laquelle l'utilisateur a déposé son Input.
 enum InputSourceType {
   TEXT

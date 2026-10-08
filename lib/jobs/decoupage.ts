@@ -1,5 +1,5 @@
 import { callAI } from "@/lib/ai/client";
-import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
+import { promptsSysteme } from "@/lib/ai/prompts";
 import { depotADecouper } from "@/lib/ai/prompts/depot-a-decouper";
 import { contratDExtraction } from "@/lib/ai/schemas";
 import { enregistrerConcepts, enregistrerLExtraction, lireDepot } from "@/lib/db/ingestion";
@@ -44,7 +44,7 @@ export async function decouperEnConcepts(job: GenerationJob): Promise<void> {
     // gardée — il n'y a rien d'écarté, et le champ ferait écrire le dépôt une
     // seconde fois pour rien. Voir `contratDExtraction`.
     contract: contratDExtraction(consigne.length > 0),
-    system: SYSTEM_PROMPTS.extract_atoms,
+    system: promptsSysteme(depot.langue).extract_atoms,
     jobId: job.id,
     userId: depot.userId ?? undefined,
     // La visite, et non l'absence de compte : celle-ci couvre aussi les

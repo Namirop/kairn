@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { callAI } from "@/lib/ai/client";
-import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
+import { OCR_EXTRACT_PROMPT } from "@/lib/ai/prompts";
 import { OCR_EXTRACT } from "@/lib/ai/schemas";
 import { enregistrerTexteLu, lireDepot, oublierImage } from "@/lib/db/ingestion";
 import { marquerEchec, marquerRejet } from "@/lib/db/fin-de-depot";
@@ -36,7 +36,7 @@ export async function lireImage(job: GenerationJob): Promise<void> {
   const contexte = depot.rawContent.trim();
   const lu = await callAI({
     contract: OCR_EXTRACT,
-    system: SYSTEM_PROMPTS.ocr_extract,
+    system: OCR_EXTRACT_PROMPT,
     jobId: job.id,
     userId: depot.userId ?? undefined,
     messages: [

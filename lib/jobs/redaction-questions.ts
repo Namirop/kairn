@@ -1,6 +1,6 @@
 import { callAI } from "@/lib/ai/client";
 import { AITruncatedOutputError } from "@/lib/ai/errors";
-import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
+import { promptsSysteme } from "@/lib/ai/prompts";
 import { lireLaConfigEffective } from "@/lib/ai/reglages-effectifs";
 import { contratDeGeneration } from "@/lib/ai/schemas";
 import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
@@ -167,7 +167,7 @@ export async function ecrireLesQuestionsDuJob(
 export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
   const depot = await prisma.input.findUnique({
     where: { id: job.inputId },
-    select: { userId: true, anonymousSessionId: true },
+    select: { userId: true, anonymousSessionId: true, langue: true },
   });
   const concepts = await conceptsDuJob(job.atomIds);
 
@@ -185,7 +185,7 @@ export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
   */
   const rendu = await callAI({
     contract: contratDuGroupe(concepts),
-    system: SYSTEM_PROMPTS.generate_variants,
+    system: promptsSysteme(depot?.langue ?? "FR").generate_variants,
     jobId: job.id,
     userId: depot?.userId ?? undefined,
     // La part du public, comme pour le découpage : depuis que l'essai montre

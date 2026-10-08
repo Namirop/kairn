@@ -22,6 +22,13 @@ model Input {
   rawContent String          @db.Text
   sourceType InputSourceType
 
+  /// La langue dans laquelle ses concepts et ses questions sont écrits, figée
+  /// au dépôt. Celle de la personne à cet instant, pas celle du texte : un
+  /// article anglais déposé en français rend des concepts français. Figée parce
+  /// que la changer réécrirait des Atoms déjà planifiés, et que la régénération
+  /// d'une question doit parler la langue de ses sœurs.
+  langue Langue @default(FR)
+
   /// L'image, le temps de la lire, et rien de plus. Une capture montre souvent
   /// plus que ce que son auteur croit y montrer — barre latérale, notifications,
   /// onglets. Ces octets sont effacés dès que `extractedText` est obtenu, et il

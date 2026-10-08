@@ -1,4 +1,4 @@
-import { EXTRACT_ATOMS_PROMPT } from "@/lib/ai/prompts/extract-atoms";
+import { EXTRACT_ATOMS_PROMPT } from "@/lib/ai/prompts";
 import type { Depot } from "../corpus";
 import type { DepotFige } from "../fige";
 import { SYSTEM_ATTENDUS } from "../juges/attendus";

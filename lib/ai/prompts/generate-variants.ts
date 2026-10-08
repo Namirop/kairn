@@ -1,3 +1,5 @@
+import type { LangueDesQuestions } from "./consignes-de-langue";
+
 /**
  * Écriture des quatre Variants d'un Atom.
  *
@@ -204,7 +206,8 @@
  * La règle est posée dans LA LANGUE, où vit déjà ce qui se recopie tel quel ;
  * la lecture relève le stock de son côté — voir `releverLeCodeCite`.
  */
-export const GENERATE_VARIANTS_PROMPT = `On te donne un ou plusieurs concepts issus d'un même dépôt. Tu écris quatre questions
+export function promptDeQuestions(langue: LangueDesQuestions): string {
+  return `On te donne un ou plusieurs concepts issus d'un même dépôt. Tu écris quatre questions
 pour chacun, indépendamment.
 
 Chaque question ne se répond qu'avec son propre concept. Ne t'appuie jamais sur un
@@ -213,16 +216,7 @@ ils seront servis à des semaines d'intervalle.
 
 LA LANGUE
 
-Tu écris en français : l'énoncé, les options, la réponse-étalon. Toujours, quelle que
-soit la langue du concept. Il n'y a pas de langue à choisir ici.
-
-Ce que le concept cite — un mot, une expression, une phrase d'exemple, un terme
-technique — se recopie dans sa langue, sans traduction ni translittération. C'est le
-texte qui **porte** la question qui est en français, pas ce sur quoi elle porte : une
-option de QCM peut donc être une forme étrangère, et un texte à trou peut masquer un
-mot dans la phrase d'exemple citée telle quelle.
-
-Une question qui s'adresse au lecteur le tutoie : « Explique », jamais « Expliquez ».
+${langue.sortie}
 
 **Un terme de code s'écrit entre accents graves, jamais entre guillemets.** Un nom de
 variable ou de méthode, un identifiant, un nom de fichier, un chemin, un paquet, un
@@ -352,7 +346,7 @@ Son \`answerKey\` ne réannonce pas le terme. Il vient de se poser dans la phras
 souligné, au moment où ce bloc s'affiche : ni « Le terme attendu est… », ni « Le
 mot masqué est… ». Commence par ce qu'il fallait avoir compris pour le trouver.
 
-Quand le concept apparie un terme étranger et son sens en français, le trou tombe sur
+Quand le concept apparie un terme étranger et son sens en ${langue.nom}, le trou tombe sur
 le terme étranger. C'est lui qu'il s'agit de savoir produire ; le sens, lui, est déjà
 dans la phrase qui entoure le trou.
 
@@ -445,3 +439,4 @@ indiquer que… ». N'ajoute pas ce qui compterait comme insuffisant : celui qui
 lit compare sa réponse à la tienne et choisit lui-même parmi quatre nuances —
 lui dicter le seuil, c'est faire son travail à sa place et le faire mal, puisque
 tu ne sais pas ce qu'il a répondu.`;
+}

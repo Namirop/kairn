@@ -15,6 +15,7 @@ export {
   InputSourceType,
   InputStatus,
   JobStatus,
+  Langue,
   MotifDeSignalement,
   NotificationType,
   ReviewRating,

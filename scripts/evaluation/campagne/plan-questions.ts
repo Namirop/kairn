@@ -1,4 +1,4 @@
-import { GENERATE_VARIANTS_PROMPT } from "@/lib/ai/prompts/generate-variants";
+import { GENERATE_VARIANTS_PROMPT } from "@/lib/ai/prompts";
 import { CONCEPTS_PAR_APPEL } from "@/lib/ai/schemas";
 import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
 import type { DepotFige } from "../fige";

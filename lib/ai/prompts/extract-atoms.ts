@@ -1,3 +1,5 @@
+import type { LangueDExtraction } from "./consignes-de-langue";
+
 /**
  * Découpage d'un Input en concepts unitaires.
  *
@@ -161,27 +163,13 @@
  * sans espace et porte un signe qu'aucun mot de prose ne porte — voir
  * `releverLeCodeCite`. La consigne, elle, vaut pour ce qui s'écrira.
  */
-export const EXTRACT_ATOMS_PROMPT = `Tu découpes ce qu'une personne vient d'apprendre en concepts unitaires, pour qu'ils
+export function promptDExtraction(langue: LangueDExtraction): string {
+  return `Tu découpes ce qu'une personne vient d'apprendre en concepts unitaires, pour qu'ils
 lui soient reposés plus tard.
 
 LA LANGUE
 
-Tu écris toujours en français, quelle que soit la langue du dépôt. Un article en
-anglais, une note en espagnol, une liste de vocabulaire : les concepts qui en sortent
-sont en français. Il n'y a pas de langue à choisir ici — c'est celle dans laquelle la
-personne révisera, et la seule que l'application lui parle.
-
-Ce que le dépôt **cite** garde sa langue : un mot, une expression, une phrase
-d'exemple, un terme technique, un nom propre. Tu les recopies tels quels, entre
-guillemets, sans les traduire ni les translittérer. C'est souvent eux qu'il y a à
-retenir, et les traduire effacerait exactement ce qu'on voulait apprendre.
-
-Un dépôt qui dit « El verbo ser se usa para expresar la identidad » rend un concept
-qui dit : Le verbe espagnol « ser » exprime l'identité, l'origine et la profession —
-« soy francés », « es médico ».
-
-Quand le sens d'un terme cité fait partie de ce qu'il y a à retenir, le concept porte
-les deux : la forme dans sa langue, le sens en français.
+${langue.sortie}
 
 **Un terme de code s'écrit entre accents graves, jamais entre guillemets.** Un nom de
 variable ou de méthode, un identifiant, un nom de fichier, un chemin, un paquet, un
@@ -330,8 +318,7 @@ peut ignorer puis apprendre. « Les revues d'équipe se tiennent le lundi et dur
 heure » s'oublie et se vérifie ; « il faudrait que je prépare mieux les revues » non.
 Le premier est un concept, le second est une intention.
 
-Écris \`rejected\` en tutoyant — « tu », « te », « ton » ; jamais « vous » —, sans
-reproche, en disant ce qui manquerait pour que ce soit exploitable.
+${langue.rejet}
 
 LA CONSIGNE, QUAND IL Y EN A UNE
 
@@ -370,6 +357,7 @@ parce qu'elle ne s'applique pas.
 
 LES ÉTIQUETTES
 
-Une à trois par concept, en français, en minuscules, sans accent ni espace : \`closures\`,
+Une à trois par concept, en ${langue.nom}, en minuscules, sans accent ni espace : \`closures\`,
 \`postgres\`, \`index-partiel\`. Elles servent à regrouper, pas à décrire. Reprends celles
 déjà utilisées ailleurs quand elles conviennent, plutôt que d'en inventer une variante.`;
+}

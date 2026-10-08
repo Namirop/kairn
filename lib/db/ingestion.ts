@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import type { Input, InputNature } from "@/lib/db/types";
+import { lireLangueUtilisateur } from "@/lib/db/user-settings";
 
 /**
  * Les écritures du pipeline d'ingestion, de la création du dépôt à son état
@@ -42,10 +43,14 @@ export async function creerDepot(
 
   if (existant) return { input: existant, nouveau: false };
 
+  // Figée ici, au dépôt : changer de langue plus tard ne retraduit rien.
+  const langue = await lireLangueUtilisateur(depot.userId);
+
   try {
     const input = await prisma.input.create({
       data: {
         userId: depot.userId,
+        langue,
         rawContent: depot.texte,
         instruction: depot.consigne ?? null,
         sourceType: depot.image ? "IMAGE" : "TEXT",

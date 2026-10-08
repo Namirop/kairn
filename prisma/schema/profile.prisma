@@ -11,6 +11,9 @@ model UserSettings {
   /// Identifiant IANA, ex. « Europe/Brussels ». Sert à l'affichage et au
   /// déclenchement des notifications, jamais au calcul d'une échéance.
   timezone             String    @default("UTC")
+  /// La langue de l'interface, des emails, et de ce que les prochains dépôts
+  /// rendront. La changer ne retraduit rien : chaque dépôt garde la sienne.
+  langue               Langue    @default(FR)
   dailyReminderEnabled Boolean   @default(true)
   /// Heure locale de l'utilisateur, 0 à 23.
   dailyReminderHour    Int       @default(19)

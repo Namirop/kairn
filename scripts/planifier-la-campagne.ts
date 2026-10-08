@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
-import { EXTRACT_ATOMS_PROMPT } from "@/lib/ai/prompts/extract-atoms";
+import { EXTRACT_ATOMS_PROMPT } from "@/lib/ai/prompts";
 import { lireCorpus, type Depot } from "./evaluation/corpus";
 import { dernierFige, lireFige, type DepotFige } from "./evaluation/fige";
 import { SYSTEM_ATTENDUS } from "./evaluation/juges/attendus";
