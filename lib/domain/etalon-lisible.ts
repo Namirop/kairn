@@ -18,10 +18,17 @@
  * bloc. L'annoncer une seconde fois occupe la première ligne à redire ce que
  * l'œil vient de lire. La consigne d'écriture est corrigée de son côté ; ici on
  * rattrape le stock, qui vivra des mois.
+ *
+ * **Les étiquettes anglaises sont lues avec les françaises**, sans qu'on dise
+ * la langue de l'étalon : « Answer: » n'ouvre pas une phrase française, ni
+ * « Réponse : » une anglaise. Un étalon anglais garderait sinon sa redite, et
+ * rien ne le signalerait.
  */
 const ETIQUETTES: readonly RegExp[] = [
   /^\s*(?:l[ae]\s+)?(?:r[eé]ponse(?:\s+(?:attendue?s?|correcte?s?))?|attendu|[eé]talon)\s*[:—-]\s*/i,
   /^\s*l[ea]\s+(?:terme|mot|expression)\s+(?:attendue?|masqu[eé]e?|manquante?|recherch[eé]e?)\s+(?:est|[eé]tait)\s*[«"“']?[^«»"“”:]{1,60}[»"”']?\s*[:—–-]\s*/i,
+  /^\s*(?:the\s+)?(?:(?:expected|correct|right)\s+)?(?:answer|response)\s*(?::|\s[—–-])\s*/i,
+  /^\s*expected\s*(?::|\s[—–-])\s*/i,
   /^\s*the\s+(?:expected|missing|hidden)\s+(?:term|word|answer)\s+is\s*[«"“']?[^«»"“”:]{1,60}[»"”']?\s*[:—–-]\s*/i,
 ];
 

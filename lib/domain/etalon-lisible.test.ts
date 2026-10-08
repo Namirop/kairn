@@ -97,3 +97,32 @@ describe("l'étiquette du texte à trou", () => {
     );
   });
 });
+
+describe("les étiquettes anglaises", () => {
+  it("retire l'étiquette d'un étalon anglais", () => {
+    expect(etalonLisible("Answer: the event loop drains microtasks first.")).toBe(
+      "The event loop drains microtasks first.",
+    );
+    expect(etalonLisible("Expected answer — interest compounds on itself.")).toBe(
+      "Interest compounds on itself.",
+    );
+    expect(etalonLisible("Expected: a partial index skips the rows it excludes.")).toBe(
+      "A partial index skips the rows it excludes.",
+    );
+  });
+
+  it("ne prend pas pour une étiquette un mot composé qui ouvre la phrase", () => {
+    expect(etalonLisible("Answer-set programming solves search problems.")).toBe(
+      "Answer-set programming solves search problems.",
+    );
+    expect(etalonLisible("Expected-value reasoning weighs outcomes by probability.")).toBe(
+      "Expected-value reasoning weighs outcomes by probability.",
+    );
+  });
+
+  it("laisse une phrase qui parle de la réponse sans l'étiqueter", () => {
+    expect(etalonLisible("The answer depends on whether the key is ephemeral.")).toBe(
+      "The answer depends on whether the key is ephemeral.",
+    );
+  });
+});
