@@ -1,21 +1,24 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { EcranErreur } from "@/components/etats/ecran-erreur";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
 export default function Introuvable() {
+  const t = useTranslations("tableau.commun.introuvable");
+
   return (
     <EcranErreur
       code="404"
-      titre="Ce sentier ne mène nulle part"
-      explication="L'adresse demandée n'existe pas, ou n'existe plus. Rien n'a été supprimé de ce que tu as déposé."
+      titre={t("titre")}
+      explication={t("explication")}
       actions={
         <>
           <Button asChild>
-            <Link href={ROUTES.aujourdhui}>Aller à Aujourd&apos;hui</Link>
+            <Link href={ROUTES.aujourdhui}>{t("allerAujourdhui")}</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href={ROUTES.accueil}>Voir la présentation</Link>
+            <Link href={ROUTES.accueil}>{t("presentation")}</Link>
           </Button>
         </>
       }

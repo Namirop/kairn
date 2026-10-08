@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducedMotion } from "motion/react";
+import { useTranslations } from "next-intl";
 import { PierrePosee } from "@/components/cairn/pierre-posee";
 import { SolDuCairn } from "@/components/cairn/sol-du-cairn";
 import { useAnimationPossible } from "@/components/cairn/use-animation-possible";
@@ -39,16 +40,24 @@ export function Cairn({
   /** Sur un panneau de roche, les pierres s'inversent en gris clairs. */
   clair?: boolean;
 }) {
+  const t = useTranslations("tableau.cairn");
   const immobile = useReducedMotion() ?? false;
   const anime = useAnimationPossible(immobile);
   const { cairns, largeur, hauteur, ySol, total } = tracerLeSentier(nombre, graines);
+  // Ce que le dessin dit à qui ne le voit pas.
+  const legende =
+    total === 0
+      ? t("legendeVide")
+      : cairns.length > 1
+        ? t("legendeSentier", { cairns: cairns.length, total })
+        : t("legendePile", { total });
 
   return (
     <svg
       viewBox={`0 ${-hauteur + ySol} ${largeur} ${hauteur}`}
       className={cn("h-full w-full", className)}
       role="img"
-      aria-label={legende(total, cairns.length)}
+      aria-label={legende}
     >
       <SolDuCairn clair={clair} largeur={largeur} />
       {cairns.map((cairn) => (
@@ -71,15 +80,4 @@ export function Cairn({
       ))}
     </svg>
   );
-}
-
-/** Ce que le dessin dit à qui ne le voit pas. */
-function legende(total: number, cairns: number): string {
-  if (total === 0) return "Aucune pierre posée";
-
-  const pierres = `${total} pierre${total > 1 ? "s" : ""}`;
-
-  return cairns > 1
-    ? `Sentier de ${cairns} cairns, ${pierres} en tout`
-    : `Empilement de ${pierres}`;
 }

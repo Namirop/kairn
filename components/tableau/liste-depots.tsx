@@ -6,7 +6,6 @@ import { EtatVide } from "@/components/etats/etat-vide";
 import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/lib/auth/routes";
 import type { DepotListe } from "@/lib/db/depots";
-import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";
 import { cn } from "@/lib/utils";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
@@ -43,7 +42,8 @@ import { conceptsLisibles, travailEnCours } from "@/lib/domain/etat-depot";
  */
 function Avancement({ depot }: { depot: DepotListe }) {
   const tEtat = useTranslations("etatDepot");
-  const concepts = compte(depot.nombreAtoms, "concept", "concepts");
+  const t = useTranslations("tableau.aujourdhui.depots");
+  const concepts = t("concepts", { nombre: depot.nombreAtoms });
 
   if (depot.etat === "echec") return <Badge variant="alerte">{tEtat(depot.etat)}</Badge>;
 
@@ -68,27 +68,32 @@ export function ListeDepots({
   depots,
   maintenant,
   fuseau,
-  titre = "Ce que tu as déposé",
+  titre,
   avecLien = true,
   surface = "papier",
 }: {
   depots: DepotListe[];
   maintenant: Date;
   fuseau: string;
-  /** Nul sur la page dédiée, où le titre de page dit déjà de quoi il s'agit. */
+  /**
+   * Nul sur la page dédiée, où le titre de page dit déjà de quoi il s'agit.
+   * Absent, c'est « Ce que tu as déposé ».
+   */
   titre?: string | null;
   avecLien?: boolean;
   /** La surface du panneau qui porte la liste : les cartes prennent l'autre. */
   surface?: "papier" | "ombre";
 }) {
   const tTemps = useTranslations("temps");
+  const t = useTranslations("tableau.aujourdhui.depots");
+  const titreAffiche = titre === undefined ? t("titre") : titre;
 
   return (
     <section>
       <div className="gap-pas-4 flex items-baseline justify-between">
-        {titre ? (
+        {titreAffiche ? (
           <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-            {titre}
+            {titreAffiche}
           </h2>
         ) : (
           <span />
@@ -98,17 +103,14 @@ export function ListeDepots({
             href={ROUTES.depots}
             className="text-petit rounded-galet text-stone-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900"
           >
-            Tout voir
+            {t("toutVoir")}
           </Link>
         ) : null}
       </div>
 
       {depots.length === 0 ? (
         <div className="mt-pas-4">
-          <EtatVide
-            constat="Tu n'as encore rien déposé."
-            contexte="Une phrase, un pavé collé, une capture d'écran — tout fait un point de départ."
-          />
+          <EtatVide constat={t("videConstat")} contexte={t("videContexte")} />
         </div>
       ) : (
         <ul className="mt-pas-4 gap-pas-2 flex max-w-3xl flex-col">
@@ -146,16 +148,14 @@ export function ListeDepots({
                           que la provenance se dit, en tête du texte, comme elle
                           se lisait avant. */}
                       {depot.sourceType === "IMAGE" ? (
-                        <span className="sr-only">Capture. </span>
+                        <span className="sr-only">{t("capture")} </span>
                       ) : null}
                       {/* Les termes de code sont relevés ici comme partout où ce
                           texte se montre. L'aperçu étant coupé à sa longueur, un
                           accent grave peut se retrouver seul : il reste alors
                           littéral, ce qui est moins bruyant qu'une paire
                           affichée. */}
-                      <TexteTechnique>
-                        {depot.apercu || "Capture en cours de lecture"}
-                      </TexteTechnique>
+                      <TexteTechnique>{depot.apercu || t("captureEnLecture")}</TexteTechnique>
                     </p>
                     <p className="mt-pas-2 gap-pas-3 text-mono flex flex-wrap items-center text-stone-500">
                       <Avancement depot={depot} />

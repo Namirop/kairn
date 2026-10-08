@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { Maximize2, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { LignesDeCode } from "@/components/typographie/lignes-de-code";
 
 /**
@@ -37,6 +38,7 @@ const GESTE =
 
 export function BlocDeCode({ texte, langage }: { texte: string; langage: string | null }) {
   const [ouvert, setOuvert] = useState(false);
+  const t = useTranslations("tableau.commun.extrait");
 
   return (
     <DialogPrimitive.Root open={ouvert} onOpenChange={setOuvert}>
@@ -46,7 +48,7 @@ export function BlocDeCode({ texte, langage }: { texte: string; langage: string 
 
           <DialogPrimitive.Trigger className={GESTE}>
             <Maximize2 aria-hidden className="size-3.5" />
-            Agrandir
+            {t("agrandir")}
           </DialogPrimitive.Trigger>
         </div>
 
@@ -68,15 +70,15 @@ export function BlocDeCode({ texte, langage }: { texte: string; langage: string 
               le dit, et la redire en grand mettrait un titre sur un extrait de
               deux lignes. */}
           <DialogPrimitive.Title className="sr-only">
-            Extrait de code{langage ? ` en ${langage}` : ""}
+            {langage ? t("titreEn", { langage }) : t("titre")}
           </DialogPrimitive.Title>
 
           <div className={BARRE}>
             <p className={ETIQUETTE}>{langage ?? "code"}</p>
 
-            <DialogPrimitive.Close className={GESTE} aria-label="Fermer l'extrait">
+            <DialogPrimitive.Close className={GESTE} aria-label={t("fermerLExtrait")}>
               <X aria-hidden className="size-3.5" />
-              Fermer
+              {t("fermer")}
             </DialogPrimitive.Close>
           </div>
 

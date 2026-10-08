@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useReducedMotion } from "motion/react";
+import { useTranslations } from "next-intl";
 import { Cairn } from "@/components/cairn/cairn";
 import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
 import { PoseDePierre } from "@/components/cairn/pose-de-pierre";
@@ -53,6 +54,7 @@ export function CairnRenversable({
   graines?: string[];
   className?: string;
 }) {
+  const t = useTranslations("tableau.cairn");
   const immobile = useReducedMotion() ?? false;
   const pose = useAnimationPossible(immobile);
   const { pierres, hauteur, ySol } = useMemo(() => empiler(nombre, graines), [nombre, graines]);
@@ -91,7 +93,7 @@ export function CairnRenversable({
           viewBox={`0 ${-hauteur + ySol} ${LARGEUR_VUE} ${hauteur}`}
           className="h-full w-full overflow-visible"
           role="img"
-          aria-label={`Empilement de ${nombre} pierres. Passe la souris ou le doigt au travers pour le faire tomber.`}
+          aria-label={t("renversable", { nombre })}
         >
           <SolDuCairn />
           {pierres.map((pierre, rang) => (

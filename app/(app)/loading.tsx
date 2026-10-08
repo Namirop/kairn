@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { PileEnConstruction } from "@/components/cairn/pile-en-construction";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
@@ -15,11 +16,13 @@ import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
  * exactement le contraire de ce qu'une attente doit dire.
  */
 export default function Chargement() {
+  const t = useTranslations("tableau.commun");
+
   return (
     <PileDePanneaux>
       <Panneau surface="papier" mesure="texte" centre remplit>
         <PileEnConstruction className="w-20 md:w-24" />
-        <p className="mt-pas-6 text-petit text-stone-500">Un instant.</p>
+        <p className="mt-pas-6 text-petit text-stone-500">{t("chargement")}</p>
       </Panneau>
     </PileDePanneaux>
   );

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { IndiceTactile, Infobulle } from "@/components/ui/infobulle";
 import { avancementDuNiveau } from "@/lib/domain/progression";
 
@@ -35,6 +36,8 @@ const ETIQUETTE = "text-mono font-mono tracking-[0.14em] text-stone-400 uppercas
 const CHIFFRE = "font-display text-nombre mt-pas-2 leading-none font-medium tabular-nums";
 
 function Serie({ streak }: { streak: number }) {
+  const t = useTranslations("tableau.aujourdhui.progression");
+
   if (streak === 0) {
     // Centré comme les deux autres mesures. Au fer à gauche, cette phrase
     // partait au bord de l'écran pendant que le niveau se tenait au milieu du
@@ -42,31 +45,21 @@ function Serie({ streak }: { streak: number }) {
     // au moment où l'une n'a pas encore de chiffre à opposer.
     return (
       <div className="text-center">
-        <p className={ETIQUETTE}>Série</p>
-        <p className="mt-pas-3 text-corps text-stone-300">
-          Une session aujourd&apos;hui ouvre ta série.
-        </p>
+        <p className={ETIQUETTE}>{t("serie")}</p>
+        <p className="mt-pas-3 text-corps text-stone-300">{t("serieVide")}</p>
       </div>
     );
   }
 
   return (
-    <Infobulle
-      className="rounded-galet block w-full text-center"
-      contenu={
-        <>
-          Le nombre de sessions consécutives, sans en manquer une. Une journée où rien n&apos;arrive
-          à échéance ne compte pas, et ne casse rien.
-        </>
-      }
-    >
+    <Infobulle className="rounded-galet block w-full text-center" contenu={t("serieAide")}>
       <p className={ETIQUETTE}>
-        Série
+        {t("serie")}
         <IndiceTactile />
       </p>
       <p className={`${CHIFFRE} text-ember-clair`}>{streak}</p>
       <p className="text-mono text-ember-clair mt-pas-2 font-mono tracking-[0.14em] uppercase">
-        {streak === 1 ? "session" : "sessions d'affilée"}
+        {t("serieUnite", { nombre: streak })}
       </p>
     </Infobulle>
   );
@@ -74,19 +67,12 @@ function Serie({ streak }: { streak: number }) {
 
 function Niveau({ xp }: { xp: number }) {
   const { niveau, part, restant } = avancementDuNiveau(xp);
+  const t = useTranslations("tableau.aujourdhui.progression");
 
   return (
-    <Infobulle
-      className="rounded-galet block w-full text-center"
-      contenu={
-        <>
-          Un point par question passée en session, un de plus quand tu retrouves un concept que tu
-          avais raté. La justesse n&apos;entre pas dans le calcul.
-        </>
-      }
-    >
+    <Infobulle className="rounded-galet block w-full text-center" contenu={t("niveauAide")}>
       <p className={ETIQUETTE}>
-        Niveau
+        {t("niveau")}
         <IndiceTactile />
       </p>
       <p className={CHIFFRE}>{niveau}</p>
@@ -106,7 +92,7 @@ function Niveau({ xp }: { xp: number }) {
       </span>
 
       <p className="text-mono mt-pas-2 font-mono text-stone-400 tabular-nums">
-        {restant} XP avant le niveau {niveau + 1}
+        {t("restant", { restant, suivant: niveau + 1 })}
       </p>
     </Infobulle>
   );

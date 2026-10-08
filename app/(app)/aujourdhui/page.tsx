@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
@@ -14,7 +15,11 @@ import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireTableauDeBord } from "@/lib/db/tableau-de-bord";
 
-export const metadata: Metadata = { title: "Aujourd'hui" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("tableau.aujourdhui");
+
+  return { title: t("titre") };
+}
 
 /**
  * Le tableau de bord, en deux panneaux.
@@ -34,6 +39,7 @@ export default async function PageAujourdhui() {
 
   const maintenant = new Date();
   const tableau = await lireTableauDeBord(utilisateur.id, maintenant);
+  const t = await getTranslations("tableau.aujourdhui.cairn");
 
   return (
     <PileDePanneaux sol="roche">
@@ -110,13 +116,9 @@ export default async function PageAujourdhui() {
                 titre de section sur grand écran, et reste au corps sur mobile où
                 il tenait déjà la largeur. */}
             <p className="mt-pas-4 md:mt-pas-6 text-corps md:text-h2-app leading-relaxed">
-              Une pierre par concept retenu : quand il revient de loin et que tu le retrouves trois
-              fois de suite, ou quand tu déclares le maîtriser. Pas quand tu l&apos;as lu.
+              {t("promesse")}
             </p>
-            <p className="mt-pas-4 text-petit text-stone-300">
-              La forme de chaque pierre est tirée du concept qu&apos;elle représente. Personne
-              n&apos;empile les mêmes.
-            </p>
+            <p className="mt-pas-4 text-petit text-stone-300">{t("forme")}</p>
           </div>
 
           {/* `atomsConsolidated` est le nom de la colonne, pas celui de ce

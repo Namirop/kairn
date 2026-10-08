@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
+import { useTranslations } from "next-intl";
 import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
 import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,7 @@ export function PileEnConstruction({
   /** Sur un panneau de roche, les pierres s'inversent en gris clairs. */
   clair?: boolean;
 }) {
+  const t = useTranslations("tableau.cairn");
   const immobile = useReducedMotion() ?? false;
   const { pierres, hauteur, ySol } = empiler(
     PIERRES,
@@ -44,7 +46,7 @@ export function PileEnConstruction({
       viewBox={`0 ${-hauteur + ySol} ${LARGEUR_VUE} ${hauteur}`}
       className={cn("h-auto w-12", className)}
       role="img"
-      aria-label="Travail en cours"
+      aria-label={t("travailEnCours")}
     >
       {pierres.map((pierre, rang) => (
         <motion.g

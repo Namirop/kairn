@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { BlocDetache } from "@/components/coquille/bloc-detache";
 import { ROUTES } from "@/lib/auth/routes";
 import { PLAFOND_MAX } from "@/lib/domain/selection-session";
@@ -44,30 +45,27 @@ export function SignalDeDette({
   /** Le plafond de session du compte : c'est lui qui dit s'il reste une marche à monter. */
   plafond: number;
 }) {
+  const t = useTranslations("tableau.aujourdhui.dette");
+
   return (
     <BlocDetache>
       <p className="text-corps max-w-prose leading-relaxed text-stone-900">
-        Ça fait {jours} jours que le retard ne descend pas : {enAttente} concepts attendent derrière
-        la session du jour.
+        {t("constat", { jours, enAttente })}
       </p>
       <p className="mt-pas-2 text-petit max-w-prose text-stone-500">
-        {plafond >= PLAFOND_MAX ? (
-          <>
-            Ta session est déjà au maximum, {plafond} concepts par jour. Il ne reste qu&apos;à lever
-            le pied sur les dépôts quelques jours, le temps que ça redescende.
-          </>
-        ) : (
-          <>
-            Deux façons de le résorber : lever le pied sur les dépôts quelques jours, ou{" "}
-            <Link
-              href={ROUTES.reglages}
-              className="rounded-galet text-stone-800 underline underline-offset-4"
-            >
-              monter le plafond de ta session
-            </Link>
-            , aujourd&apos;hui à {plafond} concepts par jour.
-          </>
-        )}
+        {plafond >= PLAFOND_MAX
+          ? t("auMaximum", { plafond })
+          : t.rich("deuxFacons", {
+              plafond,
+              lien: (morceau) => (
+                <Link
+                  href={ROUTES.reglages}
+                  className="rounded-galet text-stone-800 underline underline-offset-4"
+                >
+                  {morceau}
+                </Link>
+              ),
+            })}
       </p>
     </BlocDetache>
   );

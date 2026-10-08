@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,8 @@ function DialogContent({
   children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content>) {
+  const t = useTranslations("tableau.commun");
+
   return (
     <DialogPrimitive.Portal>
       <DialogOverlay />
@@ -56,7 +59,7 @@ function DialogContent({
         {children}
         <DialogPrimitive.Close
           className="top-pas-3 right-pas-3 absolute inline-flex size-9 items-center justify-center rounded-xs text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900"
-          aria-label="Fermer"
+          aria-label={t("fermer")}
         >
           <X className="size-4" />
         </DialogPrimitive.Close>

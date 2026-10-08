@@ -1,6 +1,7 @@
 "use client";
 
 import { Crosshair } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,12 +27,14 @@ import { cn } from "@/lib/utils";
  * bouton de plus à comprendre.
  */
 export function PriseDuCairn({ tenu, surBascule }: { tenu: boolean; surBascule: () => void }) {
+  const t = useTranslations("tableau.cairn");
+
   return (
     <button
       type="button"
       onClick={surBascule}
       aria-pressed={tenu}
-      aria-label="Jouer avec le cairn"
+      aria-label={t("jouer")}
       className={cn(
         /* La cible fait quarante-quatre pixels, le glyphe seize : c'est la zone
            qui grandit, pas le dessin. Il se tient en haut à droite, au-dessus

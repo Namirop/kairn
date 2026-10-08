@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { SolDuCairn } from "@/components/cairn/sol-du-cairn";
 import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 import { cn } from "@/lib/utils";
@@ -41,6 +42,7 @@ export function PierreAVenir({
   className?: string;
   clair?: boolean;
 }) {
+  const t = useTranslations("tableau.cairn");
   const { pierres, hauteur, ySol } = empiler(1, [GRAINE]);
   const pierre = pierres[0];
 
@@ -51,7 +53,7 @@ export function PierreAVenir({
       viewBox={`0 ${-hauteur + ySol - AIR_AU_DESSUS} ${LARGEUR_VUE} ${hauteur + AIR_AU_DESSUS}`}
       className={cn("h-full w-full", className)}
       role="img"
-      aria-label="Aucune pierre posée. La place de la première est marquée."
+      aria-label={t("pierreAVenir")}
     >
       <SolDuCairn clair={clair} />
       <g transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}>

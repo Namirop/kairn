@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
-import { compte } from "@/lib/domain/accord";
-import { PLAFOND_SESSION, type ChargeDuJour } from "@/lib/domain/selection-session";
+import type { ChargeDuJour } from "@/lib/domain/selection-session";
+import { PhraseDuJour, PourquoiCertainsAttendent } from "./phrases-du-compteur";
 
 /**
  * Ce qu'il y a à revoir aujourd'hui. Le chiffre est nu, souligné d'un filet de
@@ -16,95 +17,9 @@ import { PLAFOND_SESSION, type ChargeDuJour } from "@/lib/domain/selection-sessi
  * « Arrive à échéance » était du jargon d'algorithme : c'est vrai du point de
  * vue de la carte ts-fsrs, pas de celui de quelqu'un qui ouvre son application
  * le matin.
+ *
+ * Ses phrases à zéro et en attente vivent dans `phrases-du-compteur.tsx`.
  */
-
-/**
- * La phrase du compteur, quand il est à zéro.
- *
- * **Quatre zéros, pas un.** Rien n'a jamais été déposé ; les concepts sont là
- * mais leurs questions s'écrivent ; la journée est faite ; ou il n'y a
- * simplement rien à revoir. Les trois premiers se disaient déjà ; le troisième,
- * non — et c'est le seul qui se lisait faux.
- *
- * **« Les prochains concepts reviendront d'eux-mêmes » était un mensonge une
- * fois sur deux.** Cette phrase s'affichait aussi quand vingt-sept concepts
- * attendaient derrière un plafond atteint : ils ne revenaient pas d'eux-mêmes,
- * ils étaient au bout d'une file. Un écran qui annonce le calme au-dessus d'un
- * paragraphe qui annonce l'attente n'est pas seulement fouillis, il est faux.
- *
- * La journée faite se reconnaît à ce qu'on a revu quelque chose : le plafond est
- * journalier, donc un compteur à zéro derrière des passages faits ne veut dire
- * qu'une chose.
- */
-function PhraseDuJour({
-  aDesAtoms,
-  questionsEnRoute,
-  faitsAujourdhui,
-}: {
-  aDesAtoms: boolean;
-  questionsEnRoute: boolean;
-  faitsAujourdhui: number;
-}) {
-  if (!aDesAtoms) return <>Rien à revoir tant que tu n&apos;as rien déposé.</>;
-
-  if (questionsEnRoute) {
-    return <>Tes concepts sont là, leurs questions s&apos;écrivent. Reviens dans un moment.</>;
-  }
-
-  if (faitsAujourdhui > 0) {
-    return (
-      <>
-        Ta journée est faite : {compte(faitsAujourdhui, "concept revu", "concepts revus")}, le
-        maximum d&apos;une journée.
-      </>
-    );
-  }
-
-  return <>Rien à revoir aujourd&apos;hui. Les prochains concepts reviendront d&apos;eux-mêmes.</>;
-}
-
-/**
- * Pourquoi des concepts dus ne seront pas servis aujourd'hui.
- *
- * L'écran disait « une session s'arrête à vingt », en toutes lettres, et c'était
- * faux deux fois. Faux sur le nombre — le plafond se règle, et quelqu'un qui l'a
- * mis à dix lisait vingt. Faux sur la raison — on peut être arrêté à deux parce
- * qu'on en a déjà revu dix-huit, et « une session s'arrête à vingt » sous un
- * compteur affichant deux ne s'explique pas tout seul.
- *
- * **Il ne parle plus de la journée entamée.** C'est maintenant la phrase du
- * compteur qui le dit, et le redire ici faisait lire deux fois le même fait à
- * trois lignes d'écart — la moitié du fouillis de cet écran tenait là.
- */
-function PourquoiCertainsAttendent({ enAttente, plafond }: { enAttente: number; plafond: number }) {
-  return (
-    <>
-      {enAttente} de plus {enAttente === 1 ? "attend son tour" : "attendent leur tour"}.{" "}
-      {plafond === PLAFOND_SESSION ? (
-        <>
-          Une session s&apos;arrête à {plafond} concepts, <Lien>et ça se règle</Lien>.
-        </>
-      ) : (
-        <>
-          Tu as réglé ta session à {plafond} concepts, <Lien>et ça se rechange</Lien>.
-        </>
-      )}{" "}
-      Le reste revient demain, en commençant par ce qui risque le plus.
-    </>
-  );
-}
-
-function Lien({ children }: { children: React.ReactNode }) {
-  return (
-    <Link
-      href={ROUTES.reglages}
-      className="rounded-galet underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
-    >
-      {children}
-    </Link>
-  );
-}
-
 export function CompteurDu({
   charge,
   aDesAtoms,
@@ -131,6 +46,7 @@ export function CompteurDu({
 }) {
   const { aujourdhui, enAttente } = charge;
   const questionsEnRoute = aDesAtoms && conceptsSansQuestions > 0;
+  const t = useTranslations("tableau.aujourdhui");
 
   return (
     // Sur une colonne, tout se centre. En deux colonnes, tout revient au fer à
@@ -142,7 +58,7 @@ export function CompteurDu({
         id="titre-aujourdhui"
         className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase"
       >
-        Aujourd&apos;hui
+        {t("titre")}
       </h1>
 
       {/* Le nombre est le titre de l'écran, et il se présentait comme une
@@ -170,7 +86,7 @@ export function CompteurDu({
             faitsAujourdhui={faitsAujourdhui}
           />
         ) : (
-          `${aujourdhui === 1 ? "concept à revoir" : "concepts à revoir"} aujourd'hui.`
+          t("compteur.aRevoir", { nombre: aujourdhui })
         )}
       </p>
 
@@ -188,14 +104,13 @@ export function CompteurDu({
           qu'il y ait quelque chose à revoir ou non. */}
       {questionsEnRoute && aujourdhui > 0 ? (
         <p className="mt-pas-2 text-petit mx-auto text-stone-500 md:mx-0">
-          {compte(conceptsSansQuestions, "concept attend", "concepts attendent")} encore leurs
-          questions. Elles s&apos;écrivent, ils rejoindront la session d&apos;eux-mêmes.
+          {t("compteur.sansQuestions", { nombre: conceptsSansQuestions })}
         </p>
       ) : null}
 
       {aujourdhui > 0 ? (
         <Button asChild size="lg" className="mt-pas-6 w-full md:w-auto">
-          <Link href={ROUTES.reviser}>Commencer</Link>
+          <Link href={ROUTES.reviser}>{t("compteur.commencer")}</Link>
         </Button>
       ) : aDesAtoms && !questionsEnRoute ? (
         // Le seul endroit où l'entraînement se propose de lui-même : quand la
@@ -204,16 +119,14 @@ export function CompteurDu({
         // croire qu'ils se valent.
         <div className="mt-pas-6 flex flex-col items-center md:items-start">
           <Button asChild size="lg" variant="outline" className="w-full md:w-fit">
-            <Link href={ROUTES.entrainement}>S&apos;entraîner</Link>
+            <Link href={ROUTES.entrainement}>{t("compteur.entrainer")}</Link>
           </Button>
-          <span className="mt-pas-2 text-petit text-stone-500">
-            D&apos;autres questions sur les mêmes concepts. Ça ne change pas ton planning.
-          </span>
+          <span className="mt-pas-2 text-petit text-stone-500">{t("compteur.entrainerAide")}</span>
         </div>
       ) : aDesAtoms ? null : (
         // Rien déposé : le geste qui manque est le dépôt, pas la révision.
         <Button asChild size="lg" className="mt-pas-6 w-full md:w-auto">
-          <Link href={`${ROUTES.depots}/nouveau`}>Déposer quelque chose</Link>
+          <Link href={`${ROUTES.depots}/nouveau`}>{t("compteur.deposer")}</Link>
         </Button>
       )}
     </section>

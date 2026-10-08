@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { IndiceTactile, Infobulle } from "@/components/ui/infobulle";
 
 /**
@@ -33,20 +34,16 @@ import { IndiceTactile, Infobulle } from "@/components/ui/infobulle";
  * consolidation que le produit constate et l'archivage que l'utilisateur
  * déclare. Voir `ETATS_QUI_POSENT_UNE_PIERRE`.
  */
-function legende(retenus: number): string {
-  if (retenus === 0) return "Le premier concept retenu posera la première pierre.";
-
-  return `${retenus} ${retenus === 1 ? "concept retenu" : "concepts retenus"}. Une pierre chacun.`;
-}
-
 export function TitreDuCairn({ retenus }: { retenus: number }) {
+  const t = useTranslations("tableau.aujourdhui.cairn");
+
   return (
     <h2 className="text-mono font-mono tracking-[0.14em] text-stone-300 uppercase">
       <Infobulle
         className="rounded-galet gap-pas-1 inline-flex items-center uppercase"
-        contenu={legende(retenus)}
+        contenu={retenus === 0 ? t("legendeVide") : t("legende", { nombre: retenus })}
       >
-        Ton cairn
+        {t("titre")}
         <IndiceTactile className="ml-0 text-stone-400" />
       </Infobulle>
     </h2>

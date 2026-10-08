@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { SymboleDeMarque } from "@/components/coquille/symbole-de-marque";
 import { Button } from "@/components/ui/button";
 import { GesteManuel } from "./gestes-manuels";
@@ -36,6 +37,7 @@ import { useInstallation } from "./use-installation";
  */
 export function InviteInstallation() {
   const { mode, installer, ecarter, confirmer } = useInstallation();
+  const t = useTranslations("tableau.commun.installation");
 
   if (mode === "aucune") return null;
 
@@ -50,7 +52,7 @@ export function InviteInstallation() {
       <button
         type="button"
         onClick={ecarter}
-        aria-label="Écarter cette proposition"
+        aria-label={t("ecarter")}
         className="top-pas-3 right-pas-3 p-pas-1 rounded-galet hover:bg-surface-papier absolute text-stone-500 transition-colors hover:text-stone-900"
       >
         <X className="size-4" />
@@ -65,17 +67,14 @@ export function InviteInstallation() {
         </span>
 
         <div className="pr-pas-6 min-w-0 flex-1">
-          <p className="font-medium">Garde Kairn à portée</p>
-          <p className="mt-pas-1 text-petit text-stone-500">
-            Posée sur ton écran d&apos;accueil, elle s&apos;ouvre d&apos;un geste, sans la barre du
-            navigateur.
-          </p>
+          <p className="font-medium">{t("titre")}</p>
+          <p className="mt-pas-1 text-petit text-stone-500">{t("texte")}</p>
         </div>
       </div>
 
       {mode === "automatique" ? (
         <Button className="mt-pas-4" onClick={installer}>
-          Installer
+          {t("installer")}
         </Button>
       ) : (
         <>
@@ -98,7 +97,7 @@ export function InviteInstallation() {
             onClick={confirmer}
             className="mt-pas-4 text-petit rounded-xs text-stone-900 underline decoration-stone-300 underline-offset-4 transition-colors hover:decoration-stone-900"
           >
-            C&apos;est fait, ne plus me le proposer
+            {t("cestFait")}
           </button>
         </>
       )}

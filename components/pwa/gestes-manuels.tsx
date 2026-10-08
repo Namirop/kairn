@@ -1,4 +1,5 @@
 import { Share, SquarePlus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { GesteManuel } from "./environnement-dinstallation";
 
 /**
@@ -17,11 +18,13 @@ import type { GesteManuel } from "./environnement-dinstallation";
  * numérote.
  */
 export function GesteManuel({ geste }: { geste: GesteManuel }) {
+  const t = useTranslations("tableau.commun.installation");
+
   if (geste === "dock") {
     return (
       <ol className="mt-pas-4 gap-pas-2 text-petit flex flex-col text-stone-500">
-        <Etape rang={1}>Ouvre le menu Fichier de Safari.</Etape>
-        <Etape rang={2}>Choisis « Ajouter au Dock ».</Etape>
+        <Etape rang={1}>{t("dockMenu")}</Etape>
+        <Etape rang={2}>{t("dockChoix")}</Etape>
       </ol>
     );
   }
@@ -30,11 +33,11 @@ export function GesteManuel({ geste }: { geste: GesteManuel }) {
     <ol className="mt-pas-4 gap-pas-2 text-petit flex flex-col text-stone-500">
       <li className="gap-pas-2 flex items-center">
         <Share className="size-4 shrink-0 text-stone-900" aria-hidden />
-        Ouvre le menu de partage.
+        {t("partageMenu")}
       </li>
       <li className="gap-pas-2 flex items-center">
         <SquarePlus className="size-4 shrink-0 text-stone-900" aria-hidden />
-        Choisis « Sur l&apos;écran d&apos;accueil ».
+        {t("partageChoix")}
       </li>
     </ol>
   );
