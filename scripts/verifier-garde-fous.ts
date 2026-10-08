@@ -102,7 +102,7 @@ async function main(): Promise<void> {
 
   await expectFailure("Une fixture hors schéma est refusée", "AI_INVALID_OUTPUT", async () => {
     const { loadFixture } = await import("@/lib/ai/fixtures");
-    return loadFixture({ ...OCR_EXTRACT, purpose: "extract_atoms" }, "");
+    return loadFixture({ ...OCR_EXTRACT, purpose: "extract_atoms" }, "", "");
   });
 
   process.env.AI_ENABLED = "false";

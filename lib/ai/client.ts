@@ -247,7 +247,7 @@ export async function callAI<T>(params: CallAIParams<T>): Promise<T> {
 
   if (config.mock) {
     await new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS));
-    return loadFixture(params.contract, flattenText(params.messages));
+    return loadFixture(params.contract, flattenText(params.messages), params.system);
   }
 
   // Les places sont réservées avant d'émettre, chacune en une seule instruction :

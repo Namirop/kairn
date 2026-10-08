@@ -1,0 +1,189 @@
+{
+  "cases": [
+    {
+      "name": "liste-de-courses",
+      "keywords": ["shopping list", "red lentils"],
+      "output": {
+        "nature": "FACTUEL",
+        "atoms": [],
+        "rejected": "This is a shopping list: there's no knowledge here to ask you about later. Drop in a rule, a mechanism or an explanation you want to keep instead."
+      }
+    },
+    {
+      "name": "fiction-douteuse",
+      "keywords": ["ash dragon"],
+      "output": {
+        "nature": "FICTION",
+        "atoms": [
+          {
+            "concept": "The ash dragon doesn't breathe fire but a burning dust, which ignites on contact with humid air.",
+            "tags": ["bestiary", "dragons"],
+            "uncertain": true
+          },
+          {
+            "concept": "An ash dragon stays away in rainy weather: humidity sets off its dust before it can release it.",
+            "tags": ["bestiary", "dragons"],
+            "uncertain": true
+          }
+        ],
+        "rejected": null
+      }
+    },
+    {
+      "name": "affirmation-fausse",
+      "keywords": ["concurrently"],
+      "output": {
+        "nature": "FACTUEL",
+        "atoms": [
+          {
+            "concept": "`CREATE INDEX CONCURRENTLY` takes an exclusive lock on the table for the whole index build, which blocks writes.",
+            "tags": ["postgres", "index"],
+            "uncertain": true
+          },
+          {
+            "concept": "An interrupted `CREATE INDEX CONCURRENTLY` leaves an invalid index in the database. It has to be dropped before the build is run again.",
+            "tags": ["postgres", "index"],
+            "uncertain": false
+          }
+        ],
+        "rejected": null
+      }
+    },
+    {
+      "name": "explication-maladroite",
+      "keywords": ["keeps looping"],
+      "output": {
+        "nature": "FACTUEL",
+        "atoms": [
+          {
+            "concept": "The function returned by a `useEffect` runs before each re-run of the effect and when the component unmounts. That is where you undo what the effect set up.",
+            "tags": ["react", "useeffect"],
+            "uncertain": false
+          },
+          {
+            "concept": "An effect that adds a subscription without removing it in its cleanup function piles up one per run. Subscriptions from earlier renders keep responding.",
+            "tags": ["react", "useeffect"],
+            "uncertain": false
+          },
+          {
+            "concept": "A function or object recreated on every render and placed in an effect's dependency array gets a new identity each time, so the effect re-runs on every render.",
+            "tags": ["react", "useeffect"],
+            "uncertain": false
+          }
+        ],
+        "rejected": null
+      }
+    },
+    {
+      "name": "consigne-qui-ecarte",
+      "keywords": ["sidebar"],
+      "output": {
+        "nature": "FACTUEL",
+        "atoms": [
+          {
+            "concept": "A composite index on `(a, b)` serves a query that filters on `a`, or on `a` and `b`.",
+            "tags": ["postgres", "index"],
+            "uncertain": false
+          },
+          {
+            "concept": "A composite index on `(a, b)` does not serve a query that filters on `b` alone: column order decides what it can cover.",
+            "tags": ["postgres", "index"],
+            "uncertain": false
+          }
+        ],
+        "rejected": null,
+        "retenu": "A composite index on (a, b) serves a query that filters on a, or on a and b. It does not serve a query that filters on b alone: column order decides what the index can cover."
+      }
+    },
+    {
+      "name": "phrase-courte",
+      "minInputChars": 0,
+      "output": {
+        "nature": "FACTUEL",
+        "atoms": [
+          {
+            "concept": "`Array.prototype.at()` accepts a negative index, counted from the end of the array: `at(-1)` returns the last element.",
+            "tags": ["javascript", "arrays"],
+            "uncertain": false
+          }
+        ],
+        "rejected": null
+      }
+    },
+    {
+      "name": "paragraphe-technique",
+      "minInputChars": 300,
+      "output": {
+        "nature": "FACTUEL",
+        "atoms": [
+          {
+            "concept": "Each instruction in a Dockerfile produces a layer. A layer is only reused if every layer before it is unchanged, which is why the dependency manifest is copied before the source code.",
+            "tags": ["docker", "cache"],
+            "uncertain": false
+          },
+          {
+            "concept": "`COPY` only copies files from the build context. `ADD` also unpacks archives and downloads URLs, two implicit behaviors that make the build less predictable.",
+            "tags": ["docker", "dockerfile"],
+            "uncertain": false
+          },
+          {
+            "concept": "A multi-stage build compiles in an image with the tooling, then copies only the result into a minimal final image. The build tools don't end up in the shipped image.",
+            "tags": ["docker", "multistage"],
+            "uncertain": false
+          }
+        ],
+        "rejected": null
+      }
+    },
+    {
+      "name": "article-colle",
+      "minInputChars": 1500,
+      "output": {
+        "nature": "FACTUEL",
+        "atoms": [
+          {
+            "concept": "JavaScript runs a single call stack at a time. Until a function returns, nothing else runs: no expired timer, no resolved promise, no event handler.",
+            "tags": ["javascript", "eventloop"],
+            "uncertain": false
+          },
+          {
+            "concept": "The event loop keeps two queues apart: tasks, fed by timers and events, and microtasks, fed by promises and `queueMicrotask`.",
+            "tags": ["javascript", "eventloop"],
+            "uncertain": false
+          },
+          {
+            "concept": "The microtask queue is drained completely between two tasks, including microtasks added while it is being drained. A `setTimeout(…, 0)` therefore runs after every promise already resolved.",
+            "tags": ["javascript", "eventloop"],
+            "uncertain": false
+          },
+          {
+            "concept": "A chain of promises that keep re-queuing each other fills the microtask queue nonstop. The page stops rendering and responding, though no blocking loop is visible in the code.",
+            "tags": ["javascript", "eventloop"],
+            "uncertain": false
+          },
+          {
+            "concept": "The delay passed to `setTimeout` is a minimum, not a guarantee: the callback runs once the stack is empty and the microtasks are exhausted, which can be well after the requested delay.",
+            "tags": ["javascript", "timers"],
+            "uncertain": false
+          },
+          {
+            "concept": "`await` splits the function in two: what follows the wait becomes a microtask scheduled when the promise resolves. The calling code gets control back between the two halves.",
+            "tags": ["javascript", "async"],
+            "uncertain": false
+          },
+          {
+            "concept": "`Promise.all` rejects on the first failure and loses the other promises' results, though they keep running. `Promise.allSettled` waits for all of them and returns one status per entry.",
+            "tags": ["javascript", "promises"],
+            "uncertain": false
+          },
+          {
+            "concept": "A rejected promise with no handler fires `unhandledrejection` in the browser and crashes the Node process by default. Attaching the `catch` later in the same loop turn is enough to avoid it.",
+            "tags": ["javascript", "errors"],
+            "uncertain": false
+          }
+        ],
+        "rejected": null
+      }
+    }
+  ]
+}

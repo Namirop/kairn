@@ -1,9 +1,12 @@
 import { apercuBrut, decrireIssues } from "./diagnostic";
 import { AIFixtureMissingError, AIInvalidOutputError } from "./errors";
 import { estUneIntentionDeBanc, type AiContract, type AiPurposeProduit } from "./schemas";
+import extractAtomsEn from "./fixtures/extract-atoms.en.json";
 import extractAtoms from "./fixtures/extract-atoms.json";
+import generateVariantsEn from "./fixtures/generate-variants.en.json";
 import generateVariants from "./fixtures/generate-variants.json";
 import ocrExtract from "./fixtures/ocr-extract.json";
+import { promptsSysteme } from "./prompts";
 
 /**
  * Le mode mock. Chaque intention porte plusieurs cas, et la sélection est
@@ -43,6 +46,26 @@ const FIXTURES: Record<AiPurposeProduit, FixtureFile> = {
   ocr_extract: ocrExtract,
 };
 
+/**
+ * Les mêmes cas, écrits en anglais, pour un dépôt dont la consigne est la
+ * consigne anglaise. La lecture d'image n'en a pas : elle transcrit ce qu'elle
+ * voit, dans la langue de l'image, et sa consigne est la même dans les deux.
+ *
+ * La langue se lit sur la consigne reçue plutôt que sur un paramètre de plus :
+ * c'est la seule chose qui distingue un appel anglais d'un appel français, et
+ * c'est exactement ce que le modèle recevrait.
+ */
+const FIXTURES_EN: Partial<Record<AiPurposeProduit, FixtureFile>> = {
+  extract_atoms: extractAtomsEn,
+  generate_variants: generateVariantsEn,
+};
+
+function fixturesPour(purpose: AiPurposeProduit, system: string): FixtureFile {
+  const anglais = FIXTURES_EN[purpose];
+
+  return anglais && system === promptsSysteme("EN")[purpose] ? anglais : FIXTURES[purpose];
+}
+
 function selectCase(file: FixtureFile, input: string): FixtureCase | undefined {
   const lowered = input.toLowerCase();
   const byKeyword = file.cases.find((entry) =>
@@ -58,14 +81,14 @@ function selectCase(file: FixtureFile, input: string): FixtureCase | undefined {
     .at(-1);
 }
 
-export function loadFixture<T>(contract: AiContract<T>, input: string): T {
+export function loadFixture<T>(contract: AiContract<T>, input: string, system: string): T {
   if (estUneIntentionDeBanc(contract.purpose)) {
     throw new AIFixtureMissingError(
       `${contract.purpose} — le banc ne tourne pas en mode mock, il exige MOCK_AI=false`,
     );
   }
 
-  const selected = selectCase(FIXTURES[contract.purpose], input);
+  const selected = selectCase(fixturesPour(contract.purpose, system), input);
 
   if (!selected) {
     throw new AIFixtureMissingError(contract.purpose);

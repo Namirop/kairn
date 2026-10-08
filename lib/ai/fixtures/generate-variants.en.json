@@ -1,0 +1,116 @@
+{
+  "cases": [
+    {
+      "name": "groupe-de-trois",
+      "minInputChars": 0,
+      "output": {
+        "lots": [
+          {
+            "rang": 1,
+            "recognition": {
+              "format": "MCQ",
+              "question": "What does `[10, 20, 30].at(-1)` return?",
+              "answerKey": "30",
+              "mcq": {
+                "options": ["30", "10", "`undefined`", "an index error"],
+                "correctIndex": 0
+              }
+            },
+            "mechanism": {
+              "format": "SHORT_ANSWER",
+              "question": "On a five-element array, which position does `at(-2)` look up, and why?",
+              "answerKey": "The second-to-last position, index 3. The negative index is added to the array's length, so -2 becomes 5 - 2."
+            },
+            "boundary": {
+              "format": "CLOZE",
+              "question": "Complete the sentence.",
+              "answerKey": "Read with square brackets, a negative index names a property that doesn't exist.",
+              "cloze": {
+                "sentence": "Read with square brackets, a negative index names a property that doesn't exist, and the expression returns ___.",
+                "accepted": ["undefined", "`undefined`"]
+              }
+            },
+            "application": {
+              "format": "CODE",
+              "question": "Complete: `function last(values) { return ___; }`, for an array of unknown length.",
+              "answerKey": "`values.at(-1)`, an expression that doesn't assume the length is known. `values[values.length]` returns `undefined`, and so does `values[-1]`."
+            }
+          },
+          {
+            "rang": 2,
+            "recognition": {
+              "format": "CLOZE",
+              "question": "Complete the sentence.",
+              "answerKey": "Promises feed the microtask queue; timers feed the task queue.",
+              "cloze": {
+                "sentence": "The event loop serves two queues: the task queue, fed by timers, and the ___ queue, fed by promises.",
+                "accepted": ["microtask", "microtasks", "micro-task"]
+              }
+            },
+            "mechanism": {
+              "format": "EXPLAIN",
+              "question": "Describe the order in which the two queues are served during one turn of the loop.",
+              "answerKey": "One task is taken and run to completion, then the microtask queue is drained entirely — including microtasks added while it is being drained — before the next task starts."
+            },
+            "boundary": {
+              "format": "TRUE_FALSE",
+              "question": "A `setTimeout(…, 0)` written before an already-resolved promise runs before that promise's continuation.",
+              "answerKey": "Writing order doesn't matter: the microtask queue is drained before the timer's task is taken, whatever delay was requested.",
+              "estVraie": false
+            },
+            "application": {
+              "format": "MCQ",
+              "question": "A function schedules a render with `setTimeout(paint, 0)`, then chains a thousand resolved promises. When does `paint` run?",
+              "answerKey": "The microtask queue is drained in full before any timer task is taken.",
+              "mcq": {
+                "options": [
+                  "After the thousand promises, once the microtask queue is fully drained.",
+                  "Before the promises, since the timer was scheduled first.",
+                  "Between the fifth and sixth promise, the queue being drained in batches.",
+                  "Once the requested delay is up, the loop interrupting the promises."
+                ],
+                "correctIndex": 0
+              }
+            }
+          },
+          {
+            "rang": 3,
+            "recognition": {
+              "format": "CLOZE",
+              "question": "Complete the sentence.",
+              "answerKey": "A layer is reused as long as nothing before it has changed.",
+              "cloze": {
+                "sentence": "In a Dockerfile, each instruction produces a ___ that is reused as is while nothing before it has changed.",
+                "accepted": ["layer", "layers"]
+              }
+            },
+            "mechanism": {
+              "format": "EXPLAIN",
+              "question": "Why does copying the dependency manifest before the source code change the build time?",
+              "answerKey": "The code changes with every commit, the dependencies don't. Installed before the code is copied, the install stays cached as long as the manifest doesn't move. Copied after, everything is reinstalled on every build."
+            },
+            "boundary": {
+              "format": "MCQ",
+              "question": "Which of these differences between `COPY` and `ADD` is real?",
+              "answerKey": "Unpacking local archives is one of `ADD`'s implicit behaviors.",
+              "mcq": {
+                "options": [
+                  "`ADD` unpacks local archives, `COPY` doesn't.",
+                  "`ADD` copies from the base image, `COPY` doesn't.",
+                  "`COPY` preserves permissions, `ADD` doesn't.",
+                  "`COPY` creates a layer, `ADD` doesn't."
+                ],
+                "correctIndex": 0
+              }
+            },
+            "application": {
+              "format": "CODE",
+              "question": "A build reinstalls dependencies on every commit. Write the two instructions that fix the order.",
+              "answerKey": "COPY package*.json ./\nRUN npm ci\n\nThe manifest alone, then the install, before the `COPY . .` of everything else."
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
