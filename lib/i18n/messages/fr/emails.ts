@@ -23,10 +23,10 @@ export const emails = {
     nePlusEnRecevoir: "Ne plus en recevoir",
   },
   accueil: {
-    sujetPlein: "{nombre, plural, =1 {1 concept} other {# concepts}} t'attendent",
+    sujetPlein: "{nombre, plural, one {# concept t'attend} other {# concepts t'attendent}}",
     sujetVide: "Ton compte Kairn est ouvert",
     arrives:
-      "{nombre, plural, =1 {1 concept} other {# concepts}} sont arrivés avec toi. Leurs questions s'écrivent, et la première session t'attend.",
+      "{nombre, plural, one {# concept est arrivé avec toi. Ses questions s'écrivent} other {# concepts sont arrivés avec toi. Leurs questions s'écrivent}}, et la première session t'attend.",
     ouvert: "Ton compte est ouvert.",
     premierePierre:
       "Il attend sa première pierre. Dépose une information que tu veux garder — une phrase entendue, un paragraphe copié, une capture d'écran. Elle n'a pas à être propre ni longue.",
@@ -37,8 +37,8 @@ export const emails = {
   rappel: {
     sujet: "{nombre, plural, =1 {1 concept} other {# concepts}} à revoir aujourd'hui",
     echeance:
-      "{nombre, plural, =1 {1 concept} other {# concepts}} arrivent à échéance aujourd'hui.",
-    serieTexte: "{nombre} jours d'affilée.",
+      "{nombre, plural, one {# concept arrive} other {# concepts arrivent}} à échéance aujourd'hui.",
+    serieTexte: "{nombre, plural, one {# jour} other {# jours}} d'affilée.",
     nePlusRecevoir: "Ne plus recevoir ce rappel : {url}",
   },
   serie: {
@@ -46,7 +46,7 @@ export const emails = {
     /** `serie` arrive composée : le nombre, puis son libellé. */
     preheader: "{serie}, et rien aujourd'hui.",
     constat:
-      "Rien n'a été revu aujourd'hui, et {nombre, plural, =1 {1 concept} other {# concepts}} attendent. Une seule question suffit à tenir la série.",
+      "Rien n'a été revu aujourd'hui, et {nombre, plural, one {# concept attend} other {# concepts attendent}}. Une seule question suffit à tenir la série.",
     nePlusRecevoir: "Ne plus recevoir cette alerte : {url}",
     raison: "Tu reçois ce message parce que l'alerte de série est activée sur ton compte.",
   },
