@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { EtapeDeLAttente } from "@/lib/domain/catalogue-dattente";
 import { phraseDattente, RELEVE_MS } from "@/lib/domain/phrases-dattente";
+import { useLangue } from "@/lib/i18n/use-langue";
 import { cn } from "@/lib/utils";
 
 /**
@@ -42,6 +43,7 @@ import { cn } from "@/lib/utils";
  * suivante, et le clignotement n'existe pas.
  */
 export function usePhraseQuiTourne(etape: EtapeDeLAttente): string {
+  const langue = useLangue();
   const [tirage] = useState(() => Math.random());
   const [ecoule, setEcoule] = useState(0);
 
@@ -51,7 +53,7 @@ export function usePhraseQuiTourne(etape: EtapeDeLAttente): string {
     return () => clearInterval(battement);
   }, []);
 
-  return phraseDattente(etape, ecoule, tirage);
+  return phraseDattente(etape, ecoule, tirage, langue);
 }
 
 /**

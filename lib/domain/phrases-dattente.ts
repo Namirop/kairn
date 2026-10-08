@@ -1,4 +1,5 @@
 import { CATALOGUES, type EtapeDeLAttente, type PhrasesDunPalier } from "./catalogue-dattente";
+import type { LangueDuProduit } from "./langue-du-produit";
 
 /**
  * Quand chaque phrase d'attente paraît, et laquelle.
@@ -55,8 +56,11 @@ type Palier = {
 const BORNES = [0, 8_000, 20_000, 45_000] as const;
 
 /** Les paliers d'une étape, bornes comprises. Sert aux tests et à la relecture. */
-export function paliersDe(etape: EtapeDeLAttente): readonly [Palier, ...Palier[]] {
-  const [un, deux, trois, quatre] = CATALOGUES[etape];
+export function paliersDe(
+  etape: EtapeDeLAttente,
+  langue: LangueDuProduit,
+): readonly [Palier, ...Palier[]] {
+  const [un, deux, trois, quatre] = CATALOGUES[langue][etape];
 
   return [
     { depuisMs: BORNES[0], phrases: un },
@@ -78,9 +82,14 @@ export function paliersDe(etape: EtapeDeLAttente): readonly [Palier, ...Palier[]
  * fait qu'on ne relit jamais la même phrase deux relèves de suite, y compris
  * juste après un changement de palier.
  */
-export function phraseDattente(etape: EtapeDeLAttente, ecouleMs: number, tirage: number): string {
+export function phraseDattente(
+  etape: EtapeDeLAttente,
+  ecouleMs: number,
+  tirage: number,
+  langue: LangueDuProduit,
+): string {
   const depuis = Math.max(0, ecouleMs);
-  const paliers = paliersDe(etape);
+  const paliers = paliersDe(etape, langue);
   const rang = Math.floor(depuis / RELEVE_MS);
 
   let palier = paliers[0];

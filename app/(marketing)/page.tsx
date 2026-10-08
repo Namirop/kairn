@@ -9,6 +9,7 @@ import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { lireLEssaiEnCours } from "@/lib/depots/essai-en-cours";
 import { inviteDeDepot } from "@/lib/domain/invites-de-depot";
+import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 
 /**
  * La page publique : une pile de panneaux, chacun avec sa surface, séparés par
@@ -56,7 +57,10 @@ export default async function PageAccueil() {
       {connecte ? null : (
         <>
           <Strates de="ombre" vers="papier" graine="accueil-essai" />
-          <Essai invite={inviteDeDepot(Math.random())} essaiPrecedent={essaiPrecedent} />
+          <Essai
+            invite={inviteDeDepot(Math.random(), await langueDeLaRequete())}
+            essaiPrecedent={essaiPrecedent}
+          />
         </>
       )}
 

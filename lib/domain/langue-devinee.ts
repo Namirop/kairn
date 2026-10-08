@@ -1,3 +1,5 @@
+import type { LangueDuProduit } from "./langue-du-produit";
+
 /**
  * La langue dans laquelle parler à quelqu'un qu'on ne connaît pas encore.
  *
@@ -13,12 +15,10 @@
  * quelqu'un qui la parle.
  */
 
-export type LangueDevinee = "FR" | "EN";
-
-const LANGUES: readonly LangueDevinee[] = ["FR", "EN"];
+const LANGUES: readonly LangueDuProduit[] = ["FR", "EN"];
 
 /** « fr », « EN », « en-GB » : ce qu'un cookie ou une adresse peut porter. */
-export function langueDepuisCode(code: string | null | undefined): LangueDevinee | null {
+export function langueDepuisCode(code: string | null | undefined): LangueDuProduit | null {
   // La sous-étiquette principale entière : « frr », le frison, n'est pas « fr ».
   const prefixe = code?.trim().split(/[-_]/)[0]?.toUpperCase();
 
@@ -48,7 +48,7 @@ function lirePreference(morceau: string, rang: number): Preference | null {
  */
 export function langueDuNavigateur(
   acceptLanguage: string | null | undefined,
-): LangueDevinee | null {
+): LangueDuProduit | null {
   const preferences = (acceptLanguage ?? "")
     .split(",")
     .map(lirePreference)
@@ -67,6 +67,6 @@ export function langueDuNavigateur(
 export function langueDevinee(sources: {
   choix: string | null | undefined;
   acceptLanguage: string | null | undefined;
-}): LangueDevinee {
+}): LangueDuProduit {
   return langueDepuisCode(sources.choix) ?? langueDuNavigateur(sources.acceptLanguage) ?? "FR";
 }

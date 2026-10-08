@@ -1,3 +1,6 @@
+import { CATALOGUES_EN } from "./catalogue-dattente-en";
+import type { LangueDuProduit } from "./langue-du-produit";
+
 /**
  * Ce qu'on dit pendant que ça travaille : les phrases, et rien que les phrases.
  *
@@ -133,8 +136,8 @@ const ECRITURE: Catalogue = [
   ],
 ];
 
-export const CATALOGUES: Record<EtapeDeLAttente, Catalogue> = {
-  LECTURE,
-  DECOUPAGE,
-  ECRITURE,
+/** Les catalogues de chaque langue. L'anglais vit à côté : `catalogue-dattente-en.ts`. */
+export const CATALOGUES: Record<LangueDuProduit, Record<EtapeDeLAttente, Catalogue>> = {
+  FR: { LECTURE, DECOUPAGE, ECRITURE },
+  EN: CATALOGUES_EN,
 };

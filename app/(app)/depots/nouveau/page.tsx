@@ -99,7 +99,7 @@ export default async function PageNouveauDepot({
           <FormulaireDepot
             restants={restants}
             cleEnvoi={crypto.randomUUID()}
-            invite={inviteDeDepot(Math.random())}
+            invite={inviteDeDepot(Math.random(), await langueDeLaRequete())}
             premierDepot={aucunDepot}
             partageManque={partage === "absent"}
           />

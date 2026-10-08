@@ -1,6 +1,7 @@
 "use client";
 
 import { EXEMPLES_DE_DEPOT } from "@/lib/domain/invites-de-depot";
+import { useLangue } from "@/lib/i18n/use-langue";
 import { cn } from "@/lib/utils";
 
 /**
@@ -46,9 +47,11 @@ export function PucesDExemples({
   onChoisir: (texte: string) => void;
   className?: string;
 }) {
+  const langue = useLangue();
+
   return (
     <ul className={cn("gap-pas-2 flex flex-wrap", className)}>
-      {EXEMPLES_DE_DEPOT.map((exemple) => (
+      {EXEMPLES_DE_DEPOT[langue].map((exemple) => (
         <li key={exemple.etiquette}>
           <button
             type="button"
