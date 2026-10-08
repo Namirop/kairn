@@ -17,6 +17,7 @@ export async function POST(request: Request) {
   const userId = jeton ? readUnsubscribeToken(jeton) : null;
 
   if (!userId) {
+    // i18n-ignore — lu par le client mail (RFC 8058) ou le formulaire, qui n'affiche que le statut.
     return NextResponse.json({ erreur: "Lien de désinscription invalide." }, { status: 400 });
   }
 

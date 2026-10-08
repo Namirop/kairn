@@ -53,6 +53,7 @@ const BUDGET_DE_DEPART_MS = 20_000;
 
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
+    // i18n-ignore — lu par le planificateur de crons, jamais par une personne.
     return NextResponse.json({ erreur: "Non autorisé." }, { status: 401 });
   }
 

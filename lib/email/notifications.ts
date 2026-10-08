@@ -1,5 +1,6 @@
 import { ROUTES } from "@/lib/auth/routes";
 import { recordEmailDelivery } from "@/lib/db/reminder-audience";
+import type { Langue } from "@/lib/db/types";
 import { findUserEmail } from "@/lib/db/user";
 import { findUserSettings } from "@/lib/db/user-settings";
 import { localDay } from "@/lib/domain/local-day";
@@ -81,16 +82,17 @@ function estActive(
   return gouverne[type];
 }
 
-function composer(notification: Notification, liens: Liens): RenderedEmail {
+/** L'email est écrit dans la langue du compte, celle de son interface. */
+function composer(notification: Notification, liens: Liens, langue: Langue): RenderedEmail {
   switch (notification.type) {
     case "DAILY_REMINDER":
-      return renderDailyReminder(notification.payload, liens);
+      return renderDailyReminder(notification.payload, liens, langue);
     case "STREAK_ALERT":
-      return renderAlerteDeStreak(notification.payload, liens);
+      return renderAlerteDeStreak(notification.payload, liens, langue);
     case "ACCUEIL":
-      return renderAccueil(notification.payload, liens);
+      return renderAccueil(notification.payload, liens, langue);
     case "RELANCE_COMPTE_VIDE":
-      return renderRelanceDuCompteVide(notification.payload, liens);
+      return renderRelanceDuCompteVide(notification.payload, liens, langue);
   }
 }
 
@@ -109,11 +111,15 @@ export async function sendNotification(
   if (!recipient) return { status: "SKIPPED", reason: "NO_EMAIL" };
 
   const unsubscribeUrl = `${adresseDeLApp()}/desinscription?jeton=${createUnsubscribeToken(userId)}`;
-  const email = composer(notification, {
-    sessionUrl: `${adresseDeLApp()}${ROUTES.aujourdhui}`,
-    depotUrl: `${adresseDeLApp()}${ROUTES.depotNouveau}`,
-    unsubscribeUrl,
-  });
+  const email = composer(
+    notification,
+    {
+      sessionUrl: `${adresseDeLApp()}${ROUTES.aujourdhui}`,
+      depotUrl: `${adresseDeLApp()}${ROUTES.depotNouveau}`,
+      unsubscribeUrl,
+    },
+    settings.langue,
+  );
 
   const delivery = await sendEmail({
     to: recipient,
@@ -125,6 +131,7 @@ export async function sendNotification(
     // Gmail range plus volontiers l'envoi en indésirable.
     headers: {
       "List-Unsubscribe": `<${unsubscribeUrl}>`,
+      // i18n-ignore — valeur d'en-tête fixée par la RFC 8058.
       "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
     },
   });

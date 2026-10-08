@@ -1,8 +1,17 @@
 import type { Metadata } from "next";
-import { PageLegale, type RubriqueLegale } from "@/components/site/page-legale";
-import { AUTORITE, CONTACT, EDITEUR } from "@/lib/site/editeur";
+import type { MessageKeys, NestedKeyOf } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { PageLegale } from "@/components/site/page-legale";
+import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
+import { ETIQUETTE_INTL } from "@/lib/i18n/langues";
+import type { Messages } from "@/lib/i18n/messages";
+import { AUTORITE, CONTACT, dateDeVerification, EDITEUR } from "@/lib/site/editeur";
 
-export const metadata: Metadata = { title: "Confidentialité" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("legal.confidentialite");
+
+  return { title: t("titre") };
+}
 
 /**
  * Ce que Kairn collecte, et ce qu'on peut en faire.
@@ -35,124 +44,93 @@ export const metadata: Metadata = { title: "Confidentialité" };
  * consentement et retirerait toute discussion — c'est une décision de produit, pas
  * de page légale.
  */
-const RUBRIQUES: RubriqueLegale[] = [
+type Espace = Messages["legal"]["confidentialite"];
+type Cle = MessageKeys<Espace, NestedKeyOf<Espace>>;
+
+type Rubrique = { titre: Cle; corps: Cle[]; couples?: { terme: Cle; valeur: Cle }[] };
+
+const RUBRIQUES: Rubrique[] = [
+  { titre: "responsable.titre", corps: ["responsable.p1", "responsable.p2"] },
   {
-    titre: "Responsable du traitement",
+    titre: "collecte.titre",
     corps: [
-      `${EDITEUR.nom} — ${EDITEUR.mentionEI}, ${EDITEUR.adresse}, SIREN ${EDITEUR.siren}.`,
-      `Pour toute question ou demande relative à tes données : ${CONTACT.email}.`,
+      "collecte.p1",
+      "collecte.p2",
+      "collecte.p3",
+      "collecte.p4",
+      "collecte.p5",
+      "collecte.p6",
     ],
   },
   {
-    titre: "Ce qui est collecté",
+    titre: "cookies.titre",
+    corps: ["cookies.p1", "cookies.p2", "cookies.p3", "cookies.p4", "cookies.p5", "cookies.p6"],
+  },
+  { titre: "audience.titre", corps: ["audience.p1", "audience.p2", "audience.p3"] },
+  {
+    titre: "sousTraitants.titre",
     corps: [
-      "Ton adresse email et ton nom, pour tenir ton compte et t'envoyer les rappels que tu as acceptés.",
-      "Ton fuseau horaire, détecté par le navigateur. Il ne sert qu'à deux choses : savoir quel jour il est chez toi, et à quelle heure t'écrire.",
-      "Ce que tu déposes — textes et captures — ainsi que les concepts, les questions et les passages qui en découlent.",
-      "Des compteurs d'usage : nombre de dépôts et de concepts sur ta période, nombre de révisions, série en cours. Ils servent aux limites du service et à ta progression.",
-      "Les captures d'écran sont effacées dès que leur texte est extrait. Il n'existe aucune route pour les servir, et elles ne survivent pas non plus à un échec de lecture.",
-      "Une empreinte de ton adresse IP, si tu essaies le service sans compte depuis la page d'accueil. C'est une empreinte salée, jamais l'adresse : elle sert à compter combien d'essais viennent du même endroit, et à rien d'autre. Elle reste une donnée personnelle — hacher pseudonymise, ça n'anonymise pas — et elle disparaît avec la visite, au bout de sept jours.",
+      "sousTraitants.p1",
+      "sousTraitants.p2",
+      "sousTraitants.p3",
+      "sousTraitants.p4",
+      "sousTraitants.p5",
+      "sousTraitants.p6",
+      "sousTraitants.p7",
     ],
   },
+  { titre: "transferts.titre", corps: ["transferts.p1", "transferts.p2", "transferts.p3"] },
+  { titre: "duree.titre", corps: ["duree.p1", "duree.p2", "duree.p3", "duree.p4"] },
   {
-    titre: "Cookies",
-    corps: [
-      "Deux cookies, tous les deux strictement nécessaires au service : il n'y a donc pas de bandeau à accepter, et il n'y a rien à refuser sans casser le fonctionnement.",
-      "Les cookies de session, préfixés « better-auth. », te maintiennent connecté. Un mois, renouvelé à chaque visite.",
-      "« kairn_visite » retient l'essai que tu fais sans compte, le temps de te permettre de le récupérer en créant un compte. Sept jours, la même durée que ce qu'il désigne.",
-      "Aucun traceur publicitaire, aucun cookie de mesure d'audience, aucun partage à des tiers en dehors des sous-traitants techniques listés plus bas.",
-      "Il y a bien une mesure d'audience — combien de visites, sur quelles pages, depuis quel pays —, mais elle ne pose aucun cookie et ne te suit pas d'un site à l'autre. Elle est décrite juste en dessous.",
-      "Le contenu que tu déposes n'apparaît jamais dans les journaux du serveur : ils ne portent que des identifiants.",
-    ],
-  },
-  {
-    titre: "Mesure d'audience",
-    corps: [
-      "Savoir combien de personnes viennent et sur quelles pages elles s'arrêtent, c'est ce qui dit quoi corriger. Ça se fait sans cookie et sans profil : la mesure de Vercel ne dépose rien sur ton appareil et ne construit aucun identifiant qui te suive d'un site à l'autre.",
-      "Ce qui remonte : la page visitée, la page d'où tu viens, le pays, le type d'appareil et de navigateur. Rien de ce que tu déposes, rien de ton compte, aucune adresse IP conservée — elle sert à dériver un numéro de visite qui change chaque jour, puis elle est jetée.",
-      "C'est pour ça qu'il n'y a pas de bandeau : sans cookie, sans identifiant persistant et sans recoupement entre sites, il n'y a rien à te faire accepter.",
-    ],
-  },
-  {
-    titre: "Sous-traitants",
-    corps: [
-      "OpenRouter, Inc. (New York, États-Unis) découpe les dépôts en concepts et écrit les questions. Le contenu déposé lui est transmis pour ce traitement, qui est le service lui-même. OpenRouter s'appuie sur un sous-traitant ultérieur, OpenAI, L.L.C. (San Francisco, États-Unis), qui exécute réellement les modèles.",
-      "Nous avons désactivé sur notre compte OpenRouter toute option autorisant l'entraînement sur les données transmises. OpenRouter ne conserve pas le contenu des requêtes, mais des métadonnées techniques (horodatage, modèle, volume de tokens). OpenAI, sous-traitant ultérieur, conserve les données jusqu'à 30 jours pour la surveillance des abus, puis les supprime.",
-      "Anthropic Ireland, Limited (Dublin, Irlande), pour le même traitement, en repli automatique quand OpenRouter est indisponible. Ses conditions commerciales interdisent l'entraînement de modèles sur le contenu de ses clients, et ses journaux d'appels sont supprimés sous trente jours.",
-      "Neon, LLC — société du groupe Databricks, Inc. —, pour l'hébergement de la base de données, sur une infrastructure située à Francfort, en Allemagne.",
-      "Vercel Inc., pour l'hébergement de l'application, avec une exécution en région européenne, et pour la mesure d'audience décrite plus haut.",
-      "Plus Five Five, Inc. (Resend), pour l'acheminement des emails.",
-      `Leurs engagements contractuels ont été relus le ${EDITEUR.verifieLe}. Cette vérification est refaite une fois par an.`,
-    ],
-  },
-  {
-    titre: "Transferts hors Union européenne",
-    corps: [
-      "Il y en a, et il vaut mieux le dire clairement. La base est à Francfort et l'exécution en Europe, mais les sociétés qui les opèrent sont américaines, et le contenu déposé est traité hors de l'Union — chez OpenRouter et son sous-traitant OpenAI, avec Anthropic en Irlande comme repli.",
-      "Databricks (pour Neon), Vercel et Resend sont certifiés au titre du cadre de protection des données UE–États-Unis, et s'appuient en complément sur les clauses contractuelles types de la Commission européenne.",
-      "OpenRouter et Anthropic ne sont pas certifiés à ce cadre : leurs transferts reposent sur les seules clauses contractuelles types. OpenRouter est le sous-traitant qui reçoit ce que tu déposes (et l'achemine à OpenAI comme sous-traitant ultérieur), Anthropic le reçoit en repli — ce sont les deux points à connaître si le seul mécanisme des clauses contractuelles types ne te convient pas.",
-    ],
-  },
-  {
-    titre: "Combien de temps",
-    corps: [
-      "Tes données sont conservées tant que ton compte existe. Tu peux le supprimer à tout moment depuis les réglages : le compte, tes dépôts, tes concepts, leurs questions et tous tes passages sont effacés immédiatement.",
-      "Un essai fait sans compte, et que personne n'a réclamé en créant un compte, est effacé au bout de sept jours avec tout ce qui en découle.",
-      "L'historique de la base autorise une restauration jusqu'à six heures en arrière. Une suppression est donc effective immédiatement dans le service, et définitive au plus tard six heures après.",
-      "Deux traces survivent, détachées de toi et sans rien qui te désigne : la comptabilité des appels au modèle, parce qu'une dépense engagée ne s'efface pas, et les signalements de questions défectueuses, qui portent le texte d'une question à corriger et non ton identité.",
-    ],
-  },
-  {
-    titre: "Bases légales",
-    corps: [
-      "Chaque finalité repose sur une base et une seule.",
-      "Le rappel quotidien est actif dès la création du compte, et c'est assumé : reposer ce que tu as déposé au bon moment est le service lui-même, pas une communication qui s'y ajoute. Il se coupe d'un clic, depuis les réglages comme depuis le lien présent dans chaque email.",
-    ],
+    titre: "bases.titre",
+    corps: ["bases.p1", "bases.p2"],
     couples: [
-      { terme: "Créer et gérer ton compte, t'authentifier", valeur: "Contrat" },
-      {
-        terme: "Recevoir tes dépôts, les découper en concepts, produire les questions",
-        valeur: "Contrat",
-      },
-      { terme: "Planifier tes révisions et enregistrer tes réponses", valeur: "Contrat" },
-      { terme: "T'envoyer les emails de connexion et de confirmation", valeur: "Contrat" },
-      { terme: "T'envoyer le rappel quotidien de révision", valeur: "Contrat" },
-      { terme: "T'envoyer l'alerte de série du soir", valeur: "Intérêt légitime" },
-      {
-        terme: "Compter tes dépôts et tes concepts pour appliquer les plafonds",
-        valeur: "Intérêt légitime",
-      },
-      { terme: "Limiter les abus et les dépôts automatisés", valeur: "Intérêt légitime" },
-      { terme: "Traiter tes signalements de questions", valeur: "Intérêt légitime" },
-      { terme: "Mesurer l'usage global du service", valeur: "Intérêt légitime" },
+      { terme: "bases.compte", valeur: "bases.contrat" },
+      { terme: "bases.depots", valeur: "bases.contrat" },
+      { terme: "bases.revisions", valeur: "bases.contrat" },
+      { terme: "bases.connexion", valeur: "bases.contrat" },
+      { terme: "bases.rappel", valeur: "bases.contrat" },
+      { terme: "bases.serie", valeur: "bases.interetLegitime" },
+      { terme: "bases.plafonds", valeur: "bases.interetLegitime" },
+      { terme: "bases.abus", valeur: "bases.interetLegitime" },
+      { terme: "bases.signalements", valeur: "bases.interetLegitime" },
+      { terme: "bases.usage", valeur: "bases.interetLegitime" },
     ],
   },
-  {
-    titre: "Tes droits",
-    corps: [
-      "Tu peux emporter tes données à tout moment depuis les réglages : un fichier contenant tes dépôts, tes concepts, leurs questions, tes passages et ta progression.",
-      "Tu peux supprimer ton compte depuis le même écran, sans avoir à écrire à qui que ce soit.",
-      "Tu peux couper les emails d'un clic, depuis les réglages comme depuis le lien présent dans chacun d'eux. Coupés, plus rien ne part sauf le code de connexion — sans lui, personne ne pourrait plus entrer dans son compte.",
-      "Tu disposes également d'un droit de rectification, d'opposition et de limitation. Pour ceux-là, écris à " +
-        `${CONTACT.email}, ou par courrier à ${EDITEUR.nom}, ${EDITEUR.adresse}. La voie postale est celle à prendre s'il faut joindre une pièce d'identité.`,
-    ],
-  },
-  {
-    titre: "Autorité de contrôle",
-    corps: [
-      `Si tu estimes que le traitement de tes données n'est pas conforme, tu peux introduire une réclamation auprès de la ${AUTORITE.nom}.`,
-      `${AUTORITE.adresse} — ${AUTORITE.telephone} — ${AUTORITE.site}`,
-    ],
-  },
+  { titre: "droits.titre", corps: ["droits.p1", "droits.p2", "droits.p3", "droits.p4"] },
+  { titre: "autorite.titre", corps: ["autorite.p1", "autorite.p2"] },
 ];
 
-export default function PageConfidentialite() {
+export default async function PageConfidentialite() {
+  const t = await getTranslations("legal.confidentialite");
+  const langue = await langueDeLaRequete();
+  const valeurs = {
+    nom: EDITEUR.nom,
+    mentionEI: EDITEUR.mentionEI,
+    adresse: EDITEUR.adresse,
+    siren: EDITEUR.siren,
+    email: CONTACT.email,
+    verifieLe: dateDeVerification(ETIQUETTE_INTL[langue]),
+    autorite: AUTORITE.nom,
+    autoriteAdresse: AUTORITE.adresse,
+    autoriteTelephone: AUTORITE.telephone,
+    autoriteSite: AUTORITE.site,
+  };
+  const dire = (cle: Cle) => t(cle, valeurs);
+
   return (
     <PageLegale
-      titre="Confidentialité"
-      chapeau="Ce que Kairn collecte, à qui c'est transmis, combien de temps c'est gardé, et comment tout récupérer ou tout effacer."
-      rubriques={RUBRIQUES}
-      misAJour={`Dernière vérification des engagements des sous-traitants : ${EDITEUR.verifieLe}.`}
+      titre={t("titre")}
+      chapeau={t("chapeau")}
+      rubriques={RUBRIQUES.map(({ titre, corps, couples }) => ({
+        titre: dire(titre),
+        corps: corps.map(dire),
+        couples: couples?.map(({ terme, valeur }) => ({
+          terme: dire(terme),
+          valeur: dire(valeur),
+        })),
+      }))}
+      misAJour={t("misAJour", valeurs)}
     />
   );
 }

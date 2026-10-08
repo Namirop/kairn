@@ -1,3 +1,7 @@
+import type { Langue } from "@/lib/db/types";
+import { LOCALE } from "@/lib/i18n/langues";
+import { textesDEmail } from "../traduction";
+
 /**
  * Gabarit commun des emails.
  *
@@ -30,6 +34,7 @@ const PALETTE = {
   alerte: "#9A3B2C",
 } as const;
 
+// i18n-ignore — pile de polices CSS.
 const SANS = "ui-sans-serif, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif";
 const MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 
@@ -49,6 +54,14 @@ export type ShellContent = {
   unsubscribeUrl?: string;
   /** Ce qui justifie l'envoi, dit au pied. Sans lui, le pied disparaît. */
   raisonDeLEnvoi?: string;
+  /**
+   * La langue de la personne qui le reçoit : le `lang` du document et le pied
+   * la suivent.
+   *
+   * Facultative parce que les alertes d'exploitation ne la passent pas : elles
+   * n'ont qu'un lecteur, l'administrateur, et restent en français.
+   */
+  langue?: Langue;
 };
 
 /** Enveloppe le contenu : largeur fixe, fond papier, pied de désinscription. */
@@ -57,14 +70,17 @@ export function renderShell({
   body,
   unsubscribeUrl,
   raisonDeLEnvoi,
+  langue = "FR",
 }: ShellContent): string {
+  const t = textesDEmail(langue);
   const pied = unsubscribeUrl
-    ? `${raisonDeLEnvoi ?? "Tu reçois ce message parce que le rappel quotidien est activé sur ton compte."}
-<a href="${unsubscribeUrl}" style="color:${PALETTE.muted};">Ne plus en recevoir</a>.`
+    ? `${raisonDeLEnvoi ?? t("pied.raisonParDefaut")}
+<a href="${unsubscribeUrl}" style="color:${PALETTE.muted};">${t("pied.nePlusEnRecevoir")}</a>.`
     : (raisonDeLEnvoi ?? "");
 
+  // i18n-ignore — balisage HTML ; le pied et la langue viennent de t() et de LOCALE.
   return `<!doctype html>
-<html lang="fr">
+<html lang="${LOCALE[langue]}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
 <body style="margin:0;padding:0;background:${PALETTE.paper};font-family:${SANS};color:${PALETTE.ink};">
 <span style="display:none;font-size:1px;color:${PALETTE.paper};">${preheader}</span>

@@ -1,3 +1,5 @@
+import type { Langue } from "@/lib/db/types";
+import { textesDEmail } from "../traduction";
 import { EMAIL_STYLE as S, renderShell } from "./shell";
 
 /**
@@ -22,34 +24,33 @@ export type RenderedEmail = {
   text: string;
 };
 
-function concepts(count: number): string {
-  return count === 1 ? "1 concept" : `${count} concepts`;
-}
-
 export function renderDailyReminder(
   payload: DailyReminderPayload,
   links: { sessionUrl: string; unsubscribeUrl: string },
+  langue: Langue,
 ): RenderedEmail {
+  const t = textesDEmail(langue);
   const { dueCount, currentStreak } = payload;
-  const subject = `${concepts(dueCount)} à revoir aujourd'hui`;
+  const subject = t("rappel.sujet", { nombre: dueCount });
+  const echeance = t("rappel.echeance", { nombre: dueCount });
 
   const streak =
     currentStreak > 0
-      ? `<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.ember};">${currentStreak} ${currentStreak === 1 ? "session" : "sessions d'affilée"}</p>`
+      ? `<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.ember};">${currentStreak} ${t("commun.uniteDeSerie", { nombre: currentStreak })}</p>`
       : "";
 
   const body = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.ink};">${dueCount}</p>
-<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">${concepts(dueCount)} arrivent à échéance aujourd'hui.</p>
+<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">${echeance}</p>
 ${streak}
-<a href="${links.sessionUrl}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Commencer</a>`;
+<a href="${links.sessionUrl}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${t("commun.commencer")}</a>`;
 
-  const text = `${concepts(dueCount)} arrivent à échéance aujourd'hui.${
-    currentStreak > 0 ? `\n${currentStreak} jours d'affilée.` : ""
-  }\n\n${links.sessionUrl}\n\nNe plus recevoir ce rappel : ${links.unsubscribeUrl}`;
+  const text = `${echeance}${
+    currentStreak > 0 ? `\n${t("rappel.serieTexte", { nombre: currentStreak })}` : ""
+  }\n\n${links.sessionUrl}\n\n${t("rappel.nePlusRecevoir", { url: links.unsubscribeUrl })}`;
 
   return {
     subject,
-    html: renderShell({ preheader: subject, body, unsubscribeUrl: links.unsubscribeUrl }),
+    html: renderShell({ preheader: subject, body, unsubscribeUrl: links.unsubscribeUrl, langue }),
     text,
   };
 }

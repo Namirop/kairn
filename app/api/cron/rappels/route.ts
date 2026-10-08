@@ -35,6 +35,7 @@ export const maxDuration = 60;
 
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
+    // i18n-ignore — lu par le planificateur de crons, jamais par une personne.
     return NextResponse.json({ erreur: "Non autorisé." }, { status: 401 });
   }
 

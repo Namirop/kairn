@@ -1,0 +1,94 @@
+/**
+ * La page de confidentialité.
+ *
+ * Les coordonnées arrivent en paramètres depuis `lib/site/editeur.ts`, et
+ * jamais recopiées ici : une adresse écrite deux fois finit par n'être changée
+ * qu'une fois.
+ */
+export const confidentialite = {
+  titre: "Confidentialité",
+  chapeau:
+    "Ce que Kairn collecte, à qui c'est transmis, combien de temps c'est gardé, et comment tout récupérer ou tout effacer.",
+  misAJour: "Dernière vérification des engagements des sous-traitants : {verifieLe}.",
+  responsable: {
+    titre: "Responsable du traitement",
+    p1: "{nom} — {mentionEI}, {adresse}, SIREN {siren}.",
+    p2: "Pour toute question ou demande relative à tes données : {email}.",
+  },
+  collecte: {
+    titre: "Ce qui est collecté",
+    p1: "Ton adresse email et ton nom, pour tenir ton compte et t'envoyer les rappels que tu as acceptés.",
+    p2: "Ton fuseau horaire, détecté par le navigateur. Il ne sert qu'à deux choses : savoir quel jour il est chez toi, et à quelle heure t'écrire.",
+    p3: "Ce que tu déposes — textes et captures — ainsi que les concepts, les questions et les passages qui en découlent.",
+    p4: "Des compteurs d'usage : nombre de dépôts et de concepts sur ta période, nombre de révisions, série en cours. Ils servent aux limites du service et à ta progression.",
+    p5: "Les captures d'écran sont effacées dès que leur texte est extrait. Il n'existe aucune route pour les servir, et elles ne survivent pas non plus à un échec de lecture.",
+    p6: "Une empreinte de ton adresse IP, si tu essaies le service sans compte depuis la page d'accueil. C'est une empreinte salée, jamais l'adresse : elle sert à compter combien d'essais viennent du même endroit, et à rien d'autre. Elle reste une donnée personnelle — hacher pseudonymise, ça n'anonymise pas — et elle disparaît avec la visite, au bout de sept jours.",
+  },
+  cookies: {
+    titre: "Cookies",
+    p1: "Deux cookies, tous les deux strictement nécessaires au service : il n'y a donc pas de bandeau à accepter, et il n'y a rien à refuser sans casser le fonctionnement.",
+    p2: "Les cookies de session, préfixés « better-auth. », te maintiennent connecté. Un mois, renouvelé à chaque visite.",
+    p3: "« kairn_visite » retient l'essai que tu fais sans compte, le temps de te permettre de le récupérer en créant un compte. Sept jours, la même durée que ce qu'il désigne.",
+    p4: "Aucun traceur publicitaire, aucun cookie de mesure d'audience, aucun partage à des tiers en dehors des sous-traitants techniques listés plus bas.",
+    p5: "Il y a bien une mesure d'audience — combien de visites, sur quelles pages, depuis quel pays —, mais elle ne pose aucun cookie et ne te suit pas d'un site à l'autre. Elle est décrite juste en dessous.",
+    p6: "Le contenu que tu déposes n'apparaît jamais dans les journaux du serveur : ils ne portent que des identifiants.",
+  },
+  audience: {
+    titre: "Mesure d'audience",
+    p1: "Savoir combien de personnes viennent et sur quelles pages elles s'arrêtent, c'est ce qui dit quoi corriger. Ça se fait sans cookie et sans profil : la mesure de Vercel ne dépose rien sur ton appareil et ne construit aucun identifiant qui te suive d'un site à l'autre.",
+    p2: "Ce qui remonte : la page visitée, la page d'où tu viens, le pays, le type d'appareil et de navigateur. Rien de ce que tu déposes, rien de ton compte, aucune adresse IP conservée — elle sert à dériver un numéro de visite qui change chaque jour, puis elle est jetée.",
+    p3: "C'est pour ça qu'il n'y a pas de bandeau : sans cookie, sans identifiant persistant et sans recoupement entre sites, il n'y a rien à te faire accepter.",
+  },
+  sousTraitants: {
+    titre: "Sous-traitants",
+    p1: "OpenRouter, Inc. (New York, États-Unis) découpe les dépôts en concepts et écrit les questions. Le contenu déposé lui est transmis pour ce traitement, qui est le service lui-même. OpenRouter s'appuie sur un sous-traitant ultérieur, OpenAI, L.L.C. (San Francisco, États-Unis), qui exécute réellement les modèles.",
+    p2: "Nous avons désactivé sur notre compte OpenRouter toute option autorisant l'entraînement sur les données transmises. OpenRouter ne conserve pas le contenu des requêtes, mais des métadonnées techniques (horodatage, modèle, volume de tokens). OpenAI, sous-traitant ultérieur, conserve les données jusqu'à 30 jours pour la surveillance des abus, puis les supprime.",
+    p3: "Anthropic Ireland, Limited (Dublin, Irlande), pour le même traitement, en repli automatique quand OpenRouter est indisponible. Ses conditions commerciales interdisent l'entraînement de modèles sur le contenu de ses clients, et ses journaux d'appels sont supprimés sous trente jours.",
+    p4: "Neon, LLC — société du groupe Databricks, Inc. —, pour l'hébergement de la base de données, sur une infrastructure située à Francfort, en Allemagne.",
+    p5: "Vercel Inc., pour l'hébergement de l'application, avec une exécution en région européenne, et pour la mesure d'audience décrite plus haut.",
+    p6: "Plus Five Five, Inc. (Resend), pour l'acheminement des emails.",
+    p7: "Leurs engagements contractuels ont été relus le {verifieLe}. Cette vérification est refaite une fois par an.",
+  },
+  transferts: {
+    titre: "Transferts hors Union européenne",
+    p1: "Il y en a, et il vaut mieux le dire clairement. La base est à Francfort et l'exécution en Europe, mais les sociétés qui les opèrent sont américaines, et le contenu déposé est traité hors de l'Union — chez OpenRouter et son sous-traitant OpenAI, avec Anthropic en Irlande comme repli.",
+    p2: "Databricks (pour Neon), Vercel et Resend sont certifiés au titre du cadre de protection des données UE–États-Unis, et s'appuient en complément sur les clauses contractuelles types de la Commission européenne.",
+    p3: "OpenRouter et Anthropic ne sont pas certifiés à ce cadre : leurs transferts reposent sur les seules clauses contractuelles types. OpenRouter est le sous-traitant qui reçoit ce que tu déposes (et l'achemine à OpenAI comme sous-traitant ultérieur), Anthropic le reçoit en repli — ce sont les deux points à connaître si le seul mécanisme des clauses contractuelles types ne te convient pas.",
+  },
+  duree: {
+    titre: "Combien de temps",
+    p1: "Tes données sont conservées tant que ton compte existe. Tu peux le supprimer à tout moment depuis les réglages : le compte, tes dépôts, tes concepts, leurs questions et tous tes passages sont effacés immédiatement.",
+    p2: "Un essai fait sans compte, et que personne n'a réclamé en créant un compte, est effacé au bout de sept jours avec tout ce qui en découle.",
+    p3: "L'historique de la base autorise une restauration jusqu'à six heures en arrière. Une suppression est donc effective immédiatement dans le service, et définitive au plus tard six heures après.",
+    p4: "Deux traces survivent, détachées de toi et sans rien qui te désigne : la comptabilité des appels au modèle, parce qu'une dépense engagée ne s'efface pas, et les signalements de questions défectueuses, qui portent le texte d'une question à corriger et non ton identité.",
+  },
+  bases: {
+    titre: "Bases légales",
+    p1: "Chaque finalité repose sur une base et une seule.",
+    p2: "Le rappel quotidien est actif dès la création du compte, et c'est assumé : reposer ce que tu as déposé au bon moment est le service lui-même, pas une communication qui s'y ajoute. Il se coupe d'un clic, depuis les réglages comme depuis le lien présent dans chaque email.",
+    contrat: "Contrat",
+    interetLegitime: "Intérêt légitime",
+    compte: "Créer et gérer ton compte, t'authentifier",
+    depots: "Recevoir tes dépôts, les découper en concepts, produire les questions",
+    revisions: "Planifier tes révisions et enregistrer tes réponses",
+    connexion: "T'envoyer les emails de connexion et de confirmation",
+    rappel: "T'envoyer le rappel quotidien de révision",
+    serie: "T'envoyer l'alerte de série du soir",
+    plafonds: "Compter tes dépôts et tes concepts pour appliquer les plafonds",
+    abus: "Limiter les abus et les dépôts automatisés",
+    signalements: "Traiter tes signalements de questions",
+    usage: "Mesurer l'usage global du service",
+  },
+  droits: {
+    titre: "Tes droits",
+    p1: "Tu peux emporter tes données à tout moment depuis les réglages : un fichier contenant tes dépôts, tes concepts, leurs questions, tes passages et ta progression.",
+    p2: "Tu peux supprimer ton compte depuis le même écran, sans avoir à écrire à qui que ce soit.",
+    p3: "Tu peux couper les emails d'un clic, depuis les réglages comme depuis le lien présent dans chacun d'eux. Coupés, plus rien ne part sauf le code de connexion — sans lui, personne ne pourrait plus entrer dans son compte.",
+    p4: "Tu disposes également d'un droit de rectification, d'opposition et de limitation. Pour ceux-là, écris à {email}, ou par courrier à {nom}, {adresse}. La voie postale est celle à prendre s'il faut joindre une pièce d'identité.",
+  },
+  autorite: {
+    titre: "Autorité de contrôle",
+    p1: "Si tu estimes que le traitement de tes données n'est pas conforme, tu peux introduire une réclamation auprès de la {autorite}.",
+    p2: "{autoriteAdresse} — {autoriteTelephone} — {autoriteSite}",
+  },
+};

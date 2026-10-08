@@ -1,3 +1,5 @@
+import type { Langue } from "@/lib/db/types";
+import { textesDEmail } from "../traduction";
 import { EMAIL_STYLE, renderShell } from "./shell";
 
 /**
@@ -32,12 +34,17 @@ export type CodeDeConnexionPayload = {
 
 export type EmailRendu = { subject: string; html: string; text: string };
 
-export function renderCodeDeConnexion({ code, minutes }: CodeDeConnexionPayload): EmailRendu {
+export function renderCodeDeConnexion(
+  { code, minutes }: CodeDeConnexionPayload,
+  langue: Langue,
+): EmailRendu {
+  const t = textesDEmail(langue);
   const { SANS, MONO, ink, muted, border, paper } = EMAIL_STYLE;
 
+  // i18n-ignore — balisage HTML ; ses textes viennent de t().
   const body = `
 <p style="margin:0 0 20px;font-family:${SANS};font-size:15px;line-height:24px;color:${ink};">
-Voici ton code pour entrer dans Kairn.
+${t("code.intro")}
 </p>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;background:${paper};border:1px solid ${border};">
 <tr><td align="center" style="padding:20px 16px;">
@@ -45,20 +52,21 @@ Voici ton code pour entrer dans Kairn.
 </td></tr>
 </table>
 <p style="margin:0 0 8px;font-family:${SANS};font-size:13px;line-height:20px;color:${muted};">
-Retape-le dans la fenêtre où tu l'as demandé. Il fonctionne une seule fois et expire dans ${minutes} minutes.
+${t("code.retape", { minutes })}
 </p>
 <p style="margin:0;font-family:${SANS};font-size:13px;line-height:20px;color:${muted};">
-Si tu n'as pas demandé ce code, ignore ce message : personne ne peut entrer sans lui.
+${t("code.ignore")}
 </p>`;
 
   return {
-    subject: `${code} — ton code pour entrer dans Kairn`,
+    subject: t("code.sujet", { code }),
     html: renderShell({
-      preheader: `Ton code de connexion Kairn : ${code}`,
+      preheader: t("code.preheader", { code }),
       body,
       // Ni désinscription ni raison d'envoi : cet email a été demandé il y a
       // quelques secondes, et sa raison d'être est dans son objet.
+      langue,
     }),
-    text: `Voici ton code pour entrer dans Kairn.\n\nCode : ${code}\n\nRetape-le dans la fenêtre où tu l'as demandé. Il fonctionne une seule fois et expire dans ${minutes} minutes.\nSi tu n'as pas demandé ce code, ignore ce message.`,
+    text: `${t("code.intro")}\n\n${t("code.ligneCode", { code })}\n\n${t("code.retape", { minutes })}\n${t("code.ignoreCourt")}`,
   };
 }

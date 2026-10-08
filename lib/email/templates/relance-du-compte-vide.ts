@@ -1,3 +1,5 @@
+import type { Langue } from "@/lib/db/types";
+import { textesDEmail } from "../traduction";
 import { EMAIL_STYLE as S, renderShell } from "./shell";
 import type { RenderedEmail } from "./daily-reminder";
 
@@ -18,32 +20,32 @@ export type RelanceDuCompteVidePayload = Record<string, never>;
 export function renderRelanceDuCompteVide(
   _payload: RelanceDuCompteVidePayload,
   links: { depotUrl: string; unsubscribeUrl: string },
+  langue: Langue,
 ): RenderedEmail {
-  const subject = "Ton compte Kairn est encore vide";
+  const t = textesDEmail(langue);
+  const subject = t("relance.sujet");
 
-  const body = `<p style="margin:0 0 16px;font-size:17px;line-height:25px;font-weight:600;letter-spacing:-0.01em;color:${S.ink};">Rien n'est encore déposé.</p>
-<p style="margin:0 0 12px;font-size:15px;line-height:23px;color:${S.muted};">Kairn marche avec ce qui te passe sous les yeux : une recommandation qu'on t'a faite, un raccourci que tu réapprends tous les mois, trois lignes d'un article. Une seule chose suffit à commencer.</p>
-<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">Elle devient quelques concepts, et ils te reviennent espacés dans le temps, juste avant le moment où tu les aurais oubliés.</p>
-<a href="${links.depotUrl}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Déposer</a>`;
+  const body = `<p style="margin:0 0 16px;font-size:17px;line-height:25px;font-weight:600;letter-spacing:-0.01em;color:${S.ink};">${t("relance.titre")}</p>
+<p style="margin:0 0 12px;font-size:15px;line-height:23px;color:${S.muted};">${t("relance.exemples")}</p>
+<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">${t("relance.retour")}</p>
+<a href="${links.depotUrl}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${t("commun.deposer")}</a>`;
 
-  const text = `Rien n'est encore déposé.
-
-Kairn marche avec ce qui te passe sous les yeux : une recommandation qu'on t'a faite, un raccourci que tu réapprends tous les mois, trois lignes d'un article. Une seule chose suffit à commencer.
-
-Elle devient quelques concepts, et ils te reviennent espacés dans le temps, juste avant le moment où tu les aurais oubliés.
-
-${links.depotUrl}
-
-Ne plus recevoir d'emails de Kairn : ${links.unsubscribeUrl}`;
+  const text = [
+    t("relance.titre"),
+    t("relance.exemples"),
+    t("relance.retour"),
+    links.depotUrl,
+    t("commun.nePlusRecevoirEmails", { url: links.unsubscribeUrl }),
+  ].join("\n\n");
 
   return {
     subject,
     html: renderShell({
-      preheader: "Une seule chose suffit à commencer.",
+      preheader: t("relance.preheader"),
       body,
       unsubscribeUrl: links.unsubscribeUrl,
-      raisonDeLEnvoi:
-        "Tu reçois ce message une fois, parce que ton compte Kairn est resté vide depuis son ouverture.",
+      raisonDeLEnvoi: t("relance.raison"),
+      langue,
     }),
     text,
   };

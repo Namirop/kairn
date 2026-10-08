@@ -158,7 +158,7 @@ export const auth = betterAuth({
       expiresIn: MINUTES_DE_VALIDITE * 60,
       allowedAttempts: 3,
       storeOTP: "hashed",
-      sendVerificationOTP: async ({ email, otp, type }) => {
+      sendVerificationOTP: async ({ email, otp, type }, ctx) => {
         // Un seul type nous concerne : il n'y a ni mot de passe à réinitialiser
         // ni changement d'adresse. Lever plutôt qu'envoyer un email dont le texte
         // parlerait d'autre chose que ce qui a été demandé.
@@ -166,7 +166,14 @@ export const auth = betterAuth({
           throw new Error(`Type de code non pris en charge : ${type}.`);
         }
 
-        await envoyerLeCodeDeConnexion(email, otp);
+        // La langue du code : celle du compte s'il existe déjà, sinon celle de
+        // la requête — à l'inscription, le code part avant le compte.
+        const compte = await ctx?.context.internalAdapter.findUserByEmail(email);
+
+        await envoyerLeCodeDeConnexion(email, otp, {
+          userId: compte?.user.id ?? null,
+          entetes: ctx?.headers ?? null,
+        });
       },
     }),
     // En dernier : il pose les cookies de session sur la réponse, et doit voir

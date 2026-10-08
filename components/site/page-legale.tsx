@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { BlocDetache } from "@/components/coquille/bloc-detache";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
@@ -47,6 +48,8 @@ export function PageLegale({
   rubriques: RubriqueLegale[];
   misAJour: ReactNode;
 }) {
+  const t = useTranslations("legal.gabarit");
+
   return (
     <PileDePanneaux sol="papier">
       <Panneau surface="papier" mesure="texte" remplit className="md:py-pas-16">
@@ -84,7 +87,7 @@ export function PageLegale({
                 <ul className="gap-pas-2 flex flex-col">
                   {rubrique.aRemplir.map((manque) => (
                     <li key={manque} className="text-petit text-stone-500">
-                      À compléter — {manque}
+                      {t("aCompleter", { manque })}
                     </li>
                   ))}
                 </ul>
@@ -100,7 +103,7 @@ export function PageLegale({
             href={ROUTES.accueil}
             className="rounded-galet text-petit text-stone-500 underline-offset-4 hover:underline focus-visible:underline"
           >
-            Retour à l&apos;accueil
+            {t("retourAccueil")}
           </Link>
         </div>
       </Panneau>

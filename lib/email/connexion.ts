@@ -1,4 +1,9 @@
+import { parseCookies } from "better-auth/cookies";
+import type { Langue } from "@/lib/db/types";
+import { findUserSettings } from "@/lib/db/user-settings";
 import { LONGUEUR_DU_CODE } from "@/lib/domain/code-de-connexion";
+import { langueDevinee } from "@/lib/domain/langue-devinee";
+import { COOKIE_DE_LANGUE } from "@/lib/i18n/langues";
 import { sendEmail } from "./client";
 import { renderCodeDeConnexion } from "./templates/code-de-connexion";
 
@@ -27,14 +32,48 @@ import { renderCodeDeConnexion } from "./templates/code-de-connexion";
  */
 export const MINUTES_DE_VALIDITE = 10;
 
-export async function envoyerLeCodeDeConnexion(destinataire: string, code: string): Promise<void> {
+/** Ce qu'on sait de qui demande le code, à l'instant où il le demande. */
+export type Provenance = {
+  /** Le compte de l'adresse, s'il existe déjà ; absent à l'inscription. */
+  userId: string | null;
+  /** Les en-têtes de la requête qui a demandé le code, quand il y en a une. */
+  entetes: Headers | null;
+};
+
+/**
+ * La langue du code : celle du compte s'il existe, sinon celle de la requête.
+ *
+ * À l'inscription, personne n'a encore de réglage : le code part avant le
+ * compte. On parle alors la langue que la personne a choisie sur le site — le
+ * cookie posé par le lien de langue —, à défaut celle de son navigateur. Sans
+ * requête du tout, le français, comme partout ailleurs.
+ */
+async function langueDuCode({ userId, entetes }: Provenance): Promise<Langue> {
+  const duCompte = userId ? (await findUserSettings(userId))?.langue : undefined;
+
+  if (duCompte) return duCompte;
+
+  return langueDevinee({
+    choix: parseCookies(entetes?.get("cookie") ?? "").get(COOKIE_DE_LANGUE),
+    acceptLanguage: entetes?.get("accept-language"),
+  });
+}
+
+export async function envoyerLeCodeDeConnexion(
+  destinataire: string,
+  code: string,
+  provenance: Provenance,
+): Promise<void> {
   if (code.length !== LONGUEUR_DU_CODE) {
     // Un code de longueur inattendue veut dire que la configuration du plugin a
     // divergé de ce que l'écran de saisie attend : il vaut mieux ne pas partir.
     throw new Error(`Code de connexion de longueur inattendue : ${code.length}.`);
   }
 
-  const email = renderCodeDeConnexion({ code, minutes: MINUTES_DE_VALIDITE });
+  const email = renderCodeDeConnexion(
+    { code, minutes: MINUTES_DE_VALIDITE },
+    await langueDuCode(provenance),
+  );
 
   await sendEmail({
     to: destinataire,
