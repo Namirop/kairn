@@ -1,18 +1,28 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import { RegistreServiceWorker } from "@/components/pwa/registre-service-worker";
 import { PAPIER } from "@/lib/design/couleurs-hors-css";
 import { ORIGINE_DU_SITE } from "@/lib/site/origine";
 import { classesPolices } from "./fonts";
 import "./globals.css";
 
-const DESCRIPTION =
-  "Dépose ce que tu apprends. Kairn le découpe en concepts et te les repose au bon moment.";
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("racine");
+  const description = t("description");
 
-export const metadata: Metadata = {
+  return {
+    ...METADONNEES,
+    description,
+    openGraph: { ...METADONNEES.openGraph, locale: t("localeOpenGraph"), description },
+    twitter: { ...METADONNEES.twitter, description },
+  };
+}
+
+const METADONNEES = {
   metadataBase: new URL(ORIGINE_DU_SITE),
   title: { default: "Kairn", template: "%s · Kairn" },
-  description: DESCRIPTION,
   applicationName: "Kairn",
   manifest: "/manifest.webmanifest",
 
@@ -33,18 +43,15 @@ export const metadata: Metadata = {
   // pas.
   openGraph: {
     type: "website",
-    locale: "fr_FR",
     siteName: "Kairn",
     title: "Kairn",
-    description: DESCRIPTION,
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
     title: "Kairn",
-    description: DESCRIPTION,
   },
-};
+} satisfies Metadata;
 
 export const viewport: Viewport = {
   themeColor: PAPIER,
@@ -52,11 +59,11 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang={await getLocale()}>
       <body className={classesPolices}>
-        {children}
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
         <RegistreServiceWorker />
         {/* La mesure d'audience de Vercel : combien de visites, sur quelles
             pages, d'où. Sans cookie et sans identifiant qui suive quelqu'un d'un

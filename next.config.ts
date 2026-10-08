@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+/** La langue de chaque requête et ses textes : voir `lib/i18n/requete.ts`. */
+const avecLesLangues = createNextIntlPlugin("./lib/i18n/requete.ts");
 
 const nextConfig: NextConfig = {
   /**
@@ -40,4 +44,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default avecLesLangues(nextConfig);

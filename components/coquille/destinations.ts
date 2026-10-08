@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ROUTES } from "@/lib/auth/routes";
+import type { Messages } from "@/lib/i18n/messages";
 
 /**
  * Les destinations de l'application, nommées du point de vue de l'utilisateur.
@@ -22,7 +23,8 @@ import { ROUTES } from "@/lib/auth/routes";
  */
 export type Destination = {
   href: string;
-  libelle: string;
+  /** La clé du libellé dans l'espace `navigation` : le texte dépend de la langue. */
+  libelle: keyof Messages["navigation"];
   icone: LucideIcon;
   /**
    * La destination n'est active que sur son adresse exacte.
@@ -35,9 +37,9 @@ export type Destination = {
 };
 
 export const DESTINATIONS: Destination[] = [
-  { href: ROUTES.aujourdhui, libelle: "Aujourd'hui", icone: Mountain },
-  { href: ROUTES.depots, libelle: "Dépôts", icone: Inbox },
-  { href: ROUTES.reglages, libelle: "Réglages", icone: SlidersHorizontal },
+  { href: ROUTES.aujourdhui, libelle: "aujourdhui", icone: Mountain },
+  { href: ROUTES.depots, libelle: "depots", icone: Inbox },
+  { href: ROUTES.reglages, libelle: "reglages", icone: SlidersHorizontal },
 ];
 
 /**
@@ -51,9 +53,9 @@ export const DESTINATIONS: Destination[] = [
  * en train de travailler.
  */
 export const DESTINATIONS_PRODUIT_ADMIN: Destination[] = [
-  { href: ROUTES.aujourdhui, libelle: "Aujourd'hui", icone: Mountain },
-  { href: ROUTES.depots, libelle: "Dépôts", icone: Inbox },
-  { href: ROUTES.admin, libelle: "Admin", icone: Gauge },
+  { href: ROUTES.aujourdhui, libelle: "aujourdhui", icone: Mountain },
+  { href: ROUTES.depots, libelle: "depots", icone: Inbox },
+  { href: ROUTES.admin, libelle: "admin", icone: Gauge },
 ];
 
 /**
@@ -71,21 +73,21 @@ export const DESTINATIONS_PRODUIT_ADMIN: Destination[] = [
 export const DESTINATIONS_ADMIN: Destination[] = [
   // « Synthèse » et pas « Vue d'ensemble » : le rail fait cent douze pixels et
   // c'est le libellé le plus long qui commande sa largeur.
-  { href: ROUTES.admin, libelle: "Synthèse", icone: Gauge, exact: true },
-  { href: ROUTES.adminDepense, libelle: "Dépense", icone: Coins },
-  { href: ROUTES.adminComptes, libelle: "Comptes", icone: Users },
-  { href: ROUTES.adminContenu, libelle: "Contenu", icone: Layers },
-  { href: ROUTES.adminSignalements, libelle: "Signalements", icone: Flag },
+  { href: ROUTES.admin, libelle: "synthese", icone: Gauge, exact: true },
+  { href: ROUTES.adminDepense, libelle: "depense", icone: Coins },
+  { href: ROUTES.adminComptes, libelle: "comptes", icone: Users },
+  { href: ROUTES.adminContenu, libelle: "contenu", icone: Layers },
+  { href: ROUTES.adminSignalements, libelle: "signalements", icone: Flag },
   // « Retours » et non « Signalements du produit » : le rail fait cent douze
   // pixels, et les deux sections ne se confondent que si on les nomme pareil.
-  { href: ROUTES.adminRetours, libelle: "Retours", icone: MessageSquareWarning },
-  { href: ROUTES.adminPilotage, libelle: "Pilotage", icone: Wrench },
+  { href: ROUTES.adminRetours, libelle: "retours", icone: MessageSquareWarning },
+  { href: ROUTES.adminPilotage, libelle: "pilotage", icone: Wrench },
   // Les réglages du compte, et non ceux du modèle. Ils ont quitté le rail du
   // produit pour laisser la place à « Admin », donc ils doivent se retrouver
   // ici : le fuseau, l'heure de rappel, l'export, la suppression de compte et
   // la déconnexion n'ont pas d'autre porte.
-  { href: ROUTES.reglages, libelle: "Mon compte", icone: CircleUser, exact: true },
-  { href: ROUTES.aujourdhui, libelle: "Quitter", icone: ArrowLeft, exact: true },
+  { href: ROUTES.reglages, libelle: "monCompte", icone: CircleUser, exact: true },
+  { href: ROUTES.aujourdhui, libelle: "quitter", icone: ArrowLeft, exact: true },
 ];
 
 /**

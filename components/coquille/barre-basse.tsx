@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { destinationsPour, estActive, railInterne } from "./destinations";
 import { cn } from "@/lib/utils";
 
@@ -31,11 +32,12 @@ import { cn } from "@/lib/utils";
  */
 export function BarreBasse({ administrateur }: { administrateur: boolean }) {
   const chemin = usePathname();
+  const t = useTranslations("navigation");
   const interne = railInterne(chemin, administrateur);
 
   return (
     <nav
-      aria-label="Navigation principale"
+      aria-label={t("principale")}
       className="bg-surface-ombre p-pas-2 fixed inset-x-0 bottom-0 z-30 pb-[calc(env(safe-area-inset-bottom)+var(--pas-2))] md:hidden"
     >
       <ul className={cn("gap-pas-1 flex", interne && "overflow-x-auto")}>
@@ -55,7 +57,7 @@ export function BarreBasse({ administrateur }: { administrateur: boolean }) {
               >
                 <Icone className="size-5" strokeWidth={1.75} aria-hidden />
                 <span className="text-mono font-mono tracking-normal whitespace-nowrap">
-                  {libelle}
+                  {t(libelle)}
                 </span>
               </Link>
             </li>
