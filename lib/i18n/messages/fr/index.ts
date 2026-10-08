@@ -2,6 +2,12 @@ import { etatDepot } from "./etat-depot";
 import { navigation } from "./navigation";
 import { racine } from "./racine";
 import { temps } from "./temps";
+import { revision } from "./revision";
+import { depots } from "./depots";
+import { tableau } from "./tableau";
+import { site } from "./site";
+import { compte } from "./compte";
+import { emails } from "./emails";
 
 /**
  * Les textes de l'interface, en français — la langue de référence.
@@ -16,6 +22,12 @@ import { temps } from "./temps";
  * au singulier et l'anglais au pluriel, sans qu'on ait à s'en souvenir.
  */
 export const fr = {
+  revision,
+  depots,
+  tableau,
+  site,
+  compte,
+  emails,
   etatDepot,
   navigation,
   racine,
