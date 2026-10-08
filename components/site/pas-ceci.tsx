@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { SilhouetteDeCairn } from "@/components/cairn/silhouette-de-cairn";
 import { Panneau } from "@/components/coquille/panneau";
 import { Apparition, Temps } from "@/components/site/apparition";
@@ -32,6 +33,8 @@ import { ROUTES } from "@/lib/auth/routes";
  * temps qu'elles en fait un quatrième élément de liste.
  */
 export function PasCeci({ connecte }: { connecte: boolean }) {
+  const t = useTranslations("site.accueil.pasCeci");
+
   return (
     <Panneau
       surface="roche"
@@ -44,29 +47,21 @@ export function PasCeci({ connecte }: { connecte: boolean }) {
       <Apparition ecart={0.26}>
         <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
           <Temps balise="span" pierre className="block">
-            Ce que ce
+            {t("titreHaut")}
           </Temps>
           <Temps balise="span" pierre className="block">
-            n&apos;est pas.
+            {t("titreBas")}
           </Temps>
         </h2>
       </Apparition>
 
       <Apparition className="text-stone-300">
         <Temps>
-          <p>
-            Ce n&apos;est pas une application de fiches à écrire soi-même : ce qui use, ce
-            n&apos;est pas de réviser, c&apos;est de fabriquer les cartes. Ce n&apos;est pas un
-            outil de prise de notes — tu en as déjà un, et ce n&apos;est pas là que le savoir se
-            fixe. Ce n&apos;est pas un assistant à qui parler.
-          </p>
+          <p>{t("negations")}</p>
         </Temps>
 
         <Temps>
-          <p className="mt-pas-4 text-stone-50">
-            C&apos;est une seule chose : ce que tu as lu revient au bon moment, jusqu&apos;à ce que
-            ce soit à toi.
-          </p>
+          <p className="mt-pas-4 text-stone-50">{t("affirmation")}</p>
         </Temps>
 
         <Temps>
@@ -76,7 +71,7 @@ export function PasCeci({ connecte }: { connecte: boolean }) {
             className="mt-pas-8 bg-stone-50 text-stone-900 hover:bg-stone-300"
           >
             <Link href={connecte ? ROUTES.aujourdhui : ROUTES.connexion}>
-              {connecte ? "Aujourd'hui" : "Créer mon compte"}
+              {connecte ? t("aujourdhui") : t("creerCompte")}
             </Link>
           </Button>
         </Temps>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 /**
@@ -41,6 +42,8 @@ export function ChampEnGrand({
   texte: string;
   surTexte: (valeur: string) => void;
 }) {
+  const t = useTranslations("site.essai.champ");
+
   return (
     <Dialog
       open={ouvert}
@@ -50,12 +53,10 @@ export function ChampEnGrand({
     >
       <DialogContent className="gap-pas-3 max-w-3xl">
         <DialogTitle className="text-mono pr-pas-8 font-mono tracking-[0.14em] text-stone-500 uppercase">
-          Ce que tu veux retenir
+          {t("intitule")}
         </DialogTitle>
 
-        <DialogDescription className="sr-only">
-          La même zone de dépôt, en plus grand. Ce que tu écris ici se retrouve dans le formulaire.
-        </DialogDescription>
+        <DialogDescription className="sr-only">{t("descriptionEnGrand")}</DialogDescription>
 
         {/* Le creux de la bande, aux mêmes mesures : c'est la même zone, et elle
             doit se reconnaître. Seule la hauteur change, puisque c'est la seule

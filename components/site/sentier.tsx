@@ -1,28 +1,17 @@
+import { useTranslations } from "next-intl";
 import { Panneau } from "@/components/coquille/panneau";
 import { Apparition, Temps } from "@/components/site/apparition";
-import { TraceDuSentier, type EtapeDuSentier } from "@/components/site/trace-du-sentier";
+import { TraceDuSentier } from "@/components/site/trace-du-sentier";
 
-const ETAPES: EtapeDuSentier[] = [
-  {
-    titre: "Tu déposes",
-    // L'énumération est partie : le champ de l'essai en porte une, deux plis
-    // plus haut, au moment où la question « qu'est-ce que j'y mets ? » se pose
-    // vraiment. Reste ce que cette étape est seule à pouvoir dire — qu'il n'y a
-    // rien à faire — et le seul exemple que personne ne devine, la photo.
-    texte:
-      "Rien à formater, rien à découper, rien à mettre en fiches : tu colles, et c'est fini. Même la photo d'une page de livre.",
-  },
-  {
-    titre: "Kairn découpe",
-    texte:
-      "Le dépôt devient des concepts unitaires, chacun avec trois ou quatre façons d'être questionné : un terme à retrouver dans une phrase, un choix à faire, une explication à donner. La formulation tourne pour que tu retiennes l'idée, pas la phrase.",
-  },
-  {
-    titre: "Ça revient",
-    texte:
-      "Chaque concept revient à l'instant où tu es sur le point de l'oublier. Plus tu le sais, plus il s'espace. Une pierre de plus au cairn quand il est acquis.",
-  },
-];
+/**
+ * Les trois étapes, dans l'ordre, par leur clé dans `site.accueil.sentier`.
+ *
+ * Sur la première : l'énumération est partie : le champ de l'essai en porte
+ * une, deux plis plus haut, au moment où la question « qu'est-ce que j'y mets ? »
+ * se pose vraiment. Reste ce que cette étape est seule à pouvoir dire — qu'il
+ * n'y a rien à faire — et le seul exemple que personne ne devine, la photo.
+ */
+const ETAPES = ["deposer", "decouper", "revenir"] as const;
 
 /**
  * Le sentier : une séquence réelle, donc une liste verticale reliée par un
@@ -55,6 +44,8 @@ const ETAPES: EtapeDuSentier[] = [
  * entre les deux colonnes, où il se lit comme une séparation voulue.
  */
 export function Sentier() {
+  const t = useTranslations("site.accueil.sentier");
+
   return (
     <Panneau surface="ombre" aere className="gap-pas-12 grid md:grid-cols-[1fr_minmax(0,36rem)]">
       <Apparition ecart={0.26}>
@@ -63,15 +54,20 @@ export function Sentier() {
             l'ordre des lignes ne change pas. */}
         <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
           <Temps balise="span" pierre className="block">
-            Trois gestes,
+            {t("titreHaut")}
           </Temps>
           <Temps balise="span" pierre className="block">
-            et c&apos;est tout.
+            {t("titreBas")}
           </Temps>
         </h2>
       </Apparition>
 
-      <TraceDuSentier etapes={ETAPES} />
+      <TraceDuSentier
+        etapes={ETAPES.map((etape) => ({
+          titre: t(`${etape}.titre`),
+          texte: t(`${etape}.texte`),
+        }))}
+      />
     </Panneau>
   );
 }

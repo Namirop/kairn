@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
-import { CARACTERES_MAXIMUM, longueurEnClair } from "@/lib/depots/bornes-du-depot";
+import { CARACTERES_MAXIMUM, longueurEnClairAvec } from "@/lib/depots/bornes-du-depot";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
+import type { Messages } from "@/lib/i18n/messages";
 
 /**
  * L'essai n'a rien donné. **Quatre** situations, et elles ne se confondent pas.
@@ -41,9 +43,12 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
  * longueur inconnue, dans un display de soixante pixels. Quatre mots fixes
  * titrent ; la phrase du modèle garde le corps, où sa longueur ne casse rien.
  */
-type Situation = { titre: string; constat: string; explication: string };
+type Cle = keyof Messages["site"]["sansConcept"];
 
-const VIENT_DE_NOUS = "Ça vient de nous.";
+/** Le constat est une clé, ou le motif écrit par le modèle quand il y en a un. */
+type Situation = { titre: Cle; constat: Cle | { motif: string }; explication: Cle };
+
+const VIENT_DE_NOUS = "vientDeNous";
 
 function situationDeLEchec(
   panne: boolean,
@@ -53,35 +58,33 @@ function situationDeLEchec(
   if (panne && peutRedeposer) {
     return {
       titre: VIENT_DE_NOUS,
-      constat: "Le découpage n'a pas abouti, et ça ne vient pas de ton texte.",
-      explication: "Cet essai ne t'est pas compté. Relance-le, ou reviens dans un moment.",
+      constat: "panneConstat",
+      explication: "panneExplication",
     };
   }
 
   if (panne) {
     return {
       titre: VIENT_DE_NOUS,
-      constat: "Le découpage ne répond pas en ce moment.",
-      explication:
-        "Ça ne vient pas de ton texte, et rien ne t'a été compté. Avec un compte, tu pourras reprendre dès que ce sera rétabli.",
+      constat: "indisponibleConstat",
+      explication: "indisponibleExplication",
     };
   }
 
-  const constat = motifDechec ?? "Ce texte n'a rien donné à retenir.";
+  const constat: Situation["constat"] = motifDechec ? { motif: motifDechec } : "rienConstat";
 
   if (peutRedeposer) {
     return {
-      titre: "Rien à retenir là-dedans.",
+      titre: "rienTitre",
       constat,
-      explication:
-        "Retente avec une explication, une règle, un mécanisme — quelque chose que tu voudrais savoir dans un mois.",
+      explication: "rienRetenter",
     };
   }
 
   return {
-    titre: "Rien à retenir là-dedans.",
+    titre: "rienTitre",
     constat,
-    explication: `Un compte accepte ${longueurEnClair(CARACTERES_MAXIMUM)}, garde ce qu'il en tire, et te le repose au bon moment.`,
+    explication: "rienCompte",
   };
 }
 
@@ -93,26 +96,34 @@ export function EssaiSansConcept({
   surRedepot: () => void;
 }) {
   const { panne, peutRedeposer, motifDechec } = avancement;
+  const t = useTranslations("site.sansConcept");
+  const tRefus = useTranslations("depots.refus");
   const situation = situationDeLEchec(panne, peutRedeposer, motifDechec);
+  // La longueur se dit comme dans les refus du dépôt : une seule tournure.
+  const compte = longueurEnClairAvec(tRefus, CARACTERES_MAXIMUM);
+  const constat =
+    typeof situation.constat === "string" ? t(`${situation.constat}`) : situation.constat.motif;
 
   return (
     <div className="gap-pas-4 flex flex-col" role="status">
       <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-50">
-        {situation.titre}
+        {t(`${situation.titre}`)}
       </h2>
 
-      <p className="text-corps max-w-xl text-stone-50">{situation.constat}</p>
+      <p className="text-corps max-w-xl text-stone-50">{constat}</p>
 
-      <p className="text-petit max-w-xl text-stone-300">{situation.explication}</p>
+      <p className="text-petit max-w-xl text-stone-300">
+        {t(`${situation.explication}`, { compte })}
+      </p>
 
       <div className="mt-pas-2">
         {peutRedeposer ? (
           <Button type="button" size="lg" variant="outlineClair" onClick={surRedepot}>
-            Réessayer
+            {t("reessayer")}
           </Button>
         ) : (
           <Button asChild size="lg" variant="clair">
-            <Link href={ROUTES.connexion}>Créer un compte</Link>
+            <Link href={ROUTES.connexion}>{t("creerCompte")}</Link>
           </Button>
         )}
       </div>

@@ -2,6 +2,7 @@
 
 import { useState, type RefObject } from "react";
 import { Maximize2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ChampEnGrand } from "@/components/site/champ-en-grand";
 import { VoileDeFin } from "@/components/site/voile-de-fin";
 
@@ -95,6 +96,7 @@ export function ChampDeDepot({
   surTexte: (valeur: string) => void;
   enErreur: boolean;
 }) {
+  const t = useTranslations("site.essai.champ");
   const [enGrand, setEnGrand] = useState(false);
 
   return (
@@ -108,14 +110,14 @@ export function ChampDeDepot({
           htmlFor="essai"
           className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase"
         >
-          Ce que tu veux retenir
+          {t("intitule")}
         </label>
 
         <button
           type="button"
           onClick={() => setEnGrand(true)}
-          aria-label="Écrire en grand"
-          className="-my-pas-2 rounded-xs px-pas-2 py-pas-2 inline-flex items-center text-stone-500 transition-colors hover:text-stone-900"
+          aria-label={t("enGrand")}
+          className="-my-pas-2 px-pas-2 py-pas-2 inline-flex items-center rounded-xs text-stone-500 transition-colors hover:text-stone-900"
         >
           <Maximize2 className="size-4" />
         </button>

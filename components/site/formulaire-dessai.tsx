@@ -1,14 +1,15 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
+import { useTranslations } from "next-intl";
 import { PucesDExemples } from "@/components/depots/exemples-de-depot";
 import { Apparition, Temps } from "@/components/site/apparition";
 import { ChampDeDepot } from "@/components/site/champ-de-depot";
 import { ActionDuDepot } from "@/components/site/action-du-depot";
 import {
   CARACTERES_MAXIMUM_ANONYME,
-  motifDeLongueur,
-  tropLong,
+  defautDeLongueur,
+  motifDeDefaut,
 } from "@/lib/depots/bornes-du-depot";
 
 /**
@@ -64,6 +65,10 @@ export function FormulaireDEssai({
   /** Un découpage a déjà abouti pendant cette visite, et on en redépose un. */
   reprise: boolean;
 }) {
+  const t = useTranslations("site.essai.formulaire");
+  // Les refus sont ceux du serveur, mot pour mot : même règle, mêmes phrases,
+  // dites dans la langue de l'écran.
+  const tRefus = useTranslations("depots.refus");
   const champ = useRef<HTMLTextAreaElement>(null);
   const [texte, setTexte] = useState("");
   const [erreurLocale, setErreurLocale] = useState<string | null>(null);
@@ -84,16 +89,16 @@ export function FormulaireDEssai({
     verrous de la visite, l'empreinte d'adresse, le plafond du jour.
   */
   const verifierAvantDenvoyer = (evenement: FormEvent<HTMLFormElement>) => {
-    const motif = motifDeLongueur(texte);
+    const defaut = defautDeLongueur(texte);
 
-    if (!motif) {
+    if (!defaut) {
       surDepot();
 
       return;
     }
 
     evenement.preventDefault();
-    setErreurLocale(motif);
+    setErreurLocale(motifDeDefaut(defaut, tRefus));
     champ.current?.focus();
   };
 
@@ -102,10 +107,10 @@ export function FormulaireDEssai({
       <Apparition ecart={0.26}>
         <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em]">
           <Temps balise="span" pierre className="block">
-            Dépose
+            {t("titreHaut")}
           </Temps>
           <Temps balise="span" pierre className="block">
-            quelque chose.
+            {t("titreBas")}
           </Temps>
         </h2>
       </Apparition>
@@ -124,10 +129,7 @@ export function FormulaireDEssai({
 
               Reste le mécanisme, et il annonce exactement ce que le panneau
               montrera ensuite — des concepts, des questions, un retour. */}
-          <p className="text-stone-500">
-            Kairn découpe ce que tu colles en concepts, en fait des questions, et te les repose
-            juste avant que tu les oublies.
-          </p>
+          <p className="text-stone-500">{t("mecanisme")}</p>
         </Temps>
 
         <Temps className="mt-pas-6 md:mt-pas-8">
@@ -163,7 +165,7 @@ export function FormulaireDEssai({
                  elles, gardent leur silence jusqu'au clic : recalculées à
                  chaque frappe, elles feraient passer « il n'y a rien » à « c'est
                  trop court » au troisième caractère. */
-              erreur={erreurLocale ?? (trop ? tropLong() : erreurServeur)}
+              erreur={erreurLocale ?? (trop ? motifDeDefaut("long", tRefus) : erreurServeur)}
               reprise={reprise}
             />
           </form>
@@ -176,7 +178,7 @@ export function FormulaireDEssai({
             Ils remplissent le champ sans l'envoyer : le dépôt reste le geste de
             l'utilisateur, qui peut encore modifier ou renoncer. */}
         <Temps className="mt-pas-6 md:mt-pas-8">
-          <p className="text-petit text-stone-500">Ou pars d&apos;un exemple :</p>
+          <p className="text-petit text-stone-500">{t("exemples")}</p>
 
           <PucesDExemples
             onChoisir={(exemple) => {

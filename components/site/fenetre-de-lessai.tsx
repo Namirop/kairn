@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 /**
  * La fenêtre où l'essai se joue : l'attente, puis ce qu'elle a donné.
@@ -59,6 +60,8 @@ export function FenetreDeLEssai({
   pied?: ReactNode;
   children: ReactNode;
 }) {
+  const t = useTranslations("site.essai.fenetre");
+
   return (
     <DialogPrimitive.Root
       open={ouverte}
@@ -88,9 +91,7 @@ export function FenetreDeLEssai({
             className="grain grain-clair md:rounded-carte data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 bg-surface-roche relative flex w-full flex-col overflow-hidden text-stone-50 outline-none md:max-h-[88svh] md:w-full md:max-w-4xl"
             aria-describedby={undefined}
           >
-            <DialogPrimitive.Title className="sr-only">
-              Ce que ton texte a donné
-            </DialogPrimitive.Title>
+            <DialogPrimitive.Title className="sr-only">{t("titre")}</DialogPrimitive.Title>
 
             {/*
               La croix vit dans une barre, et pas en absolu par-dessus.
@@ -105,7 +106,7 @@ export function FenetreDeLEssai({
             <div className="px-pas-3 pt-pas-3 md:px-pas-6 md:pt-pas-6 relative z-20 flex shrink-0 justify-end">
               <DialogPrimitive.Close
                 className="inline-flex size-10 items-center justify-center rounded-xs text-stone-400 transition-colors hover:bg-stone-700 hover:text-stone-50"
-                aria-label="Fermer"
+                aria-label={t("fermer")}
               >
                 <X className="size-5" />
               </DialogPrimitive.Close>

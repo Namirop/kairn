@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Panneau } from "@/components/coquille/panneau";
 import { Strates } from "@/components/coquille/strates";
 import { Essai } from "@/components/site/essai";
@@ -26,6 +27,7 @@ export default async function PageAccueil() {
   // concepts au premier rendu, pas après un aller-retour.
   const essaiPrecedent = await lireLEssaiEnCours();
   const connecte = (await getCurrentUser()) !== null;
+  const t = await getTranslations("site.accueil.pied");
 
   return (
     <>
@@ -72,9 +74,7 @@ export default async function PageAccueil() {
 
       <Panneau surface="papier">
         <div className="gap-pas-4 flex flex-wrap items-baseline justify-between">
-          <p className="text-mono text-stone-500">
-            Kairn — un cairn balise un sentier, une pierre à la fois.
-          </p>
+          <p className="text-mono text-stone-500">{t("devise")}</p>
 
           {/* Atteignables sans compte, et depuis la seule page publique : une
               politique de confidentialité derrière une connexion ne sert à
@@ -85,19 +85,19 @@ export default async function PageAccueil() {
               href={ROUTES.tarifs}
               className="rounded-galet text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
             >
-              Tarifs
+              {t("tarifs")}
             </Link>
             <Link
               href={ROUTES.mentionsLegales}
               className="rounded-galet text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
             >
-              Mentions légales
+              {t("mentionsLegales")}
             </Link>
             <Link
               href={ROUTES.confidentialite}
               className="rounded-galet text-stone-500 underline-offset-4 hover:text-stone-900 hover:underline focus-visible:underline"
             >
-              Confidentialité
+              {t("confidentialite")}
             </Link>
           </nav>
         </div>

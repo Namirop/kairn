@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Marque } from "@/components/coquille/marque";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -18,6 +19,7 @@ import { getCurrentUser } from "@/lib/auth/session";
  */
 export default async function CoquilleSite({ children }: { children: React.ReactNode }) {
   const utilisateur = await getCurrentUser();
+  const t = await getTranslations("site.accueil.entete");
 
   return (
     <div className="bg-surface-papier flex min-h-dvh flex-col">
@@ -49,7 +51,7 @@ export default async function CoquilleSite({ children }: { children: React.React
             href={utilisateur ? ROUTES.aujourdhui : ROUTES.connexion}
             className="text-h2-app rounded-galet px-pas-6 py-pas-3 hover:bg-surface-ombre text-stone-500 transition-colors hover:text-stone-900"
           >
-            {utilisateur ? "Aujourd'hui" : "Se connecter"}
+            {utilisateur ? t("aujourdhui") : t("seConnecter")}
           </Link>
         </div>
       </header>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Cairn } from "@/components/cairn/cairn";
 import { AttenteAbandonnee, ConceptsEnAttente } from "@/components/site/concepts-en-attente";
 import { EchantillonDeQuestions } from "@/components/site/echantillon-de-questions";
@@ -65,6 +66,7 @@ export function ResultatDeLEssai({
     on verrait le résultat plus tard qu'avant, pour en avoir plus. C'est
     l'inverse de ce qu'on cherche.
   */
+  const t = useTranslations("site.essai.resultat");
   const rienEncore = !avancement || avancement.concepts.length === 0;
 
   if (rienEncore && (!avancement || avancement.enCours)) {
@@ -119,14 +121,10 @@ export function ResultatDeLEssai({
 
         <div className="gap-pas-2 flex min-w-0 flex-col">
           <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-50 tabular-nums">
-            {combien} {combien === 1 ? "concept." : "concepts."}
+            {t("titre", { nombre: combien })}
           </h2>
 
-          <p className="text-corps max-w-xl text-stone-300">
-            {combien === 1
-              ? "Il te sera reposé seul, au moment où tu allais l'oublier."
-              : "Chacun sera reposé séparément, au moment où tu allais l'oublier."}
-          </p>
+          <p className="text-corps max-w-xl text-stone-300">{t("promesse", { nombre: combien })}</p>
         </div>
       </header>
 

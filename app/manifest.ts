@@ -5,12 +5,20 @@ import { ORIGINE_DU_SITE } from "@/lib/site/origine";
 /**
  * Manifeste PWA. L'application s'installe depuis le navigateur et s'ouvre en
  * plein écran ; une application mobile native suivra.
+ *
+ * **Il reste en français, et c'est voulu.** Il est servi à une adresse fixe,
+ * mis en cache par le navigateur et demandé sans cookie : il ne peut pas suivre
+ * la langue de la personne, seulement en deviner une. Ce qui compte à
+ * l'installation — le nom, l'icône — ne dépend d'aucune langue ; la description
+ * ne se lit que dans la fenêtre d'installation de Chrome. Le jour où l'anglais
+ * pèse plus que le français dans les installations, c'est elle qui change.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Kairn",
     short_name: "Kairn",
     description:
+      // i18n-ignore — voir plus haut : le manifeste ne suit pas la langue de la requête.
       "Dépose ce que tu apprends. Kairn le découpe en concepts et te les repose au bon moment.",
     lang: "fr",
     start_url: "/aujourdhui",

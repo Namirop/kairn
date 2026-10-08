@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { adresseDuVisiteur, lireLaVisite, poserLaVisite } from "@/lib/auth/visite";
@@ -37,7 +38,13 @@ export async function essayerAction(_precedent: EtatEssai, donnees: FormData): P
   if (await getCurrentUser()) redirect(`${ROUTES.depots}/nouveau`);
 
   const texte = (donnees.get("texte") ?? "").toString();
-  const resultat = await deposerSansCompte(texte, await adresseDuVisiteur(), await lireLaVisite());
+  // Les refus se disent dans la langue de la requête, celle de l'écran qui les montre.
+  const resultat = await deposerSansCompte(
+    texte,
+    await adresseDuVisiteur(),
+    await lireLaVisite(),
+    await getTranslations("depots.refus"),
+  );
 
   if (!resultat.ok) return { erreur: resultat.motif };
 

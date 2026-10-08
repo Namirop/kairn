@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PileEnConstruction } from "@/components/cairn/pile-en-construction";
 import { PhraseQuiTourne, usePhraseQuiTourne } from "@/components/site/phrase-qui-tourne";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
  * dit.
  */
 export function ConceptsEnAttente({ attente }: { attente: EtatDeLAttente }) {
+  const t = useTranslations("site.essai.attente");
   const phrase = usePhraseQuiTourne("DECOUPAGE");
 
   return (
@@ -62,16 +64,14 @@ export function ConceptsEnAttente({ attente }: { attente: EtatDeLAttente }) {
         <PileEnConstruction clair className="w-10 shrink-0 md:w-14" />
 
         <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-50">
-          On découpe ton texte.
+          {t("titre")}
         </h2>
       </div>
 
       <PhraseQuiTourne phrase={phrase} className="text-stone-300" />
 
       <p className="text-petit min-h-5 max-w-2xl text-stone-400">
-        {attente === "LONGUE"
-          ? "On cherche encore. Tes concepts s'afficheront ici dès qu'ils arrivent, tu n'as rien à faire."
-          : "Tes concepts s'affichent ici même, pas dans un écran d'inscription."}
+        {attente === "LONGUE" ? t("longue") : t("courte")}
       </p>
     </div>
   );
@@ -102,20 +102,19 @@ export function ConceptsEnAttente({ attente }: { attente: EtatDeLAttente }) {
  * ses concepts.
  */
 export function AttenteAbandonnee({ onVerifier }: { onVerifier: () => void }) {
+  const t = useTranslations("site.essai.attente");
+
   return (
     <div className="gap-pas-4 flex flex-col" role="status">
       <h2 className="font-display text-h2-site leading-[1] font-bold tracking-[-0.02em] text-stone-50">
-        Le découpage prend son temps.
+        {t("abandonTitre")}
       </h2>
 
-      <p className="text-corps max-w-xl text-stone-300">
-        Ton texte n&apos;est pas perdu. Reviens sur cette page dans un moment : tes concepts
-        t&apos;y attendront.
-      </p>
+      <p className="text-corps max-w-xl text-stone-300">{t("abandonTexte")}</p>
 
       <div className="mt-pas-1">
         <Button type="button" variant="outlineClair" onClick={onVerifier}>
-          Vérifier maintenant
+          {t("verifier")}
         </Button>
       </div>
     </div>

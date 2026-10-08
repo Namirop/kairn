@@ -1,5 +1,6 @@
 import { CairnRenversable } from "@/components/cairn/cairn-renversable";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ROUTES } from "@/lib/auth/routes";
 import { Button } from "@/components/ui/button";
 import { Panneau } from "@/components/coquille/panneau";
@@ -63,6 +64,8 @@ import { PaysageDeCairns } from "@/components/site/paysage-de-cairns";
  * la composition de bureau est intacte.
  */
 export function Hero({ connecte }: { connecte: boolean }) {
+  const t = useTranslations("site.accueil.hero");
+
   return (
     <Panneau
       surface="papier"
@@ -120,7 +123,7 @@ export function Hero({ connecte }: { connecte: boolean }) {
       <Apparition className="md:pb-pas-24 relative z-10 md:flex md:min-h-[var(--hauteur-cairn)] md:flex-col md:justify-center">
         <h1 className="font-display text-ouverture leading-[0.95] font-bold tracking-[-0.03em] text-balance md:leading-[0.84] md:tracking-[-0.045em]">
           <Temps balise="span" className="block">
-            Tu lis beaucoup.
+            {t("constat")}
           </Temps>
 
           {/* Le creux occupe le flux, le plein se pose dessus et s'en va : la
@@ -129,12 +132,12 @@ export function Hero({ connecte }: { connecte: boolean }) {
               troisième — sans quoi la phrase serait lue trois fois. */}
           <Temps balise="span" className="ligne-oubli block">
             <span aria-hidden className="titre-creux block">
-              Tu retiens peu.
+              {t("retournement")}
             </span>
             <span aria-hidden className="oubli-plein">
-              Tu retiens peu.
+              {t("retournement")}
             </span>
-            <span className="sr-only">Tu retiens peu.</span>
+            <span className="sr-only">{t("retournement")}</span>
           </Temps>
         </h1>
 
@@ -165,9 +168,9 @@ export function Hero({ connecte }: { connecte: boolean }) {
             className="mt-pas-4 md:mt-pas-6 geste-du-ciel max-md:px-pas-6 max-md:text-petit max-md:h-10"
           >
             {connecte ? (
-              <Link href={ROUTES.aujourdhui}>Aujourd&apos;hui</Link>
+              <Link href={ROUTES.aujourdhui}>{t("aujourdhui")}</Link>
             ) : (
-              <a href="#depot">Essayer sans compte</a>
+              <a href="#depot">{t("essayer")}</a>
             )}
           </Button>
         </Temps>

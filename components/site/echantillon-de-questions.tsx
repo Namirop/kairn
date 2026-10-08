@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useArriveeDesQuestions } from "@/components/site/use-arrivee-des-questions";
 import { CarteDeLEchantillon } from "@/components/site/carte-de-lechantillon";
-import { LIBELLE_FORMAT } from "@/components/depots/libelle-format";
 import { parOrdreDeFormat } from "@/components/depots/ordre-des-formats";
 import { EnEcriture } from "@/components/site/echantillon-en-attente";
 import { unParFormat } from "@/lib/domain/formats-distincts";
@@ -91,6 +91,7 @@ export function EchantillonDeQuestions({
   attente: EtatDeLAttente;
   onVerifier: () => void;
 }) {
+  const t = useTranslations("site.essai");
   const [rang, setRang] = useState(0);
 
   const montrables = parOrdreDeFormat(unParFormat(questions));
@@ -110,9 +111,7 @@ export function EchantillonDeQuestions({
     <section ref={ancre} className="gap-pas-3 scroll-mt-pas-6 flex flex-col">
       <header className="gap-pas-2 flex flex-col">
         <h3 className="font-display text-h1-app leading-tight font-bold tracking-[-0.02em] text-stone-50 tabular-nums">
-          {montrables.length > 1
-            ? `${montrables.length} questions sur l'un d'eux.`
-            : "Une question sur l'un d'eux."}
+          {t("echantillon.titre", { nombre: montrables.length })}
         </h3>
 
         {/* Sans mesure maximale, et c'est le seul texte de la fenêtre dans ce
@@ -123,10 +122,7 @@ export function EchantillonDeQuestions({
             les formats d'une ligne vers le bas. Elle tient dans la fenêtre
             (sept cent dix-sept points pour huit cents) et se plie d'elle-même
             sur un téléphone. */}
-        <p className="text-petit text-stone-300">
-          Elles tournent d&apos;un passage à l&apos;autre. C&apos;est le concept qui doit tenir, pas
-          une phrase apprise par cœur.
-        </p>
+        <p className="text-petit text-stone-300">{t("echantillon.rotation")}</p>
       </header>
 
       {montree ? (
@@ -146,7 +142,7 @@ export function EchantillonDeQuestions({
                aux propositions d'un QCM, pour la même raison. */
             <div
               role="group"
-              aria-label="Format de la question"
+              aria-label={t("echantillon.formats")}
               className="gap-pas-1 grid grid-cols-[repeat(2,max-content)] justify-items-start md:flex md:flex-wrap"
             >
               {montrables.map((question, position) => (
@@ -161,7 +157,7 @@ export function EchantillonDeQuestions({
                       : "text-stone-300 hover:bg-stone-700/60 hover:text-stone-50"
                   }`}
                 >
-                  {LIBELLE_FORMAT[question.format]}
+                  {t(`libelleFormat.${question.format}`)}
                 </button>
               ))}
             </div>

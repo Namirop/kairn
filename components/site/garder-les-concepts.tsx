@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { PorteDeSortie } from "@/components/site/porte-de-sortie";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
@@ -52,17 +53,17 @@ export function GarderLesConcepts({
   chaineFinie: boolean;
   surRedepot: () => void;
 }) {
+  const t = useTranslations("site.essai.garder");
+
   return (
     <div className="gap-pas-2 md:gap-pas-4 flex flex-col md:flex-row md:items-center">
       <Button asChild size="lg" variant="clair" className="w-full md:w-auto">
-        <Link href={ROUTES.connexion}>Les garder</Link>
+        <Link href={ROUTES.connexion}>{t("garder")}</Link>
       </Button>
 
-      <span className="text-petit text-stone-300">
-        Ton adresse suffit, et tu récupères ceux-ci.
-      </span>
+      <span className="text-petit text-stone-300">{t("mention")}</span>
 
-      <span className="md:ml-auto shrink-0 self-start md:self-auto">
+      <span className="shrink-0 self-start md:ml-auto md:self-auto">
         <PorteDeSortie
           peutRedeposer={peutRedeposer}
           chaineFinie={chaineFinie}

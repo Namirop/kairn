@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -36,6 +37,8 @@ export function PorteDeSortie({
   /** Sur la roche, le lien et la phrase s'inversent en gris clairs. */
   clair?: boolean;
 }) {
+  const t = useTranslations("site.essai.sortie");
+
   if (peutRedeposer) {
     return (
       <Button
@@ -45,7 +48,7 @@ export function PorteDeSortie({
         className="px-0"
         onClick={surRedepot}
       >
-        Déposer autre chose
+        {t("redeposer")}
       </Button>
     );
   }
@@ -54,7 +57,7 @@ export function PorteDeSortie({
 
   return (
     <span className={`text-petit ${clair ? "text-stone-300" : "text-stone-500"}`}>
-      Tu as fait tes deux essais du jour.
+      {t("essaisFaits")}
     </span>
   );
 }

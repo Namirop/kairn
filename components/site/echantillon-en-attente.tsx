@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PhraseQuiTourne, usePhraseQuiTourne } from "@/components/site/phrase-qui-tourne";
 import { Button } from "@/components/ui/button";
 
@@ -38,6 +39,7 @@ export function EnEcriture({
   abandonnee: boolean;
   onVerifier: () => void;
 }) {
+  const t = useTranslations("site.essai.echantillon");
   const phrase = usePhraseQuiTourne("ECRITURE");
 
   if (abandonnee) return <EcritureAbandonnee onVerifier={onVerifier} />;
@@ -46,14 +48,12 @@ export function EnEcriture({
     <section className="gap-pas-3 flex flex-col" role="status" aria-live="polite">
       <header className="gap-pas-2 flex flex-col">
         <h3 className="font-display text-h1-app leading-tight font-bold tracking-[-0.02em] text-stone-50">
-          On écrit les questions.
+          {t("ecritureTitre")}
         </h3>
 
         {/* La seule ligne stable du bloc, et donc la seule que les lecteurs
             d'écran entendent : la phrase qui tourne leur est masquée. */}
-        <p className="text-petit max-w-xl text-stone-300">
-          Quatre formulations sur le même concept, de formats différents. Une vingtaine de secondes.
-        </p>
+        <p className="text-petit max-w-xl text-stone-300">{t("ecritureTexte")}</p>
       </header>
 
       {/* La carte que la question viendra remplir, à sa place et à sa taille.
@@ -75,20 +75,19 @@ export function EnEcriture({
  * suite.
  */
 function EcritureAbandonnee({ onVerifier }: { onVerifier: () => void }) {
+  const t = useTranslations("site.essai.echantillon");
+
   return (
     <section className="gap-pas-3 flex flex-col">
       <h3 className="font-display text-h1-app leading-tight font-bold tracking-[-0.02em] text-stone-50">
-        Les questions prennent leur temps.
+        {t("ecritureAbandonTitre")}
       </h3>
 
-      <p className="text-petit max-w-xl text-stone-300">
-        Tes concepts sont déjà là, c’est l’échantillon qui manque. Il s’écrit toujours, et il
-        s’affichera ici la prochaine fois que tu passes.
-      </p>
+      <p className="text-petit max-w-xl text-stone-300">{t("ecritureAbandonTexte")}</p>
 
       <div className="mt-pas-1">
         <Button type="button" variant="outlineClair" size="sm" onClick={onVerifier}>
-          Vérifier maintenant
+          {t("verifier")}
         </Button>
       </div>
     </section>

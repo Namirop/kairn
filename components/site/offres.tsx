@@ -1,5 +1,7 @@
+import { useTranslations } from "next-intl";
 import { PLAFOND_GRATUIT, PLAFOND_PAYANT } from "@/lib/domain/plafond-du-plan";
 import { PRIX_ANNUEL, PRIX_MENSUEL } from "@/lib/domain/prix";
+import { useLangue } from "@/lib/i18n/use-langue";
 import { cn } from "@/lib/utils";
 
 /**
@@ -33,25 +35,57 @@ import { cn } from "@/lib/utils";
  */
 
 export function Offres() {
+  const t = useTranslations("site.tarifs.offres");
+  // Premium n'est pas vendu en anglais (décision du 08/10) : la colonne payante
+  // y dit la limite, sans prix en euros ni rien qui mène à une caisse.
+  const vendable = useLangue() === "FR";
+
   return (
     <div className="gap-pas-4 md:gap-pas-6 grid items-start md:grid-cols-2">
       <Offre
-        nom="Gratuit"
-        prix="0 €"
-        cadence="pour toujours"
+        nom={t("gratuit.nom")}
+        prix={t("gratuit.prix")}
+        cadence={t("gratuit.cadence")}
         concepts={PLAFOND_GRATUIT}
-        raison="De quoi savoir si la mémoire tient, avant de payer quoi que ce soit."
+        raison={t("gratuit.raison")}
       />
 
-      <Offre
-        nom="Complet"
-        prix={`${PRIX_MENSUEL} €`}
-        cadence="par mois"
-        second={`ou ${PRIX_ANNUEL} € par an, deux mois offerts`}
-        concepts={PLAFOND_PAYANT}
-        raison="De quoi alimenter un domaine entier — une documentation, un cours, une veille."
-        vendue
-      />
+      {vendable ? (
+        <Offre
+          nom={t("complet.nom")}
+          prix={t("complet.prix", { prix: PRIX_MENSUEL })}
+          cadence={t("complet.cadence")}
+          second={t("complet.second", { annuel: PRIX_ANNUEL })}
+          concepts={PLAFOND_PAYANT}
+          raison={t("complet.raison")}
+          vendue
+        />
+      ) : (
+        <PremiumIndisponible />
+      )}
+    </div>
+  );
+}
+
+/**
+ * La colonne payante, là où elle ne se vend pas.
+ *
+ * Elle garde sa place et sa surface : la comparaison reste lisible, et ce qui
+ * manque se dit au lieu de disparaître. Pas de nombre en display — on ne met
+ * pas en avant ce qu'on ne peut pas offrir.
+ */
+function PremiumIndisponible() {
+  const t = useTranslations("site.tarifs.offres");
+
+  return (
+    <div className="p-pas-6 md:p-pas-8 rounded-carte bg-surface-papier">
+      <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
+        {t("indisponible.nom")}
+      </p>
+      <p className="mt-pas-4 text-h2-app font-semibold text-stone-900">{t("indisponible.titre")}</p>
+      <p className="mt-pas-3 text-petit text-stone-500">
+        {t("indisponible.texte", { concepts: PLAFOND_PAYANT })}
+      </p>
     </div>
   );
 }
@@ -74,6 +108,8 @@ function Offre({
   /** L'offre payante. C'est elle qui est posée. */
   vendue?: boolean;
 }) {
+  const t = useTranslations("site.tarifs.offres");
+
   return (
     <div className={cn("p-pas-6 md:p-pas-8", vendue && "rounded-carte bg-surface-papier")}>
       <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">{nom}</p>
@@ -91,7 +127,7 @@ function Offre({
       >
         {concepts}
       </p>
-      <p className="mt-pas-2 text-corps text-stone-900">concepts par mois</p>
+      <p className="mt-pas-2 text-corps text-stone-900">{t("conceptsParMois")}</p>
 
       <div className="mt-pas-6 pt-pas-6 border-t border-stone-300/70">
         <p className="gap-pas-2 flex flex-wrap items-baseline">

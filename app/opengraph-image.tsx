@@ -4,6 +4,7 @@ import { ImageResponse } from "next/og";
 import { ACCENT, PAPIER } from "@/lib/design/couleurs-hors-css";
 import { PIERRES_DENSE } from "@/lib/design/marque";
 import { symboleSeul } from "@/lib/design/symbole-svg";
+import { MESSAGES } from "@/lib/i18n/messages";
 
 /**
  * L'aperçu d'un lien vers Kairn, dans une messagerie ou sur un réseau.
@@ -25,15 +26,23 @@ import { symboleSeul } from "@/lib/design/symbole-svg";
  *
  * Pas de grain non plus : ce moteur ne connaît pas les filtres SVG, et un faux
  * grain plaqué serait une autre texture que celle du site.
+ *
+ * **Elle est en français, et elle ne lit pas la langue de la requête.** Ceux
+ * qui la demandent sont les robots des messageries et des réseaux : ils n'ont
+ * ni cookie ni session, et l'adresse de l'image ne porte pas de langue. Lire la
+ * requête la rendrait dynamique — un rendu à chaque aperçu au lieu d'un fichier
+ * figé au build — pour servir de toute façon le français. Une image anglaise
+ * viendra avec une adresse anglaise : un `opengraph-image.tsx` dans son segment,
+ * qui lira `MESSAGES.EN.site.partage`.
  */
+const TEXTES = MESSAGES.FR.site.partage;
 
-export const alt = "Kairn — dépose ce que tu apprends, il te le repose au bon moment.";
+export const alt = TEXTES.alt;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const ACCROCHE = ["Tu lis beaucoup.", "Tu retiens peu."];
-const PHRASE =
-  "Dépose ce que tu apprends. Kairn le découpe en concepts et te les repose au bon moment.";
+const ACCROCHE = [TEXTES.constat, TEXTES.retournement];
+const PHRASE = TEXTES.phrase;
 
 /** L'encre et le gris second du papier, écrits ici pour la même raison que le reste. */
 const ENCRE = "#0d2236";

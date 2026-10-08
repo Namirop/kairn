@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Cairn } from "@/components/cairn/cairn";
 import { Apparition, Temps } from "@/components/site/apparition";
 import { PorteDeSortie } from "@/components/site/porte-de-sortie";
@@ -94,6 +95,7 @@ export function EssaiRepris({
    */
   prendLeFocus: boolean;
 }) {
+  const t = useTranslations("site.essai.repris");
   const combien = concepts.length;
 
   return (
@@ -110,7 +112,7 @@ export function EssaiRepris({
             ) : null}
 
             <h2 className="font-display text-[min(var(--t-h2-site),9.4vw)] leading-[1] font-bold tracking-[-0.02em] tabular-nums">
-              {combien} {combien === 1 ? "concept t'attend." : "concepts t'attendent."}
+              {t("titre", { nombre: combien })}
             </h2>
           </div>
         </Temps>
@@ -118,10 +120,7 @@ export function EssaiRepris({
 
       <Apparition>
         <Temps>
-          <p className="text-stone-500">
-            On les a sortis de ce que tu viens de déposer. Ton adresse suffit pour qu&apos;on te les
-            repose au bon moment, et tu récupères ceux-ci.
-          </p>
+          <p className="text-stone-500">{t("texte")}</p>
         </Temps>
 
         {/* Les trois gestes sur une seule ligne, comme dans le pied de la
@@ -134,11 +133,11 @@ export function EssaiRepris({
         <Temps className="mt-pas-6 md:mt-pas-8">
           <div className="gap-pas-3 md:gap-pas-4 flex flex-wrap items-center">
             <Button asChild size="lg">
-              <Link href={ROUTES.connexion}>Les garder</Link>
+              <Link href={ROUTES.connexion}>{t("garder")}</Link>
             </Button>
 
             <Button type="button" variant="outline" onClick={surRevoir} autoFocus={prendLeFocus}>
-              Revoir les concepts
+              {t("revoir")}
             </Button>
 
             <PorteDeSortie
