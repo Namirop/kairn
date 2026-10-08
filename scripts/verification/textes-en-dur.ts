@@ -12,7 +12,9 @@
  * reste quelque chose, pour servir de critère de fin à une zone traduite.
  *
  * Un faux positif se tait en posant `// i18n-ignore` sur la ligne au-dessus —
- * avec la raison, comme partout ailleurs.
+ * avec la raison, comme partout ailleurs. Un fichier entier qui ne parle qu'à
+ * l'administrateur — l'outil interne, les alertes d'exploitation — se tait par
+ * `// i18n-ignore-fichier — <raison>` en tête : il reste français par décision.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -89,6 +91,8 @@ function estInvisible(noeud: ts.Node): boolean {
 }
 
 function relever(fichier: string): string[] {
+  if (readFileSync(fichier, "utf8").slice(0, 400).includes("i18n-ignore-fichier")) return [];
+
   const source = ts.createSourceFile(
     fichier,
     readFileSync(fichier, "utf8"),

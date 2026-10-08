@@ -1,3 +1,4 @@
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
 import type { Metadata } from "next";
 import { BlocComptes } from "@/components/administration/bloc-comptes";
 import { BlocListeDesComptes } from "@/components/administration/bloc-liste-des-comptes";

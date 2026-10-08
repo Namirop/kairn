@@ -1,3 +1,4 @@
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
 import { BlocDetache } from "@/components/coquille/bloc-detache";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 import type { SignalementLu } from "@/lib/db/signalement";

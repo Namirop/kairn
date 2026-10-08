@@ -1,3 +1,4 @@
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
 import type { Metadata } from "next";
 import { Bandeau } from "@/components/administration/bandeau";
 import { ConfigIllisible } from "@/components/administration/config-illisible";

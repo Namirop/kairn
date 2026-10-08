@@ -1,3 +1,4 @@
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
 import type { Metadata } from "next";
 import { BlocVolumes } from "@/components/administration/bloc-volumes";
 import { Carte, GraphiqueBarres } from "@/components/administration/graphique-barres";

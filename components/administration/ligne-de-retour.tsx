@@ -1,4 +1,5 @@
 "use client";
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
 
 import { useActionState } from "react";
 import {

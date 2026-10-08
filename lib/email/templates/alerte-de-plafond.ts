@@ -1,3 +1,4 @@
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
 import type { CompteurDeQuota } from "@/lib/db/types";
 import { EMAIL_STYLE as S, renderShell } from "./shell";
 import type { RenderedEmail } from "./daily-reminder";

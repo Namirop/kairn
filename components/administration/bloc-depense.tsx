@@ -1,3 +1,4 @@
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
 import { Section } from "@/components/administration/section";
 import { dollars, nombre } from "@/components/administration/formats";
 import type { BlocDepense as Chiffres } from "@/lib/db/administration-depense";
