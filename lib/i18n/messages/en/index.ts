@@ -9,6 +9,7 @@ import { tableau } from "./tableau";
 import { site } from "./site";
 import { compte } from "./compte";
 import { emails } from "./emails";
+import { legal } from "./legal";
 
 export const en: Messages = {
   revision,
@@ -17,6 +18,7 @@ export const en: Messages = {
   site,
   compte,
   emails,
+  legal,
   etatDepot,
   navigation,
   racine,
