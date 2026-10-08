@@ -1,0 +1,3 @@
+ok so the thing i got about useEffect is when you return a function inside it, it gets called before the effect runs again and also when the component goes away, basically to undo whatever you set up. like if you add a subscription and dont remove it they pile up and the old ones keep responding even though theyre useless now.
+
+and the annoying thing that took me 2h: if you put a function in the deps array it keeps looping on every render, because the function gets recreated every time so its never the same one, even if it does exactly the same thing.

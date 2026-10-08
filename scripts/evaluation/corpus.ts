@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import type { AiImagePart } from "@/lib/ai/message";
+import type { LangueDuProduit } from "@/lib/domain/langue-du-produit";
 
 /**
  * Le corpus du banc : des dépôts d'exemple, un par fichier, lus dans l'ordre
@@ -93,7 +94,33 @@ import type { AiImagePart } from "@/lib/ai/message";
  * douteux les priverait de toute question. Ce qu'on regarde sur ces deux-là
  * n'est donc pas le nombre de concepts mais `nature`, et le fait qu'aucun
  * concept ne parte mis de côté.
+ *
+ * **Un dépôt dont le nom porte `.en.` est fait par quelqu'un qui révise en
+ * anglais** (depuis le 08/10/2026) : il part avec la consigne anglaise, et la
+ * langue attendue en sortie est l'anglais. La langue n'est pas celle du texte
+ * mais celle de la personne — `31-phrase-courte.en.txt` peut contenir du
+ * français, c'est même le cas qui compte. Un nom sans `.en.` est fait en
+ * français, ce que tous les dépôts étaient avant cette date.
+ *
+ * `31` à `37` sont les premiers. Cinq reprennent un dépôt français déjà au
+ * banc, pour comparer une même matière d'une langue à l'autre : la phrase
+ * courte (`01`), l'explication maladroite (`04`), la liste de courses (`06`),
+ * les idées fausses (`17`), les citations espagnoles (`28`). Deux tiennent les
+ * pièges propres à l'anglais :
+ *
+ * - `36-vocabulaire-bilingue.en` : le miroir de `30` — des expressions
+ *   françaises glosées en anglais. Le trou doit tomber sur l'expression
+ *   française, et la glose, elle, s'écrit en anglais
+ * - `37-depot-francais.en` : un texte **entièrement français**, déposé par
+ *   quelqu'un qui révise en anglais. C'est le miroir de `18-anglais`, et le cas
+ *   qui dira si « tu écris toujours en anglais » tient face à un dépôt qui tire
+ *   dans l'autre sens, sur une consigne elle-même écrite en français
  */
+
+/** La langue de la personne qui fait ce dépôt, lue sur son nom. */
+export function langueDuDepot(nom: string): LangueDuProduit {
+  return /\.en\.[a-z]+$/i.test(nom) ? "EN" : "FR";
+}
 
 export type Depot = {
   nom: string;

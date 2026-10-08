@@ -1,8 +1,10 @@
+import type { LangueDuProduit } from "@/lib/domain/langue-du-produit";
 import type { DepotEvalue } from "./execution";
 import { langueApparente } from "./langue-apparente";
 
 /**
- * Les concepts et les étalons sortent-ils en français, quoi qu'on ait déposé ?
+ * Les concepts et les étalons sortent-ils dans la langue de la personne, quoi
+ * qu'elle ait déposé ?
  *
  * Ce contrôle existe parce qu'il a manqué. `18-anglais.txt` a rendu quatre
  * concepts en français, et le banc l'a classé « ok, 0 manquement » : aucun
@@ -43,10 +45,15 @@ import { langueApparente } from "./langue-apparente";
  * `langueApparente` : elle se tait alors, et c'est le bon comportement. Sur les
  * six cas relevés en production — les trois défauts et les trois sorties
  * attendues à leur place —, les concepts et les étalons se rangent du bon côté.
+ *
+ * **Depuis le 08/10/2026, la référence est la langue de la personne**, et non
+ * plus le français. Elle reste une donnée extérieure à la sortie — lue sur le
+ * nom du dépôt, voir `langueDuDepot` —, donc le contrôle garde la propriété qui
+ * le rend utile : il ne prend pas sa référence dans ce qu'il examine.
  */
 
-/** Le produit ne parle qu'une langue. Voir `EXTRACT_ATOMS_PROMPT`, « LA LANGUE ». */
-const LANGUE_DU_PRODUIT = "fr";
+const CODE: Record<LangueDuProduit, string> = { FR: "fr", EN: "en" };
+const NOM: Record<LangueDuProduit, string> = { FR: "du français", EN: "de l'anglais" };
 
 /**
  * Ce que la règle exempte, donc ce qui ne peut pas servir à la vérifier.
@@ -63,16 +70,17 @@ function textePorteur(textes: string[]): string {
 export function manquementsDeLangue(evaluation: DepotEvalue): string[] {
   if (evaluation.echec) return [];
 
+  const attendue = CODE[evaluation.langue];
   const duDepot = langueApparente(evaluation.texte);
   const provenance =
-    duDepot && duDepot !== LANGUE_DU_PRODUIT ? `, sur un dépôt qui paraît en \`${duDepot}\`` : "";
+    duDepot && duDepot !== attendue ? `, sur un dépôt qui paraît en \`${duDepot}\`` : "";
 
   const ecrits = (quoi: string, textes: string[]): string[] => {
     const langue = langueApparente(textePorteur(textes));
 
-    if (!langue || langue === LANGUE_DU_PRODUIT) return [];
+    if (!langue || langue === attendue) return [];
 
-    return [`${quoi} sont écrits en \`${langue}\` au lieu du français${provenance}`];
+    return [`${quoi} sont écrits en \`${langue}\` au lieu ${NOM[evaluation.langue]}${provenance}`];
   };
 
   return [

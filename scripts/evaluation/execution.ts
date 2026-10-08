@@ -1,7 +1,7 @@
 import { callAI } from "@/lib/ai/client";
 import { AiError, AIInvalidOutputError } from "@/lib/ai/errors";
 import type { AiMessage } from "@/lib/ai/message";
-import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
+import { promptsSysteme, SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 import {
   CONCEPTS_PAR_APPEL,
   contratDeGeneration,
@@ -18,7 +18,8 @@ import { conceptsAQuestionner, type NatureDuDepot } from "@/lib/domain/nature-du
 import { ordonnerLesOptions } from "@/lib/domain/ordre-des-options";
 import { cibleDuVraiOuFaux } from "@/lib/domain/vrai-ou-faux";
 import type { Manquement } from "@/lib/domain/manquement";
-import type { Depot } from "./corpus";
+import type { LangueDuProduit } from "@/lib/domain/langue-du-produit";
+import { langueDuDepot, type Depot } from "./corpus";
 import type { DepotFige } from "./fige";
 
 /**
@@ -104,6 +105,8 @@ export type ConceptEvalue = {
 export type DepotEvalue = {
   nom: string;
   texte: string;
+  /** La langue de la personne, donc celle qu'on attend en sortie. */
+  langue: LangueDuProduit;
   lecture?: { langue: string | null; exploitable: boolean };
   /** Absentes quand l'extraction a échoué : le modèle n'a rien rendu de lisible. */
   nature?: NatureDuDepot;
@@ -253,6 +256,7 @@ function servir(variants: VariantRendu[], concept: string): VariantEvalue[] {
 
 async function genererPourGroupe(
   groupe: Concept[],
+  langue: LangueDuProduit,
 ): Promise<{ evalues: ConceptEvalue[]; reprises: number }> {
   const base = groupe.map((concept) => ({
     concept,
@@ -266,7 +270,7 @@ async function genererPourGroupe(
         // grammaire de cet appel-là. La graine est celle du premier concept du
         // groupe : la contrainte vaut pour tout l'envoi.
         contract: contratDeGeneration(emplacementDuTexteATrou(groupe[0]?.concept ?? "")),
-        system: SYSTEM_PROMPTS.generate_variants,
+        system: promptsSysteme(langue).generate_variants,
         messages: messageDuGroupe(groupe),
       }),
     );
@@ -310,6 +314,7 @@ async function genererPourGroupe(
 async function evaluerConcepts(
   concepts: Concept[],
   nature: NatureDuDepot | undefined,
+  langue: LangueDuProduit,
 ): Promise<{ evalues: ConceptEvalue[]; reprises: number }> {
   // La même règle que l'ingestion, et pas une copie : sur un dépôt de fiction,
   // le doute n'écarte plus rien, et le banc doit le voir comme le produit.
@@ -328,7 +333,7 @@ async function evaluerConcepts(
   let reprises = 0;
 
   for (const groupe of grouper(retenus)) {
-    const rendu = await genererPourGroupe(groupe);
+    const rendu = await genererPourGroupe(groupe, langue);
     evalues.push(...rendu.evalues);
     reprises += rendu.reprises;
   }
@@ -338,20 +343,29 @@ async function evaluerConcepts(
 
 /** Un dépôt du corpus : lecture éventuelle, extraction, puis questions. */
 export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
-  const vide = { nom: depot.nom, texte: depot.texte, rejet: null, concepts: [], reprises: 0 };
+  const langue = langueDuDepot(depot.nom);
+  const vide = {
+    nom: depot.nom,
+    texte: depot.texte,
+    langue,
+    rejet: null,
+    concepts: [],
+    reprises: 0,
+  };
 
   try {
     const { texte, lecture, reprises: reprisesLecture } = await lireImage(depot);
     const { resultat: extraction, reprises: reprisesExtraction } = await avecUneReprise(() =>
       callAI({
         contract: EXTRACT_ATOMS,
-        system: SYSTEM_PROMPTS.extract_atoms,
+        system: promptsSysteme(langue).extract_atoms,
         messages: [{ role: "user", content: texte }],
       }),
     );
     const { evalues, reprises: reprisesGeneration } = await evaluerConcepts(
       extraction.atoms,
       extraction.nature,
+      langue,
     );
 
     return {
@@ -372,11 +386,13 @@ export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
 
 /** Un dépôt figé : on ne rappelle pas l'extraction, seules les questions bougent. */
 export async function rejouerDepot(fige: DepotFige): Promise<DepotEvalue> {
-  const { evalues, reprises } = await evaluerConcepts(fige.concepts, fige.nature);
+  const langue = langueDuDepot(fige.nom);
+  const { evalues, reprises } = await evaluerConcepts(fige.concepts, fige.nature, langue);
 
   return {
     nom: fige.nom,
     texte: fige.texte,
+    langue,
     lecture: fige.lecture,
     nature: fige.nature,
     rejet: fige.rejet,
