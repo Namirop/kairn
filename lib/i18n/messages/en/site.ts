@@ -22,7 +22,7 @@ export const site: Messages["site"] = {
   partage: {
     alt: "Kairn — drop in what you learn, and it brings it back at the right moment.",
     constat: "You read a lot.",
-    retournement: "You keep little.",
+    retournement: "Most of it fades.",
     phrase:
       "Drop in what you learn. Kairn breaks it into concepts and asks you again at the right moment.",
   },

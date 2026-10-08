@@ -5,7 +5,7 @@ export const accueil: Messages["site"]["accueil"] = {
     // Mesurées sur la Bricolage du dépôt : 6,8 et 7,0 corps, contre 7,7 pour
     // « Tu lis beaucoup. » — le titre tient sur une ligne avec de la marge.
     constat: "You read a lot.",
-    retournement: "You keep little.",
+    retournement: "Most of it fades.",
     aujourdhui: "Today",
     essayer: "Try without an account",
   },
