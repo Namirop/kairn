@@ -1,8 +1,8 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { BlocDetache } from "@/components/coquille/bloc-detache";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
-import { compte } from "@/lib/domain/accord";
 import type { ChargeDuJour } from "@/lib/domain/selection-session";
 
 /**
@@ -37,6 +37,8 @@ import type { ChargeDuJour } from "@/lib/domain/selection-session";
  * centré se lisait comme un reste de mise en page.
  */
 export function EntreeDansLaSerie({ charge }: { charge: ChargeDuJour }) {
+  const t = useTranslations("depots.depot.serie");
+
   if (charge.aujourdhui === 0 && charge.enAttente === 0) return null;
 
   return (
@@ -44,16 +46,15 @@ export function EntreeDansLaSerie({ charge }: { charge: ChargeDuJour }) {
       {charge.aujourdhui > 0 ? (
         <>
           <p className="text-corps text-stone-900">
-            Ta série du jour en compte {compte(charge.aujourdhui, "concept", "concepts")}.
+            {t("aujourdhui", { nombre: charge.aujourdhui })}
           </p>
           <Button asChild className="mt-pas-4 w-full md:w-auto">
-            <Link href={ROUTES.reviser}>Commencer</Link>
+            <Link href={ROUTES.reviser}>{t("commencer")}</Link>
           </Button>
         </>
       ) : (
         <p className="text-corps text-stone-900">
-          Ta journée est faite : {compte(charge.enAttente, "concept attend", "concepts attendent")}{" "}
-          demain, celui-ci compris.
+          {t("journeeFaite", { nombre: charge.enAttente })}
         </p>
       )}
     </BlocDetache>

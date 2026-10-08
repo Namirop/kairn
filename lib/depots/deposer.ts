@@ -5,11 +5,12 @@ import {
   CARACTERES_MAXIMUM,
   CONSIGNE_MAXIMUM,
   IMAGE_TROP_LOURDE,
-  longueurEnClair,
+  longueurEnClairAvec,
   TAILLE_MAXIMALE_OCTETS,
-  tropLonguePourUneConsigne,
+  type TraduireLesRefus,
 } from "@/lib/depots/bornes-du-depot";
 import { refusDeQuota } from "@/lib/depots/refus-de-quota";
+import { textesDesRefus } from "@/lib/depots/textes-des-refus";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { preparerCapture } from "@/lib/images/capture";
 import { enqueueJob } from "@/lib/jobs/queue";
@@ -23,25 +24,35 @@ import { enqueueJob } from "@/lib/jobs/queue";
  *
  * Une place prise sur un dépôt qui n'aboutit pas est rendue : le compteur suit
  * ce qui a été déposé, pas ce qui a été tenté.
+ *
+ * Les refus se disent dans la langue que porte `t` — celle de la requête pour
+ * l'action, le français par défaut pour les scripts. Le schéma se construit donc
+ * à l'appel : ses messages en dépendent.
  */
 
-const CLE_ILLISIBLE = "Ce dépôt n'a pas pu être identifié. Recharge la page et recommence.";
+function schemaDuDepot(t: TraduireLesRefus) {
+  const cleIllisible = t("cleIllisible");
 
-const depotSchema = z.object({
-  texte: z.string().max(CARACTERES_MAXIMUM, {
-    error: `Ce dépôt dépasse ${longueurEnClair(CARACTERES_MAXIMUM)}. Coupe-le en deux : deux dépôts valent mieux qu'un tronqué.`,
-  }),
-  // L'utilisateur ne remplit jamais ce champ : s'il ne tient pas, c'est le
-  // formulaire qui est en défaut, pas ce qu'on a écrit dedans. Le message reste
-  // écrit ici pour les deux bornes — sans lui, c'est la phrase brute de Zod, en
-  // anglais, qui s'affiche sous le bouton.
-  cleEnvoi: z.string().min(8, { error: CLE_ILLISIBLE }).max(64, { error: CLE_ILLISIBLE }),
-  // Facultative, et bornée court : c'est une phrase de cadrage, pas un second
-  // dépôt. Le message est écrit ici parce qu'il est le même que celui du champ.
-  consigne: z.string().max(CONSIGNE_MAXIMUM, {
-    error: (issue) => tropLonguePourUneConsigne(String(issue.input).length),
-  }),
-});
+  return z.object({
+    texte: z.string().max(CARACTERES_MAXIMUM, {
+      error: t("depotTropLong", { longueur: longueurEnClairAvec(t, CARACTERES_MAXIMUM) }),
+    }),
+    // L'utilisateur ne remplit jamais ce champ : s'il ne tient pas, c'est le
+    // formulaire qui est en défaut, pas ce qu'on a écrit dedans. Le message reste
+    // écrit ici pour les deux bornes — sans lui, c'est la phrase brute de Zod, en
+    // anglais, qui s'affiche sous le bouton.
+    cleEnvoi: z.string().min(8, { error: cleIllisible }).max(64, { error: cleIllisible }),
+    // Facultative, et bornée court : c'est une phrase de cadrage, pas un second
+    // dépôt. Le message est écrit ici parce qu'il est le même que celui du champ.
+    consigne: z.string().max(CONSIGNE_MAXIMUM, {
+      error: (issue) =>
+        t("consigneTropLongue", {
+          caracteres: String(issue.input).length,
+          maximum: CONSIGNE_MAXIMUM,
+        }),
+    }),
+  });
+}
 
 export type ResultatDepot =
   { ok: true; inputId: string; nouveau: boolean } | { ok: false; motif: string; quota?: boolean };
@@ -64,40 +75,50 @@ function lireChamps(donnees: FormData): ChampsDepot {
   };
 }
 
-export async function deposer(userId: string, donnees: FormData): Promise<ResultatDepot> {
+export async function deposer(
+  userId: string,
+  donnees: FormData,
+  t: TraduireLesRefus = textesDesRefus(),
+): Promise<ResultatDepot> {
   const champs = lireChamps(donnees);
-  const valide = depotSchema.safeParse({
+  const valide = schemaDuDepot(t).safeParse({
     texte: champs.texte,
     cleEnvoi: champs.cleEnvoi,
     consigne: champs.consigne,
   });
 
   if (!valide.success) {
-    return { ok: false, motif: valide.error.issues[0]?.message ?? "Ce dépôt n'est pas recevable." };
+    return { ok: false, motif: valide.error.issues[0]?.message ?? t("nonRecevable") };
   }
 
   const texte = valide.data.texte.trim();
 
   if (texte.length === 0 && !champs.image) {
-    return { ok: false, motif: "Il n'y a rien à déposer : colle un texte, ou joins une capture." };
+    return { ok: false, motif: t("rienADeposer") };
   }
 
   if (champs.image && champs.image.size > TAILLE_MAXIMALE_OCTETS) {
-    return { ok: false, motif: IMAGE_TROP_LOURDE };
+    return { ok: false, motif: t("imageTropLourde") };
   }
 
   const fuseau = await lireFuseauUtilisateur(userId);
   const place = await reserverDepot(userId, fuseau);
 
   if (!place.accorde) {
-    return { ok: false, ...refusDeQuota(place.motif, place.plafond) };
+    return { ok: false, ...refusDeQuota(place.motif, place.plafond, t) };
   }
 
   const capture = champs.image ? await preparerCapture(champs.image) : null;
 
   if (capture && !capture.ok) {
     await rendreDepot(userId, fuseau);
-    return { ok: false, motif: capture.motif };
+    // Le lecteur d'images n'est pas de cette zone et dit ses refus en français :
+    // ils sont redits ici dans la langue de la personne. Le poids est déjà
+    // refusé plus haut, il ne reste en pratique que l'image illisible.
+    return {
+      ok: false,
+      motif: capture.motif === IMAGE_TROP_LOURDE ? t("imageTropLourde") : t("imageIllisible"),
+    };
   }
 
   const { input, nouveau } = await creerDepot({

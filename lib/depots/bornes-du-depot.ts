@@ -1,3 +1,6 @@
+import { createTranslator } from "next-intl";
+import { depots } from "@/lib/i18n/messages/fr/depots";
+
 /**
  * Ce qu'un texte déposé a le droit de faire, avec ou sans compte.
  *
@@ -115,37 +118,13 @@ export const BORD_LONG_CAPTURE = 1568;
 export const CONSIGNE_MAXIMUM = 300;
 
 /**
- * Ce qu'on dit d'une consigne trop longue.
- *
- * Elle ne se tronque pas : couper une consigne au trois-centième signe la
- * retournerait parfois — « n'inclus pas la partie sur les prix, sauf le tableau
- * de la fin » coupé au milieu dit le contraire de ce qu'on voulait.
+ * Les phrases des refus vivent dans l'espace de messages `depots.refus`, et se
+ * disent dans la langue de l'écran. Ce module ne garde que les bornes et les
+ * verdicts — ce que les deux côtés doivent calculer pareil. Les refus d'une
+ * consigne trop longue, d'une image trop lourde et d'un texte plus long qu'un
+ * dépôt y sont désormais : `consigneTropLongue`, `imageTropLourde`,
+ * `texteTropLong`.
  */
-export function tropLonguePourUneConsigne(caracteres: number): string {
-  return `Ta consigne fait ${caracteres.toLocaleString("fr-FR")} signes, et elle en prend ${CONSIGNE_MAXIMUM}. Dis-la en une phrase ou deux.`;
-}
-
-/**
- * Le refus, dit une seule fois pour les trois endroits qui le prononcent.
- *
- * L'écran avant l'envoi, le dépôt avant de réserver la place, et le lecteur
- * d'images au moment de décoder. Il y en avait déjà deux versions, une courte et
- * une longue, pour la même règle.
- */
-export const IMAGE_TROP_LOURDE =
-  "Cette image est trop lourde pour partir. Recadre-la sur ce qui t'intéresse, ou réduis-la avant de la déposer.";
-
-/**
- * Ce qu'on dit d'un texte plus long que ce qu'un dépôt accepte.
- *
- * Il ne se tronque pas : couper au seizième millier tomberait au milieu d'une
- * phrase, et le début d'une conversation est justement le morceau dont on n'a
- * rien à retenir. C'est à la personne de garder ce qui compte, et le message
- * dit les deux nombres pour qu'elle sache de combien elle dépasse.
- */
-export function tropLongPourUnDepot(caracteres: number): string {
-  return `C'est ${caracteres.toLocaleString("fr-FR")} signes, et un dépôt en prend ${CARACTERES_MAXIMUM.toLocaleString("fr-FR")}. Garde le passage qui compte.`;
-}
 
 /**
  * Une longueur en signes, plus ce qu'elle représente en mots.
@@ -158,14 +137,42 @@ export function tropLongPourUnDepot(caracteres: number): string {
  * Six signes et demi par mot, espace comprise : la moyenne du français courant.
  * Arrondi à la centaine, parce qu'annoncer « environ 1 231 mots » se contredit
  * tout seul.
+ *
+ * Le calcul seul : la phrase est `depots.refus.longueurEnClair`, qui reçoit les
+ * deux nombres. La moyenne reste celle du français dans les deux langues — un
+ * ordre de grandeur, pas une mesure, et un nombre de mots qui changerait avec la
+ * langue de l'écran annoncerait deux bornes pour une.
  */
 const SIGNES_PAR_MOT = 6.5;
 
-export function longueurEnClair(caracteres: number): string {
-  const mots = Math.round(caracteres / SIGNES_PAR_MOT / 100) * 100;
-
-  return `${caracteres.toLocaleString("fr-FR")} caractères, environ ${mots.toLocaleString("fr-FR")} mots`;
+export function motsEnviron(caracteres: number): number {
+  return Math.round(caracteres / SIGNES_PAR_MOT / 100) * 100;
 }
+
+/**
+ * Le français figé des refus, pour ce qui les lit encore hors de la zone du
+ * dépôt — l'essai de la landing, le lecteur d'images. Il vient des mêmes
+ * messages que la langue de l'écran : rien n'est écrit deux fois.
+ */
+const enFrancais = createTranslator({
+  locale: "fr",
+  messages: { depots },
+  namespace: "depots.refus",
+});
+
+/**
+ * @deprecated En français seulement. Hors de la zone du dépôt uniquement ;
+ * ailleurs, `t("longueurEnClair", { caracteres, mots: motsEnviron(caracteres) })`.
+ */
+export function longueurEnClair(caracteres: number): string {
+  return longueurEnClairAvec(enFrancais, caracteres);
+}
+
+/**
+ * @deprecated En français seulement, pour `lib/images/capture.ts`. L'écran et le
+ * dépôt disent `depots.refus.imageTropLourde` dans la langue de la personne.
+ */
+export const IMAGE_TROP_LOURDE = enFrancais("imageTropLourde");
 
 /**
  * Ce qui cloche dans la longueur d'un essai, ou rien du tout.
@@ -185,11 +192,21 @@ export function longueurEnClair(caracteres: number): string {
  * Le vide a son propre message. « Colle un peu plus de matière » devant un champ
  * où l'on n'a rien mis parle d'une quantité alors que le problème est une
  * absence.
+ *
+ * Le verdict est rendu neutre — `vide`, `court`, `long` — et chaque côté le dit
+ * dans sa langue avec `depots.refus.essai`.
  */
-export const RIEN_A_DECOUPER =
-  "Il n'y a rien à découper. Colle une phrase, un paragraphe, un article.";
+export type DefautDeLongueur = "vide" | "court" | "long";
 
-export const TROP_COURT = "Colle un peu plus de matière : une phrase ou deux, au minimum.";
+export function defautDeLongueur(texte: string): DefautDeLongueur | null {
+  const propre = texte.trim();
+
+  if (propre.length === 0) return "vide";
+  if (propre.length < CARACTERES_MINIMUM_ANONYME) return "court";
+  if (propre.length > CARACTERES_MAXIMUM_ANONYME) return "long";
+
+  return null;
+}
 
 /**
  * Le refus de longueur d'un essai, et la seule chose importante qu'il ait à
@@ -200,17 +217,42 @@ export const TROP_COURT = "Colle un peu plus de matière : une phrase ou deux, a
  * textes longs, et referme l'onglet sur un produit qui accepte quatre fois plus
  * dès qu'on a un compte. C'est le refus le plus coûteux de la page qui convertit,
  * et le nommer coûte une phrase.
+ *
+ * Le traducteur est celui de `depots.refus` : `getTranslations`, `useTranslations`
+ * ou `textesDesRefus`, selon le côté.
  */
-export function tropLong(): string {
-  return `Ce texte dépasse ${longueurEnClair(CARACTERES_MAXIMUM_ANONYME)}, la limite d'un essai sans compte. Un compte en prend ${longueurEnClair(CARACTERES_MAXIMUM)}, et il est gratuit.`;
+export function motifDeDefaut(defaut: DefautDeLongueur, t: TraduireLesRefus): string {
+  if (defaut === "vide") return t("essai.rienADecouper");
+  if (defaut === "court") return t("essai.tropCourt");
+
+  return t("essai.tropLong", {
+    limiteEssai: longueurEnClairAvec(t, CARACTERES_MAXIMUM_ANONYME),
+    limiteCompte: longueurEnClairAvec(t, CARACTERES_MAXIMUM),
+  });
 }
 
+/** `longueurEnClair`, dite par le traducteur reçu. */
+export function longueurEnClairAvec(t: TraduireLesRefus, caracteres: number): string {
+  return t("longueurEnClair", { caracteres, mots: motsEnviron(caracteres) });
+}
+
+/** Le traducteur de `depots.refus`, quel que soit le côté qui l'a fabriqué. */
+export type TraduireLesRefus = typeof enFrancais;
+
+/** @deprecated En français seulement, pour l'essai de la landing. Voir `motifDeDefaut`. */
+export const RIEN_A_DECOUPER = motifDeDefaut("vide", enFrancais);
+
+/** @deprecated En français seulement, pour l'essai de la landing. Voir `motifDeDefaut`. */
+export const TROP_COURT = motifDeDefaut("court", enFrancais);
+
+/** @deprecated En français seulement, pour l'essai de la landing. Voir `motifDeDefaut`. */
+export function tropLong(): string {
+  return motifDeDefaut("long", enFrancais);
+}
+
+/** @deprecated En français seulement, pour l'essai de la landing. Voir `defautDeLongueur`. */
 export function motifDeLongueur(texte: string): string | null {
-  const propre = texte.trim();
+  const defaut = defautDeLongueur(texte);
 
-  if (propre.length === 0) return RIEN_A_DECOUPER;
-  if (propre.length < CARACTERES_MINIMUM_ANONYME) return TROP_COURT;
-  if (propre.length > CARACTERES_MAXIMUM_ANONYME) return tropLong();
-
-  return null;
+  return defaut ? motifDeDefaut(defaut, enFrancais) : null;
 }

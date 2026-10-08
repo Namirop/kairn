@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Paperclip, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { LibelleQuiSeRaccourcit } from "@/components/depots/libelle-qui-se-raccourcit";
 import { Button } from "@/components/ui/button";
 
@@ -24,6 +25,7 @@ export function PieceJointe({
   fichier: File | null;
   onChoisir: (fichier: File | null) => void;
 }) {
+  const t = useTranslations("depots.formulaire.pieceJointe");
   const champ = useRef<HTMLInputElement>(null);
 
   /*
@@ -70,8 +72,8 @@ export function PieceJointe({
       <Button type="button" variant="outline" size="sm" onClick={() => champ.current?.click()}>
         <Paperclip aria-hidden />
         <LibelleQuiSeRaccourcit
-          complet={fichier ? "Changer la capture" : "Joindre une capture"}
-          court={fichier ? "Changer" : "Capture"}
+          complet={fichier ? t("changer") : t("joindre")}
+          court={fichier ? t("changerCourt") : t("joindreCourt")}
         />
       </Button>
 
@@ -80,7 +82,7 @@ export function PieceJointe({
           <span className="max-w-48 truncate">{fichier.name}</span>
           <button
             type="button"
-            aria-label="Retirer la capture"
+            aria-label={t("retirer")}
             className="rounded-xs text-stone-500 transition-colors hover:text-stone-900"
             onClick={() => onChoisir(null)}
           >

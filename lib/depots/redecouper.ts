@@ -2,7 +2,9 @@ import { lireDepotAReprendre, repartirEnDecoupage } from "@/lib/db/reprise-depot
 import { rendreDepot, reserverDepot } from "@/lib/db/quota-depots";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { redecoupable } from "@/lib/domain/etat-depot";
+import type { TraduireLesRefus } from "@/lib/depots/bornes-du-depot";
 import { refusDeQuota } from "@/lib/depots/refus-de-quota";
+import { textesDesRefus } from "@/lib/depots/textes-des-refus";
 import { enqueueJob } from "@/lib/jobs/queue";
 
 /**
@@ -16,33 +18,39 @@ import { enqueueJob } from "@/lib/jobs/queue";
  * Ça coûte une extraction, donc ça prend une place du jour, exactement comme un
  * dépôt. Un redécoupage gratuit serait une porte ouverte : quinze dépôts par
  * jour et autant de relances qu'on veut sur chacun.
+ *
+ * Les refus se disent dans la langue de `t`, le français par défaut.
  */
 
 export type ResultatRedecoupage = { ok: true } | { ok: false; motif: string; quota?: boolean };
 
-export async function redecouper(userId: string, inputId: string): Promise<ResultatRedecoupage> {
+export async function redecouper(
+  userId: string,
+  inputId: string,
+  t: TraduireLesRefus = textesDesRefus(),
+): Promise<ResultatRedecoupage> {
   const depot = await lireDepotAReprendre(inputId, userId);
 
-  if (!depot) return { ok: false, motif: "Ce dépôt est introuvable." };
+  if (!depot) return { ok: false, motif: t("introuvable") };
 
   if (!redecoupable(depot.etat)) {
-    return { ok: false, motif: "Il n'y a rien à redécouper dans ce dépôt." };
+    return { ok: false, motif: t("rienARedecouper") };
   }
 
   if (!depot.aDuTexte) {
-    return { ok: false, motif: "Ce dépôt n'a pas de texte à redécouper." };
+    return { ok: false, motif: t("pasDeTexteARedecouper") };
   }
 
   const fuseau = await lireFuseauUtilisateur(userId);
   const place = await reserverDepot(userId, fuseau);
 
-  if (!place.accorde) return { ok: false, ...refusDeQuota(place.motif, place.plafond) };
+  if (!place.accorde) return { ok: false, ...refusDeQuota(place.motif, place.plafond, t) };
 
   // La place prise sur un redécoupage qui n'a pas lieu est rendue : le compteur
   // suit ce qui a été lancé, pas ce qui a été tenté.
   if (!(await repartirEnDecoupage(inputId, userId))) {
     await rendreDepot(userId, fuseau);
-    return { ok: false, motif: "Ce dépôt est introuvable." };
+    return { ok: false, motif: t("introuvable") };
   }
 
   await enqueueJob(inputId, "ATOMS");

@@ -1,3 +1,6 @@
+import type { TraduireLesRefus } from "@/lib/depots/bornes-du-depot";
+import { textesDesRefus } from "@/lib/depots/textes-des-refus";
+
 /**
  * Ce qu'un refus de quota dit.
  *
@@ -29,15 +32,19 @@ export type MotifDeRefus = "concepts" | "depots" | "debit";
  *
  * `quota` distingue la limite de la période de celle du débit : l'une se compte
  * en semaines, l'autre en secondes.
+ *
+ * Les phrases sont `depots.refus.quota`, dites dans la langue de `t` — le
+ * français par défaut, pour les scripts qui n'ont pas de requête.
  */
 export function refusDeQuota(
   motif: MotifDeRefus,
   plafond: number,
+  t: TraduireLesRefus = textesDesRefus(),
 ): { motif: string; quota: boolean } {
   const messages: Record<MotifDeRefus, string> = {
-    concepts: `Tu as atteint la limite du mois, autour de ${plafond} concepts.`,
-    depots: "Tu as fait tous les dépôts du mois.",
-    debit: "Trop de dépôts coup sur coup. Laisse passer une minute.",
+    concepts: t("quota.concepts", { plafond }),
+    depots: t("quota.depots"),
+    debit: t("quota.debit"),
   };
 
   return { motif: messages[motif], quota: motif !== "debit" };

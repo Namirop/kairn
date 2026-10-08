@@ -82,13 +82,3 @@ export function composerLePartage(partage: PartagePose): PartageCompose {
     lienSeul: prose.length === 0 && ADRESSE_SEULE.test(adresse),
   };
 }
-
-/**
- * Ce qu'on dit quand le partage n'a rapporté qu'une adresse.
- *
- * Elle nomme le geste qui marche plutôt que de constater l'échec : la sélection
- * est le seul moyen, sur un téléphone, de choisir ce qu'on garde d'une
- * conversation.
- */
-export const LIEN_SANS_MATIERE =
-  "Un lien ne se retient pas. Retourne dans la conversation, sélectionne le passage, et repartage-le.";

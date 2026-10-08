@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   confirmerConceptAction,
   desarchiverConceptAction,
@@ -26,11 +27,13 @@ import type { ConceptLu } from "@/lib/db/depot-detaille";
  */
 
 function Questions({ nombre }: { nombre: number }) {
+  const t = useTranslations("depots.concept");
+
   if (nombre === 0) return null;
 
   return (
     <p className="mt-pas-3 text-mono font-mono tracking-[0.12em] text-stone-500 uppercase">
-      {nombre} {nombre === 1 ? "question écrite" : "questions écrites"}
+      {t("questionsEcrites", { nombre })}
     </p>
   );
 }
@@ -45,6 +48,7 @@ export function ConceptCorrigeable({
   /** L'ancre du premier concept douteux, visée depuis le chapeau du dépôt. */
   ancre?: string;
 }) {
+  const t = useTranslations("depots.concept");
   const [edition, setEdition] = useState(false);
   const [texte, setTexte] = useState(concept.concept);
 
@@ -57,7 +61,7 @@ export function ConceptCorrigeable({
           <input type="hidden" name="atomId" value={concept.id} />
           <input type="hidden" name="inputId" value={inputId} />
           <label htmlFor={`concept-${concept.id}`} className="sr-only">
-            Réécrire le concept
+            {t("reecrire")}
           </label>
           <textarea
             id={`concept-${concept.id}`}
@@ -68,16 +72,13 @@ export function ConceptCorrigeable({
             // 16 px sur mobile : en deçà, Safari zoome à la mise au point.
             className="p-pas-3 md:text-petit rounded-champ bg-surface-ombre w-full resize-y border border-stone-300 text-base leading-relaxed"
           />
-          <p className="text-petit text-stone-500">
-            Les questions écrites sur l&apos;ancienne formulation seront remplacées, et la
-            planification repart de zéro.
-          </p>
+          <p className="text-petit text-stone-500">{t("avertissementReecriture")}</p>
           <div className="gap-pas-2 flex">
             <Button type="submit" size="sm" disabled={texte.trim().length < 20}>
-              Enregistrer
+              {t("enregistrer")}
             </Button>
             <Button type="button" size="sm" variant="ghost" onClick={() => setEdition(false)}>
-              Annuler
+              {t("annuler")}
             </Button>
           </div>
         </form>
@@ -87,8 +88,8 @@ export function ConceptCorrigeable({
             {concept.tags.map((tag) => (
               <Badge key={tag}>{tag}</Badge>
             ))}
-            {concept.uncertain ? <Badge variant="alerte">À vérifier</Badge> : null}
-            {concept.archivedByUser ? <Badge>Sorti du cycle</Badge> : null}
+            {concept.uncertain ? <Badge variant="alerte">{t("aVerifier")}</Badge> : null}
+            {concept.archivedByUser ? <Badge>{t("sortiDuCycle")}</Badge> : null}
           </div>
 
           {/* Un concept n'a jamais porté d'extrait de plusieurs lignes en
@@ -101,11 +102,7 @@ export function ConceptCorrigeable({
 
           {concept.uncertain ? (
             <BlocDetache ton="alerte" className="mt-pas-3">
-              <p className="text-petit text-stone-500">
-                Ce passage a été extrait tel que tu l&apos;as déposé, mais il paraît factuellement
-                douteux. Personne ne l&apos;a vérifié — aucune question n&apos;a été écrite dessus
-                pour ne pas river une erreur.
-              </p>
+              <p className="text-petit text-stone-500">{t("douteux")}</p>
             </BlocDetache>
           ) : (
             <Questions nombre={concept.questions} />
@@ -115,14 +112,12 @@ export function ConceptCorrigeable({
               trouve — sans quoi « je maîtrise ça » serait un aller sans retour. */}
           {concept.archivedByUser ? (
             <div className="mt-pas-4 gap-pas-3 flex flex-wrap items-center">
-              <p className="text-petit text-stone-500">
-                Tu l&apos;as déclaré su. Il revient dans trois mois pour vérifier.
-              </p>
+              <p className="text-petit text-stone-500">{t("declareSu")}</p>
               <form action={desarchiverConceptAction}>
                 <input type="hidden" name="atomId" value={concept.id} />
                 <input type="hidden" name="inputId" value={inputId} />
                 <Button type="submit" size="sm" variant="outline">
-                  Remettre en révision
+                  {t("remettreEnRevision")}
                 </Button>
               </form>
             </div>
@@ -137,9 +132,9 @@ export function ConceptCorrigeable({
             <SuppressionEnDeuxTemps
               action={supprimerConceptAction}
               champs={{ atomId: concept.id, inputId }}
-              declencheur="Supprimer"
-              confirmation="Supprimer ce concept"
-              consequence="Ses questions et les passages que tu as faits dessus partent avec. Ça ne se défait pas."
+              declencheur={t("supprimer")}
+              confirmation={t("supprimerCeConcept")}
+              consequence={t("consequence")}
               taille="sm"
               avant={
                 <>
@@ -148,13 +143,13 @@ export function ConceptCorrigeable({
                       <input type="hidden" name="atomId" value={concept.id} />
                       <input type="hidden" name="inputId" value={inputId} />
                       <Button type="submit" size="sm" variant="outline">
-                        Le garder tel quel
+                        {t("garderTelQuel")}
                       </Button>
                     </form>
                   ) : null}
 
                   <Button type="button" size="sm" variant="ghost" onClick={() => setEdition(true)}>
-                    Modifier
+                    {t("modifier")}
                   </Button>
                 </>
               }

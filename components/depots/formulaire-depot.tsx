@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { deposerAction, type EtatDepot } from "@/app/(app)/depots/actions";
 import { BoutonDeConsigne, ChampDeConsigne } from "@/components/depots/consigne-du-depot";
 import { ExemplesDeDepot } from "@/components/depots/exemples-de-depot";
@@ -10,12 +11,9 @@ import { Button } from "@/components/ui/button";
 import {
   CARACTERES_MAXIMUM,
   CONSIGNE_MAXIMUM,
-  IMAGE_TROP_LOURDE,
   TAILLE_MAXIMALE_OCTETS,
-  tropLongPourUnDepot,
-  tropLonguePourUneConsigne,
+  type TraduireLesRefus,
 } from "@/lib/depots/bornes-du-depot";
-import { LIEN_SANS_MATIERE } from "@/lib/domain/texte-partage";
 import { reduireLaCapture } from "@/lib/images/reduire-la-capture";
 
 /**
@@ -51,17 +49,24 @@ const SEUIL_COMPTEUR = Math.floor(CARACTERES_MAXIMUM * 0.75);
  *
  * Un seul refus à la fois, dans l'ordre où on peut y remédier : ce que le
  * serveur a répondu passe avant ce que l'écran voit venir.
+ *
+ * Les phrases sont celles que le serveur prononce, `depots.refus`.
  */
 function refusDuFormulaire(
+  t: TraduireLesRefus,
   erreur: string | undefined,
   capture: File | null,
   texte: string,
   consigne: string,
 ) {
   if (erreur) return erreur;
-  if (capture && capture.size > TAILLE_MAXIMALE_OCTETS) return IMAGE_TROP_LOURDE;
-  if (texte.length > CARACTERES_MAXIMUM) return tropLongPourUnDepot(texte.length);
-  if (consigne.length > CONSIGNE_MAXIMUM) return tropLonguePourUneConsigne(consigne.length);
+  if (capture && capture.size > TAILLE_MAXIMALE_OCTETS) return t("imageTropLourde");
+  if (texte.length > CARACTERES_MAXIMUM) {
+    return t("texteTropLong", { caracteres: texte.length, maximum: CARACTERES_MAXIMUM });
+  }
+  if (consigne.length > CONSIGNE_MAXIMUM) {
+    return t("consigneTropLongue", { caracteres: consigne.length, maximum: CONSIGNE_MAXIMUM });
+  }
 
   return null;
 }
@@ -82,6 +87,8 @@ export function FormulaireDepot({
   /** Un partage est arrivé sans que le service worker puisse le retenir. */
   partageManque?: boolean;
 }) {
+  const t = useTranslations("depots.formulaire");
+  const tRefus = useTranslations("depots.refus");
   const [etat, action, enCours] = useActionState<EtatDepot, FormData>(deposerAction, {});
   const [texte, setTexte] = useState("");
   const [capture, setCapture] = useState<File | null>(null);
@@ -137,7 +144,7 @@ export function FormulaireDepot({
     };
   }, [choisirLaCapture]);
 
-  const refus = refusDuFormulaire(etat.erreur, capture, texte, consigne);
+  const refus = refusDuFormulaire(tRefus, etat.erreur, capture, texte, consigne);
 
   return (
     <form action={action} noValidate className="gap-pas-4 flex max-w-3xl flex-col">
@@ -147,7 +154,7 @@ export function FormulaireDepot({
 
       <div>
         <label htmlFor="texte" className="sr-only">
-          Ce que tu veux retenir
+          {t("etiquetteTexte")}
         </label>
         <textarea
           id="texte"
@@ -200,7 +207,7 @@ export function FormulaireDepot({
                 texte.length > CARACTERES_MAXIMUM ? "text-alerte" : "text-stone-500"
               }`}
             >
-              {texte.length.toLocaleString("fr-FR")} / {CARACTERES_MAXIMUM.toLocaleString("fr-FR")}
+              {t("compteur", { longueur: texte.length, maximum: CARACTERES_MAXIMUM })}
             </span>
           ) : null}
           <Button
@@ -208,7 +215,7 @@ export function FormulaireDepot({
             className="flex-1 md:flex-none"
             disabled={enCours || preparation || refus !== null}
           >
-            {enCours ? "Dépôt en cours…" : preparation ? "Lecture de la capture…" : "Déposer"}
+            {enCours ? t("depotEnCours") : preparation ? t("lectureDeLaCapture") : t("deposer")}
           </Button>
         </div>
       </div>
@@ -239,9 +246,10 @@ function Conseil({
   partageManque: boolean;
   restants: number;
 }) {
-  if (partageManque)
-    return "Le partage n'est pas arrivé jusqu'ici. Colle le texte, ou repartage-le.";
-  if (lienSeul) return LIEN_SANS_MATIERE;
+  const t = useTranslations("depots.formulaire");
+
+  if (partageManque) return t("partageManque");
+  if (lienSeul) return t("lienSansMatiere");
 
   // Ce qui reste se compte en concepts : une phrase en consomme un, un article
   // en consomme huit. C'est la matière qui est plafonnée, pas le nombre de fois
@@ -251,5 +259,5 @@ function Conseil({
   // mensuel. L'écran annonçait donc le plafond du mois pour la journée, et
   // quelqu'un qui les déposait trouvait zéro le lendemain sans comprendre. La
   // valeur était juste, le mot à côté était faux.
-  return `Il te reste ${restants} ${restants === 1 ? "concept" : "concepts"} à retenir ce mois-ci.`;
+  return t("restants", { restants });
 }

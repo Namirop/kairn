@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { rejoindreListeDattenteAction } from "@/app/(app)/depots/actions";
 import { Button } from "@/components/ui/button";
 
@@ -20,8 +21,6 @@ import { Button } from "@/components/ui/button";
  * Le seul morceau client de cet écran, isolé pour ça.
  */
 
-const NOM_DE_LA_LIMITE = { concepts: "concepts", depots: "dépôts" } as const;
-
 export function ListeDattente({
   inscrit,
   motif,
@@ -29,25 +28,20 @@ export function ListeDattente({
   inscrit: boolean;
   motif: "concepts" | "depots";
 }) {
+  const t = useTranslations("depots.formulaire.listeDattente");
   const [fait, rejoindre, enCours] = useActionState(async () => {
     await rejoindreListeDattenteAction();
     return true;
   }, inscrit);
 
-  const limite = `limite de ${NOM_DE_LA_LIMITE[motif]}`;
-
   if (fait) {
-    return (
-      <p className="text-petit text-pretty text-stone-500">
-        C&apos;est noté. Tu seras prévenu si la {limite} change.
-      </p>
-    );
+    return <p className="text-petit text-pretty text-stone-500">{t("note", { motif })}</p>;
   }
 
   return (
     <form action={rejoindre}>
       <Button type="submit" variant="outline" size="sm" disabled={enCours}>
-        Me prévenir si la {limite} change
+        {t("prevenir", { motif })}
       </Button>
     </form>
   );

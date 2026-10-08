@@ -1,5 +1,5 @@
+import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
-import { accord, compte } from "@/lib/domain/accord";
 
 /**
  * Le rappel, en tête d'un dépôt, qu'il reste des concepts à trancher.
@@ -31,20 +31,20 @@ import { accord, compte } from "@/lib/domain/accord";
 export const ANCRE_A_VERIFIER = "a-verifier";
 
 export function ConceptsAVerifier({ nombre }: { nombre: number }) {
+  const t = useTranslations("depots.depot.aVerifier");
+
   if (nombre <= 0) return null;
 
   return (
     <p className="mt-pas-3 gap-pas-2 text-petit flex flex-wrap items-baseline justify-center text-stone-500 md:justify-start">
-      <Badge variant="alerte">À vérifier</Badge>
+      <Badge variant="alerte">{t("badge")}</Badge>
       <span>
-        {compte(nombre, "concept paraît douteux", "concepts paraissent douteux")}. Tant que tu ne{" "}
-        {accord(nombre, "l'as pas tranché", "les as pas tranchés")},{" "}
-        {accord(nombre, "il reste", "ils restent")} sans questions.{" "}
+        {t("constat", { nombre })}{" "}
         <a
           href={`#${ANCRE_A_VERIFIER}`}
           className="rounded-galet whitespace-nowrap text-stone-900 underline decoration-stone-300 underline-offset-4 transition-colors hover:decoration-stone-900"
         >
-          {accord(nombre, "Le voir", "Voir le premier")}
+          {t("voir", { nombre })}
         </a>
       </span>
     </p>

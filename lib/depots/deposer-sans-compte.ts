@@ -8,8 +8,15 @@ import {
   PANNES_TOLEREES,
 } from "@/lib/db/essais-de-la-visite";
 import { ouvrirUneSession } from "@/lib/db/session-anonyme";
-import { CARACTERES_MAXIMUM, longueurEnClair, motifDeLongueur } from "@/lib/depots/bornes-du-depot";
+import {
+  CARACTERES_MAXIMUM,
+  defautDeLongueur,
+  longueurEnClairAvec,
+  motifDeDefaut,
+  type TraduireLesRefus,
+} from "@/lib/depots/bornes-du-depot";
 import { essaiSansLimite, VARIABLE_SANS_LIMITE } from "@/lib/depots/essai-sans-limite";
+import { textesDesRefus } from "@/lib/depots/textes-des-refus";
 import { enqueueJob } from "@/lib/jobs/queue";
 
 /**
@@ -34,54 +41,31 @@ import { enqueueJob } from "@/lib/jobs/queue";
  * La longueur se juge par la fonction que l'écran appelle déjà, pas par deux
  * bornes Zod qui recopieraient ses messages. Le schéma garde ce qu'il sait faire
  * de mieux ici : refuser ce qui n'est pas une chaîne, et couper les blancs.
+ *
+ * Construit à l'appel, parce que le message dépend de la langue de `t`.
  */
-const anonymeSchema = z.object({
-  texte: z
-    .string()
-    .trim()
-    .superRefine((texte, controle) => {
-      const motif = motifDeLongueur(texte);
+function schemaAnonyme(t: TraduireLesRefus) {
+  return z.object({
+    texte: z
+      .string()
+      .trim()
+      .superRefine((texte, controle) => {
+        const defaut = defautDeLongueur(texte);
 
-      if (motif) controle.addIssue({ code: "custom", message: motif });
-    }),
-});
+        if (defaut) controle.addIssue({ code: "custom", message: motifDeDefaut(defaut, t) });
+      }),
+  });
+}
 
 export type ResultatDepotAnonyme =
   { ok: true; sessionId: string; inputId: string } | { ok: false; motif: string };
 
-const TROP_DE_DEPOTS =
-  "Beaucoup d'essais sont partis d'ici récemment. Crée un compte pour continuer — c'est gratuit.";
-
-/**
- * Les essais du jour sont faits, et ils ont donné quelque chose.
- *
- * « Pour cette visite » a cessé d'être vrai le jour où les essais se sont comptés
- * sur vingt-quatre heures glissantes : la même personne, avec le même cookie,
- * redépose demain. Dire quand la porte se rouvre est la seule chose utile à
- * quelqu'un qu'on refuse, et c'est aussi ce qui l'empêche d'aller chercher un
- * autre navigateur pour la contourner.
- */
-const ESSAIS_DU_JOUR_FAITS =
-  "Tes essais du jour sont faits. Crée un compte pour garder tes concepts et en déposer d'autres, ou reviens demain.";
-
-/**
- * Le même refus, mais sans concepts derrière.
- *
- * L'essai n'a rien donné, deux fois. Lui parler de « tes concepts » désignerait
- * du vide et ferait passer l'invitation pour un bug ; on dit ce qui s'est passé,
- * et ce qu'un compte change — des dépôts plus longs, et des reprises.
- */
-const ESSAIS_EPUISES = `Tes essais du jour sont faits. Un compte lève la limite, accepte ${longueurEnClair(CARACTERES_MAXIMUM)}, et c'est gratuit.`;
-
-/**
- * La visite s'est fermée sur nos pannes, pas sur ses essais.
- *
- * Ses essais sont intacts — c'est toute la règle — donc lui dire qu'ils sont
- * faits serait le troisième message faux de ce chemin. On dit ce qui se passe
- * vraiment, et le compte devient la seule suite qu'on ait à offrir.
- */
-const DECOUPAGE_INDISPONIBLE =
-  "Le découpage ne répond pas en ce moment, et ça ne vient pas de ton texte. Crée un compte : tu pourras reprendre dès que ce sera rétabli.";
+/*
+  Les trois refus d'une visite fermée — essais faits, essais épuisés sans
+  concept, découpage en panne — sont `depots.refus.essai.duJourFaits`,
+  `epuises` et `decoupageIndisponible`. Le pourquoi de chaque tournure est
+  écrit au-dessus de sa phrase, dans les messages.
+*/
 
 /**
  * Pourquoi la visite est fermée. Trois causes, trois phrases.
@@ -89,12 +73,14 @@ const DECOUPAGE_INDISPONIBLE =
  * Lu après coup plutôt que deviné : « crée un compte pour garder tes concepts »
  * n'a de sens que s'il y en a, et « tes essais sont faits » que s'ils l'ont été.
  */
-async function motifDuRefus(sessionId: string): Promise<string> {
-  if (await essaiAbouti(sessionId)) return ESSAIS_DU_JOUR_FAITS;
+async function motifDuRefus(sessionId: string, t: TraduireLesRefus): Promise<string> {
+  if (await essaiAbouti(sessionId)) return t("essai.duJourFaits");
 
   const { pannes } = await compterLesDepots(sessionId);
 
-  return pannes >= PANNES_TOLEREES ? DECOUPAGE_INDISPONIBLE : ESSAIS_EPUISES;
+  if (pannes >= PANNES_TOLEREES) return t("essai.decoupageIndisponible");
+
+  return t("essai.epuises", { limiteCompte: longueurEnClairAvec(t, CARACTERES_MAXIMUM) });
 }
 
 /**
@@ -112,16 +98,20 @@ async function motifDuRefus(sessionId: string): Promise<string> {
  * `essai-sans-limite.ts` pour ce que ça ouvre et ce que ça n'ouvre pas. Le
  * cookie est alors ignoré plutôt que réutilisé : une visite rouverte
  * accumulerait ses dépôts, et l'écran n'en montre qu'un.
+ *
+ * Les refus se disent dans la langue de `t`. Sans traducteur, c'est le
+ * français : la landing anglaise doit passer `getTranslations("depots.refus")`.
  */
 export async function deposerSansCompte(
   texte: string,
   adresse: string,
   sessionExistante: string | null,
+  t: TraduireLesRefus = textesDesRefus(),
 ): Promise<ResultatDepotAnonyme> {
-  const valide = anonymeSchema.safeParse({ texte });
+  const valide = schemaAnonyme(t).safeParse({ texte });
 
   if (!valide.success) {
-    return { ok: false, motif: valide.error.issues[0]?.message ?? "Ce dépôt n'est pas recevable." };
+    return { ok: false, motif: valide.error.issues[0]?.message ?? t("nonRecevable") };
   }
 
   const sansLimite = essaiSansLimite();
@@ -135,7 +125,7 @@ export async function deposerSansCompte(
   const visite = !sansLimite && sessionExistante ? await etatDeLaVisite(sessionExistante) : "close";
 
   if (visite === "epuisee" && sessionExistante) {
-    return { ok: false, motif: await motifDuRefus(sessionExistante) };
+    return { ok: false, motif: await motifDuRefus(sessionExistante, t) };
   }
 
   // « close » ouvre une visite neuve plutôt que de refuser : le cookie désigne
@@ -147,7 +137,7 @@ export async function deposerSansCompte(
       ? { ouverte: true as const, sessionId: sessionExistante }
       : await ouvrirUneSession(adresse, sansLimite);
 
-  if (!session.ouverte) return { ok: false, motif: TROP_DE_DEPOTS };
+  if (!session.ouverte) return { ok: false, motif: t("essai.tropDeDepots") };
 
   const depot = await prisma.input.create({
     data: {

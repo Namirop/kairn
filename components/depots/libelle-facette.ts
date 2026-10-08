@@ -1,4 +1,5 @@
 import type { VariantFacet } from "@/lib/db/types";
+import { facettes } from "@/lib/i18n/messages/fr/depots/concept";
 
 /**
  * Ce que chaque facette demande, dit à l'utilisateur.
@@ -9,10 +10,10 @@ import type { VariantFacet } from "@/lib/db/types";
  *
  * Le `Record` sur l'enum est volontaire : ajouter une facette sans son libellé
  * ne compile pas.
+ *
+ * Les libellés vivent dans `depots.facettes`, une clé par valeur de l'enum : un
+ * écran les dit dans sa langue avec `useTranslations("depots.facettes")`.
+ *
+ * @deprecated En français seulement — aucun écran ne le lit aujourd'hui.
  */
-export const LIBELLE_FACETTE: Record<VariantFacet, string> = {
-  RECOGNITION: "Reconnaître",
-  MECHANISM: "Expliquer",
-  BOUNDARY: "Délimiter",
-  APPLICATION: "Appliquer",
-};
+export const LIBELLE_FACETTE: Record<VariantFacet, string> = facettes;

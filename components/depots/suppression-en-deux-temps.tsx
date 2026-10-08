@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -43,6 +44,7 @@ export function SuppressionEnDeuxTemps({
   /** Les autres gestes de la même rangée, posés avant celui-ci. */
   avant?: ReactNode;
 }) {
+  const t = useTranslations("depots.concept");
   const [confirme, setConfirme] = useState(false);
 
   return (
@@ -61,7 +63,7 @@ export function SuppressionEnDeuxTemps({
               </Button>
             </form>
             <Button type="button" size={taille} variant="ghost" onClick={() => setConfirme(false)}>
-              Annuler
+              {t("annuler")}
             </Button>
           </>
         ) : (

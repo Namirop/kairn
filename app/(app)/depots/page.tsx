@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
@@ -11,13 +12,18 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { listerDepots } from "@/lib/db/depots";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 
-export const metadata: Metadata = { title: "Dépôts" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("depots.liste");
+
+  return { title: t("metaTitre") };
+}
 
 export default async function PageDepots() {
   const utilisateur = await getCurrentUser();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
+  const t = await getTranslations("depots.liste");
   const maintenant = new Date();
   const [depots, fuseau] = await Promise.all([
     listerDepots(utilisateur.id),
@@ -36,13 +42,11 @@ export default async function PageDepots() {
             pas. La rangée ne se reforme qu'avec la place de la porter. */}
         <div className="gap-pas-6 md:gap-pas-4 flex flex-col items-center text-center md:flex-row md:flex-wrap md:items-end md:justify-between md:text-left">
           <div>
-            <h1 className="text-h1-app leading-tight font-bold">Ce que tu as déposé</h1>
-            <p className="mt-pas-2 text-petit mx-auto text-stone-500 md:mx-0">
-              Le texte d&apos;origine n&apos;est jamais réécrit. Il reste tel que tu l&apos;as posé.
-            </p>
+            <h1 className="text-h1-app leading-tight font-bold">{t("titre")}</h1>
+            <p className="mt-pas-2 text-petit mx-auto text-stone-500 md:mx-0">{t("chapeau")}</p>
           </div>
           <Button asChild size="lg" className="w-full md:w-auto">
-            <Link href={`${ROUTES.depots}/nouveau`}>Déposer</Link>
+            <Link href={`${ROUTES.depots}/nouveau`}>{t("deposer")}</Link>
           </Button>
         </div>
       </Panneau>

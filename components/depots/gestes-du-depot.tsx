@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { redecouperAction, supprimerDepotAction } from "@/app/(app)/depots/actions";
 import { SuppressionEnDeuxTemps } from "@/components/depots/suppression-en-deux-temps";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ export function GestesDuDepot({
   redecoupable: boolean;
   concepts: number;
 }) {
+  const t = useTranslations("depots.depot.gestes");
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
@@ -44,13 +46,9 @@ export function GestesDuDepot({
       <SuppressionEnDeuxTemps
         action={supprimerDepotAction}
         champs={{ inputId }}
-        declencheur="Supprimer ce dépôt"
-        confirmation={
-          concepts > 0
-            ? `Tout supprimer, ${concepts === 1 ? "le concept compris" : "les concepts compris"}`
-            : "Tout supprimer"
-        }
-        consequence="Le texte, les concepts, leurs questions et leurs passages partent avec. Ça ne se défait pas."
+        declencheur={t("supprimer")}
+        confirmation={t("toutSupprimer", { concepts })}
+        consequence={t("consequence")}
         avant={
           redecoupable ? (
             <Button
@@ -59,7 +57,7 @@ export function GestesDuDepot({
               disabled={enCours}
               onClick={() => void relancer()}
             >
-              {enCours ? "Un instant" : "Redécouper"}
+              {enCours ? t("unInstant") : t("redecouper")}
             </Button>
           ) : null
         }
@@ -69,10 +67,7 @@ export function GestesDuDepot({
         /* Pleine largeur, comme la conséquence de la suppression juste
            au-dessus : les deux lignes se suivent dans la même carte, et l'une
            serrée à côté de l'autre étalée se lit comme un défaut. */
-        <p className="mt-pas-3 text-petit text-stone-500">
-          Redécouper relance une extraction sur le même texte, et prend une place de la journée
-          comme un dépôt.
-        </p>
+        <p className="mt-pas-3 text-petit text-stone-500">{t("explication")}</p>
       ) : null}
 
       <p className="mt-pas-3 text-petit min-h-5" role="status" aria-live="polite">

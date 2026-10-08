@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import {
@@ -42,7 +43,8 @@ async function utilisateurOuRefus(): Promise<string> {
 
 export async function deposerAction(_precedent: EtatDepot, donnees: FormData): Promise<EtatDepot> {
   const userId = await utilisateurOuRefus();
-  const resultat = await deposer(userId, donnees);
+  // Les refus reviennent à l'écran : ils se disent dans la langue de la personne.
+  const resultat = await deposer(userId, donnees, await getTranslations("depots.refus"));
 
   if (!resultat.ok) {
     return { erreur: resultat.motif, quota: resultat.quota };
@@ -159,7 +161,7 @@ export async function supprimerDepotAction(donnees: FormData): Promise<void> {
 /** Relance une extraction sur le texte d'un dépôt vidé ou en échec. */
 export async function redecouperAction(inputId: string): Promise<ResultatRedecoupage> {
   const userId = await utilisateurOuRefus();
-  const resultat = await redecouper(userId, inputId);
+  const resultat = await redecouper(userId, inputId, await getTranslations("depots.refus"));
 
   if (resultat.ok) revalidatePath(`${ROUTES.depots}/${inputId}`);
 

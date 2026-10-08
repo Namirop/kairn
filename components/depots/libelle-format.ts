@@ -1,4 +1,5 @@
 import type { VariantFormat } from "@/lib/db/types";
+import { formats } from "@/lib/i18n/messages/fr/depots/concept";
 
 /**
  * Sous quelle forme une question est posée, dit à l'utilisateur.
@@ -16,12 +17,11 @@ import type { VariantFormat } from "@/lib/db/types";
  *
  * Le `Record` sur l'enum est volontaire : ajouter un format sans son libellé ne
  * compile pas.
+ *
+ * Les libellés vivent dans `depots.formats`, une clé par valeur de l'enum : un
+ * écran les dit dans sa langue avec `useTranslations("depots.formats")`.
+ *
+ * @deprecated En français seulement, gardé pour la vitrine de la landing tant
+ * qu'elle le lit. Tiré des mêmes messages : rien n'est écrit deux fois.
  */
-export const LIBELLE_FORMAT: Record<VariantFormat, string> = {
-  MCQ: "QCM",
-  CLOZE: "Texte à trou",
-  TRUE_FALSE: "Vrai ou faux",
-  SHORT_ANSWER: "Réponse courte",
-  CODE: "Code",
-  EXPLAIN: "Explication",
-};
+export const LIBELLE_FORMAT: Record<VariantFormat, string> = formats;

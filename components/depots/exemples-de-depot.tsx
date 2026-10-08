@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { EXEMPLES_DE_DEPOT } from "@/lib/domain/invites-de-depot";
 import { useLangue } from "@/lib/i18n/use-langue";
 import { cn } from "@/lib/utils";
@@ -20,11 +21,11 @@ import { cn } from "@/lib/utils";
  * celui de l'utilisateur, et il peut encore modifier ou renoncer.
  */
 export function ExemplesDeDepot({ onChoisir }: { onChoisir: (texte: string) => void }) {
+  const t = useTranslations("depots.formulaire");
+
   return (
     <div>
-      <p className="text-corps text-stone-900">
-        Dépose la première chose que tu veux retenir. N&apos;importe quoi fait l&apos;affaire.
-      </p>
+      <p className="text-corps text-stone-900">{t("premierDepot")}</p>
 
       <PucesDExemples onChoisir={onChoisir} className="mt-pas-3" />
     </div>

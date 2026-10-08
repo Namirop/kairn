@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { avancementDuDepotAction } from "@/app/(app)/depots/actions";
 import type { EtatDepot } from "@/lib/domain/etat-depot";
 import { ABANDON_MS, AVEU_MS, pauseApres } from "@/lib/depots/rythme-de-lattente";
@@ -39,6 +40,7 @@ export function SuivreLAvancement({
   etat: EtatDepot;
   concepts: number;
 }) {
+  const t = useTranslations("depots.depot");
   const router = useRouter();
   const [lent, setLent] = useState(false);
 
@@ -89,7 +91,7 @@ export function SuivreLAvancement({
 
   return (
     <p className="mt-pas-3 text-petit text-stone-500" role="status">
-      Ça prend plus de temps que d&apos;habitude. La page se mettra à jour toute seule.
+      {t("lent")}
     </p>
   );
 }

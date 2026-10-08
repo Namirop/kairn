@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { PenLine, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { LibelleQuiSeRaccourcit } from "@/components/depots/libelle-qui-se-raccourcit";
 import { Button } from "@/components/ui/button";
 import { CONSIGNE_MAXIMUM } from "@/lib/depots/bornes-du-depot";
@@ -27,10 +28,12 @@ import { CONSIGNE_MAXIMUM } from "@/lib/depots/bornes-du-depot";
  */
 
 export function BoutonDeConsigne({ onOuvrir }: { onOuvrir: () => void }) {
+  const t = useTranslations("depots.formulaire.consigne");
+
   return (
     <Button type="button" variant="outline" size="sm" onClick={onOuvrir}>
       <PenLine aria-hidden />
-      <LibelleQuiSeRaccourcit complet="Ajouter une consigne" court="Consigne" />
+      <LibelleQuiSeRaccourcit complet={t("ajouter")} court={t("ajouterCourt")} />
     </Button>
   );
 }
@@ -44,6 +47,7 @@ export function ChampDeConsigne({
   onChange: (valeur: string) => void;
   onFermer: () => void;
 }) {
+  const t = useTranslations("depots.formulaire.consigne");
   const champ = useRef<HTMLTextAreaElement>(null);
 
   // Le champ vient d'apparaître sur un geste : le curseur y va. Sans ça, on
@@ -59,14 +63,14 @@ export function ChampDeConsigne({
           htmlFor="consigne"
           className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase"
         >
-          Ta consigne
+          {t("etiquette")}
         </label>
         <button
           type="button"
           onClick={onFermer}
           className="gap-pas-1 text-petit rounded-galet flex items-center text-stone-500 transition-colors hover:text-stone-900"
         >
-          Retirer
+          {t("retirer")}
           <X aria-hidden className="size-3.5" />
         </button>
       </div>
@@ -78,7 +82,7 @@ export function ChampDeConsigne({
         rows={2}
         value={valeur}
         onChange={(evenement) => onChange(evenement.target.value)}
-        placeholder="N'inclus pas la partie sur les prix"
+        placeholder={t("exemple")}
         // 16 px sur mobile : en deçà, Safari zoome à la mise au point.
         className="p-pas-3 md:text-petit rounded-champ mt-pas-2 field-sizing-content w-full resize-y border border-stone-300 bg-stone-50 text-base leading-relaxed text-stone-900 placeholder:text-stone-500"
       />
@@ -95,7 +99,7 @@ export function ChampDeConsigne({
             {valeur.length} / {CONSIGNE_MAXIMUM}
           </span>
         ) : (
-          "Ce qu'il faut laisser de côté dans ce dépôt. Elle cadre le découpage, elle n'ajoute rien à ce que tu retiens."
+          t("aide")
         )}
       </p>
     </div>

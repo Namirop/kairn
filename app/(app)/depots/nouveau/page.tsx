@@ -22,7 +22,11 @@ import { parametresDeRemise } from "@/lib/i18n/dire-le-temps";
 import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 import { ETIQUETTE_INTL } from "@/lib/i18n/langues";
 
-export const metadata: Metadata = { title: "Déposer" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("depots.formulaire");
+
+  return { title: t("metaTitre") };
+}
 
 export default async function PageNouveauDepot({
   searchParams,
@@ -54,6 +58,7 @@ export default async function PageNouveauDepot({
   // une offre payée s'arrêterait au soixantième dépôt.
   const depotsMax = plafondDeDepots(offre.plafond);
   const depotsPleins = usage.depots >= depotsMax;
+  const t = await getTranslations("depots.formulaire");
   const tTemps = await getTranslations("temps");
   const remiseAZero = tTemps(
     "remiseAZero",
@@ -70,10 +75,8 @@ export default async function PageNouveauDepot({
   return (
     <PileDePanneaux sol="ombre">
       <Panneau surface="papier" mesure="colonne">
-        <h1 className="text-h1-app leading-tight font-bold">Dépose ce que tu veux retenir</h1>
-        <p className="mt-pas-2 text-petit max-w-xl text-stone-500">
-          Le découpage part tout seul. Tu retrouves tes concepts dans la liste, sans rien lancer.
-        </p>
+        <h1 className="text-h1-app leading-tight font-bold">{t("titre")}</h1>
+        <p className="mt-pas-2 text-petit max-w-xl text-stone-500">{t("chapeau")}</p>
       </Panneau>
 
       <Strates de="papier" vers="ombre" graine="depot-formulaire" />

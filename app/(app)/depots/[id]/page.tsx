@@ -19,13 +19,16 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { lireDepotDetaille } from "@/lib/db/depot-detaille";
 import { lireChargeDuJour } from "@/lib/db/session-du-jour";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
-import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";
 import { etatDuDepot, redecoupable, travailEnCours } from "@/lib/domain/etat-depot";
 import { PLAFOND_CONCEPTS_PAR_DEPOT } from "@/lib/domain/plafond-de-concepts";
 import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 
-export const metadata: Metadata = { title: "Dépôt" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("depots.depot");
+
+  return { title: t("metaTitre") };
+}
 
 /**
  * Un dépôt et ce qu'il a donné.
@@ -37,6 +40,7 @@ export const metadata: Metadata = { title: "Dépôt" };
 export default async function PageDepot({ params }: { params: Promise<{ id: string }> }) {
   const tEtat = await getTranslations("etatDepot");
   const tTemps = await getTranslations("temps");
+  const t = await getTranslations("depots.depot");
   const utilisateur = await getCurrentUser();
 
   if (!utilisateur) redirect(ROUTES.connexion);
@@ -87,11 +91,11 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
             href={ROUTES.depots}
             className="text-petit rounded-galet text-stone-500 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900"
           >
-            Retour aux dépôts
+            {t("retour")}
           </Link>
 
           <h1 className="mt-pas-3 text-h1-app leading-tight font-bold">
-            {compte(depot.concepts.length, "concept", "concepts")}
+            {t("titre", { nombre: depot.concepts.length })}
           </h1>
 
           <p className="mt-pas-2 gap-pas-3 text-mono flex flex-wrap items-center justify-center text-stone-500 md:justify-start">
@@ -107,7 +111,9 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
               </Badge>
             )}
             <span>
-              Déposé {tTemps("anciennete", anciennete(depot.createdAt, new Date(), fuseau))}
+              {t("depose", {
+                quand: tTemps("anciennete", anciennete(depot.createdAt, new Date(), fuseau)),
+              })}
             </span>
           </p>
 
@@ -132,7 +138,7 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
         {texte ? (
           <section className="mt-pas-8">
             <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-              Ce que tu as déposé
+              {t("ceQueTuAsDepose")}
             </h2>
             {/* Les termes de code du dépôt sont relevés comme ceux des concepts
                 qu'on en a tirés : c'est le même texte, à deux étapes de la même
@@ -152,16 +158,12 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
               <TexteRiche>{texte}</TexteRiche>
             </div>
             {depot.texteRetenu ? (
-              <p className="mt-pas-2 text-petit text-stone-500">
-                Ta consigne écartait une partie de ce dépôt : elle n&apos;est pas montrée ici. Le
-                texte d&apos;origine, lui, est conservé tel que tu l&apos;as posé.
-              </p>
+              <p className="mt-pas-2 text-petit text-stone-500">{t("consigneEcartait")}</p>
             ) : null}
 
             {depot.texteTronque ? (
               <p className="mt-pas-2 text-petit text-stone-500">
-                La capture portait plus de texte qu&apos;un dépôt n&apos;en accepte. La lecture
-                s&apos;arrête à {CARACTERES_MAXIMUM.toLocaleString("fr-FR")} caractères.
+                {t("captureTronquee", { maximum: CARACTERES_MAXIMUM })}
               </p>
             ) : null}
 
@@ -173,7 +175,7 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
                 demande. */}
             {depot.instruction ? (
               <p className="mt-pas-3 text-petit text-stone-500">
-                Ta consigne : «&nbsp;{depot.instruction}&nbsp;»
+                {t("taConsigne", { consigne: depot.instruction })}
               </p>
             ) : null}
           </section>
@@ -184,7 +186,7 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
 
       <Panneau surface="ombre" mesure="colonne" remplit className="md:pb-pas-16">
         <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
-          Ce qu&apos;on en a tiré
+          {t("ceQuOnEnATire")}
         </h2>
 
         {depot.conceptsTronques ? (
@@ -208,9 +210,7 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
             concept de la liste le lui montre.
           */
           <p className="mt-pas-2 text-petit text-stone-500">
-            Ce texte en portait plus de {PLAFOND_CONCEPTS_PAR_DEPOT}. On l&apos;a suivi dans
-            l&apos;ordre et on s&apos;est arrêté au dernier concept de cette liste — dépose la fin
-            du texte pour avoir le reste.
+            {t("conceptsTronques", { plafond: PLAFOND_CONCEPTS_PAR_DEPOT })}
           </p>
         ) : null}
 

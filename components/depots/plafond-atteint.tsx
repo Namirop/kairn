@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { BlocDetache } from "@/components/coquille/bloc-detache";
 import { ListeDattente } from "@/components/depots/liste-dattente";
 import { ROUTES } from "@/lib/auth/routes";
 import { PLAFOND_PAYANT } from "@/lib/domain/plafond-du-plan";
 import { PRIX_MENSUEL } from "@/lib/domain/prix";
+import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
  * Ce qu'on montre quand la période est pleine.
@@ -18,6 +20,11 @@ import { PRIX_MENSUEL } from "@/lib/domain/prix";
  * qui paie déjà, ou qui bute sur le nombre de dépôts, n'a rien à acheter : lui
  * proposer une offre serait lui vendre ce qu'il a. La seule suite utile est
  * alors de se signaler.
+ *
+ * **En anglais, la porte n'existe pas encore.** Premium ne se vend qu'en
+ * français (décision du 08/10/2026) : la limite s'explique, et l'écran dit que
+ * l'offre n'est pas disponible dans cette langue, sans lien vers la caisse. Le
+ * signalement prend sa place : c'est la seule suite utile à qui n'a rien à acheter.
  */
 
 type Props = {
@@ -39,6 +46,12 @@ type Props = {
 };
 
 export function PlafondAtteint({ remiseAZero, inscrit, motif, limite, offreAProposer }: Props) {
+  const t = useTranslations("depots.formulaire.plafond");
+  // Pas de caisse hors du français : l'offre y aurait ouvert quelque chose, mais
+  // elle ne se vend pas encore. On le dit, et on retombe sur le signalement.
+  const langue = useLangue();
+  const horsVente = offreAProposer && langue !== "FR";
+
   return (
     <BlocDetache className="max-w-xl">
       {/* Les mêmes mots que le refus côté serveur : c'est la même limite.
@@ -47,13 +60,15 @@ export function PlafondAtteint({ remiseAZero, inscrit, motif, limite, offreAProp
           l'ait mal compté. Des dépôts, eux, se comptent un par un. */}
       <div className="gap-pas-3 flex flex-col">
         <p className="text-corps text-pretty text-stone-900">
-          {motif === "concepts"
-            ? `Tu as atteint la limite du mois, autour de ${limite} concepts.`
-            : `Tu as atteint la limite du mois, ${limite} dépôts.`}{" "}
-          Le compteur repart {remiseAZero}.
+          {motif === "concepts" ? t("concepts", { limite }) : t("depots", { limite })}{" "}
+          {t("remiseAZero", { quand: remiseAZero })}
         </p>
 
-        {offreAProposer ? <Offre /> : <Signalement inscrit={inscrit} motif={motif} />}
+        {offreAProposer && !horsVente ? (
+          <Offre />
+        ) : (
+          <Signalement inscrit={inscrit} motif={motif} horsVente={horsVente} />
+        )}
       </div>
     </BlocDetache>
   );
@@ -69,32 +84,45 @@ export function PlafondAtteint({ remiseAZero, inscrit, motif, limite, offreAProp
  * qu'il y a une réponse.
  */
 function Offre() {
+  const t = useTranslations("depots.formulaire.plafond");
+
   return (
     <>
       <p className="text-petit max-w-prose text-pretty text-stone-500">
-        L&apos;offre complète en ouvre{" "}
-        <span className="font-mono tabular-nums">{PLAFOND_PAYANT}</span> par mois, pour{" "}
-        <span className="font-mono tabular-nums">{PRIX_MENSUEL} €</span>. Ce que tu as déjà déposé
-        ne bouge pas, et les révisions du jour continuent.
+        {t.rich("offre", {
+          plafond: PLAFOND_PAYANT,
+          prix: PRIX_MENSUEL,
+          nombre: (morceau) => <span className="font-mono tabular-nums">{morceau}</span>,
+        })}
       </p>
 
       <Link
         href={ROUTES.reglages}
         className="rounded-galet text-petit w-fit text-stone-900 underline decoration-stone-300 underline-offset-4 transition-colors hover:decoration-stone-900"
       >
-        Voir l&apos;offre
+        {t("voirLOffre")}
       </Link>
     </>
   );
 }
 
 /** Pour qui n'a rien à acheter : le seul retour utile est de dire que ça gêne. */
-function Signalement({ inscrit, motif }: { inscrit: boolean; motif: "concepts" | "depots" }) {
+function Signalement({
+  inscrit,
+  motif,
+  horsVente,
+}: {
+  inscrit: boolean;
+  motif: "concepts" | "depots";
+  horsVente: boolean;
+}) {
+  const t = useTranslations("depots.formulaire.plafond");
+
   return (
     <>
       <p className="text-petit max-w-prose text-pretty text-stone-500">
-        Cette limite tient le coût des appels au modèle pendant que Kairn se construit. Si elle te
-        gêne, dis-le : c&apos;est le signal qui décidera de la suite.
+        {t("signalement")}
+        {horsVente ? ` ${t("horsVente")}` : null}
       </p>
 
       <ListeDattente inscrit={inscrit} motif={motif} />
