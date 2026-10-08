@@ -32,23 +32,32 @@ describe("joursAvantLaBascule", () => {
 
 describe("quandRepartLeCompteur", () => {
   it("dit demain à un jour", () => {
-    expect(quandRepartLeCompteur("2026-09-11", "2026-09-12")).toBe("demain");
+    expect(quandRepartLeCompteur("2026-09-11", "2026-09-12")).toEqual({
+      quand: "jours",
+      nombre: 1,
+    });
   });
 
   it("compte en jours tant que c'est proche", () => {
-    expect(quandRepartLeCompteur("2026-09-08", "2026-09-12")).toBe("dans 4 jours");
+    expect(quandRepartLeCompteur("2026-09-08", "2026-09-12")).toEqual({
+      quand: "jours",
+      nombre: 4,
+    });
   });
 
   /** Au-delà d'une semaine, « dans 26 jours » se convertit de tête : on nomme. */
   it("nomme la date quand elle est lointaine", () => {
-    expect(quandRepartLeCompteur("2026-08-17", "2026-09-12")).toBe("le 12 septembre");
+    expect(quandRepartLeCompteur("2026-08-17", "2026-09-12")).toEqual({
+      quand: "date",
+      jour: "2026-09-12",
+    });
   });
 
   it("ne promet rien de faux le jour même", () => {
-    expect(quandRepartLeCompteur("2026-09-12", "2026-09-12")).toBe("d'un instant à l'autre");
+    expect(quandRepartLeCompteur("2026-09-12", "2026-09-12")).toEqual({ quand: "instant" });
   });
 
-  it("rend toujours une phrase, quelles que soient les bornes", () => {
+  it("ne compte jamais en jours au-delà d'une semaine, ni à zéro jour", () => {
     fc.assert(
       fc.property(
         fc.date({ min: new Date("2025-01-01"), max: new Date("2028-12-31"), noInvalidDate: true }),
@@ -59,7 +68,9 @@ describe("quandRepartLeCompteur", () => {
             .toISOString()
             .slice(0, 10);
 
-          return quandRepartLeCompteur(aujourdhui, fin).length > 0;
+          const remise = quandRepartLeCompteur(aujourdhui, fin);
+
+          return remise.quand !== "jours" || (remise.nombre >= 1 && remise.nombre <= 7);
         },
       ),
       { numRuns: 300 },

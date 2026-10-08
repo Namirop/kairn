@@ -15,6 +15,8 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { lireLOffreDuCompte } from "@/lib/db/abonnement";
 import { lireReglages } from "@/lib/db/user-settings";
 import { termeLisible } from "@/lib/domain/terme-lisible";
+import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
+import { ETIQUETTE_INTL } from "@/lib/i18n/langues";
 import { PARAMETRE_DE_RETOUR, RETOUR_ACCEPTE } from "@/lib/paiement/achat";
 import { lireDossierStripe } from "@/lib/db/ecriture-de-labonnement";
 import { paiementOuvert } from "@/lib/paiement/config";
@@ -120,7 +122,15 @@ export default async function PageReglages({ searchParams }: Parametres) {
         <TonOffre
           plan={offre.plan}
           plafond={offre.plafond}
-          terme={offre.finDePeriode ? termeLisible(offre.finDePeriode, reglages.timezone) : null}
+          terme={
+            offre.finDePeriode
+              ? termeLisible(
+                  offre.finDePeriode,
+                  reglages.timezone,
+                  ETIQUETTE_INTL[await langueDeLaRequete()],
+                )
+              : null
+          }
           resilieALaFin={offre.resilieALaFin}
           ouvert={paiementOuvert()}
           retourDePaiement={parametres[PARAMETRE_DE_RETOUR] === RETOUR_ACCEPTE}

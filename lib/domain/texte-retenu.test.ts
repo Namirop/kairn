@@ -33,7 +33,8 @@ Il ne sert pas une requête qui ne filtre que sur b.`;
   });
 
   it("tolère un repli de lignes différent à l'intérieur d'un passage gardé", () => {
-    const garde = "Un index composite sur (a, b) sert une requête qui filtre sur a,\nou sur a et b.";
+    const garde =
+      "Un index composite sur (a, b) sert une requête qui filtre sur a,\nou sur a et b.";
 
     expect(texteRetenu(DEPOT, garde)).toBe(garde);
   });
@@ -56,7 +57,8 @@ Et il faut penser à faire un VACUUM de temps en temps.`;
   });
 
   it("garde le rendu tel quel, sans normaliser ce qu'il renvoie", () => {
-    const garde = "Un index composite sur (a, b) sert une requête qui filtre sur a,\nou sur a et b.";
+    const garde =
+      "Un index composite sur (a, b) sert une requête qui filtre sur a,\nou sur a et b.";
 
     expect(texteRetenu(DEPOT, `  ${garde}  `)).toBe(garde);
   });

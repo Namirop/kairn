@@ -3,7 +3,8 @@ import { lireReservationsDuJour } from "@/lib/db/ai-quota";
 import { modifierConcept } from "@/lib/db/concepts";
 import { lireDepotDetaille } from "@/lib/db/depot-detaille";
 import { regenererSiUsees } from "@/lib/db/regeneration";
-import { etatDuDepot, libelleEtat } from "@/lib/domain/etat-depot";
+import { etatDuDepot } from "@/lib/domain/etat-depot";
+import { etatDepot } from "@/lib/i18n/messages/fr/etat-depot";
 import { deposer } from "@/lib/depots/deposer";
 import { redecouper } from "@/lib/depots/redecouper";
 import { runJob } from "@/lib/jobs/runner";
@@ -244,7 +245,7 @@ export async function casModificationReportee(userId: string, maintenant: Date):
   record(
     "Modification — l'écran dit que les questions attendent, pas qu'elles s'écrivent",
     etat === "questions-differees",
-    etat ? libelleEtat(etat) : "dépôt introuvable",
+    etat ? etatDepot[etat] : "dépôt introuvable",
   );
 }
 

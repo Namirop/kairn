@@ -75,21 +75,6 @@ export function etatDuDepot(avancement: AvancementDepot): EtatDepot {
   return avancement.concepts > 0 ? "questions" : "decoupage";
 }
 
-const LIBELLES: Record<EtatDepot, string> = {
-  lecture: "Lecture de la capture",
-  decoupage: "Découpage en concepts",
-  questions: "Écriture des questions",
-  "questions-differees": "Questions en attente",
-  pret: "Prêt",
-  vide: "Vidé",
-  rejete: "Rien à retenir",
-  echec: "Échec",
-};
-
-export function libelleEtat(etat: EtatDepot): string {
-  return LIBELLES[etat];
-}
-
 /**
  * Un dépôt dont la chaîne tourne en ce moment.
  *

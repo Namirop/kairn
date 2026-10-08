@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
@@ -17,6 +18,9 @@ import { plafondDeDepots } from "@/lib/domain/plafond-du-plan";
 import { paiementOuvert } from "@/lib/paiement/config";
 import { localDay } from "@/lib/domain/local-day";
 import { quandRepartLeCompteur } from "@/lib/domain/remise-a-zero";
+import { parametresDeRemise } from "@/lib/i18n/dire-le-temps";
+import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
+import { ETIQUETTE_INTL } from "@/lib/i18n/langues";
 
 export const metadata: Metadata = { title: "Déposer" };
 
@@ -50,6 +54,14 @@ export default async function PageNouveauDepot({
   // une offre payée s'arrêterait au soixantième dépôt.
   const depotsMax = plafondDeDepots(offre.plafond);
   const depotsPleins = usage.depots >= depotsMax;
+  const tTemps = await getTranslations("temps");
+  const remiseAZero = tTemps(
+    "remiseAZero",
+    parametresDeRemise(
+      quandRepartLeCompteur(localDay(new Date(), fuseau), usage.periode.fin),
+      ETIQUETTE_INTL[await langueDeLaRequete()],
+    ),
+  );
   const plein = restants === 0 || depotsPleins;
   // Les concepts d'abord : quand les deux ferment le même jour, c'est celle qui
   // se paie qu'il faut nommer.
@@ -69,7 +81,7 @@ export default async function PageNouveauDepot({
       <Panneau surface="ombre" mesure="colonne" remplit className="md:pb-pas-16">
         {plein ? (
           <PlafondAtteint
-            remiseAZero={quandRepartLeCompteur(localDay(new Date(), fuseau), usage.periode.fin)}
+            remiseAZero={remiseAZero}
             inscrit={inscrit}
             motif={motif}
             limite={motif === "concepts" ? offre.plafond : depotsMax}

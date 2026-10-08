@@ -11,8 +11,6 @@ import { dayToUtcDate } from "./local-day";
 
 const JOUR_MS = 24 * 60 * 60 * 1000;
 
-const DATE_COURTE = new Intl.DateTimeFormat("fr-BE", { day: "numeric", month: "long" });
-
 /** Jours pleins entre aujourd'hui et le basculement, dans le calendrier local. */
 export function joursAvantLaBascule(aujourdhui: string, finDePeriode: string): number {
   return Math.max(
@@ -24,17 +22,24 @@ export function joursAvantLaBascule(aujourdhui: string, finDePeriode: string): n
 }
 
 /**
- * Le moment de la remise à zéro, dit en français.
+ * Le moment de la remise à zéro, prêt à être dit.
  *
  * Une échéance proche se compte en jours, une échéance lointaine se nomme : « le
  * 12 septembre » situe mieux que « dans 26 jours », qu'il faut convertir de tête.
+ * Le domaine choisit la forme ; les mots sont dans `temps.remiseAZero`, et la
+ * date se formate à l'écran, dans la langue de la personne.
  */
-export function quandRepartLeCompteur(aujourdhui: string, finDePeriode: string): string {
+export type RemiseAZero =
+  | { quand: "instant" }
+  | { quand: "jours"; nombre: number }
+  /** Le jour civil de la bascule, `AAAA-MM-JJ`. */
+  | { quand: "date"; jour: string };
+
+export function quandRepartLeCompteur(aujourdhui: string, finDePeriode: string): RemiseAZero {
   const jours = joursAvantLaBascule(aujourdhui, finDePeriode);
 
-  if (jours <= 0) return "d'un instant à l'autre";
-  if (jours === 1) return "demain";
-  if (jours <= 7) return `dans ${jours} jours`;
+  if (jours <= 0) return { quand: "instant" };
+  if (jours <= 7) return { quand: "jours", nombre: jours };
 
-  return `le ${DATE_COURTE.format(dayToUtcDate(finDePeriode))}`;
+  return { quand: "date", jour: finDePeriode };
 }

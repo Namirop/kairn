@@ -5,7 +5,7 @@ const MS_PAR_JOUR = 24 * 60 * 60 * 1000;
 /**
  * Lecture d'une échéance.
  *
- * « auj. » et « −2 j » sont des affirmations sur le calendrier de
+ * « aujourd'hui » et « demain » sont des affirmations sur le calendrier de
  * l'utilisateur, pas sur l'horloge UTC : à 00 h 30 à Paris on est déjà demain
  * chez soi et encore hier en UTC. Ces fonctions ramènent donc chaque instant à
  * son jour civil dans le fuseau de l'utilisateur avant de compter.
@@ -29,26 +29,35 @@ export function joursAvant(echeance: Date, maintenant: Date, fuseau: string): nu
   return ecartEnJoursCivils(maintenant, echeance, fuseau);
 }
 
-/** Forme courte, pour une colonne de données : « auj. », « 5 j », « −3 j ». */
-export function echeanceCourte(echeance: Date, maintenant: Date, fuseau: string): string {
-  const jours = joursAvant(echeance, maintenant, fuseau);
+/**
+ * Un écart de calendrier, prêt à être dit dans une langue.
+ *
+ * Le domaine décide du palier — des jours jusqu'à un mois, des mois au-delà —,
+ * l'écran décide des mots. « dans 3 jours » et « in 3 days » partagent la même
+ * règle de bascule ; seule la phrase change, et elle vit dans les messages
+ * (`temps.delai`, `temps.anciennete`).
+ *
+ * `nombre` vaut zéro pour « aujourd'hui », un pour « demain » ou « hier ».
+ */
+export type Duree = { unite: "jour" | "mois"; nombre: number };
 
-  if (jours === 0) return "auj.";
-  if (jours < 0) return `−${Math.abs(jours)} j`;
-  if (jours < 30) return `${jours} j`;
+function enDuree(jours: number): Duree {
+  if (jours <= 0) return { unite: "jour", nombre: 0 };
+  if (jours < 30) return { unite: "jour", nombre: jours };
+  if (jours < 60) return { unite: "mois", nombre: 1 };
 
-  return `${Math.round(jours / 30)} mois`;
+  return { unite: "mois", nombre: Math.round(jours / 30) };
 }
 
 /**
- * Forme en prose pour une échéance à venir : « demain », « dans 3 jours ».
+ * Le délai avant une échéance à venir : « demain », « dans 3 jours ».
  *
  * Une échéance déjà passée se dit « aujourd'hui » : elle est due maintenant, et
  * annoncer un retard à quelqu'un qui vient de finir sa session serait lui
  * reprocher ce qu'il vient de faire.
  */
-export function delaiAvant(echeance: Date, maintenant: Date, fuseau: string): string {
-  return delaiEnProse(joursAvant(echeance, maintenant, fuseau));
+export function delaiAvant(echeance: Date, maintenant: Date, fuseau: string): Duree {
+  return enDuree(joursAvant(echeance, maintenant, fuseau));
 }
 
 /**
@@ -57,32 +66,16 @@ export function delaiAvant(echeance: Date, maintenant: Date, fuseau: string): st
  * Le prochain passage d'un concept n'est pas toujours son échéance : celui qui
  * vient d'être revu porte une échéance encore aujourd'hui et ne reviendra que
  * demain. C'est ce jour-là qu'on annonce, et il se calcule ailleurs — ici on ne
- * fait que le dire.
+ * fait que le mesurer.
  */
-export function delaiAvantLeJour(jour: string, maintenant: Date, fuseau: string): string {
+export function delaiAvantLeJour(jour: string, maintenant: Date, fuseau: string): Duree {
   const vise = dayToUtcDate(jour).getTime();
   const aujourdhui = dayToUtcDate(localDay(maintenant, fuseau)).getTime();
 
-  return delaiEnProse(Math.round((vise - aujourdhui) / MS_PAR_JOUR));
+  return enDuree(Math.round((vise - aujourdhui) / MS_PAR_JOUR));
 }
 
-function delaiEnProse(jours: number): string {
-  if (jours <= 0) return "aujourd'hui";
-  if (jours === 1) return "demain";
-  if (jours < 30) return `dans ${jours} jours`;
-  if (jours < 60) return "dans un mois";
-
-  return `dans ${Math.round(jours / 30)} mois`;
-}
-
-/** Forme en prose, pour une ligne de texte : « il y a 6 jours ». */
-export function anciennete(instant: Date, maintenant: Date, fuseau: string): string {
-  const jours = Math.max(0, ecartEnJoursCivils(instant, maintenant, fuseau));
-
-  if (jours === 0) return "aujourd'hui";
-  if (jours === 1) return "hier";
-  if (jours < 30) return `il y a ${jours} jours`;
-  if (jours < 60) return "il y a un mois";
-
-  return `il y a ${Math.round(jours / 30)} mois`;
+/** Depuis quand, pour une ligne de texte : « hier », « il y a 6 jours ». */
+export function anciennete(instant: Date, maintenant: Date, fuseau: string): Duree {
+  return enDuree(Math.max(0, ecartEnJoursCivils(instant, maintenant, fuseau)));
 }

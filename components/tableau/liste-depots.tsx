@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Image as Capture } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { PointDeTravail } from "@/components/depots/point-de-travail";
 import { EtatVide } from "@/components/etats/etat-vide";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,7 @@ import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";
 import { cn } from "@/lib/utils";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
-import { conceptsLisibles, libelleEtat, travailEnCours } from "@/lib/domain/etat-depot";
+import { conceptsLisibles, travailEnCours } from "@/lib/domain/etat-depot";
 
 /**
  * Ce que l'utilisateur a déposé. L'étape n'apparaît que tant qu'elle a quelque
@@ -41,9 +42,10 @@ import { conceptsLisibles, libelleEtat, travailEnCours } from "@/lib/domain/etat
  * gris des mentions — elle se voit quand on la cherche et s'efface quand on lit.
  */
 function Avancement({ depot }: { depot: DepotListe }) {
+  const tEtat = useTranslations("etatDepot");
   const concepts = compte(depot.nombreAtoms, "concept", "concepts");
 
-  if (depot.etat === "echec") return <Badge variant="alerte">{libelleEtat(depot.etat)}</Badge>;
+  if (depot.etat === "echec") return <Badge variant="alerte">{tEtat(depot.etat)}</Badge>;
 
   if (depot.etat === "pret") {
     return <span className="font-mono tabular-nums">{concepts}</span>;
@@ -56,7 +58,7 @@ function Avancement({ depot }: { depot: DepotListe }) {
       ) : null}
       <Badge variant="pose">
         {travailEnCours(depot.etat) ? <PointDeTravail /> : null}
-        {libelleEtat(depot.etat)}
+        {tEtat(depot.etat)}
       </Badge>
     </>
   );
@@ -79,6 +81,8 @@ export function ListeDepots({
   /** La surface du panneau qui porte la liste : les cartes prennent l'autre. */
   surface?: "papier" | "ombre";
 }) {
+  const tTemps = useTranslations("temps");
+
   return (
     <section>
       <div className="gap-pas-4 flex items-baseline justify-between">
@@ -156,7 +160,9 @@ export function ListeDepots({
                     <p className="mt-pas-2 gap-pas-3 text-mono flex flex-wrap items-center text-stone-500">
                       <Avancement depot={depot} />
                       <span aria-hidden>·</span>
-                      <span>{anciennete(depot.createdAt, maintenant, fuseau)}</span>
+                      <span>
+                        {tTemps("anciennete", anciennete(depot.createdAt, maintenant, fuseau))}
+                      </span>
                     </p>
                   </div>
                 </div>

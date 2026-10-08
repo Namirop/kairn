@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
@@ -20,7 +21,7 @@ import { lireChargeDuJour } from "@/lib/db/session-du-jour";
 import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
 import { compte } from "@/lib/domain/accord";
 import { anciennete } from "@/lib/domain/echeance";
-import { etatDuDepot, libelleEtat, redecoupable, travailEnCours } from "@/lib/domain/etat-depot";
+import { etatDuDepot, redecoupable, travailEnCours } from "@/lib/domain/etat-depot";
 import { PLAFOND_CONCEPTS_PAR_DEPOT } from "@/lib/domain/plafond-de-concepts";
 import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 
@@ -34,6 +35,8 @@ export const metadata: Metadata = { title: "Dépôt" };
  * n'appellent pas la même conduite — c'est tout l'intérêt de les séparer.
  */
 export default async function PageDepot({ params }: { params: Promise<{ id: string }> }) {
+  const tEtat = await getTranslations("etatDepot");
+  const tTemps = await getTranslations("temps");
   const utilisateur = await getCurrentUser();
 
   if (!utilisateur) redirect(ROUTES.connexion);
@@ -100,10 +103,12 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
                 {/* Le point dit que ça tourne là où le libellé, seul, ne dit que
                     l'étape — voir `PointDeTravail`. */}
                 {travailEnCours(etat) ? <PointDeTravail /> : null}
-                {libelleEtat(etat)}
+                {tEtat(etat)}
               </Badge>
             )}
-            <span>Déposé {anciennete(depot.createdAt, new Date(), fuseau)}</span>
+            <span>
+              Déposé {tTemps("anciennete", anciennete(depot.createdAt, new Date(), fuseau))}
+            </span>
           </p>
 
           <ConceptsAVerifier nombre={aVerifier.length} />

@@ -1,5 +1,6 @@
 import { ENTRAINEMENT_LIBRE } from "@/components/revision/entrainement-libre";
 import { Palier } from "@/components/revision/palier";
+import { useTranslations } from "next-intl";
 import { ROUTES } from "@/lib/auth/routes";
 import { compte } from "@/lib/domain/accord";
 import { delaiAvantLeJour } from "@/lib/domain/echeance";
@@ -38,6 +39,8 @@ export function RienAReviser({
   fuseau,
   maintenant,
 }: Props) {
+  const tTemps = useTranslations("temps");
+
   // Le plafond du jour est atteint, et il reste des concepts dus. C'est le seul
   // écran vide qui annonce du travail : il le dit, puis il ouvre la seule porte
   // qui ne coûte rien à la mémoire.
@@ -86,7 +89,7 @@ export function RienAReviser({
       titre="Tu es à jour"
       explication={
         prochainJourServi
-          ? `Rien à revoir aujourd'hui. Le prochain concept revient ${delaiAvantLeJour(prochainJourServi, maintenant, fuseau)}.`
+          ? `Rien à revoir aujourd'hui. Le prochain concept revient ${tTemps("delai", delaiAvantLeJour(prochainJourServi, maintenant, fuseau))}.`
           : "Rien à revoir aujourd'hui."
       }
       action={{ libelle: "Déposer autre chose", href: `${ROUTES.depots}/nouveau` }}

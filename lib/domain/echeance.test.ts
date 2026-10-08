@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { anciennete, delaiAvant, delaiAvantLeJour, echeanceCourte, joursAvant } from "./echeance";
+import { anciennete, delaiAvant, delaiAvantLeJour, joursAvant, type Duree } from "./echeance";
 import { localDay } from "./local-day";
 import { unFuseau, unInstant } from "./local-day.test";
 
@@ -8,6 +8,9 @@ const utc = (iso: string) => new Date(`${iso}Z`);
 
 const PARIS = "Europe/Paris";
 const KOLKATA = "Asia/Kolkata";
+
+const jours = (nombre: number): Duree => ({ unite: "jour", nombre });
+const mois = (nombre: number): Duree => ({ unite: "mois", nombre });
 
 describe("joursAvant", () => {
   it("rend zéro pour une échéance dans le jour civil de l'utilisateur", () => {
@@ -55,55 +58,30 @@ describe("joursAvant", () => {
   });
 });
 
-describe("echeanceCourte", () => {
-  const maintenant = utc("2026-06-15T10:00:00");
-
-  it("nomme le jour courant, les retards et les échéances à venir", () => {
-    expect(echeanceCourte(utc("2026-06-15T23:00:00"), maintenant, "UTC")).toBe("auj.");
-    expect(echeanceCourte(utc("2026-06-14T10:00:00"), maintenant, "UTC")).toBe("−1 j");
-    expect(echeanceCourte(utc("2026-06-16T10:00:00"), maintenant, "UTC")).toBe("1 j");
-    expect(echeanceCourte(utc("2026-07-10T10:00:00"), maintenant, "UTC")).toBe("25 j");
-  });
-
-  it("bascule en mois à partir de trente jours", () => {
-    expect(echeanceCourte(utc("2026-07-15T10:00:00"), maintenant, "UTC")).toBe("1 mois");
-    expect(echeanceCourte(utc("2027-06-15T10:00:00"), maintenant, "UTC")).toBe("12 mois");
-  });
-
-  it("dit « auj. » à 00 h 05 comme à 23 h 55, heure locale", () => {
-    const justeApresMinuit = utc("2026-06-14T22:05:00"); // 00 h 05 le 15 à Paris
-    const justeAvantMinuit = utc("2026-06-15T21:55:00"); // 23 h 55 le 15 à Paris
-    const dansLaJournee = utc("2026-06-15T12:00:00");
-
-    expect(echeanceCourte(dansLaJournee, justeApresMinuit, PARIS)).toBe("auj.");
-    expect(echeanceCourte(dansLaJournee, justeAvantMinuit, PARIS)).toBe("auj.");
-  });
-});
-
 describe("anciennete", () => {
   const maintenant = utc("2026-06-15T10:00:00");
 
   it("nomme les dépôts récents en prose", () => {
-    expect(anciennete(utc("2026-06-15T08:00:00"), maintenant, "UTC")).toBe("aujourd'hui");
-    expect(anciennete(utc("2026-06-14T08:00:00"), maintenant, "UTC")).toBe("hier");
-    expect(anciennete(utc("2026-06-09T08:00:00"), maintenant, "UTC")).toBe("il y a 6 jours");
+    expect(anciennete(utc("2026-06-15T08:00:00"), maintenant, "UTC")).toEqual(jours(0));
+    expect(anciennete(utc("2026-06-14T08:00:00"), maintenant, "UTC")).toEqual(jours(1));
+    expect(anciennete(utc("2026-06-09T08:00:00"), maintenant, "UTC")).toEqual(jours(6));
     // 29 jours : dernier palier avant la bascule en mois.
-    expect(anciennete(utc("2026-05-17T08:00:00"), maintenant, "UTC")).toBe("il y a 29 jours");
+    expect(anciennete(utc("2026-05-17T08:00:00"), maintenant, "UTC")).toEqual(jours(29));
   });
 
   it("bascule en mois à partir de trente jours", () => {
-    expect(anciennete(utc("2026-05-16T08:00:00"), maintenant, "UTC")).toBe("il y a un mois");
-    expect(anciennete(utc("2026-04-20T08:00:00"), maintenant, "UTC")).toBe("il y a un mois");
-    expect(anciennete(utc("2026-01-15T08:00:00"), maintenant, "UTC")).toBe("il y a 5 mois");
+    expect(anciennete(utc("2026-05-16T08:00:00"), maintenant, "UTC")).toEqual(mois(1));
+    expect(anciennete(utc("2026-04-20T08:00:00"), maintenant, "UTC")).toEqual(mois(1));
+    expect(anciennete(utc("2026-01-15T08:00:00"), maintenant, "UTC")).toEqual(mois(5));
   });
 
   it("ne rend jamais d'ancienneté négative pour un instant futur", () => {
-    expect(anciennete(utc("2026-06-20T08:00:00"), maintenant, "UTC")).toBe("aujourd'hui");
+    expect(anciennete(utc("2026-06-20T08:00:00"), maintenant, "UTC")).toEqual(jours(0));
   });
 });
 
 describe("propriété : le jour civil de l'utilisateur fait foi", () => {
-  it("toute échéance tombant dans son jour civil s'affiche « auj. »", () => {
+  it("toute échéance tombant dans son jour civil est à zéro jour", () => {
     fc.assert(
       fc.property(
         unInstant,
@@ -116,7 +94,7 @@ describe("propriété : le jour civil de l'utilisateur fait foi", () => {
           // jour civil : c'est la prémisse de la propriété, pas son objet.
           fc.pre(localDay(echeance, fuseau) === localDay(maintenant, fuseau));
 
-          expect(echeanceCourte(echeance, maintenant, fuseau)).toBe("auj.");
+          expect(delaiAvant(echeance, maintenant, fuseau)).toEqual(jours(0));
           expect(joursAvant(echeance, maintenant, fuseau)).toBe(0);
         },
       ),
@@ -124,7 +102,7 @@ describe("propriété : le jour civil de l'utilisateur fait foi", () => {
     );
   });
 
-  it("un instant hors du jour civil ne s'affiche jamais « auj. »", () => {
+  it("un instant hors du jour civil n'est jamais à zéro jour", () => {
     fc.assert(
       fc.property(
         unInstant,
@@ -135,7 +113,6 @@ describe("propriété : le jour civil de l'utilisateur fait foi", () => {
 
           fc.pre(localDay(echeance, fuseau) !== localDay(maintenant, fuseau));
 
-          expect(echeanceCourte(echeance, maintenant, fuseau)).not.toBe("auj.");
           expect(joursAvant(echeance, maintenant, fuseau)).not.toBe(0);
         },
       ),
@@ -173,32 +150,32 @@ describe("delaiAvant", () => {
   const maintenant = new Date("2026-01-15T09:00:00Z");
 
   it("dit demain pour le jour suivant", () => {
-    expect(delaiAvant(new Date("2026-01-16T08:00:00Z"), maintenant, PARIS)).toBe("demain");
+    expect(delaiAvant(new Date("2026-01-16T08:00:00Z"), maintenant, PARIS)).toEqual(jours(1));
   });
 
   it("compte en jours civils, pas en heures", () => {
     // Douze heures plus tard mais déjà le lendemain à Paris : c'est « demain »,
     // pas « aujourd'hui ».
-    expect(delaiAvant(new Date("2026-01-15T23:30:00Z"), maintenant, PARIS)).toBe("demain");
+    expect(delaiAvant(new Date("2026-01-15T23:30:00Z"), maintenant, PARIS)).toEqual(jours(1));
   });
 
   it("dit aujourd'hui pour une échéance déjà passée", () => {
-    expect(delaiAvant(new Date("2026-01-10T08:00:00Z"), maintenant, PARIS)).toBe("aujourd'hui");
-    expect(delaiAvant(new Date("2026-01-15T02:00:00Z"), maintenant, PARIS)).toBe("aujourd'hui");
+    expect(delaiAvant(new Date("2026-01-10T08:00:00Z"), maintenant, PARIS)).toEqual(jours(0));
+    expect(delaiAvant(new Date("2026-01-15T02:00:00Z"), maintenant, PARIS)).toEqual(jours(0));
   });
 
   it("passe aux mois quand l'échéance est lointaine", () => {
-    expect(delaiAvant(new Date("2026-02-10T08:00:00Z"), maintenant, PARIS)).toBe("dans 26 jours");
-    expect(delaiAvant(new Date("2026-03-01T08:00:00Z"), maintenant, PARIS)).toBe("dans un mois");
-    expect(delaiAvant(new Date("2026-07-15T08:00:00Z"), maintenant, PARIS)).toBe("dans 6 mois");
+    expect(delaiAvant(new Date("2026-02-10T08:00:00Z"), maintenant, PARIS)).toEqual(jours(26));
+    expect(delaiAvant(new Date("2026-03-01T08:00:00Z"), maintenant, PARIS)).toEqual(mois(1));
+    expect(delaiAvant(new Date("2026-07-15T08:00:00Z"), maintenant, PARIS)).toEqual(mois(6));
   });
 
   it("ne dit jamais un retard, quel que soit l'écart", () => {
     fc.assert(
-      fc.property(fc.integer({ min: -400, max: 400 }), (jours) => {
-        const echeance = new Date(maintenant.getTime() + jours * 24 * 60 * 60 * 1000);
+      fc.property(fc.integer({ min: -400, max: 400 }), (ecart) => {
+        const echeance = new Date(maintenant.getTime() + ecart * 24 * 60 * 60 * 1000);
 
-        return !delaiAvant(echeance, maintenant, PARIS).includes("−");
+        return delaiAvant(echeance, maintenant, PARIS).nombre >= 0;
       }),
       { numRuns: 300 },
     );
@@ -209,22 +186,22 @@ describe("delaiAvantLeJour", () => {
   const maintenant = new Date("2026-01-15T09:00:00Z");
 
   it("dit demain pour le jour suivant", () => {
-    expect(delaiAvantLeJour("2026-01-16", maintenant, PARIS)).toBe("demain");
+    expect(delaiAvantLeJour("2026-01-16", maintenant, PARIS)).toEqual(jours(1));
   });
 
   it("dit aujourd'hui pour le jour courant", () => {
-    expect(delaiAvantLeJour("2026-01-15", maintenant, PARIS)).toBe("aujourd'hui");
+    expect(delaiAvantLeJour("2026-01-15", maintenant, PARIS)).toEqual(jours(0));
   });
 
   it("se cale sur le calendrier de l'utilisateur, pas sur UTC", () => {
     // 23 h 30 UTC le 15 : il est déjà le 16 à Paris, donc le 17 est « demain ».
     const tard = new Date("2026-01-15T23:30:00Z");
 
-    expect(delaiAvantLeJour("2026-01-17", tard, PARIS)).toBe("demain");
-    expect(delaiAvantLeJour("2026-01-17", tard, "UTC")).toBe("dans 2 jours");
+    expect(delaiAvantLeJour("2026-01-17", tard, PARIS)).toEqual(jours(1));
+    expect(delaiAvantLeJour("2026-01-17", tard, "UTC")).toEqual(jours(2));
   });
 
   it("passe aux mois de la même façon que delaiAvant", () => {
-    expect(delaiAvantLeJour("2026-07-15", maintenant, PARIS)).toBe("dans 6 mois");
+    expect(delaiAvantLeJour("2026-07-15", maintenant, PARIS)).toEqual(mois(6));
   });
 });

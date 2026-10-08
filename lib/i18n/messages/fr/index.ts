@@ -1,5 +1,7 @@
+import { etatDepot } from "./etat-depot";
 import { navigation } from "./navigation";
 import { racine } from "./racine";
+import { temps } from "./temps";
 
 /**
  * Les textes de l'interface, en français — la langue de référence.
@@ -14,8 +16,10 @@ import { racine } from "./racine";
  * au singulier et l'anglais au pluriel, sans qu'on ait à s'en souvenir.
  */
 export const fr = {
+  etatDepot,
   navigation,
   racine,
+  temps,
 };
 
 export type Messages = typeof fr;

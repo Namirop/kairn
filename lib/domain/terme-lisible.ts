@@ -11,9 +11,12 @@
  * finit le 11 à 23 h 30 UTC finit le 12 à Paris et le 11 à New York : afficher
  * la date UTC ferait mentir l'écran d'une journée pour tout l'hémisphère est,
  * et personne ne pense à vérifier ce genre de phrase.
+ *
+ * La langue est passée par l'appelant, comme le fuseau : ni l'une ni l'autre ne
+ * se devine ici, et un défaut ferait écrire « 12 octobre » à un anglophone.
  */
-export function termeLisible(echeance: Date, fuseau: string): string {
-  return new Intl.DateTimeFormat("fr-BE", {
+export function termeLisible(echeance: Date, fuseau: string, etiquette: string): string {
+  return new Intl.DateTimeFormat(etiquette, {
     dateStyle: "long",
     timeZone: fuseau,
   }).format(echeance);

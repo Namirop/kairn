@@ -4,7 +4,6 @@ import {
   conceptsLisibles,
   etapeDuTravail,
   etatDuDepot,
-  libelleEtat,
   redecoupable,
   travailEnCours,
   type AvancementDepot,
@@ -89,18 +88,6 @@ describe("etatDuDepot", () => {
 
   it("ne prend un dépôt prêt pour vidé que s'il ne reste aucun concept", () => {
     expect(etatDuDepot(avancement({ status: "READY", concepts: 1 }))).toBe("pret");
-  });
-});
-
-describe("libelleEtat", () => {
-  it("nomme chaque étape du point de vue de l'utilisateur", () => {
-    expect(libelleEtat("lecture")).toBe("Lecture de la capture");
-    expect(libelleEtat("questions")).toBe("Écriture des questions");
-  });
-
-  it("ne parle d'échec que pour une vraie panne", () => {
-    expect(libelleEtat("rejete")).toBe("Rien à retenir");
-    expect(libelleEtat("echec")).toBe("Échec");
   });
 });
 

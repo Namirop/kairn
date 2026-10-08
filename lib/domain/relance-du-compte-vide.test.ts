@@ -33,9 +33,9 @@ describe("estLHeureDeLaRelance", () => {
 
   it("se tait avant le troisième jour", () => {
     for (const jour of ["2026-08-14", "2026-08-15", "2026-08-16"]) {
-      expect(
-        estLHeureDeLaRelance(utc(`${jour}T07:10:00`), bruxelles("2026-08-14T15:00:00")),
-      ).toBe(false);
+      expect(estLHeureDeLaRelance(utc(`${jour}T07:10:00`), bruxelles("2026-08-14T15:00:00"))).toBe(
+        false,
+      );
     }
   });
 
@@ -64,10 +64,18 @@ describe("estLHeureDeLaRelance", () => {
     const inscritLe = utc("2026-08-14T15:00:00");
 
     expect(
-      estLHeureDeLaRelance(instant, { timezone: "Europe/Brussels", dailyReminderHour: 9, inscritLe }),
+      estLHeureDeLaRelance(instant, {
+        timezone: "Europe/Brussels",
+        dailyReminderHour: 9,
+        inscritLe,
+      }),
     ).toBe(true);
     expect(
-      estLHeureDeLaRelance(instant, { timezone: "America/New_York", dailyReminderHour: 9, inscritLe }),
+      estLHeureDeLaRelance(instant, {
+        timezone: "America/New_York",
+        dailyReminderHour: 9,
+        inscritLe,
+      }),
     ).toBe(false);
   });
 
@@ -191,12 +199,17 @@ describe("estLHeureDeLaRelance", () => {
 
     it("ne relance jamais un compte inscrit dans le futur", () => {
       fc.assert(
-        fc.property(unInstant, unFuseau, fc.integer({ min: 1, max: 400 }), (maintenant, timezone, jours) => {
-          const inscritLe = new Date(maintenant.getTime() + jours * 24 * 60 * 60 * 1000);
-          const dailyReminderHour = localHour(maintenant, timezone);
+        fc.property(
+          unInstant,
+          unFuseau,
+          fc.integer({ min: 1, max: 400 }),
+          (maintenant, timezone, jours) => {
+            const inscritLe = new Date(maintenant.getTime() + jours * 24 * 60 * 60 * 1000);
+            const dailyReminderHour = localHour(maintenant, timezone);
 
-          return !estLHeureDeLaRelance(maintenant, { timezone, dailyReminderHour, inscritLe });
-        }),
+            return !estLHeureDeLaRelance(maintenant, { timezone, dailyReminderHour, inscritLe });
+          },
+        ),
       );
     });
 
