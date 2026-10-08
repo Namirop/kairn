@@ -14,6 +14,12 @@ export const reglages: Messages["compte"]["reglages"] = {
     raison:
       "Detected from your browser on each visit, and updated on its own if you change countries. It decides what day it is for you, and when your reminder goes out.",
   },
+  langue: {
+    intitule: "Language",
+    explication:
+      "The language of the app, your emails and your next drops. What you've already dropped in keeps its own.",
+    echec: "The language couldn't be changed. Try again in a moment.",
+  },
   probleme: {
     titre: "A problem, a comment",
     texte:

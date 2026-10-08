@@ -1,9 +1,7 @@
-import { parseCookies } from "better-auth/cookies";
 import type { Langue } from "@/lib/db/types";
 import { findUserSettings } from "@/lib/db/user-settings";
 import { LONGUEUR_DU_CODE } from "@/lib/domain/code-de-connexion";
-import { langueDevinee } from "@/lib/domain/langue-devinee";
-import { COOKIE_DE_LANGUE } from "@/lib/i18n/langues";
+import { langueDesEnTetes } from "@/lib/i18n/langue-des-en-tetes";
 import { sendEmail } from "./client";
 import { renderCodeDeConnexion } from "./templates/code-de-connexion";
 
@@ -53,10 +51,7 @@ async function langueDuCode({ userId, entetes }: Provenance): Promise<Langue> {
 
   if (duCompte) return duCompte;
 
-  return langueDevinee({
-    choix: parseCookies(entetes?.get("cookie") ?? "").get(COOKIE_DE_LANGUE),
-    acceptLanguage: entetes?.get("accept-language"),
-  });
+  return langueDesEnTetes(entetes);
 }
 
 export async function envoyerLeCodeDeConnexion(

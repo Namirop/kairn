@@ -33,3 +33,18 @@ export function adressePublique(chemin: string, langue: Langue): string {
 
   return chemin === ROUTES.accueil ? PREFIXE_ANGLAIS : `${PREFIXE_ANGLAIS}${chemin}`;
 }
+
+/** Posé par le middleware : la page publique servie, sans son préfixe de langue. */
+export const EN_TETE_DU_CHEMIN = "x-kairn-chemin";
+
+/**
+ * Les deux versions d'une page publique, pour `alternates.languages` : un
+ * moteur sert alors à chacun la sienne au lieu de les tenir pour un doublon.
+ */
+export function versionsDeLaPage(chemin: string): Record<string, string> {
+  return {
+    fr: adressePublique(chemin, "FR"),
+    en: adressePublique(chemin, "EN"),
+    "x-default": adressePublique(chemin, "FR"),
+  };
+}

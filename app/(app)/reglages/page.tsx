@@ -7,6 +7,7 @@ import { MesDonnees } from "@/components/compte/mes-donnees";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Strates } from "@/components/coquille/strates";
+import { ChoixDeLaLangue } from "@/components/reglages/choix-de-la-langue";
 import { FormulaireDeReglages } from "@/components/reglages/formulaire-de-reglages";
 import { TonOffre } from "@/components/reglages/ton-offre";
 import { UnRetour } from "@/components/reglages/un-retour";
@@ -105,6 +106,10 @@ export default async function PageReglages({ searchParams }: Parametres) {
           alerteActive={reglages.streakAlertEnabled}
           emailsActifs={reglages.emailOptOutAt === null}
         />
+
+        <div className="mt-pas-2">
+          <ChoixDeLaLangue langue={reglages.langue} />
+        </div>
 
         <dl className="gap-pas-2 mt-pas-12 flex flex-col">
           <Ligne

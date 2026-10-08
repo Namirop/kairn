@@ -6,6 +6,7 @@ import { TIMEZONE_HEADER } from "@/lib/auth/en-tetes";
 import { envoyerLAccueil } from "@/lib/auth/email-d-accueil";
 import { reprendreLaVisite } from "@/lib/auth/reprise-de-visite";
 import { provisionAccount } from "@/lib/db/account-provisioning";
+import { langueDesEnTetes } from "@/lib/i18n/langue-des-en-tetes";
 import { prisma } from "@/lib/db/client";
 import { envoyerLeCodeDeConnexion, MINUTES_DE_VALIDITE } from "@/lib/email/connexion";
 import { LONGUEUR_DU_CODE } from "@/lib/domain/code-de-connexion";
@@ -46,10 +47,7 @@ export const isGoogleEnabled = Object.keys(socialProviders()).length > 0;
 function trustedOrigins(): string[] {
   const deploiement = process.env.VERCEL_URL;
 
-  return [
-    ...(deploiement ? [`https://${deploiement}`] : []),
-    ...originesDuReseauLocal(),
-  ];
+  return [...(deploiement ? [`https://${deploiement}`] : []), ...originesDuReseauLocal()];
 }
 
 /**
@@ -112,7 +110,9 @@ export const auth = betterAuth({
           const submitted = context?.headers?.get(TIMEZONE_HEADER);
           const timezone = submitted && isSupportedTimeZone(submitted) ? submitted : "UTC";
 
-          await provisionAccount(user.id, timezone);
+          // La langue de l'inscription : le choix fait sur le site, à défaut le
+          // navigateur. Par Google comme par code, la requête porte les deux.
+          await provisionAccount(user.id, timezone, langueDesEnTetes(context?.headers));
 
           // Ce qu'un visiteur avait déposé avant de créer son compte lui revient
           // ici, et c'est ici seulement : c'est le seul instant où l'on tient à

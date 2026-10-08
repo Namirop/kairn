@@ -1,3 +1,4 @@
+import type { Langue } from "@/lib/db/types";
 import { z } from "zod";
 import { prisma } from "@/lib/db/client";
 import { marquerEnCours } from "@/lib/db/ingestion";
@@ -107,6 +108,12 @@ export async function deposerSansCompte(
   adresse: string,
   sessionExistante: string | null,
   t: TraduireLesRefus = textesDesRefus(),
+  /**
+   * La langue de la page de l'essai, figée sur le dépôt comme pour un compte.
+   * Le français par défaut est celui des scripts de vérification, qui
+   * déposent en français ; l'essai, lui, la passe toujours.
+   */
+  langue: Langue = "FR",
 ): Promise<ResultatDepotAnonyme> {
   const valide = schemaAnonyme(t).safeParse({ texte });
 
@@ -142,6 +149,7 @@ export async function deposerSansCompte(
   const depot = await prisma.input.create({
     data: {
       anonymousSessionId: session.sessionId,
+      langue,
       rawContent: valide.data.texte,
       sourceType: "TEXT",
       status: "PENDING",

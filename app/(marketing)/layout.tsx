@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Marque } from "@/components/coquille/marque";
+import { LienDeLangue } from "@/components/site/lien-de-langue";
 import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
+import { EN_TETE_DU_CHEMIN, versionsDeLaPage } from "@/lib/i18n/adresses";
 
 /**
  * La coquille publique.
@@ -17,6 +21,13 @@ import { getCurrentUser } from "@/lib/auth/session";
  * pages légales cessent d'être statiques — elles lisent une session comme le
  * reste de la coquille.
  */
+/** Chaque page publique désigne sa version dans l'autre langue. */
+export async function generateMetadata(): Promise<Metadata> {
+  const chemin = (await headers()).get(EN_TETE_DU_CHEMIN);
+
+  return chemin ? { alternates: { languages: versionsDeLaPage(chemin) } } : {};
+}
+
 export default async function CoquilleSite({ children }: { children: React.ReactNode }) {
   const utilisateur = await getCurrentUser();
   const t = await getTranslations("site.accueil.entete");
@@ -47,12 +58,15 @@ export default async function CoquilleSite({ children }: { children: React.React
           <Link href={ROUTES.accueil} className="rounded-galet">
             <Marque taille={30} />
           </Link>
-          <Link
-            href={utilisateur ? ROUTES.aujourdhui : ROUTES.connexion}
-            className="text-h2-app rounded-galet px-pas-6 py-pas-3 hover:bg-surface-ombre text-stone-500 transition-colors hover:text-stone-900"
-          >
-            {utilisateur ? t("aujourdhui") : t("seConnecter")}
-          </Link>
+          <div className="gap-pas-2 flex items-center">
+            <LienDeLangue />
+            <Link
+              href={utilisateur ? ROUTES.aujourdhui : ROUTES.connexion}
+              className="text-h2-app rounded-galet px-pas-6 py-pas-3 hover:bg-surface-ombre text-stone-500 transition-colors hover:text-stone-900"
+            >
+              {utilisateur ? t("aujourdhui") : t("seConnecter")}
+            </Link>
+          </div>
         </div>
       </header>
 

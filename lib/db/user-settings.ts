@@ -182,3 +182,10 @@ export async function lireLangueUtilisateur(userId: string): Promise<Langue> {
 
   return reglages.langue;
 }
+
+/** La langue du compte. Rien de ce qui est déjà déposé ne change avec elle. */
+export async function changerDeLangue(userId: string, langue: Langue): Promise<boolean> {
+  const { count } = await prisma.userSettings.updateMany({ where: { userId }, data: { langue } });
+
+  return count > 0;
+}

@@ -13,6 +13,12 @@ export const reglages = {
     raison:
       "Détecté depuis ton navigateur à chaque visite, et corrigé tout seul si tu changes de pays. Il décide quel jour il est pour toi, et à quelle heure part ton rappel.",
   },
+  langue: {
+    intitule: "Langue",
+    explication:
+      "Celle de l'application, des emails et de tes prochains dépôts. Ce que tu as déjà déposé garde la sienne.",
+    echec: "La langue n'a pas pu changer. Réessaie dans un instant.",
+  },
   probleme: {
     titre: "Un problème, une remarque",
     texte:

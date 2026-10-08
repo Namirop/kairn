@@ -6,6 +6,7 @@ import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 import { adresseDuVisiteur, lireLaVisite, poserLaVisite } from "@/lib/auth/visite";
 import { deposerSansCompte } from "@/lib/depots/deposer-sans-compte";
+import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 import { lireLEssaiEnCours, type AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
 /**
@@ -44,6 +45,7 @@ export async function essayerAction(_precedent: EtatEssai, donnees: FormData): P
     await adresseDuVisiteur(),
     await lireLaVisite(),
     await getTranslations("depots.refus"),
+    await langueDeLaRequete(),
   );
 
   if (!resultat.ok) return { erreur: resultat.motif };
