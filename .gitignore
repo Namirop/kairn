@@ -76,3 +76,6 @@ next-env.d.ts
 # centime : quelques mégaoctets d'opaque par passage coûteraient plus cher à
 # relire dans l'historique qu'à recalculer. Les figés, eux, restent suivis.
 scripts/evaluation/vecteurs/
+
+# Outillage de design local (config et critiques de l'outil) : reste sur la machine.
+/.impeccable/
