@@ -14,7 +14,7 @@ Décidé le 08/10/2026.
 | une question                | a question                              |                                                                           |
 | la session (du jour)        | today's session                         |                                                                           |
 | réviser                     | review                                  | « Start reviewing », jamais « study ».                                    |
-| l'entraînement              | practice                                | « Keep practicing » ; orthographe américaine partout.            |
+| l'entraînement              | practice                                | « Keep practicing » ; orthographe américaine partout.                     |
 | Aujourd'hui                 | Today                                   |                                                                           |
 | Réglages                    | Settings                                |                                                                           |
 | la série                    | streak                                  |                                                                           |
