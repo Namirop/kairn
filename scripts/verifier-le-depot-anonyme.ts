@@ -39,7 +39,7 @@ import { executerToutLePipeline } from "./verification/depot-simule";
  * À sec par défaut. `--emettre` pour appeler le modèle pour de vrai.
  */
 
-const CORPUS = "corpus-test-landing.md";
+const CORPUS = "docs/corpus-test-landing.md";
 
 /** Ce que le corpus déclare comme vérifiable à la ligne près. */
 type Controle =

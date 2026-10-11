@@ -2,10 +2,7 @@
   "cases": [
     {
       "name": "liste-de-courses",
-      "keywords": [
-        "liste de courses",
-        "lentilles corail"
-      ],
+      "keywords": ["liste de courses", "lentilles corail"],
       "output": {
         "nature": "FACTUEL",
         "atoms": [],
@@ -14,26 +11,18 @@
     },
     {
       "name": "fiction-douteuse",
-      "keywords": [
-        "dragon des cendres"
-      ],
+      "keywords": ["dragon des cendres"],
       "output": {
         "nature": "FICTION",
         "atoms": [
           {
             "concept": "Le dragon des cendres ne crache pas de flamme mais une poussière brûlante, qui s'enflamme au contact de l'air humide.",
-            "tags": [
-              "bestiaire",
-              "dragons"
-            ],
+            "tags": ["bestiaire", "dragons"],
             "uncertain": true
           },
           {
             "concept": "Un dragon des cendres ne s'approche pas par temps de pluie : l'humidité déclenche sa poussière avant qu'il ne la libère.",
-            "tags": [
-              "bestiaire",
-              "dragons"
-            ],
+            "tags": ["bestiaire", "dragons"],
             "uncertain": true
           }
         ],
@@ -42,26 +31,18 @@
     },
     {
       "name": "affirmation-fausse",
-      "keywords": [
-        "concurrently"
-      ],
+      "keywords": ["concurrently"],
       "output": {
         "nature": "FACTUEL",
         "atoms": [
           {
             "concept": "`CREATE INDEX CONCURRENTLY` pose un verrou exclusif sur la table pendant toute la construction de l'index, ce qui bloque les écritures.",
-            "tags": [
-              "postgres",
-              "index"
-            ],
+            "tags": ["postgres", "index"],
             "uncertain": true
           },
           {
             "concept": "Un `CREATE INDEX CONCURRENTLY` interrompu laisse un index invalide en base. Il faut le supprimer avant de relancer la construction.",
-            "tags": [
-              "postgres",
-              "index"
-            ],
+            "tags": ["postgres", "index"],
             "uncertain": false
           }
         ],
@@ -70,34 +51,23 @@
     },
     {
       "name": "explication-maladroite",
-      "keywords": [
-        "ça repart en boucle"
-      ],
+      "keywords": ["ça repart en boucle"],
       "output": {
         "nature": "FACTUEL",
         "atoms": [
           {
             "concept": "La fonction rendue par un `useEffect` est appelée avant chaque réexécution de l'effet et au démontage du composant. C'est là qu'on défait ce que l'effet a mis en place.",
-            "tags": [
-              "react",
-              "useeffect"
-            ],
+            "tags": ["react", "useeffect"],
             "uncertain": false
           },
           {
             "concept": "Un effet qui pose un abonnement sans le retirer dans sa fonction de nettoyage en accumule un par exécution. Les abonnements des rendus précédents continuent de répondre.",
-            "tags": [
-              "react",
-              "useeffect"
-            ],
+            "tags": ["react", "useeffect"],
             "uncertain": false
           },
           {
             "concept": "Une fonction ou un objet recréé à chaque rendu et placé dans le tableau de dépendances d'un effet change d'identité à chaque fois, donc l'effet se rejoue à chaque rendu.",
-            "tags": [
-              "react",
-              "useeffect"
-            ],
+            "tags": ["react", "useeffect"],
             "uncertain": false
           }
         ],
@@ -106,26 +76,18 @@
     },
     {
       "name": "consigne-qui-ecarte",
-      "keywords": [
-        "barre latérale"
-      ],
+      "keywords": ["barre latérale"],
       "output": {
         "nature": "FACTUEL",
         "atoms": [
           {
             "concept": "Un index composite sur `(a, b)` sert une requête qui filtre sur `a`, ou sur `a` et `b`.",
-            "tags": [
-              "postgres",
-              "index"
-            ],
+            "tags": ["postgres", "index"],
             "uncertain": false
           },
           {
             "concept": "Un index composite sur `(a, b)` ne sert pas une requête qui ne filtre que sur `b` : l'ordre des colonnes décide de ce qu'il peut couvrir.",
-            "tags": [
-              "postgres",
-              "index"
-            ],
+            "tags": ["postgres", "index"],
             "uncertain": false
           }
         ],
@@ -141,10 +103,7 @@
         "atoms": [
           {
             "concept": "`Array.prototype.at()` accepte un index négatif, compté depuis la fin du tableau : `at(-1)` rend le dernier élément.",
-            "tags": [
-              "javascript",
-              "tableaux"
-            ],
+            "tags": ["javascript", "tableaux"],
             "uncertain": false
           }
         ],
@@ -159,26 +118,17 @@
         "atoms": [
           {
             "concept": "Chaque instruction d'un Dockerfile produit une couche. Une couche n'est réutilisée que si toutes celles qui la précèdent sont inchangées, d'où l'intérêt de copier le manifeste de dépendances avant le code source.",
-            "tags": [
-              "docker",
-              "cache"
-            ],
+            "tags": ["docker", "cache"],
             "uncertain": false
           },
           {
             "concept": "`COPY` se contente de copier des fichiers du contexte de build. `ADD` y ajoute la décompression d'archives et le téléchargement d'URL, deux comportements implicites qui rendent le build moins prévisible.",
-            "tags": [
-              "docker",
-              "dockerfile"
-            ],
+            "tags": ["docker", "dockerfile"],
             "uncertain": false
           },
           {
             "concept": "Un build multi-étapes compile dans une image outillée puis ne copie que le résultat dans une image finale minimale. Les outils de compilation ne se retrouvent pas dans l'image livrée.",
-            "tags": [
-              "docker",
-              "multistage"
-            ],
+            "tags": ["docker", "multistage"],
             "uncertain": false
           }
         ],
@@ -193,66 +143,42 @@
         "atoms": [
           {
             "concept": "JavaScript exécute une seule pile d'appels à la fois. Tant qu'une fonction n'a pas rendu la main, rien d'autre ne s'exécute : ni minuterie échue, ni promesse résolue, ni gestionnaire d'événement.",
-            "tags": [
-              "javascript",
-              "eventloop"
-            ],
+            "tags": ["javascript", "eventloop"],
             "uncertain": false
           },
           {
             "concept": "La boucle d'événements sépare deux files : les tâches, alimentées par les minuteries et les événements, et les microtâches, alimentées par les promesses et `queueMicrotask`.",
-            "tags": [
-              "javascript",
-              "eventloop"
-            ],
+            "tags": ["javascript", "eventloop"],
             "uncertain": false
           },
           {
             "concept": "La file des microtâches est vidée entièrement entre deux tâches, y compris les microtâches ajoutées pendant qu'on la vide. Un `setTimeout(…, 0)` s'exécute donc après toutes les promesses déjà résolues.",
-            "tags": [
-              "javascript",
-              "eventloop"
-            ],
+            "tags": ["javascript", "eventloop"],
             "uncertain": false
           },
           {
             "concept": "Une boucle de promesses qui se réenchaînent sans fin remplit la file des microtâches en continu. La page ne rend plus rien et ne répond plus, alors qu'aucune boucle bloquante n'est visible dans le code.",
-            "tags": [
-              "javascript",
-              "eventloop"
-            ],
+            "tags": ["javascript", "eventloop"],
             "uncertain": false
           },
           {
             "concept": "Le délai passé à `setTimeout` est un minimum, pas une garantie : le rappel part quand la pile est vide et que les microtâches sont épuisées, ce qui peut être bien après le délai demandé.",
-            "tags": [
-              "javascript",
-              "timers"
-            ],
+            "tags": ["javascript", "timers"],
             "uncertain": false
           },
           {
             "concept": "`await` découpe la fonction en deux : ce qui suit l'attente devient une microtâche planifiée à la résolution de la promesse. Le code appelant reprend la main entre les deux moitiés.",
-            "tags": [
-              "javascript",
-              "async"
-            ],
+            "tags": ["javascript", "async"],
             "uncertain": false
           },
           {
             "concept": "`Promise.all` rejette dès le premier échec et perd les résultats des autres promesses, qui continuent pourtant de tourner. `Promise.allSettled` attend tout le monde et rend un statut par entrée.",
-            "tags": [
-              "javascript",
-              "promesses"
-            ],
+            "tags": ["javascript", "promesses"],
             "uncertain": false
           },
           {
             "concept": "Une promesse rejetée sans gestionnaire déclenche `unhandledrejection` dans le navigateur et fait tomber le processus Node par défaut. Attacher le `catch` plus tard dans le même tour de boucle suffit à l'éviter.",
-            "tags": [
-              "javascript",
-              "erreurs"
-            ],
+            "tags": ["javascript", "erreurs"],
             "uncertain": false
           }
         ],
