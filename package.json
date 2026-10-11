@@ -40,7 +40,8 @@
     "lire:cache": "tsx scripts/lire-taux-de-cache.ts",
     "depot:code": "tsx scripts/ajouter-depot-de-code.ts",
     "exporter:assets": "tsx scripts/exporter-les-assets.ts",
-    "exporter:marque": "tsx scripts/exporter-la-marque.tsx"
+    "exporter:marque": "tsx scripts/exporter-la-marque.tsx",
+    "prepare": "husky"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.116.0",
@@ -68,6 +69,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -78,6 +81,8 @@
     "eslint-config-next": "15.5.26",
     "eslint-config-prettier": "^10.1.8",
     "fast-check": "^4.9.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "prisma": "^7.9.1",
