@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push on the same branch cancels the run still in progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # `prisma generate` reads prisma.config.ts, which requires this variable even
+  # though no database is reached. A placeholder is enough.
+  DIRECT_URL: postgresql://ci:ci@localhost:5432/ci
+
+jobs:
+  checks:
+    name: Lint, types, format, tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run format:check
+      - run: npm test
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Not `npm run build`: that one also runs `prisma migrate deploy`.
+      - run: npx next build --turbopack
+        env:
+          # Placeholders: the build loads the route modules, which read these
+          # variables at import time. Nothing connects to a database or a service.
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+          BETTER_AUTH_SECRET: ci-placeholder-secret-not-used-anywhere-else
+          BETTER_AUTH_URL: http://localhost:3000
+          MOCK_AI: "true"
