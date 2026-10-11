@@ -37,7 +37,7 @@ import { executerToutLePipeline } from "./verification/depot-simule";
  * À sec par défaut. `--emettre` pour appeler le modèle.
  */
 
-const CORPUS = "corpus-test-landing.md";
+const CORPUS = "docs/corpus-test-landing.md";
 
 type Attendu = "rejet" | "concepts";
 type Cas = { code: string; passages: number; attendu: Attendu };
