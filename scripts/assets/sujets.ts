@@ -26,11 +26,15 @@ export type Sujet = {
 const DOSSIER = path.join(import.meta.dirname, "sujets");
 const CORPUS = path.join(import.meta.dirname, "..", "evaluation", "corpus");
 
+/**
+ * Le dépôt porte le nom de son fichier, comme au banc : un `.en.` dans le nom
+ * le fait déposer par quelqu'un qui révise en anglais (`langueDuDepot`).
+ */
 function texte(cle: string, titre: string, fichier: string): Sujet {
   return {
     cle,
     titre,
-    depot: { nom: cle, texte: readFileSync(path.join(DOSSIER, fichier), "utf8").trim() },
+    depot: { nom: fichier, texte: readFileSync(path.join(DOSSIER, fichier), "utf8").trim() },
   };
 }
 
@@ -61,6 +65,9 @@ export const SUJETS: Sujet[] = [
   // Une capture d'assistant reconstituée : elle exerce l'OCR et sert le dépôt
   // « avec une capture d'écran jointe ». Réutilisée du corpus du banc.
   image("capture-assistant", "Capture d'écran jointe", "07-capture-assistant.png", "image/png"),
+  // Le seul sujet anglais : un cours collé par quelqu'un qui révise en anglais,
+  // pour les captures de l'interface anglaise.
+  texte("cours-biologie", "Biology class", "cours-biologie.en.txt"),
 ];
 
 /** Le rang d'un sujet dans l'ordre canonique, pour trier le figé. */

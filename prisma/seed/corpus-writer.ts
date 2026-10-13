@@ -94,6 +94,7 @@ async function writeInput(userId: string, input: SeedInput, now: Date): Promise<
       rawContent: input.rawContent,
       sourceType: input.sourceType,
       extractedText: input.extractedText ?? null,
+      langue: input.langue,
       status: "READY",
       createdAt,
       updatedAt: createdAt,

@@ -34,12 +34,22 @@ npm run assets:videos                   # ou : -- session   pour une seule scèn
 `assets:figer` ne réextrait que les sujets absents du figé ; `-- --refaire` les
 reprend tous. `assets:videos` accepte un filtre par nom de scène.
 
+`assets:captures` prend deux options. `--langue en` capture l'interface anglaise
+sur les seuls dépôts anglais (un sujet dont le fichier porte `.en.`) : le compte
+de démo passe en anglais le temps des captures puis reprend sa langue, et les
+fichiers prennent `.en` avant l'extension. `--seulement` ne tire que les
+fichiers nommés, en `<viewport>/<ecran>/<sujet>` :
+
+```bash
+npm run assets:captures -- --langue en --seulement mobile/depot-colle/cours-biologie,mobile/question/mcq-faux
+```
+
 ## Sortie
 
 Les fichiers sont écrits **hors du dépôt**, dans `../contenu/commun/assets/`
 (réglable par `ASSETS_OUT_DIR`), rangés en
-`<mobile|bureau>/<ecran>/<sujet>.png|.mp4`. Un `manifest.json` à la racine décrit
-chaque fichier (écran, sujet, format de question, viewport, date, dépôt source) —
+`<mobile|bureau>/<ecran>/<sujet>[.en].png|.mp4`. Un `manifest.json` à la racine décrit
+chaque fichier (écran, sujet, format de question, viewport, langue, date, dépôt source) —
 c'est lui que le studio interroge. Les PNG et MP4 ne sont pas versionnés ; le
 manifeste, si.
 
@@ -70,5 +80,6 @@ sous ce même drapeau, pour qu'il ne se glisse pas dans les captures.
 ## Prérequis
 
 `ffmpeg` sur le `PATH` (montage vidéo), et le navigateur Playwright
-(`npx playwright install chromium`). Le serveur dev et le seed doivent viser la
+(`npx playwright install chromium`) — ou, à défaut, `ASSETS_NAVIGATEUR=chrome`
+pour piloter le Chrome installé. Le serveur dev et le seed doivent viser la
 même base.

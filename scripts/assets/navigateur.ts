@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { chromium, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import type { Langue } from "@/lib/db/types";
 import {
   assurerLeDossier,
   BASE_URL,
@@ -19,8 +20,14 @@ import { cookiesDeSession } from "@/scripts/assets/session";
  * `display: swap` au lieu de Satoshi ou Bricolage.
  */
 
+/**
+ * Le Chromium de Playwright, ou un navigateur installé nommé par
+ * `ASSETS_NAVIGATEUR` (`chrome`, `msedge`) quand celui de Playwright manque.
+ */
 export async function ouvrirLeNavigateur(): Promise<Browser> {
-  return chromium.launch();
+  const canal = process.env.ASSETS_NAVIGATEUR;
+
+  return chromium.launch(canal ? { channel: canal } : {});
 }
 
 /** Un contexte réglé pour un viewport, connecté au compte de démo ou non. */
@@ -56,6 +63,8 @@ export type OptionsDeTir = {
   sujet?: string;
   format?: string;
   depotSource?: string;
+  /** La langue de l'interface ; le français par défaut. */
+  langue?: Langue;
   /** Un sélecteur CSS pour ne tirer qu'un élément (recadrage serré). */
   selecteur?: string;
   /** Toute la page plutôt que la seule fenêtre visible. */
@@ -70,6 +79,7 @@ export async function tirer(page: Page, opts: OptionsDeTir): Promise<string> {
     viewport: opts.viewport,
     ecran: opts.ecran,
     sujet: opts.sujet,
+    langue: opts.langue,
     ext: "png",
   });
   assurerLeDossier(fichier);
@@ -88,6 +98,7 @@ export async function tirer(page: Page, opts: OptionsDeTir): Promise<string> {
     viewport: opts.viewport,
     format: opts.format ?? null,
     depotSource: opts.depotSource ?? null,
+    langue: opts.langue ?? "FR",
     date: new Date().toISOString(),
   });
 

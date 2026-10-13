@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
+import type { Langue } from "@/lib/db/types";
 
 /**
  * La configuration de la banque d'assets.
@@ -36,15 +37,19 @@ export const VIEWPORTS = {
  * Le chemin d'un fichier produit : `<out>/<viewport>/<ecran>/<sujet>.<ext>`.
  *
  * Sans sujet, l'écran nomme lui-même le fichier — pour les écrans qui n'ont pas
- * de déclinaison par sujet (la page des offres, l'email de rappel).
+ * de déclinaison par sujet (la page des offres, l'email de rappel). Une capture
+ * de l'interface anglaise prend `.en` avant l'extension, à côté de la française
+ * sans l'écraser.
  */
 export function cheminDeSortie(opts: {
   viewport: Viewport;
   ecran: string;
   sujet?: string;
+  langue?: Langue;
   ext: "png" | "mp4";
 }): string {
-  const nom = opts.sujet ? `${opts.sujet}.${opts.ext}` : `${opts.ecran}.${opts.ext}`;
+  const suffixe = opts.langue === "EN" ? ".en" : "";
+  const nom = `${opts.sujet ?? opts.ecran}${suffixe}.${opts.ext}`;
 
   return path.join(ASSETS_OUT_DIR, opts.viewport, opts.ecran, nom);
 }

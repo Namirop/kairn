@@ -3,6 +3,7 @@ import { compterReussitesConsecutives, etatApresRevision } from "@/lib/domain/et
 import type { SeedAtom, SeedInput, SeedReview, SeedVariant } from "@/prisma/seed/corpus-types";
 import { replay } from "@/prisma/seed/replay";
 import type { DepotDAssets, VariantDAssets } from "@/scripts/assets/fige";
+import { langueDuDepot } from "@/scripts/evaluation/corpus";
 
 /**
  * Transforme le figé d'assets en corpus de seed, avec un historique de révisions
@@ -124,6 +125,7 @@ export function construireLeCorpus(depots: DepotDAssets[], now: Date): SeedInput
       rawContent: depot.texte,
       sourceType: depot.estImage ? "IMAGE" : "TEXT",
       ...(depot.estImage ? { extractedText: depot.texte } : {}),
+      langue: langueDuDepot(depot.nom),
       createdDaysAgo: maxJour + 2,
       atoms,
     };

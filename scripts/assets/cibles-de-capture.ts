@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import type { Langue } from "@/lib/db/types";
 import { optionsDUnQCM, texteATrouServi } from "@/lib/db/question-servie";
 import { SEED_USER_ID } from "@/prisma/seed/account";
 import { lireFigeDAssets } from "@/scripts/assets/fige";
@@ -11,14 +12,20 @@ import { lireFigeDAssets } from "@/scripts/assets/fige";
  * générées, celle qui illustre le mieux le format — jamais on n'en invente une.
  */
 
-export type DepotDeDemo = { id: string; cle: string; titre: string; estImage: boolean };
+export type DepotDeDemo = {
+  id: string;
+  cle: string;
+  titre: string;
+  estImage: boolean;
+  langue: Langue;
+};
 
 /** Les dépôts seedés, appariés aux sujets du figé par leur texte. */
 export async function depotsDeDemo(): Promise<DepotDeDemo[]> {
   const fige = lireFigeDAssets();
   const inputs = await prisma.input.findMany({
     where: { userId: SEED_USER_ID, status: "READY" },
-    select: { id: true, rawContent: true, extractedText: true },
+    select: { id: true, rawContent: true, extractedText: true, langue: true },
     orderBy: { createdAt: "asc" },
   });
 
@@ -29,7 +36,15 @@ export async function depotsDeDemo(): Promise<DepotDeDemo[]> {
       (entree) => entree.rawContent === depot.texte || entree.extractedText === depot.texte,
     );
 
-    if (input) cibles.push({ id: input.id, cle: depot.cle, titre: depot.titre, estImage: depot.estImage });
+    if (input) {
+      cibles.push({
+        id: input.id,
+        cle: depot.cle,
+        titre: depot.titre,
+        estImage: depot.estImage,
+        langue: input.langue,
+      });
+    }
   }
 
   return cibles;
@@ -49,11 +64,13 @@ function servable(format: string, payload: unknown, answerKey: string): boolean 
 /**
  * Une question par format, celle dont la longueur d'énoncé approche le mieux une
  * cible lisible — assez pour être claire, pas au point d'être tronquée à l'écran.
+ * Seulement parmi les dépôts de la langue capturée : une question anglaise n'a
+ * rien à faire dans l'interface française.
  */
-export async function variantesParFormat(): Promise<CibleDeFormat[]> {
+export async function variantesParFormat(langue: Langue): Promise<CibleDeFormat[]> {
   const LONGUEUR_CIBLE = 90;
   const variants = await prisma.variant.findMany({
-    where: { atom: { userId: SEED_USER_ID }, retiredAt: null },
+    where: { atom: { userId: SEED_USER_ID, input: { langue } }, retiredAt: null },
     select: { id: true, format: true, question: true, answerKey: true, payload: true },
   });
 

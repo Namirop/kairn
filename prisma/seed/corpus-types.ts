@@ -1,6 +1,7 @@
 import type {
   AtomState,
   InputSourceType,
+  Langue,
   ReviewRating,
   VariantFacet,
   VariantFormat,
@@ -36,6 +37,8 @@ export type SeedInput = {
   rawContent: string;
   sourceType: InputSourceType;
   extractedText?: string;
+  /** La langue de ses concepts et questions ; le français par défaut. */
+  langue?: Langue;
   createdDaysAgo: number;
   atoms: SeedAtom[];
 };

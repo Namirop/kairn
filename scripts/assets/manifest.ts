@@ -25,6 +25,8 @@ const entree = z.object({
   format: z.string().nullable(),
   /** Le nom du dépôt source dans le figé d'assets, quand il y en a un. */
   depotSource: z.string().nullable(),
+  /** La langue de l'interface capturée. Les entrées d'avant l'anglais sont françaises. */
+  langue: z.enum(["FR", "EN"]).default("FR"),
   /** Instant de génération, en ISO 8601. */
   date: z.string().min(1),
 });
@@ -57,9 +59,9 @@ export function ecrireManifeste(entrees: EntreeDeManifeste[]): void {
  * Ajoute une entrée, ou remplace celle du même fichier, puis réécrit le
  * manifeste. La clé est le chemin : rejouer une capture ne crée pas de doublon.
  */
-export function ajouterAuManifeste(nouvelle: EntreeDeManifeste): void {
+export function ajouterAuManifeste(nouvelle: z.input<typeof entree>): void {
   const entrees = lireManifeste().filter((e) => e.fichier !== nouvelle.fichier);
 
-  entrees.push(nouvelle);
+  entrees.push(entree.parse(nouvelle));
   ecrireManifeste(entrees);
 }

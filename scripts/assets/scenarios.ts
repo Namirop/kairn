@@ -4,6 +4,7 @@ import { writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import type { Page } from "@playwright/test";
+import type { Langue } from "@/lib/db/types";
 import { renderDailyReminder } from "@/lib/email/templates/daily-reminder";
 import { aller } from "@/scripts/assets/navigateur";
 
@@ -30,10 +31,12 @@ export function ecrireEmailDeRappel(
   dueCount: number,
   currentStreak: number,
   dossier: string,
+  langue: Langue,
 ): string {
   const rendu = renderDailyReminder(
     { dueCount, currentStreak },
     { sessionUrl: "https://kairn.app/reviser", unsubscribeUrl: "https://kairn.app/desinscription" },
+    langue,
   );
   const fichier = path.join(dossier, "email-de-rappel.html");
 

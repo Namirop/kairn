@@ -1,5 +1,5 @@
 {
-  "genereLe": "2026-09-28T10:45:29.873Z",
+  "genereLe": "2026-10-12T19:56:54.753Z",
   "modele": "claude-sonnet-5",
   "depots": [
     {
@@ -3234,6 +3234,546 @@
                 "Domaine public pour le backend, domaine privé pour Postgres"
               ],
               "correctIndex": 3,
+              "cloze": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cle": "cours-biologie",
+      "titre": "Biology class",
+      "nom": "cours-biologie.en.txt",
+      "texte": "Biology class — how the immune system fights an infection\n\nWhen a pathogen such as a bacterium or a virus gets past the skin, the body answers in two waves. The first is the innate immune system: it reacts within minutes to hours, and it attacks anything that looks foreign without recognizing one germ from another. The second is the adaptive immune system: it takes several days to get going, but it targets one specific pathogen and remembers it.\n\nThe innate response starts with inflammation. Damaged cells release chemical signals that widen nearby blood vessels, which is why an infected cut turns red, warm and swollen. White blood cells called phagocytes, mainly neutrophils and macrophages, squeeze out of the vessels and engulf the invaders, a process called phagocytosis.\n\nThe adaptive response relies on lymphocytes. B cells produce antibodies, Y-shaped proteins that lock onto one particular antigen, the molecular \"tag\" on the surface of a pathogen. An antibody does not kill the germ by itself: it neutralizes it and marks it for destruction by other cells. Helper T cells coordinate the response by activating B cells, while cytotoxic T cells destroy the body's own cells once a virus has infected them.\n\nAfter the infection is cleared, most of these lymphocytes die off, but some remain as memory cells. If the same pathogen shows up again, memory cells recognize it right away and launch a faster, stronger response, often before any symptoms appear. This is called immunological memory, and it is the reason you usually catch chickenpox only once.",
+      "estImage": false,
+      "lecture": null,
+      "nature": "FACTUEL",
+      "rejet": null,
+      "echec": null,
+      "concepts": [
+        {
+          "concept": "The immune system responds to a pathogen in two waves: the innate immune system reacts within minutes to hours against anything foreign without recognizing specific germs, while the adaptive immune system takes several days to activate but targets one specific pathogen and remembers it.",
+          "tags": [
+            "immune-system",
+            "innate-immunity",
+            "adaptive-immunity"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "The ___ immune system reacts within minutes to hours against anything foreign without recognizing specific germs.",
+              "answerKey": "The innate system reacts fast but without recognizing specific germs, while the adaptive system is slower and targets one specific pathogen.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "The ___ immune system reacts within minutes to hours against anything foreign without recognizing specific germs.",
+                "accepted": [
+                  "innate",
+                  "innate immune"
+                ],
+                "leurres": [
+                  "adaptive",
+                  "acquired",
+                  "specific"
+                ]
+              }
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Explain the key difference in timing and targeting between the innate and adaptive immune systems.",
+              "answerKey": "The innate immune system reacts within minutes to hours against anything foreign, without recognizing specific germs. The adaptive immune system takes several days to activate, but it targets one specific pathogen and remembers it.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "The adaptive immune system reacts within minutes to hours and does not recognize specific germs.",
+              "answerKey": "This describes the innate immune system instead. The adaptive immune system takes several days to activate, but targets one specific pathogen and remembers it, while the innate system reacts within minutes to hours without recognizing specific germs.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "A person is exposed to a pathogen their body has encountered and fought off once before. Based on how the adaptive immune system behaves, what would you expect?",
+              "answerKey": "The adaptive immune system remembers the specific pathogen it has targeted before.",
+              "estVraie": null,
+              "options": [
+                "Neither system responds any differently than to a completely new pathogen",
+                "The innate immune system recognizes and remembers the specific pathogen from before",
+                "The adaptive immune system recognizes and remembers the specific pathogen from before",
+                "The adaptive immune system reacts within minutes because it is now the only system responding"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "The innate response starts with inflammation: damaged cells release chemical signals that widen nearby blood vessels, which is why an infected cut turns red, warm and swollen.",
+          "tags": [
+            "innate-immunity",
+            "inflammation"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "The innate response starts with ___: damaged cells release chemical signals that widen nearby blood vessels.",
+              "answerKey": "The innate response begins with this process, triggered by damaged cells releasing chemical signals that widen nearby blood vessels.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "The innate response starts with ___: damaged cells release chemical signals that widen nearby blood vessels.",
+                "accepted": [
+                  "inflammation"
+                ],
+                "leurres": [
+                  "phagocytosis",
+                  "coagulation",
+                  "infection"
+                ]
+              }
+            },
+            {
+              "format": "EXPLAIN",
+              "facet": "MECHANISM",
+              "question": "Explain why an infected cut becomes red, warm and swollen.",
+              "answerKey": "Damaged cells release chemical signals that widen nearby blood vessels. This widening of blood vessels near the injury is why an infected cut turns red, warm and swollen.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "The redness, warmth and swelling of an infected cut result from damaged cells releasing chemical signals that widen nearby blood vessels.",
+              "answerKey": "Damaged cells release chemical signals that widen nearby blood vessels, and this widening is why an infected cut turns red, warm and swollen.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "You notice a cut on your skin has become red, warm and swollen. According to how inflammation works, what is happening nearby?",
+              "answerKey": "Damaged cells have released chemical signals that widen nearby blood vessels.",
+              "estVraie": null,
+              "options": [
+                "The adaptive immune system has fully activated at the site",
+                "Blood vessels near the cut have narrowed to seal off the area",
+                "Damaged cells released chemical signals that widened nearby blood vessels",
+                "White blood cells have started remembering this specific pathogen"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "Phagocytes, mainly neutrophils and macrophages, are white blood cells that squeeze out of blood vessels and engulf invaders in a process called phagocytosis.",
+          "tags": [
+            "innate-immunity",
+            "phagocytosis"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "CLOZE",
+              "facet": "RECOGNITION",
+              "question": "Phagocytes, mainly ___ and macrophages, are white blood cells that squeeze out of blood vessels and engulf invaders.",
+              "answerKey": "These are the two main types of white blood cells described as phagocytes.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Phagocytes, mainly ___ and macrophages, are white blood cells that squeeze out of blood vessels and engulf invaders.",
+                "accepted": [
+                  "neutrophils",
+                  "neutrophil"
+                ],
+                "leurres": [
+                  "lymphocytes",
+                  "platelets",
+                  "antibodies"
+                ]
+              }
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Describe the process by which phagocytes deal with invaders, including how they reach them.",
+              "answerKey": "Phagocytes, mainly neutrophils and macrophages, are white blood cells that squeeze out of blood vessels and then engulf invaders in a process called phagocytosis.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Neutrophils and macrophages are white blood cells that squeeze out of blood vessels and engulf invaders.",
+              "answerKey": "Phagocytes, mainly neutrophils and macrophages, are described as white blood cells that squeeze out of blood vessels and engulf invaders in a process called phagocytosis.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "MCQ",
+              "facet": "APPLICATION",
+              "question": "A researcher observes white blood cells leaving a blood vessel near a wound and then engulfing bacteria. Based on the concept, what are these cells most likely doing?",
+              "answerKey": "They are phagocytes, mainly neutrophils and macrophages, performing phagocytosis.",
+              "estVraie": null,
+              "options": [
+                "Activating a response that targets one specific pathogen and remembers it",
+                "Taking several days to recognize the specific invader",
+                "Performing phagocytosis after squeezing out of the blood vessel",
+                "Releasing chemical signals to widen the blood vessel"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "The adaptive response relies on lymphocytes, including B cells and T cells.",
+          "tags": [
+            "adaptive-immunity",
+            "lymphocytes"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Which two cell types does the text name as the lymphocytes the adaptive response relies on?",
+              "answerKey": "The adaptive response relies on lymphocytes, specifically B cells and T cells.",
+              "estVraie": null,
+              "options": [
+                "B cells and macrophages",
+                "T cells and neutrophils",
+                "Macrophages and neutrophils",
+                "B cells and T cells"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "What role do lymphocytes play in the adaptive response, according to what is stated?",
+              "answerKey": "The adaptive response relies on lymphocytes, including B cells and T cells, meaning these cells are the basis on which this response depends.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "The adaptive response relies solely on T cells, without involvement from B cells.",
+              "answerKey": "The adaptive response relies on lymphocytes including both B cells and T cells, not T cells alone.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "The adaptive response relies on ___, including B cells and T cells.",
+              "answerKey": "The adaptive response is described as depending on a category of white blood cells that includes both B and T cells.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "The adaptive response relies on ___, including B cells and T cells.",
+                "accepted": [
+                  "lymphocytes",
+                  "lymphocyte"
+                ],
+                "leurres": [
+                  "antibodies",
+                  "pathogens",
+                  "antigens"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "B cells produce antibodies, Y-shaped proteins that lock onto one particular antigen, the molecular \"tag\" on the surface of a pathogen; an antibody does not kill the germ itself but neutralizes it and marks it for destruction by other cells.",
+          "tags": [
+            "adaptive-immunity",
+            "antibodies"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "What shape are the proteins that B cells produce to lock onto antigens?",
+              "answerKey": "B cells produce antibodies, which are Y-shaped proteins.",
+              "estVraie": null,
+              "options": [
+                "branched",
+                "Y-shaped",
+                "coiled",
+                "spherical"
+              ],
+              "correctIndex": 1,
+              "cloze": null
+            },
+            {
+              "format": "EXPLAIN",
+              "facet": "MECHANISM",
+              "question": "Explain what an antibody does to a pathogen once it locks onto its antigen, and what it does not do.",
+              "answerKey": "An antibody does not kill the germ itself; instead, it neutralizes the pathogen and marks it for destruction by other cells, after locking onto the particular antigen, the molecular tag on the pathogen's surface.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "An antibody does not kill the germ itself, but neutralizes it and marks it for destruction by other cells.",
+              "answerKey": "This matches what is stated: antibodies lock onto a particular antigen, neutralize the pathogen, and mark it for destruction by other cells rather than killing it directly.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "An antibody locks onto one particular ___, the molecular \"tag\" on the surface of a pathogen.",
+              "answerKey": "An antibody locks onto one particular antigen, which is the molecular tag found on the surface of a pathogen.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "An antibody locks onto one particular ___, the molecular \"tag\" on the surface of a pathogen.",
+                "accepted": [
+                  "antigen",
+                  "antigens"
+                ],
+                "leurres": [
+                  "antibody",
+                  "lymphocyte",
+                  "pathogen"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "Helper T cells coordinate the adaptive immune response by activating B cells.",
+          "tags": [
+            "adaptive-immunity",
+            "t-cells"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "Which cells do helper T cells activate as part of coordinating the adaptive immune response?",
+              "answerKey": "Helper T cells coordinate the adaptive immune response by activating B cells.",
+              "estVraie": null,
+              "options": [
+                "Red blood cells",
+                "Platelets",
+                "Neurons",
+                "B cells"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "How do helper T cells coordinate the adaptive immune response, as described?",
+              "answerKey": "Helper T cells coordinate the adaptive immune response by activating B cells.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "BOUNDARY",
+              "question": "Helper T cells coordinate the adaptive immune response by activating red blood cells.",
+              "answerKey": "Helper T cells coordinate the adaptive immune response by activating B cells, not red blood cells.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "APPLICATION",
+              "question": "Helper T cells coordinate the adaptive immune response by activating ___.",
+              "answerKey": "Helper T cells are described as coordinating the adaptive immune response specifically through activating this type of lymphocyte.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Helper T cells coordinate the adaptive immune response by activating ___.",
+                "accepted": [
+                  "B cells",
+                  "B cell"
+                ],
+                "leurres": [
+                  "T cells",
+                  "platelets",
+                  "neurons"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "concept": "Cytotoxic T cells destroy the body's own cells once a virus has infected them.",
+          "tags": [
+            "adaptive-immunity",
+            "t-cells"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "What do cytotoxic T cells do once a virus has infected the body's own cells?",
+              "answerKey": "They destroy the infected cells.",
+              "estVraie": null,
+              "options": [
+                "They swallow and digest the free virus particles",
+                "They signal other cells to stop dividing until the virus clears",
+                "They produce antibodies that neutralize the virus in the blood",
+                "They destroy the body's own cells that the virus has infected"
+              ],
+              "correctIndex": 3,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Explain what triggers cytotoxic T cells to act and what the outcome of their action is.",
+              "answerKey": "A virus infects the body's own cells, and once infected, cytotoxic T cells destroy those infected cells.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "BOUNDARY",
+              "question": "Cytotoxic T cells destroy the body's own cells once a ___ has infected them.",
+              "answerKey": "The cells are destroyed only after this agent has infected them, not before or without it.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "Cytotoxic T cells destroy the body's own cells once a ___ has infected them.",
+                "accepted": [
+                  "virus",
+                  "viruses"
+                ],
+                "leurres": [
+                  "toxin",
+                  "hormone",
+                  "allergen"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "APPLICATION",
+              "question": "If a person's own cell becomes infected with a virus, a cytotoxic T cell may destroy that infected cell.",
+              "answerKey": "Cytotoxic T cells destroy the body's own cells once a virus has infected them, so an infected cell is a target for destruction.",
+              "estVraie": true,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            }
+          ]
+        },
+        {
+          "concept": "After an infection is cleared, most lymphocytes die off, but some remain as memory cells; if the same pathogen shows up again, memory cells recognize it right away and launch a faster, stronger response, often before symptoms appear — this is called immunological memory and is the reason you usually catch chickenpox only once.",
+          "tags": [
+            "adaptive-immunity",
+            "immunological-memory"
+          ],
+          "uncertain": false,
+          "variants": [
+            {
+              "format": "MCQ",
+              "facet": "RECOGNITION",
+              "question": "What term describes the phenomenon where memory cells recognize a previously encountered pathogen and mount a faster, stronger response?",
+              "answerKey": "Immunological memory.",
+              "estVraie": null,
+              "options": [
+                "Antigenic drift",
+                "Passive immunization",
+                "Immunological memory",
+                "Autoimmune response"
+              ],
+              "correctIndex": 2,
+              "cloze": null
+            },
+            {
+              "format": "SHORT_ANSWER",
+              "facet": "MECHANISM",
+              "question": "Walk through what happens to lymphocytes after an infection clears, and what happens if the same pathogen appears again later.",
+              "answerKey": "After an infection is cleared, most lymphocytes die off, but some remain as memory cells. If the same pathogen shows up again, memory cells recognize it right away and launch a faster, stronger response, often before symptoms appear.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": null
+            },
+            {
+              "format": "CLOZE",
+              "facet": "BOUNDARY",
+              "question": "After an infection is cleared, most lymphocytes die off, but some remain as ___ cells.",
+              "answerKey": "These are the lymphocytes that persist after the infection is gone and that recognize the pathogen if it returns.",
+              "estVraie": null,
+              "options": null,
+              "correctIndex": null,
+              "cloze": {
+                "sentence": "After an infection is cleared, most lymphocytes die off, but some remain as ___ cells.",
+                "accepted": [
+                  "memory"
+                ],
+                "leurres": [
+                  "plasma",
+                  "naive",
+                  "regulatory"
+                ]
+              }
+            },
+            {
+              "format": "TRUE_FALSE",
+              "facet": "APPLICATION",
+              "question": "Because immunological memory exists, a person who has already had chickenpox will typically develop symptoms again just as quickly and severely the next time they encounter the same pathogen.",
+              "answerKey": "Memory cells recognize the pathogen right away and launch a faster, stronger response, often before symptoms appear, which is why a person usually catches chickenpox only once rather than experiencing the same illness again.",
+              "estVraie": false,
+              "options": null,
+              "correctIndex": null,
               "cloze": null
             }
           ]
