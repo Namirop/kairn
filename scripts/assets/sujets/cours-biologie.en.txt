@@ -1,0 +1,9 @@
+Biology class — how the immune system fights an infection
+
+When a pathogen such as a bacterium or a virus gets past the skin, the body answers in two waves. The first is the innate immune system: it reacts within minutes to hours, and it attacks anything that looks foreign without recognizing one germ from another. The second is the adaptive immune system: it takes several days to get going, but it targets one specific pathogen and remembers it.
+
+The innate response starts with inflammation. Damaged cells release chemical signals that widen nearby blood vessels, which is why an infected cut turns red, warm and swollen. White blood cells called phagocytes, mainly neutrophils and macrophages, squeeze out of the vessels and engulf the invaders, a process called phagocytosis.
+
+The adaptive response relies on lymphocytes. B cells produce antibodies, Y-shaped proteins that lock onto one particular antigen, the molecular "tag" on the surface of a pathogen. An antibody does not kill the germ by itself: it neutralizes it and marks it for destruction by other cells. Helper T cells coordinate the response by activating B cells, while cytotoxic T cells destroy the body's own cells once a virus has infected them.
+
+After the infection is cleared, most of these lymphocytes die off, but some remain as memory cells. If the same pathogen shows up again, memory cells recognize it right away and launch a faster, stronger response, often before any symptoms appear. This is called immunological memory, and it is the reason you usually catch chickenpox only once.

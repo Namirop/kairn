@@ -1,0 +1,19 @@
+Réponse collée depuis un assistant — async/await en JavaScript
+
+En JavaScript, async et await servent à écrire du code asynchrone qui se lit comme du code synchrone, sans empiler les .then().
+
+Une fonction déclarée avec async renvoie toujours une promesse, même si son corps retourne une valeur ordinaire. À l'intérieur, le mot-clé await suspend l'exécution de la fonction jusqu'à ce que la promesse attendue soit résolue, puis reprend avec la valeur résolue. await ne bloque pas le fil principal : il rend la main à la boucle d'événements le temps de l'attente.
+
+Exemple :
+
+  async function chargerUtilisateur(id) {
+    const reponse = await fetch(`/api/users/${id}`);
+    const donnees = await reponse.json();
+    return donnees;
+  }
+
+Ici, chaque await attend la résolution avant de passer à la ligne suivante. La fonction renvoie une promesse ; on la consomme avec await à son tour, ou avec .then().
+
+Pour gérer les erreurs, on entoure les await d'un bloc try/catch. Une promesse rejetée fait que await lève une exception, attrapée par le catch — c'est l'équivalent asynchrone du try/catch classique.
+
+Attention : deux await placés l'un après l'autre s'exécutent en série, l'un après l'autre. Si les deux opérations sont indépendantes, il vaut mieux les lancer ensemble avec Promise.all pour qu'elles tournent en parallèle et gagner du temps.
