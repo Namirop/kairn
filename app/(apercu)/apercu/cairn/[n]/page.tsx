@@ -21,7 +21,7 @@ export default async function PageApercuCairn({ params }: { params: Promise<{ n:
   if (!Number.isInteger(nombre) || nombre < 0 || nombre > 200) notFound();
 
   return (
-    <main className="flex min-h-dvh items-center justify-center p-pas-8">
+    <main className="p-pas-8 flex min-h-dvh items-center justify-center">
       <div data-cairn className="flex h-[70vh] w-full max-w-md items-end justify-center">
         <Cairn nombre={nombre} />
       </div>

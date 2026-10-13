@@ -15,10 +15,7 @@
       "concepts": [
         {
           "concept": "« To thrive » signifie prospérer, se développer avec vigueur (une plante, une entreprise), et non simplement survivre. Il se distingue de « to survive », qui n'implique aucune réussite, juste la persistance.",
-          "tags": [
-            "vocabulaire-anglais",
-            "faux-amis"
-          ],
+          "tags": ["vocabulaire-anglais", "faux-amis"],
           "uncertain": false,
           "variants": [
             {
@@ -46,14 +43,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "« To thrive » implique une réussite, contrairement à « to ___ », qui n'implique aucune réussite, juste la persistance.",
-                "accepted": [
-                  "survive"
-                ],
-                "leurres": [
-                  "succeed",
-                  "endure",
-                  "progress"
-                ]
+                "accepted": ["survive"],
+                "leurres": ["succeed", "endure", "progress"]
               }
             },
             {
@@ -72,12 +63,7 @@
               "question": "Une plante placée dans un environnement idéal pousse vite, développe de nombreuses feuilles et fleurit abondamment. Quel verbe anglais décrit le mieux cette situation ?",
               "answerKey": "« To thrive » décrit une plante qui se développe avec vigueur, une réussite qui va au-delà de la simple survie.",
               "estVraie": null,
-              "options": [
-                "It overlooks",
-                "It thrives",
-                "It endures merely",
-                "It survives"
-              ],
+              "options": ["It overlooks", "It thrives", "It endures merely", "It survives"],
               "correctIndex": 1,
               "cloze": null
             }
@@ -85,9 +71,7 @@
         },
         {
           "concept": "« Cumbersome » signifie encombrant, lourd à manier, au sens propre (« a cumbersome suitcase ») comme au figuré (« a cumbersome process », une procédure pénible et lente). Le mot insiste sur la gêne causée par la taille ou la complexité, pas sur le poids seul.",
-          "tags": [
-            "vocabulaire-anglais"
-          ],
+          "tags": ["vocabulaire-anglais"],
           "uncertain": false,
           "variants": [
             {
@@ -115,14 +99,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "« Cumbersome » insiste sur la gêne causée par la taille ou la complexité, pas sur le ___ seul.",
-                "accepted": [
-                  "poids"
-                ],
-                "leurres": [
-                  "prix",
-                  "bruit",
-                  "volume"
-                ]
+                "accepted": ["poids"],
+                "leurres": ["prix", "bruit", "volume"]
               }
             },
             {
@@ -141,12 +119,7 @@
               "question": "Une administration impose une démarche avec de nombreux formulaires, des délais longs et des étapes redondantes. Quel adjectif anglais qualifie le mieux cette démarche ?",
               "answerKey": "« Cumbersome » qualifie une procédure pénible et lente, marquée par la gêne causée par sa complexité.",
               "estVraie": null,
-              "options": [
-                "Lightweight",
-                "Swift",
-                "Effortless",
-                "Cumbersome"
-              ],
+              "options": ["Lightweight", "Swift", "Effortless", "Cumbersome"],
               "correctIndex": 3,
               "cloze": null
             }
@@ -154,9 +127,7 @@
         },
         {
           "concept": "« To overlook » a deux sens presque opposés selon le contexte : « ne pas remarquer, laisser passer » (« I overlooked a typo ») ou « donner sur, surplomber » (« the terrace overlooks the sea »). C'est le contexte, jamais la forme, qui tranche entre les deux.",
-          "tags": [
-            "vocabulaire-anglais"
-          ],
+          "tags": ["vocabulaire-anglais"],
           "uncertain": false,
           "variants": [
             {
@@ -184,14 +155,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "C'est le ___, jamais la forme, qui tranche entre les deux sens de « to overlook ».",
-                "accepted": [
-                  "contexte"
-                ],
-                "leurres": [
-                  "sujet",
-                  "temps",
-                  "ton"
-                ]
+                "accepted": ["contexte"],
+                "leurres": ["sujet", "temps", "ton"]
               }
             },
             {
@@ -223,10 +188,7 @@
         },
         {
           "concept": "« Thorough » signifie minutieux, complet, qui ne laisse rien de côté (« a thorough investigation »). L'adverbe « thoroughly » signifie « à fond ». On le confond avec « through » (à travers) et « though » (bien que), qui se prononcent différemment.",
-          "tags": [
-            "vocabulaire-anglais",
-            "faux-amis"
-          ],
+          "tags": ["vocabulaire-anglais", "faux-amis"],
           "uncertain": false,
           "variants": [
             {
@@ -254,14 +216,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "L'adverbe « ___ » signifie « à fond ».",
-                "accepted": [
-                  "thoroughly"
-                ],
-                "leurres": [
-                  "throughly",
-                  "thoughly",
-                  "thorougly"
-                ]
+                "accepted": ["thoroughly"],
+                "leurres": ["throughly", "thoughly", "thorougly"]
               }
             },
             {
@@ -293,9 +249,7 @@
         },
         {
           "concept": "« To afford » signifie pouvoir se permettre, financièrement ou non : « I can't afford a new car » (argent) ; « we can't afford to lose » (on ne peut pas se permettre de perdre). Il est presque toujours précédé de « can », « could » ou « be able to ».",
-          "tags": [
-            "vocabulaire-anglais"
-          ],
+          "tags": ["vocabulaire-anglais"],
           "uncertain": false,
           "variants": [
             {
@@ -323,14 +277,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "« we can't ___ to lose » signifie « on ne peut pas se permettre de perdre ».",
-                "accepted": [
-                  "afford"
-                ],
-                "leurres": [
-                  "accept",
-                  "allow",
-                  "admit"
-                ]
+                "accepted": ["afford"],
+                "leurres": ["accept", "allow", "admit"]
               }
             },
             {
@@ -362,9 +310,7 @@
         },
         {
           "concept": "« Awkward » signifie gênant, maladroit, mal à l'aise : « an awkward silence » est un silence gênant, « an awkward gesture » un geste maladroit. Le mot couvre à la fois la situation et la personne qui la vit.",
-          "tags": [
-            "vocabulaire-anglais"
-          ],
+          "tags": ["vocabulaire-anglais"],
           "uncertain": false,
           "variants": [
             {
@@ -392,14 +338,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "« an ___ silence » est un silence gênant.",
-                "accepted": [
-                  "awkward"
-                ],
-                "leurres": [
-                  "akward",
-                  "awkard",
-                  "awful"
-                ]
+                "accepted": ["awkward"],
+                "leurres": ["akward", "awkard", "awful"]
               }
             },
             {
@@ -444,9 +384,7 @@
       "concepts": [
         {
           "concept": "L'expression anglaise « It's not rocket science » se dit de quelque chose qui n'est pas si compliqué et qu'on devrait comprendre sans effort ; elle est ironique et sert souvent à reprocher gentiment à quelqu'un de compliquer une tâche simple.",
-          "tags": [
-            "expressions-anglaises"
-          ],
+          "tags": ["expressions-anglaises"],
           "uncertain": false,
           "variants": [
             {
@@ -494,23 +432,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "« It's not ___ science, » lui dit-elle en riant.",
-                "accepted": [
-                  "rocket"
-                ],
-                "leurres": [
-                  "brain",
-                  "space",
-                  "nuclear"
-                ]
+                "accepted": ["rocket"],
+                "leurres": ["brain", "space", "nuclear"]
               }
             }
           ]
         },
         {
           "concept": "L'expression anglaise « To get cold feet » ne signifie pas avoir froid aux pieds mais se dégonfler, prendre peur au dernier moment, surtout avant un engagement important comme un mariage, une décision ou un saut. On dit « he got cold feet before the wedding ».",
-          "tags": [
-            "expressions-anglaises"
-          ],
+          "tags": ["expressions-anglaises"],
           "uncertain": false,
           "variants": [
             {
@@ -523,14 +453,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "« To get ___ feet » signifie se dégonfler, prendre peur au dernier moment.",
-                "accepted": [
-                  "cold"
-                ],
-                "leurres": [
-                  "warm",
-                  "tired",
-                  "heavy"
-                ]
+                "accepted": ["cold"],
+                "leurres": ["warm", "tired", "heavy"]
               }
             },
             {
@@ -568,23 +492,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "He got ___ feet right before the jump.",
-                "accepted": [
-                  "cold"
-                ],
-                "leurres": [
-                  "warm",
-                  "numb",
-                  "heavy"
-                ]
+                "accepted": ["cold"],
+                "leurres": ["warm", "numb", "heavy"]
               }
             }
           ]
         },
         {
           "concept": "L'expression anglaise « To be on the same page » signifie être d'accord, avoir la même compréhension d'une situation ; « Let's make sure we're on the same page » veut dire « assurons-nous qu'on a bien compris la même chose », sans rapport avec une page de livre.",
-          "tags": [
-            "expressions-anglaises"
-          ],
+          "tags": ["expressions-anglaises"],
           "uncertain": false,
           "variants": [
             {
@@ -632,23 +548,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Let's make sure we're on the same ___.",
-                "accepted": [
-                  "page"
-                ],
-                "leurres": [
-                  "team",
-                  "plan",
-                  "level"
-                ]
+                "accepted": ["page"],
+                "leurres": ["team", "plan", "level"]
               }
             }
           ]
         },
         {
           "concept": "L'expression anglaise « To bite the bullet » signifie se résoudre à faire une chose désagréable mais nécessaire, en serrant les dents ; l'image vient des blessés de guerre qui mordaient une balle en plomb pendant une opération sans anesthésie.",
-          "tags": [
-            "expressions-anglaises"
-          ],
+          "tags": ["expressions-anglaises"],
           "uncertain": false,
           "variants": [
             {
@@ -661,14 +569,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "« To bite the ___ » signifie se résoudre à faire une chose désagréable mais nécessaire, en serrant les dents.",
-                "accepted": [
-                  "bullet"
-                ],
-                "leurres": [
-                  "blanket",
-                  "pillow",
-                  "hammer"
-                ]
+                "accepted": ["bullet"],
+                "leurres": ["blanket", "pillow", "hammer"]
               }
             },
             {
@@ -710,9 +612,7 @@
         },
         {
           "concept": "L'expression anglaise « To spill the beans » signifie révéler un secret, souvent par maladresse ; « Who spilled the beans? » demande qui a vendu la mèche. L'expression est familière et suppose que le secret n'aurait pas dû sortir.",
-          "tags": [
-            "expressions-anglaises"
-          ],
+          "tags": ["expressions-anglaises"],
           "uncertain": false,
           "variants": [
             {
@@ -725,14 +625,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "« To spill the ___ » signifie révéler un secret, souvent par maladresse.",
-                "accepted": [
-                  "beans"
-                ],
-                "leurres": [
-                  "cards",
-                  "dishes",
-                  "papers"
-                ]
+                "accepted": ["beans"],
+                "leurres": ["cards", "dishes", "papers"]
               }
             },
             {
@@ -774,9 +668,7 @@
         },
         {
           "concept": "L'expression anglaise « A blessing in disguise » désigne un mal pour un bien, une chose qui paraît mauvaise sur le moment mais se révèle bénéfique, comme dans « Losing that job was a blessing in disguise ».",
-          "tags": [
-            "expressions-anglaises"
-          ],
+          "tags": ["expressions-anglaises"],
           "uncertain": false,
           "variants": [
             {
@@ -789,14 +681,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "« A blessing in ___ » désigne un mal pour un bien, une chose qui paraît mauvaise sur le moment mais se révèle bénéfique.",
-                "accepted": [
-                  "disguise"
-                ],
-                "leurres": [
-                  "shadow",
-                  "secret",
-                  "silence"
-                ]
+                "accepted": ["disguise"],
+                "leurres": ["shadow", "secret", "silence"]
               }
             },
             {
@@ -851,10 +737,7 @@
       "concepts": [
         {
           "concept": "Une habitude se construit sur une boucle en quatre temps : le signal déclenche le cerveau, l'envie le motive, la réponse est le geste accompli, et la récompense apprend au cerveau si la boucle vaut la peine d'être retenue. Retirer un seul de ces temps empêche l'habitude de se former.",
-          "tags": [
-            "habitudes",
-            "boucle-habitude"
-          ],
+          "tags": ["habitudes", "boucle-habitude"],
           "uncertain": false,
           "variants": [
             {
@@ -867,15 +750,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "La réponse est le ___ accompli, et la récompense apprend au cerveau si la boucle vaut la peine d'être retenue.",
-                "accepted": [
-                  "geste",
-                  "action"
-                ],
-                "leurres": [
-                  "signal",
-                  "désir",
-                  "souvenir"
-                ]
+                "accepted": ["geste", "action"],
+                "leurres": ["signal", "désir", "souvenir"]
               }
             },
             {
@@ -922,10 +798,7 @@
         },
         {
           "concept": "S'améliorer de 1 % chaque jour pendant un an rend environ trente-sept fois meilleur, tandis que régresser de 1 % par jour ramène presque à zéro. Ce sont les petits écarts répétés, jamais les grands gestes ponctuels, qui décident du résultat.",
-          "tags": [
-            "habitudes",
-            "progres"
-          ],
+          "tags": ["habitudes", "progres"],
           "uncertain": false,
           "variants": [
             {
@@ -938,15 +811,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "S'améliorer de 1 % chaque jour pendant un an rend environ ___ fois meilleur.",
-                "accepted": [
-                  "trente-sept",
-                  "37"
-                ],
-                "leurres": [
-                  "dix",
-                  "cent",
-                  "quinze"
-                ]
+                "accepted": ["trente-sept", "37"],
+                "leurres": ["dix", "cent", "quinze"]
               }
             },
             {
@@ -988,10 +854,7 @@
         },
         {
           "concept": "L'empilement d'habitudes consiste à accrocher une nouvelle habitude à une habitude déjà solide, selon la formule « Après [habitude actuelle], je ferai [nouvelle habitude] ». L'ancienne habitude sert de signal à la nouvelle, ce qui évite d'avoir à trouver un déclencheur de toutes pièces.",
-          "tags": [
-            "habitudes",
-            "empilement"
-          ],
+          "tags": ["habitudes", "empilement"],
           "uncertain": false,
           "variants": [
             {
@@ -1004,16 +867,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "« Après [habitude actuelle], je ferai [___] »",
-                "accepted": [
-                  "nouvelle habitude",
-                  "nouvelle",
-                  "habitude nouvelle"
-                ],
-                "leurres": [
-                  "ancienne habitude",
-                  "récompense finale",
-                  "signal externe"
-                ]
+                "accepted": ["nouvelle habitude", "nouvelle", "habitude nouvelle"],
+                "leurres": ["ancienne habitude", "récompense finale", "signal externe"]
               }
             },
             {
@@ -1055,10 +910,7 @@
         },
         {
           "concept": "On ne s'élève pas au niveau de ses objectifs, on tombe au niveau de ses systèmes : se fixer un but donne une direction, mais c'est le système — la routine quotidienne qui y mène — qui produit les résultats. Deux personnes qui visent la même chose divergent par leurs systèmes, pas par leurs intentions.",
-          "tags": [
-            "habitudes",
-            "systemes"
-          ],
+          "tags": ["habitudes", "systemes"],
           "uncertain": false,
           "variants": [
             {
@@ -1086,15 +938,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "On ne s'élève pas au niveau de ses objectifs, on tombe au niveau de ses ___.",
-                "accepted": [
-                  "systèmes",
-                  "système"
-                ],
-                "leurres": [
-                  "ambitions",
-                  "habitudes",
-                  "principes"
-                ]
+                "accepted": ["systèmes", "système"],
+                "leurres": ["ambitions", "habitudes", "principes"]
               }
             },
             {
@@ -1126,10 +971,7 @@
         },
         {
           "concept": "Rendre une habitude évidente, attrayante, facile et satisfaisante augmente les chances de la tenir ; pour rompre une mauvaise habitude, on la rend au contraire invisible, rebutante, difficile et insatisfaisante.",
-          "tags": [
-            "habitudes",
-            "formation"
-          ],
+          "tags": ["habitudes", "formation"],
           "uncertain": false,
           "variants": [
             {
@@ -1157,14 +999,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Pour rompre une mauvaise habitude, on la rend invisible, rebutante, difficile et ___.",
-                "accepted": [
-                  "insatisfaisante"
-                ],
-                "leurres": [
-                  "inutile",
-                  "ennuyeuse",
-                  "coûteuse"
-                ]
+                "accepted": ["insatisfaisante"],
+                "leurres": ["inutile", "ennuyeuse", "coûteuse"]
               }
             },
             {
@@ -1209,10 +1045,7 @@
       "concepts": [
         {
           "concept": "L'attentat de Sarajevo, le 28 juin 1914, où l'archiduc François-Ferdinand d'Autriche est assassiné par Gavrilo Princip, est le déclencheur immédiat de la Première Guerre mondiale.",
-          "tags": [
-            "premiere-guerre-mondiale",
-            "sarajevo"
-          ],
+          "tags": ["premiere-guerre-mondiale", "sarajevo"],
           "uncertain": false,
           "variants": [
             {
@@ -1240,15 +1073,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "L'attentat de Sarajevo, le 28 juin 1914, où l'archiduc François-Ferdinand d'Autriche est assassiné par ___, est le déclencheur immédiat de la Première Guerre mondiale.",
-                "accepted": [
-                  "Gavrilo Princip",
-                  "Princip"
-                ],
-                "leurres": [
-                  "Gavrilo Draskovic",
-                  "Milan Obrenovic",
-                  "Nikola Pasic"
-                ]
+                "accepted": ["Gavrilo Princip", "Princip"],
+                "leurres": ["Gavrilo Draskovic", "Milan Obrenovic", "Nikola Pasic"]
               }
             },
             {
@@ -1280,9 +1106,7 @@
         },
         {
           "concept": "Un attentat isolé ne suffit pas à expliquer une guerre générale : celui de Sarajevo a mis le feu à des tensions accumulées depuis des décennies.",
-          "tags": [
-            "premiere-guerre-mondiale"
-          ],
+          "tags": ["premiere-guerre-mondiale"],
           "uncertain": false,
           "variants": [
             {
@@ -1310,15 +1134,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Un attentat isolé ne suffit pas à expliquer une guerre générale : celui de Sarajevo a mis le feu à des tensions accumulées depuis des ___.",
-                "accepted": [
-                  "décennies",
-                  "décennie"
-                ],
-                "leurres": [
-                  "semaines",
-                  "mois",
-                  "années"
-                ]
+                "accepted": ["décennies", "décennie"],
+                "leurres": ["semaines", "mois", "années"]
               }
             },
             {
@@ -1350,10 +1167,7 @@
         },
         {
           "concept": "Le système des alliances a transformé une querelle régionale en guerre générale : la Triple-Entente réunissait la France, le Royaume-Uni et la Russie, tandis que la Triple-Alliance liait l'Allemagne, l'Autriche-Hongrie et l'Italie.",
-          "tags": [
-            "premiere-guerre-mondiale",
-            "alliances"
-          ],
+          "tags": ["premiere-guerre-mondiale", "alliances"],
           "uncertain": false,
           "variants": [
             {
@@ -1381,15 +1195,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Le système des alliances a transformé une querelle régionale en guerre générale : la Triple-Entente réunissait la France, le Royaume-Uni et la Russie, tandis que la Triple-Alliance liait l'Allemagne, l'Autriche-Hongrie et ___.",
-                "accepted": [
-                  "l'Italie",
-                  "Italie"
-                ],
-                "leurres": [
-                  "l'Espagne",
-                  "la Roumanie",
-                  "la Bulgarie"
-                ]
+                "accepted": ["l'Italie", "Italie"],
+                "leurres": ["l'Espagne", "la Roumanie", "la Bulgarie"]
               }
             },
             {
@@ -1421,10 +1228,7 @@
         },
         {
           "concept": "Chaque puissance étant tenue de soutenir ses alliés, une déclaration de guerre en entraînait mécaniquement d'autres.",
-          "tags": [
-            "premiere-guerre-mondiale",
-            "alliances"
-          ],
+          "tags": ["premiere-guerre-mondiale", "alliances"],
           "uncertain": false,
           "variants": [
             {
@@ -1452,15 +1256,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Chaque puissance étant tenue de soutenir ses ___, une déclaration de guerre en entraînait mécaniquement d'autres.",
-                "accepted": [
-                  "alliés",
-                  "allié"
-                ],
-                "leurres": [
-                  "voisins",
-                  "rivaux",
-                  "créanciers"
-                ]
+                "accepted": ["alliés", "allié"],
+                "leurres": ["voisins", "rivaux", "créanciers"]
               }
             },
             {
@@ -1492,10 +1289,7 @@
         },
         {
           "concept": "La course aux armements, depuis les années 1890, opposait notamment l'Allemagne et le Royaume-Uni sur mer autour des cuirassés Dreadnought, tandis que les armées de terre gonflaient leurs effectifs.",
-          "tags": [
-            "premiere-guerre-mondiale",
-            "armement"
-          ],
+          "tags": ["premiere-guerre-mondiale", "armement"],
           "uncertain": false,
           "variants": [
             {
@@ -1523,15 +1317,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "La course aux armements, depuis les années 1890, opposait notamment l'Allemagne et le Royaume-Uni sur mer autour des cuirassés ___, tandis que les armées de terre gonflaient leurs effectifs.",
-                "accepted": [
-                  "Dreadnought",
-                  "Dreadnoughts"
-                ],
-                "leurres": [
-                  "Bismarck",
-                  "Trafalgar",
-                  "Nautilus"
-                ]
+                "accepted": ["Dreadnought", "Dreadnoughts"],
+                "leurres": ["Bismarck", "Trafalgar", "Nautilus"]
               }
             },
             {
@@ -1563,10 +1350,7 @@
         },
         {
           "concept": "Une puissance militaire prête à servir rend la guerre plus probable, sans pour autant la rendre inévitable.",
-          "tags": [
-            "premiere-guerre-mondiale",
-            "armement"
-          ],
+          "tags": ["premiere-guerre-mondiale", "armement"],
           "uncertain": false,
           "variants": [
             {
@@ -1589,14 +1373,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Une puissance militaire prête à servir rend la guerre plus probable, sans pour autant la rendre ___.",
-                "accepted": [
-                  "inévitable"
-                ],
-                "leurres": [
-                  "improbable",
-                  "tardive",
-                  "légitime"
-                ]
+                "accepted": ["inévitable"],
+                "leurres": ["improbable", "tardive", "légitime"]
               }
             },
             {
@@ -1633,10 +1411,7 @@
         },
         {
           "concept": "Le nationalisme exacerbé nourrissait les rivalités européennes avant 1914.",
-          "tags": [
-            "premiere-guerre-mondiale",
-            "nationalisme"
-          ],
+          "tags": ["premiere-guerre-mondiale", "nationalisme"],
           "uncertain": false,
           "variants": [
             {
@@ -1684,26 +1459,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Le nationalisme ___ nourrissait les rivalités européennes avant 1914.",
-                "accepted": [
-                  "exacerbé",
-                  "exacerbés",
-                  "exacerbée"
-                ],
-                "leurres": [
-                  "modéré",
-                  "naissant",
-                  "tempéré"
-                ]
+                "accepted": ["exacerbé", "exacerbés", "exacerbée"],
+                "leurres": ["modéré", "naissant", "tempéré"]
               }
             }
           ]
         },
         {
           "concept": "La France n'avait pas digéré la perte de l'Alsace-Lorraine en 1871.",
-          "tags": [
-            "premiere-guerre-mondiale",
-            "nationalisme"
-          ],
+          "tags": ["premiere-guerre-mondiale", "nationalisme"],
           "uncertain": false,
           "variants": [
             {
@@ -1751,24 +1515,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "La France n'avait pas digéré la perte de l'Alsace-Lorraine en ___.",
-                "accepted": [
-                  "1871"
-                ],
-                "leurres": [
-                  "1870",
-                  "1875",
-                  "1890"
-                ]
+                "accepted": ["1871"],
+                "leurres": ["1870", "1875", "1890"]
               }
             }
           ]
         },
         {
           "concept": "Les nationalismes des Balkans fragilisaient l'Autriche-Hongrie, un empire multinational qui craignait son propre morcellement.",
-          "tags": [
-            "premiere-guerre-mondiale",
-            "nationalisme"
-          ],
+          "tags": ["premiere-guerre-mondiale", "nationalisme"],
           "uncertain": false,
           "variants": [
             {
@@ -1816,24 +1571,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Les nationalismes des Balkans fragilisaient l'Autriche-Hongrie, un empire ___ qui craignait son propre morcellement.",
-                "accepted": [
-                  "multinational",
-                  "multinationale"
-                ],
-                "leurres": [
-                  "centralisé",
-                  "unitaire",
-                  "industrialisé"
-                ]
+                "accepted": ["multinational", "multinationale"],
+                "leurres": ["centralisé", "unitaire", "industrialisé"]
               }
             }
           ]
         },
         {
           "concept": "L'enchaînement des déclarations de guerre entre le 28 juillet et le 4 août 1914 fait basculer l'Europe dans un conflit que chacun imaginait court et qui durera plus de quatre ans.",
-          "tags": [
-            "premiere-guerre-mondiale"
-          ],
+          "tags": ["premiere-guerre-mondiale"],
           "uncertain": false,
           "variants": [
             {
@@ -1861,15 +1607,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "L'enchaînement des déclarations de guerre entre le 28 juillet et le 4 août 1914 fait basculer l'Europe dans un conflit que chacun imaginait ___ et qui durera plus de quatre ans.",
-                "accepted": [
-                  "court",
-                  "bref"
-                ],
-                "leurres": [
-                  "long",
-                  "inévitable",
-                  "décisif"
-                ]
+                "accepted": ["court", "bref"],
+                "leurres": ["long", "inévitable", "décisif"]
               }
             },
             {
@@ -1914,10 +1653,7 @@
       "concepts": [
         {
           "concept": "En JavaScript, « async » et « await » servent à écrire du code asynchrone qui se lit comme du code synchrone, sans empiler les « .then() ».",
-          "tags": [
-            "javascript",
-            "async-await"
-          ],
+          "tags": ["javascript", "async-await"],
           "uncertain": false,
           "variants": [
             {
@@ -1965,25 +1701,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Un développeur remplace une chaîne de « .then() » par « async » et « await » pour que son code ressemble à du code ___.",
-                "accepted": [
-                  "synchrone",
-                  "synchrones"
-                ],
-                "leurres": [
-                  "asynchrone",
-                  "parallèle",
-                  "compilé"
-                ]
+                "accepted": ["synchrone", "synchrones"],
+                "leurres": ["asynchrone", "parallèle", "compilé"]
               }
             }
           ]
         },
         {
           "concept": "Une fonction déclarée avec « async » renvoie toujours une promesse, même si son corps retourne une valeur ordinaire.",
-          "tags": [
-            "javascript",
-            "async-await"
-          ],
+          "tags": ["javascript", "async-await"],
           "uncertain": false,
           "variants": [
             {
@@ -2031,25 +1757,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Une fonction « async function getValue() { return 10; } » ne renvoie pas directement le nombre 10 à l'appelant, mais une ___.",
-                "accepted": [
-                  "promesse",
-                  "promise"
-                ],
-                "leurres": [
-                  "exception",
-                  "référence",
-                  "fonction"
-                ]
+                "accepted": ["promesse", "promise"],
+                "leurres": ["exception", "référence", "fonction"]
               }
             }
           ]
         },
         {
           "concept": "À l'intérieur d'une fonction « async », le mot-clé « await » suspend l'exécution de la fonction jusqu'à ce que la promesse attendue soit résolue, puis reprend avec la valeur résolue.",
-          "tags": [
-            "javascript",
-            "async-await"
-          ],
+          "tags": ["javascript", "async-await"],
           "uncertain": false,
           "variants": [
             {
@@ -2077,15 +1793,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Après avoir utilisé « await » sur une promesse, l'exécution de la fonction « async » reprend avec la ___.",
-                "accepted": [
-                  "valeur résolue",
-                  "valeur"
-                ],
-                "leurres": [
-                  "fonction appelante",
-                  "erreur levée",
-                  "promesse initiale"
-                ]
+                "accepted": ["valeur résolue", "valeur"],
+                "leurres": ["fonction appelante", "erreur levée", "promesse initiale"]
               }
             },
             {
@@ -2108,25 +1817,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Dans une fonction « async », l'instruction « const data = await fetchData(); » ___ l'exécution de la fonction jusqu'à ce que « fetchData() » soit résolue.",
-                "accepted": [
-                  "suspend",
-                  "suspende"
-                ],
-                "leurres": [
-                  "accélère",
-                  "duplique",
-                  "ignore"
-                ]
+                "accepted": ["suspend", "suspende"],
+                "leurres": ["accélère", "duplique", "ignore"]
               }
             }
           ]
         },
         {
           "concept": "« await » ne bloque pas le fil principal : il rend la main à la boucle d'événements le temps de l'attente.",
-          "tags": [
-            "javascript",
-            "boucle-evenements"
-          ],
+          "tags": ["javascript", "boucle-evenements"],
           "uncertain": false,
           "variants": [
             {
@@ -2174,25 +1873,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "L'interface reste réactive parce que « await » rend la main à la boucle d'événements plutôt que de ___ le fil principal.",
-                "accepted": [
-                  "bloquer",
-                  "bloque"
-                ],
-                "leurres": [
-                  "accélérer",
-                  "dupliquer",
-                  "interrompre"
-                ]
+                "accepted": ["bloquer", "bloque"],
+                "leurres": ["accélérer", "dupliquer", "interrompre"]
               }
             }
           ]
         },
         {
           "concept": "Exemple JavaScript illustrant async/await : « async function chargerUtilisateur(id) { const reponse = await fetch(`/api/users/${id}`); const donnees = await reponse.json(); return donnees; } ». La fonction renvoie une promesse, qu'on consomme avec « await » à son tour, ou avec « .then() ».",
-          "tags": [
-            "javascript",
-            "async-await"
-          ],
+          "tags": ["javascript", "async-await"],
           "uncertain": false,
           "variants": [
             {
@@ -2235,26 +1924,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Un autre code qui veut récupérer le résultat de « chargerUtilisateur(id) » sans utiliser « await » doit appeler ___() sur la promesse renvoyée.",
-                "accepted": [
-                  ".then",
-                  ".then()",
-                  "then"
-                ],
-                "leurres": [
-                  ".catch()",
-                  ".resolve()",
-                  ".map()"
-                ]
+                "accepted": [".then", ".then()", "then"],
+                "leurres": [".catch()", ".resolve()", ".map()"]
               }
             }
           ]
         },
         {
           "concept": "Pour gérer les erreurs avec async/await en JavaScript, on entoure les « await » d'un bloc « try/catch » : une promesse rejetée fait que « await » lève une exception, attrapée par le « catch » — c'est l'équivalent asynchrone du try/catch classique.",
-          "tags": [
-            "javascript",
-            "gestion-erreurs"
-          ],
+          "tags": ["javascript", "gestion-erreurs"],
           "uncertain": false,
           "variants": [
             {
@@ -2302,24 +1980,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Pour gérer les erreurs avec async/await en JavaScript, on entoure les « await » d'un bloc « try/___ ».",
-                "accepted": [
-                  "catch"
-                ],
-                "leurres": [
-                  "finally",
-                  "throw",
-                  "resolve"
-                ]
+                "accepted": ["catch"],
+                "leurres": ["finally", "throw", "resolve"]
               }
             }
           ]
         },
         {
           "concept": "En JavaScript, deux « await » placés l'un après l'autre s'exécutent en série, l'un après l'autre. Si les deux opérations sont indépendantes, il vaut mieux les lancer ensemble avec « Promise.all » pour qu'elles tournent en parallèle et gagner du temps.",
-          "tags": [
-            "javascript",
-            "promise-all"
-          ],
+          "tags": ["javascript", "promise-all"],
           "uncertain": false,
           "variants": [
             {
@@ -2347,15 +2016,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Si deux opérations sont indépendantes, il vaut mieux les lancer ensemble avec « ___ » pour qu'elles tournent en parallèle et gagner du temps.",
-                "accepted": [
-                  "Promise.all",
-                  "Promise.all()"
-                ],
-                "leurres": [
-                  "Promise.race",
-                  "Promise.any",
-                  "Promise.resolve"
-                ]
+                "accepted": ["Promise.all", "Promise.all()"],
+                "leurres": ["Promise.race", "Promise.any", "Promise.resolve"]
               }
             },
             {
@@ -2400,10 +2062,7 @@
       "concepts": [
         {
           "concept": "La diffusion de Rayleigh est le phénomène physique qui explique la couleur du ciel ; il a été décrit par un physicien britannique à la fin du XIXe siècle.",
-          "tags": [
-            "diffusion-rayleigh",
-            "optique"
-          ],
+          "tags": ["diffusion-rayleigh", "optique"],
           "uncertain": false,
           "variants": [
             {
@@ -2416,14 +2075,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "La diffusion de ___ est le phénomène physique qui explique la couleur du ciel.",
-                "accepted": [
-                  "Rayleigh"
-                ],
-                "leurres": [
-                  "Newton",
-                  "Faraday",
-                  "Maxwell"
-                ]
+                "accepted": ["Rayleigh"],
+                "leurres": ["Newton", "Faraday", "Maxwell"]
               }
             },
             {
@@ -2465,10 +2118,7 @@
         },
         {
           "concept": "La lumière du Soleil paraît blanche mais elle est en réalité composée de toutes les couleurs de l'arc-en-ciel, chacune correspondant à une longueur d'onde différente.",
-          "tags": [
-            "lumiere",
-            "spectre"
-          ],
+          "tags": ["lumiere", "spectre"],
           "uncertain": false,
           "variants": [
             {
@@ -2481,14 +2131,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "La lumière du Soleil paraît blanche mais elle est en réalité composée de toutes les couleurs de l'___.",
-                "accepted": [
-                  "arc-en-ciel"
-                ],
-                "leurres": [
-                  "éclipse",
-                  "crépuscule",
-                  "aurore boréale"
-                ]
+                "accepted": ["arc-en-ciel"],
+                "leurres": ["éclipse", "crépuscule", "aurore boréale"]
               }
             },
             {
@@ -2530,10 +2174,7 @@
         },
         {
           "concept": "Les molécules d'air, plus petites que la longueur d'onde de la lumière, dispersent celle-ci dans toutes les directions, d'autant plus fortement que la longueur d'onde est courte.",
-          "tags": [
-            "diffusion-rayleigh",
-            "atmosphere"
-          ],
+          "tags": ["diffusion-rayleigh", "atmosphere"],
           "uncertain": false,
           "variants": [
             {
@@ -2546,14 +2187,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Les molécules d'air dispersent la lumière dans toutes les directions, d'autant plus fortement que la longueur d'onde est ___.",
-                "accepted": [
-                  "courte"
-                ],
-                "leurres": [
-                  "longue",
-                  "intense",
-                  "stable"
-                ]
+                "accepted": ["courte"],
+                "leurres": ["longue", "intense", "stable"]
               }
             },
             {
@@ -2595,10 +2230,7 @@
         },
         {
           "concept": "Le bleu, dont la longueur d'onde est courte, est diffusé environ dix fois plus que le rouge, dont la longueur d'onde est longue.",
-          "tags": [
-            "diffusion-rayleigh",
-            "couleurs"
-          ],
+          "tags": ["diffusion-rayleigh", "couleurs"],
           "uncertain": false,
           "variants": [
             {
@@ -2636,16 +2268,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Le bleu, dont la longueur d'onde est courte, est diffusé environ dix fois plus que le rouge, dont la longueur d'onde est ___.",
-                "accepted": [
-                  "longue",
-                  "grande",
-                  "élevée"
-                ],
-                "leurres": [
-                  "courte",
-                  "nulle",
-                  "variable"
-                ]
+                "accepted": ["longue", "grande", "élevée"],
+                "leurres": ["courte", "nulle", "variable"]
               }
             },
             {
@@ -2662,10 +2286,7 @@
         },
         {
           "concept": "Le ciel apparaît bleu parce que cette couleur est diffusée depuis toutes les portions du ciel et renvoyée vers nos yeux.",
-          "tags": [
-            "ciel-bleu",
-            "diffusion-rayleigh"
-          ],
+          "tags": ["ciel-bleu", "diffusion-rayleigh"],
           "uncertain": false,
           "variants": [
             {
@@ -2703,15 +2324,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Le ciel apparaît bleu parce que cette couleur est diffusée depuis toutes les portions du ciel et ___ vers nos yeux.",
-                "accepted": [
-                  "renvoyée",
-                  "renvoyé"
-                ],
-                "leurres": [
-                  "absorbée",
-                  "projetée",
-                  "réfléchie"
-                ]
+                "accepted": ["renvoyée", "renvoyé"],
+                "leurres": ["absorbée", "projetée", "réfléchie"]
               }
             },
             {
@@ -2728,10 +2342,7 @@
         },
         {
           "concept": "Au lever et au coucher du Soleil, la lumière traverse une épaisseur d'atmosphère bien plus grande car elle arrive de biais ; le bleu est alors diffusé au loin avant d'atteindre l'observateur, ne laissant que le rouge et l'orange pour colorer l'horizon.",
-          "tags": [
-            "couchant",
-            "diffusion-rayleigh"
-          ],
+          "tags": ["couchant", "diffusion-rayleigh"],
           "uncertain": false,
           "variants": [
             {
@@ -2769,14 +2380,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Au lever et au coucher du Soleil, la lumière traverse une épaisseur d'atmosphère bien plus grande car elle arrive de ___.",
-                "accepted": [
-                  "biais"
-                ],
-                "leurres": [
-                  "face",
-                  "haut",
-                  "loin"
-                ]
+                "accepted": ["biais"],
+                "leurres": ["face", "haut", "loin"]
               }
             },
             {
@@ -2793,10 +2398,7 @@
         },
         {
           "concept": "Le Soleil semble jaunâtre vu du sol parce qu'il a perdu une partie de sa lumière bleue en traversant l'atmosphère.",
-          "tags": [
-            "soleil",
-            "diffusion-rayleigh"
-          ],
+          "tags": ["soleil", "diffusion-rayleigh"],
           "uncertain": false,
           "variants": [
             {
@@ -2805,12 +2407,7 @@
               "question": "Vu depuis le sol, quelle couleur prend le Soleil ?",
               "answerKey": "Le Soleil paraît jaunâtre.",
               "estVraie": null,
-              "options": [
-                "Bleuâtre",
-                "Verdâtre",
-                "Blanc pur",
-                "Jaunâtre"
-              ],
+              "options": ["Bleuâtre", "Verdâtre", "Blanc pur", "Jaunâtre"],
               "correctIndex": 3,
               "cloze": null
             },
@@ -2824,15 +2421,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Le Soleil semble jaunâtre vu du sol parce qu'il a perdu une partie de sa lumière ___ en traversant l'atmosphère.",
-                "accepted": [
-                  "bleue",
-                  "bleu"
-                ],
-                "leurres": [
-                  "rouge",
-                  "verte",
-                  "violette"
-                ]
+                "accepted": ["bleue", "bleu"],
+                "leurres": ["rouge", "verte", "violette"]
               }
             },
             {
@@ -2864,10 +2454,7 @@
         },
         {
           "concept": "Sur la Lune, en l'absence d'atmosphère pour diffuser la lumière, le ciel reste noir même en plein jour.",
-          "tags": [
-            "lune",
-            "atmosphere"
-          ],
+          "tags": ["lune", "atmosphere"],
           "uncertain": false,
           "variants": [
             {
@@ -2876,12 +2463,7 @@
               "question": "Quelle est la couleur du ciel lunaire en plein jour ?",
               "answerKey": "Le ciel reste noir même en plein jour.",
               "estVraie": null,
-              "options": [
-                "Noir",
-                "Orangé",
-                "Gris clair",
-                "Bleu pâle"
-              ],
+              "options": ["Noir", "Orangé", "Gris clair", "Bleu pâle"],
               "correctIndex": 0,
               "cloze": null
             },
@@ -2895,14 +2477,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Sur la Lune, en l'absence d'___ pour diffuser la lumière, le ciel reste noir même en plein jour.",
-                "accepted": [
-                  "atmosphère"
-                ],
-                "leurres": [
-                  "gravité",
-                  "magnétisme",
-                  "relief"
-                ]
+                "accepted": ["atmosphère"],
+                "leurres": ["gravité", "magnétisme", "relief"]
               }
             },
             {
@@ -2950,10 +2526,7 @@
       "concepts": [
         {
           "concept": "Sur Railway, le « Private Networking » est un réseau interne qui permet aux services (backend, base de données) de communiquer entre eux via des noms d'hôte internes comme « postgres.railway.internal », sans être accessible depuis l'extérieur.",
-          "tags": [
-            "railway",
-            "private-networking"
-          ],
+          "tags": ["railway", "private-networking"],
           "uncertain": false,
           "variants": [
             {
@@ -2981,15 +2554,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Le « Private Networking » est un réseau interne qui permet aux services de communiquer entre eux via des noms d'hôte internes, sans être accessible depuis ___.",
-                "accepted": [
-                  "l'extérieur",
-                  "l'exterieur"
-                ],
-                "leurres": [
-                  "le backend",
-                  "la base de données",
-                  "le navigateur"
-                ]
+                "accepted": ["l'extérieur", "l'exterieur"],
+                "leurres": ["le backend", "la base de données", "le navigateur"]
               }
             },
             {
@@ -3002,10 +2568,7 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Ce réseau interne rend les services (backend, base de données) accessibles ___ Railway grâce aux noms d'hôte internes.",
-                "accepted": [
-                  "depuis l'extérieur de",
-                  "depuis l'exterieur de"
-                ],
+                "accepted": ["depuis l'extérieur de", "depuis l'exterieur de"],
                 "leurres": [
                   "uniquement à l'intérieur de",
                   "seulement via un domaine public de",
@@ -3027,10 +2590,7 @@
         },
         {
           "concept": "Le backend utilise le private networking de Railway pour se connecter à la base de données via la variable « DATABASE_URL », sans passer par un domaine public.",
-          "tags": [
-            "railway",
-            "private-networking"
-          ],
+          "tags": ["railway", "private-networking"],
           "uncertain": false,
           "variants": [
             {
@@ -3068,15 +2628,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Le backend utilise le private networking de Railway pour se connecter à la base de données via la variable « DATABASE_URL », sans passer par un ___ public.",
-                "accepted": [
-                  "domaine",
-                  "domaine public"
-                ],
-                "leurres": [
-                  "port",
-                  "token",
-                  "protocole"
-                ]
+                "accepted": ["domaine", "domaine public"],
+                "leurres": ["port", "token", "protocole"]
               }
             },
             {
@@ -3093,10 +2646,7 @@
         },
         {
           "concept": "Un « domaine public » sur Railway expose un service à Internet, ce qui est nécessaire quand une app mobile ou un frontend doit appeler le backend depuis l'extérieur de Railway, par exemple via « GET https://ton-backend.up.railway.app/api/... ».",
-          "tags": [
-            "railway",
-            "domaine-public"
-          ],
+          "tags": ["railway", "domaine-public"],
           "uncertain": false,
           "variants": [
             {
@@ -3124,15 +2674,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Un domaine public est nécessaire quand une app mobile ou un frontend doit appeler le backend depuis ___ Railway.",
-                "accepted": [
-                  "l'extérieur de",
-                  "l'exterieur de"
-                ],
-                "leurres": [
-                  "l'intérieur de",
-                  "le réseau interne de",
-                  "la base de données de"
-                ]
+                "accepted": ["l'extérieur de", "l'exterieur de"],
+                "leurres": ["l'intérieur de", "le réseau interne de", "la base de données de"]
               }
             },
             {
@@ -3145,14 +2688,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Un domaine public sur Railway expose un service à Internet, ce qui est ___ quand une app mobile ou un frontend doit appeler le backend depuis l'extérieur de Railway.",
-                "accepted": [
-                  "nécessaire"
-                ],
-                "leurres": [
-                  "facultatif",
-                  "interdit",
-                  "déconseillé"
-                ]
+                "accepted": ["nécessaire"],
+                "leurres": ["facultatif", "interdit", "déconseillé"]
               }
             },
             {
@@ -3169,10 +2706,7 @@
         },
         {
           "concept": "Sur Railway, il faut générer un domaine public pour le service backend, mais pas pour le service Postgres, qui doit rester en privé car c'est plus sûr et il n'en a pas besoin.",
-          "tags": [
-            "railway",
-            "domaine-public"
-          ],
+          "tags": ["railway", "domaine-public"],
           "uncertain": false,
           "variants": [
             {
@@ -3185,15 +2719,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Sur Railway, il faut générer un domaine public pour le service backend, mais pas pour le service ___, qui doit rester en privé.",
-                "accepted": [
-                  "Postgres",
-                  "PostgreSQL"
-                ],
-                "leurres": [
-                  "Redis",
-                  "MongoDB",
-                  "MySQL"
-                ]
+                "accepted": ["Postgres", "PostgreSQL"],
+                "leurres": ["Redis", "MongoDB", "MySQL"]
               }
             },
             {
@@ -3253,11 +2780,7 @@
       "concepts": [
         {
           "concept": "The immune system responds to a pathogen in two waves: the innate immune system reacts within minutes to hours against anything foreign without recognizing specific germs, while the adaptive immune system takes several days to activate but targets one specific pathogen and remembers it.",
-          "tags": [
-            "immune-system",
-            "innate-immunity",
-            "adaptive-immunity"
-          ],
+          "tags": ["immune-system", "innate-immunity", "adaptive-immunity"],
           "uncertain": false,
           "variants": [
             {
@@ -3270,15 +2793,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "The ___ immune system reacts within minutes to hours against anything foreign without recognizing specific germs.",
-                "accepted": [
-                  "innate",
-                  "innate immune"
-                ],
-                "leurres": [
-                  "adaptive",
-                  "acquired",
-                  "specific"
-                ]
+                "accepted": ["innate", "innate immune"],
+                "leurres": ["adaptive", "acquired", "specific"]
               }
             },
             {
@@ -3320,10 +2836,7 @@
         },
         {
           "concept": "The innate response starts with inflammation: damaged cells release chemical signals that widen nearby blood vessels, which is why an infected cut turns red, warm and swollen.",
-          "tags": [
-            "innate-immunity",
-            "inflammation"
-          ],
+          "tags": ["innate-immunity", "inflammation"],
           "uncertain": false,
           "variants": [
             {
@@ -3336,14 +2849,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "The innate response starts with ___: damaged cells release chemical signals that widen nearby blood vessels.",
-                "accepted": [
-                  "inflammation"
-                ],
-                "leurres": [
-                  "phagocytosis",
-                  "coagulation",
-                  "infection"
-                ]
+                "accepted": ["inflammation"],
+                "leurres": ["phagocytosis", "coagulation", "infection"]
               }
             },
             {
@@ -3385,10 +2892,7 @@
         },
         {
           "concept": "Phagocytes, mainly neutrophils and macrophages, are white blood cells that squeeze out of blood vessels and engulf invaders in a process called phagocytosis.",
-          "tags": [
-            "innate-immunity",
-            "phagocytosis"
-          ],
+          "tags": ["innate-immunity", "phagocytosis"],
           "uncertain": false,
           "variants": [
             {
@@ -3401,15 +2905,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Phagocytes, mainly ___ and macrophages, are white blood cells that squeeze out of blood vessels and engulf invaders.",
-                "accepted": [
-                  "neutrophils",
-                  "neutrophil"
-                ],
-                "leurres": [
-                  "lymphocytes",
-                  "platelets",
-                  "antibodies"
-                ]
+                "accepted": ["neutrophils", "neutrophil"],
+                "leurres": ["lymphocytes", "platelets", "antibodies"]
               }
             },
             {
@@ -3451,10 +2948,7 @@
         },
         {
           "concept": "The adaptive response relies on lymphocytes, including B cells and T cells.",
-          "tags": [
-            "adaptive-immunity",
-            "lymphocytes"
-          ],
+          "tags": ["adaptive-immunity", "lymphocytes"],
           "uncertain": false,
           "variants": [
             {
@@ -3502,25 +2996,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "The adaptive response relies on ___, including B cells and T cells.",
-                "accepted": [
-                  "lymphocytes",
-                  "lymphocyte"
-                ],
-                "leurres": [
-                  "antibodies",
-                  "pathogens",
-                  "antigens"
-                ]
+                "accepted": ["lymphocytes", "lymphocyte"],
+                "leurres": ["antibodies", "pathogens", "antigens"]
               }
             }
           ]
         },
         {
           "concept": "B cells produce antibodies, Y-shaped proteins that lock onto one particular antigen, the molecular \"tag\" on the surface of a pathogen; an antibody does not kill the germ itself but neutralizes it and marks it for destruction by other cells.",
-          "tags": [
-            "adaptive-immunity",
-            "antibodies"
-          ],
+          "tags": ["adaptive-immunity", "antibodies"],
           "uncertain": false,
           "variants": [
             {
@@ -3529,12 +3013,7 @@
               "question": "What shape are the proteins that B cells produce to lock onto antigens?",
               "answerKey": "B cells produce antibodies, which are Y-shaped proteins.",
               "estVraie": null,
-              "options": [
-                "branched",
-                "Y-shaped",
-                "coiled",
-                "spherical"
-              ],
+              "options": ["branched", "Y-shaped", "coiled", "spherical"],
               "correctIndex": 1,
               "cloze": null
             },
@@ -3568,25 +3047,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "An antibody locks onto one particular ___, the molecular \"tag\" on the surface of a pathogen.",
-                "accepted": [
-                  "antigen",
-                  "antigens"
-                ],
-                "leurres": [
-                  "antibody",
-                  "lymphocyte",
-                  "pathogen"
-                ]
+                "accepted": ["antigen", "antigens"],
+                "leurres": ["antibody", "lymphocyte", "pathogen"]
               }
             }
           ]
         },
         {
           "concept": "Helper T cells coordinate the adaptive immune response by activating B cells.",
-          "tags": [
-            "adaptive-immunity",
-            "t-cells"
-          ],
+          "tags": ["adaptive-immunity", "t-cells"],
           "uncertain": false,
           "variants": [
             {
@@ -3595,12 +3064,7 @@
               "question": "Which cells do helper T cells activate as part of coordinating the adaptive immune response?",
               "answerKey": "Helper T cells coordinate the adaptive immune response by activating B cells.",
               "estVraie": null,
-              "options": [
-                "Red blood cells",
-                "Platelets",
-                "Neurons",
-                "B cells"
-              ],
+              "options": ["Red blood cells", "Platelets", "Neurons", "B cells"],
               "correctIndex": 3,
               "cloze": null
             },
@@ -3634,25 +3098,15 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Helper T cells coordinate the adaptive immune response by activating ___.",
-                "accepted": [
-                  "B cells",
-                  "B cell"
-                ],
-                "leurres": [
-                  "T cells",
-                  "platelets",
-                  "neurons"
-                ]
+                "accepted": ["B cells", "B cell"],
+                "leurres": ["T cells", "platelets", "neurons"]
               }
             }
           ]
         },
         {
           "concept": "Cytotoxic T cells destroy the body's own cells once a virus has infected them.",
-          "tags": [
-            "adaptive-immunity",
-            "t-cells"
-          ],
+          "tags": ["adaptive-immunity", "t-cells"],
           "uncertain": false,
           "variants": [
             {
@@ -3690,15 +3144,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "Cytotoxic T cells destroy the body's own cells once a ___ has infected them.",
-                "accepted": [
-                  "virus",
-                  "viruses"
-                ],
-                "leurres": [
-                  "toxin",
-                  "hormone",
-                  "allergen"
-                ]
+                "accepted": ["virus", "viruses"],
+                "leurres": ["toxin", "hormone", "allergen"]
               }
             },
             {
@@ -3715,10 +3162,7 @@
         },
         {
           "concept": "After an infection is cleared, most lymphocytes die off, but some remain as memory cells; if the same pathogen shows up again, memory cells recognize it right away and launch a faster, stronger response, often before symptoms appear — this is called immunological memory and is the reason you usually catch chickenpox only once.",
-          "tags": [
-            "adaptive-immunity",
-            "immunological-memory"
-          ],
+          "tags": ["adaptive-immunity", "immunological-memory"],
           "uncertain": false,
           "variants": [
             {
@@ -3756,14 +3200,8 @@
               "correctIndex": null,
               "cloze": {
                 "sentence": "After an infection is cleared, most lymphocytes die off, but some remain as ___ cells.",
-                "accepted": [
-                  "memory"
-                ],
-                "leurres": [
-                  "plasma",
-                  "naive",
-                  "regulatory"
-                ]
+                "accepted": ["memory"],
+                "leurres": ["plasma", "naive", "regulatory"]
               }
             },
             {

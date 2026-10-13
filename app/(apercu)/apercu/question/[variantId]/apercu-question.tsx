@@ -79,7 +79,8 @@ function mauvaisIndex(question: QuestionServie): number {
  */
 function trouFige(question: QuestionServie, etat: EtatDApercu): TexteATrou {
   const attendu = question.cloze?.accepted[0] ?? "";
-  const verdict = question.cloze === null ? null : etat === "faux" ? "RATE" : etat === "juste" ? "JUSTE" : null;
+  const verdict =
+    question.cloze === null ? null : etat === "faux" ? "RATE" : etat === "juste" ? "JUSTE" : null;
   // À côté, on montre ce qui a été écrit : un leurre généré fait une saisie
   // plausible. Sinon rien n'est saisi.
   const saisie = verdict === "RATE" ? (question.cloze?.leurres[0] ?? "…") : "";

@@ -1,7 +1,12 @@
 import "dotenv/config";
 import { prisma } from "@/lib/db/client";
 import { ETATS_QUI_POSENT_UNE_PIERRE } from "@/lib/domain/etat-maitrise";
-import { createSeedAccount, resetSeedAccount, SEED_EMAIL, SEED_TIMEZONE } from "@/prisma/seed/account";
+import {
+  createSeedAccount,
+  resetSeedAccount,
+  SEED_EMAIL,
+  SEED_TIMEZONE,
+} from "@/prisma/seed/account";
 import { writeCorpus } from "@/prisma/seed/corpus-writer";
 import { writeDailyUsage } from "@/prisma/seed/ledger";
 import { construireLeCorpus } from "@/scripts/assets/fige-vers-seed";

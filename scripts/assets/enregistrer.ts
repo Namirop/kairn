@@ -119,7 +119,8 @@ async function main(): Promise<void> {
 
   // Sans argument, tout ; sinon, seulement les scènes dont le nom contient un filtre.
   const filtres = process.argv.slice(2).filter((arg) => !arg.startsWith("-"));
-  const aFaire = filtres.length > 0 ? scenes.filter((s) => filtres.some((f) => s.nom.includes(f))) : scenes;
+  const aFaire =
+    filtres.length > 0 ? scenes.filter((s) => filtres.some((f) => s.nom.includes(f))) : scenes;
 
   const browser = await ouvrirLeNavigateur();
 

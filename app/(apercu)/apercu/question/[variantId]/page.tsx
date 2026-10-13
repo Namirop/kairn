@@ -31,7 +31,7 @@ export default async function PageApercuQuestion({
   const etatChoisi: EtatDApercu = estEtat(etat) ? etat : "juste";
 
   return (
-    <main className="mx-auto w-full max-w-xl px-pas-4 py-pas-8">
+    <main className="px-pas-4 py-pas-8 mx-auto w-full max-w-xl">
       <ApercuQuestion question={question} etat={etatChoisi} />
     </main>
   );

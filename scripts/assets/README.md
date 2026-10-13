@@ -66,16 +66,16 @@ sous ce même drapeau, pour qu'il ne se glisse pas dans les captures.
 
 ## Fichiers
 
-| Fichier | Rôle |
-|---|---|
-| `config.ts` | Racine de sortie, viewports, chemins. |
-| `manifest.ts` | Schéma et écriture du manifeste. |
-| `session.ts` | Cookie de session (better-auth `testUtils`) pour Playwright. |
-| `sujets.ts` / `sujets/` | Les textes déposés, un par sujet. |
-| `fige.ts` / `figer-les-sujets.ts` | Figé d'assets sans perte, et son extraction réelle. |
-| `fige-vers-seed.ts` / `stats-de-demo.ts` / `seed-demo.ts` | Compte de démo depuis le figé + historique simulé. |
-| `navigateur.ts` / `cibles-de-capture.ts` / `scenarios.ts` / `captures.ts` / `capturer.ts` | Captures fixes. |
-| `enregistreur.ts` / `enregistrer.ts` | Vidéos mobiles + montage ffmpeg. |
+| Fichier                                                                                   | Rôle                                                         |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `config.ts`                                                                               | Racine de sortie, viewports, chemins.                        |
+| `manifest.ts`                                                                             | Schéma et écriture du manifeste.                             |
+| `session.ts`                                                                              | Cookie de session (better-auth `testUtils`) pour Playwright. |
+| `sujets.ts` / `sujets/`                                                                   | Les textes déposés, un par sujet.                            |
+| `fige.ts` / `figer-les-sujets.ts`                                                         | Figé d'assets sans perte, et son extraction réelle.          |
+| `fige-vers-seed.ts` / `stats-de-demo.ts` / `seed-demo.ts`                                 | Compte de démo depuis le figé + historique simulé.           |
+| `navigateur.ts` / `cibles-de-capture.ts` / `scenarios.ts` / `captures.ts` / `capturer.ts` | Captures fixes.                                              |
+| `enregistreur.ts` / `enregistrer.ts`                                                      | Vidéos mobiles + montage ffmpeg.                             |
 
 ## Prérequis
 

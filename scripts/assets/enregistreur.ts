@@ -114,7 +114,16 @@ export async function enregistrer(
 
 /** Agrandissement propre du viewport mobile (390×844) au double, pour la sortie. */
 const ECHELLE = "scale=780:1688:flags=lanczos";
-const SORTIE_H264 = ["-r", "30", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart"];
+const SORTIE_H264 = [
+  "-r",
+  "30",
+  "-c:v",
+  "libx264",
+  "-pix_fmt",
+  "yuv420p",
+  "-movflags",
+  "+faststart",
+];
 
 function monterLaVideo(webm: string, coupures: Coupure[], sortie: string): void {
   const args =

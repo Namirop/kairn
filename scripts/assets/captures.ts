@@ -15,7 +15,13 @@ import {
 
 /** Les écrans capturés, par famille. L'orchestrateur boucle sur les viewports. */
 
-const IMAGE_CAPTURE = path.join(process.cwd(), "scripts", "evaluation", "corpus", "07-capture-assistant.png");
+const IMAGE_CAPTURE = path.join(
+  process.cwd(),
+  "scripts",
+  "evaluation",
+  "corpus",
+  "07-capture-assistant.png",
+);
 const CARTE = "main section";
 const CAIRN = "[data-cairn]";
 const HAUTEURS = [1, 5, 20];
