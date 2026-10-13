@@ -81,6 +81,11 @@ que là où la session n'a rien à donner ce jour-là — sinon, il la remplacer
   jamais sur le Variant. Les Variants tournent pour éviter la mémorisation par
   formulation.
 - States d'un Atom : `LEARNING`, `REVIEWING`, `CONSOLIDATED`, `ARCHIVED`.
+- **Deux langues : français et anglais** (`lib/i18n/`, next-intl). La langue est une propriété
+  de la personne (`UserSettings.langue`) et se fige sur chaque dépôt (`Input.langue`) : concepts
+  et questions sont écrits dans la langue du dépôt, et changer de réglage ne retraduit rien. Les
+  pages publiques portent leur langue dans l'adresse (français sans préfixe, anglais sous `/en`) ;
+  l'application, elle, suit le réglage du compte. L'outil d'administration reste en français.
 - Mode mock par défaut en développement, aucun appel modèle silencieux,
   plafond journalier et interrupteur global.
 
@@ -106,8 +111,6 @@ que là où la session n'a rien à donner ce jour-là — sinon, il la remplacer
 
 **Conditionnelles au succès du produit** :
 
-- **Version anglaise** — aujourd'hui français uniquement ; prévue si le
-  produit trouve son public.
 - **App native** — aujourd'hui PWA uniquement ; prévue si le produit trouve
   son public.
 
@@ -121,9 +124,9 @@ que là où la session n'a rien à donner ce jour-là — sinon, il la remplacer
 - **Signature visuelle (non-négociable)** : le cairn — un empilement de
   pierres dessiné à la main en SVG, qui grandit d'une pierre à chaque Atom
   passé en `CONSOLIDATED`. Chaque page importante en porte trace.
-- **Voix (non-négociable)** : tutoiement français, phrase capitalisée, pas de
-  point d'exclamation, pas d'encouragement creux, pas d'emoji. Pas de version
-  anglaise à ce stade. Nomme les choses du point de vue de l'utilisateur
+- **Voix (non-négociable)** : tutoiement en français, « you » en anglais ; phrase
+  capitalisée, pas de point d'exclamation, pas d'encouragement creux, pas d'emoji,
+  dans les deux langues. Nomme les choses du point de vue de l'utilisateur
   (« Ce que tu as déposé », pas « Inputs »).
 
 ## Evidence on Hand
