@@ -44,33 +44,6 @@ const nextConfig: NextConfig = {
   },
 
   /**
-   * Les liens courts des bios TikTok, un par compte.
-   *
-   * Une bio affiche l'adresse telle qu'on la tape : `kairn.me/?utm_source=…` s'y
-   * lirait en entier. L'adresse courte renvoie à l'accueil dans la langue du
-   * compte, avec sa source en paramètres UTM, que Vercel Analytics range sans
-   * code de suivi. Ces redirections passent avant le middleware : `/en/tt` n'est
-   * pas une page publique et serait sinon renvoyée vers `/tt`.
-   *
-   * Temporaires (307) : une campagne se renomme, une redirection permanente
-   * resterait dans le cache des navigateurs.
-   */
-  async redirects() {
-    return [
-      {
-        source: "/tt",
-        destination: "/?utm_source=tiktok&utm_medium=bio&utm_campaign=fr",
-        permanent: false,
-      },
-      {
-        source: "/en/tt",
-        destination: "/en?utm_source=tiktok&utm_medium=bio&utm_campaign=en",
-        permanent: false,
-      },
-    ];
-  },
-
-  /**
    * Pendant les captures d'assets (`ASSETS_PREVIEW=1`), on éteint l'indicateur de
    * dev de Next : sa pastille se retrouverait sinon dans un coin de chaque
    * capture. C'est un réglage de développement uniquement — il n'a aucun effet en
