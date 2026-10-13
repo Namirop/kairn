@@ -25,6 +25,10 @@ import type { Langue } from "@/lib/db/types";
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const lienCourt = LIENS_COURTS[pathname];
+
+  if (lienCourt) return servirUnLienCourt(request, lienCourt);
+
   const prefixe = /^\/(en|fr)(\/.*)?$/.exec(pathname);
 
   if (prefixe) return servirLaLangue(request, prefixe[1] === "en" ? "EN" : "FR", prefixe[2] ?? "/");
@@ -37,6 +41,26 @@ export function middleware(request: NextRequest) {
   destination.searchParams.set(RETURN_TO_PARAM, pathname);
 
   return NextResponse.redirect(destination);
+}
+
+/**
+ * Les liens courts des bios TikTok, un par compte.
+ *
+ * Ils servent l'accueil dans la langue du compte **sans changer d'adresse** :
+ * la page vue reste `/tt` ou `/en/tt`, et l'onglet Pages de Vercel Analytics
+ * compte ainsi les visites venues de chaque bio, sur le plan gratuit. Une
+ * redirection avec des paramètres UTM ne se lisait qu'avec l'offre payante.
+ */
+const LIENS_COURTS: Record<string, Langue> = { "/tt": "FR", "/en/tt": "EN" };
+
+function servirUnLienCourt(request: NextRequest, langue: Langue): NextResponse {
+  const reponse = NextResponse.rewrite(
+    versLaPage(request, "/"),
+    avecLaLangue(request, langue, "/"),
+  );
+
+  // Le compte anglais retient l'anglais, comme `/en` ; le français ne pose rien.
+  return langue === "EN" ? retenir(reponse, langue) : reponse;
 }
 
 /** Le choix retenu un an, pour les pages qu'on visite sans compte. */
@@ -103,6 +127,7 @@ function orienter(request: NextRequest): NextResponse {
 export const config = {
   matcher: [
     "/",
+    "/tt",
     "/en",
     "/en/:path*",
     "/fr",
