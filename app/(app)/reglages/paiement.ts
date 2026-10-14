@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
-import { lireLUtilisateur } from "@/lib/auth/session";
+import { lireLUtilisateur, type UtilisateurDeSession } from "@/lib/auth/session";
 import { prendreUnGeste } from "@/lib/db/limite-de-gestes";
 import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 import { ouvrirLePaiement } from "@/lib/paiement/achat";
@@ -35,6 +35,32 @@ export type EtatDuPaiement = { erreur?: string };
  */
 const erreurs = () => getTranslations("compte.offre.erreurs");
 
+type Erreurs = Awaited<ReturnType<typeof erreurs>>;
+
+/** Ce que porte la demande, déjà lu, ou ce qu'on répond quand elle ne se lit pas. */
+type Demande<D> = { lue: D } | { refus: string };
+
+type Acces<D> = { erreur: string } | { utilisateur: UtilisateurDeSession; demande: D };
+
+/**
+ * L'entrée commune des gestes : la session, puis la demande, puis la limite de
+ * débit. Dans cet ordre : une demande illisible est refusée sans consommer de
+ * geste, et une session expirée se dit avant tout le reste.
+ */
+async function ouvrirLeGeste<D>(t: Erreurs, demande: Demande<D>): Promise<Acces<D>> {
+  const utilisateur = await lireLUtilisateur();
+
+  if (!utilisateur) return { erreur: t("sessionExpiree") };
+
+  if ("refus" in demande) return { erreur: demande.refus };
+
+  if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
+    return { erreur: t("tropVite") };
+  }
+
+  return { utilisateur, demande: demande.lue };
+}
+
 /**
  * Ouvre la page de paiement et y envoie.
  *
@@ -45,23 +71,20 @@ export async function payerAction(
   _precedent: EtatDuPaiement,
   donnees: FormData,
 ): Promise<EtatDuPaiement> {
-  const utilisateur = await lireLUtilisateur();
   const t = await erreurs();
-
-  if (!utilisateur) return { erreur: t("sessionExpiree") };
-
   const cadence = cadenceSchema.safeParse(donnees.get("cadence"));
+  const acces = await ouvrirLeGeste(
+    t,
+    cadence.success ? { lue: cadence.data } : { refus: t("offreInconnue") },
+  );
 
-  if (!cadence.success) return { erreur: t("offreInconnue") };
+  if ("erreur" in acces) return { erreur: acces.erreur };
 
-  if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
-    return { erreur: t("tropVite") };
-  }
-
+  const { utilisateur } = acces;
   let adresse: string;
 
   try {
-    adresse = await ouvrirLePaiement(utilisateur, cadence.data);
+    adresse = await ouvrirLePaiement(utilisateur, acces.demande);
   } catch (erreur) {
     console.error("[paiement] ouverture refusée", {
       userId: utilisateur.id,
@@ -81,15 +104,12 @@ export async function payerAction(
  * qui se font dans Kairn. Redirection hors du `try`, comme pour l'achat.
  */
 export async function portailAction(): Promise<EtatDuPaiement> {
-  const utilisateur = await lireLUtilisateur();
   const t = await erreurs();
+  const acces = await ouvrirLeGeste(t, { lue: null });
 
-  if (!utilisateur) return { erreur: t("sessionExpiree") };
+  if ("erreur" in acces) return { erreur: acces.erreur };
 
-  if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
-    return { erreur: t("tropVite") };
-  }
-
+  const { utilisateur } = acces;
   let adresse: string;
 
   try {
@@ -131,14 +151,11 @@ async function basculer(
   geste: (userId: string) => Promise<void>,
   echec: string,
 ): Promise<EtatDuPaiement> {
-  const utilisateur = await lireLUtilisateur();
-  const t = await erreurs();
+  const acces = await ouvrirLeGeste(await erreurs(), { lue: null });
 
-  if (!utilisateur) return { erreur: t("sessionExpiree") };
+  if ("erreur" in acces) return { erreur: acces.erreur };
 
-  if (!(await prendreUnGeste(utilisateur.id, await lireFuseauUtilisateur(utilisateur.id)))) {
-    return { erreur: t("tropVite") };
-  }
+  const { utilisateur } = acces;
 
   try {
     await geste(utilisateur.id);

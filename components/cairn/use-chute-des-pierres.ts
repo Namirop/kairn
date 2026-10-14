@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   avancer,
   cairnRenverse,
@@ -48,7 +48,10 @@ export function useChuteDesPierres(
   { cadre = CADRE_SERRE, tenu = false }: { cadre?: Cadre; tenu?: boolean } = {},
 ) {
   const refsGroupes = useRef<(SVGGElement | null)[]>([]);
-  const corps = useRef<Corps[]>(initialiser(pierres));
+  // Initialisation paresseuse : seul le premier rendu sert, l'effet réinitialise
+  // ensuite à chaque nouvel empilement.
+  const [corpsDeDepart] = useState(() => initialiser(pierres));
+  const corps = useRef<Corps[]>(corpsDeDepart);
   const phase = useRef<Phase>("pose");
   const boucle = useRef<number | null>(null);
   const posee = useRef(0);

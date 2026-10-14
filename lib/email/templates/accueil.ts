@@ -1,6 +1,6 @@
 import type { Langue } from "@/lib/db/types";
 import { textesDEmail } from "../traduction";
-import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
+import { STYLE_DES_EMAILS as S, bouton, envelopper, type EmailRendu } from "./gabarit";
 
 /**
  * L'accueil, une fois, à l'inscription : il dit quoi faire maintenant, et rien
@@ -20,11 +20,6 @@ export type AccueilPayload = {
 };
 
 type Textes = ReturnType<typeof textesDEmail>;
-
-/** Le bouton porte le mot de l'interface, et le même dans tout le flux. */
-function bouton(href: string, libelle: string): string {
-  return `<a href="${href}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${libelle}</a>`;
-}
 
 function corpsAvecConcepts(t: Textes, nombre: number, lienDeSession: string): string {
   return `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.encre};">${nombre}</p>

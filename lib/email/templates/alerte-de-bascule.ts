@@ -1,5 +1,6 @@
 // i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
 import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
+import { heureUtc, lignesDeValeurs } from "./blocs-d-alerte";
 import { echapper } from "./echapper";
 
 /**
@@ -29,10 +30,6 @@ export type AlerteDeBasculePayload = {
   instant: Date;
 };
 
-function heureUtc(instant: Date): string {
-  return `${instant.toISOString().slice(11, 16)} UTC`;
-}
-
 function sujet({ bascules }: AlerteDeBasculePayload): string {
   return `Kairn — ${bascules} bascules Luna → Sonnet aujourd'hui`;
 }
@@ -49,12 +46,7 @@ export function composerLAlerteDeBascule(payload: AlerteDeBasculePayload): Email
     ["AI_FOURNISSEUR=anthropic", "restaure Sonnet natif en une variable"],
   ];
 
-  const tableau = lignes
-    .map(
-      ([valeur, legende]) =>
-        `<tr><td style="padding:0 12px 8px 0;font-family:${S.MONO};font-size:15px;color:${S.encre};white-space:nowrap;">${valeur}</td><td style="padding:0 0 8px;font-size:14px;color:${S.secondaire};">${legende}</td></tr>`,
-    )
-    .join("");
+  const tableau = lignesDeValeurs(lignes);
 
   const motifCourt = motif.length > 500 ? `${motif.slice(0, 500)}…` : motif;
 

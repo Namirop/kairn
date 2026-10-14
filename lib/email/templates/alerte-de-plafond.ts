@@ -1,6 +1,7 @@
 // i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
 import type { CompteurDeQuota } from "@/lib/db/types";
 import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
+import { heureUtc, lignesDeValeurs } from "./blocs-d-alerte";
 
 /**
  * L'alerte d'exploitation quand un compteur d'appels se remplit.
@@ -55,10 +56,6 @@ const COMPTEURS: Record<CompteurDeQuota, { nom: string; plein: string; protege: 
   },
 };
 
-function heureUtc(instant: Date): string {
-  return `${instant.toISOString().slice(11, 16)} UTC`;
-}
-
 function dollars(montant: string): string {
   const valeur = Number(montant);
 
@@ -90,19 +87,14 @@ export function composerLAlerteDePlafond(payload: AlerteDePlafondPayload): Email
     ? "Des dépôts échouent en ce moment. Ils reprendront demain sans rien perdre, mais la journée est fermée."
     : "Il reste de quoi décider : relever le plafond, ou regarder ce qui consomme.";
 
-  const lignes = [
+  const lignes: [string, string][] = [
     [`${utilisees} appels sur ${plafond}`, COMPTEURS[compteur].nom.toLowerCase()],
     [heureUtc(instant), "heure de la journée qui compte"],
     [dollars(depenseDuJourUsd), "dépensé aujourd'hui, au registre"],
     [variable, "la variable à changer"],
   ];
 
-  const tableau = lignes
-    .map(
-      ([valeur, legende]) =>
-        `<tr><td style="padding:0 12px 8px 0;font-family:${S.MONO};font-size:15px;color:${S.encre};white-space:nowrap;">${valeur}</td><td style="padding:0 0 8px;font-size:14px;color:${S.secondaire};">${legende}</td></tr>`,
-    )
-    .join("");
+  const tableau = lignesDeValeurs(lignes);
 
   const compteConcerne =
     compteur === "COMPTE" && cible

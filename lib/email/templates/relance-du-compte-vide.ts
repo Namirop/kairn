@@ -1,6 +1,6 @@
 import type { Langue } from "@/lib/db/types";
 import { textesDEmail } from "../traduction";
-import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
+import { STYLE_DES_EMAILS as S, bouton, envelopper, type EmailRendu } from "./gabarit";
 
 /**
  * La relance d'un compte resté vide, une fois, quelques jours après l'inscription.
@@ -25,7 +25,7 @@ export function composerLaRelanceDuCompteVide(
   const corps = `<p style="margin:0 0 16px;font-size:17px;line-height:25px;font-weight:600;letter-spacing:-0.01em;color:${S.encre};">${t("relance.titre")}</p>
 <p style="margin:0 0 12px;font-size:15px;line-height:23px;color:${S.secondaire};">${t("relance.exemples")}</p>
 <p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.secondaire};">${t("relance.retour")}</p>
-<a href="${liens.lienDeDepot}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${t("commun.deposer")}</a>`;
+${bouton(liens.lienDeDepot, t("commun.deposer"))}`;
 
   const text = [
     t("relance.titre"),

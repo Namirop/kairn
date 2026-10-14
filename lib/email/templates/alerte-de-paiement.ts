@@ -1,5 +1,6 @@
 // i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
 import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
+import { heureUtc, lignesDeValeurs } from "./blocs-d-alerte";
 
 /**
  * L'alerte d'exploitation quand un webhook de paiement n'aboutit pas : Stripe a
@@ -24,10 +25,6 @@ export type AlerteDePaiementPayload = {
 /** Assez pour reconnaître la panne, pas assez pour faire un email de trace. */
 const MOTIF_MAXIMUM = 500;
 
-function heureUtc(instant: Date): string {
-  return `${instant.toISOString().slice(11, 16)} UTC`;
-}
-
 export function composerLAlerteDePaiement(payload: AlerteDePaiementPayload): EmailRendu {
   const { type, code, motif, instant } = payload;
 
@@ -42,12 +39,7 @@ export function composerLAlerteDePaiement(payload: AlerteDePaiementPayload): Ema
     [heureUtc(instant), "heure de la première alerte du jour"],
   ];
 
-  const tableau = lignes
-    .map(
-      ([valeur, legende]) =>
-        `<tr><td style="padding:0 12px 8px 0;font-family:${S.MONO};font-size:15px;color:${S.encre};white-space:nowrap;">${valeur}</td><td style="padding:0 0 8px;font-size:14px;color:${S.secondaire};">${legende}</td></tr>`,
-    )
-    .join("");
+  const tableau = lignesDeValeurs(lignes);
 
   const motifCourt = motif.length > MOTIF_MAXIMUM ? `${motif.slice(0, MOTIF_MAXIMUM)}…` : motif;
 

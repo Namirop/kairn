@@ -1,5 +1,5 @@
 // i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
-import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
+import { STYLE_DES_EMAILS as S, bouton, envelopper, type EmailRendu } from "./gabarit";
 import { echapper } from "./echapper";
 
 /**
@@ -47,7 +47,7 @@ export function composerLAlerteDeRetour(payload: AlerteDeRetourPayload): EmailRe
   const corps = `<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:${S.secondaire};">${echapper(entete)}</p>
 <p style="margin:0 0 24px;font-size:17px;line-height:26px;color:${S.encre};white-space:pre-wrap;">${echapper(court)}</p>
 ${pied ? `<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.secondaire};">${echapper(pied)}</p>` : ""}
-<a href="${lien}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">Ouvrir les retours</a>`;
+${bouton(lien, "Ouvrir les retours")}`;
 
   const text = [entete, "", court, ...(pied ? ["", pied] : []), "", `Les retours : ${lien}`].join(
     "\n",

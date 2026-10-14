@@ -1,6 +1,6 @@
 import type { Langue } from "@/lib/db/types";
 import { textesDEmail } from "../traduction";
-import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
+import { STYLE_DES_EMAILS as S, bouton, envelopper, type EmailRendu } from "./gabarit";
 
 /**
  * Le rappel quotidien. Il énonce ce qui attend, il ne motive pas.
@@ -34,7 +34,7 @@ export function composerLeRappelQuotidien(
   const corps = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.encre};">${dus}</p>
 <p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.secondaire};">${echeance}</p>
 ${serie}
-<a href="${liens.lienDeSession}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${t("commun.commencer")}</a>`;
+${bouton(liens.lienDeSession, t("commun.commencer"))}`;
 
   const text = `${echeance}${
     currentStreak > 0 ? `\n${t("rappel.serieTexte", { nombre: currentStreak })}` : ""

@@ -49,6 +49,8 @@ export function TonOffre({
   const paye = plan !== "GRATUIT";
   // Rien ne mène vers une caisse en euros depuis l'interface anglaise.
   const vend = useLangue() === "FR";
+  // Le portail suppose un dossier chez Stripe ; sans vente, il reste à qui paie déjà.
+  const portail = dossier && ouvert && (vend || paye);
 
   return (
     <section className="mt-pas-12">
@@ -96,10 +98,10 @@ export function TonOffre({
           </p>
         ) : null}
 
-        {paye || (dossier && ouvert && vend) ? (
+        {paye || portail ? (
           <div className="gap-pas-4 mt-pas-6 flex flex-wrap items-center">
             {paye ? <Renouvellement resilieALaFin={resilieALaFin} /> : null}
-            {dossier && ouvert && (vend || paye) ? <Portail /> : null}
+            {portail ? <Portail /> : null}
           </div>
         ) : null}
       </div>
