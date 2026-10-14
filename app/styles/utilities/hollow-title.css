@@ -1,0 +1,44 @@
+/* Un titre dont on ne garde que le trait.
+   « Tu retiens peu » n'est pas la seconde ligne d'un titre, c'est ce que la
+   première a perdu. La lettre évidée le dit sans qu'on l'écrive, et c'est la
+   seule chose du site qui ne se lise pas au premier regard sans qu'on le
+   regrette : ici, l'effort de lecture est le sujet.
+
+   Le contour est en `--stone-700` et non dans un gris de second plan — un
+   titre reste du texte, il tient le plancher AA comme le reste. À l'épaisseur
+   retenue il ne descend jamais sous 1,6 px, ce qui le garde net sur les
+   petites tailles où `0.021em` seul l'aurait effilé.
+
+   La couleur pleine est déclarée avant la garde et non dedans : sans le
+   contour, un `color: transparent` isolé effacerait la ligne au lieu de
+   l'évider. */
+/*
+  La seconde ligne de l'ouverture : un contour, et un intérieur en papier.
+
+  L'intérieur était transparent, ce qui revient à ouvrir une fenêtre dans le
+  titre. Tant que rien ne passait derrière, la fenêtre donnait sur du papier et
+  personne ne la voyait — c'est d'ailleurs pour ça que le paysage de bureau tient
+  ses crêtes au-dessus de la ligne de titre. Mais le cairn de l'ouverture se
+  renverse, ses pierres traversent l'écran, et une pierre passée derrière la
+  phrase se voyait **à travers les lettres**. Le mot devenait illisible au moment
+  précis où il porte le produit.
+
+  L'intérieur prend donc la couleur de la surface qui le porte. Au repos, papier
+  sur papier : rien ne change à l'œil. En mouvement, la lettre est pleine, et ce
+  qui passe derrière passe vraiment derrière.
+
+  Le repli sans `-webkit-text-stroke` garde une lettre pleine en gris moyen : là
+  il n'y a pas de contour à tenir, donc pas de fenêtre à refermer.
+*/
+@utility titre-creux {
+  color: var(--stone-500);
+
+  @supports (-webkit-text-stroke: 1px currentColor) {
+    /* Les lettres se remplissent de la surface qui les porte, et le trait est
+       l'encre. Les deux passent par une variable : sur un ciel coloré, le creux
+       doit se remplir du sol et se tracer en clair, sinon on lit une ligne
+       grise posée sur du bleu. */
+    color: var(--creux-fond, var(--surface-papier));
+    -webkit-text-stroke: max(1.6px, 0.021em) var(--creux-trait, var(--stone-700));
+  }
+}

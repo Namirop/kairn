@@ -1,0 +1,91 @@
+/*
+  Sur grand écran, tout le bas de l'échelle monte, mais moins vite que le corps.
+
+  Les deux registres du bas restaient fixes, pour creuser l'écart avec le corps
+  et hiérarchiser. L'intention était juste, le réglage non : sur un écran large,
+  `mono` tenait 61 % du corps et `petit` 72 %, si bien que tout le second plan de
+  l'application — étiquettes de navigation, séries, niveaux, commentaires
+  d'écran, et jusqu'au texte déposé par l'utilisateur — vivait à onze ou treize
+  pixels sous un corps de dix-huit. Ce n'était plus de la hiérarchie, c'était du
+  petit.
+
+  Ils montent donc aussi, d'un cran de moins que le corps : la hiérarchie tient
+  dans le *rapport*, pas dans l'immobilité. Treize, quinze, dix-huit sur grand
+  écran ; douze, quatorze, seize sur mobile, où seize est le plancher de lecture
+  qu'on ne descend pas.
+*/
+@media (min-width: 48rem) {
+  :root {
+    --t-mono: 0.8125rem;
+    --t-petit: 0.9375rem;
+    --t-corps: 1.125rem;
+    --t-h2-app: 1.5rem;
+
+    /*
+      Les trois registres qui portent une composition suivent la fenêtre, hauteur
+      comprise, et par le même `min()` des deux axes que le titre de campagne.
+
+      Ce ne sont pas des tailles de lecture — le corps, le petit et le mono ne
+      bougent pas d'un pixel, parce que la mesure d'un texte n'a rien à voir avec
+      la hauteur d'une fenêtre. Ce sont les trois tailles qui **occupent** :
+      l'énoncé d'une question, un titre d'écran, un grand nombre. Fixées sur un
+      écran de quatorze cents pixels de haut, elles étaient les mêmes sur un
+      mille quatre-vingts — où l'écran de question débordait dès qu'une réponse
+      s'affichait, et où le tableau de bord coupait sa série en deux.
+
+      La borne haute est la valeur d'avant : jamais plus gros, seulement plus
+      petit là où ça ne tenait pas.
+    */
+    --t-h1-app: clamp(1.75rem, min(3vw, 4.4vh), 2.5rem);
+    --t-enonce: clamp(1.375rem, min(2.6vw, 3.2vh), 2rem);
+    --t-nombre: clamp(3.5rem, min(6vw, 9vh), 5.75rem);
+    --t-compteur: clamp(4.5rem, min(10vw, 16vh), 10.5rem);
+
+    --pas-dedans: clamp(1.25rem, 3.6vh, 3rem);
+    --pas-scene: clamp(2rem, 5vh, 4rem);
+
+    --t-h2-site: 3.75rem;
+
+    /*
+      Le titre de campagne se mesure à la fenêtre, hauteur comprise.
+
+      Il était fixe de sept cent soixante-huit pixels de large jusqu'à
+      vingt-cinq cents : sur un écran de deux mille quatre cents de haut il
+      ouvrait juste, et sur un mille quatre-vingts — l'écran le plus répandu au
+      monde — l'ouverture ne tenait plus dans la fenêtre, le geste d'appel passé
+      sous le pli. Un titre de campagne n'a pas de taille absolue : il a une
+      **part de l'écran**, et l'écran a deux dimensions.
+
+      D'où le `min()` des deux axes : c'est la dimension la plus étroite qui
+      décide, comme pour n'importe quel objet qu'on veut voir en entier. Sur un
+      écran haut c'est la largeur qui limite, sur un écran bas c'est la hauteur,
+      et le résultat est borné par le corps d'origine — jamais plus gros
+      qu'avant, seulement plus petit là où il ne passait pas.
+
+      La borne basse est un peu au-dessus du corps mobile : entre les deux, la
+      typographie n'aurait plus rien d'une ouverture.
+    */
+    --t-h1-site: clamp(3.5rem, min(7.4vw, 9.6vh), 6.5rem);
+    --t-ouverture: clamp(
+      3.5rem,
+      min(13.5vh, calc((min(80rem, 100vw - 4rem) - 3rem) * 0.084)),
+      8rem
+    );
+
+    --pas-campagne: clamp(2.5rem, 6vh, 6rem);
+  }
+}
+
+/* Au-delà de quinze cents pixels, la mesure large passe à quatre-vingt-seize
+   rems : la colonne du titre grandit avec elle, et la formule doit suivre le
+   même palier que le panneau, sinon le titre s'arrête où le conteneur ne
+   s'arrête plus. */
+@media (min-width: 96rem) {
+  :root {
+    --t-ouverture: clamp(
+      3.5rem,
+      min(13.5vh, calc((min(96rem, 100vw - 4rem) - 3rem) * 0.084)),
+      8rem
+    );
+  }
+}

@@ -8,7 +8,7 @@ import { conclure, record } from "./verification/journal";
  * « Ça se lit » n'est pas une vérification : deux gris passables à l'œil sur un
  * grand écran calibré deviennent illisibles au soleil, et personne ne s'en
  * aperçoit avant qu'un utilisateur le dise. Ce script lit les jetons dans
- * `globals.css` et calcule les ratios WCAG des combinaisons que le produit pose
+ * `app/styles/tokens/` et calcule les ratios WCAG des combinaisons que le produit pose
  * réellement.
  *
  * Le piège qu'il vient de rattraper : la surface nommée « ombre » est claire,
@@ -129,7 +129,7 @@ function main(): void {
     const fond = jetons[combinaison.fond];
 
     if (!texte || !fond) {
-      record(`Contraste — ${combinaison.role}`, false, "jeton introuvable dans globals.css");
+      record(`Contraste — ${combinaison.role}`, false, "jeton introuvable dans app/styles/tokens/");
       continue;
     }
 

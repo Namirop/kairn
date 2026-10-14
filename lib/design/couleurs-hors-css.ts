@@ -10,7 +10,7 @@
  * les clients de messagerie ne lisent pas les variables CSS non plus.
  */
 
-/** Doit rester égal à `--surface-papier` dans app/globals.css. */
+/** Doit rester égal à `--surface-papier` dans `app/styles/tokens/colors.css`. */
 export const PAPIER = "#eef5f7";
 
 /**
@@ -22,7 +22,7 @@ export const PAPIER = "#eef5f7";
  * de passer par les classes — deux traductions d'une même géométrie, jamais deux
  * géométries.
  *
- * Chacune doit rester égale à son jeton dans `app/globals.css`.
+ * Chacune doit rester égale à son jeton dans `app/styles/tokens/colors.css`.
  */
 
 /** `--stone-900`, `--stone-800`, `--stone-700` — les pierres sur fond clair. */

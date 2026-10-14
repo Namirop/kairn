@@ -18,7 +18,7 @@ import { PaysageDeCairns } from "@/components/site/paysage-de-cairns";
  * creux : la ligne perd sa chair au moment où elle dit qu'on perd ce qu'on a
  * lu. C'est la seule figure de style du site, elle porte la phrase qui porte le
  * produit, et elle ne coûte rien à la lecture — le contour tient le contraste
- * d'un texte, pas d'un ornement (voir `titre-creux` dans `globals.css`).
+ * d'un texte, pas d'un ornement (voir `titre-creux` dans `app/styles/utilities/hollow-title.css`).
  *
  * **Et la seconde ligne se vide sous les yeux.** Elle était creuse d'emblée,
  * donc la phrase la plus importante de la page arrivait déjà oubliée, sans

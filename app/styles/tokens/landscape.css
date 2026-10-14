@@ -1,0 +1,135 @@
+/* Le paysage de l'ouverture : son titre, son ciel, sa terre, ses pierres. */
+
+:root {
+  /*
+    Le titre de l'ouverture, et lui seul.
+
+    Il ne suit pas la campagne : à deux colonnes, ce n'est plus la fenêtre qui
+    le borne mais **sa colonne**, et une taille tirée d'un pourcentage de
+    fenêtre ignore que le panneau s'arrête à sa mesure. C'est ce qui bloquait le
+    titre à six rems sur un écran de deux mille pixels — la place existait, la
+    formule ne la voyait pas.
+
+    Le calcul reprend donc la chaîne complète : la mesure du panneau, bornée par
+    la fenêtre moins ses marges, moins la gouttière entre les deux colonnes, fois
+    la part de gauche, divisé par la longueur de la phrase la plus longue. Sous
+    `md`, le titre reprend `--t-h1-site` : il n'y a plus qu'une colonne, et le
+    diviseur d'origine est exactement fait pour ce cas-là.
+
+    Le facteur `0.084` porte les deux derniers termes : la part de gauche
+    (1,7 sur 2,7) divisée par 7,5 — la largeur de « Tu lis beaucoup. » en
+    multiples de son corps, avec un demi-cran de garde pour la police de secours.
+    Un titre d'ouverture plus long se remesure, comme celui de la campagne.
+
+    Sous `md`, il reprend le diviseur de `--t-h1-site` — une colonne, et ce
+    diviseur est fait pour ce cas-là — mais pas sa garde. La formule partagée
+    retranche cinq rems de marge parce qu'elle sert tous les titres du site sans
+    savoir dans quel panneau ils tombent ; l'ouverture, elle, connaît le sien :
+    `px-pas-6`, trois rems en tout. Sur deux rems d'écart, on en reprend un et
+    on garde l'autre. C'est cinq pour cent de corps en plus, et un rem qui reste
+    entre la phrase et le bord — la ligne remplit sa colonne, elle ne la touche
+    pas.
+  */
+  /*
+    Le ciel de l'ouverture, et il penche dans les deux sens.
+
+    De haut en bas, un lavis d'une seule teinte, du bleu de nuit au bleu clair
+    vers l'horizon : c'est un ciel, pas un dégradé décoratif, et c'est la
+    nuance qui le sépare de ce qui est interdit ailleurs.
+
+    De gauche à droite, le versant d'ombre. L'inclinaison de trois degrés
+    suffisait à poser le plus sombre à gauche mais pas à ce qu'on le voie : les
+    deux bords du haut étaient à la même valeur à un pour cent près. Le matin
+    éclaire la droite de la vallée, la gauche reste dans la nuit.
+
+    L'ombre est sortie en jeton parce que **l'en-tête porte la même fonction de
+    x** : deux dégradés à quatre-vingt-dix degrés sur deux éléments pleine
+    largeur se rejoignent exactement à chaque colonne. C'est ce qui permet
+    d'avoir un écart franc entre les deux bords *et* une couture invisible, là
+    où faire suivre l'en-tête à la main oblige à choisir.
+  */
+  --ombre-du-versant: linear-gradient(
+    90deg,
+    rgb(6 21 60 / 0.6) 0%,
+    rgb(6 21 60 / 0.26) 46%,
+    rgb(6 21 60 / 0) 84%
+  );
+  --ciel:
+    var(--ombre-du-versant),
+    linear-gradient(177deg, #163f96 0%, #1a4aa6 26%, #1e5cc4 66%, #3a86c9 100%);
+  /*
+    La même chose, mais toujours une couleur plate.
+
+    `--ciel` est un dégradé ; `color-mix` n'en accepte pas. Le paysage a besoin
+    d'une teinte vers laquelle faire virer ses lointains — c'est ça, la brume.
+    Elle est calculée pour que le lointain, mêlé à 18 %, tombe exactement sur
+    la bande de glace de la maquette.
+  */
+  --ciel-teinte: #a5d8e7;
+  /*
+    La terre du premier plan de l'ouverture.
+
+    Un sol appartient à son ciel : sous un ciel coloré, une butte restée au
+    beige de l'ombre coupe l'image en deux moitiés qui n'ont rien à voir l'une
+    avec l'autre — ce n'est plus un paysage, ce sont deux aplats superposés.
+    C'est le niveau 3 de la maquette.
+  */
+  --terre: #47a2cb;
+
+  /*
+    Les pierres du paysage, et elles ne sont pas celles du grand cairn.
+
+    Les cairns du lointain sont presque blancs : la brume les mange. Ceux du
+    plan proche sont de la même pierre que le grand, et leur sommet porte le
+    lichen — c'est la seule marque de maîtrise qu'on voie de loin.
+  */
+  --pierre-loin-1: #b3d4e1;
+  --pierre-loin-2: #c2dde8;
+  --pierre-loin-3: #cfe6ee;
+  --pierre-proche-1: #1b3d58;
+  --pierre-proche-2: #24506f;
+  --pierre-proche-3: #2e6285;
+  --pierre-proche-sommet: #9fc22e;
+
+  /*
+    Les arêtes des deux plans du paysage, et les deux habillages de l'ouverture.
+
+    **Les arêtes se taisent.** Sur un aplat coloré, le trait gris du relief
+    dessine un liseré qui coupe la couleur au lieu de la dessiner. C'est le
+    changement de valeur entre deux terrasses qui fait la crête, pas un trait.
+
+    L'en-tête, lui, est le haut du ciel : sa couleur de départ, sous le même
+    versant d'ombre. Il n'a donc rien à savoir de la hauteur du hero ni de
+    l'inclinaison du ciel, et la couture ne peut pas exister. Le filet se tait
+    pour la même raison — une ligne claire entre deux surfaces continues est
+    une couture qu'on dessine exprès.
+  */
+  --arete-loin: transparent;
+  --arete-proche: transparent;
+  --entete: var(--ombre-du-versant), linear-gradient(90deg, #163f96 0%, #163f96 100%);
+  --entete-filet: transparent;
+  /* Le geste de l'ouverture : l'encre de la nuit sur le ciel, et plus de
+     hauteur — sur un aplat, une pilule fine se perd. */
+  --geste-ciel: #14202e;
+  --geste-ciel-encre: #f4f9fb;
+  /* Le creux du titre se remplit du sol et se trace en blanc. */
+  --creux-fond: #47a2cb;
+  --creux-trait: #ffffff;
+  /* Le trait qui dit que le rail est devant la page, et non à côté — voir sa
+     règle plus bas. */
+  --filet-du-rail: #7fb3c8;
+
+  /*
+    Le trait de sol sous le cairn, et l'ombre qu'il porte.
+
+    Le trait se tait pour la raison des arêtes : sur un aplat coloré, c'est une
+    barre claire en travers de la couleur. Reste l'ombre, et c'est elle seule
+    qui dit que la pierre touche terre — elle est donc plus dense qu'elle ne
+    l'était sur du papier.
+  */
+  --sol-du-cairn: transparent;
+  --ombre-du-cairn: #0b1c2c;
+  --ombre-du-cairn-part: 0.3;
+
+  --t-ouverture: clamp(2.25rem, calc((100vw - 4rem) / 7.4), 3.75rem);
+}

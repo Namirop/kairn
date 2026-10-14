@@ -43,7 +43,7 @@ export default async function CoquilleApplication({ children }: { children: Reac
       <div className="bg-surface-papier flex min-h-dvh flex-col">
         <Rail administrateur={administrateur} />
         {/* Le décalage du rail vit ici, et la règle de passage le reprend à
-            zéro quand le rail s'efface — voir `globals.css`. */}
+            zéro quand le rail s'efface — voir `app/styles/shell.css`. */}
         <div data-colonne className="flex flex-1 flex-col md:pl-28">
           <EnTete />
           {/* Aucune mesure ici, et aucun rembourrage : chaque écran est une

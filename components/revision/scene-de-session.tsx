@@ -60,7 +60,7 @@ export function SceneDeSession({
   return (
     <PileDePanneaux sol="session">
       {/* La déclaration que lit la coquille pour se retirer — voir
-          `globals.css`. Elle est posée ici parce que c'est ici qu'on sait qu'on
+          `app/styles/shell.css`. Elle est posée ici parce que c'est ici qu'on sait qu'on
           est dans un passage, et nulle part ailleurs. */}
       <div data-passage className="flex flex-1 flex-col lg:flex-row">
         {rail ? (
