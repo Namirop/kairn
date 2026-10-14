@@ -55,13 +55,13 @@ export async function creerDepot(
     });
 
     return { input, nouveau: true };
-  } catch {
+  } catch (erreur) {
     // Course perdue contre une requête jumelle : c'est elle qui a créé le dépôt.
     const rattrape = await prisma.input.findUnique({
       where: { userId_submissionKey: { userId: depot.userId, submissionKey: depot.cleEnvoi } },
     });
 
-    if (!rattrape) throw new Error("Le dépôt n'a pas pu être créé.");
+    if (!rattrape) throw new Error("Le dépôt n'a pas pu être créé.", { cause: erreur });
 
     return { input: rattrape, nouveau: false };
   }

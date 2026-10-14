@@ -8,6 +8,8 @@ export const refus: Messages["depots"]["refus"] = {
     "This image is too heavy to send. Crop it to the part you care about, or shrink it before dropping it in.",
   imageIllisible:
     "This file isn't an image we can read. Drop in a screenshot as JPEG, PNG, WebP or GIF.",
+  captureSansTexte:
+    "This screenshot has no readable text. Crop it to the passage you care about, or paste the text directly.",
   texteTropLong:
     "That's {caracteres, number} characters, and a drop takes {maximum, number}. Keep the part that matters.",
   depotTropLong: "This drop is over {longueur}. Split it in two: two drops beat one cut short.",

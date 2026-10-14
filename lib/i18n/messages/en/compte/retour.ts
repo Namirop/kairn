@@ -22,7 +22,7 @@ export const retour: Messages["compte"]["retour"] = {
   erreurs: {
     sujet: "Choose what it's about before sending.",
     longueur: "Write between {min} and {max} characters. One sentence is enough.",
-    image: "This image is over 5 MB. Crop it, or send your message without it.",
+    image: "This image is over 4 MB. Crop it, or send your message without it.",
     plafond: "You've sent {nombre} messages today. Come back tomorrow — they get read.",
   },
 };

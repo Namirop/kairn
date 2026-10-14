@@ -27,6 +27,9 @@ export const refus = {
   /** Le lecteur d'images n'a pas reconnu le fichier — voir `lib/images/capture.ts`. */
   imageIllisible:
     "Ce fichier n'est pas une image que l'on sait lire. Dépose une capture en JPEG, PNG, WebP ou GIF.",
+  /** Enregistré sur le dépôt : un rejet de la lecture, dit dans la langue du dépôt. */
+  captureSansTexte:
+    "Cette capture ne porte pas de texte lisible. Recadre-la sur le passage qui t'intéresse, ou colle le texte directement.",
   /**
    * Un texte trop long ne se tronque pas : la coupe tomberait au milieu d'une
    * phrase, et le début d'un texte collé est souvent ce qui compte le moins.

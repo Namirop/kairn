@@ -1,4 +1,4 @@
-import { fsrs, Rating, type Card } from "ts-fsrs";
+import { fsrs, generatorParameters, Rating, type Card } from "ts-fsrs";
 import { fromCard, toCard, type AtomCardFields } from "@/lib/db/fsrs-card";
 import type { ReviewRating } from "@/lib/db/types";
 
@@ -6,12 +6,14 @@ import type { ReviewRating } from "@/lib/db/types";
  * Le calcul d'échéance, délégué à ts-fsrs : la carte stockée est celle que
  * l'algorithme rend. Seul endroit de l'application qui appelle l'ordonnanceur.
  *
- * `fsrs()` sans paramètres laisse le brouillage (`enable_fuzz`) à son défaut,
- * qui est désactivé : des concepts révisés le même jour reviennent le même
- * jour. Le seed (`prisma/seed/replay.ts`) le coupe explicitement.
+ * Le brouillage (`enable_fuzz`) décale chaque intervalle d'un peu de hasard :
+ * des concepts révisés le même jour avec la même note ne reviennent pas tous
+ * le même jour, et la charge des sessions se lisse. ts-fsrs le désactive par
+ * défaut, d'où le réglage explicite. Le seed (`prisma/seed/replay.ts`) le
+ * coupe, pour rester reproductible.
  */
 
-const ordonnanceur = fsrs();
+const ordonnanceur = fsrs(generatorParameters({ enable_fuzz: true }));
 
 const NOTES: Record<ReviewRating, Rating.Again | Rating.Hard | Rating.Good | Rating.Easy> = {
   AGAIN: Rating.Again,

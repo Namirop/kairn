@@ -1,6 +1,7 @@
 // i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
 import { EMAIL_STYLE as S, renderShell } from "./shell";
 import type { RenderedEmail } from "./daily-reminder";
+import { echapper } from "./echapper";
 
 /**
  * Un retour vient d'arriver.
@@ -32,14 +33,6 @@ export type AlerteDeRetourPayload = {
 
 /** Au-delà, on lit la suite dans l'écran : un email n'est pas une page. */
 const MESSAGE_MAX = 1200;
-
-function echapper(texte: string): string {
-  return texte
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 export function renderAlerteDeRetour(payload: AlerteDeRetourPayload): RenderedEmail {
   const { sujet, ecran, message, contexte, avecCapture, lien } = payload;

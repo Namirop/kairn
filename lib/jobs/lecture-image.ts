@@ -6,6 +6,7 @@ import { enregistrerTexteLu, lireDepot, oublierImage } from "@/lib/db/ingestion"
 import { marquerEchec, marquerRejet } from "@/lib/db/fin-de-depot";
 import type { GenerationJob } from "@/lib/db/types";
 import { enqueueJob } from "./queue";
+import { textesDesRefus } from "@/lib/depots/textes-des-refus";
 
 /**
  * La lecture d'une capture. Les octets de l'image ne survivent pas à cette
@@ -14,9 +15,6 @@ import { enqueueJob } from "./queue";
  */
 
 const TYPES_LISIBLES = z.enum(["image/jpeg", "image/png", "image/gif", "image/webp"]);
-
-const RIEN_A_LIRE =
-  "Cette capture ne porte pas de texte lisible. Recadre-la sur le passage qui t'intéresse, ou colle le texte directement.";
 
 export async function lireImage(job: GenerationJob): Promise<void> {
   const depot = await lireDepot(job.inputId);
@@ -55,7 +53,9 @@ export async function lireImage(job: GenerationJob): Promise<void> {
   if (!lu.usable) {
     // Rien à lire sur la capture : un rejet, pas une panne.
     await oublierImage(depot.id);
-    await marquerRejet(depot.id, RIEN_A_LIRE);
+    // Le motif est enregistré puis affiché tel quel : il se dit dans la langue
+    // figée sur le dépôt.
+    await marquerRejet(depot.id, textesDesRefus(depot.langue)("captureSansTexte"));
     return;
   }
 

@@ -15,7 +15,13 @@ import { defineConfig } from "vitest/config";
  *   calibrés. Une segmentation qui dérive rend deux rapports incomparables. Le
  *   client d'embeddings et son cache restent hors périmètre.
  * - `scripts/docs/` : la carte des docs que lit `npm run docs:check`.
+ *
+ * Le fuseau du processus est fixé, et sur un décalage non entier : un test qui
+ * dépendrait en douce du fuseau de la machine échoue partout de la même façon,
+ * au lieu de passer à Paris et de casser en CI (UTC).
  */
+process.env.TZ = "Asia/Kathmandu";
+
 export default defineConfig({
   test: {
     include: [
@@ -27,6 +33,7 @@ export default defineConfig({
       "scripts/docs/*.test.ts",
     ],
     environment: "node",
+    env: { TZ: "Asia/Kathmandu" },
   },
   resolve: {
     alias: { "@": resolve(import.meta.dirname, ".") },

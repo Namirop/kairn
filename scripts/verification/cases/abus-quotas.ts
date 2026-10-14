@@ -321,7 +321,7 @@ export async function casBornesDentree(userId: string): Promise<void> {
   );
 
   record(
-    "Bornes — une capture de plus de 5 Mo est refusée côté serveur",
+    "Bornes — une capture de plus de 4 Mo est refusée côté serveur",
     !lourd.ok,
     lourd.ok ? "accepté" : lourd.motif,
   );
