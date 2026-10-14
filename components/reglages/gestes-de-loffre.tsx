@@ -14,20 +14,14 @@ import { PRIX_ANNUEL, PRIX_MENSUEL } from "@/lib/domain/prix";
 /**
  * Les boutons qui engagent de l'argent, et ce qu'ils disent quand ils échouent.
  *
- * À part du panneau qui les héberge, et pas seulement pour tenir une longueur :
- * ce sont les seuls éléments de tout le produit qui ouvrent une page de
- * paiement, résilient un abonnement ou envoient chez Stripe. Les garder dans un
- * fichier qui ne fait que ça rend visible, à la relecture comme à la revue, tout
- * ajout d'un geste d'argent.
+ * Ce sont les seuls gestes du produit qui ouvrent un paiement, résilient ou
+ * envoient chez Stripe : isolés ici, tout ajout d'un geste d'argent se voit en
+ * revue.
  */
 
 /**
- * Les deux cadences. Deux boutons, pas deux colonnes : le choix est fait, il
- * reste à payer.
- *
- * Le refus d'un paiement fermé appartient à l'écran qui héberge ces boutons, pas
- * à eux : c'est lui qui sait ce qu'il y a à dire à la place, et il n'a alors
- * aucune raison de charger un composant qui ne fait qu'engager de l'argent.
+ * Les deux cadences. Quand le paiement est fermé, c'est l'écran hôte qui dit
+ * quoi afficher à la place.
  */
 export function Achat({ ouvert }: { ouvert: boolean }) {
   const [etat, action, enCours] = useActionState<EtatDuPaiement, FormData>(payerAction, {});
@@ -88,9 +82,7 @@ export function Renouvellement({ resilieALaFin }: { resilieALaFin: boolean }) {
     <form action={action}>
       <input type="hidden" name="geste" value={resilieALaFin ? "reprendre" : "arreter"} />
 
-      {/* Arrêter n'est pas destructeur — rien ne se supprime et la reprise est
-          à un clic. Le rouge irait à contre-emploi ici : il annoncerait une
-          conséquence que ce bouton n'a pas. */}
+      {/* Pas de rouge : arrêter ne supprime rien, la reprise est à un clic. */}
       <Button
         type="submit"
         variant={resilieALaFin ? "default" : "outline"}
@@ -106,14 +98,9 @@ export function Renouvellement({ resilieALaFin }: { resilieALaFin: boolean }) {
 }
 
 /**
- * Le seul lien qui sorte du produit.
- *
- * Discret et non un bouton : ce n'est pas ce qu'on vient faire sur cet écran.
- * Quelqu'un l'ouvre parce que sa carte a expiré ou qu'il lui faut une facture —
- * deux fois par an, et il sait déjà ce qu'il cherche.
- *
- * Le libellé nomme les deux choses qu'on y trouve, parce que c'est tout ce qu'on
- * y trouve : la configuration du portail refuse le reste.
+ * Le lien vers le portail Stripe, discret : on y vient rarement, en sachant ce
+ * qu'on cherche. Le libellé nomme les deux seules choses que la configuration
+ * du portail autorise.
  */
 export function Portail() {
   const [etat, action, enCours] = useActionState<EtatDuPaiement, FormData>(portailAction, {});
@@ -135,14 +122,9 @@ export function Portail() {
 }
 
 /**
- * Le message n'occupe plus rien tant qu'il n'a rien à dire.
- *
- * Sa place était réservée en permanence — une ligne sous chaque geste, pour une
- * phrase qui paraît un jour sur cent. Trois gestes dans la même carte, et c'était
- * soixante pixels de vide qui écartaient « arrêter le renouvellement » du lien
- * vers les factures au point qu'ils n'avaient plus l'air d'appartenir au même
- * sujet. Il est **sous** son bouton : il ne décale que ce qui vient après, à
- * l'instant où quelqu'un lit une erreur, et ce déplacement-là se comprend.
+ * Le message n'occupe aucune place tant qu'il est vide : réservée sous chacun
+ * des trois gestes, elle écarterait trop la carte. Sous son bouton, il ne décale
+ * que ce qui suit.
  */
 function Message({ erreur }: { erreur?: string }) {
   return (

@@ -3,15 +3,9 @@ import { Label } from "@/components/ui/label";
 /**
  * Une décision : son nom, ce qu'elle change, son contrôle, et sa suite.
  *
- * **L'explication n'a pas de mesure à elle, et c'est délibéré.** Elle en portait
- * une — celle d'un paragraphe de prose, soixante-quatre signes — dans une carte
- * qui lui en offrait quatre-vingts, posée dans un panneau déjà serré à la mesure
- * d'une colonne de lecture. Deux bornes pour la même chose : la seconde ne
- * protégeait plus rien et laissait un quart de carte vide à droite de chaque
- * phrase, qui se lisait comme un écran pas fini.
- *
- * Ce qui la borne maintenant est la carte : la place qui reste à gauche du
- * contrôle. Le panneau, lui, tient la mesure de lecture pour tout le monde.
+ * L'explication n'a pas de `max-w` : la carte la borne déjà, et le panneau
+ * tient la mesure de lecture. Une seconde borne laissait un vide à droite de
+ * chaque phrase.
  */
 export function Reglage({
   nom,

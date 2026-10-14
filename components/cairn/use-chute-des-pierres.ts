@@ -27,26 +27,16 @@ import type { Pierre } from "@/lib/domain/cairn-stack";
 /** Temps d'arrêt avant que le cairn ne se reconstruise, en millisecondes. */
 const AVANT_REMONTEE = 1600;
 /**
- * Durée maximale d'une chute, en millisecondes.
- *
- * Un solveur à impulsions a des configurations sans fin : une pierre debout en
- * équilibre sur l'arête d'une autre peut osciller indéfiniment sans jamais
- * franchir le seuil de repos. Le balayage exhaustif n'en trouve plus une seule,
- * mais « plus une seule aujourd'hui » n'est pas une garantie, et le prix d'une
- * boucle d'animation qui ne s'arrête jamais est trop élevé pour se contenter
- * d'un réglage bien choisi. Passé ce délai, la chute est déclarée finie et le
- * cairn se reconstruit.
+ * Durée maximale d'une chute, en millisecondes. Un solveur à impulsions peut
+ * osciller sans jamais atteindre le repos (une pierre en équilibre sur une
+ * arête) : ce délai garantit que la boucle d'animation s'arrête.
  */
 const CHUTE_MAXIMALE = 9000;
 /** Au-delà, un geste est considéré comme un coup porté. */
 const VITESSE_MINIMALE = 40;
 /**
- * Plafond de la force transmise.
- *
- * Il était calé sur la largeur du dessin : au-delà, les pierres n'avaient nulle
- * part où aller. Maintenant qu'elles peuvent sortir du cadre, un geste franc
- * doit pouvoir les envoyer loin — c'est toute la différence entre effleurer un
- * empilement et le faucher.
+ * Plafond de la force transmise. Les pierres peuvent sortir du cadre : un geste
+ * franc doit pouvoir les envoyer loin.
  */
 const VITESSE_MAXIMALE = 640;
 
@@ -60,11 +50,9 @@ export function useChuteDesPierres(
 ) {
   const refSvg = useRef<SVGSVGElement>(null);
   /**
-   * La zone qui joue — pas le dessin.
-   *
-   * C'est elle qui dit si un geste est parti du cairn, et elle est plus large
-   * que lui : le mouvement qui fauche un empilement commence **à côté** des
-   * pierres. Voir la bande de prise dans `CairnRenversable`.
+   * La zone qui dit si un geste est parti du cairn. Elle est plus large que le
+   * dessin : le geste qui fauche commence à côté des pierres. Voir la bande de
+   * prise dans `CairnRenversable`.
    */
   const refZoneDeJeu = useRef<HTMLDivElement>(null);
   const refsGroupes = useRef<(SVGGElement | null)[]>([]);
@@ -148,17 +136,10 @@ export function useChuteDesPierres(
   );
 
   /**
-   * Le passage d'un pointeur au travers de l'empilement.
-   *
-   * À la souris, le survol suffit — il n'y a rien d'autre qu'un survol puisse
-   * vouloir dire ici. Au doigt, il faut appuyer : sans ça, le moindre défilement
-   * de la page aurait fauché le cairn en passant.
-   *
-   * **Le doigt ne passe plus par ici.** Le navigateur annule le pointeur dès
-   * qu'il décide de défiler, et il le décide avant que le doigt ait atteint une
-   * pierre : ce chemin-là ne pouvait servir qu'en lui interdisant le
-   * défilement, ce qui coûtait plus cher que l'effet ne vaut. Le balayage
-   * tactile est écouté sur la fenêtre, plus bas.
+   * Le passage d'un pointeur au travers de l'empilement. À la souris, le survol
+   * suffit ; un stylet doit appuyer. Le doigt est ignoré ici : le navigateur
+   * annule le pointeur dès qu'il décide de défiler, avant que le doigt atteigne
+   * une pierre. Le balayage tactile est écouté sur la fenêtre, plus bas.
    */
   const surDeplacement = useCallback(
     (evenement: React.PointerEvent<Element>) => {
@@ -186,11 +167,8 @@ export function useChuteDesPierres(
   );
 
   /**
-   * L'appui simple, au doigt.
-   *
-   * Il reste, à côté du glissé : un tapotement est ce qu'on essaie en premier,
-   * et il n'a pas de vitesse à donner. La secousse est donc fixe, et de quoi
-   * déséquilibrer sans faucher.
+   * L'appui simple, au doigt. Un tapotement n'a pas de vitesse à donner : la
+   * secousse est fixe, de quoi déséquilibrer sans faucher.
    */
   const surAppui = useCallback(
     (evenement: React.PointerEvent<Element>) => {
@@ -209,32 +187,18 @@ export function useChuteDesPierres(
   /**
    * Le balayage au doigt, écouté sur la fenêtre.
    *
-   * **Pourquoi la fenêtre, et pas le cairn.** `touch-action` se lit sur ce que
-   * le doigt touche en premier, et le geste qui fauche un empilement part à côté
-   * de lui. Le temps d'y arriver, le navigateur a décidé de défiler et annulé le
-   * pointeur : rien ne remonte plus. On peut le lui interdire — c'est ce qu'on a
-   * essayé —, mais ça fait de la bande une zone où la page ne défile plus, sur
-   * l'écran d'ouverture. Un easter egg ne vaut pas ce prix-là.
+   * Le navigateur annule le pointeur dès qu'il décide de défiler, alors que les
+   * événements tactiles continuent d'être émis pendant le défilement : les
+   * écouter, en passif, est le seul moyen de voir le geste sans bloquer le
+   * défilement de la page d'ouverture.
    *
-   * Les événements **tactiles**, eux, continuent d'être émis pendant que la page
-   * défile. En écouter est donc le seul moyen de voir le geste sans en réclamer
-   * la propriété. L'écoute est passive : on n'empêche jamais rien, on regarde.
+   * Un geste dont la part verticale l'emporte est un défilement et ne transmet
+   * rien. Seule exception : la prise armée et un geste parti du cairn — la zone
+   * porte alors `touch-action: none`, la page ne défile pas, et toutes les
+   * directions valent.
    *
-   * **Un défilement est vertical, un balayage est horizontal.** C'est le seul
-   * discriminant nécessaire tant qu'on regarde sans rien prendre, et il est
-   * catégorique : tout geste dont la part verticale l'emporte appartient à la
-   * page et ne transmet rien. Personne ne fauche un cairn de haut en bas.
-   *
-   * **La prise lève cette règle, et elle seule.** Quand elle est armée et que le
-   * geste est parti du cairn, la zone porte `touch-action: none` : la page ne
-   * défile pas, il n'y a donc plus rien à départager et les quatre directions
-   * valent. Un geste parti d'ailleurs reste un défilement, prise ou pas —
-   * l'exception ne concerne que ce qui commence sur l'empilement.
-   *
-   * Les deux points sont projetés avec la matrice **du moment**. Si la page a
-   * défilé entre les deux images, le cairn a bougé sous le doigt : projeter le
-   * point d'avant avec la matrice d'avant ajouterait ce décalage au coup. Avec
-   * celle du moment, il s'annule, et il ne reste que le geste.
+   * Les deux points sont projetés avec la matrice du moment : si la page a
+   * défilé entre deux images, le décalage s'annule au lieu de s'ajouter au coup.
    */
   useEffect(() => {
     if (!actif) return;

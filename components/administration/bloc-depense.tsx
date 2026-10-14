@@ -6,23 +6,15 @@ import type { BlocDepense as Chiffres } from "@/lib/db/administration-depense";
 /**
  * Ce que la journée a coûté, dans les deux conventions de prix.
  *
- * Les deux colonnes sont là parce qu'aucune ne suffit. Le **catalogue** est ce
- * que le registre enregistre — il majore volontairement, ce qui est le bon sens
- * de l'erreur pour un garde-fou. Le **réel** est ce qui est facturé aujourd'hui,
- * remises d'introduction comprises. Ne montrer que le premier annonce une facture
- * qu'on ne paie pas ; ne montrer que le second ferait oublier que les remises
- * expirent, et que la dépense montera d'une marche ce jour-là sans qu'on ait rien
- * changé.
+ * Le catalogue est ce qu'enregistre le registre : il majore volontairement, le
+ * bon sens de l'erreur pour un garde-fou. Le réel est ce qui est facturé,
+ * remises d'introduction comprises ; seul, il ferait oublier que les remises
+ * expirent et que la dépense montera d'une marche.
  *
- * Les échecs ont leur colonne : un appel raté a pu consommer des tokens et a pris
- * sa place au plafond. Les masquer ferait croire à une dépense plus faible
- * exactement le jour où quelque chose ne va pas.
+ * Les échecs ont leur colonne : un appel raté a pu consommer des tokens et
+ * compte au plafond.
  *
- * Les totaux étaient six grands chiffres posés au-dessus du tableau qui les
- * détaille ; ils sont maintenant en pied de colonne, là où on les cherche quand
- * on lit un tableau, et la synthèse est montée dans le bandeau de tête. Un pied
- * de tableau se compare à ses lignes d'un mouvement d'œil — six tuiles séparées
- * du tableau par leur propre marge, non.
+ * Les totaux sont en pied de tableau ; la synthèse vit dans `Bandeau`.
  */
 export function BlocDepense({ chiffres }: { chiffres: Chiffres }) {
   return (

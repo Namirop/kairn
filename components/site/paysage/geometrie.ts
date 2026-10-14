@@ -7,13 +7,9 @@ export const encre = (part: number) =>
 /**
  * Les trois nuances d'un cairn, dérivées de sa part d'encre.
  *
- * **Chacune passe par une variable dont la valeur de repli est le calcul
- * d'origine.** Sans palette, `var()` retombe donc sur exactement ce qui était
- * peint hier, au centième près ; avec, une palette peut poser ses propres
- * pierres. La dérivation ne suffisait plus : la brume rapproche un cairn de la
- * couleur du ciel, ce qui est juste pour le lointain et faux pour le plan
- * proche, qu'une palette peut vouloir sombre sur un sol clair. Un mélange ne
- * sait pas descendre plus bas que ce qu'on lui donne.
+ * Chacune passe par une variable dont le repli est la dérivation : une palette
+ * peut ainsi poser ses propres pierres, par exemple sombres sur un plan proche
+ * clair, ce qu'un mélange avec le ciel ne sait pas faire.
  */
 export const teintesDe = (part: number, variable: string): [string, string, string] => [
   `var(${variable}-1, ${encre(part)})`,
@@ -26,11 +22,9 @@ export const terre = (part: number) =>
   `color-mix(in oklab, var(--terre) ${part.toFixed(0)}%, var(--ciel-teinte))`;
 
 /**
- * Une ligne de crête, tracée dans l'espace commun aux deux plans.
- *
- * Les sept appuis ne sont pas répartis pareil d'un plan à l'autre : deux crêtes
- * qui ondulent au même rythme font des rayures, pas un relief. C'est le
- * décalage des creux qui donne l'impression que l'une passe derrière l'autre.
+ * Une ligne de crête, tracée dans l'espace commun aux deux plans. Les appuis
+ * diffèrent d'un plan à l'autre : deux crêtes au même rythme feraient des
+ * rayures, pas un relief.
  */
 export function cheminDeCrete(y: number, appuis: number[]) {
   const pas = 1200 / (appuis.length - 1);

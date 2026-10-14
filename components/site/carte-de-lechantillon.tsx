@@ -6,18 +6,9 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
 /**
  * La question de l'échantillon, dans la carte de l'écran de révision.
  *
- * Même arrondi, même corps d'énoncé, même absence de bordure : ce qu'on montre
- * ici n'est pas une maquette de question, c'est la question telle qu'elle
- * apparaîtra — et la reconnaître plus tard fait partie de ce qu'on promet.
- *
- * Le trou d'un texte à trou est donc **le composant de l'écran de révision**, et
- * pas trois traits de soulignement. Les trois traits étaient le marqueur brut de
- * la génération arrivé jusqu'à l'écran sans être lu par personne — le même défaut
- * que les accents graves autour d'un terme de code, corrigé au même endroit. La
- * carte d'ici est une dalle de roche là où celle de la révision est de papier :
- * la fenêtre de l'essai est sombre, et un objet posé dessus capte la lumière au
- * lieu de creuser. Le trou, lui, descend jusqu'à l'encre — un creux reste un
- * creux, quelle que soit la lumière, et c'est ce que dit `FondDuTrou`.
+ * Même arrondi et même corps d'énoncé que la carte de révision, et le même
+ * `PhraseTrouee` : c'est la question telle qu'elle apparaîtra. La carte est de
+ * roche, la fenêtre de l'essai étant sombre ; le trou suit (voir `FondDuTrou`).
  */
 export function CarteDeLEchantillon({
   question,
@@ -36,28 +27,10 @@ export function CarteDeLEchantillon({
         <PhraseTrouee phrase={question} comble={null} fond="roche" />
       </p>
 
-      {/* Les propositions, sous l'énoncé et côte à côte.
-
-          Elles ne sont pas rendues comme celles de l'écran de révision — une
-          colonne de boutons pleine largeur — parce qu'ici on ne répond pas :
-          ce seraient des boutons qui ne font rien, et une colonne de quatre
-          doublerait la hauteur de la vitrine. Sans fond ni bordure et sur une
-          ligne, elles disent ce qu'elles sont — le choix qu'on aura — sans se
-          donner pour cliquables.
-
-          Elles tiennent sur une ligne dans la fenêtre, et **une par ligne** sur
-          un téléphone. Deux colonnes de la largeur de leur contenu ont été
-          essayées d'abord, pour le pli régulier des noms de format au-dessus —
-          mais un format a quatre libellés connus d'avance, une proposition de
-          QCM n'a aucune longueur maximale. « Pour saluer quelqu'un avec
-          insistance » et « Pour contredire une phrase négative » côte à côte
-          faisaient quatre cent cinquante points dans une fenêtre qui en offre
-          trois cent trente : les propositions sortaient de la carte et rendaient
-          toute la fenêtre défilable en largeur, ce qu'aucun écran du produit ne
-          doit être. Une colonne ne peut pas déborder : le texte s'y plie.
-
-          La bonne n'est pas marquée, et elle n'est même pas descendue jusqu'ici :
-          voir `optionsDUnQCM`. */}
+      {/* Les propositions, en texte et non en boutons : ici on ne répond pas.
+          Une par ligne sur téléphone : une proposition de QCM n'a pas de
+          longueur maximale, et deux côte à côte déborderaient de la carte. La
+          bonne n'arrive pas jusqu'ici : voir `optionsDUnQCM`. */}
       {options ? (
         <ul className="gap-x-pas-4 gap-y-pas-1 mt-pas-4 text-petit grid grid-cols-1 text-stone-300 md:flex md:flex-wrap">
           {options.map((option) => (

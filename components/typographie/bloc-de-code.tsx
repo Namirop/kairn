@@ -7,26 +7,16 @@ import { useTranslations } from "next-intl";
 import { LignesDeCode } from "@/components/typographie/lignes-de-code";
 
 /**
- * Un extrait de code cité en bloc.
+ * Un extrait de code cité en bloc, sur la roche : c'est la seule chose qui s'y
+ * pose sans être un panneau, parce qu'un extrait se recopie plutôt qu'il ne se
+ * lit dans le flux.
  *
- * **Il est sur la roche, et c'est la seule chose de ce produit qui s'y pose sans
- * être un panneau.** Le choix n'est pas décoratif : un extrait de code est du
- * texte qu'on ne lit pas, qu'on recopie — il n'appartient pas au flux de la
- * phrase, et la surface le dit mieux qu'un filet ou qu'un encadré. La roche
- * existe déjà dans le produit, elle n'ajoute donc aucune couleur ; c'est la même
- * encre que sur le panneau du cairn.
+ * Il s'ouvre en grand : une ligne de code dépasse souvent la largeur d'une
+ * carte, et sur téléphone défiler à l'horizontale pour lire revient à
+ * abandonner.
  *
- * **Il s'ouvre en grand.** Une ligne de code fait cent signes là où la carte d'un
- * dépôt en montre soixante, et sur un téléphone la moitié d'un extrait vit hors
- * du cadre. Défiler à l'horizontale pour lire deux lignes est un geste qu'on ne
- * fait pas : on abandonne. Le bouton ouvre donc l'extrait par-dessus la page,
- * sur un voile qui éteint le reste — c'est le seul endroit du produit où quelque
- * chose demande toute l'attention, et c'est parce que rien d'autre ne permet de
- * le lire.
- *
- * La barre du haut existe toujours, avec ou sans langage : c'est elle qui porte
- * le bouton, et une carte dont l'en-tête apparaît selon le contenu change de
- * forme d'un extrait à l'autre.
+ * La barre du haut existe toujours, avec ou sans langage : elle porte le
+ * bouton, et la carte garde la même forme d'un extrait à l'autre.
  */
 
 const CARTE = "rounded-carte bg-surface-roche overflow-hidden";
@@ -56,19 +46,15 @@ export function BlocDeCode({ texte, langage }: { texte: string; langage: string 
       </div>
 
       <DialogPrimitive.Portal>
-        {/* Bien plus sombre que le voile des autres dialogues du produit. Ceux-là
-            posent une question au-dessus d'une page qu'on doit encore
-            reconnaître ; celui-ci sert à lire, et ce qui reste visible derrière
-            n'est plus qu'une distraction. */}
+        {/* Plus sombre que le voile des autres dialogues : celui-ci sert à
+            lire, et la page derrière n'a plus à rester reconnaissable. */}
         <DialogPrimitive.Overlay className="data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 fixed inset-0 z-50 bg-stone-900/85" />
 
         <DialogPrimitive.Content
           className={`${CARTE} data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 fixed top-1/2 left-1/2 z-50 flex max-h-[88dvh] w-[calc(100%-1.5rem)] max-w-5xl -translate-x-1/2 -translate-y-1/2 flex-col outline-none`}
         >
           {/* Le titre existe pour les lecteurs d'écran et pour Radix, qui refuse
-              un dialogue sans nom. À l'écran, c'est l'étiquette du langage qui
-              le dit, et la redire en grand mettrait un titre sur un extrait de
-              deux lignes. */}
+              un dialogue sans nom. À l'écran, l'étiquette du langage suffit. */}
           <DialogPrimitive.Title className="sr-only">
             {langage ? t("titreEn", { langage }) : t("titre")}
           </DialogPrimitive.Title>

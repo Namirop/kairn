@@ -4,23 +4,13 @@ import type { ReactNode } from "react";
 import { motion } from "motion/react";
 
 /**
- * Comment une pierre se pose.
+ * Comment une pierre se pose : celles du bas descendent de peu, presque
+ * ensemble ; celle du sommet vient de plus haut, penchée, un peu plus lentement.
+ * Partagé par le cairn du tableau de bord et celui de la page publique.
  *
- * Les pierres du bas descendent de peu et se posent presque ensemble ; celle du
- * sommet vient de plus haut, penchée, et met un peu plus longtemps. C'est ce qui
- * fait qu'un cairn qui apparaît raconte quelque chose : l'empilement était déjà
- * là, et la dernière pierre est celle qu'on vient d'ajouter.
- *
- * Le geste vit ici et non dans les deux composants qui en ont besoin — celui du
- * tableau de bord, où chaque pierre est un concept acquis, et celui de la page
- * publique, qu'on peut renverser d'un mouvement de souris. Écrit deux fois, il
- * aurait deux durées au bout de trois passes.
- *
- * **Il n'anime que son contenu, jamais sa position.** La place de la pierre dans
- * l'empilement est portée par le groupe du dessus, en unités de `viewBox` ; sur la
- * page publique, c'est aussi ce groupe-là que la physique déplace quand on
- * traverse l'empilement. Les deux ne se disputent donc rien : le parent place, ce
- * composant pose.
+ * Il n'anime que son contenu, jamais sa position : la place de la pierre est
+ * portée par le groupe parent, que la physique de la page publique déplace
+ * aussi. Les deux ne doivent pas se disputer le même `transform`.
  */
 
 /** L'état posé. Tout part de plus haut et y revient. */
@@ -29,12 +19,8 @@ const POSE = { y: "0%", rotate: 0, opacity: 1 } as const;
 /** L'écart entre deux pierres. Assez pour compter, trop peu pour attendre. */
 const ECART_S = 0.06;
 /**
- * Ce que la pose entière ne dépasse jamais, en secondes.
- *
- * L'écart fixe convient à sept pierres et ne dit plus rien à cinquante : le
- * sentier mettrait trois secondes à se poser pendant qu'on lit sa journée. Au
- * delà d'une quinzaine de pierres, l'écart se resserre donc pour tenir dans ce
- * budget. En deçà, rien ne change — c'est le minimum des deux.
+ * Ce que la pose entière ne dépasse jamais, en secondes. Au-delà d'une
+ * quinzaine de pierres, l'écart se resserre pour tenir dans ce budget.
  */
 const ETALEMENT_MAX_S = 0.9;
 

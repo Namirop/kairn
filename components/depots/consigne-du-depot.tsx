@@ -8,22 +8,12 @@ import { Button } from "@/components/ui/button";
 import { CONSIGNE_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 
 /**
- * Ce qu'on dit du dépôt, à côté du dépôt.
+ * Ce qu'on dit du dépôt, à côté du dépôt — typiquement, ce qu'une capture
+ * montre en trop.
  *
- * **Le besoin est étroit et il vaut la peine.** Une capture d'écran montre
- * presque toujours plus que ce qu'on voulait en garder — une barre latérale, un
- * encart, la moitié d'un autre sujet —, et recadrer avant de déposer n'est pas
- * toujours possible. Une phrase suffit à dire ce qu'il faut laisser de côté.
- *
- * **Elle est repliée, et c'est la décision qui compte.** Tout le produit repose
- * sur la vitesse du geste de dépôt : on colle, on dépose. Un second champ posé
- * en permanence sous le premier demanderait à chacun, à chaque dépôt, de décider
- * s'il a quelque chose à y écrire — pour un cas sur vingt. Le bouton se tient
- * dans la rangée de la pièce jointe, avec laquelle il fait paire : deux choses
- * facultatives qu'on joint à un dépôt.
- *
- * Elle ne se retire pas du dépôt une fois écrite : c'est le champ qui se ferme,
- * et le fermer efface ce qu'il portait. Garder une consigne invisible qui
+ * Repliée par défaut : le produit repose sur la vitesse du dépôt, et un second
+ * champ permanent demanderait une décision à chaque fois, pour un cas sur
+ * vingt. Fermer le champ efface la consigne : une consigne invisible qui
  * partirait quand même serait le pire des deux.
  */
 
@@ -50,8 +40,7 @@ export function ChampDeConsigne({
   const t = useTranslations("depots.formulaire.consigne");
   const champ = useRef<HTMLTextAreaElement>(null);
 
-  // Le champ vient d'apparaître sur un geste : le curseur y va. Sans ça, on
-  // clique « ajouter une consigne » puis on clique une seconde fois dedans.
+  // Le champ vient d'apparaître sur un geste : le focus y va.
   useEffect(() => champ.current?.focus(), []);
 
   const reste = CONSIGNE_MAXIMUM - valeur.length;
@@ -87,10 +76,8 @@ export function ChampDeConsigne({
         className="p-pas-3 md:text-petit rounded-champ mt-pas-2 field-sizing-content w-full resize-y border border-stone-300 bg-stone-50 text-base leading-relaxed text-stone-900 placeholder:text-stone-500"
       />
 
-      {/* Une seule ligne sous le champ, et elle change de sujet quand la borne
-          approche : avant, l'explication ; après, le compte. Deux lignes
-          empilées feraient du secondaire l'élément le plus bavard du
-          formulaire. */}
+      {/* Une seule ligne sous le champ : l'aide, puis le compte quand la borne
+          approche. */}
       <p className="mt-pas-2 text-petit text-stone-500">
         {reste < 60 ? (
           <span

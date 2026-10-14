@@ -2,21 +2,13 @@
  * Les surfaces, et ce qu'elles emportent.
  *
  * Une page est une pile de panneaux, et chaque panneau porte l'une d'elles :
- * c'est le changement de fond qui sépare deux sujets, plus jamais un filet.
+ * c'est le changement de fond qui sépare deux sujets, jamais un filet.
  *
- * Elles étaient quatre et sont cinq. La cinquième n'est pas une nuance de plus
- * dans la liste : c'est **le sol d'un seul écran**, celui de la session, et
- * elle existe parce que cet écran-là ne pose pas un panneau de lecture mais un
- * objet dans un terrain. Tant que tout le produit est en gris, elle vaut
- * l'ombre et personne ne la distingue ; dès qu'une palette est posée, c'est
- * elle qui prend la couleur, et la carte de la question redevient la pierre
- * claire posée dessus. Aucun autre écran ne la prend, et c'est la règle qui
- * l'empêche de devenir une surface de plus à dépenser.
+ * `session` est le sol d'un seul écran, celui de la session, où la carte de la
+ * question est posée comme un objet. Aucun autre écran ne la prend.
  *
- * Le tableau dit aussi la couleur de l'encre et celle du texte second, pour que
- * personne n'ait à se demander comment écrire sur la roche. Un panneau sombre
- * qui hériterait des gris du papier serait illisible, et c'est le genre d'oubli
- * qu'on ne voit qu'en production.
+ * Le tableau dit aussi l'encre et le texte second de chaque surface : un
+ * panneau sombre qui hériterait des gris du papier serait illisible.
  */
 
 export type Surface = "papier" | "ombre" | "lichen" | "roche" | "session";
@@ -58,13 +50,8 @@ export const SURFACES: Record<Surface, Habillage> = {
     sombre: false,
   },
   /*
-    Le sol de la session.
-
-    Son texte second descend d'un cran : sur un aplat teinté, le gris réglé
-    pour du papier passe sous le seuil, et ce qui se pose ici — les tags du
-    concept, la consigne de réponse, l'intervalle tenu — est précisément du
-    texte second. L'objet qu'elle porte est du papier : c'est tout le sujet de
-    cette surface.
+    Le texte second fonce d'un cran : sur cet aplat teinté, le gris réglé pour
+    le papier passe sous le seuil de contraste.
   */
   session: {
     fond: "bg-surface-session",
@@ -80,16 +67,8 @@ export const SURFACES: Record<Surface, Habillage> = {
     second: "text-stone-300",
     grain: "grain grain-clair",
     /*
-      `stone-800` a vécu ici, et il ne pouvait pas marcher : il vaut exactement
-      `#2a2e2c`, c'est-à-dire la roche elle-même. Une dalle posée dessus était
-      invisible sur son propre fond. Le défaut n'a jamais crevé les yeux parce
-      que personne n'avait encore posé d'objet sur un panneau sombre.
-
-      `stone-700` monte d'un cran au lieu de descendre : sur une surface sombre,
-      un objet posé capte la lumière, il ne creuse pas. L'écart mesuré est de
-      1,34 contre 1,14 entre le papier et l'ombre — la dalle de roche se
-      détache donc un peu mieux que la carte de papier, ce qui est exactement ce
-      qu'il faut quand l'œil dispose de moins de lumière pour trancher.
+      Plus clair que la roche et non plus sombre : sur une surface sombre, un
+      objet posé capte la lumière, il ne creuse pas.
     */
     objet: "bg-stone-700",
     sombre: true,

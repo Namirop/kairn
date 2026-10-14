@@ -9,14 +9,12 @@ import { Button } from "@/components/ui/button";
 /**
  * La capture qu'on joint à un dépôt.
  *
- * Le champ de fichier sort du parcours au clavier comme à la souris : c'est le
- * bouton qui porte l'action, et deux entrées pour un même geste feraient
- * doublon dans la tabulation comme pour un lecteur d'écran.
+ * Le champ de fichier sort de la tabulation et de l'arbre d'accessibilité :
+ * c'est le bouton qui porte l'action, sans doublon.
  *
- * **Le fichier est tenu au-dessus, pas ici.** Un partage du système peut en
- * apporter un sans que personne l'ait choisi dans un sélecteur, et le
- * formulaire a besoin de son poids pour refuser avant l'envoi. Ce composant
- * montre ce qui est joint et le repose dans le champ ; il ne décide de rien.
+ * Le fichier est tenu par le formulaire : un partage du système peut en
+ * apporter un sans sélecteur, et le formulaire a besoin de son poids pour
+ * refuser avant l'envoi.
  */
 export function PieceJointe({
   fichier,
@@ -29,14 +27,10 @@ export function PieceJointe({
   const champ = useRef<HTMLInputElement>(null);
 
   /*
-    Un fichier qui n'est pas passé par le sélecteur doit être posé à la main.
-
-    `input.files` ne se règle que par un `DataTransfer` — c'est la seule façon,
-    pour du code, de remplir un champ de fichier. Sans ça le nom s'afficherait,
-    le formulaire partirait, et la capture resterait sur le carreau.
-
-    La comparaison d'identité coupe la boucle : après un choix au sélecteur, le
-    champ porte déjà ce fichier-là, et le réécrire relancerait l'effet.
+    Un fichier venu d'ailleurs que le sélecteur doit être posé dans le champ,
+    sinon il ne part pas avec le formulaire. Un `DataTransfer` est le seul moyen
+    de régler `input.files` par code. La comparaison d'identité évite de
+    réécrire un fichier que le sélecteur vient d'y mettre.
   */
   useEffect(() => {
     const entree = champ.current;

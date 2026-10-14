@@ -1,4 +1,4 @@
-// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
 import Link from "next/link";
 import { Section } from "@/components/administration/section";
 import { LigneDeSignalement } from "@/components/signalements/ligne-de-signalement";
@@ -7,22 +7,9 @@ import type { PageDeSignalements } from "@/lib/db/signalement";
 import { cn } from "@/lib/utils";
 
 /**
- * Ce qu'on reproche aux questions, dans l'ordre où c'est arrivé.
- *
- * C'est la seule instrumentation qualitative du produit : les compteurs disent
- * combien de questions ont été écrites, ceux-ci disent lesquelles n'auraient pas
- * dû l'être. L'empreinte de prompt portée par chaque ligne est ce qui permet de
- * rattacher une série de plaintes à un réglage précis plutôt qu'à une
- * impression.
- *
- * La liste est paginée court. Un signalement se lit en entier — question,
- * réponse, concept, empreinte —, donc cinq occupent déjà un écran ; à cent, une
- * page unique devient une chose qu'on fait défiler sans lire, et un signalement
- * qu'on ne lit pas ne sert à rien.
- *
- * Le décompte ne figure pas dans l'intitulé mais sous la liste, avec le rang de
- * page : c'est là qu'il sert, et un nombre entre parenthèses dans un titre n'est
- * pas une façon d'écrire.
+ * Les signalements de questions, les plus récents d'abord. L'empreinte de
+ * prompt de chaque ligne rattache une série de plaintes à un réglage précis.
+ * Paginée court : un signalement se lit en entier, cinq occupent déjà un écran.
  */
 export function BlocSignalements({ page }: { page: PageDeSignalements }) {
   return (
@@ -80,12 +67,8 @@ function Pagination({ page }: { page: PageDeSignalements }) {
 }
 
 /**
- * Un bout de page qui n'existe pas ne s'affiche pas du tout.
- *
- * Ni lien mort — atteignable au clavier pour n'arriver nulle part —, ni libellé
- * grisé, qui aurait demandé une encre trop pâle pour rester lisible. La place
- * reste tenue par la grille, donc le rang de page ne se déplace pas quand on
- * passe de la première page à la deuxième.
+ * Un bout de page qui n'existe pas ne s'affiche pas : un lien mort resterait
+ * atteignable au clavier. La grille garde sa place, le rang de page ne bouge pas.
  */
 function Rang({ cible, actif, children }: { cible: number; actif: boolean; children: string }) {
   if (!actif) return <span aria-hidden />;

@@ -1,19 +1,12 @@
-// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
 import { Mesure, Section } from "@/components/administration/section";
 import { nombre } from "@/components/administration/formats";
 import type { BlocComptes as Chiffres } from "@/lib/db/administration";
 
 /**
- * Qui a un compte, et qui s'en sert.
- *
- * Les deux ne se confondent pas, et c'est tout l'intérêt de les poser côte à
- * côte : un écart qui se creuse entre inscriptions et comptes actifs est le
- * signal le plus précoce qu'on ait — il apparaît des semaines avant que le
- * nombre d'inscriptions, lui, cesse de monter.
- *
- * Le total et les actifs sur sept jours ne sont plus ici : ils sont montés dans
- * le bandeau, où ils forment l'une des quatre réponses de l'écran. Les laisser
- * aux deux endroits aurait fait une synthèse qui ne synthétise rien.
+ * Qui a un compte, et qui s'en sert, côte à côte : l'écart entre inscriptions
+ * et comptes actifs est le signal le plus précoce. Le total et les actifs sur
+ * sept jours sont dans le bandeau, pas ici.
  */
 export function BlocComptes({ chiffres }: { chiffres: Chiffres }) {
   return (

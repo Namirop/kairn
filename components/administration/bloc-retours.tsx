@@ -7,18 +7,10 @@ import type { PageDeRetours } from "@/lib/db/retour";
 import { cn } from "@/lib/utils";
 
 /**
- * Ce qu'on reproche au produit, ce qui reste à lire d'abord.
- *
- * C'est le pendant des signalements, et il ne s'y confond pas : ceux-là portent
- * sur une question générée, ceux-ci sur tout le reste — une logique qui
- * surprend, un mot de travers, un écran qui déborde. Les seconds ne laissent
- * aucune trace dans les chiffres, alors ils n'en laissent que si quelqu'un les
- * écrit.
- *
- * L'ordre est le point de cet écran : ce qui n'est pas traité passe devant, quel
- * que soit son âge. Trier par date seule ferait redescendre un retour non lu
- * sous quinze retours classés au bout d'une semaine, et il n'y a personne
- * d'autre pour le rattraper.
+ * Les retours écrits par les comptes, sur tout sauf une question générée (ça,
+ * ce sont les signalements). Ce qui n'est pas traité passe devant quel que soit
+ * son âge : trié par date seule, un retour non lu redescendrait sous les
+ * retours classés.
  */
 export function BlocRetours({ page }: { page: PageDeRetours }) {
   return (
@@ -78,8 +70,8 @@ function Pagination({ page }: { page: PageDeRetours }) {
 }
 
 /**
- * Un bout de page qui n'existe pas ne s'affiche pas du tout : ni lien mort, ni
- * libellé grisé. La grille tient la place, donc le rang ne se déplace pas.
+ * Un rang qui n'existe pas ne s'affiche pas, ni lien mort ni libellé grisé ;
+ * la grille tient sa place.
  */
 function Rang({ cible, actif, children }: { cible: number; actif: boolean; children: string }) {
   if (!actif) return <span aria-hidden />;

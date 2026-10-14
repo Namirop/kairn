@@ -5,26 +5,12 @@ import type { ProchainRappel } from "@/lib/domain/prochain-rappel";
 import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
- * Où en est la session du jour.
+ * Où en est la session du jour : la série, le chemin parcouru, le prochain
+ * rappel (seulement s'il est réglé). En colonne sur grand écran, en bande
+ * au-dessus.
  *
- * Trois choses, et pas une quatrième : la série en cours, le chemin parcouru, et
- * quand le prochain rappel tombera. Aucune n'est un score — la série est un fait
- * de calendrier, le chemin se lit en pierres, le rappel est une heure.
- *
- * La série est la seule occurrence de l'ember de tout l'écran, et c'est la règle
- * du produit : cet accent ne sert qu'à elle. Le rappel n'apparaît que s'il est
- * réglé — annoncer une heure à quelqu'un qui a coupé ses emails serait un
- * mensonge poli.
- *
- * En colonne, les trois blocs se répartissent sur la hauteur et la pile se
- * retrouve au milieu ; en bande, ils s'alignent.
- *
- * **Sur téléphone, le rappel ne s'affiche pas, et la bande tient sur une
- * ligne.** Depuis qu'elle suit le défilement, sa hauteur est un coût permanent
- * — elle occupe le haut de l'écran pendant toute la session, à l'endroit même
- * qu'on vient de libérer en effaçant l'en-tête. Sur trois informations, une
- * seule s'y regarde en révisant : où l'on en est. L'heure du prochain rappel se
- * lit au tableau de bord, avant ou après ; pendant, elle ne se décide pas.
+ * Sur téléphone, le rappel est masqué pour que la bande, qui suit le
+ * défilement, tienne sur une ligne : il se lit au tableau de bord.
  */
 
 /** L'intitulé d'un bloc : mono, très petit, espacé, sur la roche. */
@@ -59,10 +45,8 @@ export function EtatDeSession({
       </div>
 
       <div className="gap-pas-3 order-1 flex items-center lg:order-2 lg:flex-col">
-        {/* La pile demande de la hauteur pour rester un empilement : en bande,
-            sept pierres tiendraient dans soixante pixels et ne seraient plus
-            qu'une texture. Le compte dit la même chose en une ligne, et c'est
-            lui qui reste quand il n'y a pas la place. */}
+        {/* La pile n'existe qu'en colonne : en bande, elle tiendrait dans 60 px
+            et ne se lirait plus. Le compte reste partout. */}
         <div className="hidden lg:block">
           <PileDeSession rang={faites} total={total} clair />
         </div>

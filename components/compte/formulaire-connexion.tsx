@@ -8,20 +8,14 @@ import { Button } from "@/components/ui/button";
 import { emailOtp } from "@/lib/auth/client";
 
 /**
- * Une adresse, un code, et c'est tout.
+ * Une adresse, un code. Inscription et connexion sont un même geste : personne
+ * n'a à savoir s'il a déjà un compte.
  *
- * Il n'y a plus de mot de passe, donc plus de distinction entre s'inscrire et se
- * connecter : dans les deux cas on donne son adresse et on reçoit un code. Deux
- * écrans pour un seul geste auraient obligé quelqu'un à savoir s'il a déjà un
- * compte, ce qu'il ne sait pas toujours.
+ * L'écran ne dit jamais si l'adresse existe : sinon il révélerait à n'importe
+ * qui si telle personne a un compte ici.
  *
- * L'écran ne dit jamais si l'adresse existe déjà. Le message est le même dans
- * les deux cas — sans quoi ce formulaire dirait à n'importe qui si telle
- * personne a un compte ici.
- *
- * Un code plutôt qu'un lien, parce qu'un lien s'ouvre depuis le client mail,
- * donc dans le navigateur par défaut, et jamais dans l'application installée.
- * Voir `lib/domain/code-de-connexion.ts`.
+ * Un code plutôt qu'un lien : un lien s'ouvre dans le navigateur par défaut,
+ * jamais dans l'application installée. Voir `lib/domain/code-de-connexion.ts`.
  */
 export function FormulaireConnexion({ suite }: { suite: string }) {
   const [adresse, setAdresse] = useState("");
@@ -89,8 +83,8 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
         {enCours ? t("envoi") : t("recevoir")}
       </Button>
 
-      {/* Le mécanisme du code, dit une fois et ici : c'est sous le champ que la
-          question se pose, et le titre de la page le répétait plus haut. */}
+      {/* Le mécanisme du code, dit une fois, sous le champ où la question se
+          pose. */}
       <p className="text-petit text-stone-500">{t("mecanisme")}</p>
     </form>
   );

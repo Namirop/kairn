@@ -6,17 +6,12 @@ import type { ChargeDuJour } from "@/lib/domain/selection-session";
 import { PhraseDuJour, PourquoiCertainsAttendent } from "./phrases-du-compteur";
 
 /**
- * Ce qu'il y a à revoir aujourd'hui. Le chiffre est nu, souligné d'un filet de
- * lichen, et suivi de sa phrase — un nombre sans contexte ne dit rien.
+ * Ce qu'il y a à revoir aujourd'hui : le chiffre, souligné d'un filet d'accent,
+ * puis sa phrase.
  *
- * Le chiffre affiché est celui de la session, pas celui du retard. Trente-huit
- * décourage sans rien apprendre : la session en servira vingt, et les dix-huit
- * autres reviennent demain sans que rien ne soit perdu. Le total reste dit, sous
- * le compteur, parce que le cacher serait mentir dans l'autre sens.
- *
- * « Arrive à échéance » était du jargon d'algorithme : c'est vrai du point de
- * vue de la carte ts-fsrs, pas de celui de quelqu'un qui ouvre son application
- * le matin.
+ * Le chiffre est celui de la session, pas celui du retard : un retard de 38
+ * décourage quand la session en servira 20, et le reste revient demain sans
+ * perte. Le total reste dit sous le compteur, le cacher serait mentir.
  *
  * Ses phrases à zéro et en attente vivent dans `phrases-du-compteur.tsx`.
  */
@@ -36,11 +31,8 @@ export function CompteurDu({
   plafond: number;
   faitsAujourdhui: number;
   /**
-   * Le signal de dette est affiché juste en dessous.
-   *
-   * Il dit la même chose que « vingt-sept de plus attendent leur tour », en
-   * mieux : depuis combien de temps, et quoi y faire. Les deux ensemble, c'était
-   * le même nombre annoncé deux fois en quatre lignes.
+   * Le signal de dette est affiché juste en dessous : il dit déjà ce qui attend,
+   * en mieux, et la phrase d'attente ferait doublon.
    */
   detteSignalee: boolean;
 }) {
@@ -49,10 +41,8 @@ export function CompteurDu({
   const t = useTranslations("tableau.aujourdhui");
 
   return (
-    // Sur une colonne, tout se centre. En deux colonnes, tout revient au fer à
-    // gauche : le bloc n'est plus seul dans la largeur, il ouvre une rangée, et
-    // un texte centré à côté d'une liste alignée à gauche donne deux axes de
-    // lecture pour un seul écran. Le point de bascule est celui de la grille.
+    // Centré sur une colonne, au fer à gauche en deux colonnes (un seul axe de
+    // lecture par écran). Le point de bascule est celui de la grille.
     <section aria-labelledby="titre-aujourdhui" className="text-center md:text-left">
       <h1
         id="titre-aujourdhui"
@@ -61,21 +51,12 @@ export function CompteurDu({
         {t("titre")}
       </h1>
 
-      {/* Le nombre est le titre de l'écran, et il se présentait comme une
-          statistique. Son échelle est à lui — voir `--t-compteur` —, son poids
-          est celui des grands titres du site, et son interlignage se resserre
-          sous un : des chiffres n'ont pas de jambage, la boîte d'une ligne
-          pleine leur laissait un vide au-dessus et au-dessous qui éloignait
-          l'étiquette de ce qu'elle nomme.
-
-          L'étiquette se rapproche d'un cran pour la même raison : elle
-          appartient au nombre, le trait et la phrase appartiennent à ce qui
-          suit. C'est l'écart qui dit lequel va avec lequel. */}
+      {/* Interlignage sous un : des chiffres n'ont pas de jambage, et une ligne
+          pleine éloignerait l'étiquette du nombre qu'elle nomme. Échelle :
+          `--t-compteur`. */}
       <p className="mt-pas-2 font-display text-compteur leading-[0.8] font-bold tabular-nums">
         {aujourdhui}
       </p>
-      {/* Le trait grandit avec le nombre : sous des chiffres de dix rems, il
-          faisait une miette. */}
       <span aria-hidden className="mt-pas-4 bg-accent mx-auto block h-1 w-20 md:mx-0 md:w-28" />
 
       <p className="mt-pas-4 mx-auto text-stone-500 md:mx-0">
@@ -96,12 +77,8 @@ export function CompteurDu({
         </p>
       ) : null}
 
-      {/* Ce qui manque et qui n'est pas un report.
-
-          Six concepts découpés, trois questionnés, une session de trois : l'écran
-          ne disait rien, et il n'y avait aucun moyen de comprendre où étaient
-          passés les trois autres. Le cas se dit maintenant à côté du compteur,
-          qu'il y ait quelque chose à revoir ou non. */}
+      {/* Des concepts encore sans question : sans cette phrase, ils
+          manqueraient à la session sans explication. */}
       {questionsEnRoute && aujourdhui > 0 ? (
         <p className="mt-pas-2 text-petit mx-auto text-stone-500 md:mx-0">
           {t("compteur.sansQuestions", { nombre: conceptsSansQuestions })}
@@ -113,10 +90,8 @@ export function CompteurDu({
           <Link href={ROUTES.reviser}>{t("compteur.commencer")}</Link>
         </Button>
       ) : aDesAtoms && !questionsEnRoute ? (
-        // Le seul endroit où l'entraînement se propose de lui-même : quand la
-        // session n'a rien à donner. Tant qu'il y a quelque chose à revoir,
-        // c'est la session qui compte, et deux boutons côte à côte laisseraient
-        // croire qu'ils se valent.
+        // L'entraînement ne se propose que quand la session n'a rien à donner :
+        // côte à côte, les deux boutons auraient l'air de se valoir.
         <div className="mt-pas-6 flex flex-col items-center md:items-start">
           <Button asChild size="lg" variant="outline" className="w-full md:w-fit">
             <Link href={ROUTES.entrainement}>{t("compteur.entrainer")}</Link>

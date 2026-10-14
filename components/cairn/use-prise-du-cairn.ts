@@ -5,12 +5,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /**
  * L'état « le cairn tient le doigt », et la zone qu'il concerne.
  *
- * **Il se relâche dès que la zone quitte l'écran.** C'est le seul garde-fou de
- * l'affaire : la prise crée exactement le défaut qu'on cherchait à éviter — une
- * part de l'écran où la page ne défile plus — et quelqu'un qui a joué puis qui
- * est descendu lire n'a aucune raison de retrouver ça en remontant une heure
- * plus tard, ni de faire le lien avec un petit bouton allumé. Sortir de vue
- * signifie ici « je ne joue plus » ; revenir jouer coûte un appui.
+ * Il se relâche dès que la zone quitte l'écran : la prise bloque le défilement
+ * sur cette zone, et qui revient une heure plus tard ne ferait pas le lien avec
+ * le bouton resté allumé. Reprendre coûte un appui.
  */
 export function usePriseDuCairn() {
   const refZone = useRef<HTMLDivElement>(null);

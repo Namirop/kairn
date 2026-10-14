@@ -3,18 +3,12 @@
 import { useEffect, useState } from "react";
 
 /**
- * Le temps qu'on laisse à une réponse qu'on n'avait pas.
+ * Le temps qu'on laisse à une réponse qu'on n'avait pas : sur un format à
+ * choix, la main part vers la suite avant que l'œil ait lu la correction.
  *
- * Sur un format à choix, la main est déjà sur la souris quand la correction
- * s'affiche : le geste suivant part avant que l'œil ait rien lu, et la seule
- * chose qu'un échec avait à apprendre passe à la trappe. Le bouton attend donc,
- * et cette attente est la moitié de l'intérêt du format.
- *
- * **Elle ne s'applique qu'à ce qu'on ne savait pas.** Une bonne réponse n'a rien
- * à faire lire : retenir quelqu'un devant sa propre réussite serait une punition
- * pour avoir eu juste, et le rythme d'une session tient à ce que les bonnes
- * réponses s'enchaînent. Le passage, lui, est déjà écrit dans les deux cas —
- * l'attente ne retient rien, elle ne fait que retarder l'affichage du suivant.
+ * Seulement après un échec : une bonne réponse n'a rien à faire lire. Le
+ * passage est déjà écrit dans les deux cas, l'attente ne retarde que
+ * l'affichage du suivant.
  */
 
 /** Assez pour lire deux lignes, trop peu pour qu'on aille voir ailleurs. */

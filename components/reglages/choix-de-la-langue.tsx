@@ -19,11 +19,8 @@ const NOMS: Record<Langue, string> = {
 };
 
 /**
- * La langue du compte, en deux choix posés côte à côte.
- *
- * Le même dessin que le sujet d'un retour — un radio natif habillé —, et le
- * même arrondi de saisie. Le choix s'enregistre au clic : il n'y a rien d'autre
- * à remplir, et un bouton « Enregistrer » pour un seul geste serait un péage.
+ * La langue du compte, en radios natifs habillés. Le choix s'enregistre au
+ * clic : un bouton « Enregistrer » pour un seul geste serait un péage.
  */
 export function ChoixDeLaLangue({ langue }: { langue: Langue }) {
   const t = useTranslations("compte.reglages.langue");

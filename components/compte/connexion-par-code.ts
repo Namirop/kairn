@@ -8,15 +8,11 @@ import { TIMEZONE_HEADER } from "@/lib/auth/en-tetes";
 import { codeComplet, lireLeCode } from "@/lib/domain/code-de-connexion";
 
 /**
- * L'échange avec le serveur pendant le second temps de l'entrée.
+ * La vérification et le renvoi du code de connexion.
  *
- * Séparé de l'écran parce que ce sont deux sujets : ici la vérification, le
- * renvoi et ce qu'on en dit ; là-bas la mise en forme du champ et des boutons.
- *
- * La saisie part dès qu'elle est complète — c'est le geste qu'on ferait de toute
- * façon —, et le dernier code parti est retenu pour qu'un code refusé ne se
- * rejoue pas seul en boucle. Le bouton, lui, rejoue sans cette retenue : un
- * envoi qu'on ne déclenche pas soi-même laisse sans recours quand il échoue.
+ * Le code part dès qu'il est complet ; le dernier code parti est retenu pour
+ * qu'un code refusé ne se rejoue pas seul en boucle. Le bouton, lui, rejoue
+ * sans cette retenue, pour laisser un recours.
  */
 
 export type ConnexionParCode = {
@@ -45,10 +41,8 @@ export function useConnexionParCode(adresse: string, suite: string): ConnexionPa
       setErreur(null);
       setEnCours(true);
 
-      // Le compte se crée ici quand il n'existe pas encore, donc dans une requête
-      // que ce formulaire émet : c'est la seule occasion de porter le fuseau du
-      // navigateur. Le lien de connexion ne l'avait pas — il partait du client
-      // mail, sans aucun de nos en-têtes.
+      // Le compte se crée dans cette requête s'il n'existe pas : c'est la seule
+      // occasion de transmettre le fuseau du navigateur.
       const fuseau = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const entetes = fuseau ? { [TIMEZONE_HEADER]: fuseau } : {};
 
@@ -63,8 +57,8 @@ export function useConnexionParCode(adresse: string, suite: string): ConnexionPa
         return;
       }
 
-      // Pas de `setEnCours(false)` : la navigation part, et rendre le bouton à
-      // son état d'attente le rouvrirait le temps que l'écran change.
+      // Pas de `setEnCours(false)` : le bouton se rouvrirait le temps que la
+      // navigation aboutisse.
       router.push(suite);
       router.refresh();
     },

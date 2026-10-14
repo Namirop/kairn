@@ -3,13 +3,9 @@ import { crete, teintesDe, terre } from "./geometrie";
 import type { Plan } from "./plans";
 
 /**
- * Un plan : ses cairns, puis sa terre par-dessus leurs pieds.
- *
- * L'ordre compte plus que le reste — c'est lui qui plante les pierres au lieu
- * de les poser. Le composant ne connaît ni la fenêtre ni le nombre de plans, il
- * dessine celui qu'on lui donne : c'est ce qui permet aux deux paysages, celui
- * de bureau et celui du téléphone, d'être deux jeux de valeurs et non deux
- * dessins à tenir en parallèle.
+ * Un plan : ses cairns, puis sa terre par-dessus leurs pieds — c'est cet ordre
+ * qui plante les pierres au lieu de les poser. Le composant ignore la fenêtre :
+ * bureau et téléphone sont deux jeux de valeurs, pas deux dessins.
  */
 export function PlanDuPaysage({ plan, graine }: { plan: Plan; graine: string }) {
   return (
@@ -45,13 +41,9 @@ export function PlanDuPaysage({ plan, graine }: { plan: Plan; graine: string }) 
         aria-hidden
       >
         <path d={crete(plan).masse} fill={terre(plan.sol)} />
-        {/* L'arête, sans quoi la butte n'existe pas.
-            Deux terres voisines ne se séparent que de quelques centièmes de
-            luminance : l'écart suffit à faire un plan, pas à faire une
-            ligne, et le relief se devinait sans jamais se voir. Le trait la
-            dessine. Il ne grossit pas avec la vue — elle est étirée en
-            hauteur —, donc il reste le même cheveu partout, et sa teinte
-            monte d'un cran quand le plan se rapproche. */}
+        {/* L'arête : deux terres voisines ne diffèrent que de quelques
+            centièmes de luminance, le trait rend le relief visible.
+            `non-scaling-stroke`, car la vue est étirée en hauteur. */}
         <path
           d={crete(plan).ligne}
           fill="none"

@@ -4,28 +4,17 @@ import type { Pierre } from "@/lib/domain/cairn-stack";
  * Le tracé d'une pierre : sa forme, et l'arête de lichen quand c'est la
  * dernière posée.
  *
- * Ce fichier ne dépend d'aucune animation, contrairement à `pierre-posee.tsx` :
- * la pierre seule d'un état vide et les emplacements d'un compteur de session
- * n'ont pas à embarquer une librairie de mouvement pour ne jamais bouger.
+ * Sans dépendance d'animation, contrairement à `pierre-posee.tsx` : un état
+ * vide ou un compteur de session n'embarquent pas Motion pour ne jamais bouger.
  */
 
-/**
- * Les nuances d'une pierre, selon la surface qui la porte.
- *
- * Sur la roche, les pierres s'inversent en gris clairs — sans quoi un
- * empilement sombre sur un panneau sombre n'existerait pas. Le lichen du
- * sommet, lui, ne bouge pas : c'est la constante de l'identité.
- */
+/** Les nuances d'une pierre : claires sur la roche, sombres sur le papier. */
 const NUANCES = ["fill-stone-900", "fill-stone-800", "fill-stone-700"] as const;
 const NUANCES_CLAIRES = ["fill-stone-50", "fill-stone-100", "fill-stone-300"] as const;
 
 /**
- * Une pierre pas encore posée : le contour seul, en pointillé.
- *
- * Elle était dessinée pleine à quinze pour cent d'opacité, ce qui donnait une
- * tache pâle — un aplat qui a l'air d'une pierre ratée plutôt que d'une place
- * qui attend. Un contour interrompu dit l'emplacement sans prétendre au volume,
- * et il tient sur les deux surfaces.
+ * Une pierre pas encore posée : le contour seul, en pointillé, qui dit
+ * l'emplacement sans prétendre au volume.
  */
 function Emplacement({ pierre, clair }: { pierre: Pierre; clair: boolean }) {
   return (

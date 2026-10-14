@@ -10,39 +10,16 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
 /**
- * Ce que l'essai a donné : l'attente, les concepts, ou aucun des deux.
+ * Ce que l'essai a donné : l'attente, les concepts, ou aucun des deux. Rendu
+ * dans `FenetreDeLEssai`.
  *
- * **Tout ceci vit dans la fenêtre de l'essai, et plus dans la bande.** La bande
- * devait être quatre mises en page à elle seule — le formulaire sur deux
- * colonnes, l'attente pleine largeur, les concepts avec une seconde attente
- * imbriquée dedans, le résultat entier. Aucune ne pouvait être bien composée.
- * Voir `FenetreDeLEssai`, qui rend à la bande son unique travail.
+ * Le compte de concepts est accompagné du cairn, dessiné à partir de leurs
+ * identifiants : le seul endroit public où l'élément signature porte du vrai
+ * contenu. Les sections se séparent par du vide, jamais par un filet.
  *
- * **Le compte de concepts n'est plus seul à porter le titre.** Il l'était, en
- * display, au-dessus d'une liste de paragraphes au corps d'une légende : un
- * grand nombre, puis plus rien qui ait d'échelle. Il est maintenant accompagné
- * du cairn, monté à autant de pierres qu'il y a de concepts et dessiné à partir
- * de leurs identifiants. Le chiffre et la figure disent la même chose, et c'est
- * le seul endroit public où l'élément signature du produit porte du vrai
- * contenu plutôt qu'une décoration.
- *
- * **La descente a trois temps de même forme** : un titre, une phrase qui
- * l'explique, puis l'objet. Les concepts, puis les questions. Ce qui les sépare
- * est du vide et non un filet — deux sujets ne se séparent jamais par une ligne
- * dans ce système.
- *
- * **L'appel à garder n'est plus au bout de la descente**, il est dans le pied
- * de la fenêtre, qui ne défile pas. Sur un téléphone, un appel posé à la fin
- * d'une liste de huit concepts se trouve à deux écrans du pouce, et c'est la
- * seule conversion de la page. Voir `GarderLesConcepts` — qui porte aussi,
- * depuis, la porte de sortie : elle fermait la descente, où elle flottait seule
- * sous l'échantillon. Les gestes qui terminent l'essai sont au même endroit.
- *
- * **Le jeu d'attente est parti.** Il occupait un panneau de dix-huit rem à
- * droite : on empilait des pierres à la souris pendant que le découpage
- * tournait. Ce qui manque pendant une attente n'est pas une occupation, c'est un
- * signe que quelqu'un travaille — et c'est ce que fait la phrase qui tourne,
- * pour rien et sans rien demander.
+ * L'appel à garder n'est pas ici mais dans le pied de la fenêtre, qui ne défile
+ * pas : au bout de la liste, il serait à deux écrans du pouce sur téléphone.
+ * Voir `GarderLesConcepts`.
  */
 export function ResultatDeLEssai({
   avancement,
@@ -58,13 +35,9 @@ export function ResultatDeLEssai({
   onVerifier: () => void;
 }) {
   /*
-    On montre ce qui existe dès qu'il existe.
-
-    L'essai se joue en deux temps — les concepts, puis les questions écrites sur
-    le premier d'entre eux qui soit questionnable —, et attendre le second temps
-    pour afficher le premier ferait payer à tout le monde l'ajout des questions :
-    on verrait le résultat plus tard qu'avant, pour en avoir plus. C'est
-    l'inverse de ce qu'on cherche.
+    On montre ce qui existe dès qu'il existe : les concepts arrivent avant les
+    questions, et attendre les secondes pour afficher les premiers retarderait
+    tout le résultat.
   */
   const t = useTranslations("site.essai.resultat");
   const rienEncore = !avancement || avancement.concepts.length === 0;
@@ -86,30 +59,13 @@ export function ResultatDeLEssai({
   return (
     <div className="gap-pas-8 md:gap-pas-12 flex flex-col" role="status">
       <header className="gap-pas-4 md:gap-pas-6 flex items-center">
-        {/* Une pierre par concept, dessinée à partir de leurs identifiants :
-            l'empilement est propre à ce dépôt-là et stable dans le temps. La
-            dernière se pose en arrivant, et c'est elle qui porte le lichen.
+        {/* Le cairn se borne en largeur, jamais en hauteur : sa vue est aussi
+            haute qu'il a de pierres, et bornée en hauteur une pile d'une pierre
+            deviendrait un galet géant qui écrase le titre.
 
-            **Il se mesure en largeur.** Sa vue est aussi large qu'un cairn et
-            aussi haute qu'il a de pierres : bornée en hauteur, une pile d'une
-            seule pierre devient un galet de deux cents pixels de large qui
-            écrase le titre d'à côté — ce qui est exactement ce qui s'est passé.
-            Bornée en largeur, elle grandit vers le haut à mesure que les
-            concepts s'ajoutent, ce qui est le geste du produit.
-
-            **Il est passé à gauche du titre, centré sur sa hauteur.** Il tenait
-            le coin haut droit, où deux choses claires se disputaient la même
-            zone que la croix de fermeture, et où une pierre unique n'était plus
-            qu'un trait lumineux flottant au-dessus du vide. À gauche du nombre
-            qu'il dessine, les deux disent la même chose au même endroit — et le
-            centrage tient quel que soit le nombre de pierres, puisque c'est la
-            ligne qui centre et non une marge calculée.
-
-            **Et il attend d'avoir deux pierres.** Une pierre seule n'est pas un
-            empilement : la vue est large de cent unités pour une pierre haute de
-            quinze, donc à un concept la figure est une barre claire posée sur un
-            trait, qu'on lit comme une coquille plutôt que comme un cairn.
-            L'élargir ne fait qu'allonger la barre. */}
+            Il attend deux pierres : la vue fait cent unités de large pour une
+            pierre de quinze de haut, et une pierre seule se lit comme une barre,
+            pas comme un cairn. */}
         {combien > 1 ? (
           <Cairn
             nombre={combien}
@@ -130,9 +86,8 @@ export function ResultatDeLEssai({
 
       <PileDeConcepts concepts={avancement.concepts} />
 
-      {/* L'échantillon, et il ferme l'arc : ton texte, tes concepts, de vraies
-          questions sur l'un d'eux. Sans lui, la page promettait qu'on te les
-          repose sans jamais te montrer sous quelle forme. */}
+      {/* De vraies questions sur l'un des concepts : la page montre sous quelle
+          forme on te les reposera. */}
       <EchantillonDeQuestions
         questions={avancement.questions}
         enCours={avancement.enCours}

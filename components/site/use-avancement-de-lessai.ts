@@ -11,19 +11,9 @@ import {
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
 /**
- * Redemander où en est le découpage, jusqu'à ce qu'il s'arrête.
- *
- * C'est le seul endroit du produit qui interroge en boucle. L'extraction est
- * asynchrone — l'ingestion écrit un job et rend la main —, donc l'écran n'a pas
- * d'autre moyen de savoir. Le rythme et les paliers vivent dans
- * `rythme-de-lattente.ts`, partagés avec le détail d'un dépôt : deux cadences
- * qui doivent être égales et qui vivraient à deux endroits finiraient par
- * diverger.
- *
- * Extrait de `EssaiDeDepot` parce que ce sont deux rôles : celui-ci sait quand
- * redemander et quand renoncer, l'autre sait quoi montrer. Le second a grandi
- * en gagnant la fenêtre, et le fichier est passé au-dessus du plafond de deux
- * cents lignes — ce qui était le signal qu'il en faisait deux.
+ * Redemander où en est le découpage de l'essai, jusqu'à ce qu'il s'arrête.
+ * Le rythme et les paliers vivent dans `rythme-de-lattente.ts`, partagés avec
+ * le détail d'un dépôt.
  */
 export function useAvancementDeLEssai({
   essai,
@@ -38,17 +28,13 @@ export function useAvancementDeLEssai({
   depart: AvancementDeLEssai | null;
 }) {
   const [avancement, setAvancement] = useState<AvancementDeLEssai | null>(depart);
-  // Depuis combien de temps on attend, et si l'on cherche encore. Un état à
-  // part et non l'absence d'intervalle : c'est ce que l'écran doit dire, et il
-  // faut qu'il le sache. Trois valeurs et non un booléen, parce que « c'est
-  // long » et « on a arrêté » ne se disent pas de la même façon — le premier
-  // demande de patienter, le second demande un geste.
+  // Trois valeurs et non un booléen : « c'est long » demande de patienter,
+  // « on a arrêté » demande un geste.
   const [attente, setAttente] = useState<EtatDeLAttente>("NORMALE");
   const [relance, setRelance] = useState(0);
 
-  // On interroge aussi quand la page se charge sur un découpage déjà en route.
-  // Sans ça, un rechargement pendant l'extraction figeait l'écran sur l'attente :
-  // l'intervalle ne démarrait qu'au retour de l'action, et il n'y en avait pas.
+  // On interroge aussi quand la page se charge sur un découpage déjà en route :
+  // après un rechargement, aucune action ne revient pour lancer la boucle.
   const aPoursuivre = Boolean(essai) || reprend;
 
   useEffect(() => {
@@ -89,9 +75,8 @@ export function useAvancementDeLEssai({
       vivant = false;
       clearTimeout(minuteur);
     };
-    // `essai` et non la session : deux essais d'une même visite portent la même
-    // session, la dépendance ne changeait donc pas de valeur et l'effet n'était
-    // jamais rejoué. L'écran restait sur l'avancement du premier.
+    // `essai` et non la session : deux essais d'une même visite partagent la
+    // session, et l'effet ne serait pas rejoué pour le second.
   }, [essai, aPoursuivre, relance]);
 
   return {

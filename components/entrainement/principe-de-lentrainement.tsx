@@ -4,12 +4,8 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /**
- * L'explication du principe, montrée une seule fois.
- *
- * Elle passe en plein écran plutôt qu'en bandeau parce qu'elle n'arrive qu'une
- * fois et qu'elle dit une chose contre-intuitive : s'entraîner ne fait pas
- * avancer. Quelqu'un qui l'ignore croirait perdre son temps, ou pire, croirait
- * en gagner.
+ * L'explication du principe, montrée une seule fois, en plein écran : elle dit
+ * une chose contre-intuitive, que s'entraîner ne fait pas avancer.
  *
  * Ensuite, une ligne discrète et permanente suffit — voir `TourDentrainement`.
  */

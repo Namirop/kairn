@@ -6,17 +6,11 @@ import { Button } from "@/components/ui/button";
 /**
  * « Je maîtrise ça », sous la question de la session du jour.
  *
- * Le geste appartient à la session : il repousse l'échéance à trois mois et
- * sort le concept du cycle. L'entraînement libre ne le propose pas — il ne
- * décide de rien de la mémoire, et offrir ce bouton depuis un tour qu'on fait
- * pour s'occuper serait le meilleur moyen de perdre un concept par mégarde.
+ * Le geste appartient à la session : il repousse l'échéance et sort le concept
+ * du cycle. L'entraînement ne le propose pas, il ne touche pas à la mémoire.
  *
- * C'est le geste le plus lourd de l'écran, et il se présente comme tel : un
- * bouton dessiné, pas un lien de plus dans une rangée de liens. Il était posé au
- * même poids que le signalement, avec sa conséquence flottant à l'autre bout de
- * la ligne — rien ne disait laquelle des trois actions cette phrase décrivait,
- * et c'est le genre d'ambiguïté qui se paie en clics regrettés. La conséquence
- * est donc collée au bouton, sur la même ligne, et à personne d'autre.
+ * Le geste le plus lourd de l'écran : un bouton dessiné, sa conséquence collée
+ * à lui, pour qu'elle ne se rapporte à aucune autre action de la rangée.
  */
 export function SortieDuCycleAction({
   enCours,
@@ -35,25 +29,14 @@ export function SortieDuCycleAction({
         size="sm"
         disabled={enCours}
         onClick={onSortir}
-        /* Le seul objet dessiné sous le trait, et la seule cible tactile de la
-           rangée : à trente-six pixels de haut, il se ratait au doigt comme les
-           liens qui l'entourent, et rien ne le distinguait d'eux. */
+        /* 44 px sur téléphone : à la hauteur `sm`, il se ratait au doigt. */
         className="max-sm:px-pas-6 self-start max-sm:h-11 sm:self-auto"
       >
         {t("geste")}
       </Button>
 
-      {/* Ce que le geste fait vraiment : il repousse, il ne supprime pas, et il
-          se défait. Annoncer « une seule fois » laissait croire l'inverse.
-
-          « Sort du cycle » a été retiré : c'est du vocabulaire de système, et la
-          phrase suivante disait déjà la même chose en langue d'utilisateur. Sur
-          téléphone, elle prenait trois lignes de gris sous un bouton qu'on
-          clique une fois par mois.
-
-          Sans mesure : la phrase tient sur une ligne dès qu'il y a la largeur, et
-          la colonne l'a. Bornée à trois cents pixels au milieu d'un écran vide,
-          elle se cassait en deux sans raison lisible. */}
+      {/* Sans mesure : la phrase tient sur une ligne dès que la colonne a la
+          largeur. */}
       <p className="text-petit text-stone-500">{t("precision")}</p>
     </div>
   );

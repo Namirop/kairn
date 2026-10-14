@@ -5,15 +5,9 @@ import type { SignalementLu } from "@/lib/db/signalement";
 import type { MotifDeSignalement } from "@/lib/db/types";
 
 /**
- * Un signalement, tel qu'on le relit.
- *
- * Écran interne : la question porte le poids, tout le reste est en retrait. Le
- * contexte technique se lit en prose sur une ligne plutôt qu'en table de specs —
- * ce sont six valeurs courtes qu'on parcourt, pas six lignes qu'on compare.
- *
- * Le concept apparaît sous la question parce que c'est lui qui dit si la
- * question était juste. Quand il a été supprimé depuis, on le dit : c'est
- * souvent le geste qui suit un signalement, et c'est un signal en soi.
+ * Un signalement, tel qu'on le relit. Le concept suit la question parce que
+ * c'est lui qui dit si elle était juste ; s'il a été supprimé depuis, on le
+ * dit, c'est souvent le geste qui suit un signalement.
  */
 
 const MOTIFS: Record<MotifDeSignalement, string> = {
@@ -57,8 +51,8 @@ export function LigneDeSignalement({ signalement }: { signalement: SignalementLu
         {signalement.conceptExisteEncore ? "" : " (supprimé depuis)"}
       </p>
 
-      {/* Six valeurs courtes qu'on parcourt : une ligne en prose se lit plus
-          vite qu'une table de six lignes, et n'invente pas de colonnes. */}
+      {/* Cinq valeurs courtes qu'on parcourt : une ligne en prose plutôt
+          qu'une table. */}
       <p className="mt-pas-2 text-mono font-mono text-stone-500">
         {signalement.format} · {signalement.facet} · {signalement.model} · prompt{" "}
         {signalement.promptVersion ?? "inconnu"} · dépôt {signalement.inputId ?? "détaché"}

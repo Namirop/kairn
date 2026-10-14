@@ -5,21 +5,15 @@ import { useEffect } from "react";
 /**
  * Enregistre le service worker. Ne rend rien.
  *
- * Il est posé à la racine et non dans la coquille authentifiée : les critères
- * d'installabilité s'évaluent sur la page où l'on se trouve, et la première page
- * que voit n'importe qui est la page publique. Enregistré plus bas, le
- * navigateur n'aurait rien à proposer tant que personne ne s'est connecté.
+ * Posé à la racine, pas dans la coquille authentifiée : l'installabilité
+ * s'évalue sur la page courante, et la première vue est la page publique.
  *
- * **En développement, jamais.** Un service worker actif intercepte les
- * navigations pendant que Turbopack recompile, et le jour où il resservirait une
- * page d'un cache on chercherait le bug ailleurs pendant une heure. Pour le
- * vérifier en local, c'est `npm run build` puis `npm start` — l'enregistrement
- * suit le mode, pas un réglage à retenir.
+ * Jamais en développement : il intercepterait les navigations pendant que
+ * Turbopack recompile. Pour le vérifier en local : `npm run build` puis
+ * `npm start`.
  *
- * `updateViaCache: "none"` : le script lui-même est toujours relu au réseau. Sans
- * lui, un cache HTTP peut figer une version du service worker pour un jour, et
- * une correction déployée n'atteindrait pas les appareils qui en ont le plus
- * besoin.
+ * `updateViaCache: "none"` : sans lui, un cache HTTP peut figer une version du
+ * script jusqu'à un jour, et une correction déployée n'arriverait pas.
  */
 export function RegistreServiceWorker() {
   useEffect(() => {
@@ -27,8 +21,7 @@ export function RegistreServiceWorker() {
     if (!("serviceWorker" in navigator)) return;
 
     navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).catch(
-      // Pas de rattrapage : un enregistrement qui échoue coûte l'installation,
-      // pas l'application. On le trace et on continue.
+      // Un échec coûte l'installation, pas l'application : tracé, sans plus.
       (erreur: unknown) => {
         console.error("[pwa] enregistrement du service worker refusé", erreur);
       },

@@ -3,17 +3,13 @@ import { Section } from "@/components/administration/section";
 import type { EtatDuPaiement } from "@/lib/paiement/etat-pour-ladministration";
 
 /**
- * Où en est le paiement — en lecture seule, et c'est le sujet.
+ * Où en est le paiement, en lecture seule : `PAIEMENT_LIVE` est le dernier
+ * verrou avant d'encaisser, et ne se manœuvre pas depuis l'écran qu'il protège
+ * (même règle que `ADMIN_EMAILS`).
  *
- * Le reste de cet écran se manœuvre : on y coupe les appels, on y baisse un
- * plafond. Ce bloc-là ne fait que dire, parce que `PAIEMENT_LIVE` est le dernier
- * verrou avant d'encaisser du vrai argent et qu'un verrou ne se pose pas derrière
- * le bouton qu'il protège. C'est la règle déjà écrite pour `ADMIN_EMAILS`.
- *
- * Ce qu'on vient y chercher tient en deux questions : dans quel monde suis-je,
- * et le catalogue répond-il ? La seconde décide de tout — un prix dont la clé ou
- * le montant divergent de la page fait échouer chaque achat au clic, et rien
- * d'autre ne le dirait avant le premier client.
+ * Le catalogue confronte chaque prix annoncé à ce que Stripe rend : une clé ou
+ * un montant qui diverge fait échouer chaque achat, et rien d'autre ne le dirait
+ * avant le premier client.
  */
 
 const CE_QUE_LE_MODE_VEUT_DIRE = {

@@ -3,33 +3,15 @@ import { IndiceTactile, Infobulle } from "@/components/ui/infobulle";
 import { avancementDuNiveau } from "@/lib/domain/progression";
 
 /**
- * Ce que la progression vaut, sous le cairn.
+ * La progression, en bande sous le cairn. C'est la seule récompense du
+ * produit (on ne félicite pas, on montre ce qui est construit), d'où le grand
+ * chiffre.
  *
- * Trois lignes de la même taille tassées dans un coin disaient que rien de tout
- * ça n'avait d'importance — alors que c'est la seule récompense du produit : on
- * ne félicite jamais quelqu'un pour une bonne réponse, on lui montre ce qu'il a
- * construit. Une récompense qu'on chuchote ne récompense pas.
- *
- * Elle a donc quitté la colonne du cairn pour prendre toute la largeur du
- * panneau, en bande centrée sous les deux colonnes. Le panneau est le plus grand
- * de l'application et son tiers bas était vide ; c'est là que ces deux mesures
- * ont la place de compter, et le grand chiffre y devient lisible de loin.
- *
- * Deux mesures, deux traitements, parce qu'elles ne disent pas la même chose.
- * **La série** est un nombre qu'on regarde : grand chiffre, en display, et
- * l'ember — c'est la seule occurrence du produit, et elle est ici. **Le niveau**
- * est un chemin : il lui fallait sa part parcourue, parce que « Niveau 2 · 34 XP »
- * ne situe rien. La barre est en gris et jamais en accent : sur ce panneau, le
- * lichen appartient au sommet du cairn.
- *
- * Rien n'est mis en carte. Deux cartes côte à côte auraient posé des contenants
- * sur le seul panneau du produit qui n'en porte aucun.
- *
- * **Les deux explications s'ouvrent aussi au doigt depuis le 13/09/2026.** Elles
- * étaient dans des info-bulles, qui répondent à un survol et à rien d'autre :
- * sur un téléphone — c'est-à-dire là où ce produit s'installe — personne n'a
- * jamais pu lire ce qu'était une série ni d'où venait le niveau. Voir
- * `Infobulle`, qui bascule sur ce que l'appareil sait faire.
+ * La série porte l'ember, seule occurrence du produit. Le niveau a sa barre de
+ * part parcourue, en gris et jamais en accent : sur ce panneau, le lichen
+ * appartient au sommet du cairn. Pas de cartes : ce panneau n'a aucun
+ * contenant. Les explications passent par `Infobulle`, qui s'ouvre aussi au
+ * doigt — un survol seul les cacherait sur téléphone.
  */
 
 const ETIQUETTE = "text-mono font-mono tracking-[0.14em] text-stone-400 uppercase";
@@ -39,10 +21,7 @@ function Serie({ streak }: { streak: number }) {
   const t = useTranslations("tableau.aujourdhui.progression");
 
   if (streak === 0) {
-    // Centré comme les deux autres mesures. Au fer à gauche, cette phrase
-    // partait au bord de l'écran pendant que le niveau se tenait au milieu du
-    // sien : deux mesures qui se lisent ensemble s'éloignaient l'une de l'autre
-    // au moment où l'une n'a pas encore de chiffre à opposer.
+    // Centré comme le niveau, pour que les deux mesures restent ensemble.
     return (
       <div className="text-center">
         <p className={ETIQUETTE}>{t("serie")}</p>
@@ -77,13 +56,9 @@ function Niveau({ xp }: { xp: number }) {
       </p>
       <p className={CHIFFRE}>{niveau}</p>
 
-      {/* La strate qui se remplit. Pleine largeur et à angles vifs plutôt
-            qu'une gouttière arrondie : c'est une couche qui monte, pas une jauge
-            de tableau de bord.
-
-            Le rail est en `stone-500` et non dans le gris des séparateurs : un
-            rail invisible ne dit pas ce qui reste, et c'est justement ce qu'on
-            est venu montrer. */}
+      {/* Angles vifs : une strate qui monte, pas une jauge. Le rail est en
+          `stone-500` et non dans le gris des séparateurs, sinon il ne dirait
+          pas ce qui reste. */}
       <span aria-hidden className="mt-pas-4 block h-1 w-full overflow-hidden bg-stone-500">
         <span
           className="block h-full bg-stone-50"
@@ -99,13 +74,9 @@ function Niveau({ xp }: { xp: number }) {
 }
 
 /**
- * La bande est centrée et bornée : étalée sur toute la largeur du panneau, les
- * deux mesures se seraient retrouvées aux extrémités de l'écran, sans rapport
- * l'une avec l'autre. Elles se lisent ensemble, donc elles tiennent ensemble.
- *
- * Sur un téléphone, la borne ne borne plus rien — la fenêtre est déjà plus
- * étroite qu'elle — et c'est la gouttière qui écarte. Elle se resserre donc,
- * puis reprend son ampleur quand la largeur revient.
+ * Centrée et bornée, pour que les deux mesures se lisent ensemble plutôt
+ * qu'aux deux bords de l'écran. Sur téléphone, c'est la gouttière qui écarte :
+ * elle s'y resserre.
  */
 export function ProgressionDuCairn({ streak, xp }: { streak: number; xp: number }) {
   return (

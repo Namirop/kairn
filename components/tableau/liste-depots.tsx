@@ -12,33 +12,10 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { conceptsLisibles, travailEnCours } from "@/lib/domain/etat-depot";
 
 /**
- * Ce que l'utilisateur a déposé. L'étape n'apparaît que tant qu'elle a quelque
- * chose à annoncer : un dépôt prêt affiche ce qu'il a produit, pas son état.
- *
- * Le compte de concepts s'affiche dès qu'il existe, sans attendre les
- * questions — c'est le retour qui dit que le geste a servi à quelque chose.
- *
- * La couleur d'alerte est réservée à la panne. Un dépôt dont le contenu ne
- * portait rien à retenir le dit avec ses mots, en gris : rien ne s'est cassé,
- * et l'annoncer en rouge faisait passer une limite du texte pour une avarie du
- * produit.
- *
- * **D'où vient un dépôt se dit dans une gouttière, et non dans son texte.** Un
- * dépôt d'image commençait par « Capture — », collé devant le premier mot de ce
- * qu'on avait lu à l'écran : un mot du système planté dans la phrase de
- * l'utilisateur, qu'on relit deux fois avant de comprendre qu'il n'en fait pas
- * partie. C'est une propriété du dépôt, pas le début de son contenu.
- *
- * La gouttière est **réservée sur toutes les lignes**, et vide sur la plupart.
- * C'est ce qui garde un seul bord gauche au texte de la liste : ouverte
- * seulement sous les captures, elle décalerait une ligne sur dix et ferait
- * flotter les autres. Une colonne vide ne coûte qu'à la mesure ; un bord qui
- * bouge coûte à la lecture.
- *
- * Un trait plutôt qu'un émoji : la palette du produit n'a qu'un accent, et un
- * pictogramme en couleur dans une liste de papier serait le seul objet de
- * l'écran à ne pas en venir. L'icône est un cadre d'image en `stone-500`, le
- * gris des mentions — elle se voit quand on la cherche et s'efface quand on lit.
+ * L'avancement d'un dépôt. Un dépôt prêt affiche ce qu'il a produit, pas son
+ * état ; le compte de concepts paraît dès qu'il existe, sans attendre les
+ * questions. L'alerte est réservée à la panne : un texte qui ne portait rien à
+ * retenir n'est pas une avarie.
  */
 function Avancement({ depot }: { depot: DepotListe }) {
   const tEtat = useTranslations("etatDepot");
@@ -129,9 +106,9 @@ export function ListeDepots({
                 )}
               >
                 <div className="gap-pas-3 flex">
-                  {/* La gouttière de provenance. Sa largeur est celle de l'icône
-                      et elle ne bouge pas : c'est elle qui aligne le texte de
-                      toutes les lignes, qu'elles portent une image ou non. */}
+                  {/* La gouttière de provenance est réservée sur toutes les
+                      lignes, vide ou non, pour garder un seul bord gauche au
+                      texte. */}
                   <span className="mt-pas-1 size-4 shrink-0">
                     {depot.sourceType === "IMAGE" ? (
                       <Capture aria-hidden className="size-4 text-stone-500" />
@@ -139,22 +116,14 @@ export function ListeDepots({
                   </span>
 
                   <div className="min-w-0 flex-1">
-                    {/* Au corps de lecture : c'est le texte que la personne a
-                        déposé, donc la seule raison d'être de la carte. Il était
-                        en dessous de l'interface qui l'entoure — un contenu ne se
-                        lit pas plus petit que le cadre qui le montre. */}
                     <p className="text-corps line-clamp-2">
-                      {/* L'icône est muette pour un lecteur d'écran : c'est ici
-                          que la provenance se dit, en tête du texte, comme elle
-                          se lisait avant. */}
+                      {/* L'icône est muette : la provenance se dit ici au
+                          lecteur d'écran. */}
                       {depot.sourceType === "IMAGE" ? (
                         <span className="sr-only">{t("capture")} </span>
                       ) : null}
-                      {/* Les termes de code sont relevés ici comme partout où ce
-                          texte se montre. L'aperçu étant coupé à sa longueur, un
-                          accent grave peut se retrouver seul : il reste alors
-                          littéral, ce qui est moins bruyant qu'une paire
-                          affichée. */}
+                      {/* L'aperçu est tronqué : un accent grave resté seul
+                          s'affiche littéralement, c'est voulu. */}
                       <TexteTechnique>{depot.apercu || t("captureEnLecture")}</TexteTechnique>
                     </p>
                     <p className="mt-pas-2 gap-pas-3 text-mono flex flex-wrap items-center text-stone-500">

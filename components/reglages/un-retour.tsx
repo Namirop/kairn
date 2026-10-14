@@ -11,25 +11,14 @@ import type { SujetDeRetour } from "@/lib/db/types";
 import { MESSAGE_MAX } from "@/lib/domain/retour-sur-le-produit";
 
 /**
- * Dire ce qui ne va pas, où que ce soit dans le produit.
+ * Un retour sur le produit, depuis les réglages. Distinct du signalement d'une
+ * question (écran de révision), qui retire une formulation du tirage : ceci ne
+ * retire rien.
  *
- * **Ce n'est pas le signalement d'une question**, et les deux ne se rejoignent
- * nulle part. Un signalement se déclenche depuis l'écran de révision, désigne
- * une formulation précise et la retire du tirage. Ceci porte sur le produit —
- * une logique qui surprend, un mot de travers, un écran qui déborde — et ne
- * retire rien. C'est aussi la seule trace que ces défauts-là laisseront : un
- * mauvais découpage se voit dans les chiffres, un écran mal fichu se subit en
- * silence.
- *
- * Le formulaire demande le strict minimum. Le sujet est présélectionné, l'écran
- * et la capture sont facultatifs, et il n'y a pas de champ d'adresse ni de
- * catégorie fine : chaque champ obligatoire de plus fait renoncer une part des
- * gens, et un retour qu'on n'écrit pas vaut zéro.
- *
- * La largeur de la fenêtre et le navigateur partent avec, parce que c'est ce
- * qu'un rapport écrit à la main n'inclut jamais et ce dont on a besoin pour
- * reproduire un défaut d'affichage. Rien d'autre — pas d'adresse, pas de contenu
- * déposé.
+ * Le formulaire demande le strict minimum : sujet présélectionné, écran et
+ * capture facultatifs. La taille de la fenêtre et le navigateur partent avec,
+ * pour reproduire un défaut d'affichage ; rien d'autre (ni adresse, ni contenu
+ * déposé).
  */
 export function UnRetour() {
   const [etat, envoyer, enCours] = useActionState<EtatDuRetour, FormData>(
@@ -119,11 +108,8 @@ export function UnRetour() {
 }
 
 /**
- * La capture, facultative.
- *
- * Le champ natif sort du parcours clavier et c'est le bouton qui porte l'action,
- * comme au dépôt : deux arrêts pour un seul geste sont un doublon, et le champ
- * natif ne se dessine pas.
+ * La capture, facultative. Le champ natif sort du parcours clavier : c'est le
+ * bouton qui porte l'action, pour un seul arrêt de tabulation.
  */
 function PieceJointe({
   capture,

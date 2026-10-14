@@ -8,60 +8,18 @@ import { Apparition, Temps } from "@/components/site/apparition";
 import { PaysageDeCairns } from "@/components/site/paysage-de-cairns";
 
 /**
- * L'ouverture. Titre à gauche, cairn à droite, un pli.
+ * L'ouverture. Titre à gauche, cairn à droite.
  *
- * **Le titre arrive en deux temps.** « Tu lis beaucoup » est un constat, « Tu
- * retiens peu » son retournement — décalage d'un dixième de seconde entre les
- * deux blocs.
+ * La seconde ligne du titre arrive pleine et se vide (`ligne-oubli`) : elle
+ * perd son encre au moment où elle dit qu'on perd ce qu'on a lu. Le contour
+ * tient le contraste d'un texte (`titre-creux`, dans
+ * `app/styles/utilities/hollow-title.css`).
  *
- * **Et il arrive en deux matières.** Le constat est plein, le retournement est
- * creux : la ligne perd sa chair au moment où elle dit qu'on perd ce qu'on a
- * lu. C'est la seule figure de style du site, elle porte la phrase qui porte le
- * produit, et elle ne coûte rien à la lecture — le contour tient le contraste
- * d'un texte, pas d'un ornement (voir `titre-creux` dans `app/styles/utilities/hollow-title.css`).
- *
- * **Et la seconde ligne se vide sous les yeux.** Elle était creuse d'emblée,
- * donc la phrase la plus importante de la page arrivait déjà oubliée, sans
- * qu'on ait rien vu se perdre. Elle arrive maintenant pleine, et son encre s'en
- * va — voir `ligne-oubli`. C'est le seul moment écrit de l'ouverture ; tout le
- * reste du mouvement y était déjà et n'a pas bougé.
- *
- * **Le paysage se pose avant elle**, du plus proche au plus lointain : on
- * arrive au sol, puis on lève les yeux, puis la phrase se vide.
- *
- * **Le titre a sa propre échelle, `--t-ouverture`, et elle se mesure à sa
- * colonne**, pas à la fenêtre : il grandit jusqu'à la largeur disponible sans
- * jamais passer à la ligne.
- *
- * **L'ouverture porte un geste, en contour**, et il ne s'adresse qu'aux
- * visiteurs : quelqu'un de connecté voit un mot de reprise plus bas, pas
- * l'essai.
- *
- * **Les deux colonnes se calent en bas.** Centrées, elles ne se déplaçaient que
- * de la moitié de la marge qu'on leur donnait ; calées, elles se placent à la
- * distance qu'on leur donne. Le rembourrage bas est le seul réglage à toucher,
- * et il est posé sur les deux — n'en décaler qu'une ferait glisser le cairn par
- * rapport au titre alors qu'ils tiennent la même ligne d'horizon.
- *
- * **Elles partagent aussi leur hauteur, et c'est `--hauteur-cairn`.** Le bas
- * commun suffisait tant que la fenêtre restait basse ; sur un écran haut, le
- * cairn touche son plafond pendant que le panneau suit la fenêtre, et le titre
- * descend seul jusqu'au pied du dessin. Le titre prend donc la mesure du cairn
- * et s'y centre : ils se lisent sur le même axe à toutes les hauteurs, sans que
- * le cairn quitte sa butte.
- *
- * **Sur téléphone, le cairn était réduit de moitié, et il ne l'est plus.** Il
- * avait été ramené à une signature pour une raison qui tenait alors : posé sur
- * du papier vide, à sa taille de bureau, il occupait plus de hauteur que le
- * titre et la page disait « voici un dessin » avant de dire « tu retiens peu ».
- * Ce qui a changé n'est pas la taille, c'est ce qu'il y a autour — le paysage
- * descend maintenant sous le titre, et le cairn y est planté au lieu de
- * flotter. Un objet seul au milieu d'un blanc est une illustration ; le même
- * objet debout dans un terrain est le sujet d'une scène, et une scène a le
- * droit d'occuper la place. Il reprend donc l'ampleur qu'il avait perdue, et
- * les deux blocs s'écartent d'autant — le pas qui les serrait n'avait de sens
- * que face à un emblème réduit. Au-delà de `md`, rien de tout ça ne s'applique :
- * la composition de bureau est intacte.
+ * Les deux colonnes se calent en bas et partagent `--hauteur-cairn` : le cairn
+ * plafonne quand le panneau, lui, suit la fenêtre, donc le titre prend la
+ * hauteur du cairn et s'y centre pour rester sur le même axe. Le rembourrage
+ * bas est posé sur les deux ; n'en décaler qu'une ferait glisser le cairn par
+ * rapport au titre.
  */
 export function Hero({ connecte }: { connecte: boolean }) {
   const t = useTranslations("site.accueil.hero");
@@ -69,57 +27,20 @@ export function Hero({ connecte }: { connecte: boolean }) {
   return (
     <Panneau
       surface="papier"
-      /* L'ouverture est le seul panneau qui dessine un dehors : elle porte le
-         ciel plutôt que sa surface. Sans palette à l'essai, `--ciel` vaut le
-         papier et rien ne bouge. */
+      /* Le seul panneau qui porte le ciel plutôt que sa surface. */
       ciel
       aere
       mesure="large"
-      /* Sur téléphone, l'ouverture démarre peu sous l'en-tête. Le rythme de
-         campagne ouvrait de cinquante pixels au-dessus du titre : de la marge
-         prise sur le seul écran où la hauteur est comptée, et qui repoussait le
-         cairn et son geste sous le pli. Au-delà de `md`, le rythme reprend
-         intact — c'est là qu'il a un sens, il y a la hauteur pour le porter.
-
-         Deux pas et non un : la marque et le titre se touchaient presque, et
-         l'ouverture avait l'air de commencer dans l'en-tête. Le cairn reste au-
-         dessus du pli, c'est la mesure qui borne ce réglage. */
-      /* `--hauteur-cairn` est la mesure que les deux colonnes partagent : le
-         cairn l'occupe, le titre s'y centre. Elle vit ici parce qu'aucune des
-         deux ne peut la lire chez l'autre. */
+      /* Sur téléphone, un rembourrage haut réduit : le cairn et son geste
+         doivent tenir au-dessus du pli. `--hauteur-cairn` vit ici parce
+         qu'aucune des deux colonnes ne peut la lire chez l'autre. */
       className="max-md:pt-pas-8 gap-pas-12 grid items-center [--hauteur-cairn:clamp(20rem,52vh,36rem)] md:min-h-[calc(100svh-5rem-2rem)] md:grid-cols-[1.7fr_1fr] md:items-end"
       fond={<PaysageDeCairns />}
     >
-      {/* Le titre passe **devant** les pierres.
-
-          Les deux colonnes sont sœurs dans la même grille, et le cairn arrive
-          après dans le balisage : sans rien, c'est lui qui se peint par-dessus.
-          Ça ne se voyait pas tant qu'il tenait debout — il est à droite, le
-          titre à gauche — mais renversé, ses pierres traversent l'écran et
-          venaient recouvrir la phrase. Une pierre qui roule devant le texte
-          efface ce qu'on est venu lire ; derrière, elle passe, et la seconde
-          ligne étant évidée, on la voit même passer au travers des lettres.
-
-          Un rang de plus sur le titre suffit : le bloc du cairn reste au sien.
-
-          L'ouverture a la même hauteur pour tout le monde, parce qu'elle porte
-          un geste dans les deux cas. Elle n'en portait qu'un pour les visiteurs,
-          et le bloc commençait alors soixante-huit pixels plus bas chez les
-          autres — la hauteur du bouton absent, les deux colonnes se calant en
-          bas. On compensait ce trou ; il n'y en a plus. */}
-      {/* **Le titre se centre sur le cairn, il ne se cale plus à côté de lui.**
-          Les deux colonnes tenaient leur bas commun, ce qui va tant que la
-          fenêtre reste basse : le cairn plafonne à trente-six rems, le titre le
-          rejoint par le bas, et l'écart entre leurs deux milieux est de l'ordre
-          d'un centimètre. Sur un écran haut, le cairn atteint son plafond
-          pendant que le panneau, lui, continue de grandir avec la fenêtre — le
-          titre descend alors seul, et se retrouve au pied du dessin qu'il est
-          censé accompagner.
-
-          Il prend donc la hauteur du cairn et s'y centre : les deux se lisent
-          sur le même axe quelle que soit la fenêtre, et le cairn ne bouge pas
-          d'un pixel. `min-h` et non `h` — un titre qui déborderait sa mesure
-          pousse sa boîte au lieu d'en sortir. */}
+      {/* `z-10` : le titre passe devant le cairn, qui vient après dans le
+          balisage. Renversé, ses pierres traversent l'écran et effaceraient la
+          phrase. `min-h` et non `h` : un titre trop long pousse sa boîte au lieu
+          d'en sortir. */}
       <Apparition className="md:pb-pas-24 relative z-10 md:flex md:min-h-[var(--hauteur-cairn)] md:flex-col md:justify-center">
         <h1 className="font-display text-ouverture leading-[0.95] font-bold tracking-[-0.03em] text-balance md:leading-[0.84] md:tracking-[-0.045em]">
           <Temps balise="span" className="block">
@@ -141,30 +62,16 @@ export function Hero({ connecte }: { connecte: boolean }) {
           </Temps>
         </h1>
 
-        {/* Le geste de l'ouverture, et il s'adresse à tout le monde — seule sa
-            destination change.
-
-            Il n'existait que pour les visiteurs, parce qu'il pointait vers un
-            panneau d'essai que les autres n'ont pas : une porte sur un mur. Mais
-            quelqu'un de connecté vient ici pour une raison, et c'est la même à
-            un mot près — il ne veut pas essayer le produit, il veut retrouver
-            sa journée. Le lien mène donc là, plutôt que de laisser l'ouverture
-            sans issue et de reporter l'action dans un panneau plus bas que
-            personne n'a envie d'aller chercher.
-
-            Il porte sa surface, et pour la raison qui a rempli le titre creux :
-            un bouton en contour n'a pas de fond, donc une pierre renversée se
-            voyait au travers. Le papier du panneau referme la fenêtre, et le
-            survol continue de le foncer comme partout ailleurs. */}
+        {/* Visiteur : l'essai plus bas. Connecté : sa journée. Le bouton en
+            contour porte la surface du panneau, sans quoi une pierre renversée
+            se verrait au travers. */}
         <Temps>
           <Button
             asChild
             variant="outline"
             size="lg"
-            /* Un cran plus petit sur téléphone : à la taille de bureau, le
-               bouton était le second objet le plus haut de l'écran après le
-               titre, pour une action secondaire — le sujet de l'ouverture est
-               la phrase, pas le geste. Il reprend sa pleine taille dès `md`. */
+            /* Un cran plus petit sur téléphone : le sujet de l'ouverture est la
+               phrase, pas le geste. */
             className="mt-pas-4 md:mt-pas-6 geste-du-ciel max-md:px-pas-6 max-md:text-petit max-md:h-10"
           >
             {connecte ? (
@@ -176,27 +83,17 @@ export function Hero({ connecte }: { connecte: boolean }) {
         </Temps>
       </Apparition>
 
-      {/* Sur téléphone, l'emblème descend sous le rythme bas du panneau.
-
-          Le rembourrage de campagne le calait à soixante-quatre pixels du bord,
-          soit exactement la hauteur de la crête proche : il se posait donc sur la
-          ligne d'horizon au lieu de se tenir dans la butte.
-
-          **Il descend maintenant jusqu'à mi-butte**, et c'est la mesure qui
-          compte, pas le nombre de pas : la crête proche est à 11,5 % de la
-          hauteur du panneau (`PLANS_TELEPHONE`), la butte va de là jusqu'au bas,
-          et le pied de la pierre la plus basse se pose à la moitié de cette
-          bande. Un cran de moins le laissait au-dessus, à une quinzaine de
-          pixels — assez pour qu'il ait l'air posé dessus plutôt que planté
-          dedans. Si la crête bouge, cette valeur se remesure. */}
+      {/* Sur téléphone, le cairn descend jusqu'à mi-butte : la crête proche
+          est à 11,5 % de la hauteur du panneau (`PLANS_TELEPHONE`) et le pied
+          de la pierre la plus basse se pose au milieu de la bande qui va de là
+          au bas. Si la crête bouge, ce `-mb` se remesure. */}
       <div className="-mb-pas-12 md:pb-pas-24 flex justify-center md:mb-0">
         <div className="relative aspect-[100/93] w-[min(62vw,17rem)] md:aspect-auto md:h-[var(--hauteur-cairn)] md:w-full">
           <span
             aria-hidden
-            /* L'ombre portée du cairn. Elle passe par des variables : sur un
-               sol coloré, une ombre réglée pour du papier disparaît, et c'est
-               elle qui dit que la pierre touche terre — surtout quand le trait
-               de sol se tait. */
+            /* L'ombre portée passe par des variables : réglée pour du papier,
+               elle disparaîtrait sur un sol coloré, et c'est elle qui dit que
+               la pierre touche terre. */
             className="rounded-galet absolute bottom-[1%] left-1/2 h-[6%] w-[54%] -translate-x-1/2 blur-[12px]"
             style={{
               background: "var(--ombre-du-cairn)",

@@ -19,38 +19,24 @@ import { reduireLaCapture } from "@/lib/images/reduire-la-capture";
 /**
  * Le geste de dépôt : un champ, une pièce jointe facultative, un bouton.
  *
- * Pas de choix de type, pas d'onglet, pas de bouton « générer » : on colle ce
- * qu'on a et ça part. Tout le reste du produit repose sur la vitesse de ce
- * geste-là.
+ * La clé d'envoi vient du serveur, tirée à l'affichage : deux clics sur le même
+ * formulaire n'écrivent qu'un dépôt. `useId()` ne convient pas, il rend la même
+ * valeur à chaque chargement.
  *
- * La clé d'envoi vient du serveur, tirée à l'affichage de la page : deux clics
- * sur le même formulaire portent la même, et n'écrivent qu'un dépôt. Elle ne
- * peut pas être tirée ici — `useId()` rend la même valeur à chaque chargement,
- * puisqu'elle décrit une position dans l'arbre, pas un geste.
+ * Un partage du système, rangé par le service worker, est repris ici au montage
+ * sans partir tout seul : on relit et on taille avant de déposer.
  *
- * **Il se remplit aussi tout seul.** Un partage venu du système est rangé sur
- * l'appareil par le service worker, et repris ici au montage. C'est le même
- * formulaire dans les deux cas, à dessein : on relit, on coupe ce qui déborde,
- * puis on dépose. Un partage qui déposerait directement enlèverait le seul
- * moment où l'on peut tailler dans ce qui a été sélectionné.
- *
- * **Toute capture passe par la réduction avant d'entrer dans l'état.** C'est le
- * seul endroit où une image arrive — sélecteur ou partage —, donc le seul où la
- * poser. Tout ce qui suit — l'affichage du nom, le refus de poids, l'envoi — ne
- * voit alors que l'image réduite, et c'est exactement ce qu'on veut : c'est elle
- * qui part.
+ * Toute capture (sélecteur ou partage) est réduite avant d'entrer dans l'état :
+ * le refus de poids et l'envoi ne voient que l'image qui part vraiment.
  */
 
 /** Au-delà, on montre le compteur : avant, il n'apprend rien à personne. */
 const SEUIL_COMPTEUR = Math.floor(CARACTERES_MAXIMUM * 0.75);
 
 /**
- * Ce qui empêche ce dépôt de partir, ou rien.
- *
- * Un seul refus à la fois, dans l'ordre où on peut y remédier : ce que le
- * serveur a répondu passe avant ce que l'écran voit venir.
- *
- * Les phrases sont celles que le serveur prononce, `depots.refus`.
+ * Ce qui empêche ce dépôt de partir, ou `null`. Un seul refus à la fois : la
+ * réponse du serveur passe avant ce que l'écran voit venir. Les phrases sont
+ * celles du serveur, `depots.refus`.
  */
 function refusDuFormulaire(
   t: TraduireLesRefus,
@@ -98,13 +84,9 @@ export function FormulaireDepot({
   const [lienSeul, setLienSeul] = useState(false);
 
   /*
-    Le rang du choix en cours, pour que seul le dernier compte.
-
-    Réduire une image de plusieurs mégaoctets prend le temps d'un décodage et
-    d'un réencodage. Qui change d'avis pendant ce temps-là verrait la première
-    capture s'installer après la seconde, et déposerait celle qu'il venait de
-    remplacer. Le compteur tranche : un rendu qui n'est plus le dernier demandé
-    est jeté.
+    Le rang du choix en cours : la réduction prend du temps, et sans lui une
+    première capture pourrait s'installer après la seconde. Une réduction qui
+    n'est plus la dernière demandée est jetée.
   */
   const rang = useRef(0);
 
@@ -184,16 +166,9 @@ export function FormulaireDepot({
         />
       ) : null}
 
-      {/* Deux facultatifs à gauche, le geste à droite — et les uns au-dessus de
-          l'autre dès que la largeur ne les tient plus. La rangée s'enroulait
-          déjà à deux boutons ; à trois, elle rendait sur un téléphone trois
-          petits boutons empilés au fer à gauche dont le dernier était le seul
-          qui compte. Il prend donc la largeur, comme tous les gestes principaux
-          du produit en mobile.
-
-          Les deux facultatifs, eux, tiennent maintenant leur ligne sur un
-          téléphone : c'est leur libellé qui se raccourcit, pas la rangée qui
-          s'enroule. Voir `libelle-qui-se-raccourcit.tsx`. */}
+      {/* Sur téléphone, le bouton de dépôt passe sous les facultatifs et prend
+          la largeur ; les facultatifs tiennent leur ligne en raccourcissant
+          leur libellé (`libelle-qui-se-raccourcit.tsx`). */}
       <div className="gap-pas-4 flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between">
         <div className="gap-pas-3 flex flex-wrap items-center">
           <PieceJointe fichier={capture} onChoisir={choisirLaCapture} />
@@ -251,13 +226,7 @@ function Conseil({
   if (partageManque) return t("partageManque");
   if (lienSeul) return t("lienSansMatiere");
 
-  // Ce qui reste se compte en concepts : une phrase en consomme un, un article
-  // en consomme huit. C'est la matière qui est plafonnée, pas le nombre de fois
-  // qu'on colle quelque chose.
-  //
-  // « Ce mois-ci » et non « aujourd'hui » : `restants` vient du plafond
-  // mensuel. L'écran annonçait donc le plafond du mois pour la journée, et
-  // quelqu'un qui les déposait trouvait zéro le lendemain sans comprendre. La
-  // valeur était juste, le mot à côté était faux.
+  // `restants` se compte en concepts, sur le plafond mensuel : le message doit
+  // dire « ce mois-ci », pas « aujourd'hui ».
   return t("restants", { restants });
 }

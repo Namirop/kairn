@@ -5,35 +5,14 @@ import { ROUTES } from "@/lib/auth/routes";
 import { PLAFOND_MAX } from "@/lib/domain/selection-session";
 
 /**
- * Quand quelqu'un dépose plus vite qu'il ne révise.
+ * Quand quelqu'un dépose plus vite qu'il ne révise : un constat, jamais un
+ * reproche, toujours avec sa sortie.
  *
- * Un constat, jamais un reproche : personne n'a mal fait, deux rythmes ne se
- * rejoignent simplement pas. La phrase dit ce qui se passe, et la sortie qui va
- * avec. Sans sortie, ce serait de la culpabilisation avec un chiffre.
+ * La sortie est le plafond de session, dans les réglages : une seconde session
+ * le jour même ne servirait rien, le plafond journalier étant consommé. Déjà au
+ * maximum (`PLAFOND_MAX`), il ne reste qu'à lever le pied, et c'est dit tel quel.
  *
- * Il n'apparaît qu'au-delà du seuil et disparaît dès que le retard redescend.
- * Une bannière permanente devient un élément de décor, et on cesse de la lire
- * au moment précis où elle aurait quelque chose à dire.
- *
- * Le nombre de jours est donné, pas arrondi en « quelques ». On le connaît, et
- * le flou fait plus peur que le chiffre : « quelques jours » se lit comme un
- * reproche qu'on n'ose pas chiffrer, « six jours » se lit comme un fait.
- *
- * Il se détache en gris de pierre, et pas en ember : cet accent-là appartient à
- * la série et à rien d'autre. Le mettre ici, fût-ce à quarante pour cent, en
- * faisait la couleur de deux choses opposées — ce qu'on tient, et ce qui
- * s'accumule.
- *
- * **« Faire une seconde session maintenant » a été retiré le 13/09/2026, parce
- * que c'était impossible.** La phrase datait d'avant le plafond journalier :
- * depuis, une journée dont le plafond est consommé ne sert plus rien, et le lien
- * « Reprendre une session » menait donc à un écran vide — proposé, qui plus est,
- * sous un compteur affichant zéro. Le vrai levier est celui qui décide du
- * plafond, et il est dans les réglages.
- *
- * **Il connaît son propre bout.** Quelqu'un déjà réglé au maximum ne peut pas
- * monter : lui proposer serait la deuxième fausse sortie de ce bloc en deux
- * versions. Il ne lui reste alors qu'à lever le pied, et c'est dit tel quel.
+ * En gris de pierre et non en ember, qui appartient à la série seule.
  */
 export function SignalDeDette({
   enAttente,

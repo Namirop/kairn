@@ -1,11 +1,8 @@
 import type { ReactNode } from "react";
 
 /**
- * Les champs d'un réglage surchargeable.
- *
- * Chacun montre la valeur d'environnement à côté du sien, et c'est ce qui rend
- * le champ vide lisible : sans elle, « vide » ne dit pas quelle valeur
- * s'applique, seulement qu'on n'en a pas posé.
+ * Les champs d'un réglage surchargeable. Chacun montre la valeur
+ * d'environnement à côté : c'est elle qui s'applique quand le champ est vide.
  */
 
 const CHAMP =

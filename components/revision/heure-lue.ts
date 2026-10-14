@@ -5,9 +5,8 @@ import { ETIQUETTE_INTL } from "@/lib/i18n/langues";
  * L'heure du rappel, écrite comme la langue l'écrit : « 19 h » ici, « 7 PM »
  * ailleurs.
  *
- * L'heure arrive seule, déjà dans le calendrier de la personne. Elle est posée
- * sur un jour quelconque en UTC et lue en UTC : aucun fuseau ne s'y ajoute, et
- * seul compte le format.
+ * L'heure est déjà dans le fuseau de la personne : posée et lue en UTC sur un
+ * jour quelconque, elle ne subit aucun décalage, seul compte le format.
  */
 export function heureLue(heure: number, langue: Langue): string {
   return new Intl.DateTimeFormat(ETIQUETTE_INTL[langue], {

@@ -5,18 +5,12 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 /**
- * L'écran qui se met à jour tout seul, le temps que le webhook arrive.
+ * L'écran qui se met à jour tout seul, le temps que le webhook arrive : le
+ * retour de Stripe gagne souvent la course, et l'écran resterait à « Gratuit »
+ * jusqu'à un rechargement manuel.
  *
- * **Le manque qu'il comble était de dire d'attendre sans que rien ne bouge.**
- * Le retour de Stripe et l'arrivée du webhook sont deux chemins distincts, et le
- * navigateur gagne souvent la course : quelqu'un qui vient de payer lisait
- * « quelques secondes », puis rien — l'écran restait à « Gratuit » jusqu'à ce
- * qu'il pense à recharger. C'est le moment du parcours où l'on est le plus
- * inquiet, et c'était le seul où le produit ne faisait rien.
- *
- * Deux secondes entre deux essais, une trentaine de secondes en tout. Au-delà,
- * on cesse et on le dit : un webhook qui n'est pas arrivé en trente secondes est
- * en incident, et continuer à interroger le serveur n'y changerait rien.
+ * Quinze essais à deux secondes. Un webhook absent après trente secondes est
+ * en incident : on cesse, et on le dit.
  */
 
 const CADENCE_MS = 2000;

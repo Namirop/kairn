@@ -9,18 +9,8 @@ import { etalonLisible } from "@/lib/domain/etalon-lisible";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
- * Ce qui suit une pierre jetée.
- *
- * On a renoncé : il n'y a plus rien à juger, et l'écran ne demande plus rien.
- * Il donne la réponse — sans elle, renoncer n'apprendrait rien et le geste ne
- * serait qu'une porte de sortie.
- *
- * Il dit aussi ce que ça coûte. Un geste qui compte comme un échec et ne le dit
- * pas se découvre à la mauvaise échéance, des jours plus tard.
- *
- * Le bouton attend le temps de lire, comme après une réponse fausse : la réponse
- * affichée ici est toute la contrepartie du renoncement, et on vient de la
- * demander expressément.
+ * Ce qui suit une pierre jetée (on renonce) : la réponse, et ce qui est noté.
+ * Le bouton attend le temps de lire, comme après une réponse fausse.
  */
 export function PierreJetee({
   reponse,
@@ -51,9 +41,8 @@ export function PierreJetee({
         ) : null}
       </BlocReponse>
 
-      {/* Ce qui est écrit, pas ce que ça déclenche : en entraînement rien ne se
-          replanifie, et « compte » aurait dit le contraire de la ligne qui vit
-          sous la carte. */}
+      {/* Le texte dit ce qui est noté, pas ce que ça déclenche : en
+          entraînement, rien ne se replanifie. */}
       <p className="mt-pas-6 text-petit text-stone-500">{t("nonRetrouve")}</p>
 
       <div className="gap-pas-4 mt-pas-3 flex flex-wrap items-center">

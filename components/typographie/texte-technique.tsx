@@ -5,74 +5,37 @@ import { segmentsDeCode } from "@/lib/domain/texte-code";
 import { segmentsEnGras } from "@/lib/domain/texte-en-gras";
 
 /**
- * Un texte dont les termes de code sont relevés.
+ * Un texte dont les termes de code sont relevés en jetons.
  *
- * Ce qu'on lisait avant : « Jusqu'où porte un `"use client"` placé en haut d'un
- * fichier ? », accents graves compris, au milieu d'un titre. La convention
- * d'écriture arrivait jusqu'à l'écran sans être lue par personne, et le terme
- * qu'elle devait relever ressortait moins que la ponctuation qui l'entourait.
+ * Les mesures du jeton sont en `em` : il sert aussi bien dans un titre de 40 px
+ * que dans une ligne de corps. Le poids est fixé plutôt qu'hérité : dans un
+ * titre en gras, un jeton en gras se lit comme un pâté.
  *
- * Le jeton est en mono — c'est le rôle « données » de l'échelle typographique,
- * et un nom de fonction en est —, sur un fond d'encre diluée qui tient aussi
- * bien sur le papier que sur l'ombre. Ses mesures sont en `em` : le même
- * composant sert dans un titre de quarante pixels et dans une ligne de corps,
- * et un jeton calé en pixels serait minuscule dans l'un et énorme dans l'autre.
+ * `box-decoration-break: clone` donne à chaque morceau d'un extrait coupé son
+ * cadre entier, au lieu d'un cadre fendu. `break-words` empêche un identifiant
+ * plus large que sa colonne de déborder.
  *
- * Le poids est fixé plutôt qu'hérité : dans un titre en gras, un jeton en gras
- * se lit comme un pâté.
- *
- * `box-decoration-break: clone` est là pour le jour où un long extrait passe la
- * fin d'une ligne : sans lui, le fond et la bordure se fendent en deux moitiés
- * ouvertes, et le jeton a l'air cassé. Avec, chaque morceau est un jeton entier.
- * `break-words` couvre le cas pire — un identifiant plus large que sa colonne
- * débordait la carte au lieu de se couper.
- *
- * **C'est le jeton qui ouvre sa ligne, et c'est son interligne qui le fait.**
- * Deux jetons de lignes consécutives se chevauchaient : sur un énoncé de
- * téléphone à vingt-quatre pixels serré à `leading-tight`, la ligne fait trente
- * pixels et le jeton en peint trente et demi — le cadre de l'un traversait
- * l'autre. Mesuré, pas déduit.
- *
- * Le réglage précédent partait d'une idée fausse : un `line-height` réduit ne
- * rétrécit **pas** la boîte peinte d'un élément en ligne. Cette boîte vaut les
- * métriques de la fonte plus le rembourrage et la bordure, et rien d'autre ne
- * l'atteint. L'interligne, lui, décide de la place que le jeton **réclame dans
- * la ligne** : monté à 1,7, il ouvre de quoi loger sa propre hauteur peinte et
- * quatre pixels d'air, et il n'ouvre que les lignes qui en portent un.
- *
- * La proportion se conserve à toutes les tailles — la hauteur peinte comme la
- * place réclamée se mesurent en `em` du corps qui les porte —, donc une seule
- * valeur suffit du téléphone au grand écran. Baisser cet interligne, ou monter
- * le rembourrage, rouvre le défaut.
+ * L'interligne à 1,7 empêche deux jetons de lignes consécutives de se
+ * chevaucher : un `line-height` réduit ne rétrécit pas la boîte peinte d'un
+ * élément en ligne (métriques de fonte + rembourrage + bordure), il ne fait que
+ * réserver la place dans la ligne. À 1,7, la ligne loge la hauteur peinte plus
+ * quelques pixels d'air, à toutes les tailles puisque tout est en `em`. Baisser
+ * cet interligne, ou monter le rembourrage, rouvre le chevauchement.
  */
 export const JETON =
   "rounded-champ bg-jeton border border-jeton-bord font-mono text-[0.86em] font-medium leading-[1.7] px-[0.36em] py-[0.06em] [box-decoration-break:clone] break-words";
 
 /**
- * Au-delà, un jeton ne tient plus sur la ligne la plus étroite du produit.
- *
- * Mesuré sur ce qu'il y a de plus serré : un énoncé de révision sur un téléphone
- * de trois cent quatre-vingt-dix points, où la carte laisse un peu plus de vingt
- * signes de mono à une ligne. En dessous du seuil, un jeton qui se coupe se
- * coupe **par choix de la mise en page** et non par manque de place — et c'est
- * ce choix-là qu'on retire.
+ * Au-delà, un jeton ne tient plus sur la ligne la plus étroite du produit : un
+ * énoncé de révision sur un téléphone de 390 points laisse un peu plus de vingt
+ * signes de mono par ligne.
  */
 const SIGNES_INSECABLES = 20;
 
 /**
- * Le jeton court ne se coupe pas.
- *
- * `s-maxage=300` porte un trait d'union, et un trait d'union est une occasion de
- * coupure ordinaire : la fin de ligne emportait « s- » et laissait
- * « maxage=300 » à la ligne suivante. Avec `box-decoration-break: clone`, chaque
- * moitié reçoit son cadre entier — on lisait deux termes là où il y en a un, et
- * la question portait sur celui-là.
- *
- * On ne renonce pas au cadre cloné pour autant : c'est lui qui sauve les longs
- * extraits, où la coupure est inévitable et où deux cadres pleins valent mieux
- * qu'un cadre fendu. On retire la coupure là où elle n'était pas nécessaire,
- * c'est-à-dire presque partout — un nom de directive, un identifiant, un appel
- * de méthode tiennent tous sous le seuil.
+ * Le jeton court ne se coupe pas : un trait d'union (`s-maxage=300`) est une
+ * occasion de coupure, et avec le cadre cloné on lirait deux termes là où il
+ * n'y en a qu'un. Les longs extraits, eux, gardent la coupure.
  */
 export function jetonInsecable(terme: string): boolean {
   return terme.trim().length <= SIGNES_INSECABLES;
@@ -104,18 +67,10 @@ function Jetons({ texte }: { texte: string }) {
 }
 
 /**
- * Ce qu'un dépôt a voulu mettre en avant, et les jetons qui vivent dedans.
- *
- * **Le gras se découpe en premier, les jetons à l'intérieur.** L'ordre inverse
- * a été servi le 30/09 : `**Du code Dart à l'APK (`flutter build apk`)**`
- * affichait ses quatre astérisques, parce que la marque ouvrante et la
- * fermante tombaient dans deux morceaux différents et qu'aucune ne voyait sa
- * paire. Un passage en gras **contient** des termes de code ; l'inverse
- * n'arrive pas, et `segmentsEnGras` sait déjà ignorer une marque écrite dans un
- * terme cité.
- *
- * Le poids du jeton est fixé et non hérité, donc un terme cité dans du gras
- * reste lisible — voir `JETON`.
+ * Le gras se découpe en premier, les jetons à l'intérieur. Dans l'ordre
+ * inverse, un passage en gras qui contient un terme de code voit ses marques
+ * ouvrante et fermante tomber dans deux morceaux différents, et les astérisques
+ * s'affichent. `segmentsEnGras` ignore déjà une marque écrite dans un terme cité.
  */
 function Segments({ texte }: { texte: string }) {
   return (
@@ -136,16 +91,10 @@ function Segments({ texte }: { texte: string }) {
 /**
  * L'extrait de plusieurs lignes, réduit à un jeton, faute de mieux.
  *
- * Ce composant vit en ligne : dans un titre de carte, dans une option de QCM,
- * dans un aperçu coupé à deux lignes. Un extrait en bloc n'y a pas sa place —
- * c'est `TexteRiche` qui le rend, là où le contenu est de la lecture au long.
- *
- * Mais il peut en arriver un, et il faut alors qu'il se lise. `segmentsDeCode`
- * ne connaît que la paire d'accents en ligne : trois accents graves lui font
- * voir le nom du langage dans un cadre, la première ligne dans un autre, et le
- * mot resté au bout dans un troisième. Un seul jeton pour tout l'extrait n'est
- * pas beau, mais il est juste — et c'est un état qu'aucun concept ni aucune
- * question de la production n'a encore connu.
+ * Ce composant vit en ligne (titre de carte, option de QCM, aperçu) ; le bloc
+ * de code se rend dans `TexteRiche`. Mais `segmentsDeCode` ne connaît que la
+ * paire d'accents en ligne et éclaterait une barrière de trois accents en
+ * plusieurs cadres : un seul jeton pour tout l'extrait reste lisible.
  */
 function ExtraitsEnLigne({ texte }: { texte: string }) {
   return (
@@ -165,9 +114,6 @@ function ExtraitsEnLigne({ texte }: { texte: string }) {
 }
 
 export function TexteTechnique({ children }: { children: string }) {
-  // Le chemin ordinaire est celui d'avant, au caractère près : le détour ne
-  // s'ouvre que sur un texte qui porte vraiment une barrière, c'est-à-dire
-  // jamais, jusqu'au jour où.
   if (porteDuCodeEnBloc(children)) return <ExtraitsEnLigne texte={children} />;
 
   return <Segments texte={children} />;

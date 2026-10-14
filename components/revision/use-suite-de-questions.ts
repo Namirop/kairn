@@ -12,15 +12,9 @@ import { reponseAcceptee } from "@/lib/domain/reponse-cloze";
  * La mécanique d'une suite de questions : ce qui est écrit, ce qui avance, et où
  * en est le geste de réponse de la question courante.
  *
- * Elle vivait dans le composant qui dessine la carte, et les deux ensemble
- * dépassaient la taille où un fichier reste lisible. Ce sont bien deux choses :
- * ici on décide quand un passage part et quand on passe à la suivante ; là on
- * décide de ce que ça donne à voir.
- *
- * Elle ne sait rien de ce qu'on écrit derrière : la session du jour replanifie,
- * l'entraînement libre ne touche à rien, et ça se décide dans `onRepondre`. Elle
- * connaît en revanche la justesse — un choix se compare à son index, une saisie
- * à ses formes acceptées —, parce que c'est elle qui décide quelle note part.
+ * Elle ne sait rien de ce qu'on écrit derrière (session ou entraînement, c'est
+ * `onRepondre` qui décide). Elle connaît en revanche la justesse, parce que
+ * c'est elle qui décide quelle note part.
  */
 
 export type PassageDonne = {
@@ -38,12 +32,9 @@ export type Valider = (note: ReviewRating, maitrise?: boolean) => Promise<void>;
 export type VerdictDuTrou = null | "JUSTE" | "RATE";
 
 /**
- * L'état d'un texte à trou, partagé par l'énoncé et le champ.
- *
- * Le trou de la phrase se remplit à la frappe, et la phrase est en titre, donc
- * au-dessus du champ : l'état ne peut pas vivre dans le champ. C'est aussi ce
- * qui permet, une fois vérifié, de montrer le terme attendu **dans** la phrase
- * plutôt que de la redire en dessous.
+ * L'état d'un texte à trou, partagé par l'énoncé et le champ : le trou de la
+ * phrase, au-dessus du champ, se remplit à la frappe, puis montre le terme
+ * attendu.
  */
 export type TexteATrou = {
   saisie: string;
@@ -151,21 +142,11 @@ export function useSuiteDeQuestions({
 
   /**
    * Le passage engagé mais pas encore noté, écrit avant de quitter la session.
+   * Sans lui, une réponse vue puis abandonnée serait reposée telle quelle, et
+   * l'espacement se réglerait sur un rappel qui n'a pas eu lieu.
    *
-   * **C'était la faille de la porte de sortie.** On demande à voir la réponse,
-   * on la lit, on clique « Arrêter là » — et rien n'est enregistré : ni la
-   * question, ni le fait qu'on l'ait vue. En revenant, la même question est
-   * reposée, réponse déjà connue, et l'espacement se règle sur un rappel qui n'a
-   * pas eu lieu. C'est le seul endroit du produit où l'on peut se mentir à
-   * soi-même sans le vouloir.
-   *
-   * La note est `AGAIN`, et c'est la seule honnête : quelqu'un qui a vu la
-   * réponse et qui n'a pas voulu se situer n'a rien démontré. Le concept revient
-   * tôt, ce qui est exactement ce qu'il faut quand on ne sait pas.
-   *
-   * `engage` sans `ecrit` désigne précisément ce cas : la réponse a été révélée,
-   * une option cliquée ou une saisie vérifiée — donc le chronomètre est arrêté —
-   * mais aucun passage n'est parti. Un QCM, lui, écrit au clic : il n'est jamais
+   * La note est `AGAIN` : avoir vu la réponse sans se situer ne démontre rien.
+   * `engage` sans `ecrit` désigne ce cas ; un QCM écrit au clic et n'est jamais
    * en suspens.
    */
   const abandonner = useCallback(async () => {
@@ -202,11 +183,8 @@ export function useSuiteDeQuestions({
       saisir: setSaisie,
       verdict,
       attendu,
-      // Le trou porte la saisie tant qu'on cherche, puis le terme attendu dès
-      // qu'on ne cherche plus — vérification faite **ou pierre jetée**. Renoncer
-      // laissait le creux vide alors que la réponse s'affichait juste en
-      // dessous : on lisait le terme sans jamais voir la phrase juste, et c'est
-      // pourtant elle qu'on est venu apprendre.
+      // Le trou porte la saisie tant qu'on cherche, puis le terme attendu —
+      // aussi quand on renonce : c'est la phrase juste qu'on vient apprendre.
       comble: verdict === null && !jetee ? saisie.trim() || null : attendu,
       // La graine est l'identifiant de la question : l'ordre des pistes ne bouge
       // pas d'un affichage à l'autre, et le terme attendu ne tombe pas toujours
@@ -231,9 +209,8 @@ export function useSuiteDeQuestions({
       arreter();
       setRevelee(true);
     },
-    // Juste, le passage part tout de suite : le temps de lire une confirmation
-    // n'a pas à s'ajouter à celui de la réponse, et rien ne se perd si on ferme
-    // l'onglet avant de l'avoir lue.
+    // Juste, le passage part tout de suite : le temps de lire la confirmation
+    // ne compte pas, et rien ne se perd si l'onglet se ferme.
     verifier: () => {
       if (!question?.cloze || saisie.trim().length === 0) return;
 
@@ -245,9 +222,8 @@ export function useSuiteDeQuestions({
       }
 
       setVerdict("JUSTE");
-      // Juste avec un coup de pouce reste un rappel, mais un cran plus facile :
-      // la note le dit, sans quoi l'aide serait gratuite et deviendrait le geste
-      // par défaut.
+      // L'aide coûte un cran de note, sans quoi elle deviendrait le geste par
+      // défaut.
       void enregistrer(noteApresAide("GOOD", aide));
     },
     jeter: () => {

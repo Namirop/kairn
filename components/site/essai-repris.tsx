@@ -9,66 +9,21 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
- * Ce que la bande garde quand la fenêtre de l'essai est fermée.
+ * Ce que la bande garde quand la fenêtre de l'essai est fermée : sans ce
+ * rappel, revenir dans les sept jours du cookie retomberait sur un champ vide
+ * alors que les concepts sont là. Un rappel, pas une seconde copie du
+ * résultat ; il garde la charpente du formulaire qu'il remplace pour que la
+ * bande ne change pas de forme selon son état.
  *
- * Le découpage a donné quelque chose, et il faut que la page le dise : sans
- * rappel, fermer la fenêtre effacerait le résultat, et revenir sur le site dans
- * les sept jours du cookie retomberait sur un champ vide alors que les concepts
- * sont là.
+ * Le cairn est dessiné à partir des mêmes identifiants que dans la fenêtre,
+ * donc il est identique. Il ne paraît qu'à partir de deux pierres : à un
+ * concept, la figure (cent unités de large pour une pierre de quinze) se lit
+ * comme un trait. Sur téléphone il s'efface : la ligne du titre y demande
+ * 338 points pour 331 disponibles.
  *
- * **C'est un rappel, pas une seconde copie du résultat.** La tentation était de
- * remettre la liste des concepts et l'échantillon dans la bande, ce qui aurait
- * demandé de rendre tout l'arbre sur deux surfaces — et aurait rendu à la bande
- * le défaut qu'on vient de lui retirer, celui d'être plusieurs mises en page à
- * la fois. Ici il n'y a que ce qui sert à décider : combien, l'appel à garder,
- * et de quoi rouvrir.
- *
- * **Le cairn fait le lien.** C'est le même empilement que dans la fenêtre,
- * dessiné à partir des mêmes identifiants, donc exactement la même figure :
- * rouvrir ne donne pas l'impression d'ouvrir autre chose.
- *
- * **Il est à côté du titre, et plus en dessous.** Posé sous une ligne de soixante
- * pixels, un cairn d'une seule pierre est une barre sombre de cent points de
- * large sur quinze de haut : on ne lit pas une pierre, on lit un trait resté là.
- * À gauche du titre et centré sur sa hauteur, il redevient ce qu'il est — un
- * objet posé au sol, à côté du nombre qu'il dessine. Sa hauteur grandit avec les
- * concepts, le centrage ne bouge pas.
- *
- * **Le titre n'a plus de coupure forcée**, et il en avait une au milieu. Sur le
- * bureau, « 1 concept t'attend. » fait cinq cent sept points dans une colonne qui
- * en offre six cent cinquante-six : la ligne tenait déjà, on la cassait en deux
- * pour rien. Au-delà d'un concept, le pli revient tout seul et au bon endroit —
- * ce qu'une balise posée à la main ne sait pas faire.
- *
- * **Il ne paraît qu'à partir de deux pierres.** Une pierre seule n'est pas un
- * empilement, et le dessin le dit sans détour : la vue d'un cairn est large de
- * cent unités pour une pierre haute de quinze, donc à un concept la figure est
- * une barre sombre de quatre-vingts points sur dix-sept, posée sur un trait. Ni
- * la position ni la taille n'y changent rien — élargie à cent quarante, c'est
- * une barre plus longue, et elle renvoie le titre à la ligne. Ce qu'on perd à un
- * concept est un ornement ; ce qu'on garderait est un tiret qu'on prend pour une
- * coquille. À deux, il y a un empilement, et la figure redevient la signature du
- * produit.
- *
- * **Sur téléphone, le cairn s'efface.** La ligne y demande trois cent
- * trente-huit points pour trois cent trente et un disponibles. Entre un cairn
- * qui prend le tiers de la largeur pour renvoyer le titre à la ligne, et un
- * titre entier, c'est le titre qui porte la bande — le cairn, lui, est dans la
- * fenêtre, à un geste d'ici.
- *
- * **Et le corps du titre se mesure à la fenêtre en dessous de quatre cent
- * vingt-cinq points.** Il manquait sept pixels pour que la ligne tienne sur un
- * téléphone de trois cent quatre-vingt-dix : à deux pour cent près, on lisait
- * « 1 concept » puis « t'attend. », c'est-à-dire la coupure qu'on venait de
- * retirer. Le corps suit donc la largeur tant qu'elle est plus contraignante que
- * lui, et reprend sa valeur de jeton dès qu'elle ne l'est plus — soit partout
- * au-dessus d'un grand téléphone. La formule est réglée sur la phrase la plus
- * longue à un concept, cas de loin le plus fréquent sur la landing ; au-delà,
- * le pli revient et c'est très bien.
- *
- * Il porte la charpente du formulaire qu'il remplace — titre à gauche, contenu à
- * droite, même mesure, même grille. La bande ne change pas de forme selon son
- * état : c'est tout l'objet de la manœuvre.
+ * Le corps du titre suit la largeur (`9.4vw`) tant qu'elle contraint plus que
+ * le jeton : réglé pour que « 1 concept t'attend. » tienne sur une ligne d'un
+ * téléphone de 390 points.
  */
 export function EssaiRepris({
   concepts,
@@ -123,13 +78,8 @@ export function EssaiRepris({
           <p className="text-stone-500">{t("texte")}</p>
         </Temps>
 
-        {/* Les trois gestes sur une seule ligne, comme dans le pied de la
-            fenêtre. « Déposer autre chose » vivait en dessous, seul sur sa
-            ligne : un lien isolé sous deux boutons se lit comme un quatrième
-            niveau de hiérarchie alors que c'est la porte de sortie du même
-            groupe. Les trois font cinq cent dix points dans une colonne qui en
-            offre cinq cent soixante-seize, et le `flex-wrap` les replie sur un
-            téléphone. */}
+        {/* Les trois gestes sur une ligne, comme dans le pied de la fenêtre ;
+            `flex-wrap` les replie sur téléphone. */}
         <Temps className="mt-pas-6 md:mt-pas-8">
           <div className="gap-pas-3 md:gap-pas-4 flex flex-wrap items-center">
             <Button asChild size="lg">

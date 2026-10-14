@@ -4,10 +4,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 /**
- * Badge retokenisé. La forme est une pilule — c'est la forme des gestes et des
- * étiquettes —, mais rien du combo décoratif : pas de pastel, pas d'emoji. Un
- * libellé technique en mono, très petit, en majuscules espacées. Il porte un
- * statut, jamais une décoration.
+ * Badge retokenisé : un libellé technique en mono, en majuscules espacées. Il
+ * porte un statut, jamais une décoration.
  */
 const badgeVariants = cva(
   "inline-flex items-center gap-pas-1 rounded-galet font-mono text-mono tracking-[0.12em] uppercase",

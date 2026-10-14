@@ -3,16 +3,10 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 import { cn } from "@/lib/utils";
 
 /**
- * Un cairn en très faible opacité, comme texture de fond.
+ * Un cairn en très faible opacité, comme texture de fond. Un seul dans toute
+ * l'application (sur `PasCeci`) : répété, il deviendrait un habillage.
  *
- * **Un seul dans toute l'application.** C'est de la matière, pas un motif à
- * répéter : dès qu'il apparaît deux fois, il cesse d'être une texture et
- * devient un habillage. Il vit sur le panneau qui affirme ce que le produit
- * n'est pas — le seul endroit où le fond a le droit d'être occupé sans rien
- * dire.
- *
- * La géométrie vient de `empiler`, comme partout : aucune pierre n'est
- * redessinée ailleurs.
+ * La géométrie vient de `empiler`, comme partout.
  */
 
 const PIERRES = 9;

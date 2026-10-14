@@ -13,19 +13,9 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  * Les formats où seule la personne peut juger : réponse courte, explication,
  * code.
  *
- * Elle formule sa réponse, demande à voir, puis se situe. Le chronomètre
- * s'arrête au moment où elle demande — jamais après : le temps de lire une
- * réponse ne dit rien du rappel.
- *
- * Ce qui s'affiche alors n'est pas une correction qui tombe. C'est un point de
- * comparaison, et c'est la personne qui compare — d'où la consigne : sans
- * réponse formulée, il n'y a rien à comparer et l'écran ne sert qu'à lire.
- *
- * Cette consigne est la demande de l'écran, et elle se lit comme telle : au
- * poids du corps, avec le bouton juste dessous. Empilée en trois morceaux — une
- * ligne, une deuxième plus pâle, puis un bouton, puis un lien — elle n'était
- * plus qu'un des quatre éléments d'une colonne molle. La raison de la consigne
- * tient sur la même ligne que le bouton : elle explique, elle ne demande rien.
+ * Elle formule sa réponse, demande à voir, puis se juge sur l'étalon. Le
+ * chronomètre s'arrête quand elle demande à voir : le temps de lecture ne dit
+ * rien du rappel.
  */
 export function ReponseOuverte({
   answerKey,

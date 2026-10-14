@@ -1,31 +1,17 @@
 /**
- * Le nom du passage, debout dans la marge, sur toute la hauteur du contenu.
+ * Le nom du passage, debout dans la marge, sur toute la hauteur du contenu :
+ * il dit le mode d'un coup d'œil.
  *
- * Ce n'est pas une étiquette : c'est ce qui dit, d'un coup d'œil et sans se lire,
- * dans quel mode on est. Les marges d'un écran large sont vides ; un mot posé
- * dedans les occupe mieux qu'un libellé de douze pixels en tête de colonne.
- *
- * **Les lettres sont distribuées, pas espacées.** Le mot va du haut de l'en-tête
- * au bas de la dernière action, et cette hauteur change d'une question à l'autre —
- * un QCM à quatre options est plus long qu'un texte à trou. Si le corps s'ajustait
- * à la hauteur, la typo grandirait et rétrécirait à chaque question, ce qui se
- * verrait immédiatement. Le corps est donc **fixe**, et c'est le blanc entre les
- * lettres qui respire : on ne remarque pas qu'un interlettrage a gagné trois
- * pixels, on remarque tout de suite qu'un mot a changé de taille.
- *
- * Ce corps se déduit de la longueur du mot, et de rien d'autre. « SESSION » et
- * « ENTRAÎNEMENT » n'ont pas le même nombre de lettres ; au même corps, l'un
- * remplirait la colonne et l'autre s'arrêterait au tiers. Un mot de sept lettres
- * est donc dessiné plus grand — c'est la densité qui est constante d'un mode à
- * l'autre, pas la mesure du glyphe.
+ * Le corps est fixe pour un mot donné et c'est l'écart entre les lettres qui
+ * absorbe la hauteur, variable d'une question à l'autre : un interlettrage qui
+ * change ne se voit pas, un mot qui change de taille si. Le corps se déduit de
+ * la longueur du mot, pour une densité constante d'un mode à l'autre.
  */
 
 /**
- * La hauteur que le mot vise, en pixels.
- *
- * Elle n'est pas une contrainte : `justify-between` étire ou resserre l'écart des
- * lettres autour d'elle. C'est la hauteur pour laquelle l'interlettrage tombe
- * juste — celle d'un écran de question ordinaire.
+ * La hauteur, en pixels, pour laquelle l'interlettrage tombe juste — celle
+ * d'un écran de question ordinaire. Pas une contrainte : `justify-between`
+ * étire ou resserre autour.
  */
 const HAUTEUR_VISEE_PX = 620;
 
@@ -52,26 +38,19 @@ export function MotDeMarge({ mot }: { mot: string }) {
 
   return (
     // `right-full` plutôt qu'un décalage négatif : c'est le bord droit du mot
-    // qu'on veut à distance fixe de la colonne, et sa largeur dépend du corps.
-    // Le seuil porte sur la colonne et non sur la fenêtre — avec le rail à
-    // droite, la même fenêtre laisse deux marges très différentes.
+    // qu'on veut à distance fixe, et sa largeur dépend du corps. Le seuil porte
+    // sur la colonne et non sur la fenêtre, le rail changeant les marges.
     //
-    // Quatre-vingt-douze rems, et c'est le plancher : le contenu de la colonne
-    // est borné à soixante-douze, donc la marge vaut dix rems de chaque côté, et
-    // le mot le plus large en a besoin de neuf. C'est « SESSION » qui commande —
-    // sept lettres, donc dessiné à quatre-vingt-treize pixels, plus les trois
-    // rems qui le tiennent à distance de la colonne. Descendre plus bas ferait
-    // toucher le mot et le texte. Le seuil était à quatre-vingt-seize, ce qui
-    // laissait deux rems inutiles et coupait juste au-dessus d'un écran de deux
-    // mille cinq cents à cent cinquante pour cent — la configuration de bureau
-    // la plus courante passait à cinq pixels près, du mauvais côté.
+    // 92rem est le plancher : la colonne est bornée à 72rem, la marge vaut donc
+    // 10rem de chaque côté, et « SESSION » (sept lettres, 93 px) plus ses 3rem
+    // d'écart en demande 9. En dessous, le mot touche le texte.
     <p
       className="mr-pas-12 pointer-events-none absolute inset-y-0 right-full hidden justify-between font-mono leading-none text-stone-300 uppercase select-none [writing-mode:vertical-rl] @min-[92rem]:flex"
       style={{ fontSize: `${corpsDeLaMarge(lettres.length)}px` }}
     >
       {/* Lettre à lettre pour l'œil, d'un bloc pour l'oreille : épelé, le mot
-          serait illisible à qui l'écoute. L'en-tête cesse de le dire dès que la
-          marge le porte, et le reprend dès qu'elle ne le porte plus. */}
+          serait illisible au lecteur d'écran. L'en-tête cesse de le dire quand
+          la marge le porte. */}
       <span className="sr-only">{mot}</span>
 
       {lettres.map((lettre, rang) => (

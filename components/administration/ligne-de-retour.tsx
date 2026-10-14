@@ -11,20 +11,9 @@ import type { RetourLu } from "@/lib/db/retour";
 import { LIBELLE_DE_SUJET } from "@/lib/retours/libelle-du-sujet";
 
 /**
- * Un retour, tel qu'on le relit.
- *
- * Le message porte le poids, tout le reste est en retrait — c'est la seule
- * chose qu'une personne a pris la peine d'écrire. Le contexte technique tient
- * sur une ligne en prose : quatre valeurs courtes qu'on parcourt, pas quatre
- * lignes qu'on compare.
- *
- * **La capture ne s'affiche que si on la demande.** Une page de cinq retours
- * chargerait cinq images de plusieurs centaines de kilo-octets pour n'en montrer
- * aucune ; `<details>` ne demande la sienne qu'à l'ouverture, sans une ligne de
- * JavaScript.
- *
- * L'état « traité » est un aller-retour et non un aller : se tromper de bouton
- * ne doit pas sortir un retour de la pile pour de bon.
+ * Un retour, tel qu'on le relit. La capture est dans un `<details>` : l'image
+ * n'est chargée qu'à l'ouverture, sans JavaScript. « Traité » se bascule dans
+ * les deux sens, pour qu'un mauvais clic ne sorte pas un retour de la pile.
  */
 
 const JOUR = new Intl.DateTimeFormat("fr-BE", { dateStyle: "medium", timeStyle: "short" });
@@ -63,9 +52,8 @@ export function LigneDeRetour({ retour }: { retour: RetourLu }) {
             Voir la capture
           </summary>
 
-          {/* Sans dimensions connues : l'image vient d'un téléphone, d'un écran
-              large ou d'un recadrage, et lui en imposer les déformerait toutes
-              sauf une. */}
+          {/* Sans dimensions imposées : téléphone, écran large ou recadrage, en
+              fixer les déformerait. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`/api/admin/retours/${retour.id}/capture`}

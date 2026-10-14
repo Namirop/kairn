@@ -9,11 +9,8 @@ import type { QuestionServie } from "@/lib/db/question-servie";
 import type { ReviewRating } from "@/lib/db/types";
 
 /**
- * Le geste de réponse, choisi d'après le format de la question.
- *
- * Le déroulé ne sait rien des formats : il compte les questions, mesure le temps
- * et écrit les passages. C'est ici, et seulement ici, qu'on décide qu'un QCM se
- * clique, qu'un texte à trou se saisit et qu'une question ouverte se juge.
+ * Le geste de réponse, choisi d'après le format de la question : le seul
+ * endroit qui connaît les formats, le déroulé n'en sait rien.
  *
  * Un format dont la charge utile est abîmée retombe sur la question ouverte
  * plutôt que de bloquer l'écran : on peut toujours se juger contre l'étalon.
@@ -69,9 +66,8 @@ export function ZoneDeReponse({
 
   if (question.cloze) {
     return (
-      // Le texte à trou note lui-même, par `trou.juger` : c'est le seul format
-      // dont la note dépend d'autre chose que du geste — un coup de pouce
-      // demandé la fait descendre d'un cran, et cette règle vit dans le domaine.
+      // Le texte à trou note lui-même, par `trou.juger` : un coup de pouce
+      // demandé fait descendre la note d'un cran (règle du domaine).
       <ReponseCloze trou={trou} enCours={enCours} dernier={dernier} onVerifier={onVerifier} />
     );
   }

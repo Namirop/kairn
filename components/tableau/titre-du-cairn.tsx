@@ -2,31 +2,13 @@ import { useTranslations } from "next-intl";
 import { IndiceTactile, Infobulle } from "@/components/ui/infobulle";
 
 /**
- * Le titre de la section, et ce qu'il explique.
+ * Le titre de la section, qui porte l'explication du cairn : c'est contre le
+ * titre qu'on la cherche. Pour le lecteur d'écran, `Cairn` énonce déjà le
+ * nombre de pierres par son `aria-label`.
  *
- * **La fiche était accrochée au dessin, et elle y était mal.** L'indice tactile
- * flottait sous l'empilement, au milieu d'un panneau, sans rien contre quoi se
- * poser — et la fiche qui s'ouvrait dessous recouvrait le filet de la bande de
- * progression. Un point d'interrogation au milieu du vide ne se rattache à rien,
- * et on ne sait pas de quoi il parle avant de l'avoir touché.
- *
- * Contre le titre de la section, il se lit tout seul : c'est là qu'on cherche
- * « qu'est-ce que c'est, ça ? », et c'est l'endroit conventionnel d'une marque
- * d'explication. Le dessin, lui, redevient un dessin.
- *
- * Le compte reste dit sans toucher à rien pour qui ne touche à rien : `Cairn`
- * porte son `aria-label`, et il énonce le nombre de pierres.
- *
- * **Les capitales se posent sur le déclencheur, et pas seulement sur le titre.**
- * `Infobulle` rend un `<button>`, et la feuille de style par défaut des
- * navigateurs y écrit `text-transform: none` — c'est une coupure d'héritage
- * volontaire, faite pour que les commandes de formulaire ne subissent pas la
- * casse de leur page. La `preflight` de Tailwind rétablit la police, la graisse,
- * l'interlettrage et la couleur sur les boutons, mais pas la casse. « TON
- * CAIRN » retombait donc en « Ton cairn » à côté de « SÉRIE » et « NIVEAU »,
- * dont les étiquettes, elles, vivent **dans** le bouton et non autour. Deux
- * étiquettes de même rôle sur le même panneau, dont l'une seule en capitales,
- * se lisent comme deux polices.
+ * `uppercase` est répété sur le déclencheur : `Infobulle` rend un `<button>`,
+ * auquel la feuille par défaut des navigateurs impose `text-transform: none`,
+ * et la `preflight` de Tailwind ne rétablit pas la casse.
  */
 
 /**

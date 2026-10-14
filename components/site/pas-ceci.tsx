@@ -7,30 +7,13 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
- * Dire ce que le produit n'est pas vaut mieux qu'une liste de fonctionnalités :
- * c'est ce qui permet à quelqu'un de décider en dix secondes que ce n'est pas
- * pour lui, et de partir sans rancune.
+ * Ce que le produit n'est pas, sur le panneau de roche de la page publique.
  *
- * C'est le panneau de roche de la page publique — l'un des deux de toute
- * l'application. Le noir sert l'affirmation : on ne dit pas « ce n'est pas ça »
- * sur la même surface que tout le reste.
- *
- * C'est aussi le seul endroit qui porte la silhouette du cairn en fond. Elle
- * déborde du panneau et sort du cadre : une forme entière, posée bien au
+ * La silhouette du cairn déborde du panneau : une forme entière, posée au
  * milieu, redeviendrait une illustration.
  *
- * **La première négation nomme la corvée, elle n'invente pas de statistique.**
- * Elle disait « personne ne tient un jeu de cartes plus de trois semaines » :
- * trois semaines ne vient d'aucune mesure, et « tenir un jeu de cartes » se lit
- * d'abord comme des cartes à jouer. Surtout, elle donnait le symptôme sans la
- * cause — or la cause est exactement ce que le produit remplace. Ce qui use
- * n'est pas de réviser, c'est de fabriquer les cartes, et c'est ce travail-là
- * que Kairn fait à la place.
- *
- * Les deux paragraphes n'arrivent pas ensemble, et c'est la seule chose que
- * l'animation fait ici : les négations d'abord, l'affirmation ensuite. « C'est une
- * seule chose » est la conclusion des trois « ce n'est pas », et la lire en même
- * temps qu'elles en fait un quatrième élément de liste.
+ * Les négations arrivent avant l'affirmation, qui en est la conclusion : lue en
+ * même temps, elle deviendrait un élément de plus de la liste.
  */
 export function PasCeci({ connecte }: { connecte: boolean }) {
   const t = useTranslations("site.accueil.pasCeci");

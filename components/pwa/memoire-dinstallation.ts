@@ -1,27 +1,19 @@
 import { REFUS_AVANT_SILENCE, type RefusDInstallation } from "@/lib/domain/report-de-linvite";
 
 /**
- * Ce qu'on retient de l'installation, sur l'appareil.
+ * Ce qu'on retient de l'installation, sur l'appareil et non en base : l'invite
+ * ne parle que de l'appareil qu'on a en main, et l'avoir installée sur son
+ * téléphone ne dit rien de l'ordinateur.
  *
- * Sur l'appareil et non en base : cette invite ne parle que du téléphone qu'on a
- * en main. Quelqu'un qui a installé Kairn sur son mobile a toutes les raisons de
- * se la voir proposer sur son ordinateur, et un réglage de compte le lui
- * interdirait.
- *
- * Le stockage est faillible — navigation privée, quota, réglage de
- * confidentialité — et son échec n'est pas une erreur du produit. On retombe
- * alors sur « jamais refusé », c'est-à-dire sur une invite qui reparaîtra à la
- * prochaine visite. C'est le moindre mal : l'alternative serait un aller-retour
- * serveur pour un réglage qui ne quitte pas cette machine.
+ * Le stockage est faillible (navigation privée, quota, confidentialité) : on
+ * retombe alors sur « jamais refusé », et l'invite reparaîtra.
  */
 
 const CLE = "cairn:invite-installation-ecartee";
 
 /**
- * La première version ne stockait qu'un « 1 », et il valait pour toujours.
- * Quiconque le porte a refusé sous ce régime-là : on l'honore tel qu'il a été
- * donné, en silence définitif, plutôt que de rouvrir une porte qu'on avait
- * annoncée fermée.
+ * L'ancien format, un « 1 » qui valait refus pour toujours. Il reste honoré
+ * comme un silence définitif sur les appareils qui le portent.
  */
 const REFUS_DEFINITIF_HISTORIQUE = "1";
 
@@ -39,18 +31,12 @@ export function lireRefus(): RefusDInstallation | null {
 /**
  * L'utilisateur dit avoir installé l'application. On ne lui repropose plus.
  *
- * **C'est le seul moyen de le savoir sur un appareil d'Apple.** Une application
- * posée sur l'écran d'accueil d'un iPhone y a son propre bac à sable : ni les
- * cookies, ni le stockage local, ni les registres du navigateur ne traversent la
- * frontière, et Safari n'expose pas `getInstalledRelatedApps`. Depuis un onglet,
- * il n'existe donc **aucun** signal technique qui dise que Kairn est déjà
- * installée — la seule source d'information disponible est la personne devant
- * l'écran, et il faut lui donner un moyen de le dire.
+ * Sur iPhone, c'est le seul moyen de le savoir : l'application de l'écran
+ * d'accueil a son propre bac à sable (ni cookies ni stockage partagés), et
+ * Safari n'expose pas `getInstalledRelatedApps`.
  *
- * C'est écrit comme un refus définitif parce que la conséquence attendue est
- * exactement celle d'un refus définitif : ne plus rien proposer sur cet
- * appareil. Un second champ pour la même conséquence ferait deux vérités à tenir
- * d'accord, et un jour elles ne le seraient plus.
+ * C'est écrit comme un refus définitif, dont la conséquence est la même : un
+ * second champ ferait deux vérités à tenir d'accord.
  */
 export function confirmerInstallation(maintenant: Date): void {
   ecrire({ compte: REFUS_AVANT_SILENCE, dernier: maintenant.toISOString() });
@@ -80,10 +66,8 @@ function lire(): string | null {
 }
 
 /**
- * Ce qu'on relit, on ne l'a pas forcément écrit : une extension, une version
- * antérieure du produit ou une main curieuse peuvent avoir posé n'importe quoi
- * sous cette clef. Une valeur qu'on ne comprend pas est traitée comme une
- * absence de refus — se taire sur la foi d'une chaîne illisible serait la pire
+ * Ce qu'on relit, on ne l'a pas forcément écrit. Une valeur illisible vaut
+ * absence de refus : se taire sur la foi d'une chaîne illisible serait la pire
  * des deux erreurs.
  */
 function analyser(brut: string): RefusDInstallation | null {

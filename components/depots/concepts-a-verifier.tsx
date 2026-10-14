@@ -2,29 +2,13 @@ import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * Le rappel, en tête d'un dépôt, qu'il reste des concepts à trancher.
+ * Le rappel, en tête d'un dépôt, qu'il reste des concepts à trancher : sur un
+ * long dépôt, les concepts douteux sont loin dans la liste, et ils restent sans
+ * questions tant qu'on ne les a pas regardés.
  *
- * **Sans lui, le marqueur ne se voyait que par hasard.** Un concept douteux
- * porte son badge et son explication, mais dans la liste — et sur un dépôt de
- * trente-six concepts, la liste commence après le texte déposé. Quelqu'un qui ne
- * défile pas jusqu'au bout ne sait pas qu'il a quatre concepts en attente, ni
- * qu'ils resteront sans questions tant qu'il ne les aura pas regardés. C'est le
- * seul état du produit qui demande une action et qui pouvait passer inaperçu.
- *
- * **Il dit la conséquence, pas l'injonction.** « Va les vérifier » commande ;
- * « ils restent sans questions » informe, et laisse décider. C'est aussi
- * l'information utile : un concept douteux n'est pas cassé, il est simplement
- * hors du cycle jusqu'à ce qu'on tranche.
- *
- * **Le badge est le même que sur les cartes**, et c'est sa fonction : il apprend
- * quoi chercher en défilant. Reproduire ici une pastille d'une autre forme
- * obligerait à faire le lien soi-même.
- *
- * Le lien est une ancre, pas un bouton. Il ne déclenche rien, il déplace le
- * regard — et sur un dépôt qui en porte plusieurs, c'est au premier qu'on veut
- * aller, les autres se suivant dans l'ordre du texte. Il ne se coupe pas en deux :
- * sur téléphone, où la ligne fait trois lignes et le tout est centré, « Voir » et
- * « le premier » se retrouvaient sur deux rangs et le geste se lisait en morceaux.
+ * Le badge est le même que sur les cartes : il apprend quoi chercher en
+ * défilant. Le lien est une ancre vers le premier concept douteux, insécable
+ * pour ne pas se couper en deux sur téléphone.
  */
 
 /** L'ancre posée sur le premier concept douteux, et visée par le lien. */

@@ -3,32 +3,17 @@ import { cn } from "@/lib/utils";
 import { SURFACES, type Surface } from "./surfaces";
 
 /**
- * Un panneau : une bande pleine largeur qui porte sa surface.
+ * Un panneau : une bande pleine largeur qui porte sa surface, l'unité de
+ * composition des pages. Le fond va d'un bord à l'autre, le contenu reste dans
+ * une mesure centrée.
  *
- * C'est l'unité de composition de toutes les pages. Le fond va d'un bord à
- * l'autre — c'est lui qui donne le rythme —, le contenu reste dans une mesure
- * centrée. Sur un écran très large, c'est donc la surface qui s'étend, jamais
- * la ligne de texte.
- *
- * Le grain vit ici, derrière le contenu : monté à une opacité où il se sent
- * enfin, il ne sable pas les lettres puisqu'il passe dessous.
+ * Le grain vit ici, sous le contenu, pour ne pas sabler les lettres.
  */
 
 /**
- * Mesures de contenu.
- *
- * Elles serrent le contenu au lieu de le laisser flotter : une colonne de 600
- * pixels posée à gauche d'un conteneur de 1000 laissait deux fois plus de vide
- * à droite qu'à gauche, et ça se voyait avant même de savoir pourquoi. Une page
- * choisit la mesure de ce qu'elle porte, et ce qu'elle porte est centré dedans.
- *
- * Les mesures à plusieurs colonnes ont gagné un cran, et un second au-delà de
- * quinze cents pixels : sur un écran de deux mille cinq cents, un tableau de
- * bord serré à mille occupait moins de la moitié de la fenêtre et se lisait
- * comme une colonne perdue au milieu. Les mesures de lecture, elles, ne bougent
- * pas — `texte` fait environ soixante-cinq signes au corps actuel, ce qui est
- * exactement ce qu'on veut, et l'élargir dégraderait la lecture au lieu de
- * l'améliorer.
+ * Mesures de contenu. Une page choisit la mesure de ce qu'elle porte, centré
+ * dedans. Les mesures à colonnes s'élargissent sur très grand écran ; `texte`
+ * reste à ~65 signes au corps actuel, la bonne longueur de lecture.
  */
 const MESURES = {
   texte: "max-w-2xl",
@@ -56,39 +41,26 @@ export function Panneau({
   surface?: Surface;
   mesure?: Mesure;
   /**
-   * Le rythme d'un panneau de marketing, plus ample que celui d'un écran.
-   *
-   * Ample **relativement à la fenêtre** : `--pas-campagne` suit sa hauteur, si
-   * bien qu'un même panneau ouvre de six pas sur un grand écran et de trois sur
-   * un portable, au lieu de déborder du pli sur le second.
+   * Le rythme ample d'un panneau de marketing. `--pas-campagne` suit la hauteur
+   * de la fenêtre, pour ne pas pousser le contenu sous le pli d'un portable.
    */
   aere?: boolean;
   /**
-   * Contenu centré dans toute la hauteur du panneau.
-   *
-   * Réservé à ce qui n'est pas une page : une attente, un message qui tient en
-   * deux lignes. Posés en haut à gauche d'un panneau vide, ils ont l'air d'un
-   * bout de page qui n'a pas fini de charger — ce qui, pour une attente, est
-   * une ironie coûteuse.
+   * Contenu centré dans toute la hauteur du panneau. Réservé à ce qui n'est pas
+   * une page (une attente, un message court), qui en haut à gauche aurait l'air
+   * d'une page pas finie de charger.
    */
   centre?: boolean;
   /**
-   * Le panneau porte le ciel au lieu de sa surface.
-   *
-   * Réservé à l'ouverture, qui est le seul panneau du produit à dessiner un
-   * dehors. `--ciel` vaut le papier par défaut : sans palette à l'essai, ce
-   * drapeau ne change rien du tout. Avec, il peut recevoir un aplat coloré ou
-   * un lavis vertical — et la peinture qui va avec, que la feuille de style
-   * n'ouvre que dans ce cas.
+   * Le panneau porte le ciel au lieu de sa surface. Réservé à l'ouverture.
+   * `--ciel` vaut le papier par défaut : sans palette à l'essai, ce drapeau ne
+   * change rien.
    */
   ciel?: boolean;
   /**
-   * Le panneau prend toute la hauteur qui reste dans la pile.
-   *
-   * À poser sur le dernier panneau d'une page. Sans lui, le grain s'arrêtait
-   * avec le panneau et laissait une couture visible en travers de l'écran, là
-   * même où on croyait avoir réglé le problème en peignant le sol de la bonne
-   * couleur : c'est la texture qui trahissait la jointure, pas la teinte.
+   * Le panneau prend toute la hauteur qui reste dans la pile. À poser sur le
+   * dernier panneau d'une page : sinon le grain s'arrête avec lui et laisse une
+   * couture visible, même quand la teinte du sol est la bonne.
    */
   remplit?: boolean;
   /** Ce qui vit derrière le contenu, sous le grain. Une texture, jamais un texte. */
@@ -102,30 +74,17 @@ export function Panneau({
     <section
       id={id}
       /*
-        La surface est déclarée, pas seulement peinte.
-
-        L'anneau de focus en dépend : `lichen-deep` tombe à 2,48 pour 1 sur la
-        roche, sous le seuil d'un indicateur de focus, et la feuille de style le
-        relève en lichen sur cette surface-là. Lire la classe de fond aurait
-        marché, mais aurait lié une règle d'accessibilité au nom d'un utilitaire
-        Tailwind.
+        La surface est déclarée, pas seulement peinte : l'anneau de focus en
+        dépend. `lichen-deep` tombe à 2,48:1 sur la roche, sous le seuil d'un
+        indicateur de focus, et la feuille de style le relève sur cette surface.
       */
       data-surface={surface}
       className={cn(
         "relative w-full overflow-hidden",
         /*
-          Un panneau ancré s'arrête bien au-dessus de son bord.
-
-          La marge appartient à la **section**, parce que c'est elle qui porte
-          l'ancre. Posée sur le bloc de contenu — là où arrive `className` —,
-          elle ne s'applique à rien : le navigateur cale l'élément visé, et
-          l'élément visé est la section. On peut alors augmenter la valeur autant
-          qu'on veut sans que le point d'arrivée bouge d'un pixel, ce qui est
-          exactement ce qui s'est passé deux fois de suite.
-
-          Ce qu'on gagne à s'arrêter plus haut : la coupe de roche qu'on vient de
-          traverser reste à l'écran, et le saut se lit comme une descente plutôt
-          que comme un changement de page.
+          Le `scroll-mt` va sur la section, qui porte l'ancre : posé sur le bloc
+          de contenu (où arrive `className`), il ne s'applique à rien. S'arrêter
+          plus haut garde à l'écran la coupe qu'on vient de traverser.
         */
         id && "scroll-mt-pas-16 md:scroll-mt-[22svh]",
         remplit ? "flex-1" : "shrink-0",
@@ -142,9 +101,8 @@ export function Panneau({
         className={cn(
           "px-pas-6 md:px-pas-8 relative z-10 mx-auto w-full",
           MESURES[mesure],
-          // Les deux rythmes suivent la fenêtre : sur un écran de mille
-          // quatre-vingts, six pas de marge sur deux panneaux empilés font cent
-          // pixels qui passent sous le pli sans rien porter.
+          // Les deux rythmes suivent la hauteur de la fenêtre, pour que les
+          // marges de panneaux empilés ne poussent pas le contenu sous le pli.
           aere ? "py-pas-campagne" : "py-pas-dedans",
           centre && "flex flex-col items-center text-center",
           className,

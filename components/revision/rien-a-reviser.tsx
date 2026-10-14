@@ -5,19 +5,13 @@ import { ROUTES } from "@/lib/auth/routes";
 import { delaiAvantLeJour } from "@/lib/domain/echeance";
 
 /**
- * Les quatre raisons de n'avoir rien à réviser.
- *
- * Aucune n'est un vide à combler. Être à jour est l'état normal du produit :
+ * Les quatre raisons de n'avoir rien à réviser. Être à jour est l'état normal :
  * une session ne se remplit jamais de concepts non échus pour faire nombre.
  *
- * La quatrième est la seule où quelque chose est encore dû : le plafond du jour
- * est atteint. Elle ne dit donc pas « tu es à jour », qui serait faux, et elle
- * n'ouvre pas sur un dépôt — déposer plus quand on vient d'atteindre son plafond
- * est le contraire du conseil utile.
+ * Le plafond du jour atteint est le seul cas où quelque chose reste dû : il ne
+ * dit pas « tu es à jour », et n'ouvre pas sur un dépôt.
  *
- * Les quatre passent par le même palier que la fin de session et la fin d'un tour
- * d'entraînement : ce sont les mêmes haltes, elles se ressemblent parce qu'elles
- * sont de même nature.
+ * Toutes passent par le même `Palier` que la fin de session et d'entraînement.
  */
 
 type Props = {
@@ -41,9 +35,8 @@ export function RienAReviser({
   const tTemps = useTranslations("temps");
   const t = useTranslations("revision.paliers");
 
-  // Le plafond du jour est atteint, et il reste des concepts dus. C'est le seul
-  // écran vide qui annonce du travail : il le dit, puis il ouvre la seule porte
-  // qui ne coûte rien à la mémoire.
+  // Plafond atteint, des concepts restent dus : la seule porte ouverte est
+  // l'entraînement, qui ne touche pas à la mémoire.
   if (reporteAuLendemain > 0) {
     return (
       <Palier
@@ -69,8 +62,8 @@ export function RienAReviser({
     );
   }
 
-  // Des concepts existent, mais aucun ne porte encore de question : leurs
-  // formulations sont en cours d'écriture. On dit l'attente, pas la file de jobs.
+  // Aucun concept ne porte encore de question : on dit l'attente, pas la file
+  // de jobs.
   if (!prochainJourServi && conceptsEnAttenteDeQuestions > 0) {
     return (
       <Palier
@@ -81,9 +74,7 @@ export function RienAReviser({
     );
   }
 
-  // Le moment exact où l'entraînement existe : un compte neuf a fait le tour de
-  // sa session en quatre questions et tombe sur « reviens demain ». Déposer
-  // d'abord — c'est ce qui fait avancer —, s'entraîner ensuite.
+  // Déposer d'abord, c'est ce qui fait avancer ; s'entraîner en second.
   return (
     <Palier
       titre={t("rien.aJourTitre")}

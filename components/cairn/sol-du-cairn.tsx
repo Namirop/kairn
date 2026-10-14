@@ -1,11 +1,8 @@
 import { LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 
 /**
- * Le sol : un trait, pas une ombre portée.
- *
- * Il traverse tout le sentier, et pas chaque cairn : un chemin est continu, et
- * deux traits séparés diraient deux endroits. Les marges qu'il garde de part et
- * d'autre restent celles d'un cairn seul.
+ * Le sol : un seul trait sous tout le sentier, pas un par cairn. Ses marges
+ * restent celles d'un cairn seul.
  */
 export function SolDuCairn({
   clair = false,

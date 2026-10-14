@@ -4,30 +4,17 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
  * Le tableau d'un texte déposé, en tableau sur un écran large et en fiches sur
  * un téléphone.
  *
- * **Trois colonnes de prose ne tiennent pas dans trois cent vingt points, et
- * aucune ruse de largeur ne les y fait tenir.** Mesuré : la colonne qui porte un
- * chemin de fichier — insécable dans son jeton — prend la moitié de la place, la
- * troisième sort du cadre, et chaque cellule s'enroule sur quatre lignes. On lit
- * alors un tiers du tableau à la fois, en le poussant du doigt. Le défilement
- * horizontal n'était pas la réponse, c'était le constat d'échec.
+ * Trois colonnes de prose ne tiennent pas dans 320 points (un chemin insécable
+ * prend la moitié de la place, chaque cellule s'enroule sur quatre lignes).
+ * Sous `sm`, chaque rangée devient un bloc : le titre de colonne au-dessus de
+ * sa valeur, un filet entre les rangées.
  *
- * En dessous de `sm`, chaque rangée devient donc un petit bloc : le titre de
- * colonne au-dessus de sa valeur, dans le libellé technique du produit, et un
- * filet entre les rangées. C'est la même information, lue dans le sens de
- * l'écran — pas une version amputée.
+ * Les `role` sont posés à la main parce que `display: block` efface la
+ * sémantique du tableau : sans eux, un lecteur d'écran n'y lit plus que du
+ * texte à la suite.
  *
- * **Les rôles sont posés à la main parce que `display: block` les efface.**
- * Basculer un tableau en blocs lui retire sa sémantique : un lecteur d'écran n'y
- * voit plus des rangées et des cellules mais du texte à la suite. `role` les
- * rend, et la grille reste une grille pour qui ne la voit pas.
- *
- * Pas de rayures, pas de cadre : un filet entre les rangées, et la première
- * colonne à l'encre pleine parce que c'est elle qu'on lit pour se repérer. La
- * hiérarchie vient du poids et de l'encre, comme partout ailleurs dans le
- * produit.
- *
- * `tabular-nums` sur toute la grille : un dépôt met rarement des chiffres en
- * colonne, mais quand il le fait ils doivent s'aligner.
+ * La première colonne est à l'encre pleine : c'est elle qu'on lit pour se
+ * repérer.
  */
 
 const LIBELLE = "text-mono font-mono tracking-[0.14em] text-stone-500 uppercase";

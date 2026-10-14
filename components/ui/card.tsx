@@ -3,14 +3,9 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Carte retokenisée. Elle n'existe que pour grouper de l'information liée —
- * jamais pour habiller une seule ligne. Le padding est réglé par `densite` :
- * une carte dense et une carte de mise en avant ne respirent pas pareil.
- *
- * Elle se distingue par sa surface, pas par un trait d'un pixel : une bordure
- * fine sur un fond presque identique, c'est ce qui donnait à l'application son
- * air de document. `surface` dit sur quoi la carte est posée — sur le papier
- * elle prend l'ombre, sur l'ombre elle prend le papier.
+ * Carte retokenisée, pour grouper de l'information liée, jamais pour habiller
+ * une seule ligne. Elle se distingue par sa surface, sans bordure : `surface`
+ * dit sur quoi elle est posée, et elle prend l'autre.
  */
 const PADDING = {
   dense: "p-pas-4",

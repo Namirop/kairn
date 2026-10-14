@@ -1,15 +1,9 @@
 import { ArreterLa } from "@/components/revision/arreter-la";
 
 /**
- * Ce qui nomme le passage en cours, et la porte pour en sortir.
- *
- * La porte est nommée plutôt que devinée. Sans elle, il fallait comprendre qu'on
- * quitte une session en cliquant une icône de navigation — ce qui, quand on ne
- * sait pas si le travail est enregistré, ressemble à un abandon.
- *
- * Ce qu'elle demande avant de s'ouvrir, et ce qu'elle promet en s'ouvrant, sont
- * écrits par l'écran qui la pose : une session laisse derrière elle des
- * échéances déplacées, un tour d'entraînement ne laisse rien.
+ * Ce qui nomme le passage en cours, et la porte pour en sortir. Ce qu'elle
+ * demande et promet est écrit par l'écran qui la pose : une session déplace des
+ * échéances, un tour d'entraînement ne laisse rien.
  */
 export function EnTeteDeScene({
   intitule,
@@ -19,9 +13,8 @@ export function EnTeteDeScene({
 }: {
   intitule?: string;
   /**
-   * Ce qui complète le nom du passage : la date pour une session, ce qu'un tour
-   * d'entraînement n'engage pas. Elle reste ici quoi qu'il arrive — c'est
-   * l'intitulé qui part en marge, pas ce qu'il précise.
+   * Ce qui complète le nom du passage. Reste ici même quand l'intitulé part en
+   * marge.
    */
   precision?: string;
   /**

@@ -6,13 +6,11 @@ import type { LigneDeJour } from "@/lib/db/administration";
 /**
  * Ce qui est entré dans le produit, jour par jour.
  *
- * La moyenne de concepts par dépôt est la mesure la plus utile des trois : c'est
- * elle qui dit si le découpage rend ce qu'il devrait. Elle s'effondre quand les
- * dépôts partent en rejet, et elle grimpe quand les gens collent des articles
- * entiers — deux usages très différents que les compteurs bruts confondent.
+ * La moyenne de concepts par dépôt dit si le découpage rend ce qu'il devrait :
+ * elle s'effondre sur les rejets et grimpe sur les articles entiers, ce que les
+ * compteurs bruts confondent.
  *
- * Les jours sans dépôt affichent un tiret et non un zéro : zéro concept sur zéro
- * dépôt n'est pas une moyenne nulle, c'est une moyenne qui n'existe pas.
+ * Un jour sans dépôt affiche un tiret, pas un zéro : la moyenne n'existe pas.
  */
 export function BlocVolumes({ jours }: { jours: LigneDeJour[] }) {
   return (

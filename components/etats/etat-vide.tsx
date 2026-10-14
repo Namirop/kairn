@@ -2,12 +2,8 @@ import type { ReactNode } from "react";
 import { PierreSeule } from "@/components/cairn/pierre-seule";
 
 /**
- * Écran vide : un constat, un contexte, une action. Pas d'illustration, pas
- * d'emoji, pas de troisième phrase qui redit la deuxième.
- *
- * La pierre seule posée au sol remplace le cadre en pointillés — un rectangle
- * vide dessiné autour du vide n'ajoutait rien. Elle vient de la géométrie du
- * cairn : c'est le premier état de l'empilement, pas une icône.
+ * Écran vide : un constat, un contexte, une action. Pas d'illustration : la
+ * pierre seule est le premier état du cairn, pas une icône.
  */
 export function EtatVide({
   constat,

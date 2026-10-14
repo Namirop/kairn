@@ -6,24 +6,14 @@ import { CARACTERES_MAXIMUM_ANONYME } from "@/lib/depots/bornes-du-depot";
 import { ETIQUETTE_INTL } from "@/lib/i18n/langues";
 import { useLangue } from "@/lib/i18n/use-langue";
 
-/**
- * Au-delà, on montre le compteur : avant, il n'apprend rien à personne.
- *
- * Trois quarts du maximum, comme dans le formulaire du produit. La borne, elle,
- * est importée et non recopiée : deux nombres qui doivent être égaux et qui
- * vivent à deux endroits finissent par diverger, et c'est l'écran qui ment
- * pendant que le serveur refuse.
- */
+/** Au-delà, on montre le compteur. Trois quarts, comme dans le formulaire du produit. */
 const SEUIL_COMPTEUR = Math.floor(CARACTERES_MAXIMUM_ANONYME * 0.75);
 
 /**
  * Le bouton, sa mention, et ce que le dépôt a à dire.
  *
- * Le bouton et sa mention restent sur une ligne : c'était un `flex-wrap`, et la
- * mention passait dessous dès qu'elle ne tenait pas — c'est-à-dire sur tous les
- * téléphones —, où elle prenait la place d'un bloc alors qu'elle n'est qu'une
- * note en marge. Sans le retour à la ligne, c'est la mention qui se plie sur
- * deux lignes étroites : le groupe se déforme au lieu de se casser.
+ * Bouton et mention restent sur une ligne, sans `flex-wrap` : sur téléphone,
+ * c'est la mention qui se plie, plutôt que de passer dessous comme un bloc.
  */
 export function ActionDuDepot({
   enCours,
@@ -53,11 +43,8 @@ export function ActionDuDepot({
           {enCours ? t("enCours") : t("envoyer")}
         </Button>
 
-        {/* Le compteur ne paraît qu'à l'approche de la borne. Avant, il n'apprend
-            rien et compte à voix haute pendant qu'on écrit ; après, il est la
-            seule chose qui dise pourquoi le bouton refuse. Il remplace le libellé
-            rassurant plutôt que de s'ajouter à côté : « sans compte, sans email »
-            n'a plus rien à faire là au moment où on annonce un refus. */}
+        {/* À l'approche de la borne, le compteur remplace la mention rassurante :
+            c'est lui qui dit pourquoi le bouton refuse. */}
         {longueur > SEUIL_COMPTEUR ? (
           <span
             className={`text-mono min-w-0 font-mono tabular-nums ${trop ? "text-alerte" : "text-stone-500"}`}
@@ -70,16 +57,9 @@ export function ActionDuDepot({
         )}
       </div>
 
-      {/* Le message n'occupe plus rien tant qu'il n'a rien à dire. Sa place était
-          réservée en permanence pour une phrase qui paraît un jour sur cent, et ce
-          vide-là poussait le bas du panneau vers le sol qui le termine. Il est
-          **sous** le bouton, donc il ne peut de toute façon pas le décaler : il ne
-          décale que ce qui vient après, à l'instant où quelqu'un lit une erreur —
-          exactement le moment où un déplacement se comprend tout seul.
-
-          `empty:` fait le travail sans condition dans le rendu : la balise reste
-          en place pour que le lecteur d'écran ait quelque chose à annoncer, et
-          c'est sa marge qui disparaît avec son contenu. */}
+      {/* Pas de place réservée : sous le bouton, le message ne décale que ce qui
+          suit. La balise reste montée pour que la région `aria-live` annonce ;
+          `empty:` retire seulement sa marge. */}
       <p className="text-petit mt-pas-2 empty:mt-0" role="status" aria-live="polite">
         {erreur ? <span className="text-alerte">{erreur}</span> : null}
         {!erreur && reprise ? <span className="text-stone-500">{t("reprise")}</span> : null}

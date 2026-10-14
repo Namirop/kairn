@@ -4,13 +4,10 @@ import type { QuestionServie } from "@/lib/db/question-servie";
 /**
  * Ce qu'on montre d'une question quand on a jeté la pierre.
  *
- * Sur un format à choix, la bonne réponse est l'option : la montrer telle qu'on
- * l'aurait cliquée vaut mieux que de servir l'étalon, qui la reformule. Celui-ci
- * vient en précision, et seulement quand il ajoute quelque chose — sur un vrai
- * ou faux, il commence souvent par le mot qui est déjà affiché.
- *
- * Le déroulé n'a pas à savoir tout ça : il compte les questions et mesure le
- * temps. Quel format porte sa réponse où, c'est une affaire de format.
+ * Sur un format à choix, la bonne option telle qu'on l'aurait cliquée, plutôt
+ * que l'étalon qui la reformule. L'étalon ne vient en précision que s'il
+ * ajoute quelque chose (`etalonUtile`) : sur un vrai ou faux, il commence
+ * souvent par le mot déjà affiché.
  */
 export function reponseDeSecours(question: QuestionServie): {
   reponse: string;

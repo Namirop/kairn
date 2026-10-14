@@ -3,21 +3,15 @@ import { cn } from "@/lib/utils";
 /**
  * Une série de jours, en barres.
  *
- * Une seule teinte, et pas de palette : toutes les séries de cet écran mesurent
- * une **grandeur** — des dollars, des concepts, des appels. Une grandeur n'a pas
- * d'identité à distinguer, donc peindre chaque barre d'une couleur différente
- * n'encoderait rien et se lirait comme une information qui n'existe pas. La
- * couleur ne revient qu'une fois, sur la barre du jour courant, parce que celle-
- * là dit quelque chose : elle est encore en train de monter.
+ * Une seule teinte : chaque série mesure une grandeur, sans identité à
+ * distinguer. Seule la barre du jour courant est atténuée, parce qu'elle monte
+ * encore.
  *
- * Le jour à zéro garde une amorce grise plutôt que rien. C'est la même raison
- * qui fait engendrer les jours par la base : une série qui laisse un trou là où
- * il ne s'est rien passé se lit comme une série interrompue.
+ * Le jour à zéro garde une amorce grise : un trou se lirait comme une série
+ * interrompue.
  *
- * Pas de bibliothèque. Deux graphiques ne justifient pas une dépendance, et
- * celle-ci arriverait avec son propre moteur de rendu client sur un écran qui
- * n'a aucune raison d'être autre chose que du HTML rendu au serveur. L'infobulle
- * native de `title` porte la valeur exacte ; l'axe porte les repères.
+ * Pas de bibliothèque : deux graphiques ne justifient pas une dépendance ni un
+ * rendu client. L'infobulle native de `title` porte la valeur exacte.
  */
 
 export type PointDeSerie = {
@@ -50,8 +44,8 @@ export function GraphiqueBarres({
         aria-label={`${intitule}. ${points.map((point) => `${point.jour} : ${format(point.valeur)}`).join(", ")}`}
       >
         {points.map((point) => {
-          // Le zéro garde deux pixels d'amorce ; le reste se répartit sur ce
-          // qui dépasse, pour qu'une valeur minuscule reste distincte du vide.
+          // Deux pixels d'amorce sous chaque barre : une valeur minuscule reste
+          // distincte du zéro.
           const part = maximum === 0 ? 0 : point.valeur / maximum;
           const hauteurBarre =
             point.valeur === 0 ? "2px" : `calc(2px + ${(part * 100).toFixed(2)}%)`;
