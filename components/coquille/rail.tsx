@@ -27,7 +27,7 @@ export function Rail({ administrateur }: { administrateur: boolean }) {
       aria-label={t("principale")}
       /* `data-coquille` dit que ce plan appartient à la coquille et non à la
          page : c'est ce que lit la règle qui l'efface pendant un passage, et
-         c'est aussi par là qu'il reçoit son filet — voir `globals.css`. */
+         c'est aussi par là qu'il reçoit son filet — voir `app/styles/shell.css`. */
       data-coquille="rail"
       /* Les icônes commencent en haut. Le rembourrage valait la hauteur de
          l'en-tête, pour que la première s'aligne sous lui ; mais le rail

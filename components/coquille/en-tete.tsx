@@ -26,7 +26,7 @@ import { Marque } from "./marque";
  * lisait le chemin pour s'effacer pendant une session, ce qui en faisait un
  * composant client pour une ligne de mise en forme. C'est la scène de session
  * qui se déclare passage, et une règle de feuille de style qui retire la
- * coquille — voir `globals.css`. Elle redevient donc un composant serveur.
+ * coquille — voir `app/styles/shell.css`. Elle redevient donc un composant serveur.
  */
 const TAILLE_DE_LA_MARQUE = 32;
 

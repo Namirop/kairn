@@ -8,7 +8,7 @@ import { textesDEmail } from "../traduction";
  * Les couleurs sont écrites en dur ici, contrairement au reste du projet : les
  * clients mail ne savent pas lire une variable CSS, et beaucoup suppriment les
  * feuilles de style externes. Ce fichier est le seul endroit où elles sont
- * dupliquées ; il suit `app/globals.css`.
+ * dupliquées ; il suit `app/styles/tokens/colors.css`.
  *
  * L'email reprend la composition du produit : un fond d'ombre, une surface de
  * papier posée dessus. Le blanc pur n'existe nulle part dans Kairn.

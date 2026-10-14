@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
  *
  * Le rembourrage bas suit l'encoche gestuelle plutôt qu'une constante.
  *
- * Sa hauteur totale est reprise par `--barre-basse` dans `globals.css` : ce qui
+ * Sa hauteur totale est reprise par `--barre-basse` dans `app/styles/tokens/scale.css` : ce qui
  * doit se poser au-dessus d'elle s'y réfère. Une cible ou un rembourrage qui
  * change ici se reporte là-bas.
  *

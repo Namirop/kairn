@@ -499,7 +499,7 @@ compteur impose le pont Anthropic, le seul dont la base se redirige, retire les 
 modèle primaire sur le modèle de repli : chaque émission y échoue, et un repli ouvert doublerait les
 comptages. Le repli a son propre cas, qui le rouvre.
 
-`verifier:contrastes` lit les jetons de couleur dans `app/globals.css` et calcule les ratios WCAG des
+`verifier:contrastes` lit les jetons de couleur dans `app/styles/tokens/` et calcule les ratios WCAG des
 couples que l'interface pose réellement, surface sombre comprise. « Ça se lit » n'est pas une
 vérification : deux gris passables sur un écran calibré deviennent illisibles au soleil, et le nom
 d'une surface suffit à s'y tromper — celle qui s'appelle « ombre » est claire, seule « roche » est
