@@ -1,6 +1,7 @@
 // i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
 import { EMAIL_STYLE as S, renderShell } from "./shell";
 import type { RenderedEmail } from "./daily-reminder";
+import { echapper } from "./echapper";
 
 /**
  * L'alerte d'exploitation quand les bascules Luna → Sonnet s'accumulent.
@@ -63,7 +64,7 @@ export function renderAlerteDeBascule(payload: AlerteDeBasculePayload): Rendered
 <p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">${constat}</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">${tableau}</table>
 <p style="margin:0 0 4px;font-size:14px;color:${S.muted};">Motif de la dernière bascule :</p>
-<p style="margin:0;font-family:${S.MONO};font-size:13px;line-height:19px;color:${S.ink};word-break:break-all;">${motifCourt}</p>`;
+<p style="margin:0;font-family:${S.MONO};font-size:13px;line-height:19px;color:${S.ink};word-break:break-all;">${echapper(motifCourt)}</p>`;
 
   const text = [
     `${bascules} bascules Luna → Sonnet aujourd'hui (seuil ${seuil}).`,
