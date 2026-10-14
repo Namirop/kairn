@@ -12,17 +12,15 @@
 export type CarteDesDocs = Readonly<Record<string, readonly string[]>>;
 
 export const CARTE_DES_DOCS: CarteDesDocs = {
-  "README.md": [
-    "package.json",
-    ".env.example",
+  "README.md": [".nvmrc", "package.json", ".github/", ".husky/", "knip.json"],
+  "CONTRIBUTING.md": [
+    ".husky/",
     ".github/",
-    "prisma/schema/",
-    "lib/ai/client.ts",
-    "lib/ai/config.ts",
-    "lib/jobs/",
-    "lib/cron/",
-    "lib/depots/",
-    "app/api/",
+    "commitlint.config.mjs",
+    "lint-staged.config.mjs",
+    "eslint.config.mjs",
+    "knip.json",
+    "vitest.config.mts",
   ],
   "DESIGN.md": [
     "app/globals.css",
@@ -35,6 +33,26 @@ export const CARTE_DES_DOCS: CarteDesDocs = {
     "lib/design/",
   ],
   "PRODUCT.md": ["app/(marketing)/", "lib/paiement/catalogue.ts"],
+  "docs/architecture.md": [
+    "lib/ai/client.ts",
+    "lib/ai/config.ts",
+    "lib/ai/reservation.ts",
+    "lib/ai/schema-de-sortie.ts",
+    "lib/ai/fournisseurs/",
+    "lib/ai/schemas/",
+    "lib/db/ai-quota.ts",
+    "lib/db/quota-depots.ts",
+    "lib/db/fin-de-depot.ts",
+    "lib/db/session-anonyme.ts",
+    "lib/db/essais-de-la-visite.ts",
+    "lib/domain/plafond-du-plan.ts",
+    "lib/domain/nature-du-depot.ts",
+    "lib/jobs/",
+    "lib/depots/",
+    "lib/cron/",
+    "app/api/cron/",
+    "eslint.config.mjs",
+  ],
   "docs/deploiement.md": [
     ".env.example",
     "vercel.json",
