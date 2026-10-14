@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "
 import { basename, dirname, join } from "node:path";
 import { z } from "zod";
 import type { CouvertureAttendu } from "../attendus";
-import { SENS_DOUBLON, type VerdictDoublon } from "./doublon";
+import { SENS_DOUBLON, appelsPour, type VerdictDoublon } from "./doublon";
 import type { VerdictFidelite } from "./fidelite";
 import type { VerdictInvention, VerdictManque } from "./residu";
 
@@ -109,7 +109,12 @@ export function cacheDuDepot(cache: CacheDeMesure, nom: string): CacheDeDepot {
   return cache.depots[nom];
 }
 
-/** Combien d'items sont déjà en cache, par juge. Sert au plan chiffré : « X en cache, Y à faire ». */
+/**
+ * Combien d'appels les verdicts en cache ont coûtés, par juge : la même unité
+ * que `compterLesAppelsDesJuges`, pour que le plan chiffré lise « X en cache,
+ * Y à faire » sans mélanger dépôts et appels. Un dépôt mis en cache sans rien
+ * à juger (aucune paire, résidu ou attendu vide) n'a coûté aucun appel.
+ */
 export function compterEnCache(cache: CacheDeMesure): {
   doublon: number;
   residu: number;
@@ -121,10 +126,12 @@ export function compterEnCache(cache: CacheDeMesure): {
   let fidelite = 0;
   let attendus = 0;
   for (const depot of Object.values(cache.depots)) {
-    if (depot.doublons !== undefined) doublon += 1;
-    if (depot.residu !== undefined) residu += 1;
+    doublon += appelsPour(depot.doublons?.length ?? 0);
+    if (depot.residu && depot.residu.manques.length + depot.residu.inventions.length > 0) {
+      residu += 1;
+    }
     if (depot.fidelite !== undefined) fidelite += Object.keys(depot.fidelite).length;
-    if (depot.attendus !== undefined) attendus += 1;
+    if (depot.attendus && depot.attendus.length > 0) attendus += 1;
   }
   return { doublon, residu, fidelite, attendus };
 }

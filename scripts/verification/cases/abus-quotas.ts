@@ -7,6 +7,7 @@ import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 import { deposer, type ResultatDepot } from "@/lib/depots/deposer";
 import { refusDeQuota } from "@/lib/depots/refus-de-quota";
 import { GESTES_PAR_FENETRE, prendreUnGeste } from "@/lib/db/limite-de-gestes";
+import { DEPOTS_PAR_FENETRE } from "@/lib/db/quota-depots";
 import { enregistrerEntrainement } from "@/lib/db/entrainement";
 import { debutEnDate } from "@/lib/domain/periode-de-quota";
 import { executerToutLePipeline, formulaire } from "./depot-simule";
@@ -23,7 +24,6 @@ const DEPOTS_DUN_COMPTE_GRATUIT = plafondDeDepots(PLAFOND_GRATUIT);
  */
 
 const FUSEAU = "Europe/Paris";
-const DEBIT_PAR_FENETRE = 3;
 const SIMULTANES = 10;
 
 const PARAGRAPHE = `Une requête HTTP conditionnelle envoie \`If-None-Match\` avec l'étiquette reçue à la
@@ -62,8 +62,8 @@ export async function casDebitConcurrent(userId: string): Promise<void> {
   const acceptes = resultats.filter((resultat) => resultat.ok).length;
 
   record(
-    `Débit — ${SIMULTANES} dépôts simultanés ne dépassent pas les ${DEBIT_PAR_FENETRE} de la fenêtre`,
-    acceptes <= DEBIT_PAR_FENETRE,
+    `Débit — ${SIMULTANES} dépôts simultanés ne dépassent pas les ${DEPOTS_PAR_FENETRE} de la fenêtre`,
+    acceptes <= DEPOTS_PAR_FENETRE,
     `${acceptes} dépôt(s) acceptés d'un coup`,
   );
 }

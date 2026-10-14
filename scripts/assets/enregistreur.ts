@@ -4,6 +4,7 @@ import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import type { Browser, Page } from "@playwright/test";
+import { ACCENT } from "@/lib/design/couleurs-hors-css";
 import {
   assurerLeDossier,
   BASE_URL,
@@ -29,7 +30,7 @@ const DOSSIER_WEBM = path.join(tmpdir(), "kairn-webm");
  */
 const OVERLAY_TOUCH = `
 (function () {
-  var CSS = ".kairn-touch{position:fixed;z-index:2147483647;width:52px;height:52px;border-radius:50%;background:rgba(122,139,79,0.28);border:2px solid rgba(122,139,79,0.75);pointer-events:none;transition:opacity .45s ease-out,transform .45s ease-out;}";
+  var CSS = ".kairn-touch{position:fixed;z-index:2147483647;width:52px;height:52px;border-radius:50%;background:color-mix(in srgb,${ACCENT} 28%,transparent);border:2px solid color-mix(in srgb,${ACCENT} 75%,transparent);pointer-events:none;transition:opacity .45s ease-out,transform .45s ease-out;}";
   function poserLeStyle() {
     if (document.getElementById("kairn-touch-style")) return;
     var s = document.createElement("style");

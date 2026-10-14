@@ -25,7 +25,6 @@ import {
   type ModeleOpenRouter,
 } from "./openrouter/modeles";
 import { verifierLeListing } from "./openrouter/verification";
-import type { Vecteur } from "./mesures/espace";
 
 /**
  * L'émission de la campagne 2 (close, sans commande : voir `docs/outillage.md`,
@@ -173,17 +172,9 @@ async function main(): Promise<void> {
   console.info(`## Référence Sonnet — plongée de ${textesRef.length} questions (cache utilisé).`);
   const passeRef = await plonger(textesRef);
   console.info(`  vecteurs : ${passeRef.calcules} calculés, ${passeRef.enCache} au cache.\n`);
-  const vecteurSonnet = (texte: string): Vecteur | null => {
-    try {
-      return passeRef.vecteur(texte);
-    } catch {
-      return null;
-    }
-  };
-
   const reference: ReferenceSonnetQuestions = {
     depots: fige.depots.map((d) =>
-      scoreReferenceSonnet(d, cache.depots[d.nom]?.fidelite, vecteurSonnet),
+      scoreReferenceSonnet(d, cache.depots[d.nom]?.fidelite, passeRef.vecteur),
     ),
   };
 

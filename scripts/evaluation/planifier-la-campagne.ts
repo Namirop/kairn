@@ -69,7 +69,7 @@ function afficherLePerimetre(
   );
   console.info(`- Signalements Sonnet (par colonne challenger) :`);
   console.info(
-    `  · doublon — ${doublon.appels} appels sur ${nbAppelsDoublonDeptCorpus(verdicts)} dépôts, ${totalPaires(verdicts)} paires réparties en lots de ${PAIRES_PAR_APPEL} max`,
+    `  · doublon — ${doublon.appels} appels sur ${nbDepotsAvecDoublons(verdicts)} dépôts, ${totalPaires(verdicts)} paires réparties en lots de ${PAIRES_PAR_APPEL} max`,
   );
   console.info(
     `  · résidu — ${residu.appels} appels sur ${residu.appels} dépôts, ${totalItemsResidu(verdicts)} items`,
@@ -112,7 +112,7 @@ function afficherLesCouts(extraction: Plan, juges: Plan): void {
   }
   console.info();
   console.info(
-    `**Total campagne 1** : ~${coutTotalCampagne.toFixed(2)} $ (4 challengers × extraction + ${juges.appels} appels Haiku via OpenRouter par colonne).`,
+    `**Total campagne 1** : ~${coutTotalCampagne.toFixed(2)} $ (${CHALLENGERS.length} challengers × extraction + ${juges.appels} appels Haiku via OpenRouter par colonne).`,
   );
   console.info();
   console.info(
@@ -159,7 +159,7 @@ function totalAttendus(verdicts: VerdictsFige): number {
   return Object.values(verdicts.depots).reduce((s, d) => s + (d.attendus?.length ?? 0), 0);
 }
 
-function nbAppelsDoublonDeptCorpus(verdicts: VerdictsFige): number {
+function nbDepotsAvecDoublons(verdicts: VerdictsFige): number {
   return Object.values(verdicts.depots).filter((d) => (d.doublons?.length ?? 0) > 0).length;
 }
 

@@ -24,7 +24,6 @@ appliquerCapDuBanc();
  */
 
 const RAPPORTS = join(import.meta.dirname, "rapports");
-const MAX_CONCEPTS_PAR_DEPOT = 12;
 
 function refuser(motif: string): never {
   console.error(`Le banc ne démarre pas : ${motif}`);
@@ -87,6 +86,8 @@ async function main(): Promise<void> {
   }
 
   const { CONCEPTS_PAR_APPEL } = await import("@/lib/ai/schemas");
+  // Le pire cas annoncé avant `--emettre` : la borne réelle d'un dépôt.
+  const { PLAFOND_CONCEPTS_PAR_DEPOT } = await import("@/lib/domain/plafond-de-concepts");
   const appelsPour = (concepts: number) => Math.ceil(concepts / CONCEPTS_PAR_APPEL);
 
   // Un concept douteux ne part pas en génération.
@@ -98,7 +99,7 @@ async function main(): Promise<void> {
   const plancher = rejeu ? generations : corpus.length + images;
   const plafond = rejeu
     ? generations
-    : plancher + corpus.length * appelsPour(MAX_CONCEPTS_PAR_DEPOT);
+    : plancher + corpus.length * appelsPour(PLAFOND_CONCEPTS_PAR_DEPOT);
   const source = rejeu
     ? `rejeu du figé ${basename(figeDemande ?? "")} (${fige?.modele}, ${fige?.emisA.slice(0, 16)} UTC)`
     : "extraction du corpus";

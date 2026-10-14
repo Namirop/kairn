@@ -156,9 +156,10 @@ export async function plonger(textes: string[]): Promise<Passe> {
 
       return trouve;
     },
-    dimension: [...parEmpreinte.values()][0]?.length ?? 0,
+    // Le vecteur vide de la chaîne vide n'est ni une dimension ni un texte servi.
+    dimension: [...parEmpreinte.values()].find((v) => v.length > 0)?.length ?? 0,
     calcules: aCalculer.length,
-    enCache: parEmpreinte.size - aCalculer.length,
+    enCache: parEmpreinte.size - 1 - aCalculer.length,
     tokens,
   };
 }

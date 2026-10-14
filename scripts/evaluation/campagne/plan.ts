@@ -2,7 +2,7 @@ import { EXTRACT_ATOMS_PROMPT } from "@/lib/ai/prompts";
 import type { Depot } from "../corpus";
 import type { DepotFige } from "../fige";
 import { SYSTEM_ATTENDUS } from "../juges/attendus";
-import { SYSTEM_DOUBLON } from "../juges/doublon";
+import { PAIRES_PAR_APPEL, SYSTEM_DOUBLON } from "../juges/doublon";
 import { SYSTEM_RESIDU } from "../juges/residu";
 import type { ModeleOpenRouter } from "../openrouter/modeles";
 
@@ -19,8 +19,7 @@ import type { ModeleOpenRouter } from "../openrouter/modeles";
 const CHARS_PAR_TOKEN = 4;
 /** Approximation surface JSON par item (accolades, guillemets, noms de champs). */
 export const SURCHARGE_JSON_ITEM = 30;
-/** Paires de doublon par appel juge ; doit rester égal à `PAIRES_PAR_APPEL` de `doublon.ts`. */
-export const PAIRES_PAR_APPEL = 20;
+export { PAIRES_PAR_APPEL };
 
 export function tok(texte: string): number {
   return Math.ceil(texte.length / CHARS_PAR_TOKEN);

@@ -147,7 +147,7 @@ export function deriverIndependance(
  * sortie contrainte s'est arrêtée à 57 : la grammaire trouve un point d'arrêt
  * valide avant la fin du lot. Vingt laisse de la marge, sans surcoût par paire.
  */
-const PAIRES_PAR_APPEL = 20;
+export const PAIRES_PAR_APPEL = 20;
 
 /**
  * Combien d'appels le juge fera pour un dépôt donné, pour chiffrer le plan avant

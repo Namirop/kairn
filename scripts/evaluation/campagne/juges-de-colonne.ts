@@ -16,7 +16,8 @@ import { PAIRES_PAR_APPEL } from "./plan";
  * dépôt. Le juge est `JUGE_PRINCIPAL` pour toutes les colonnes.
  */
 
-/** Le fournisseur de Haiku refuse `reasoning` : voir `valider-le-juge.ts`. */
+/** Le fournisseur de Haiku refuse `reasoning` : voir `reasoningPour` dans
+ * `validation-du-juge/volets.ts`. */
 const REASONING_HAIKU = false as const;
 
 export type VerdictsDesJuges = {
