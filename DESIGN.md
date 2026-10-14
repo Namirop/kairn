@@ -4,7 +4,7 @@ description: Retenir ce qu'on apprend, une pierre à la fois.
 colors:
   papier: "#eef5f7"
   ombre: "#cfe3ec"
-  lichen-surface: "#e4eff2"
+  givre: "#e4eff2"
   session: "#b3cfda"
   roche: "#1e2b3c"
   stone-50: "#f4f9fb"
@@ -49,15 +49,15 @@ typography:
     lineHeight: "0.95"
     letterSpacing: "-0.03em"
   h1-app:
-    fontFamily: "Bricolage Grotesque, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Satoshi, ui-sans-serif, system-ui, sans-serif"
     fontSize: "clamp(1.75rem, min(3vw, 4.4vh), 2.5rem)"
     fontWeight: 700
-    lineHeight: "1.1"
-    letterSpacing: "-0.02em"
+    lineHeight: "1.25"
   enonce:
-    fontFamily: "Bricolage Grotesque, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Satoshi, ui-sans-serif, system-ui, sans-serif"
     fontSize: "clamp(1.375rem, min(2.6vw, 3.2vh), 2rem)"
-    fontWeight: 600
+    fontWeight: 700
+    lineHeight: "1.25"
   body:
     fontFamily: "Satoshi, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.125rem"
@@ -70,10 +70,11 @@ typography:
   mono:
     fontFamily: "Geist Mono, ui-monospace, monospace"
     fontSize: "0.8125rem"
-    fontWeight: 500
+    fontWeight: 400
     letterSpacing: "0.14em"
 rounded:
   plein: "0"
+  pierre: "6px"
   champ: "10px"
   carte: "20px"
   galet: "999px"
@@ -90,22 +91,24 @@ spacing:
 components:
   button-primary:
     backgroundColor: "{colors.stone-900}"
-    textColor: "{colors.papier}"
+    textColor: "{colors.stone-50}"
     rounded: "{rounded.galet}"
-    padding: "0.75rem 2rem"
+    padding: "0 1.5rem"
+    height: "2.5rem"
   button-primary-hover:
     backgroundColor: "{colors.stone-800}"
   input-trait:
-    backgroundColor: "transparent"
+    backgroundColor: "{colors.papier}"
     textColor: "{colors.stone-900}"
-    rounded: "{rounded.plein}"
+    rounded: "{rounded.champ}"
+    height: "2.75rem"
   input-trait-focus:
     textColor: "{colors.stone-900}"
   panneau:
     backgroundColor: "{colors.papier}"
     textColor: "{colors.stone-900}"
     rounded: "{rounded.plein}"
-    padding: "clamp(2.5rem, 6vh, 6rem) 1rem"
+    padding: "1.5rem"
   carte:
     backgroundColor: "{colors.papier}"
     textColor: "{colors.stone-900}"
@@ -126,8 +129,8 @@ marque est délibérée, aucun ornement n'est gratuit. **Ce n'est pas là pour t
 séduire, c'est là parce que tu en as besoin. La forme suit la fonction, mais
 elle a du grain.**
 
-Le système est **calme, minéral et délibéré**. Quatre surfaces mates
-(papier / ombre / lichen / roche) suffisent à séparer les sujets — aucun trait
+Le système est **calme, minéral et délibéré**. Cinq surfaces mates
+(papier / ombre / givre / session / roche) suffisent à séparer les sujets — aucun trait
 fin, aucune bordure grise. Une seule audace visuelle est autorisée : le cairn
 lui-même, dessiné à la main, aux pierres légèrement irrégulières dérivées d'un
 seed déterministe. Toute autre exubérance est proscrite.
@@ -148,9 +151,11 @@ seed déterministe. Toute autre exubérance est proscrite.
 
 **Key Characteristics:**
 
-- Palette minérale sur quatre surfaces mates (papier / ombre / lichen / roche).
-- Un seul accent chromatique (lichen), un seul accent chaud (ember), chacun
-  réservé à un emploi unique.
+- Palette minérale sur cinq surfaces mates (papier / ombre / givre / session /
+  roche).
+- Deux accents froids qui ne se confondent pas (l'accent pour ce que le
+  produit demande, le lichen pour la maîtrise) et un accent chaud (ember),
+  chacun réservé à son emploi.
 - Typographie serrée en trois rôles (Bricolage Grotesque display, Satoshi
   texte, Geist Mono données).
 - Grain overlay léger sur toutes les surfaces — se sent, ne se voit pas.
@@ -160,48 +165,67 @@ seed déterministe. Toute autre exubérance est proscrite.
 
 ## Colors
 
-Une palette minérale de gris papier à roche sombre, avec un accent lichen
-désaturé qui signale et un accent ember réservé à l'affichage du streak.
+Une palette minérale bleu glacier, du papier à la roche bleu de nuit, avec un
+accent qui porte ce que le produit demande, un lichen qui ne dit que la
+maîtrise et un ember réservé à l'affichage du streak. Les valeurs vivent dans
+`app/styles/tokens/couleurs.css` (et `paysage.css` pour l'ouverture) ; aucun
+composant ne les écrit en dur.
 
-### Primary (accent unique du produit)
+### Primary (ce que le produit demande)
 
-- **Vert Lichen Désaturé** (`--lichen` #7a8b4f) : l'accent unique de l'app.
-  N'apparaît que sur le sommet du cairn et sur l'outline de focus. Sa rareté
-  est ce qui le rend signal.
-- **Lichen Approfondi** (`--lichen-deep` #5f6e3b) : version foncée pour tenir
-  4,7:1 de contraste sur le papier. Sert au focus visible et au data-mark des
-  graphiques internes.
+- **Accent** (`--accent` #1b4fc4) : tout ce que le produit demande — focus,
+  choix retenu, interrupteur, trait du compteur du jour.
+- **Accent Profond** (`--accent-profond` #143b8d) : l'anneau de focus et le
+  trait de focus des champs sur les surfaces claires (9,33:1 sur le papier).
+- **Accent Clair** (`--accent-clair` #86b7f0) : la variante des surfaces
+  sombres, où l'accent du papier passe sous le seuil de l'anneau de focus
+  (6,85:1 sur la roche, contre 1,39 pour `--accent-profond`).
+
+### Secondary (la maîtrise, et elle seule)
+
+- **Lichen** (`--lichen` #9fc22e) : sommet du cairn, pierre tenue, bonne
+  réponse. Saturé pour se poser sur des pierres sombres (6,98:1 sur la roche).
+- **Lichen Approfondi** (`--lichen-deep` #5c7418) : le lichen des surfaces
+  claires, où le lichen saturé tombe à 1,86:1 ; celui-ci tient 4,80:1 sur le
+  papier.
 
 ### Tertiary (streak uniquement)
 
 - **Braise Terracotta** (`--ember` #b4552f) : réservé strictement à
   l'affichage du streak. Aucun autre emploi, jamais.
 - **Braise Approfondie** (`--ember-deep` #9e4526) : version foncée.
-- **Braise Éclaircie** (`--ember-clair` #d98a63) : version éclaircie pour la
-  surface roche (contraste 6,54 sur roche là où l'ember d'origine tombait à
-  3,60).
+- **Braise Éclaircie** (`--ember-clair` #d98a63) : l'ember des surfaces
+  sombres (5,30:1 sur la roche, là où l'ember du papier tombe à 2,92).
 
 ### Neutral (surfaces et encre)
 
-- **Papier Minéral** (`--surface-papier` #f2f2ef, alias `--stone-50`) :
-  surface de lecture par défaut.
-- **Ombre** (`--surface-ombre` #e4e4df, alias `--stone-100`) : panneau
-  alterné, jamais deux d'affilée.
+- **Papier** (`--surface-papier` #eef5f7) : surface de lecture par défaut.
+- **Ombre** (`--surface-ombre` #cfe3ec) : panneau alterné, jamais deux
+  d'affilée. Papier contre ombre : 1,20 pour 1, volontairement faible.
 - **Givre** (`--surface-givre` #e4eff2) : un seul panneau dans
   toute l'application — celui où le produit tient sa promesse. Interdit tout
   autre usage du lichen sur cet écran, sauf le sommet du cairn.
-- **Roche Sombre** (`--surface-roche` #2a2e2c) : deux panneaux maximum. Le
-  texte et les pierres s'y inversent en gris clairs ; le sommet lichen reste
+- **Session** (`--surface-session` #b3cfda) : le sol de l'écran de session, et
+  d'aucun autre. La carte de la question, en papier, s'y pose à 1,48 pour 1.
+- **Roche** (`--surface-roche` #1e2b3c) : deux panneaux maximum. Le
+  texte et les pierres s'y inversent en clairs ; le sommet lichen reste
   lichen.
-- **Encre Granit** (`--stone-900` #16191a) : texte principal sur surfaces
-  claires.
-- **Gris Lichen** (`--stone-500` #5e635f) : texte secondaire, traits porteurs
-  d'information.
-- **Gris Feuille** (`--stone-400` #9aa09b) : texte secondaire sur surface
-  sombre (tient 6,63 sur roche et 5,16 sur ombre, là où stone-500 tombait à
-  2,88).
-- **Gris Sol** (`--stone-300` #bfc0ba) : traits légers, indicateurs de fond,
+- **Encre de Nuit** (`--stone-900` #0d2236) : texte principal sur surfaces
+  claires (14,65:1 sur le papier).
+- **Pierre 800** (`--stone-800` #143049) : survol du bouton principal.
+- **Pierre 700** (`--stone-700` #1f4360) : objet posé sur la roche, texte
+  second sur le sol de la session.
+- **Pierre 500** (`--stone-500` #345770) : texte secondaire, le plus répandu
+  de l'interface ; réglé pour tenir AA sur l'ombre (5,78:1) et sur le sol de la
+  session, pas seulement sur le papier.
+- **Pierre 400** (`--stone-400` #8fb2c4) : texte secondaire sur surface
+  sombre (6,37:1 sur la roche, là où stone-500 tombe à 1,87).
+- **Pierre 300** (`--stone-300` #7fb3c8) : les filets, réglés pour se voir
+  aussi sur le sol de la session ; texte second des panneaux de roche (6,26:1) ;
   ascenseur discret.
+- **Pierre 100** (`--stone-100` #dcebf0) et **Pierre 50** (`--stone-50`
+  #f4f9fb) : les pierres claires du cairn sur la roche ; `--stone-50` est
+  l'encre des surfaces sombres.
 
 ### Sémantique
 
@@ -211,18 +235,32 @@ désaturé qui signale et un accent ember réservé à l'affichage du streak.
 
 ### Data (graphiques internes uniquement)
 
-- **Data Mark** (`--data-mark` #5f6e3b) : tous les graphiques mesurent une
-  grandeur, jamais une catégorie — une seule teinte suffit. C'est le lichen
-  approfondi pour tenir 4,7:1 sur le papier.
-- **Data Mark Zero** (`--data-mark-zero` #cfd0ca) : amorce grise pour qu'un
+- **Data Mark** (`--data-mark` #143b8d) : tous les graphiques mesurent une
+  grandeur, jamais une catégorie — une seule teinte suffit. C'est l'accent
+  approfondi, parce qu'une barre fine demande plus de contraste qu'un aplat.
+- **Data Mark Zero** (`--data-mark-zero` #c3d7e1) : amorce pour qu'un
   jour sans donnée se lise comme un zéro et non comme un trou dans la série.
+
+### Paysage (ouverture uniquement)
+
+Le ciel de l'ouverture est un lavis d'une seule teinte (`--ciel`, de
+#163f96 à #3a86c9 en passant par #1a4aa6 et #1e5cc4), sous l'ombre du versant
+(`--ombre-du-versant`) — un ciel, pas un dégradé décoratif. Autour de lui :
+`--ciel-teinte` #a5d8e7 (la brume vers laquelle virent les lointains),
+`--terre` #47a2cb (le sol du premier plan), les pierres lointaines
+`--pierre-loin-1` #b3d4e1, `--pierre-loin-2` #c2dde8, `--pierre-loin-3`
+#cfe6ee, les pierres proches `--pierre-proche-1` #1b3d58,
+`--pierre-proche-2` #24506f, `--pierre-proche-3` #2e6285, le geste
+`--geste-ciel` #14202e et l'ombre au sol du cairn `--ombre-du-cairn` #0b1c2c.
 
 ### Jetons de code (transparence contextuelle)
 
-- **`--jeton`** (`color-mix(in oklab, #16191a 7%, transparent)`) : fond du
-  jeton d'un terme de code cité dans une phrase. Défini en transparence pour
+- **`--jeton`** (`color-mix(in oklab, var(--stone-900) 7%, transparent)`) et
+  **`--jeton-bord`** (même mélange à 14 %) : fond et bord du
+  jeton d'un terme de code cité dans une phrase. Définis en transparence pour
   se poser aussi bien sur papier que sur ombre.
-- **`--jeton-clair`** (`color-mix(in oklab, #f2f2ef 12%, transparent)`) :
+- **`--jeton-clair`** (`color-mix(in oklab, var(--stone-50) 12%, transparent)`)
+  et **`--jeton-bord-clair`** (même mélange à 22 %) :
   version pour la surface roche — encre diluée y serait plus sombre que le
   fond.
 - **Un jeton court ne se coupe pas** (≤ 20 signes, seuil mesuré sur la ligne la
@@ -259,26 +297,42 @@ de code cités, jamais pour du texte de lecture.
 
 ### Hierarchy
 
-- **H1 Site** (Bricolage Grotesque, 700, `clamp(2.25rem, calc((100vw - 4rem) /
-7.4), 3.75rem)` mobile puis `clamp(3.5rem, min(7.4vw, 9.6vh), 6.5rem)`
-  desktop, leading 0.95, tracking -0.03em) : titres de campagne marketing.
-  Deux lignes maximum. Le diviseur 7,4 est mesuré sur la phrase la plus longue
-  du hero (« Tu lis beaucoup. »).
-- **H1 App** (Bricolage Grotesque, 700, `clamp(1.75rem, min(3vw, 4.4vh),
-2.5rem)`) : titres des écrans internes.
-- **Énoncé** (Bricolage Grotesque, 600, `clamp(1.375rem, min(2.6vw, 3.2vh),
-2rem)`) : énoncé d'une question, un cran sous H1 app, avec mesure élargie.
-- **Nombre** (Bricolage Grotesque, 700, `clamp(3.5rem, min(6vw, 9vh),
-5.75rem)`) : grands nombres du tableau de bord.
-- **H2 Site** (Bricolage Grotesque, 3.75rem desktop / 2.5rem mobile) : titres
-  de section marketing secondaires.
-- **H2 App** (Bricolage Grotesque, 1.5rem desktop / 1.125rem mobile) : titres
+Les tailles sont des jetons (`--t-*`) : `app/styles/tokens/echelle.css` pour
+le mobile, `grand-ecran.css` à partir de `md` (48rem), `paysage.css` pour le
+titre de l'ouverture. Les polices sont chargées dans `app/polices.ts`.
+
+- **Ouverture** (Bricolage Grotesque, 700, `--t-ouverture` :
+  `clamp(2.25rem, calc((100vw - 4rem) / 7.4), 3.75rem)` mobile, leading 0.95,
+  tracking -0.03em ; à partir de `md`,
+  `clamp(3.5rem, min(13.5vh, calc((min(80rem, 100vw - 4rem) - 3rem) * 0.084)), 8rem)`,
+  leading 0.84, tracking -0.045em, la mesure passant à 96rem à partir de 96rem
+  de large) : le titre de la landing. Deux lignes maximum. Le diviseur 7,4 est
+  mesuré sur la phrase la plus longue du hero (« Tu lis beaucoup. »).
+- **H1 Site** (Bricolage Grotesque, 700, `--t-h1-site` :
+  `clamp(2.25rem, calc((100vw - 5rem) / 7.4), 3.75rem)` mobile puis
+  `clamp(3.5rem, min(7.4vw, 9.6vh), 6.5rem)` desktop, leading 1, tracking
+  -0.02em) : titres des autres pages marketing (tarifs).
+- **H2 Site** (Bricolage Grotesque, 700, 3.75rem desktop / 3.5rem mobile,
+  leading 1, tracking -0.02em) : titres de section marketing.
+- **H1 App** (Satoshi, 700, `clamp(1.75rem, min(3vw, 4.4vh), 2.5rem)` desktop
+  / 1.625rem mobile, leading 1.25) : titres des écrans internes. L'écran
+  d'erreur et la fenêtre de l'essai le prennent en Bricolage Grotesque.
+- **Énoncé** (Satoshi, 700, `clamp(1.375rem, min(2.6vw, 3.2vh), 2rem)`
+  desktop / 1.5rem mobile, leading 1.25) : énoncé d'une question, un cran sous
+  H1 app, pour qu'une question de quinze mots tienne sur deux lignes.
+- **Nombre** (Bricolage Grotesque, 500, `clamp(3.5rem, min(6vw, 9vh),
+5.75rem)` desktop / 3.5rem mobile) : grands nombres du tableau de bord et des
+  offres.
+- **Compteur** (Bricolage Grotesque, 700, `clamp(4.5rem, min(10vw, 16vh),
+10.5rem)` desktop / 4.5rem mobile, leading 0.8) : le compteur du jour, et lui
+  seul — le titre de son écran.
+- **H2 App** (Satoshi, 600 à 700, 1.5rem desktop / 1.125rem mobile) : titres
   de bloc dans l'application.
 - **Corps** (Satoshi, 400, 1.125rem desktop / 1rem mobile, leading 1.55) :
   texte principal, mesure 65-75 caractères.
 - **Petit** (Satoshi, 400, 0.9375rem desktop / 0.875rem mobile) : notes,
   seconds plans, aides contextuelles.
-- **Mono** (Geist Mono, 500, 0.8125rem desktop / 0.75rem mobile, letter-spacing
+- **Mono** (Geist Mono, 400, 0.8125rem desktop / 0.75rem mobile, letter-spacing
   0.14em) : libellés techniques UPPERCASE, intervalles, compteurs, tags.
 
 ### Named Rules
@@ -306,13 +360,22 @@ deux panneaux de surfaces différentes ; jamais deux fois le même dessin.
 
 ### Rythme d'espacement
 
-Rythme vertical en pas : `--pas-1` (0.25rem) à `--pas-24` (6rem), plus deux
-rythmes qui suivent la fenêtre :
+Rythme vertical en pas : `--pas-1` (0.25rem), `--pas-2` (0.5rem), `--pas-3`
+(0.75rem), `--pas-4` (1rem), `--pas-6` (1.5rem), `--pas-8` (2rem), `--pas-12`
+(3rem), `--pas-16` (4rem), `--pas-24` (6rem), plus trois rythmes fixes sur
+mobile qui suivent la hauteur de fenêtre à partir de `md` :
 
-- `--pas-campagne` (clamp 2.5rem–6rem) : rythme marketing, s'ajuste à la
-  hauteur de fenêtre pour ne pas déborder du pli.
-- `--pas-dedans` (clamp 1.25rem–3rem) : marge intérieure d'un panneau app.
-- `--pas-scene` (clamp 2rem–4rem) : écart entre deux temps d'un écran app.
+- `--pas-campagne` (4rem mobile, `clamp(2.5rem, 6vh, 6rem)` desktop) : rythme
+  marketing, s'ajuste à la hauteur de fenêtre pour ne pas déborder du pli.
+- `--pas-dedans` (1.5rem mobile, `clamp(1.25rem, 3.6vh, 3rem)` desktop) :
+  marge intérieure d'un panneau app, et ce qui sépare un contenu du bord de ce
+  qui le porte.
+- `--pas-scene` (3rem mobile, `clamp(2rem, 5vh, 4rem)` desktop) : écart entre
+  deux temps d'un écran app (question, réponse, gestes).
+
+`--barre-basse` (`calc(3.5rem + var(--pas-2) * 2 + env(safe-area-inset-bottom))`)
+est la hauteur de la navigation basse du téléphone, pour ce qui doit se poser
+au-dessus d'elle.
 
 **Aucun pixel arbitraire dans un composant.** Les valeurs en dur (`gap-4`,
 `p-6`, etc.) sont interdites ; utiliser les tokens `pas-*`.
@@ -321,10 +384,13 @@ rythmes qui suivent la fenêtre :
 
 - **texte** (`max-w-2xl`) : lecture longue, ~65 signes.
 - **colonne** (`max-w-3xl`) : contenu narratif.
-- **page** (`max-w-6xl` puis `max-w-[84rem]` au-delà de 1500px) : mise en page
-  standard.
-- **large** (`max-w-7xl` puis `max-w-[96rem]` au-delà de 1500px) : tableau de
-  bord dense.
+- **page** (`max-w-6xl` puis `max-w-[84rem]` à partir de `2xl`, 96rem) : mise
+  en page standard.
+- **large** (`max-w-7xl` puis `max-w-[96rem]` à partir de `2xl`, 96rem) :
+  tableau de bord dense.
+
+Le contenu d'un panneau garde une gouttière de `--pas-6` sur mobile, `--pas-8`
+à partir de `md`.
 
 ### Responsive
 
@@ -347,15 +413,19 @@ que personne n'écrit à côté.
 ## Elevation & Depth
 
 **Plat avec ombres réservées au cairn.** Aucun composant de l'interface ne
-porte d'ombre : la profondeur se joue via les quatre surfaces (papier → ombre
-→ lichen → roche, du plus clair au plus foncé) et le grain overlay qui donne
-de la matière. Sur les surfaces claires, un objet posé **descend** d'un cran
-(`--surface-ombre` sur du papier) ; sur la roche, il **monte** (`--stone-700`),
-parce qu'un objet posé y capte la lumière au lieu de creuser. `--stone-800` ne
-peut pas servir d'objet sur la roche : les deux valent le même `#2a2e2c`. **Une seule exception documentée** : les pierres du cairn
-peuvent acquérir une ombre légère au sol pour renforcer leur présence
-sculptée. Cette ombre-là n'est pas encore implémentée — c'est la direction, à
-poser quand le cairn signature entrera en scène en full plein écran.
+porte d'ombre : la profondeur se joue via les cinq surfaces (papier → givre
+→ ombre → session → roche, du plus clair au plus foncé) et le grain overlay qui
+donne de la matière. Sur les surfaces claires, un objet posé change de cran
+(`--surface-ombre` sur du papier, `--surface-papier` sur l'ombre, le givre et
+la session — table `SURFACES` de `components/coquille/surfaces.ts`) ; sur la
+roche, il **monte** (`--stone-700` #1f4360), parce qu'un objet posé y capte la
+lumière au lieu de creuser. `--stone-800` (#143049) ne peut pas servir d'objet
+sur la roche : plus sombre qu'elle (#1e2b3c), il la creuserait. **Une seule
+exception documentée** : les pierres du cairn portent une ombre légère au sol.
+Elle est posée sous le `CairnRenversable` de l'ouverture
+(`components/site/ouverture.tsx`) : une ellipse floutée en `--ombre-du-cairn`
+(#0b1c2c) à l'opacité `--ombre-du-cairn-part` (0.3), passée par des variables
+pour rester visible sur un sol coloré.
 
 ### Named Rules
 
@@ -377,8 +447,13 @@ lit comme un document, pas comme une application.
 
 - **`--r-plein` (0)** : le panneau, à angle vif — c'est le sol, la paroi,
   pleine largeur.
-- **`--r-champ` (10px)** : les jetons de code cités, les champs de saisie qui
-  en ont besoin. Un arrondi discret qui dit « c'est un objet interne ».
+- **`--r-pierre` (6px)** : une cible désignée dans une liste, haute de
+  plusieurs lignes (les choix d'une question fermée) : le galet en ferait une
+  gélule qui mange un mot, le champ l'arrondirait trop.
+- **`--r-champ` (10px)** : les jetons de code cités, les champs de saisie, les
+  blocs internes des réglages ; c'est aussi le `--radius` de shadcn, et
+  radius-xs / radius-sm / radius-md y sont remappés. Un arrondi discret qui dit
+  « c'est un objet interne ».
 - **`--r-carte` (20px)** : les cartes qui portent un contenu délimité, les
   composants shadcn (radius-lg / radius-xl y sont remappés). Un arrondi plus
   généreux qui dit « c'est un objet posé ».
@@ -401,8 +476,10 @@ autre radius n'est légitime.
 - **Shape** : aucun arrondi (`--r-plein`).
 - **Behavior** : le grain vit derrière le contenu. `aere=true` applique
   `--pas-campagne` (rythme marketing), `false` applique `--pas-dedans`
-  (rythme app).
-- **API** : `<Panneau surface="papier|ombre|lichen|roche" mesure="texte|colonne|page|large" aere centre remplit fond={...} />`
+  (rythme app). Le panneau déclare sa surface par `data-surface`, dont dépend
+  la couleur de l'anneau de focus. `ciel` lui fait porter le ciel de
+  l'ouverture au lieu de sa surface.
+- **API** : `<Panneau id surface="papier|ombre|givre|session|roche" mesure="texte|colonne|page|large" aere centre remplit ciel fond={...} />`
 - **Fichier** : `components/coquille/panneau.tsx`.
 
 ### Strates
@@ -411,49 +488,72 @@ autre radius n'est légitime.
   de roche procédurale.
 - **Shape** : dessinée par un algorithme (graine + surfaces), hauteur 32 px
   mobile / 56 px desktop.
-- **Behavior** : la coupe se déplace légèrement au scroll (parallaxe subtil) ;
-  deux veines dérivent verticalement à vitesses différentes (1.3 et 0.6). Rien
-  ne bouge en tâche de fond — le déplacement est celui du regard qui traverse.
+- **Behavior** : la coupe reste fixe (la décaler découvrirait une couture
+  d'un pixel) ; deux veines, mêlées à `--stone-500` par `color-mix`, dérivent
+  verticalement au scroll à vitesses différentes (1.3 et 0.6). Rien ne bouge
+  en tâche de fond — le déplacement est celui du regard qui traverse, et il
+  s'arrête sous `prefers-reduced-motion`.
 - **API** : `<Strates de="papier" vers="ombre" graine="accueil-sentier" />`
 - **Fichier** : `components/coquille/strates.tsx`.
 
 ### Buttons
 
 - **Shape** : pilule (`--r-galet`, 999px).
-- **Primary** : fond `--stone-900`, texte `--stone-50`. Padding
-  `0.75rem 2rem`. Hauteur minimum 44 px (cible tactile).
-- **Hover** : léger décalage vertical ou variation de teinte (pas d'ombre).
-- **Focus** : outline `--lichen-deep` 2 px, offset 2 px — et `--lichen` sur les
-  surfaces de roche, où le premier tombe à 2,48:1, sous le seuil d'un
-  indicateur de focus. Le crochet est `[data-surface="roche"]`, posé par
+- **Primary** : fond `--stone-900`, texte `--stone-50`. Taille `default` :
+  hauteur 40 px (`h-10`), padding horizontal `--pas-6`, texte `petit`. Taille
+  `lg` : hauteur 44 px (`h-11`), padding `--pas-8`, texte `corps` — calée sur
+  la cible tactile de l'action principale.
+- **Hover** : variation de teinte (`--stone-800`) ; à l'appui, un décalage
+  vertical d'un pixel. Pas d'ombre.
+- **Sur la roche** : variantes `clair` (fond `--stone-50`, texte
+  `--stone-900`), `outlineClair` et `linkClair`, où un bouton plein
+  `--stone-900` disparaîtrait dans le fond.
+- **Focus** : outline globale `--accent-profond` 2 px, offset 2 px
+  (`app/styles/base.css`) — et `--accent-clair` sur les surfaces de roche, où
+  la première tombe à 1,39:1, sous le seuil d'un indicateur de focus (6,85:1
+  pour la seconde). Le crochet est `[data-surface="roche"]`, posé par
   `Panneau` et par la fenêtre de l'essai.
+- **Fichier** : `components/ui/button.tsx`.
 - **Character** : sobre, ferme, sans ornementation.
 
 ### Inputs
 
 - **Style** : **aucune bordure, aucun contour.** Un trait de 2 px sous le
   champ, visible au repos. Le champ s'écrit à même la surface.
-- **Focus** : le trait passe en `--lichen-deep`. Pas de changement d'épaisseur
-  (le bouton ne doit pas se décaler d'un pixel à chaque entrée). Le changement
-  mesure 3,03:1 contre l'état de repos — au-dessus du seuil exigé d'un
-  indicateur de focus.
+- **Focus** : sur le creux de l'essai, le trait passe de `--stone-300` à
+  `--accent-profond`. Pas de changement d'épaisseur (le bouton ne doit pas se
+  décaler d'un pixel à chaque entrée). Le changement mesure 4,50:1 contre
+  l'état de repos — au-dessus du seuil exigé d'un indicateur de focus. Les
+  champs de l'application gardent l'anneau de focus global.
 - **Le creux, et lui seul** : un champ de **conversion** — celui de l'essai
   public, où personne ne sait encore ce qu'on attend de lui — est creusé dans
-  sa surface (`--surface-ombre` dans du papier, `--r-champ`, le trait au bas du
-  creux). C'est un **creux, pas un contour** : un contour fait une boîte posée
+  sa surface (`--surface-ombre` dans du papier, `--r-champ` sur les seuls
+  angles du haut, le trait de 2 px au bas du creux — sur un angle arrondi, il
+  s'interromprait au début de la courbe ; `components/site/champ-de-depot.tsx`). C'est un **creux, pas un contour** : un contour fait une boîte posée
   sur la page, un creux est du terrain, et on dépose dans un creux. La règle du
   sol survit intacte. Dans l'application, l'utilisateur sait déjà où il est :
   le champ y reste nu — registre marketing contre registre interne.
 - **Texte d'invite** : `--stone-500` au minimum. `--stone-400` ne donne que
-  2,09:1 sur le creux, et c'est la seule phrase qui dise quoi mettre dans le
+  1,70:1 sur le creux, et c'est la seule phrase qui dise quoi mettre dans le
   champ.
 - **Character** : « un sol, pas une boîte » — creusé là où il faut le montrer.
 
-### Cartes (shadcn primitive retokenisée)
+### Cartes (une forme, pas un composant)
 
-- **Shape** : `--r-carte` (20 px).
-- **Style** : fond `--surface-papier` ou `--surface-ombre` selon la surface
-  environnante, aucune bordure, aucune ombre.
+- **Rôle** : il n'y a plus de composant `Card`. Une carte est un bloc qui
+  porte la classe `rounded-carte` et un fond de surface, posés directement à l'endroit où elle sert : la carte de la
+  question (`components/revision/carte-question.tsx`), le bloc de réponse sur
+  la roche, la fin de session, les offres, la boîte d'authentification, le
+  dialogue (`components/ui/dialog.tsx`), les blocs de code, les concepts de
+  l'essai, les dépôts listés, les destinations du rail et de la barre basse.
+- **Shape** : `--r-carte` (20 px). C'est aussi la valeur de radius-lg et
+  radius-xl, pour les primitives shadcn.
+- **Style** : le fond suit en général la surface « objet » de la table
+  `SURFACES` — `--surface-ombre` sur le papier, `--surface-papier` sur
+  l'ombre, le givre et la session, `--stone-700` sur la roche ; le bloc de
+  réponse et les blocs de code prennent `--surface-roche`. Aucune ombre. Les
+  cartes de l'écran d'administration (`components/administration/`) portent en
+  plus une bordure `--stone-300`.
 - **Behavior** : l'objet est posé sur la page ; le contraste de surface avec
   le panneau qui l'accueille le distingue.
 
@@ -467,18 +567,22 @@ autre radius n'est légitime.
   passé en `CONSOLIDATED`. Sur la landing, le `CairnRenversable` répond à un
   geste souris/tactile (chute physique des pierres, `overflow-visible` sur le
   SVG pour laisser les stones sortir).
-- **Palette** : stones en `--stone-800` à `--stone-900`, sommet couronné du
-  contour `--lichen`.
-- **Composants** : `Cairn`, `CairnRenversable`, `PierreSeule`, `PoseDePierre`,
-  `ArêtesDePierre`, `SolDuCairn`, `PileEnConstruction`, `SilhouetteDeCairn`
-  dans `components/cairn/`.
+- **Palette** : sur surface claire, pierres en `--stone-700`, `--stone-800`
+  et `--stone-900` ; sur la roche, en `--stone-50`, `--stone-100` et
+  `--stone-300`. La dernière pierre posée porte une arête `--lichen`. Une
+  pierre à venir n'est qu'un contour pointillé (`--stone-300`, ou
+  `--stone-500` sur la roche).
+- **Composants** : `Cairn`, `CairnRenversable`, `PierreSeule`, `PierrePosee`,
+  `PierreAVenir`, `PoseDePierre`, `ArêtesDePierre`, `SolDuCairn`,
+  `PileEnConstruction`, `PriseDuCairn`, `SilhouetteDeCairn` dans
+  `components/cairn/`.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** utiliser une des quatre surfaces (`papier`, `ombre`, `lichen`,
-  `roche`) pour poser un panneau. Le fond va d'un bord à l'autre.
+- **Do** utiliser une des cinq surfaces (`papier`, `ombre`, `givre`,
+  `session`, `roche`) pour poser un panneau. Le fond va d'un bord à l'autre.
 - **Do** séparer deux sujets par un changement de surface via `<Strates>`,
   jamais par un `<hr>` ni un filet.
 - **Do** utiliser `--lichen` uniquement sur le sommet du cairn, l'outline de
