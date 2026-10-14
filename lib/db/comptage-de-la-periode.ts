@@ -2,26 +2,15 @@ import { prisma } from "@/lib/db/client";
 import { periodeDuCompte } from "@/lib/db/periode-du-compte";
 
 /**
- * Ce qui s'ajoute au compteur une fois la dépense faite.
- *
- * L'autre moitié du quota — `quota-depots.ts` — décide **avant** : elle accorde
- * une place ou la refuse, et son résultat change ce qui arrive ensuite. Ici,
- * rien ne se décide. L'extraction a eu lieu, elle a coûté ce qu'elle a coûté,
- * et on enregistre. Un décompte n'a pas de valeur de retour parce qu'il n'a rien
- * à refuser.
- *
- * C'est ce qui permet à un compte de dépasser son plafond à un seul endroit du
- * produit, et de le dépasser légitimement : le dernier dépôt d'une période est
- * autorisé sur une place, puis rend ce qu'il rend.
+ * Ce qui s'ajoute au compteur une fois la dépense faite. La décision se prend
+ * avant, dans `quota-depots.ts` ; ici rien n'est refusé, d'où l'absence de
+ * valeur de retour, et un compte peut donc dépasser son plafond.
  */
 
 /**
- * Les concepts qu'un dépôt vient de rendre entrent au compteur.
- *
- * Écrit après l'extraction, puisque c'est elle qui dit combien. La période se
- * recalcule à cet instant-là : un dépôt fait la veille du basculement dont
- * l'extraction rend le lendemain compte sur la période neuve, ce qui vaut mieux
- * que de compter dans une période déjà close.
+ * Les concepts qu'un dépôt vient de rendre entrent au compteur. La période se
+ * recalcule à cet instant : une extraction qui rend après le basculement compte
+ * sur la période neuve.
  */
 export async function compterConceptsRetenus(
   userId: string,
@@ -43,20 +32,10 @@ export async function compterConceptsRetenus(
 }
 
 /**
- * Ce qu'un essai fait sans compte prend au compteur, une fois réclamé.
- *
- * Un compte neuf démarrait avec les concepts de son essai **en plus** de ses
- * trente : le chemin anonyme ne passe par aucun quota, et la reprise ne
- * comptait rien. Trois concepts offerts par compte n'est pas ruineux, mais la
- * limite annoncée cessait d'être la limite réelle, et c'est ça qu'on ne veut
- * pas — un plafond qu'on affiche se tient.
- *
- * Le dépôt entre aussi. Le second rideau borne les extractions payées quoi
- * qu'elles rendent, et celle-là l'a été comme les autres.
- *
- * C'est un décompte, pas une réservation : la dépense a déjà eu lieu, il n'y a
- * plus rien à refuser. Un compte peut donc passer au-dessus du plafond à cet
- * instant précis, et c'est le seul endroit où ça arrive.
+ * Ce qu'un essai fait sans compte prend au compteur, une fois réclamé. Le
+ * chemin anonyme ne passe par aucun quota : sans ce décompte, l'essai
+ * s'ajouterait au plafond affiché. Le dépôt entre aussi, son extraction a été
+ * payée comme les autres.
  */
 export async function compterLaVisiteReprise(
   userId: string,

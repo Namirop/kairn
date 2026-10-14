@@ -2,15 +2,8 @@ import { prisma } from "@/lib/db/client";
 import { etatDuDepot, type EtatDepot } from "@/lib/domain/etat-depot";
 
 /**
- * Ce qu'on peut faire à un dépôt déjà déposé : le relancer, ou l'effacer.
- *
- * Deux gestes pour deux intentions. Redécouper garde le texte et retente
- * l'extraction — c'est la suite naturelle d'un dépôt qu'on a vidé parce que le
- * découpage ne convenait pas. Supprimer emporte le texte et tout ce qui en
- * découle, parce qu'on ne veut plus de ça du tout.
- *
- * Toute écriture passe par l'identifiant du propriétaire : un dépôt qui n'est
- * pas à l'utilisateur n'est pas trouvé, donc pas touché.
+ * Ce qu'on peut faire à un dépôt existant : le redécouper (le texte reste, les
+ * concepts sont refaits) ou l'effacer. Toute écriture filtre par propriétaire.
  */
 
 export type DepotAReprendre = {
@@ -50,12 +43,9 @@ export async function lireDepotAReprendre(
 }
 
 /**
- * Remet le dépôt au point de départ du découpage.
- *
- * Les concepts et les travaux passés partent : ce qui va être écrit remplace ce
- * qui restait, et laisser d'anciens jobs en base ferait clore le dépôt sur un
- * état qui n'est plus le sien. Le texte, lui, n'est jamais touché — c'est la
- * règle du produit, et c'est aussi tout l'intérêt du geste.
+ * Remet le dépôt au point de départ du découpage. Les anciens jobs partent avec
+ * les concepts : laissés en base, ils feraient clore le dépôt sur un état qui
+ * n'est plus le sien. Le texte n'est jamais touché.
  */
 export async function repartirEnDecoupage(inputId: string, userId: string): Promise<boolean> {
   const depot = await prisma.input.findFirst({
@@ -78,10 +68,8 @@ export async function repartirEnDecoupage(inputId: string, userId: string): Prom
 }
 
 /**
- * Efface un dépôt, et avec lui ses concepts, leurs questions et leurs passages.
- *
- * La cascade est celle du schéma. Rien n'est conservé : c'est la différence
- * avec « supprimer ce concept », qui ne touche qu'à une pierre de l'édifice.
+ * Efface un dépôt, et par la cascade du schéma ses concepts, leurs questions
+ * et leurs passages.
  */
 export async function supprimerDepot(inputId: string, userId: string): Promise<boolean> {
   const { count } = await prisma.input.deleteMany({ where: { id: inputId, userId } });

@@ -2,55 +2,27 @@ import { createHash } from "node:crypto";
 import { prisma } from "@/lib/db/client";
 
 /**
- * L'ouverture d'une visite : qui a le droit de déposer sans compte.
+ * L'ouverture d'une visite : qui a le droit de déposer sans compte. Ce qu'il
+ * reste à une visite ouverte se compte dans `essais-de-la-visite.ts`.
  *
- * Ce qu'il **reste** à une visite ouverte se compte dans
- * `essais-de-la-visite.ts` — deux règles, deux fenêtres, deux fichiers.
- *
- * C'est le seul endroit du produit qui dépense sans compte identifié. Il est
- * donc le plus serré des verrous du budget : **deux essais dus et deux pannes
- * tolérées par visite et par tranche de vingt-quatre heures**, **deux visites
- * par empreinte d'adresse**, et un seul concept questionné — les trois autres
- * lots de questions n'arrivent qu'après la création du compte. Le pire cas
- * complet est écrit sous `VISITES_PAR_ADRESSE`.
- *
- * Rien ici ne conserve d'adresse IP. Ce qu'on veut compter est « combien de
- * dépôts viennent d'ici », et une empreinte y répond aussi bien sans garder de
- * donnée qui désigne quelqu'un. Elle est salée par le secret d'application :
- * une base volée ne se retourne pas en liste d'adresses.
+ * Aucune adresse IP n'est conservée, seulement une empreinte salée par le
+ * secret d'application : une base volée ne se retourne pas en liste d'adresses.
  */
 
 /**
- * **Visites** tolérées par empreinte d'adresse, sur la fenêtre — pas dépôts.
- *
- * Le nom précédent, `DEPOTS_PAR_ADRESSE`, mentait sur ce qui est compté : la
- * constante borne les appels à `ouvrirUneSession`, donc des visites, et chaque
- * visite porte plusieurs dépôts. On lisait « deux dépôts par adresse » là où le
- * vrai maximum est quatre fois plus haut.
- *
- * **Le pire cas par empreinte et par 24 h se lit ici, et nulle part ailleurs :**
+ * **Visites** tolérées par empreinte d'adresse sur la fenêtre, pas dépôts.
+ * Pire cas par empreinte et par 24 h :
  *
  *     2 visites × (2 essais dus + 2 pannes tolérées) = 8 extractions
  *
- * **Ce compte-là ne vaut que pour des visites neuves.** Un navigateur qui garde
- * son cookie ne repasse jamais par ici : il puise dans les essais de sa propre
- * visite, renouvelés toutes les vingt-quatre heures, et la sortie réseau qu'il
- * emprunte n'en sait rien. Sur les sept jours du cookie, ça fait quatorze
- * extractions imputables pour un seul visiteur obstiné — et c'est assumé pour la
- * même raison que le reste : ce verrou-ci freine le passant qui recommence, la
- * dépense est bornée par le plafond journalier d'appels.
+ * Un navigateur qui garde son cookie ne repasse pas par ici et puise dans les
+ * essais de sa visite, renouvelés chaque jour. Assumé : ce verrou freine le
+ * passant qui recommence, c'est le plafond journalier d'appels qui borne la
+ * dépense.
  *
- * Deux visites, et pas une. Une seule par adresse serait le réglage évident si
- * une adresse désignait une personne — mais elle n'en désigne pas une. Un
- * bureau, un coworking, une école ou un opérateur mobile derrière son CGNAT
- * sortent tous par une seule IPv4 : à une visite par adresse, le premier arrivé
- * grillerait l'essai de tous les autres pour la journée, et précisément dans les
- * endroits où quelqu'un partage un outil à ses collègues.
- *
- * Serrer davantage ne protégerait d'ailleurs de personne : basculer en 4G ou
- * ouvrir un VPN change d'adresse en cinq secondes. Ce verrou-ci freine le
- * passant qui recommence, pas l'abuseur — c'est le plafond journalier d'appels
- * qui borne la dépense, et lui ne se contourne pas.
+ * Deux et pas une : un bureau, une école ou un opérateur mobile derrière son
+ * CGNAT sortent par une seule IPv4, et le premier arrivé grillerait l'essai des
+ * autres. Serrer ne protégerait de personne, un VPN change d'adresse.
  */
 export const VISITES_PAR_ADRESSE = 2;
 
@@ -69,17 +41,13 @@ export type OuvertureDeSession =
 /**
  * Ouvre une session de visite, ou la refuse.
  *
- * Le refus par empreinte se lit avant d'écrire : c'est une lecture puis une
- * écriture, donc une course, et deux visiteurs simultanés depuis la même adresse
- * peuvent passer à trois. C'est assumé — la conséquence d'une course ici est un
- * dépôt de plus, soit deux centimes, là où la fermer demanderait une table de
- * compteurs pour des lignes qu'on efface au bout d'une semaine.
+ * Lire puis écrire est une course : deux visiteurs simultanés depuis la même
+ * adresse peuvent passer à trois. Assumé, le coût est une visite de plus ; la
+ * fermer demanderait une table de compteurs pour des lignes éphémères.
  *
- * `sansCompte` porte l'échappement de vérification en ligne, décidé par
- * `lib/depots/essai-sans-limite.ts` et passé en paramètre plutôt que relu ici :
- * l'accès aux données ne lit pas d'interrupteur, sinon la même fonction ne fait
- * plus la même chose selon l'environnement et les scripts de vérification n'ont
- * plus de prise dessus.
+ * `sansCompte` (l'échappement de vérification en ligne) est décidé par
+ * `lib/depots/essai-sans-limite.ts` et passé en paramètre : l'accès aux données
+ * ne lit pas d'interrupteur, pour que les scripts de vérification gardent prise.
  */
 export async function ouvrirUneSession(
   adresse: string,

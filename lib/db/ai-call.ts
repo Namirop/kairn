@@ -9,11 +9,7 @@ import type { Fournisseur } from "@/lib/ai/fournisseurs";
 export type AiCallRecord = {
   purpose: string;
   model: string;
-  /**
-   * La lignée qui a servi l'appel. Persistée en `AiCall.provider` — nommée
-   * `fournisseur` côté TS pour rester alignée avec le reste du code AI, mais
-   * la colonne base est en anglais comme le reste du schéma.
-   */
+  /** Persisté dans la colonne `AiCall.provider`. */
   fournisseur: Fournisseur;
   inputTokens: number;
   outputTokens: number;
@@ -27,9 +23,8 @@ export type AiCallRecord = {
   userId?: string | null;
   jobId?: string | null;
   /**
-   * Marque la ligne du succès de repli quand l'appel initial (Luna) a échoué
-   * et que Sonnet Anthropic natif a servi à sa place. Comptée par
-   * `compterBasculesDuJour` pour l'alerte d'exploitation.
+   * L'appel au modèle primaire a échoué et le modèle de repli, chez le même
+   * fournisseur, a servi à sa place. Compté par `compterBasculesDuJour`.
    */
   basculee?: boolean;
 };
@@ -49,11 +44,9 @@ export function startOfUtcDay(instant: Date): Date {
 }
 
 /**
- * Nombre d'appels réels émis depuis minuit UTC.
- *
- * Sert à l'observation, pas à l'autorisation : c'est `reserverAppelModele()`
- * de `lib/db/ai-quota.ts` qui décide, parce qu'un compteur lu ici puis comparé
- * dans le code laisse passer deux appels simultanés.
+ * Nombre d'appels émis depuis minuit UTC. Pour l'observation seulement :
+ * l'autorisation passe par `reserverAppelModele()` (`lib/db/ai-quota.ts`), car
+ * un compteur lu puis comparé laisse passer deux appels simultanés.
  */
 export async function countAiCallsToday(now: Date = new Date()): Promise<number> {
   return prisma.aiCall.count({ where: { createdAt: { gte: startOfUtcDay(now) } } });
@@ -108,11 +101,10 @@ export async function recordAiCall(record: AiCallRecord): Promise<void> {
 }
 
 /**
- * Combien de fois on a basculé sur Sonnet aujourd'hui.
- *
- * Filtre partiel sur l'index `AiCall_basculee_createdAt_idx` : la lecture
- * reste bornée, même si le registre grossit. Sert à l'alerte d'exploitation
- * — au-delà de cinq dans la journée, un email part.
+ * Bascules sur le modèle de repli depuis minuit UTC, pour l'alerte
+ * d'exploitation (`SEUIL_BASCULES`). L'index partiel
+ * `AiCall_basculee_createdAt_idx` garde la lecture bornée quand le registre
+ * grossit.
  */
 export async function compterBasculesDuJour(now: Date = new Date()): Promise<number> {
   return prisma.aiCall.count({

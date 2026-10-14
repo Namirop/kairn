@@ -5,11 +5,8 @@ import { retirerQuestions } from "@/lib/db/variants";
 import { compterReussitesConsecutives, etatApresRevision } from "@/lib/domain/etat-maitrise";
 
 /**
- * Lecture et correction d'un concept.
- *
- * Toute écriture passe par l'identifiant du propriétaire : un concept qui n'est
- * pas à l'utilisateur n'est pas trouvé, donc pas touché. Le `userId` ne vient
- * jamais du client.
+ * Correction d'un concept. Toute écriture filtre sur le propriétaire : un
+ * concept qui n'est pas à l'utilisateur n'est pas trouvé, donc pas touché.
  */
 
 /** Ce qu'une réécriture remet à zéro côté planification. */
@@ -28,23 +25,15 @@ const CARTE_NEUVE = {
 } as const;
 
 /**
- * Les questions de ce concept ne le décrivent plus : elles sortent, et on en
- * redemande.
+ * Retire les questions du concept, puis en redemande — dans cet ordre : garder
+ * les anciennes en attendant servirait des questions qui contredisent le texte.
+ * Un concept momentanément sans question, lui, l'écran l'annonce.
  *
- * Les deux gestes sont indissociables et dans cet ordre. Garder les anciennes
- * en attendant les neuves servirait des questions qui contredisent le texte —
- * c'est le seul des trois résultats possibles qui soit malhonnête. Un concept
- * momentanément sans question ne l'est pas : l'écran dit qu'elles arrivent.
+ * La demande passe par `demanderDesQuestions` avec report : refusée par le
+ * plafond hebdomadaire, elle part seule à sa date, jamais jetée.
  *
- * La demande passe par le point de passage unique, comme le seuil d'usure : si
- * le plafond hebdomadaire la refuse, elle est écrite avec sa date et part toute
- * seule ce jour-là. Elle n'est jamais jetée.
- *
- * Rend les jobs à lancer tout de suite, jamais vide sauf report. Corriger un
- * concept est un geste où l'on attend un résultat : ses questions partent en
- * appel direct, comme celles d'un dépôt, et non par le chemin groupé qui coûte
- * moitié prix mais rend le lendemain. C'est l'appelant qui les déclenche — la
- * couche données n'a pas à connaître l'exécuteur.
+ * Rend les jobs à lancer tout de suite (vide en cas de report) ; c'est
+ * l'appelant qui les déclenche, la couche données ne connaît pas l'exécuteur.
  */
 async function relancerLesQuestions(atomId: string, inputId: string): Promise<string[]> {
   await retirerQuestions(atomId);
@@ -59,39 +48,20 @@ async function relancerLesQuestions(atomId: string, inputId: string): Promise<st
 }
 
 /**
- * Ce qu'un geste sur un concept rend à son appelant.
- *
- * `null` quand le concept n'est pas le sien : il n'est pas trouvé, donc pas
- * touché. Sinon, les jobs à déclencher — vides quand la demande a été reportée,
- * ce qui reste un succès du point de vue du geste.
+ * `null` quand le concept n'est pas le sien ; sinon les jobs à déclencher, vides
+ * quand la demande a été reportée — ce qui reste un succès.
  */
 export type GesteSurConcept = string[] | null;
 
 /**
- * Réécrit un concept. Ses questions ne le décrivent plus : elles sortent du
- * tirage et repartent en écriture. Pour la mémoire, c'est un concept neuf même
- * s'il garde son identifiant — la planification recommence.
+ * Réécrit un concept : ses questions repartent en écriture, et sa planification
+ * recommence comme pour un concept neuf.
  *
- * **Un concept réécrit ne redevient jamais douteux, et c'est une décision.**
- * `uncertain` tombe à faux quoi que dise le nouveau texte : la modification ne
- * repasse pas par le modèle, elle ne relance que l'écriture des questions. Donc
- * quelqu'un qui corrige une virgule en laissant l'erreur aura ses questions sur
- * l'erreur, sans second avertissement.
- *
- * Le choix se défend par ce qui vient de se passer à l'écran. La personne a lu
- * « ce passage paraît factuellement douteux », elle a ouvert le champ, elle a
- * réécrit : c'est une décision informée, prise sur l'information qu'on lui devait.
- * Une application qui la contredirait une seconde fois sur le même texte
- * n'arbitrerait plus, elle discuterait — et le prompt dit explicitement que
- * trancher à la place de la personne est ce qu'on ne fait pas.
- *
- * L'argument du coût ne tient pas, lui, et il ne faut pas s'en servir : cette
- * fonction paie déjà un appel modèle par modification, pour les questions. Rejuger
- * le texte n'en coûterait pas un de plus si on le demandait au même appel.
- *
- * Ce qui la ferait changer : voir des concepts faux revenir en session après une
- * correction de forme. Rien ne le mesure aujourd'hui — un signalement porte sur
- * une question, pas sur le fait qu'elle vienne d'un concept réécrit.
+ * Un concept réécrit ne redevient jamais douteux, et c'est voulu : le texte ne
+ * repasse pas par le modèle. La personne a lu l'avertissement et réécrit en
+ * connaissance de cause ; la contredire une seconde fois serait trancher à sa
+ * place. Le coût n'est pas la raison — rejuger le texte pourrait se faire dans
+ * l'appel qui écrit déjà les questions.
  */
 export async function modifierConcept(
   atomId: string,
@@ -107,8 +77,7 @@ export async function modifierConcept(
     data: { concept: texte, uncertain: false, ...CARTE_NEUVE, due: new Date() },
   });
 
-  // Un concept consolidé qu'on réécrit repart en apprentissage : sa pierre
-  // tombe, et le cairn doit le savoir avant la prochaine session.
+  // Un concept consolidé qu'on réécrit repart en apprentissage : sa pierre tombe.
   await recompterLesPierres(userId);
 
   return relancerLesQuestions(atomId, atome.inputId);
@@ -126,22 +95,13 @@ export async function confirmerConcept(atomId: string, userId: string): Promise<
 }
 
 /**
- * Remet dans le cycle un concept que l'utilisateur en avait sorti.
+ * Remet dans le cycle un concept que l'utilisateur avait déclaré maîtrisé.
  *
- * « Je maîtrise ça » est une déclaration, pas une suppression, et une
- * déclaration se retire. Sans ce chemin, un clic sortait un concept pour six
- * mois sans aucun retour possible — une perte de données déguisée en geste
- * réversible.
+ * Le filtre porte sur `archivedByUser` et non sur l'état `ARCHIVED` : c'est
+ * l'intention de la personne qu'on lit, pas une étiquette qu'une ancienne règle
+ * a pu poser seule.
  *
- * `archivedByUser` est redondant avec l'état depuis que le produit n'archive
- * plus rien de lui-même — mais c'est le champ le plus étroit, et une ligne
- * écrite sous l'ancienne règle qu'une migration aurait ratée porterait encore
- * `ARCHIVED` sans que personne ne l'ait demandé. On lit l'intention, pas
- * l'étiquette.
- *
- * La planification ne repart pas de zéro — le concept a une histoire et elle
- * reste vraie. Seule l'échéance revient à maintenant : qui remet un concept en
- * révision veut le revoir, pas attendre.
+ * La planification garde son histoire ; seule l'échéance revient à maintenant.
  */
 export async function desarchiverConcept(
   atomId: string,

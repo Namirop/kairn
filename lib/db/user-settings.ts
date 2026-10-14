@@ -14,14 +14,14 @@ export class ReglagesIntrouvablesError extends Error {
   }
 }
 
-/** Lecture tolérante, pour les chemins qui savent traiter l'absence — l'envoi
- *  d'email, par exemple, qui se contente de ne rien envoyer. */
+/** Lecture tolérante, pour les chemins qui savent traiter l'absence (l'envoi
+ *  d'email se contente de ne rien envoyer). */
 export async function findUserSettings(userId: string): Promise<UserSettings | null> {
   return prisma.userSettings.findUnique({ where: { userId } });
 }
 
-/** Lecture stricte, pour les écrans : afficher un réglage par défaut inventé
- *  serait mentir à l'utilisateur sur l'état de son compte. */
+/** Lecture stricte, pour les écrans : un réglage par défaut inventé mentirait
+ *  sur l'état du compte. */
 export async function lireReglages(userId: string): Promise<UserSettings> {
   const reglages = await findUserSettings(userId);
 
@@ -31,11 +31,8 @@ export async function lireReglages(userId: string): Promise<UserSettings> {
 }
 
 /**
- * Le fuseau de l'utilisateur, sans repli.
- *
- * Aucun affichage d'échéance ne doit se rabattre sur « UTC » : ce serait
- * afficher une date fausse à quelqu'un plutôt que de signaler que son compte
- * est cassé.
+ * Le fuseau de l'utilisateur, sans repli sur « UTC » : mieux vaut signaler un
+ * compte cassé qu'afficher une échéance fausse.
  */
 export async function lireFuseauUtilisateur(userId: string): Promise<string> {
   const reglages = await prisma.userSettings.findUnique({
@@ -49,12 +46,8 @@ export async function lireFuseauUtilisateur(userId: string): Promise<string> {
 }
 
 /**
- * Ce qu'il faut savoir d'un compte pour composer sa session : quel jour il est
- * chez lui, et combien de concepts il accepte d'un coup.
- *
- * Les deux en une lecture : ils sont demandés ensemble à chaque ouverture de la
- * session comme du tableau de bord, et deux requêtes pour deux colonnes de la
- * même ligne n'ont aucune raison d'exister.
+ * Le fuseau et le plafond de session, lus ensemble : la session et le tableau
+ * de bord les demandent toujours tous les deux.
  */
 export type CadreDeSession = { fuseau: string; plafond: number };
 
@@ -82,11 +75,8 @@ export async function setTimezone(userId: string, timezone: string): Promise<voi
 }
 
 /**
- * Note que le principe de l'entraînement libre a été expliqué.
- *
- * Écrit une fois pour toutes, sans jamais réécrire : la date du premier
- * passage est celle qui compte, et une seconde ouverture ne doit pas la
- * repousser.
+ * Note que le principe de l'entraînement libre a été expliqué. N'écrit que si
+ * la date est vide : c'est le premier passage qui compte.
  */
 export async function marquerPrincipeVu(userId: string, at: Date = new Date()): Promise<void> {
   await prisma.userSettings.updateMany({
@@ -96,11 +86,9 @@ export async function marquerPrincipeVu(userId: string, at: Date = new Date()): 
 }
 
 /**
- * Ce qu'un compte peut changer de ses notifications.
- *
- * Trois réglages et rien d'autre : le fuseau se détecte, l'adresse est
- * l'identité du compte. Tout est écrit d'un coup — un formulaire qui enregistre
- * champ par champ laisse un état à moitié appliqué si un envoi échoue.
+ * Ce qu'un compte peut changer depuis ses réglages : le plafond de session et
+ * les notifications. Le fuseau se détecte, l'adresse est l'identité du compte.
+ * Tout s'écrit d'un coup, pour ne jamais laisser un état à moitié appliqué.
  */
 export type ReglagesModifiables = {
   /** Concepts au plus dans une session. Ce qui déborde revient le lendemain. */
@@ -112,11 +100,8 @@ export type ReglagesModifiables = {
 };
 
 /**
- * Enregistre les réglages de notification d'un compte.
- *
- * `updateMany` et non `update` : la clause porte l'`userId`, donc une ligne qui
- * n'appartient pas à l'appelant ne peut pas être touchée même si l'identifiant
- * était forgé. Rend `false` quand rien n'a été écrit.
+ * Enregistre les réglages modifiables d'un compte. `updateMany` pour rendre
+ * `false` quand aucune ligne n'existe, là où `update` lèverait.
  */
 export async function enregistrerLesReglages(
   userId: string,
@@ -128,11 +113,8 @@ export async function enregistrerLesReglages(
 }
 
 /**
- * Rend les emails à quelqu'un qui les avait coupés.
- *
- * Le refus global partait en même temps que les deux réglages de contenu — c'est
- * ce que fait `optOutOfEmails`. Les remettre ici serait décider à sa place : on
- * lève le refus, et il choisit ensuite ce qu'il veut recevoir.
+ * Rend les emails à quelqu'un qui les avait coupés. `optOutOfEmails` éteint
+ * aussi le rappel et l'alerte de série ; on ne les rallume pas à sa place.
  */
 export async function reprendreLesEmails(userId: string): Promise<boolean> {
   const { count } = await prisma.userSettings.updateMany({
@@ -155,11 +137,8 @@ export async function optOutOfEmails(userId: string, at: Date = new Date()): Pro
 }
 
 /**
- * Note que l'espacement a été expliqué, à la fin de la première session.
- *
- * Même écriture conditionnelle que `marquerPrincipeVu`, et pour la même raison :
- * la date du premier passage est celle qui compte, et une seconde session ne
- * doit pas la repousser.
+ * Note que l'espacement a été expliqué, à la fin de la première session. Même
+ * écriture conditionnelle que `marquerPrincipeVu`.
  */
 export async function marquerEspacementVu(userId: string, at: Date = new Date()): Promise<void> {
   await prisma.userSettings.updateMany({
@@ -169,8 +148,8 @@ export async function marquerEspacementVu(userId: string, at: Date = new Date())
 }
 
 /**
- * La langue de la personne, sans repli — même raison que pour le fuseau : un
- * dépôt écrit dans une langue inventée ne se rattrape plus, il est figé.
+ * La langue de la personne, sans repli : un dépôt généré dans une langue
+ * inventée reste figé.
  */
 export async function lireLangueUtilisateur(userId: string): Promise<Langue> {
   const reglages = await prisma.userSettings.findUnique({

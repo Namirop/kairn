@@ -6,76 +6,20 @@ import { localDay } from "@/lib/domain/local-day";
 import { debutEnDate } from "@/lib/domain/periode-de-quota";
 
 /**
- * Prendre une place de la période, ou la refuser.
+ * Prendre une place de la période, ou la refuser, **avant** la dépense. La
+ * lecture vit dans `periode-du-compte.ts`, le décompte après coup dans
+ * `comptage-de-la-periode.ts` ; ce module est le seul qui puisse dire non.
  *
- * Ce module décide **avant** la dépense. Ce qui la lit vit dans
- * `periode-du-compte.ts`, ce qui l'enregistre après coup dans
- * `comptage-de-la-periode.ts` : trois rôles, et celui-ci est le seul qui puisse
- * dire non.
- *
- * Il tient d'un bloc et ne se découpe pas plus loin. La fenêtre de débit n'est
- * pas une limite à part rangée ailleurs : elle vit dans la ligne qu'on
- * verrouille, sans quoi l'incrément et le refus ne tiendraient plus dans la
- * même instruction — et c'est exactement le bug qu'elle a corrigé, dix envois
- * simultanés qui lisaient tous zéro.
- *
- * Trois limites, trois rôles.
- *
- * **Le plafond porte sur les concepts, et il se compte au mois**, sur une
- * période ancrée au jour d'inscription.
- *
- * C'est la bonne unité pour l'utilisateur : quelqu'un qui dépose une phrase ne
- * doit pas consommer autant que quelqu'un qui colle un article. Ça reste vrai.
- *
- * **Mais ce plafond n'est plus une contrainte de coût, et il ne faut pas le
- * relire comme telle.** Il l'a été : au tarif Sonnet, ce commentaire annonçait
- * une trentaine de dollars par mois pour un compte qui saturait tous les jours,
- * et trente concepts par mois ramenaient ce maximum sous le demi-dollar. Depuis
- * le passage à `gpt-5.6-luna`, un dépôt complet — son extraction et ses quatre
- * questions — coûte **0,004 $** : mesuré au registre le 01/09/2026, pas estimé.
- * Une période gratuite saturée coûte donc quelques centimes.
- *
- * Ce qui reste est un plafond **commercial**, et c'est ce qu'il faut assumer en
- * le changeant : le monter ne met plus aucun budget en danger, le tenir bas est
- * une décision de prix. Le plan payant s'y branche en le remplaçant.
- *
- * Le plafond de dépôts reste en second rideau, et il passe au mois lui aussi :
- * chaque dépôt paie une extraction quoi qu'elle rende, et un dépôt rejeté n'en
- * rend aucun. Le laisser au jour aurait fait un second rideau trente fois plus
- * lâche que ce qu'il couvre.
- *
- * La limite de débit, elle, reste courte et inchangée : elle protège le serveur
- * sur la minute, pas le budget sur le mois. Les deux sont nécessaires et ne se
- * remplacent pas.
- */
-
-/**
- * Ce qu'une période permet de retenir, c'est le plan du compte qui le dit.
- *
- * C'était une constante ; `lib/domain/plafond-du-plan.ts` la remplace, et le
- * plafond se lit désormais par compte. Rien ici ne connaît les plans ni leurs
- * valeurs : ce module réserve des places, il ne décide pas combien il y en a.
- */
-
-/**
- * Second rideau : au-delà, ce sont les extractions qu'on paie pour rien.
- *
- * C'est le seul endroit où la longueur d'un texte échappe au quota en concepts.
- * Un dépôt rejeté paie son extraction et ne rend aucun concept : il n'entre donc
- * jamais dans le compteur que le plafond de concepts surveille, et sans ce
- * rideau-là quelqu'un pourrait ne déposer que des textes rejetés, sans fin.
- *
- * L'ordre de grandeur vient de là : le rideau vaut le double du plafond de
- * concepts, donc cent extractions pour un compte gratuit, de seize mille
- * caractères au pire — autour de 4 800 tokens d'entrée chacune. Au tarif Sonnet
- * ce plein aurait coûté plus d'un dollar ; au tarif Luna il en coûte **une
- * trentaine de fois moins**.
- * Comme le plafond de concepts, ce rideau ne protège plus un budget — il protège
- * contre l'abus, ce qui est un autre métier.
- *
- * **Le nombre n'est plus écrit ici**, il se dérive du plafond du compte : voir
- * `plafondDeDepots` dans le domaine, qui dit pourquoi un rideau figé annulait
- * l'offre payante.
+ * Trois limites, qui ne se remplacent pas :
+ * - le plafond de concepts, au mois, sur une période ancrée au jour
+ *   d'inscription. C'est un plafond commercial, pas de coût (un dépôt complet
+ *   coûte ~0,004 $) : le monter ne met aucun budget en danger ;
+ * - le plafond de dépôts, au mois aussi : un dépôt rejeté paie son extraction
+ *   sans rendre de concept, donc échappe au premier. Sa valeur se dérive du
+ *   plafond du compte, voir `plafondDeDepots` ;
+ * - la fenêtre de débit, à la minute, qui protège le serveur. Elle vit dans la
+ *   ligne qu'on verrouille pour que l'incrément et le refus tiennent dans la
+ *   même instruction : ne pas la sortir dans une requête à part.
  */
 
 /** Fenêtre courte du débit, et ce qu'on y tolère. */
@@ -89,11 +33,8 @@ export type Autorisation =
       motif: "concepts" | "depots" | "debit";
       restants: number;
       /**
-       * La limite qui a refusé, portée par le refus.
-       *
-       * Le message qui l'annonce est écrit ailleurs, et il doit dire le plafond
-       * de *ce* compte. Le lui faire relire en base serait une seconde lecture
-       * qui peut ne pas rendre la même chose que celle qui vient de décider.
+       * La limite qui a refusé. Portée par le refus pour que le message dise
+       * celle qui a décidé : une relecture en base pourrait rendre autre chose.
        */
       plafond: number;
     };
@@ -101,19 +42,15 @@ export type Autorisation =
 /**
  * Prend une place de la période, ou la refuse.
  *
- * Deux compteurs, deux instructions, dans cet ordre : le budget de la période
- * d'abord, la fenêtre de débit ensuite. Chacune incrémente et refuse d'un seul
- * mouvement — un compteur lu puis écrit laisse passer tout ce qui part ensemble.
+ * Deux compteurs, chacun incrémenté et refusé d'une seule instruction (un
+ * compteur lu puis écrit laisse passer les envois simultanés). La période
+ * d'abord, la fenêtre de débit ensuite, et la place est rendue si la fenêtre
+ * refuse : dans l'ordre inverse, un mois plein consommerait aussi un jeton de
+ * débit.
  *
- * Si la fenêtre refuse, la place de la période est rendue. L'ordre inverse
- * aurait laissé un refus de budget consommer un jeton de débit, ce qui aurait
- * fait payer une minute d'attente à quelqu'un dont le mois est plein — deux
- * punitions pour une seule limite.
- *
- * Le refus porte sur les concepts déjà retenus, un compteur que ce dépôt-ci ne
- * remplira qu'après son extraction : on ignore encore ce qu'il rendra. Le dernier
- * dépôt d'une période peut donc déborder le plafond, et c'est pour ça qu'il est
- * annoncé comme approximatif.
+ * Le refus porte sur les concepts déjà retenus ; ce dépôt-ci ne compte qu'après
+ * son extraction. Le dernier dépôt d'une période peut donc déborder le plafond,
+ * et il est annoncé comme approximatif.
  */
 export async function reserverDepot(
   userId: string,
@@ -122,9 +59,8 @@ export async function reserverDepot(
 ): Promise<Autorisation> {
   const periode = await periodeDuCompte(userId, fuseau, maintenant);
   const debut = periode.debut;
-  // Lu une fois, puis porté jusqu'au refus. Le relire après coup pourrait rendre
-  // une autre valeur — un abonnement qui commence entre les deux lectures — et
-  // le message annoncerait alors une limite qui n'est pas celle qui a décidé.
+  // Lu une fois, puis porté jusqu'au refus : un abonnement qui commence entre
+  // deux lectures ferait annoncer une limite qui n'est pas celle qui a décidé.
   const plafond = await plafondDuCompte(userId, maintenant);
 
   const lignes = await prisma.$queryRaw<{ deposits: number; concepts: number }[]>`
@@ -163,13 +99,9 @@ export async function reserverDepot(
 }
 
 /**
- * La fenêtre courte, sur la ligne du jour.
- *
- * Elle vit là et pas dans une requête à part : compter les dépôts récents avant
- * de décider était une course, et dix envois simultanés lisaient tous zéro. Ici,
- * la fenêtre est dans la ligne qu'on verrouille, donc l'incrément et le refus
- * tiennent dans la même instruction. Un redécoupage, qui n'écrit aucun dépôt, y
- * entre au même titre : c'est la place qui compte, pas la trace qu'elle laisse.
+ * La fenêtre courte, sur la ligne du jour. Compter les dépôts récents dans une
+ * requête à part serait une course (des envois simultanés lisent tous zéro).
+ * Un redécoupage, qui n'écrit aucun dépôt, y entre au même titre.
  */
 async function fenetreDeDebitOuverte(
   userId: string,
@@ -206,11 +138,8 @@ async function fenetreDeDebitOuverte(
 }
 
 /**
- * Pourquoi la place a été refusée.
- *
- * Lu après coup et non deviné : les deux causes n'appellent pas la même conduite,
- * et « tu as fait tous tes dépôts » ne se dit pas comme « tu as retenu tout ce
- * que la période permet ».
+ * Pourquoi la place a été refusée, relu après coup : les deux causes ne
+ * s'annoncent pas de la même façon.
  */
 async function motifDuRefus(
   userId: string,

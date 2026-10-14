@@ -10,18 +10,10 @@ import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
 /**
  * Le suivi de l'arriéré, d'un jour à l'autre.
  *
- * Un arriéré qui dépasse le plafond de session un jour ne veut rien dire ; le
- * même plusieurs jours de suite veut dire que le rythme de dépôt et le rythme de
- * révision ne se rejoindront pas tout seuls. Pour le savoir il faut se souvenir
- * du jour où ça a commencé, et ce jour-là ne se déduit d'aucune autre donnée :
- * on ne peut pas reconstruire l'arriéré d'hier à partir des échéances
- * d'aujourd'hui, parce que les révisions les ont déplacées.
- *
- * D'où cette écriture au fil de la lecture du tableau de bord, qui est le seul
- * endroit où l'on regarde l'arriéré. Elle est conditionnelle : elle ne part que
- * quand l'état change — l'arriéré s'installe, ou il se résorbe. Un arriéré qui
- * dure ne réécrit rien, donc la très grande majorité des affichages ne font
- * qu'une lecture.
+ * Seul un arriéré qui dure veut dire quelque chose, et son premier jour ne se
+ * reconstruit pas à partir des échéances, que les révisions ont déplacées : il
+ * faut l'écrire. L'écriture se fait à la lecture du tableau de bord, seul
+ * endroit qui regarde l'arriéré, et seulement quand l'état change.
  */
 export type ArriereSuivi = {
   /** Assez long pour qu'on le dise. */
@@ -42,8 +34,8 @@ export async function suivreLArriere(
     select: { backlogSince: true },
   });
 
-  // Aucune ligne de statistiques : le compte n'a jamais révisé, il n'a pas
-  // d'arriéré à raconter. On ne crée pas la ligne pour y écrire un vide.
+  // `provisionAccount` crée la ligne à l'inscription ; si elle manque, il n'y a
+  // rien à suivre, et ce n'est pas ici qu'on la crée.
   if (!stats) return { signaler: false, jours: 0 };
 
   const avant: SuiviDeLArriere = {

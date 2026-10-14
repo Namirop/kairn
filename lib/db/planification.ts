@@ -3,16 +3,12 @@ import { fromCard, toCard, type AtomCardFields } from "@/lib/db/fsrs-card";
 import type { ReviewRating } from "@/lib/db/types";
 
 /**
- * Le calcul d'échéance, délégué à ts-fsrs.
+ * Le calcul d'échéance, délégué à ts-fsrs : la carte stockée est celle que
+ * l'algorithme rend. Seul endroit de l'application qui appelle l'ordonnanceur.
  *
- * L'algorithme n'est jamais réécrit : on lui passe la carte du concept et la
- * note, il rend une carte, on la stocke telle quelle. Ce fichier est le seul
- * endroit de l'application qui appelle l'ordonnanceur.
- *
- * Le brouillage reste **actif**, contrairement au seed qui le coupe pour être
- * rejouable. Il existe pour éviter qu'un paquet de concepts révisés le même jour
- * revienne le même jour pour toujours : c'est utile en vrai, et seulement gênant
- * quand on veut une base identique à chaque exécution.
+ * `fsrs()` sans paramètres laisse le brouillage (`enable_fuzz`) à son défaut,
+ * qui est désactivé : des concepts révisés le même jour reviennent le même
+ * jour. Le seed (`prisma/seed/replay.ts`) le coupe explicitement.
  */
 
 const ordonnanceur = fsrs();

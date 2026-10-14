@@ -17,21 +17,15 @@ import {
 } from "@/lib/domain/selection-session";
 
 /**
- * Ce qu'il y a à réviser maintenant.
- *
- * La requête ne décide rien : elle ramène un peu plus large que nécessaire, et
- * ce sont les fonctions pures de `lib/domain/` qui tranchent ce qui est dû, dans
- * quel ordre, et quelle formulation servir. La vérité du produit est testable
- * sans base ; la base ne fait que la nourrir.
+ * Ce qu'il y a à réviser maintenant. La requête ramène un peu large ; ce sont
+ * les fonctions pures de `lib/domain/` qui tranchent ce qui est dû, dans quel
+ * ordre et sous quelle formulation.
  */
 
 /**
- * Marge de la présélection SQL.
- *
- * Le jour civil de l'utilisateur se termine au plus tard dans un peu moins de
- * 24 h, quel que soit son décalage. On ramène 36 h pour n'avoir à réfléchir ni
- * aux fuseaux extrêmes ni aux changements d'heure, puis `composerSession` fait
- * le tri exact.
+ * Marge de la présélection SQL. Le jour civil de l'utilisateur finit au plus
+ * tard dans un peu moins de 24 h ; 36 h couvrent les fuseaux extrêmes et les
+ * changements d'heure, et `estServableAujourdhui` fait le tri exact.
  */
 const MARGE_MS = 36 * 60 * 60 * 1000;
 
@@ -44,11 +38,8 @@ export type SessionDuJour = {
   /** Jour civil du prochain passage, au format AAAA-MM-JJ. */
   prochainJourServi: string | null;
   /**
-   * Ce qui est dû et que la journée ne servira pas : le plafond est atteint.
-   *
-   * Zéro dans tous les autres cas, y compris quand rien n'est dû. C'est ce qui
-   * distingue « tu es à jour » de « tu as fait ta journée », deux écrans vides qui
-   * n'ont ni le même sens ni la même suite.
+   * Ce qui est dû mais dépasse le plafond, zéro sinon. Distingue « tu es à
+   * jour » de « tu as fait ta journée ».
    */
   reporteAuLendemain: number;
 };
@@ -106,8 +97,7 @@ export async function lireSessionDuJour(
       where: { userId, uncertain: false, variants: { some: { retiredAt: null } } },
       orderBy: { due: "asc" },
       select: { due: true, lastReview: true },
-      // Le prochain jour servi est parmi les plus proches échéances : inutile de
-      // ramener un historique entier pour trouver un minimum.
+      // Le prochain jour servi est parmi les plus proches échéances.
       take: 50,
     }),
     compterFaitsAujourdhui(userId, maintenant, fuseau),
@@ -117,27 +107,16 @@ export async function lireSessionDuJour(
   const reste = plafondRestant(plafond, faits);
 
   /*
-    La journée est composée **avant** que les formulations soient choisies.
+    La journée est composée avant de choisir les formulations : la requête
+    ramène 36 h d'avance, et répartir les formats sur tous les candidats ferait
+    consommer des QCM par des concepts dus demain.
 
-    Trois décisions ne regardent pas la formulation — ce qui est dû, dans quel
-    ordre d'urgence, et jusqu'où le plafond va. On les prend donc en premier,
-    et la répartition des formats porte ensuite sur exactement les concepts que
-    la session posera.
-
-    C'est le défaut qui a fait revenir trois QCM d'affilée après la première
-    correction : la requête ramène trente-six heures d'avance, et répartir les
-    formats sur tous les candidats faisait consommer des QCM et des textes à
-    trou par des concepts dus **demain**. Les questions réellement posées
-    héritaient d'un compteur déjà déséquilibré.
-
-    L'ordre passé au répartiteur est celui des identifiants et non celui de
-    l'urgence : le glouton en dépend, et une session qui se recompose doit se
-    recomposer à l'identique.
+    Le répartiteur reçoit l'ordre des identifiants, pas celui de l'urgence : le
+    glouton en dépend, et une session doit se recomposer à l'identique.
   */
   const proposables = candidats.flatMap((atome) => {
-    // Une formulation sans texte ni réponse ne se pose pas : elle donnerait une
-    // carte blanche. La requête ne sait pas le dire — un `not: ""` laisserait
-    // passer une espace —, donc le tri se fait ici, comme le reste des règles.
+    // Une formulation vide se trie ici : un `not: ""` en SQL laisserait passer
+    // une espace.
     const equivalentes = variantesEquivalentes(
       atome.variants.filter(questionServable),
       atome.reviews[0]?.variant.facet ?? null,
@@ -178,11 +157,9 @@ export async function lireSessionDuJour(
 }
 
 /**
- * Combien de concepts la journée a déjà servis, chez l'utilisateur.
- *
- * `lastReview` est écrit par la session et par elle seule — l'entraînement libre
- * ne le touche pas —, donc c'est exactement le compte qui doit entrer dans le
- * plafond. La borne SQL est large et le jour se compare en mémoire, comme partout.
+ * Combien de concepts la journée a déjà servis. `lastReview` n'est écrit que
+ * par la session, jamais par l'entraînement : c'est le compte qui entre dans
+ * le plafond.
  */
 export async function compterFaitsAujourdhui(
   userId: string,
@@ -200,12 +177,9 @@ export async function compterFaitsAujourdhui(
 }
 
 /**
- * Le prochain jour où quelque chose sera effectivement posé.
- *
- * Ce n'est pas la plus petite échéance en base : un concept revu ce matin porte
- * une échéance encore aujourd'hui — ts-fsrs replanifie court en apprentissage —
- * et ne reviendra pourtant que demain. Annoncer son échéance produisait la
- * phrase « rien n'arrive aujourd'hui, le prochain revient aujourd'hui ».
+ * Le prochain jour où quelque chose sera posé. Pas la plus petite échéance : un
+ * concept revu ce matin peut porter une échéance encore aujourd'hui (ts-fsrs
+ * replanifie court en apprentissage) et ne reviendra pourtant que demain.
  */
 function prochainJourServi(
   concepts: { due: Date; lastReview: Date | null }[],
@@ -216,13 +190,9 @@ function prochainJourServi(
 }
 
 /**
- * Combien de concepts la session servirait maintenant.
- *
- * C'est le chiffre qu'annonce le tableau de bord, et il doit venir d'ici : le
- * compter à part revenait à avoir deux définitions de « est dû », et elles
- * avaient déjà divergé — l'accueil promettait cinq concepts, la session
- * répondait « tu es à jour ». La règle est dans `estServableAujourdhui`, et
- * elle n'a qu'un seul endroit où vivre.
+ * Combien de concepts la session servirait maintenant : le chiffre du tableau
+ * de bord. Il passe par `estServableAujourdhui` pour qu'il n'existe qu'une
+ * définition de « est dû ».
  */
 export async function compterDusAujourdhui(
   userId: string,
@@ -244,12 +214,8 @@ export async function compterDusAujourdhui(
 }
 
 /**
- * Ce que la journée sert et ce qu'elle reporte, avec de quoi le dire.
- *
- * Le tableau de bord composait ces quatre valeurs lui-même. Un second écran en a
- * eu besoin — la page d'un dépôt, qui dit ce que les concepts qu'on vient
- * d'obtenir changent à la journée —, et recomposer la même chose ailleurs, c'est
- * se donner deux définitions de la charge du jour. Elles divergent toujours.
+ * Ce que la journée sert et ce qu'elle reporte. Partagé par le tableau de bord
+ * et la page d'un dépôt, pour une seule définition de la charge du jour.
  */
 export async function lireChargeDuJour(
   userId: string,
@@ -270,14 +236,11 @@ export async function lireChargeDuJour(
 }
 
 /**
- * Ce qui revient demain, dans le calendrier de l'utilisateur.
+ * Ce qui revient demain, dans le calendrier de l'utilisateur. À lire après la
+ * session : les notes données viennent de déplacer les échéances.
  *
- * Lu après la session et non avant : les notes qu'on vient de donner ont
- * déplacé les échéances, et annoncer le chiffre d'avant serait annoncer faux.
- *
- * Ce qui est resté dû aujourd'hui en fait partie. Le plafond étant journalier, un
- * concept que la journée n'a pas servi ne repassera pas avant demain : l'annoncer
- * pour aujourd'hui serait promettre une session qui ne viendra pas.
+ * Ce qui reste dû aujourd'hui au-delà du plafond en fait partie : il ne
+ * repassera pas avant demain.
  */
 export async function compterDusDemain(
   userId: string,
@@ -291,10 +254,8 @@ export async function compterDusDemain(
       userId,
       uncertain: false,
       variants: { some: { retiredAt: null } },
-      // Borne haute seulement. Une borne basse écarterait les concepts en
-      // retard — quatre jours de retard, et le concept sortait de la fenêtre
-      // alors qu'il revient bien demain. Le retard accumulé est justement le
-      // cas où ce chiffre compte le plus.
+      // Borne haute seulement : une borne basse écarterait les concepts en
+      // retard, qui reviennent pourtant demain.
       due: { lte: new Date(maintenant.getTime() + 2 * MARGE_MS) },
     },
     select: { due: true, lastReview: true },

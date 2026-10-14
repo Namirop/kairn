@@ -22,11 +22,10 @@ export async function createGenerationJob(
 
 /**
  * Prend le job s'il est encore à prendre : en attente, ou bloqué en cours
- * depuis plus de dix minutes. Rend `null` si quelqu'un d'autre l'a déjà pris.
+ * depuis `STALL_AFTER_MS`. Rend `null` si quelqu'un d'autre l'a déjà pris.
  *
- * Une demande reportée est refusée jusqu'à sa date. La garde est ici et nulle
- * part ailleurs : c'est le seul passage obligé vers l'exécution, et un
- * déclenchement direct la contournerait partout où on l'aurait mise plus haut.
+ * La garde sur `notBefore` est ici parce que c'est le seul passage obligé vers
+ * l'exécution : plus haut, un déclenchement direct la contournerait.
  */
 export async function claimJob(
   jobId: string,
@@ -50,12 +49,9 @@ export async function claimJob(
 }
 
 /**
- * Rend le job à la file sans lui compter sa tentative.
- *
- * Réservé au plafond d'appels atteint. Ce n'est pas un échec : rien ne s'est
- * cassé, la journée est simplement pleine, et le même travail réussira demain
- * à l'identique. Lui compter une tentative le condamnerait au bout de trois
- * journées chargées, pour une raison qui ne le concerne pas.
+ * Rend le job à la file sans lui compter sa tentative. Réservé au plafond
+ * d'appels atteint : ce n'est pas un échec, et compter la tentative le
+ * condamnerait au bout de trois journées chargées.
  */
 export async function reporterJob(jobId: string, motif: string): Promise<void> {
   await prisma.generationJob.update({
@@ -65,23 +61,14 @@ export async function reporterJob(jobId: string, motif: string): Promise<void> {
 }
 
 /**
- * Le travail rendu par un job est incomplet : il repart en file avec ce qui
- * manque.
+ * Le travail rendu par un job est incomplet : il est rétréci aux concepts sans
+ * questions et rendu à la file, où le cron le reprend. Terminé `DONE`, ces
+ * concepts ne seraient repris par personne, et l'écran ne dirait rien tant
+ * qu'un seul concept est servable.
  *
- * **C'est la faille qui laissait des concepts sans questions pour toujours.** Un
- * appel porte trois concepts ; s'il n'en rend qu'un, `rangerLesLots` écrit ce
- * qui est venu, signale les rangs manquants — et le job se terminait quand même
- * `DONE`. Les deux concepts sans questions n'étaient repris par personne : ni le
- * cron, qui ne ramasse que les jobs en file, ni l'écran, qui ne dit rien tant
- * qu'un seul concept est servable. Ils restaient invisibles et muets.
- *
- * Le job est donc rétréci à ce qui manque et rendu à la file. La reprise passe
- * par la soumission groupée, qui coûte moitié prix et peut attendre : ce n'est
- * pas une urgence, c'est une dette. La tentative reste comptée — sans quoi un
- * modèle qui rend systématiquement deux lots sur trois boucle sans fin.
- *
- * Rend `false` quand les tentatives sont épuisées : au tiers essai, on arrête et
- * l'appelant laisse le job échouer pour de bon.
+ * La tentative reste comptée, sans quoi un modèle qui rend toujours deux lots
+ * sur trois boucle sans fin. Rend `false` quand elles sont épuisées : l'appelant
+ * laisse alors le job échouer.
  */
 export async function reprendreCeQuiManque(
   jobId: string,
@@ -115,35 +102,15 @@ export async function finishJob(
 }
 
 /**
- * Jobs que le cron peut relancer : les dépôts d'abord, puis les plus anciens.
+ * Jobs que le cron peut relancer : en file, ou bloqués en cours. Les trois
+ * natures y sont : un job de questions dont le déclenchement après réponse s'est
+ * perdu (processus recyclé) n'a pas d'autre filet.
  *
- * **Les trois natures y sont, questions comprises.** Elles en étaient exclues
- * parce qu'un job de questions vivait dans un lot chez le fournisseur et que
- * seule la relève du lot pouvait le refermer. L'envoi groupé n'existe plus : un
- * job de questions part en appel direct comme les deux autres, et sans ce
- * filet, celui dont le déclenchement après réponse n'a pas eu lieu — processus
- * recyclé, contexte de requête perdu — restait en attente pour toujours.
- *
- * Un job repris est soit resté en file, soit en cours depuis plus longtemps
- * qu'un traitement ne dure. `notBefore` tient les régénérations différées.
- *
- * **Une régénération passe toujours après un dépôt, quel que soit son âge.**
- * L'ancienneté seule les mettait dans la même file, et le 09/09/2026 elle a
- * donné ce qu'elle devait donner : vingt et un jobs de réparation datés du 04/09,
- * dont le `notBefore` venait d'échoir, se sont retrouvés devant un dépôt fait à
- * l'instant. À trois jobs par passage toutes les quinze minutes, la personne
- * regardait un dépôt sans questions pendant près de deux heures, sans qu'aucune
- * erreur ne le dise.
- *
- * Les deux natures ne se valent pas et n'ont pas à se ranger ensemble. Une
- * régénération réécrit des questions qui existent déjà, sous un prompt qui a
- * changé : personne ne l'attend, et un jour de retard ne coûte rien. Un dépôt
- * est quelqu'un devant un écran. Ce n'est pas une priorité qu'on accorde, c'est
- * la seule qui décrive ce qui se passe réellement.
- *
- * L'ancienneté départage à l'intérieur de chaque nature, et rien ne peut mourir
- * de faim : les dépôts arrivent quelques-uns par jour, la file se vide, et les
- * régénérations reprennent la main dès qu'il n'y a plus personne à servir.
+ * Une régénération passe toujours après un dépôt, quel que soit son âge :
+ * personne ne l'attend, alors qu'un dépôt est quelqu'un devant un écran. À trois
+ * jobs par passage toutes les quinze minutes, un lot de régénérations échues
+ * devant un dépôt le laisse des heures sans questions. L'ancienneté départage
+ * ensuite ; les régénérations ne meurent pas de faim, la file des dépôts se vide.
  */
 export async function findResumableJobs(
   limit: number,
@@ -165,12 +132,10 @@ export async function findResumableJobs(
 
 /**
  * Ferme les jobs bloqués qui ont épuisé leurs tentatives. Sans ça ils
- * resteraient RUNNING pour toujours, invisibles et jamais repris.
+ * resteraient RUNNING pour toujours, jamais repris.
  *
- * Un job de questions parti en lot est exclu : il vit chez le fournisseur, et
- * c'est la relève qui le termine. Un job de questions sans lot, lui, entre —
- * depuis qu'ils partent en appel direct, ils peuvent se bloquer comme les
- * autres.
+ * Le filtre `batchId: null` écarte les jobs rattachés à un envoi groupé, que
+ * plus aucun code ne crée.
  */
 export async function failExhaustedJobs(now: Date = new Date()): Promise<number> {
   const stallCutoff = new Date(now.getTime() - STALL_AFTER_MS);

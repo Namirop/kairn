@@ -2,16 +2,12 @@ import { prisma } from "@/lib/db/client";
 import { evenementARetenir, type EtatDAbonnement } from "@/lib/domain/rapport-de-stripe";
 
 /**
- * Ce qui écrit la ligne d'abonnement.
+ * Ce qui écrit la ligne d'abonnement, à part de `abonnement.ts` qui la lit :
+ * seul le webhook rend un compte payant, et rien ne doit pouvoir accorder un
+ * plan en important le module d'affichage.
  *
- * À part de `abonnement.ts`, qui lit, et pour la raison qu'il énonce : le droit
- * de rendre un compte payant n'appartient qu'au webhook. Séparer les deux
- * fichiers fait que rien ne peut accorder un plan par mégarde en important le
- * module qui sert à l'afficher — un abonnement offert ne se voit pas, il ne
- * produit ni erreur ni réclamation.
- *
- * Le dossier client fait exception : il s'écrit avant tout paiement, il n'ouvre
- * aucun droit, et il est ici parce qu'il vit dans la même ligne.
+ * Le dossier client fait exception : il s'écrit avant tout paiement et n'ouvre
+ * aucun droit.
  */
 
 /** Le dossier d'un compte chez Stripe, tel qu'on le connaît. */
@@ -33,12 +29,9 @@ export async function lireDossierStripe(userId: string): Promise<DossierStripe> 
 }
 
 /**
- * Rattache un compte à son client Stripe, et crée la ligne si elle manque.
- *
- * C'est la première écriture de la vie d'un abonnement, et elle n'accorde rien :
- * un compte peut avoir un client Stripe sans avoir jamais payé — c'est
- * exactement l'état de quelqu'un qui a ouvert la page de paiement puis fermé
- * l'onglet. Le plan reste à sa valeur par défaut.
+ * Rattache un compte à son client Stripe, en créant la ligne si elle manque.
+ * N'accorde rien : on a un client Stripe dès qu'on ouvre la page de paiement,
+ * même sans payer.
  */
 export async function attacherLeClientStripe(userId: string, clientId: string): Promise<void> {
   await prisma.subscription.upsert({
@@ -62,15 +55,13 @@ export async function compteDuClientStripe(clientId: string): Promise<string | n
 export type Ecriture = "ecrit" | "ignore";
 
 /**
- * Écrit l'état d'un abonnement, si l'événement qui le porte a quelque chose à
- * apprendre à la ligne.
+ * Écrit l'état d'un abonnement si l'événement est plus récent que le dernier
+ * retenu.
  *
- * **La règle est vérifiée deux fois, et ce n'est pas une redondance.**
- * `evenementARetenir` est la règle elle-même : elle est pure, elle est testée,
- * et c'est elle qui décide de ce qu'on rapporte à l'appelant. La condition
- * répétée dans le `where` est le verrou : deux webhooks traités en parallèle
- * liraient tous les deux l'ancienne valeur, et le plus vieux gagnerait la course
- * une fois sur deux. L'une dit pourquoi, l'autre empêche.
+ * La règle est vérifiée deux fois, à dessein : `evenementARetenir` décide ce
+ * qu'on rapporte, la condition du `where` sert de verrou. Sans elle, deux
+ * webhooks en parallèle liraient la même valeur et le plus vieux pourrait
+ * gagner.
  */
 export async function enregistrerLEtatDeLAbonnement(entree: {
   userId: string;

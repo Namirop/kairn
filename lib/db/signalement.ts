@@ -2,16 +2,12 @@ import { prisma } from "@/lib/db/client";
 import type { MotifDeSignalement, VariantFacet, VariantFormat } from "@/lib/db/types";
 
 /**
- * Ce que quelqu'un dit d'une question qui ne va pas.
+ * Ce que quelqu'un dit d'une question qui ne va pas : le seul signal sur une
+ * mauvaise question, qui se subit en silence.
  *
- * C'est la seule instrumentation du produit. Les prompts ont été réglés sur onze
- * dépôts d'exemple, et rien d'autre ne dira quand une question part en vrille
- * chez quelqu'un d'autre — un mauvais découpage se voit, une mauvaise question
- * se subit en silence.
- *
- * **Rien n'est régénéré automatiquement.** La question signalée sort du tirage,
- * on remercie, on passe. Réécrire dans la foulée coûterait un appel sur la foi
- * d'un clic, et surtout effacerait la trace qu'on cherchait justement à garder.
+ * Rien n'est régénéré automatiquement : la question sort du tirage, c'est
+ * tout. Réécrire coûterait un appel sur la foi d'un clic et effacerait la
+ * trace qu'on veut garder.
  */
 
 export type SignalementAEcrire = {
@@ -24,18 +20,12 @@ export type SignalementAEcrire = {
 /**
  * Écrit le signalement et retire la question du tirage.
  *
- * Le contexte n'est pas demandé à l'appelant : il est lu en base au moment du
- * geste. Ce qu'un client envoie, ce sont deux identifiants et un motif ; tout le
- * reste — la question, sa réponse, le concept, le format, la facette, le modèle
- * et l'empreinte du prompt — vient de la ligne elle-même, et ne peut donc pas
- * être arrangé.
+ * Le client n'envoie que des identifiants et un motif : le contexte (question,
+ * réponse, concept, modèle, version du prompt) est lu en base, donc ne peut
+ * pas être arrangé. Les textes sont recopiés, pour rester lisibles après la
+ * suppression du concept, geste naturel après un signalement.
  *
- * Les textes sont **recopiés** dans le signalement. Signaler une question fausse
- * puis supprimer le concept est le geste naturel, et c'est précisément ce
- * signalement-là qu'on veut pouvoir lire un mois plus tard.
- *
- * Rend `false` quand la question n'est pas celle de cette personne : l'identifiant
- * vient du client, il n'est jamais cru sur parole.
+ * Rend `false` si la question n'appartient pas à cette personne.
  */
 export async function signalerUneQuestion(
   signalement: SignalementAEcrire,
@@ -75,8 +65,7 @@ export async function signalerUneQuestion(
         promptVersion: variante.promptVersion,
       },
     }),
-    // Déjà retirée : on ne repousse pas sa date. Deux signalements sur la même
-    // question sont possibles depuis deux onglets, et le premier fait foi.
+    // Déjà retirée (deux onglets) : le premier signalement garde sa date.
     prisma.variant.updateMany({
       where: { id: variante.id, retiredAt: null },
       data: { retiredAt: maintenant },
@@ -113,15 +102,9 @@ export type PageDeSignalements = {
 };
 
 /**
- * Une page de signalements, la plus récente d'abord.
- *
- * La liste entière tenait sur l'écran tant qu'il y en avait dix. À cent, elle
- * fait une page qu'on ne lit pas — et un signalement qu'on ne lit pas ne sert à
- * rien, puisque c'est la seule instrumentation qualitative du produit.
- *
- * Le rang demandé est ramené dans les bornes plutôt que refusé : un numéro de
- * page vient d'une URL, donc de n'importe qui, et une page vide serait un cul-de-
- * sac là où la dernière page est manifestement ce qu'on voulait.
+ * Une page de signalements, la plus récente d'abord. Le rang vient de l'URL :
+ * il est ramené dans les bornes plutôt que refusé, la dernière page étant
+ * manifestement ce qu'on voulait.
  */
 export async function listerLesSignalementsPagines(
   rang: number,
@@ -148,10 +131,9 @@ export async function listerLesSignalements(limite = 100): Promise<SignalementLu
 }
 
 /**
- * Dit, pour chaque ligne, si le concept dont elle est tirée existe encore.
- *
- * En une requête pour toute la page et non une par ligne : le signalement porte
- * une copie de son concept, mais pas la preuve qu'il n'a pas été supprimé depuis.
+ * Dit, pour chaque ligne, si le concept d'origine existe encore, en une requête
+ * pour toute la page. La copie du concept ne prouve pas qu'il n'a pas été
+ * supprimé depuis.
  */
 async function enrichir(
   lignes: Awaited<ReturnType<typeof prisma.signalement.findMany>>,

@@ -2,11 +2,9 @@ import { prisma } from "@/lib/db/client";
 import type { VarianteEnBase } from "@/lib/db/question-servie";
 
 /**
- * Charge un Variant et son Atom pour la vitrine d'assets (dev-only).
- *
- * C'est le seul appelant : la vitrine a besoin d'une vraie question, désignée par
- * son id, pour la montrer dans un état de réponse figé sans piloter une session.
- * Rien n'est écrit. La route qui l'appelle est inerte hors développement.
+ * Charge un Variant et son Atom pour la vitrine d'assets, qui montre une vraie
+ * question dans un état de réponse figé. Lecture seule ; la route qui l'appelle
+ * est inerte hors développement.
  */
 
 export type ConceptEtVariante = {

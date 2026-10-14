@@ -12,20 +12,16 @@ export type CandidatALaRelance = {
 /**
  * Les comptes qui n'ont jamais rien déposé et qu'on n'a jamais relancés.
  *
- * **Trois filtres, et c'est SQL qui les applique**, parce qu'ils portent tous
- * sur des ensembles : aucun `Input`, aucune relance déjà écrite, et une
- * inscription assez récente. L'heure locale, elle, ne se compare pas en SQL —
- * elle dépend du fuseau de chacun — et reste à `estLHeureDeLaRelance`.
+ * L'heure locale dépend du fuseau de chacun : elle reste à
+ * `estLHeureDeLaRelance`.
  *
- * **`inputs: { none: {} }` et non un compteur à zéro.** Un dépôt rejeté ou en
- * échec reste un `Input` : quelqu'un qui a essayé et dont le dépôt n'a rien
- * donné n'est pas quelqu'un qui n'a jamais essayé, et lui écrire « rien n'est
- * encore déposé » serait faux. La relance s'adresse à qui n'a pas franchi le
- * pas, pas à qui a buté.
+ * `inputs: { none: {} }` compte aussi les dépôts rejetés ou en échec : qui a
+ * essayé et buté n'est pas qui n'a jamais essayé, et lui écrire « rien n'est
+ * encore déposé » serait faux.
  *
- * **La borne basse se lit sur `createdAt`**, pas sur un jour local : elle ne
- * sert qu'à empêcher la requête de parcourir toute la table, et une marge d'un
- * jour couvre tous les fuseaux. Le jugement exact revient à la fonction pure.
+ * La borne sur `createdAt` ne sert qu'à ne pas parcourir toute la table ; le
+ * jour de marge couvre tous les fuseaux, le jugement exact revient à la
+ * fonction pure.
  */
 export async function findComptesARelancer(
   maintenant: Date,

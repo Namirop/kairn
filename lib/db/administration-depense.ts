@@ -4,14 +4,11 @@ import { localDay } from "@/lib/domain/local-day";
 import { coutSelonConventions } from "@/lib/domain/tarifs";
 
 /**
- * La dépense du jour, lue au registre `AiCall`.
+ * La dépense, lue au registre `AiCall`. Le jour est celui d'UTC, calendrier du
+ * plafond d'appels, pour recouvrir exactement les lignes qu'il résume.
  *
- * Le jour est celui d'UTC, parce que c'est le calendrier du plafond d'appels :
- * une fenêtre calculée autrement ne recouvrirait pas les lignes qu'elle résume.
- *
- * Les échecs sont comptés et non écartés. Un appel qui échoue a pu consommer des
- * tokens et a pris sa place au plafond ; le masquer ferait croire à une dépense
- * plus faible qu'elle n'est, exactement le jour où quelque chose ne va pas.
+ * Les échecs sont comptés : un appel qui échoue a pu consommer des tokens et a
+ * pris sa place au plafond.
  */
 
 export type LigneDIntention = {
@@ -55,11 +52,8 @@ type LigneDAppels = {
 };
 
 /**
- * Additionne deux coûts réels en propageant l'absence.
- *
- * Un total réel n'a de sens que si **toutes** ses composantes en ont un. Traiter
- * une absence comme un zéro ferait un total plus bas que la réalité, ce qui est
- * précisément l'erreur qu'un tableau de dépense ne doit pas commettre.
+ * Additionne deux coûts réels en propageant l'absence : traiter une absence
+ * comme zéro sous-estimerait le total.
  */
 function ajouterReel(cumul: number | null | undefined, ajout: number | null): number | null {
   if (cumul === null || ajout === null) return null;
@@ -76,18 +70,12 @@ type LigneDeJourEtModele = {
 };
 
 /**
- * La dépense jour par jour, sur une fenêtre glissante.
+ * La dépense jour par jour sur une fenêtre glissante, pour dire si le chiffre
+ * du jour est habituel.
  *
- * Le total du jour dit combien on a dépensé ; il ne dit pas si c'est habituel.
- * C'est la seule question à laquelle un chiffre seul ne répond jamais, et c'est
- * pour elle que cette série existe — trois centimes ne veulent rien dire tant
- * qu'on ne sait pas si les jours d'avant en faisaient trois ou trente.
- *
- * Les jours vides sont engendrés par la base, comme pour les volumes : une série
- * qui saute les jours sans appel dessinerait une dépense continue.
- *
- * La maille de groupement est le **jour et le modèle**, parce que la conversion
- * de tarif appartient à un modèle et à une date. On replie ensuite par jour.
+ * `generate_series` engendre les jours vides, qui doivent rester dans la série.
+ * Groupé par jour et modèle, parce que la conversion de tarif dépend des deux,
+ * puis replié par jour.
  */
 export async function lireLaDepenseParJour(
   maintenant: Date,
@@ -121,8 +109,7 @@ export async function lireLaDepenseParJour(
     };
     const cumul = parJour.get(ligne.jour) ?? vide;
 
-    // Un jour sans appel arrive quand même, par la jointure ouverte : il porte
-    // un modèle nul et des compteurs à zéro. Il doit rester dans la série.
+    // Jour sans appel : la jointure ouverte le rend avec un modèle nul.
     if (ligne.model === null) {
       parJour.set(ligne.jour, cumul);
       continue;
@@ -143,18 +130,15 @@ export async function lireLaDepenseParJour(
 }
 
 /**
- * La base rend une ligne par intention **et par modèle** : c'est la maille où la
- * conversion de tarif est juste, une remise appartenant à un modèle. On replie
- * ensuite par intention pour l'écran.
+ * La dépense du jour par intention. La base groupe par intention et par
+ * modèle, maille où la conversion de tarif est juste, puis on replie.
  */
 export async function lireLaDepenseDuJour(maintenant: Date): Promise<BlocDepense> {
   const jour = localDay(maintenant, "UTC");
   const debut = debutDuJourUtc(maintenant);
   const fin = new Date(debut.getTime() + 24 * 60 * 60 * 1000);
 
-  // La fenêtre est bornée des deux côtés. Sans borne haute, « le jour » veut dire
-  // « depuis ce matin, et pour toujours » : c'est la même chose tant qu'on
-  // regarde le présent, et c'est faux dès qu'on regarde une journée passée.
+  // Bornée des deux côtés, pour rester juste sur une journée passée.
   const lignes = await prisma.$queryRaw<LigneDAppels[]>`
     SELECT
       "purpose", "model",

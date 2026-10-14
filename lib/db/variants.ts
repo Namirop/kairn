@@ -4,12 +4,9 @@ import type { VariantFacet, VariantFormat } from "@/lib/db/types";
 import { ordonnerLesOptions } from "@/lib/domain/ordre-des-options";
 
 /**
- * Écriture des questions d'un concept.
- *
- * Les données propres au format vivent dans `payload` : les options d'un QCM et
- * l'index de la bonne, la phrase trouée et les formes acceptées d'un texte à
- * trou. Aucun champ d'échéance ni de difficulté n'apparaît ici — la
- * planification porte sur l'Atom, jamais sur la formulation.
+ * Écriture des questions d'un concept. Ce qui est propre au format vit dans
+ * `payload`. Aucun champ d'échéance ni de difficulté ici : la planification
+ * porte sur l'Atom.
  */
 
 export type QuestionAEcrire = {
@@ -25,29 +22,17 @@ export type QuestionAEcrire = {
 };
 
 /**
- * Ce que le format ajoute à la question, ou rien s'il n'ajoute rien.
+ * Ce que le format ajoute à la question, ou rien.
  *
- * Les options d'un QCM sont remises en ordre avant d'être écrites : le modèle
- * place la bonne réponse en première position neuf fois sur dix, et ce qui est
- * stocké ici est ce qui sera montré. La raison complète est dans
- * `lib/domain/ordre-des-options.ts`.
+ * Les options d'un QCM sont remises en ordre avant écriture : le modèle met la
+ * bonne réponse en tête neuf fois sur dix (voir `lib/domain/ordre-des-options.ts`).
+ * La graine est concept + facette, faute d'id de Variant avant le `createMany` :
+ * une facette est unique par lot et stable d'une régénération à l'autre.
  *
- * La graine est le concept et la facette plutôt que l'id du Variant, qui
- * n'existe pas encore — `createMany` les fait naître en base. Elle en a les deux
- * propriétés utiles : une facette n'apparaît qu'une fois par lot, donc chaque
- * question a la sienne, et elle ne bouge pas d'une régénération à l'autre.
- *
- * **Un vrai ou faux y pose son verdict, et ce n'est pas un détail de stockage.**
- * Il ne l'a jamais fait : la génération rendait `estVraie`, le schéma le lisait,
- * le contrôle le relisait contre la cible — et l'écriture le jetait. La seule
- * trace qui restait était le mot « Vrai » ou « Faux » en tête de `answerKey`,
- * que `choixDUnVraiOuFaux` allait chercher faute de mieux. Le 02/09, le prompt a
- * interdit ce verdict en tête, à raison : les deux propositions sont déjà à
- * l'écran. Le dernier signal a disparu avec lui, et chaque affirmation réécrite
- * depuis est retombée en question ouverte — une phrase posée à plat, sans ses
- * deux boutons, dont une sur deux est fausse par construction. On révisait des
- * contre-vérités. Le verdict est donc écrit, et le repli sur `answerKey` ne sert
- * plus qu'aux lignes d'avant.
+ * Un vrai ou faux y écrit son verdict `expected`. Sans lui, l'affirmation
+ * retombe en question ouverte, alors qu'une sur deux est fausse par
+ * construction. Le repli sur `answerKey` dans `choixDUnVraiOuFaux` ne sert
+ * qu'aux lignes qui n'ont pas ce champ.
  */
 function payloadDe(question: QuestionAEcrire, atomId: string) {
   if (question.cloze) return question.cloze;
@@ -71,13 +56,8 @@ export async function ecrireQuestions(
   atomId: string,
   questions: QuestionAEcrire[],
   /**
-   * Le modèle qui a écrit ces questions, nommé par l'appelant.
-   *
-   * Ce module le lisait lui-même dans l'environnement, ce qui était faux de deux
-   * façons : il inscrivait le modèle par défaut là où une surcharge en avait
-   * imposé un autre, et il levait sur un environnement incomplet alors que
-   * l'appel venait précisément de réussir grâce à la surcharge qui le complétait.
-   * L'appelant, lui, sait sous quelle configuration il a émis.
+   * Le modèle qui a écrit ces questions, nommé par l'appelant : lui seul sait
+   * si une surcharge d'environnement a remplacé le modèle par défaut.
    */
   model: string,
 ): Promise<number> {
@@ -94,10 +74,9 @@ export async function ecrireQuestions(
   const promptVersion = versionsDesPrompts(input.langue).generate_variants;
 
   const [, ecrites] = await prisma.$transaction([
-    // Les anciennes formulations sortent du tirage à l'instant où les nouvelles
-    // arrivent, jamais avant : entre la mise en file et la relève il peut se
-    // passer des heures, et le concept doit rester révisable pendant ce temps.
-    // Elles sont retirées et non supprimées — leurs Reviews passées les citent.
+    // Les anciennes formulations sortent du tirage dans la même transaction que
+    // l'arrivée des nouvelles : le concept reste révisable pendant l'attente.
+    // Retirées et non supprimées : leurs Reviews les citent.
     prisma.variant.updateMany({
       where: { atomId, retiredAt: null },
       data: { retiredAt: new Date() },
@@ -110,8 +89,6 @@ export async function ecrireQuestions(
         question: question.question,
         answerKey: question.answerKey,
         payload: payloadDe(question, atomId),
-        // Le réglage sous lequel cette question a été écrite. Posé ici, à la
-        // création, parce qu'il n'y a pas d'autre moment où on le connaisse.
         promptVersion,
         model,
       })),
@@ -122,15 +99,9 @@ export async function ecrireQuestions(
 }
 
 /**
- * Les anciennes questions d'un concept réécrit : elles ne le décrivent plus.
- *
- * Retirées, jamais supprimées. `Review.variantId` est en cascade : les
- * supprimer emportait tous les passages donnés sur ce concept — donc l'histoire
- * qui alimente la consolidation et le signal de maîtrise. Corriger une faute de
- * frappe effaçait des mois de révision, sans un mot.
- *
- * C'est déjà ce que fait `ecrireQuestions` quelques lignes plus haut, et pour
- * la même raison. Il n'y avait pas deux règles, il y en avait une et un oubli.
+ * Retire les questions d'un concept réécrit, sans les supprimer :
+ * `Review.variantId` est en cascade, et supprimer emporterait l'historique de
+ * révision du concept. Même règle que dans `ecrireQuestions`.
  */
 export async function retirerQuestions(atomId: string, maintenant = new Date()): Promise<number> {
   const { count } = await prisma.variant.updateMany({
