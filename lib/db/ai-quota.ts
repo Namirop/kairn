@@ -121,6 +121,12 @@ export async function reserverPlaceAnonyme(
   plafond: number,
   maintenant: Date = new Date(),
 ): Promise<Reservation> {
+  // Même garde que les deux autres compteurs : la première réservation du jour
+  // échappe à la clause `WHERE`, et un plafond à zéro doit tout refuser.
+  if (plafond < 1) {
+    return { obtenue: false, utilisees: await lirePlacesAnonymes(maintenant) };
+  }
+
   const jour = jourUtc(maintenant);
   const lignes = await prisma.$queryRaw<{ reserved: number }[]>`
     INSERT INTO "AiAnonymousQuota" ("day", "reserved", "createdAt", "updatedAt")
