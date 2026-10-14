@@ -6,17 +6,12 @@ import type { Manquement } from "./manquement";
  */
 
 /*
-  Les deux langues sont lues ensemble, sans qu'on dise laquelle.
+  Les deux langues sont lues ensemble : les motifs ne se recouvrent pas, et
+  passer la langue ouvrirait la possibilité de la passer mal en silence.
 
-  Un concept porte la langue de son dépôt, et ces motifs ne se recouvrent pas :
-  « ci-dessus » n'apparaît pas dans une phrase anglaise, ni « mentioned above »
-  dans une française. Demander la langue en plus aurait ouvert la seule façon de
-  rater : la passer mal, et que le contrôle cesse d'attraper en silence.
-
-  L'anglais est lu plus étroitement. « above », « below », « previously » y sont
-  aussi des mots de prose — « above 40 °C », « previously known as » — là où
-  « ci-dessus » ne renvoie qu'à un texte. On n'en retient que les tournures qui
-  ne peuvent désigner qu'un passage absent.
+  L'anglais est lu plus étroitement : « above », « previously » y sont aussi des
+  mots de prose (« above 40 °C »). On ne retient que les tournures qui ne
+  désignent qu'un passage absent.
 */
 const RENVOIS = [
   /ci-dessus|ci-dessous|ci-avant|plus haut dans|comme vu|comme expliqué|précédemment|le précédent|la précédente|susmentionné|évoqué plus haut/i,
@@ -30,10 +25,9 @@ const OUVERTURES_REPRISES = [
 ];
 
 /**
- * « Il faut », « il existe », « it is possible » : le pronom ne reprend rien, il
- * est impersonnel. « It is » laisse passer « It is a framework », qui reprend
- * bien un absent — c'est le prix d'un contrôle qui sert à mesurer, et le
- * français paie le même avec « il est ».
+ * « Il faut », « it is possible » : le pronom est impersonnel. « It is » laisse
+ * passer « It is a framework », qui reprend bien un absent : prix accepté pour
+ * un contrôle qui mesure, payé aussi par « il est ».
  */
 const OUVERTURES_IMPERSONNELLES = [
   /^il (faut|existe|est|y a|n'y a|s'agit|suffit|vaut|arrive|reste)\b/i,
@@ -42,14 +36,10 @@ const OUVERTURES_IMPERSONNELLES = [
 
 /**
  * Ce qui déclenche la règle CODE du prompt : une citation, pas un jugement sur
- * le sujet.
+ * le sujet. Sert à mesurer, pas à sanctionner.
  *
- * L'extraction écrit rarement des accents graves — elle rend `L'instruction COPY`
- * ou `Le délai passé à setTimeout`. Les marqueurs suivent donc le code tel qu'il
- * est réellement écrit, pas tel qu'on aimerait qu'il soit balisé.
- *
- * Sert à mesurer, pas à sanctionner : une question CODE posée pour respecter une
- * règle plutôt que pour éprouver quelque chose ne se verra qu'à l'œil.
+ * L'extraction écrit rarement des accents graves (« L'instruction COPY ») : les
+ * marqueurs suivent le code tel qu'il est réellement écrit.
  */
 const CITATIONS_DE_CODE = [
   /`[^`]+`/, // un fragment entre accents graves

@@ -1,24 +1,14 @@
 import { tirageDe } from "./tirage-deterministe";
 
 /**
- * Géométrie d'une jointure entre deux panneaux : une coupe de roche.
+ * Géométrie d'une jointure entre deux panneaux : une bande de strates (une
+ * ligne de coupe et deux veines) plutôt qu'un filet d'un pixel.
  *
- * Deux panneaux ne se séparent plus par un filet d'un pixel — c'est ce trait-là
- * qui faisait lire l'application comme un article. Ils se séparent par une
- * bande de strates : la surface du dessus s'arrête sur une ligne irrégulière,
- * deux veines intermédiaires marquent le passage, et la surface du dessous
- * commence.
+ * Le motif ne reprend pas la pierre du cairn : elle reste réservée à ce qui
+ * informe. Chaque jointure a sa graine, sinon le même dessin répété redevient un
+ * séparateur de gabarit.
  *
- * Le motif ne reprend pas la pierre du cairn, et c'est délibéré : la pierre
- * doit rester informative — le cairn, le compteur de session, les états vides.
- * L'étendre à la décoration de chaque jointure la viderait de son sens.
- *
- * Fonction pure : même graine, même coupe, pour toujours. Chaque jointure a la
- * sienne, sinon la répétition du même dessin en ferait un séparateur de
- * gabarit, ce qu'on vient justement d'enlever.
- *
- * Les coordonnées sont en unités de viewBox : largeur 100, hauteur 10, étirées
- * à la largeur réelle par `preserveAspectRatio="none"`.
+ * Unités de viewBox (100 × 10), étirées par `preserveAspectRatio="none"`.
  */
 
 export const LARGEUR_STRATES = 100;
@@ -38,12 +28,7 @@ function arrondi(valeur: number): number {
   return Math.round(valeur * 100) / 100;
 }
 
-/**
- * Une ligne qui traverse la bande, ondulée autour de `hauteur`.
- *
- * Les points sont reliés par des courbes lisses plutôt que par des segments :
- * une roche sédimentaire n'a pas d'angles, elle a des plis.
- */
+/** Une ligne qui traverse la bande, ondulée autour de `hauteur`, en courbes lisses. */
 function ligne(hauteur: number, amplitude: number, tirage: () => number): string {
   const pas = LARGEUR_STRATES / SEGMENTS;
   const hauteurs = Array.from({ length: SEGMENTS + 1 }, () =>
@@ -69,12 +54,9 @@ function jusquenBas(chemin: string): string {
 export function strates(graine: string): Strates {
   const tirage = tirageDe(graine);
 
-  // Les trois lignes descendent, et chacune ondule un peu moins que la
-  // précédente : la couche du dessus est celle qui a été le plus attaquée.
-  //
-  // L'amplitude compte plus qu'on ne croit. Étirée sur un écran large, une
-  // ondulation timide redevient exactement le filet qu'on a enlevé partout — il
-  // faut que le pli se voie à deux mètres de l'écran.
+  // Chaque ligne ondule un peu moins que celle du dessus. Ne pas réduire
+  // l'amplitude : étirée sur un écran large, une ondulation timide redevient un
+  // filet droit.
   const premiere = ligne(2.6, 2.2, tirage);
   const seconde = ligne(5.4, 1.8, tirage);
   const troisieme = ligne(7.8, 1.4, tirage);

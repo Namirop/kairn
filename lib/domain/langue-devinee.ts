@@ -3,16 +3,11 @@ import type { LangueDuProduit } from "./langue-du-produit";
 /**
  * La langue dans laquelle parler à quelqu'un qu'on ne connaît pas encore.
  *
- * Deux sources, dans cet ordre. Un choix explicite — le lien « English » ou
- * « Français » suivi une fois, gardé en cookie — l'emporte toujours : il a été
- * fait. À défaut, `Accept-Language`, qui dit ce que le navigateur lit, et non
- * le pays d'où l'on se connecte : on parle anglais à Lisbonne comme à
- * Bruxelles, et la Belgique seule a trois langues.
+ * D'abord le choix explicite gardé en cookie, puis `Accept-Language`, qui dit
+ * ce que le navigateur lit et non le pays d'où l'on se connecte.
  *
- * Le français reste la langue par défaut quand rien ne tranche — un
- * navigateur portugais ou allemand, un en-tête absent ou illisible. C'est la
- * langue d'origine du produit, la seule où chaque texte a été relu par
- * quelqu'un qui la parle.
+ * Le français par défaut quand rien ne tranche : c'est la langue d'origine, la
+ * seule où chaque texte a été relu par quelqu'un qui la parle.
  */
 
 const LANGUES: readonly LangueDuProduit[] = ["FR", "EN"];
@@ -42,9 +37,9 @@ function lirePreference(morceau: string, rang: number): Preference | null {
 /**
  * La première langue du produit dans l'ordre de préférence du navigateur.
  *
- * Pas seulement la première de la liste : « pt-PT, en;q=0.8 » est un navigateur
- * portugais qui lit l'anglais, et c'est l'anglais qu'il faut lui parler plutôt
- * que le français par défaut. À poids égal, l'ordre d'écriture départage.
+ * Pas seulement la première de la liste : « pt-PT, en;q=0.8 » doit donner
+ * l'anglais, pas le français par défaut. À poids égal, l'ordre d'écriture
+ * départage.
  */
 export function langueDuNavigateur(
   acceptLanguage: string | null | undefined,

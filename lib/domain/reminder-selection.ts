@@ -1,11 +1,9 @@
 import { localDay, localHour } from "./local-day";
 
 /**
- * Qui doit recevoir le rappel quotidien à cet instant.
- *
- * Fonction pure : le cron horaire lui passe les candidats lus en base et
- * l'heure courante, elle rend ceux dont l'heure locale correspond. Aucun accès
- * données, donc testable sans base ni horloge système.
+ * Qui doit recevoir le rappel quotidien à cet instant : les candidats dont
+ * l'heure locale est celle de leur rappel. Le cron peut passer plusieurs fois
+ * dans l'heure, d'où la clé de jour qui rend l'envoi idempotent.
  */
 
 export type ReminderTarget = {

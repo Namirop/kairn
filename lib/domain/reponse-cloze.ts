@@ -1,50 +1,35 @@
 /**
- * La vérification d'un texte à trou.
+ * La vérification d'un texte à trou, sans appel modèle : la tolérance est payée
+ * à la génération, sous forme de formes acceptées.
  *
- * Elle ne coûte aucun appel modèle : la tolérance a été payée une fois, à la
- * génération, sous la forme d'une liste de formes acceptées. Ici on compare, et
- * c'est tout — instantané, gratuit, et rejouable à l'identique dans un test.
+ * On absorbe la casse, les accents, la ponctuation, un déterminant de tête et
+ * une faute de frappe sur un mot assez long. Pas un mot court à une lettre près
+ * (« ver » et « vert » diffèrent), ni un mot de contenu manquant.
  *
- * Ce qu'on absorbe : la casse, les accents, les espaces en trop, la ponctuation
- * autour, un déterminant de tête en trop ou en moins, et une faute de frappe sur
- * un mot assez long pour qu'une lettre de travers reste manifestement le même
- * mot. Ce qu'on n'absorbe pas : un mot court à une lettre près — « ver » et
- * « vert » sont deux réponses différentes — ni un mot de contenu qui manque.
- *
- * Quand la comparaison échoue, l'écran montre le terme attendu et laisse la
- * personne dire « je l'avais ». C'est le seul jugement qu'on lui demande sur ce
- * format, et seulement dans ce cas.
+ * En cas d'échec, l'écran montre le terme attendu et laisse dire « je l'avais ».
  */
 
 /** Le trou dans la phrase. Trois soulignés : ça se lit, et ça se retape. */
 export const TROU = "___";
 
 /**
- * Longueur maximale d'une saisie.
- *
- * Un trou masque un à trois mots ; la forme acceptée la plus longue du corpus en
- * fait vingt-trois signes. Le plafond n'est donc pas là pour arbitrer une
- * réponse, il est là pour que la phrase reste une phrase : la saisie se recopie
- * dans le trou de l'énoncé, et rien n'empêchait d'y coller un paragraphe qui
- * poussait la carte hors de l'écran.
+ * Longueur maximale d'une saisie. La plus longue forme acceptée fait 23 signes :
+ * ce plafond n'arbitre pas une réponse, il empêche qu'un paragraphe recopié dans
+ * le trou de l'énoncé pousse la carte hors de l'écran.
  */
 export const LONGUEUR_MAX_SAISIE = 64;
 
 /**
- * Longueurs à partir desquelles une faute de frappe est tolérée.
- *
- * En deçà de six lettres, aucun écart : sur des mots courts, une lettre change
- * le sens plus souvent qu'elle ne trahit un doigt qui glisse.
+ * Longueurs à partir desquelles une faute de frappe est tolérée. Sous six
+ * lettres, une lettre change le sens plus souvent qu'elle ne trahit un doigt
+ * qui glisse.
  */
 const LONGUEUR_UN_ECART = 6;
 const LONGUEUR_DEUX_ECARTS = 10;
 
 /**
- * Ce qu'on ramène à la même chose avant de comparer.
- *
- * Le trait d'union et l'apostrophe deviennent des espaces, comme le reste de la
- * ponctuation : personne ne devrait échouer pour avoir écrit « porte greffe »
- * là où le concept dit « porte-greffe ».
+ * Ce qu'on ramène à la même chose avant de comparer. Trait d'union et
+ * apostrophe deviennent des espaces : « porte greffe » vaut « porte-greffe ».
  */
 export function normaliserReponse(texte: string): string {
   return texte
@@ -56,13 +41,9 @@ export function normaliserReponse(texte: string): string {
 }
 
 /**
- * Les déterminants qu'on ôte en tête avant de comparer.
- *
- * « l'overtraining » et « overtraining » sont la même réponse : l'article vient
- * de la phrase qui accueille le terme, pas de la connaissance qu'on vérifie. On
- * n'en ôte qu'un, et seulement s'il reste un mot derrière — le terme attendu
- * peut être un article, et « le » n'est alors pas un déterminant mais la
- * réponse.
+ * Les déterminants qu'on ôte en tête avant de comparer : l'article vient de la
+ * phrase, pas de la connaissance vérifiée. Un seul, et seulement s'il reste un
+ * mot derrière, car le terme attendu peut être un article.
  */
 const DETERMINANTS = new Set([
   "le",
@@ -138,10 +119,8 @@ function correspond(attendu: string, saisi: string): boolean {
 }
 
 /**
- * La saisie vaut-elle l'une des formes acceptées ?
- *
- * Une saisie vide ne vaut rien, même si une forme acceptée était vide : ne rien
- * écrire n'est pas une réponse.
+ * La saisie vaut-elle l'une des formes acceptées ? Une saisie vide ne vaut
+ * rien, même face à une forme acceptée vide.
  */
 export function reponseAcceptee(saisie: string, formes: string[]): boolean {
   const saisi = normaliserReponse(saisie);

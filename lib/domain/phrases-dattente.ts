@@ -2,32 +2,18 @@ import { CATALOGUES, type EtapeDeLAttente, type PhrasesDunPalier } from "./catal
 import type { LangueDuProduit } from "./langue-du-produit";
 
 /**
- * Quand chaque phrase d'attente paraît, et laquelle.
+ * Quand chaque phrase d'attente paraît, et laquelle. Les phrases vivent dans
+ * `catalogue-dattente.ts` ; ici, seulement le temps et l'index.
  *
- * L'essai est le moment le plus fragile du produit : la seule page qui
- * convertit, et des délais qu'on ne maîtrise pas. Mesurés sur trois semaines de
- * production, le découpage va de 2,5 à 15 secondes, l'écriture des questions
- * jusqu'à une quarantaine. Un écran qui répète la même phrase pendant quarante
- * secondes a l'air figé ; un écran qui promet « quelques secondes » à la
- * trentième ment.
- *
- * Les phrases elles-mêmes sont dans `catalogue-dattente.ts` : ici il n'y a que
- * le temps et l'index.
- *
- * **Le temps mesuré est celui du regard, pas celui du travail.** Il repart de
- * zéro à chaque affichage de l'écran, et c'est voulu : quelqu'un qui recharge la
- * page sur une extraction déjà vieille d'une minute vient, lui, d'arriver.
- *
- * Aucune horloge ici : l'instant écoulé est un paramètre, comme partout dans
- * `lib/domain/`.
+ * Mesuré en production : le découpage va de 2,5 à 15 s, l'écriture des
+ * questions jusqu'à une quarantaine. Le temps passé en paramètre est celui du
+ * regard, pas du travail : il repart de zéro à chaque affichage, car qui
+ * recharge la page vient d'arriver.
  */
 
 /**
- * Combien de temps une phrase reste à l'écran.
- *
- * Assez pour être lue sans effort, assez peu pour que l'écran ne paraisse pas
- * arrêté. En dessous de trois secondes on lit en se dépêchant ; au-delà de
- * quatre, le silence entre deux phrases redevient une attente immobile.
+ * Combien de temps une phrase reste à l'écran : sous trois secondes on lit en se
+ * dépêchant, au-delà de quatre l'écran paraît arrêté.
  */
 export const RELEVE_MS = 3500;
 
@@ -40,18 +26,12 @@ type Palier = {
 /**
  * Les bornes des quatre paliers, communes aux trois étapes.
  *
- * Elles ne sont pas rondes par hasard. Huit secondes, c'est la médiane du
- * découpage plus une marge : en dessous, reconnaître que « c'est long » serait
- * faux. Vingt, c'est là où plus personne ne croit à « quelques secondes ».
- * Quarante-cinq, c'est au-delà de tout ce qu'on a mesuré en production — on n'a
- * plus rien à promettre, seulement à rassurer. Le dernier palier tient jusqu'à
- * l'abandon, à quatre-vingt-dix secondes, où un autre écran prend la main.
+ * 8 s : la médiane du découpage plus une marge. 20 s : plus personne ne croit à
+ * « quelques secondes ». 45 s : au-delà de tout ce qu'on a mesuré. Le dernier
+ * palier tient jusqu'à l'abandon, à 90 s, où un autre écran prend la main.
  *
- * **Une borne est atteinte à la relève suivante, pas à la seconde près.** Un
- * appelant qui interroge toutes les relèves passe de sept secondes à dix et
- * demie : le palier des huit secondes commence donc pour lui à dix et demie.
- * C'est le prix à payer pour qu'aucune phrase ne soit remplacée une seconde
- * après être apparue — un clignotement se voit, trois secondes de décalage non.
+ * Une borne est atteinte à la relève suivante, pas à la seconde près : c'est ce
+ * qui évite qu'une phrase soit remplacée une seconde après être apparue.
  */
 const BORNES = [0, 8_000, 20_000, 45_000] as const;
 
@@ -73,14 +53,10 @@ export function paliersDe(
 /**
  * La phrase à afficher, pour une étape, un temps d'attente et un tirage donnés.
  *
- * `tirage` est un nombre entre 0 et 1, tiré une fois par attente — même
- * convention que `inviteDeDepot`. Il décale le point d'entrée dans chaque
- * palier, pour que deux attentes de la même durée ne racontent pas la même
- * chose : sans lui, quiconque dépose deux fois lit deux fois la même séquence.
- *
- * Le rang avance d'une phrase par relève, indépendamment du palier. C'est ce qui
- * fait qu'on ne relit jamais la même phrase deux relèves de suite, y compris
- * juste après un changement de palier.
+ * `tirage` (entre 0 et 1, tiré une fois par attente, comme pour `inviteDeDepot`)
+ * décale le point d'entrée dans chaque palier, pour que deux dépôts ne lisent
+ * pas la même séquence. Le rang avance d'une phrase par relève, indépendamment
+ * du palier : on ne relit jamais la même phrase deux relèves de suite.
  */
 export function phraseDattente(
   etape: EtapeDeLAttente,
@@ -101,8 +77,6 @@ export function phraseDattente(
   const borne = Math.min(Math.max(tirage, 0), 1 - Number.EPSILON);
   const decalage = Math.floor(borne * palier.phrases.length);
 
-  // `rang` et `decalage` sont positifs, donc l'index l'est aussi et tombe
-  // toujours dans le tuple. Le repli sur la première phrase est là pour le
-  // typage, pas pour un cas réel.
+  // L'index est toujours positif et dans le tuple ; le repli ne sert qu'au typage.
   return palier.phrases[(rang + decalage) % palier.phrases.length] ?? palier.phrases[0];
 }

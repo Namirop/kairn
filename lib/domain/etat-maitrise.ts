@@ -1,32 +1,21 @@
 /**
- * L'état de maîtrise d'un concept.
- *
- * Une machine à états dérivée de données qu'on possède déjà : l'intervalle que
- * ts-fsrs vient de rendre, et la suite de notes du concept. Aucun appel modèle,
- * aucun calcul coûteux — un champ mis à jour à chaque passage.
+ * L'état de maîtrise d'un concept, dérivé de l'intervalle rendu par ts-fsrs et
+ * de la suite de notes.
  *
  * L'état ne pilote rien : c'est la carte ts-fsrs qui décide quand un concept
- * revient. Il ne sert qu'à dire où en est la personne.
+ * revient. Il dit seulement où en est la personne.
  */
 
 /** Bornes en jours, telles qu'annoncées à l'utilisateur. */
 export const JOURS_AVANT_REVIEWING = 7;
 export const JOURS_AVANT_CONSOLIDATION = 21;
 /**
- * Trois mois : l'échéance que pose « je maîtrise ça ».
+ * L'échéance que pose « je maîtrise ça ». Trois mois laissent à l'oubli le temps
+ * de se produire tout en restant une promesse qu'on peut afficher ; six
+ * s'entendaient comme « jamais ».
  *
- * Ce n'était pas seulement une échéance : un intervalle qui dépassait trois mois
- * archivait le concept de lui-même. On a retiré cette règle. Elle affichait
- * « sorti du cycle » sur un concept qui n'en était pas sorti — il revenait bien
- * en session à son échéance —, et cette étiquette mensongère servait ensuite à
- * décider ailleurs, notamment à écarter de l'entraînement ce qu'on sait le
- * mieux. `CONSOLIDATED` disait déjà « bien su ». `ARCHIVED` ne signifie plus
- * qu'une chose, et c'est ce qui le rend lisible : l'utilisateur l'a demandé.
- *
- * Six mois laissaient l'oubli faire son travail deux fois plutôt qu'une, et
- * surtout c'était une promesse qu'on n'ose pas afficher : « on te le repose
- * dans six mois » s'entend comme « on te le rend jamais ». Trois mois suffisent
- * à ce qu'oublier ait le temps de se produire, et ça se dit devant quelqu'un.
+ * Ce n'est pas un seuil d'archivage automatique : `ARCHIVED` ne veut dire qu'une
+ * chose, l'utilisateur l'a demandé.
  */
 export const JOURS_AVANT_ARCHIVAGE = 90;
 
@@ -36,18 +25,11 @@ export const REUSSITES_POUR_CONSOLIDER = 3;
 export type EtatMaitrise = "LEARNING" | "REVIEWING" | "CONSOLIDATED" | "ARCHIVED";
 
 /**
- * Les états qui valent une pierre au cairn.
+ * Les états qui valent une pierre au cairn. `ARCHIVED` en fait partie : déclarer
+ * « je maîtrise ça » ne doit pas retirer la pierre.
  *
- * `ARCHIVED` en fait partie, et il a manqué. Le cairn ne comptait que
- * `CONSOLIDATED` : déclarer « je maîtrise ça » sortait donc le concept de l'état
- * compté, et **retirait sa pierre** — l'empilement rétrécissait au moment où
- * quelqu'un disait savoir le mieux. La pierre marque un concept devenu tien, et
- * l'archivage est une revendication plus forte que la consolidation, pas plus
- * faible.
- *
- * Défini ici, et pas dans les deux requêtes qui s'en servent : le compteur et
- * les graines du dessin doivent voir exactement le même ensemble, sans quoi la
- * hauteur du cairn et le nombre annoncé se contredisent.
+ * Défini ici pour que le compteur et les graines du dessin voient le même
+ * ensemble, sans quoi la hauteur du cairn et le nombre annoncé divergent.
  */
 export const ETATS_QUI_POSENT_UNE_PIERRE: EtatMaitrise[] = ["CONSOLIDATED", "ARCHIVED"];
 
@@ -55,11 +37,9 @@ export const ETATS_QUI_POSENT_UNE_PIERRE: EtatMaitrise[] = ["CONSOLIDATED", "ARC
 export type Note = "AGAIN" | "HARD" | "GOOD" | "EASY";
 
 /**
- * `AGAIN` seul vaut échec.
- *
- * `HARD` dit que la réponse est venue difficilement, pas qu'elle était fausse :
- * la compter comme un échec rendrait la consolidation presque inatteignable
- * pour quelqu'un d'honnête avec lui-même.
+ * `AGAIN` seul vaut échec. `HARD` dit que la réponse est venue difficilement :
+ * le compter comme échec rendrait la consolidation presque inatteignable pour
+ * qui se note honnêtement.
  */
 export function estReussite(note: Note): boolean {
   return note !== "AGAIN";
@@ -83,14 +63,10 @@ export function compterReussitesConsecutives(notes: readonly Note[]): number {
 /**
  * L'état après un passage.
  *
- * `ARCHIVED` ne se pose que sur une déclaration de l'utilisateur — c'est le seul
- * état que le produit ne décide pas. Aucun intervalle, si long soit-il, ne sort
- * un concept du cycle : la thèse tient qu'on croit savoir et qu'on oublie, et
- * un concept bien su revient à son échéance comme les autres. Ce qu'il y avait
- * à dire de lui, `CONSOLIDATED` le dit déjà.
- *
- * Un concept espacé mais pas encore régulier reste en `REVIEWING` — la
- * consolidation demande les deux, la durée **et** la régularité.
+ * `ARCHIVED` ne se pose que sur déclaration de l'utilisateur : aucun intervalle,
+ * si long soit-il, ne sort un concept du cycle. La consolidation demande la
+ * durée et la régularité ; espacé sans régularité, un concept reste en
+ * `REVIEWING`.
  */
 export function etatApresRevision(
   intervalleJours: number,

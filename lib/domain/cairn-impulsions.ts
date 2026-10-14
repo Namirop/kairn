@@ -1,17 +1,12 @@
 import type { Boite, Vecteur } from "./cairn-collision";
 
 /**
- * Ce qu'est un corps mobile, et ce qu'une impulsion lui fait.
+ * La cinématique d'un solide en deux dimensions : ce qu'une impulsion change à
+ * la vitesse et à la rotation d'une pierre. Le choix de l'impulsion vit dans
+ * `cairn-resolution`.
  *
- * La cinématique d'un solide en deux dimensions, et rien d'autre : où va un
- * point de la pierre, ce qu'une impulsion change à sa vitesse et à sa rotation,
- * et quelle masse elle oppose le long d'une direction donnée. Décider **quelle**
- * impulsion appliquer est un autre sujet — c'est `cairn-resolution`.
- *
- * Une impulsion posée loin du centre fait tourner autant qu'elle pousse : c'est
- * ce bras de levier qui fait basculer une pierre heurtée par un coin plutôt que
- * de la faire glisser à plat. Sans le terme de rotation, un éboulis n'est qu'un
- * jeu de palets.
+ * Le terme de rotation fait basculer une pierre heurtée par un coin au lieu de
+ * la faire glisser à plat.
  */
 
 export type Mobile = {
@@ -59,12 +54,10 @@ export function appliquer(mobile: Mobile, point: Vecteur, jx: number, jy: number
 }
 
 /**
- * Masse effective d'un contact le long d'un axe, rotations comprises.
- *
- * C'est ce qu'il faut d'impulsion pour gagner une unité de vitesse relative à
- * cet endroit-là. Une pierre poussée près de son centre oppose sa masse ; la
- * même poussée à son extrémité en oppose bien moins, parce qu'elle peut tourner
- * au lieu de résister.
+ * L'inverse de la masse effective d'un contact le long d'un axe, rotations
+ * comprises : la vitesse relative gagnée par unité d'impulsion. Elle croît
+ * quand on pousse loin du centre, parce que la pierre peut tourner au lieu de
+ * résister.
  */
 export function masseEffective(a: Mobile, b: Mobile, point: Vecteur, axe: Vecteur): number {
   const bras = (mobile: Mobile) =>

@@ -1,22 +1,15 @@
 import type { LangueDuProduit } from "./langue-du-produit";
 
 /**
- * L'heure du rappel quotidien, telle qu'on l'écrit.
+ * L'heure du rappel quotidien, telle qu'on l'écrit : un champ libre à lecture
+ * tolérante (« 8 », « 08:00 », « 20 h 00 », « 7 pm »).
  *
- * Un seul champ et une lecture tolérante, plutôt qu'une liste de vingt-quatre
- * choix : « 8 », « 8h », « 08:00 » et « 20 h 00 » désignent tous une heure, et
- * personne ne devrait avoir à deviner laquelle des formes est attendue.
+ * Les minutes ne sont acceptées qu'à zéro : l'envoi ne compare que l'heure
+ * locale du compte à celle du réglage, donc « 20 h 30 » ne pourrait pas être
+ * tenu, et l'arrondir en silence mentirait.
  *
- * Les minutes sont lues mais pas acceptées ailleurs qu'à zéro. Le passage qui
- * envoie est horaire — il compare l'heure locale de chaque compte à celle de son
- * réglage — donc « 20 h 30 » ne pourrait pas être tenu. Le refuser dit la vérité ;
- * l'arrondir en silence promettrait une précision qui n'existe pas.
- *
- * **La lecture ne dépend pas de la langue, l'écriture si.** En anglais l'heure se
- * dit sur douze heures — « 7 pm » —, et c'est ce que le champ montre à un
- * anglophone. La lecture, elle, accepte les deux façons partout : quelqu'un qui
- * tape « 19 h » dans l'interface anglaise, ou « 7 pm » dans la française, a écrit
- * une heure sans ambiguïté, et la refuser ne protégerait de rien.
+ * La lecture accepte les deux conventions dans les deux langues ; seule
+ * l'écriture suit la langue de l'écran.
  */
 
 export const HEURE_MIN = 0;
@@ -29,11 +22,8 @@ export const HEURE_MAX = 23;
 const ECRITURE = /^(\d{1,2})\s*(?:h|:)?\s*(\d{2})?\s*(?:([ap])\.?\s*m\.?)?\s*$/i;
 
 /**
- * L'heure sur vingt-quatre heures, depuis une heure sur douze.
- *
- * Midi s'écrit « 12 pm » et minuit « 12 am » : c'est le seul endroit où le
- * passage n'est pas une simple addition, et la source classique de décalage
- * d'une demi-journée.
+ * L'heure sur vingt-quatre heures, depuis une heure sur douze. Midi est
+ * « 12 pm » et minuit « 12 am » : le piège classique d'une demi-journée.
  */
 function depuisDouzeHeures(heure: number, apresMidi: boolean): number | null {
   if (heure < 1 || heure > 12) return null;
@@ -43,12 +33,7 @@ function depuisDouzeHeures(heure: number, apresMidi: boolean): number | null {
   return apresMidi ? base + 12 : base;
 }
 
-/**
- * L'heure lue, ou `null` si ce qui est écrit n'en désigne pas une.
- *
- * `null` et non une exception : l'appelant est un formulaire, et il a un message
- * à afficher plutôt qu'une panne à propager.
- */
+/** L'heure lue, ou `null` si ce qui est écrit n'en désigne pas une. */
 export function lireHeureDeRappel(saisie: string): number | null {
   const trouve = ECRITURE.exec(saisie.trim());
 
@@ -65,11 +50,7 @@ export function lireHeureDeRappel(saisie: string): number | null {
   return heure;
 }
 
-/**
- * L'heure telle qu'on la relit dans le champ, dans la langue de l'écran.
- *
- * « 19 h » en français, jamais « 19:00 » ; « 7 pm » en anglais, jamais « 19 ».
- */
+/** L'heure relue dans le champ : « 19 h » en français, « 7 pm » en anglais. */
 export function ecrireHeureDeRappel(heure: number, langue: LangueDuProduit): string {
   const bornee = Math.min(Math.max(Math.floor(heure), HEURE_MIN), HEURE_MAX);
 

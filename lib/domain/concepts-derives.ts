@@ -1,40 +1,20 @@
 /**
- * Combien de concepts se déclarent découler d'un voisin. **On le mesure, on ne
- * coupe pas.**
+ * Combien de concepts se déclarent découler d'un voisin. On le mesure, on ne
+ * coupe pas.
  *
- * Ce fichier a coupé pendant un passage de banc, et un seul a suffi. Le corpus
- * est tombé de 129 concepts à 85 : dix-huit dépôts sur vingt-deux ont baissé,
- * `20-narratif-historique` de six à un, `11-sigles-scientifiques` — qui porte
- * deux sujets sans le moindre rapport — de neuf à quatre. La sur-segmentation
- * qu'on voulait corriger coûtait sept concepts redondants sur tout le corpus.
- * Le remède en a détruit quarante-quatre.
- *
- * **L'analogie qui l'avait justifié était fausse.** On s'était dit que le modèle
- * qualifierait la relation comme il choisit un format dans une énumération, ce
- * qu'il fait très bien. Mais un `enum` est un ensemble fermé à appartenance
- * objective, alors que « ce concept découle-t-il de celui-là ? » est un jugement
- * relationnel à frontière floue — et le modèle place cette frontière beaucoup
- * plus loin que nous. Sur `09-fait-pratique`, il a rattaché six concepts sur
- * sept au premier : l'équidistance lue dans la légende « découlait » de la
- * définition d'une courbe de niveau.
- *
- * Resserrer la formulation déplacerait cette frontière sans qu'on sache où elle
- * atterrit, et chaque essai coûte un passage de banc. Le champ reste donc dans
- * le schéma et se relit — quelques tokens, et la donnée sous la main si on
- * reprend le sujet —, mais il ne décide plus de rien. La granularité redevient
- * une question de qualité, à traiter par un juge qui la mesure plutôt que par
- * une coupe qui tranche à notre place.
+ * Couper sur ce champ détruit des concepts légitimes : « découle de » est un
+ * jugement à frontière floue, que le modèle place bien plus loin que nous (six
+ * concepts sur sept rattachés au premier sur un dépôt du banc), et le corpus
+ * tombait de 129 à 85 concepts pour sept redondants réels. Le champ reste dans
+ * le schéma pour la mesure ; la granularité relève d'un juge, pas d'une coupe.
  */
 
 export type Derivable = { deriveDe?: number | null };
 
 /**
- * Un renvoi ne compte que s'il désigne un autre concept du même envoi.
- *
- * Les indices sont ceux annoncés au modèle, à partir de 1. Un renvoi à
- * soi-même, à zéro ou hors de la liste ne décrit aucune relation lisible, et ne
- * se compte donc pas : une mesure qui gonfle sur des valeurs illisibles ne
- * mesure plus rien.
+ * Un renvoi ne compte que s'il désigne un autre concept du même envoi. Les
+ * indices annoncés au modèle partent de 1 ; un renvoi à soi-même, à zéro ou
+ * hors de la liste ne décrit rien et gonflerait la mesure.
  */
 function renvoieAUnAutre(concept: Derivable, rang: number, total: number): boolean {
   const cible = concept.deriveDe ?? null;

@@ -3,13 +3,9 @@ import { tirageDe } from "./tirage-deterministe";
 /**
  * Géométrie de l'empilement de pierres.
  *
- * Fonction pure : même graine, même cairn, pour toujours. Chaque pierre tire sa
- * largeur, sa hauteur, sa rotation, son décalage et le mordu de ses quatre
- * coins d'un générateur semé par l'identifiant de l'Atom qu'elle représente.
- * Deux utilisateurs n'ont donc jamais le même empilement, et le sien ne bouge
- * pas entre deux visites.
- *
- * Les coordonnées sont en unités de viewBox, largeur 100.
+ * Chaque pierre tire ses dimensions, sa rotation, son décalage et ses coins d'un
+ * générateur semé par l'id de son Atom : même graine, même cairn, pour toujours.
+ * Coordonnées en unités de viewBox, largeur 100.
  */
 
 export const LARGEUR_VUE = 100;
@@ -17,23 +13,10 @@ const LARGEUR_BASE = 60;
 /** Un vrai cairn s'affine en montant. */
 const AFFINEMENT = 0.45;
 /**
- * De combien chaque pierre mord celle du dessous.
- *
- * C'était un **jeu** — un espace positif entre deux pierres — et ça se voyait :
- * un liseré de fond passait entre chacune, et l'empilement avait l'air de
- * léviter au lieu de reposer. Deux pierres qui se touchent vraiment n'ont pas de
- * jour entre elles ; celles-ci ont en plus des arêtes penchées et une rotation,
- * dont les coins écartent encore le contact apparent. Elles se chevauchent donc,
- * de quoi absorber la pente d'une face et l'inclinaison des deux.
- *
- * Le remplissage est opaque : ce que le chevauchement enfouit ne se voit pas,
- * seule la pile raccourcit un peu.
- *
- * La valeur se cherche entre deux défauts, et les deux se voient. Trop peu, un
- * liseré de fond passe et les pierres lévitent. Trop, elles s'enfoncent les unes
- * dans les autres et la pile devient un bloc où l'on ne distingue plus ce qui
- * est posé sur quoi. Un peu moins d'un pixel de viewBox suffit à fermer le jour
- * sans manger les faces.
+ * De combien chaque pierre mord celle du dessous. Les arêtes penchées et la
+ * rotation écartent le contact apparent : trop peu, un liseré de fond passe et
+ * les pierres lévitent ; trop, la pile devient un bloc. Le remplissage opaque
+ * cache le chevauchement.
  */
 const CHEVAUCHEMENT = 0.9;
 const MARGE_HAUTE = 6;
@@ -64,17 +47,12 @@ function arrondi(valeur: number): number {
 }
 
 /**
- * Quadrilatère taillé.
+ * Quadrilatère taillé : flancs pincés vers le haut, arêtes penchées, coins mordus
+ * inégalement puis adoucis. C'est la somme des trois qui évite le rectangle
+ * arrondi.
  *
- * Trois irrégularités se cumulent, et c'est leur somme qui donne une pierre
- * plutôt qu'un rectangle arrondi : les flancs se pincent vers le haut, les deux
- * arêtes penchent d'un côté ou de l'autre, et les quatre coins sont mordus de
- * façon inégale avant d'être adoucis.
- *
- * Exporté pour la marque, et pour elle seule : la pierre qui remplace le point du
- * i n'est pas dans un empilement, elle a ses propres proportions. Un rectangle
- * arrondi à sa place jurerait avec les cinq autres — c'est précisément ce que
- * cette fonction évite.
+ * Exporté pour la marque, dont la pierre du point du i a ses propres
+ * proportions.
  */
 export function tailler(largeur: number, hauteur: number, tirage: () => number): string {
   const bas = largeur / 2;
@@ -122,8 +100,8 @@ export function empiler(nombre: number, graines?: string[]): Empilement {
     const progression = total === 1 ? 0 : index / (total - 1);
     const largeur = LARGEUR_BASE * (1 - progression * AFFINEMENT) * (0.86 + tirage() * 0.24);
     const hauteur = 10 + tirage() * 9;
-    // Une pierre de base est posée à plat ; l'assise devient plus hasardeuse en
-    // montant. Le décalage et l'inclinaison suivent donc la hauteur.
+    // L'assise devient plus hasardeuse en montant : décalage et inclinaison
+    // suivent la hauteur.
     const instabilite = 0.35 + progression * 0.65;
 
     const chemin = tailler(largeur, hauteur, tirage);

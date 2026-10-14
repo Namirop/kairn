@@ -6,13 +6,9 @@ import { LARGEUR_VUE, type Pierre } from "./cairn-stack";
 /**
  * Chute des pierres du cairn.
  *
- * Fonctions pures : l'état d'un corps ne dépend que de son état précédent et du
- * pas de temps. Aucun accès à l'horloge, aucun aléatoire — le composant fournit
- * les deux, et deux exécutions du même geste donnent la même chute.
- *
- * Ce fichier intègre et range ; il ne décide pas des contacts. Les pierres se
- * heurtent, s'empilent et s'appuient sur le socle resté debout : c'est
- * `cairn-resolution` qui le résout, sur la géométrie de `cairn-collision`.
+ * L'état d'un corps ne dépend que de son état précédent et du pas de temps,
+ * fourni par le composant : le même geste donne la même chute. Ce fichier
+ * intègre ; les contacts se résolvent dans `cairn-resolution`.
  *
  * Le repère est celui du viewBox : `y` croît vers le bas, le sol est à zéro.
  */
@@ -22,20 +18,10 @@ export type { Cadre } from "./cairn-collision";
 export const CADRE_SERRE: Cadre = { gauche: 0, droite: LARGEUR_VUE };
 
 /**
- * Le cairn de la page publique n'a pas de bords du tout.
- *
- * Il en avait, posés à deux largeurs de dessin de chaque côté, et c'était censé
- * les mettre hors de vue. Ça ne pouvait pas marcher : ces deux largeurs sont
- * comptées en unités de dessin, autour d'un dessin qui n'est pas au milieu de la
- * fenêtre. Le cairn occupe la colonne droite du hero, donc le bord droit tombait
- * au-delà de la fenêtre — les pierres sortaient par là sans jamais le toucher —
- * pendant que le gauche, lui, tombait en plein écran, au travers de la colonne
- * de texte. On voyait les pierres s'écraser contre rien.
- *
- * Aucune distance finie ne répare ça : elle serait toujours dépassée par une
- * fenêtre plus large ou une mise en page différente. Ce qui arrête une pierre,
- * c'est le frottement au sol, et c'est lui qui garantit la fin de la simulation
- * — les bords ne servaient à rien d'autre qu'à créer le défaut.
+ * Le cairn de la page publique n'a pas de bords. Le dessin n'est pas centré
+ * dans la fenêtre : tout bord fini, compté en unités de dessin, tombe soit hors
+ * de l'écran soit en travers du texte, et les pierres s'y écrasent contre rien.
+ * C'est le frottement au sol qui garantit la fin de la simulation.
  */
 export const SANS_BORDS: Cadre = { gauche: -Infinity, droite: Infinity };
 
@@ -44,42 +30,25 @@ const GRAVITE = 300;
 /**
  * Ce qu'il faut pour qu'une pierre soit déclarée posée.
  *
- * Les seuils sont larges : un éboulis résolu par impulsions ne s'arrête jamais
- * tout à fait, et sur un dessin de cent unités de large, cinq unités par
- * seconde sont invisibles. Attendre le zéro parfait ferait tourner la boucle
- * d'animation longtemps après que tout ait l'air immobile.
- *
- * L'enfoncement compte autant que la vitesse : endormir une pierre encore
- * entrée d'une unité dans sa voisine fige exactement l'image qu'on corrige.
- * `SEUIL_FIGE` est la sortie de secours — une pierre coincée entre un bord et
- * le socle n'a nulle part où se dégager, et attendre l'impossible bloquerait la
- * boucle sur une image qui ne change plus.
+ * Seuils larges : un éboulis résolu par impulsions ne s'arrête jamais tout à
+ * fait, et 5 unités/s sont invisibles sur un dessin de 100 de large. Une pierre
+ * encore enfoncée dans sa voisine ne s'endort pas, sauf sous `SEUIL_FIGE` :
+ * coincée entre un bord et le socle, elle ne peut pas se dégager.
  */
 const SEUIL_REPOS = 5;
 const SEUIL_ROTATION = 30;
 const SEUIL_ENFONCEMENT = 0.6;
 const SEUIL_FIGE = 0.35;
 /**
- * Ce qu'une pierre garde de sa vitesse après **une seconde** de contact.
- *
- * Par seconde, et non d'une image à l'autre — c'était la seconde façon de le
- * lire, et elle donnait un tout autre effet. Retenir 0,9 à chaque image revient
- * à retenir 0,9^60 en une seconde, soit deux millièmes : la pierre frappée
- * partait, perdait presque tout en un tiers de seconde, s'arrêtait net en l'air
- * puis tombait. On ne voyait pas une pierre fauchée, on voyait une pierre qui
- * renonce. Le geste franc que `VITESSE_MAXIMALE` autorise n'arrivait jamais
- * jusqu'à l'image.
- *
- * Élevé au pas de temps, l'amortissement cesse aussi de dépendre de la cadence
- * d'affichage : la même chute sur un écran à 120 Hz et sur un écran à 60.
+ * Ce qu'une pierre garde de sa vitesse après une seconde de contact, et non
+ * d'une image à l'autre : 0,9 par image ferait 0,9^60 par seconde, et la pierre
+ * frappée s'arrêterait net en l'air. Élevé au pas de temps, l'amortissement ne
+ * dépend pas non plus de la cadence d'affichage.
  */
 const AMORTI_AU_CONTACT = 0.35;
 /**
- * Le frein des lentes, qui garantit la fin.
- *
- * Beaucoup plus mordant que l'autre, et c'est voulu : c'est lui qui tue les
- * pierres qui vibrent sous le seuil de repos sans jamais s'y poser. Il n'agit
- * que sur ce qui est déjà trop lent pour se voir bouger.
+ * Le frein des pierres déjà lentes, bien plus mordant : il arrête celles qui
+ * vibrent sous le seuil de repos sans jamais s'y poser, et garantit la fin.
  */
 const AMORTI_LENT = 0.02;
 /** Pas de temps maximal : un onglet qui reprend la main ne téléporte rien. */
@@ -115,13 +84,10 @@ export function initialiser(pierres: Pierre[]): Corps[] {
 }
 
 /**
- * Déloge une pierre, et avec elle tout ce qu'elle portait : une pierre dont
- * l'assise part n'a aucune raison de rester en l'air.
+ * Déloge une pierre et tout ce qu'elle portait.
  *
- * La pierre visée prend tout le coup, celles du dessus une part qui décroît
- * vite : de quoi pencher du bon côté, la gravité fait le reste. Leur donner la
- * même vitesse ferait glisser la pile d'un bloc maintenant qu'elles s'appuient
- * les unes sur les autres — le contraire d'un éboulement.
+ * Celles du dessus ne reçoivent qu'une part décroissante du coup : à vitesse
+ * égale, la pile glisserait d'un bloc au lieu de s'ébouler.
  */
 const SOUFFLE = 0.6;
 
@@ -145,13 +111,10 @@ export function renverser(corps: Corps[], index: number, impulsion: Impulsion): 
 }
 
 /**
- * Le corps tel que le solveur le voit.
- *
- * Masse et inertie d'un rectangle plein de densité un : c'est leur rapport qui
- * compte, pas leur échelle. Une pierre large et plate bascule moins volontiers
- * qu'un galet, et c'est ce qu'on veut voir. Ce qui n'est pas libre reçoit une
- * masse infinie : le socle ne s'écroule pas parce qu'une pierre lui retombe
- * dessus, la coupure a déjà décidé de ce qui tombe.
+ * Le corps tel que le solveur le voit. Ce qui n'est pas libre a une masse
+ * infinie : le socle ne s'écroule pas sous une pierre qui retombe, la coupure a
+ * déjà décidé de ce qui tombe. Les pierres libres (`enMobile`) ont la masse et
+ * l'inertie d'un rectangle plein de densité un.
  */
 function enMur(solide: Corps, pierre: Pierre | undefined): Mobile {
   return {
@@ -217,20 +180,16 @@ export function avancer(
 
     if (!solide.libre || !mobile || !appui || !pierres[index]) return solide;
 
-    // Posée : elle touche quelque chose, elle en est ressortie, et elle n'a
-    // plus de quoi bouger. Le reste de vitesse est coupé net plutôt que laissé
-    // vibrer sous le seuil, sans quoi la boucle ne s'arrête jamais.
+    // Posée : le reste de vitesse est coupé net, sinon il vibre sous le seuil
+    // et la boucle ne s'arrête jamais.
     const vitesse = Math.hypot(mobile.vx, mobile.vy);
     const immobile = vitesse < SEUIL_REPOS && Math.abs(mobile.vr) < SEUIL_ROTATION;
     const posee =
       appui.touche && immobile && (appui.enfoncement < SEUIL_ENFONCEMENT || vitesse < SEUIL_FIGE);
 
-    // Une pierre appuyée et déjà lente est freinée jusqu'à l'arrêt. C'est le
-    // frottement de contact, et c'est aussi ce qui garantit la fin : une pierre
-    // coincée contre un bord et le socle vibrait de quelques dixièmes d'unité
-    // par seconde indéfiniment, trop lente pour qu'on la voie bouger et trop
-    // vive pour qu'on la déclare posée. La boucle tournait alors sans fin sur
-    // une image immobile.
+    // Appuyée et déjà lente, elle est freinée jusqu'à l'arrêt : sans ça, une
+    // pierre coincée vibre indéfiniment, trop lente pour se voir et trop vive
+    // pour être déclarée posée.
     const parSeconde = immobile ? AMORTI_LENT : AMORTI_AU_CONTACT;
     const freine = posee || !appui.touche ? 1 : parSeconde ** pas;
 

@@ -2,23 +2,17 @@ import type { Corps } from "./cairn-physique";
 import type { Pierre } from "./cairn-stack";
 
 /**
- * Détection du geste sur l'empilement.
- *
- * Séparée de la simulation : savoir ce que la souris a touché et savoir comment
- * une pierre tombe sont deux questions distinctes, et seule la première dépend
- * du repère de l'écran.
+ * Détection du geste sur l'empilement : ce que le pointeur a touché. La chute
+ * relève de la simulation (`cairn-physique.ts`).
  */
 
 /** Points testés le long du segment parcouru entre deux images. */
 const ECHANTILLONS = 6;
 
 /**
- * Marge ajoutée autour de chaque pierre, en unités de viewBox.
- *
- * Les pierres sont posées avec un léger jeu vertical. Sans cette marge, un
- * balayage strictement horizontal peut se faufiler dans un interstice et ne
- * rien renverser du tout — ce qui, du point de vue de la personne qui vient de
- * traverser l'empilement, ressemble à un bug.
+ * Marge ajoutée autour de chaque pierre, en unités de viewBox. Les pierres ont
+ * un léger jeu vertical : sans marge, un balayage horizontal passerait dans un
+ * interstice sans rien renverser.
  */
 const TOLERANCE = 1.5;
 
@@ -41,9 +35,8 @@ function contient(solide: Corps, pierre: Pierre, point: Point): boolean {
 /**
  * Pierre traversée par le segment, la plus haute d'abord.
  *
- * C'est le segment qui compte, pas le point d'arrivée : un geste rapide saute
- * d'une image à l'autre et passerait au travers d'une pierre sans la toucher si
- * l'on ne testait que les positions successives du curseur.
+ * On teste le segment, pas le point d'arrivée : un geste rapide saute d'une
+ * image à l'autre et traverserait une pierre sans la toucher.
  */
 export function pierreTraversee(
   corps: Corps[],

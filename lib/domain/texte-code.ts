@@ -1,15 +1,7 @@
 /**
- * Découpe d'un texte en parties ordinaires et termes de code.
- *
- * Les concepts et les questions d'un sujet technique citent du code au milieu
- * d'une phrase : un nom de fonction, une directive, un bout de requête. Ils
- * arrivent entourés d'accents graves — la convention que tout le monde écrit,
- * du modèle qui les génère à la personne qui colle une doc. Affichés tels
- * quels, ces accents deviennent de la ponctuation parasite, et le terme qu'ils
- * devaient relever se noie au lieu de ressortir.
- *
- * Fonction pure : elle ne décide de rien du rendu, elle dit seulement ce qui
- * est du code et ce qui n'en est pas.
+ * Découpe d'un texte en prose et termes de code cités entre accents graves,
+ * convention qu'écrivent aussi bien le modèle que la personne qui colle une
+ * doc.
  */
 
 const MARQUEUR = "`";
@@ -20,10 +12,7 @@ export type SegmentDeTexte = {
   texte: string;
 };
 
-/**
- * Empile en fusionnant : deux morceaux de prose voisins n'ont aucune raison de
- * rester séparés, et un morceau vide n'a rien à rendre.
- */
+/** Empile en fusionnant la prose voisine et en ignorant les morceaux vides. */
 function empiler(segments: SegmentDeTexte[], texte: string, code: boolean): void {
   if (texte.length === 0) return;
 
@@ -38,13 +27,8 @@ function empiler(segments: SegmentDeTexte[], texte: string, code: boolean): void
 }
 
 /**
- * Un accent grave ouvre, le suivant ferme.
- *
- * Ce qui n'est pas refermé reste du texte, tel qu'il a été écrit : un accent
- * grave isolé est le plus souvent une citation qu'on n'a pas terminée, et
- * l'avaler ferait disparaître un caractère du dépôt de quelqu'un. Une paire
- * vide reste littérale pour la même raison — il n'y a pas de terme à relever
- * entre deux accents collés.
+ * Un accent grave ouvre, le suivant ferme. Un accent non refermé ou une paire
+ * vide reste littéral : l'avaler ferait disparaître un signe du dépôt.
  */
 export function segmentsDeCode(texte: string): SegmentDeTexte[] {
   const segments: SegmentDeTexte[] = [];

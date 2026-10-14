@@ -4,22 +4,15 @@ import type { EtapeDeLAttente } from "./catalogue-dattente";
  * Où en est un dépôt, du point de vue de celui qui l'a déposé.
  *
  * L'état stocké dit ce que le système fait ; celui-ci dit ce que l'utilisateur
- * attend. « En cours » ne renseigne personne : entre la lecture d'une capture
- * et l'écriture des questions, il n'attend ni la même chose ni le même délai.
+ * attend, qui n'est ni la même chose ni le même délai d'une étape à l'autre.
  *
- * Trois fins sans concept, et il a longtemps fallu les vivre pour comprendre
- * qu'elles n'avaient rien à voir :
+ * Trois fins sans concept, à ne pas confondre :
  *
- * - `rejete` — la chaîne a tourné et a conclu qu'il n'y avait rien à retenir.
- *   Le motif le dit précisément. Redéposer le même texte donnera le même
- *   résultat ; il n'y a qu'à jeter.
- * - `echec` — quelque chose s'est cassé. Retenter a du sens.
- * - `vide` — il y a eu des concepts, l'utilisateur les a tous supprimés. Le
- *   texte, lui, est toujours là, et on peut le redécouper.
- *
- * Les confondre était le vrai bug : un dépôt vidé annonçait « découpage en
- * cours » pour l'éternité, et un dépôt sans matière annonçait « échec » comme
- * si le produit était en panne.
+ * - `rejete` : la chaîne a conclu qu'il n'y avait rien à retenir. Redéposer
+ *   donnerait le même résultat.
+ * - `echec` : quelque chose s'est cassé. Retenter a du sens.
+ * - `vide` : l'utilisateur a supprimé tous les concepts. Le texte reste, on
+ *   peut le redécouper.
  */
 
 export type EtatDepot =
@@ -35,10 +28,8 @@ export type EtatDepot =
 export type TravailEnCours = {
   kind: "OCR" | "ATOMS" | "VARIANTS";
   /**
-   * Le travail est écrit mais attend sa date. Un concept ne redemande des
-   * questions qu'une fois par semaine ; quand la demande arrive trop tôt, elle
-   * patiente au lieu d'être jetée. Dire « écriture en cours » pendant six jours
-   * serait faux, et taire l'attente le serait aussi.
+   * Le travail attend sa date : un concept ne redemande des questions qu'une
+   * fois par semaine, et une demande trop tôt patiente au lieu d'être jetée.
    */
   differe?: boolean;
 };
@@ -54,8 +45,8 @@ export function etatDuDepot(avancement: AvancementDepot): EtatDepot {
   if (avancement.status === "REJECTED") return "rejete";
   if (avancement.status === "FAILED") return "echec";
 
-  // Un dépôt clos sans concept en a forcément eu : sans quoi il serait rejeté
-  // ou en échec, pas prêt. C'est donc que l'utilisateur les a supprimés.
+  // Prêt sans concept : sinon il serait rejeté ou en échec, donc l'utilisateur
+  // les a supprimés.
   if (avancement.status === "READY") return avancement.concepts > 0 ? "pret" : "vide";
 
   const kinds = new Set(
@@ -66,34 +57,24 @@ export function etatDuDepot(avancement: AvancementDepot): EtatDepot {
   if (kinds.has("ATOMS")) return "decoupage";
   if (kinds.has("VARIANTS")) return "questions";
 
-  // Il ne reste que des travaux qui attendent leur date. Le dépôt n'est pas en
-  // panne et il n'est pas fini : il a rendez-vous.
   if (avancement.travaux.some((travail) => travail.differe)) return "questions-differees";
 
-  // Plus rien en attente sans être passé à READY : la clôture n'a pas encore
-  // eu lieu. Les concepts sont là ou non, c'est ce qui décide.
+  // Plus aucun travail mais pas encore READY : la clôture n'a pas eu lieu.
   return avancement.concepts > 0 ? "questions" : "decoupage";
 }
 
 /**
- * Un dépôt dont la chaîne tourne en ce moment.
- *
- * Trois états et pas quatre : `questions-differees` n'en est pas — la demande
- * attend sa date, parfois six jours, et rien ne tourne pendant ce temps. C'est
- * ce qui décide si l'écran redemande tout seul, et si son étiquette porte le
- * point qui bat.
+ * Un dépôt dont la chaîne tourne en ce moment : décide si l'écran se
+ * rafraîchit seul. `questions-differees` n'en est pas, rien ne tourne pendant
+ * l'attente de sa date.
  */
 export function travailEnCours(etat: EtatDepot): boolean {
   return etat === "lecture" || etat === "decoupage" || etat === "questions";
 }
 
 /**
- * Ce qu'on raconte pendant que ce dépôt travaille, ou rien s'il ne travaille pas.
- *
- * Les trois étapes de l'attente ont chacune leur catalogue, parce qu'elles ne
- * parlent pas à la même personne — voir `catalogue-dattente.ts`. La
- * correspondance est ici plutôt que dans l'écran : c'est une propriété de
- * l'état, et deux écrans l'auraient écrite deux fois.
+ * L'étape d'attente à raconter pendant que ce dépôt travaille, ou `null`
+ * (voir `catalogue-dattente.ts`).
  */
 export function etapeDuTravail(etat: EtatDepot): EtapeDeLAttente | null {
   if (etat === "lecture") return "LECTURE";
@@ -109,15 +90,8 @@ export function conceptsLisibles(etat: EtatDepot): boolean {
 }
 
 /**
- * Peut-on relancer une extraction sur ce texte ?
- *
- * Sur un dépôt vidé, c'est le geste attendu : le découpage ne convenait pas, on
- * a tout supprimé, on retente. Sur un échec aussi — c'est même la seule raison
- * de distinguer l'échec du rejet.
- *
- * Sur un rejet, non. La chaîne a déjà lu ce texte et a dit ce qui manquait ;
- * relancer paierait un appel pour obtenir la même phrase. Il ne reste qu'à
- * supprimer.
+ * Peut-on relancer une extraction sur ce texte ? Oui sur un dépôt vidé ou en
+ * échec. Pas sur un rejet : relancer paierait un appel pour la même réponse.
  */
 export function redecoupable(etat: EtatDepot): boolean {
   return etat === "vide" || etat === "echec";

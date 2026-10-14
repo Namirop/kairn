@@ -1,19 +1,10 @@
 /**
- * Ce qu'un appel coûte, selon deux conventions qui ne disent pas la même chose.
+ * Le coût d'un appel selon deux conventions, montrées côte à côte :
  *
- * Le registre `AiCall` enregistre le coût au **tarif catalogue**, et c'est
- * volontaire : surestimer la dépense est le bon sens de l'erreur pour un
- * garde-fou de budget. Mais un tableau de bord qui n'affiche que ce chiffre ment
- * dans l'autre sens — il annonce une facture qu'on ne paie pas.
- *
- * D'où deux conventions, montrées côte à côte et nommées :
- *
- * - **catalogue** — le tarif public, celui qui est écrit dans `AiCall`.
- * - **réel** — ce qui est effectivement facturé aujourd'hui, remises
- *   d'introduction comprises.
- *
- * Les deux se rejoindront quand les remises expireront ; c'est justement ce
- * jour-là qu'on veut avoir vu venir la marche.
+ * - **catalogue** : le tarif public, celui écrit dans `AiCall`. Surestimer est
+ *   le bon sens de l'erreur pour un garde-fou de budget.
+ * - **réel** : ce qui est facturé ce jour-là, remises d'introduction comprises.
+ *   Sans lui, le tableau de bord annonce une facture qu'on ne paie pas.
  */
 
 /** Dollars par million de tokens. */
@@ -27,18 +18,12 @@ export const CATALOGUE: Record<string, Tarif> = {
   "claude-opus-5": { entreePerMillion: 5, sortiePerMillion: 25 },
   "claude-sonnet-5": { entreePerMillion: 3, sortiePerMillion: 15 },
   "claude-haiku-4-5": { entreePerMillion: 1, sortiePerMillion: 5 },
-  // Retenu à la campagne 1+2 comme finaliste des deux tâches (extraction et
-  // génération) — l'identifiant OpenRouter est `openai/gpt-5.6-luna`, mais le
-  // catalogue indexe le modèle sur son slug court, tel qu'`AI_MODEL` le porte
-  // (côté OpenRouter, on passe l'identifiant complet). Les deux clés
-  // renvoient au même tarif ; garder les deux évite de deviner qui appelle.
+  // Slug court (tel qu'`AI_MODEL` le porte) et identifiant OpenRouter complet :
+  // même tarif, les deux clés évitent de deviner qui appelle.
   "gpt-5.6-luna": { entreePerMillion: 0.2, sortiePerMillion: 1.2 },
   "openai/gpt-5.6-luna": { entreePerMillion: 0.2, sortiePerMillion: 1.2 },
-  // Le modèle du repli, routé par OpenRouter. Même prix que la clé courte : le
-  // préfixe dit par où l'appel passe, pas ce que le modèle vaut. OpenRouter
-  // l'affiche aujourd'hui à 2/10 — le catalogue garde 3/15, qui est le tarif
-  // public une fois la remise d'introduction expirée, et surestimer est le bon
-  // sens de l'erreur pour un garde-fou de budget.
+  // Le repli, routé par OpenRouter : le préfixe dit la route, pas le prix. Le
+  // catalogue garde le tarif public même quand OpenRouter affiche une remise.
   "anthropic/claude-sonnet-5": { entreePerMillion: 3, sortiePerMillion: 15 },
 };
 
@@ -46,11 +31,8 @@ export const CATALOGUE: Record<string, Tarif> = {
 export const TARIF_PAR_DEFAUT: Tarif = { entreePerMillion: 5, sortiePerMillion: 25 };
 
 /**
- * Les remises d'introduction, avec leur date de fin.
- *
- * Elles sont datées parce qu'elles s'arrêtent, et qu'une remise qu'on oublie
- * fait croire à une dépense qui double du jour au lendemain sans raison. La date
- * est le dernier jour où le tarif réduit s'applique.
+ * Les remises d'introduction. `jusquAu` est le dernier jour du tarif réduit :
+ * datées, leur fin ne se lit pas comme une dépense qui double sans raison.
  */
 export const INTRODUCTION: Record<string, { jusquAu: string; tarif: Tarif }> = {
   "claude-sonnet-5": {
@@ -64,10 +46,8 @@ export function tarifCatalogue(modele: string): Tarif {
 }
 
 /**
- * Le tarif réellement facturé un jour donné.
- *
- * Le jour est une étiquette `AAAA-MM-JJ` et se compare comme une chaîne : c'est
- * ce qui rend la bascule insensible au fuseau de la machine qui pose la question.
+ * Le tarif réellement facturé un jour donné. `jour` est une étiquette
+ * `AAAA-MM-JJ` comparée comme une chaîne, insensible au fuseau de la machine.
  */
 export function tarifReel(modele: string, jour: string): Tarif {
   const remise = INTRODUCTION[modele];
@@ -80,16 +60,10 @@ export function tarifReel(modele: string, jour: string): Tarif {
 /**
  * De quoi multiplier un coût catalogue pour obtenir le coût réel.
  *
- * Passer par un facteur plutôt que de recalculer depuis les tokens n'est pas un
- * raccourci : `AiCall` ne garde pas si l'appel est parti en envoi groupé, et la
- * remise de moitié qui va avec serait perdue au recalcul. Le facteur, lui,
- * traverse toutes les remises multiplicatives — groupage comme cache — sans avoir
- * besoin de les connaître.
- *
- * Il n'existe que si l'entrée et la sortie sont réduites dans la même
- * proportion. Sinon le facteur dépendrait du mélange entrée/sortie de chaque
- * appel, et un chiffre unique mentirait : on rend `null`, à charge de l'appelant
- * de ne pas afficher ce qu'il ne sait pas.
+ * Un facteur plutôt qu'un recalcul depuis les tokens : il traverse les remises
+ * multiplicatives déjà comprises dans le coût enregistré (cache, envoi groupé)
+ * sans les connaître. `null` si l'entrée et la sortie ne sont pas réduites dans
+ * la même proportion : le facteur dépendrait alors du mélange de chaque appel.
  */
 export function facteurDuTarifReel(modele: string, jour: string): number | null {
   const catalogue = tarifCatalogue(modele);

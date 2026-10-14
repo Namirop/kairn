@@ -1,21 +1,11 @@
 /**
- * Ce qu'un texte déposé porte comme structure, au-delà de ses paragraphes.
+ * La structure markdown d'un texte déposé (réponses d'assistant, documentation,
+ * cours copiés), pour que l'écran rende la notation au lieu de l'afficher.
  *
- * **Le dépôt le plus courant du produit est du markdown, et on le lisait en
- * brut.** Une réponse d'assistant, une page de documentation, un cours copié :
- * tout ça arrive avec des dièses en tête de ligne, des astérisques autour des
- * mots importants et des tableaux à barres verticales. L'écran « Ce que tu as
- * déposé » les affichait tels quels — `## 2.1 Gradle`, `**En bref**`,
- * `|---|---|---|` —, c'est-à-dire la notation à la place de ce qu'elle note.
- *
- * Ce module lit la structure, il ne réécrit rien : l'Input reste au caractère
- * près ce qui a été posé, et c'est le rendu seul qui change. La grammaire
- * couverte est délibérément courte — titres, listes, tableaux — parce que c'est
- * ce qu'un dépôt porte réellement. Le gras se lit ailleurs (`texte-en-gras.ts`),
- * en ligne, et les extraits entre barrières ont déjà leur module
- * (`blocs-de-texte.ts`) : celui-ci ne voit que de la prose.
- *
- * Fonction pure : elle dit ce que le texte contient, jamais comment le peindre.
+ * L'Input n'est jamais réécrit : seul le rendu change. La grammaire est
+ * volontairement courte (titres, listes, tableaux). Le gras relève de
+ * `texte-en-gras.ts`, les extraits entre barrières de `blocs-de-texte.ts` : ce
+ * module ne voit que de la prose.
  */
 
 export type ElementDeProse =
@@ -54,10 +44,8 @@ function cellules(ligne: string): string[] {
 /**
  * Un tableau, à partir des rangées qui se suivent.
  *
- * L'en-tête n'existe que si une ligne séparatrice le suit : sans elle, ce n'est
- * pas un titre de colonne, c'est une première ligne comme les autres. Les
- * rangées sont ramenées à la largeur de la plus large pour que le rendu ne
- * laisse pas de trou à droite.
+ * L'en-tête n'existe que si une ligne séparatrice le suit. Les rangées sont
+ * ramenées à la largeur de la plus large, sans trou à droite au rendu.
  */
 function tableauDe(rangees: string[]): ElementDeProse | null {
   const grille = rangees.filter((ligne) => !SEPARATRICE.test(ligne)).map(cellules);
@@ -65,8 +53,7 @@ function tableauDe(rangees: string[]): ElementDeProse | null {
   const corps = entetes.length > 0 ? grille.slice(1) : grille;
   const largeur = Math.max(entetes.length, ...corps.map((ligne) => ligne.length), 0);
 
-  // Des barres sans une seule cellule ne font pas un tableau : elles repartent
-  // en paragraphe, où elles s'affichent telles qu'elles ont été déposées.
+  // Des barres sans cellule repartent en paragraphe, affichées telles quelles.
   if (largeur === 0 || corps.length === 0) return null;
 
   const completer = (ligne: string[]) =>
@@ -108,12 +95,8 @@ function listeAPuces(lignes: string[]): ElementDeProse {
 }
 
 /**
- * Une liste numérotée, et le numéro par lequel elle commence.
- *
- * On ne renumérote pas à partir de un : un dépôt coupé au milieu d'une
- * énumération reprend à quatre, et afficher « 1 » à la place réécrirait ce
- * qu'on a posé. Seuls les numéros suivants sont rendus au rendu, qui sait
- * compter.
+ * Une liste numérotée, et le numéro par lequel elle commence : un dépôt coupé au
+ * milieu d'une énumération reprend à quatre, pas à un.
  */
 function listeNumerotee(lignes: string[]): ElementDeProse {
   const premier = Number(NUMERO.exec(lignes[0] ?? "")?.[1] ?? "1");
@@ -148,9 +131,8 @@ function blocDe(lignes: string[], nature: ReturnType<typeof natureDe>): ElementD
 /**
  * Les éléments d'un texte de prose, dans l'ordre où ils s'y trouvent.
  *
- * Une ligne vide ferme ce qui est ouvert, comme partout en markdown. Un
- * changement de nature aussi : une puce sous un paragraphe ouvre une liste sans
- * qu'il faille sauter une ligne, parce que c'est ce que tout le monde écrit.
+ * Une ligne vide ferme ce qui est ouvert, un changement de nature aussi : une
+ * puce sous un paragraphe ouvre une liste sans ligne vide, comme on l'écrit.
  */
 export function elementsDeProse(texte: string): ElementDeProse[] {
   const elements: ElementDeProse[] = [];

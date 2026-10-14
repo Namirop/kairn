@@ -1,42 +1,30 @@
 import { jourSuivant } from "./local-day";
 
 /**
- * Quand quelqu'un dépose plus vite qu'il ne révise.
+ * Quand quelqu'un dépose plus vite qu'il ne révise : un constat, pas un
+ * reproche. Un jour d'arriéré ne veut rien dire ; plusieurs d'affilée disent que
+ * les deux rythmes ne se rejoindront pas seuls.
  *
- * Ce n'est pas une alerte et surtout pas un reproche : c'est un constat, avec sa
- * sortie. L'arriéré qui dépasse le plafond de session un jour ne veut rien dire
- * — on a été occupé. Le même arriéré plusieurs jours d'affilée veut dire que le
- * rythme de dépôt et le rythme de révision ne se rejoindront pas tout seuls, et
- * personne ne s'en aperçoit en regardant un compteur qui monte lentement.
- *
- * Le message disparaît dès que l'arriéré redescend. Une bannière permanente
- * devient un élément de décor, et on cesse de la lire au moment précis où elle
- * aurait quelque chose à dire.
+ * Le message disparaît dès que l'arriéré redescend : une bannière permanente
+ * cesse d'être lue.
  */
 
 /**
- * Jours consécutifs d'arriéré avant de le dire.
- *
- * Deux, c'est du bruit : un week-end sauté suffit. Trois est le premier nombre
- * qui distingue un creux d'une tendance.
+ * Jours consécutifs d'arriéré avant de le dire. À deux, un week-end sauté
+ * suffit ; trois distingue un creux d'une tendance.
  */
 export const JOURS_AVANT_SIGNAL = 3;
 
 /**
- * Le suivi de l'arriéré, tel qu'il est conservé d'un jour à l'autre.
- *
- * Un seul jour civil suffit à tout dire : celui où l'arriéré a commencé à
- * dépasser. Le nombre de jours s'en déduit, et il n'y a rien à incrémenter —
- * donc rien à désynchroniser si la personne ne passe pas un jour.
+ * Le suivi de l'arriéré : le jour civil où il a commencé. Le nombre de jours
+ * s'en déduit ; sans compteur, rien à désynchroniser si la personne ne passe
+ * pas un jour.
  */
 export type SuiviDeLArriere = { depuis: string | null };
 
 /**
- * Le suivi après une observation.
- *
- * Il ne bouge que quand l'état change : l'arriéré s'installe, ou il se résorbe.
- * Un arriéré qui dure ne réécrit rien, ce qui rend l'appel sans effet la plupart
- * du temps — et évite d'écrire à chaque affichage du tableau de bord.
+ * Le suivi après une observation. Il ne change que quand l'arriéré s'installe ou
+ * se résorbe, ce qui évite d'écrire à chaque affichage du tableau de bord.
  */
 export function suiviApresObservation(
   suivi: SuiviDeLArriere,
@@ -52,8 +40,7 @@ export function suiviApresObservation(
  * Depuis combien de jours l'arriéré dure, aujourd'hui compris.
  *
  * Compté sur les étiquettes de jour et non sur des instants : une journée locale
- * fait 23 ou 25 heures aux changements d'heure, et l'étiquette, elle, avance
- * toujours d'un cran.
+ * fait 23 ou 25 heures aux changements d'heure.
  */
 export function joursDArriere(suivi: SuiviDeLArriere, jour: string): number {
   if (suivi.depuis === null || suivi.depuis > jour) return 0;
@@ -61,8 +48,8 @@ export function joursDArriere(suivi: SuiviDeLArriere, jour: string): number {
   let compte = 1;
   let curseur = suivi.depuis;
 
-  // Borné par construction : on s'arrête au jour observé. La garde de sortie
-  // couvre un suivi laissé dans le futur par une horloge qui a reculé.
+  // La garde de 400 couvre un suivi laissé dans le futur par une horloge qui a
+  // reculé.
   while (curseur !== jour && compte < 400) {
     curseur = jourSuivant(curseur);
     compte += 1;
