@@ -3,11 +3,8 @@ import { FsrsState } from "@/lib/db/generated/enums";
 import type { AtomModel } from "@/lib/db/generated/models";
 
 /**
- * Traduction entre la ligne `Atom` et la carte attendue par ts-fsrs.
- *
- * L'algorithme n'est jamais réimplémenté : on lui passe une carte, il rend une
- * carte, et ce fichier fait l'aller-retour avec la base. C'est aussi le seul
- * endroit qui connaît la correspondance entre `FsrsState` et `State`.
+ * Traduction entre la ligne `Atom` et la carte de ts-fsrs, dans les deux sens.
+ * Seul endroit qui connaît la correspondance entre `FsrsState` et `State`.
  */
 
 const TO_LIBRARY: Record<FsrsState, State> = {

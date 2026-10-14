@@ -2,20 +2,14 @@ import { prisma } from "@/lib/db/client";
 import { debutEnDate, periodeDeQuota, type PeriodeDeQuota } from "@/lib/domain/periode-de-quota";
 
 /**
- * Où en est un compte dans sa période, et où sa période commence.
- *
- * Lecture seule. Ce qui prend et rend des places vit dans `quota-depots.ts` :
- * ici on regarde, là-bas on décide. La distinction n'est pas cosmétique — les
- * écrans lisent sans jamais réserver, et un module qui ne fait que lire ne peut
- * pas provoquer d'écriture par accident.
+ * Où en est un compte dans sa période. Lecture seule : ce qui prend et rend des
+ * places vit dans `quota-depots.ts`, et les écrans qui lisent ici ne peuvent pas
+ * écrire par accident.
  */
 
 /**
- * La période en cours d'un compte.
- *
- * L'ancrage est la date d'inscription. Un compte introuvable — supprimé entre
- * deux requêtes — ancre sur maintenant : il n'obtiendra rien de toute façon,
- * autant que le calcul ne lève pas.
+ * La période en cours, ancrée à l'inscription. Un compte supprimé entre deux
+ * requêtes ancre sur maintenant : il n'obtiendra rien, autant ne pas lever.
  */
 export async function periodeDuCompte(
   userId: string,

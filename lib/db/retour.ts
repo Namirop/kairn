@@ -3,18 +3,8 @@ import type { SujetDeRetour } from "@/lib/db/types";
 import { peutEncoreEnvoyer } from "@/lib/domain/retour-sur-le-produit";
 
 /**
- * Les retours sur le produit : ce qu'on en écrit, ce qu'on en relit.
- *
- * C'est la seconde instrumentation qualitative du produit, à côté des
- * signalements — et la seule qui porte sur autre chose qu'une question. Un
- * mauvais découpage se voit dans les chiffres ; un mot de travers, un écran qui
- * déborde, une logique qui surprend ne laissent aucune trace nulle part. Ils
- * n'en laisseront que si quelqu'un les écrit.
- *
- * D'où la forme du formulaire, et d'où celle de ce fichier : on demande le
- * minimum, on n'échoue jamais en silence, et le plafond est haut. Le seul cas où
- * l'on refuse est celui où la table sert à autre chose qu'à ce pour quoi elle
- * existe.
+ * Les retours sur le produit : ce qu'on en écrit, ce qu'on en relit. Le
+ * plafond est haut à dessein : il ne refuse que l'usage détourné de la table.
  */
 
 export type RetourAEcrire = {
@@ -33,14 +23,9 @@ export type EcritureDeRetour = { ok: true } | { ok: false; motif: "PLAFOND" };
 const FENETRE_MS = 24 * 60 * 60 * 1000;
 
 /**
- * Écrit un retour, si le compte n'a pas déjà rempli sa journée.
- *
- * Le plafond est ici et non dans la Server Action, pour la raison qui vaut
- * partout dans ce dossier : c'est le passage obligé vers l'écriture, et une
- * garde posée plus haut se contourne le jour où un second appelant apparaît.
- *
- * L'identifiant du compte vient de la session, jamais du formulaire — la Server
- * Action le lit et le passe, il n'existe aucun chemin où le client le fournisse.
+ * Écrit un retour, si le compte n'a pas déjà rempli sa journée. Le plafond est
+ * ici et non dans la Server Action : c'est le passage obligé vers l'écriture,
+ * qu'un second appelant ne contournera pas.
  */
 export async function ecrireUnRetour(
   retour: RetourAEcrire,
@@ -93,13 +78,9 @@ export type PageDeRetours = {
 
 /**
  * Une page de retours : ce qui n'est pas traité d'abord, puis le plus récent.
+ * Par date seule, un retour non lu redescendrait sous les traités.
  *
- * L'ordre est le point de tout l'écran. Trier par date seule ferait redescendre
- * un retour non lu sous quinze retours traités au bout d'une semaine, et il n'y
- * a personne d'autre pour le rattraper.
- *
- * Le rang demandé est ramené dans les bornes plutôt que refusé, comme pour les
- * signalements : un numéro de page vient d'une URL.
+ * Le rang est ramené dans les bornes plutôt que refusé : il vient d'une URL.
  */
 export async function listerLesRetoursPagines(
   rang: number,
@@ -137,8 +118,8 @@ export async function listerLesRetoursPagines(
       message: ligne.message,
       ecran: ligne.ecran,
       contexte: ligne.contexte,
-      // La colonne d'octets n'est jamais chargée pour une liste : une page de
-      // cinq captures ferait un mégaoctet de réponse dont on n'affiche rien.
+      // La colonne d'octets n'est jamais chargée pour une liste : quelques
+      // captures pèseraient un mégaoctet dont on n'affiche rien.
       aUneCapture: ligne.captureMediaType !== null,
       traiteLe: ligne.traiteLe,
       createdAt: ligne.createdAt,
@@ -171,10 +152,8 @@ export async function basculerLeTraitement(
 }
 
 /**
- * La capture d'un retour, pour la seule route qui la sert.
- *
- * Elle est lue à part et jamais avec la liste : c'est la seule requête du
- * produit qui rapporte des octets d'image, et elle doit rester la seule.
+ * La capture d'un retour, pour la seule route qui la sert. Seule requête qui
+ * rapporte des octets d'image : ne pas les charger ailleurs.
  */
 export async function lireLaCapture(
   id: string,

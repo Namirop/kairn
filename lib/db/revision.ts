@@ -15,19 +15,13 @@ import { apresLePassage } from "@/lib/domain/rotation-variantes";
 import { signalDeMaitrise, type SignalDeMaitrise } from "@/lib/domain/signal-maitrise";
 
 /**
- * Un passage sur une question, écrit immédiatement.
- *
- * Une session interrompue à la troisième question sur dix garde ses trois
- * révisions : rien n'est mis de côté pour être validé à la fin. Personne ne perd
- * son travail parce qu'il a fermé un onglet.
+ * Un passage sur une question, écrit immédiatement : une session interrompue
+ * garde les révisions déjà faites, rien n'attend la fin pour être validé.
  */
 
 /**
- * Passages relus pour juger l'état et le signal.
- *
- * Le signal en regarde trois, la consolidation s'arrête au premier échec en
- * remontant et se compare à trois : dix suffisent largement aux deux, et
- * bornent la lecture d'un concept révisé depuis des mois.
+ * Passages relus pour juger l'état et le signal. Les deux en regardent trois au
+ * plus ; dix suffisent et bornent la lecture d'un concept révisé depuis des mois.
  */
 const PASSAGES_RELUS = 10;
 
@@ -85,11 +79,9 @@ export async function enregistrerRevision(
       fsrsState: true,
       lastReview: true,
       masterySignaledAt: true,
-      // Les variantes retirées entrent aussi. Une question posée à l'écran a pu
-      // être retirée entre-temps — le concept réécrit dans un autre onglet, ou
-      // ses questions renouvelées — et la personne a quand même répondu. Refuser
-      // le passage perdrait un fait réel pour une raison qui ne la regarde pas.
-      // C'est `actives` qui sert la rotation ; la retirée ne sert qu'à écrire.
+      // Les variantes retirées entrent aussi : une question affichée a pu être
+      // retirée entre-temps (concept réécrit, questions renouvelées), et la
+      // réponse reste un fait réel. Seules les `actives` servent la rotation.
       variants: {
         select: {
           id: true,
@@ -114,20 +106,17 @@ export async function enregistrerRevision(
 
   if (!variante) return null;
 
-  // L'usure se juge sur ce qui est encore servable : une variante retirée n'a
-  // plus à peser dans la décision de renouveler.
   const actives = atome.variants.filter((candidate) => candidate.retiredAt === null);
 
   const plan = planifier(atome, revision.note, maintenant);
 
-  // L'archivage déclaré ne supprime rien : il repousse l'échéance à trois mois.
-  // La thèse du produit est qu'on croit savoir et qu'on oublie — prendre la
-  // déclaration au pied de la lettre reviendrait à contredire le produit.
+  // « Je maîtrise » repousse l'échéance à trois mois sans sortir le concept :
+  // la thèse du produit est qu'on croit savoir et qu'on oublie.
   const echeance = revision.maitrise ? dansTroisMois(maintenant) : plan.carte.due;
   const intervalleJours = revision.maitrise ? JOURS_AVANT_ARCHIVAGE : plan.intervalleJours;
 
-  // Les passages arrivent du plus récent au plus ancien : on les remet dans le
-  // sens de l'histoire avant d'y ajouter celui qu'on est en train d'écrire.
+  // Lus du plus récent au plus ancien : remis dans l'ordre chronologique avant
+  // d'y ajouter le passage en cours.
   const passes = [...atome.reviews].reverse();
   const notes = [...passes.map((passe) => passe.rating), revision.note];
   const chronometres = [
@@ -176,18 +165,17 @@ export async function enregistrerRevision(
 
   await regenererSiUsees(atome, apresLePassage(actives, variante.id, "SESSION"), maintenant);
 
-  // La progression se compte après l'écriture du passage, et sur l'état qui en
-  // résulte : c'est le nombre de concepts consolidés d'après qui donne la
-  // hauteur du cairn. Le passage précédent est celui qui précède celui-ci —
-  // `atome.reviews` a été lu avant qu'on écrive, il porte donc bien l'avant.
+  // Après l'écriture : la hauteur du cairn se compte sur l'état qui en résulte.
+  // `atome.reviews` a été lu avant l'écriture, son dernier est bien le passage
+  // précédent.
   const progression = await compterLePassage(
     {
       userId: revision.userId,
       ratePrecedemment: passes.at(-1)?.rating === "AGAIN",
       reussiMaintenant: estReussite(revision.note),
       fuseau: await lireFuseauUtilisateur(revision.userId),
-      // Celle d'avant le passage : c'est elle qui dit si ce concept attendait
-      // depuis un jour où personne n'est venu.
+      // Celle d'avant le passage : elle dit si ce concept attendait depuis un
+      // jour où personne n'est venu.
       echeanceAvant: atome.due,
     },
     maintenant,

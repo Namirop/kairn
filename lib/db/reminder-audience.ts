@@ -12,15 +12,12 @@ export type ReminderCandidate = {
 };
 
 /**
- * Comptes qui acceptent encore ce type d'envoi.
+ * Comptes qui acceptent encore ce type d'envoi ; chaque type a son propre
+ * réglage.
  *
- * Chaque type a son réglage, et c'est SQL qui l'applique : un compte qui a coupé
- * l'alerte de série reste candidat au rappel quotidien, et l'inverse aussi.
- *
- * Le filtrage sur l'heure locale se fait en mémoire — il dépend du fuseau de
- * chacun, que SQL ne sait pas comparer ici. La borne évite qu'un passage du
- * cron parte pour un tour complet de la table quand la base grossira ; à ce
- * moment-là, il faudra découper par tranche d'heure plutôt que relever la borne.
+ * L'heure locale se filtre en mémoire, car elle dépend du fuseau de chacun. La
+ * borne évite un tour complet de la table : quand la base grossira, il faudra
+ * découper par tranche d'heure plutôt que relever la borne.
  */
 export async function findReminderCandidates(
   type: NotificationType = "DAILY_REMINDER",

@@ -9,18 +9,12 @@ import {
 } from "@/lib/domain/progression";
 
 /**
- * L'écriture de la progression, après un passage en session du jour.
+ * L'écriture de la progression (`UserStats`), après un passage en session du
+ * jour. Seul ce fichier l'alimente ; l'entraînement libre ne l'importe pas.
  *
- * `UserStats` existait depuis la phase 0 sans que rien ne l'alimente. C'est ce
- * fichier, et lui seul : l'entraînement libre n'y passe pas, et le fait qu'il
- * n'ait aucune raison d'importer ce module est la garantie la plus solide qu'on
- * puisse lui donner.
- *
- * Tout se joue dans une transaction interactive parce que la série se déduit de
- * la valeur précédente : lire puis écrire hors transaction laisserait deux
- * passages simultanés poser deux fois le même jour. C'est une écriture par
- * révision sur une ligne qui n'appartient qu'à une personne — la contention est
- * celle d'un utilisateur avec lui-même.
+ * Transaction interactive : la série se déduit de la valeur précédente, et
+ * lire puis écrire hors transaction laisserait deux passages simultanés compter
+ * deux fois le même jour.
  */
 
 export type PassageCompte = {
@@ -30,12 +24,9 @@ export type PassageCompte = {
   reussiMaintenant: boolean;
   fuseau: string;
   /**
-   * L'échéance que portait le concept **avant** ce passage.
-   *
-   * Elle est passée par l'appelant parce qu'elle n'existe plus au moment où on
-   * compte : la replanification l'a déjà déplacée dans le futur. Sans elle, un
-   * concept en retard depuis trois jours et revu maintenant ferait tenir la série
-   * qu'il vient précisément de casser.
+   * L'échéance du concept avant ce passage, fournie par l'appelant : la
+   * replanification l'a déjà déplacée. Sans elle, un concept en retard revu
+   * maintenant ferait tenir la série qu'il vient de casser.
    */
   echeanceAvant: Date;
 };
@@ -54,10 +45,9 @@ export type ProgressionEcrite = {
 /**
  * Compte un passage de session, et rend l'état d'après.
  *
- * Le nombre de concepts consolidés est recompté plutôt qu'incrémenté : un
- * concept peut entrer en `CONSOLIDATED` comme en sortir, et un compteur qui
- * dérive d'un seul point de vue finit toujours par mentir sur la hauteur du
- * cairn. C'est une requête de comptage par révision, sur un index existant.
+ * Les consolidés sont recomptés plutôt qu'incrémentés : un concept peut entrer
+ * dans `ETATS_QUI_POSENT_UNE_PIERRE` comme en sortir. Le comptage s'appuie sur l'index
+ * `[userId, state]`.
  */
 export async function compterLePassage(
   passage: PassageCompte,
@@ -124,13 +114,8 @@ export async function compterLePassage(
 }
 
 /**
- * Les jours d'échéance déjà atteints : celle du concept qu'on vient de revoir, et
- * celles de ce qui reste en attente.
- *
- * Une borne large en SQL, le tri exact en mémoire : c'est le même partage que
- * partout ailleurs, parce que « quel jour est-ce chez lui » ne se compare pas
- * dans une requête. La borne haute est l'instant courant — une échéance dans le
- * futur n'a par définition manqué aucun rendez-vous.
+ * Les jours d'échéance déjà atteints : celle du concept revu, et celles de ce
+ * qui reste en attente. Borne SQL large, comparaison de jour local en mémoire.
  */
 async function echeancesPassees(passage: PassageCompte, maintenant: Date): Promise<string[]> {
   const enAttente = await prisma.atom.findMany({
@@ -138,15 +123,14 @@ async function echeancesPassees(passage: PassageCompte, maintenant: Date): Promi
       userId: passage.userId,
       uncertain: false,
       state: { not: "ARCHIVED" },
-      // Les mêmes conditions que pour être servable : un concept dont toutes les
-      // questions ont été retirées ne pouvait pas être révisé, donc il n'a
-      // manqué aucun rendez-vous.
+      // Mêmes conditions que pour être servable : un concept sans question
+      // active ne pouvait pas être révisé, il n'a manqué aucun rendez-vous.
       variants: { some: { retiredAt: null } },
       due: { lte: maintenant },
     },
     select: { due: true },
-    // De quoi couvrir tout arriéré réel : le produit plafonne les dépôts à trente
-    // concepts par mois, et seule l'existence d'une échéance dans le trou compte.
+    // Couvre tout arriéré réel (`PLAFOND_PAYANT` : 500 concepts par période), et
+    // seule l'existence d'une échéance dans le trou compte.
     take: 500,
   });
 

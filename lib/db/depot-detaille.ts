@@ -3,12 +3,9 @@ import type { AtomState, GenerationKind, InputStatus } from "@/lib/db/types";
 import type { AvancementDepot } from "@/lib/domain/etat-depot";
 
 /**
- * Un dépôt et ce qu'il a donné, tel que son écran le lit.
- *
- * Séparé des gestes qui corrigent un concept : lire un dépôt et le réécrire
- * n'ont ni les mêmes appelants ni les mêmes raisons de changer. La propriété se
- * vérifie ici comme ailleurs — un dépôt qui n'est pas à l'utilisateur n'est pas
- * trouvé, donc pas lu.
+ * Un dépôt et ce qu'il a donné, tel que son écran le lit. La propriété se
+ * vérifie dans la requête : un dépôt qui n'est pas à l'utilisateur n'est pas
+ * trouvé.
  */
 
 export type ConceptLu = {
@@ -20,11 +17,9 @@ export type ConceptLu = {
   /** Sorti du cycle par l'utilisateur — et donc remettable par lui. */
   archivedByUser: boolean;
   /**
-   * Combien de questions portent ce concept, sans leur texte.
-   *
-   * Les lire hors session reviendrait à se gâcher la surprise : on retient une
-   * formulation qu'on n'a pas eu à retrouver, et la question suivante ne mesure
-   * plus rien. Le nombre suffit à dire que le travail est fait.
+   * Combien de questions portent ce concept, sans leur texte : les lire hors
+   * session ferait retenir une formulation, et la question ne mesurerait plus
+   * rien.
    */
   questions: number;
 };
@@ -36,11 +31,8 @@ export type DepotDetaille = {
   /** La consigne jointe au dépôt, ou rien. Relue pour être montrée, pas pour agir. */
   instruction: string | null;
   /**
-   * Ce que la consigne a laissé du dépôt, quand elle en a écarté une part.
-   *
-   * Une vue vérifiée fidèle au dépôt, jamais une réécriture : voir
-   * `lib/domain/texte-retenu.ts`. Nulle sans consigne, et nulle quand la
-   * consigne oriente sans retrancher.
+   * Ce que la consigne a laissé du dépôt, vérifié fidèle et jamais réécrit
+   * (`lib/domain/texte-retenu.ts`). Nul quand la consigne n'a rien retranché.
    */
   texteRetenu: string | null;
   status: InputStatus;
@@ -51,9 +43,8 @@ export type DepotDetaille = {
   texteTronque: boolean;
   createdAt: Date;
   concepts: ConceptLu[];
-  /** Travaux encore en cours ou en attente, avec leur nature : c'est elle qui
-   * dit à l'utilisateur ce qu'il attend. `differe` distingue ce qui s'écrit
-   * maintenant de ce qui a rendez-vous. */
+  /** Travaux en cours ou en attente. `differe` : ceux dont le `notBefore` n'est
+   * pas encore échu. */
   travauxEnCours: { kind: GenerationKind; differe: boolean }[];
 };
 
@@ -109,14 +100,9 @@ export async function lireDepotDetaille(
 }
 
 /**
- * Juste de quoi savoir si l'écran a changé, et rien d'autre.
- *
- * L'écran de détail redemande son avancement tant qu'un travail tourne. La
- * requête complète rapporterait le texte déposé, ses concepts et leurs
- * comptes de questions à chaque tour, pour n'en lire que trois nombres. Celle-ci
- * ne rapporte que ce qui décide : l'état, les travaux ouverts, et le nombre de
- * concepts. Le reste de la page se recharge par `router.refresh()` le jour où
- * l'un des trois bouge — c'est-à-dire une fois, à la fin.
+ * Juste de quoi savoir si l'écran a changé : l'écran de détail l'interroge en
+ * boucle tant qu'un travail tourne, et ne recharge le reste (`router.refresh()`)
+ * que quand l'état, les travaux ou le nombre de concepts bougent.
  */
 export async function lireAvancementDuDepot(
   inputId: string,

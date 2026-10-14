@@ -7,38 +7,26 @@ import { apresLePassage } from "@/lib/domain/rotation-variantes";
 import { composerEntrainement, QUESTIONS_PAR_TOUR } from "@/lib/domain/selection-entrainement";
 
 /**
- * Concepts lus pour composer un tour.
- *
- * Dix fois ce qu'un tour sert : de quoi alterner les sujets et piocher des
- * facettes fraîches, sans que la lecture grandisse avec le corpus.
+ * Concepts lus pour composer un tour : dix fois ce qu'un tour sert, de quoi
+ * alterner les sujets sans que la lecture grandisse avec le corpus.
  */
 const CONCEPTS_PAR_TOUR = 120;
 
 /**
  * L'entraînement libre : lire un tour de questions, écrire un passage.
  *
- * **Rien de ce qui est écrit ici ne touche à la mémoire.** Pas d'échéance, pas
- * de stabilité, pas de difficulté, pas d'état de maîtrise, pas de carte
- * ts-fsrs. On incrémente un compteur qui ne pilote aucune planification, et on
- * garde le passage dans l'histoire.
- *
- * C'est volontairement un fichier à part de `revision.ts`. Les deux écritures
- * se ressemblent assez pour qu'on soit tenté d'ajouter un drapeau à la
- * première ; le jour où quelqu'un le fait, une ligne oubliée derrière une
- * condition suffit à laisser l'entraînement déplacer une échéance. Ici, il n'y
- * a rien à oublier : le code qui replanifie n'existe pas dans ce fichier.
+ * Rien ici ne touche à la mémoire (échéance, stabilité, difficulté, état,
+ * carte ts-fsrs). C'est volontairement un fichier à part de `revision.ts` : ne
+ * pas fusionner les deux derrière un drapeau, une ligne oubliée suffirait à
+ * laisser l'entraînement déplacer une échéance.
  */
 
 /**
- * Un tour de questions tirées des concepts de cette personne.
+ * Un tour de questions tirées des concepts de cette personne, échus ou non.
  *
- * Seuls les concepts que l'utilisateur a lui-même sortis du cycle en sont
- * exclus : les reproposer contredirait le geste. L'archivage que le produit
- * pose au-delà de trois mois d'intervalle, lui, n'est qu'une étiquette d'état —
- * l'exclure reviendrait à retirer de l'entraînement précisément ce qu'on sait
- * le mieux, alors que la thèse du produit est qu'on croit savoir et qu'on
- * oublie. Tout le reste entre, échu ou non : l'entraînement ne regarde aucune
- * échéance, c'est tout son intérêt.
+ * Seuls les concepts sortis du cycle par l'utilisateur sont exclus. L'archivage
+ * automatique (`ARCHIVED`) reste : l'exclure retirerait de l'entraînement ce
+ * qu'on croit le mieux savoir.
  */
 export async function lireTourDentrainement(
   userId: string,
@@ -51,15 +39,9 @@ export async function lireTourDentrainement(
       archivedByUser: false,
       variants: { some: { retiredAt: null } },
     },
-    // Un tour tire douze questions : il n'a jamais eu besoin de tout le corpus,
-    // et le lire entier — concepts et variantes — était une lecture sans borne
-    // qu'un clic répétait à volonté.
-    //
-    // L'ordre est celui du concept touché il y a le plus longtemps, et c'est ce
-    // qui fait tourner la fenêtre : chaque passage d'entraînement horodate son
-    // concept, donc celui qui vient de servir passe en fin de file et laisse la
-    // place aux suivants. Sur un corpus plus grand que la fenêtre, tout finit
-    // par passer.
+    // Le moins récemment entraîné d'abord : chaque passage horodate son concept
+    // (`trainedAt`), ce qui fait tourner la fenêtre sur un corpus plus grand
+    // qu'elle.
     orderBy: { trainedAt: { sort: "asc", nulls: "first" } },
     take: CONCEPTS_PAR_TOUR,
     select: {
@@ -126,13 +108,11 @@ export type PassageDentrainement = {
 /**
  * Écrit un passage d'entraînement.
  *
- * Rend `false` quand le concept n'est pas celui de cette personne, ou quand la
- * question ne porte pas sur ce concept : l'identifiant vient du client, il
- * n'est jamais cru sur parole.
+ * Rend `false` quand le concept n'est pas à cette personne, ou que la question
+ * ne porte pas sur lui : les identifiants viennent du client.
  *
- * `stabilityBefore` et `stabilityAfter` recopient la stabilité du moment, sans
- * la modifier. Le passage doit rester lisible dans l'historique à côté des
- * autres, et un zéro y ferait croire à un effondrement qui n'a pas eu lieu.
+ * `stabilityBefore` et `stabilityAfter` recopient la stabilité du moment : un
+ * zéro ferait croire, dans l'historique, à un effondrement.
  */
 export async function enregistrerEntrainement(
   passage: PassageDentrainement,
@@ -144,9 +124,8 @@ export async function enregistrerEntrainement(
       id: true,
       inputId: true,
       stability: true,
-      // Retirées comprises, pour la même raison qu'en session : une question
-      // posée puis retirée pendant qu'on y répondait reste une question à
-      // laquelle on a répondu.
+      // Retirées comprises : une question retirée pendant qu'on y répondait
+      // reste une question à laquelle on a répondu.
       variants: {
         select: {
           id: true,
@@ -185,15 +164,13 @@ export async function enregistrerEntrainement(
       where: { id: variante.id },
       data: { trainingCount: { increment: 1 }, lastTrainedAt: maintenant },
     }),
-    // Le curseur de rotation des tours, et rien d'autre. Aucune échéance ne le
-    // lit : l'entraînement ne touche toujours à rien de la mémoire.
+    // Le curseur de rotation des tours, et rien d'autre : aucune échéance ne le lit.
     prisma.atom.update({ where: { id: atome.id }, data: { trainedAt: maintenant } }),
   ]);
 
-  // Le seul effet de l'entraînement au-delà de son propre compteur : les
-  // questions s'usent d'être lues, quel que soit le mode. Ce n'est pas de la
-  // planification — aucune échéance ne bouge —, c'est du renouvellement de
-  // stock, et il est plafonné à une écriture par concept et par semaine.
+  // Les questions s'usent d'être lues, quel que soit le mode : c'est du
+  // renouvellement de stock, pas de la planification, et il est plafonné à une
+  // régénération par concept et par semaine.
   await regenererSiUsees(atome, apresLePassage(actives, variante.id, "TRAINING"), maintenant);
 
   return true;

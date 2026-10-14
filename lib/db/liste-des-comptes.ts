@@ -2,18 +2,10 @@ import { prisma } from "@/lib/db/client";
 import { type Plan, planEffectif } from "@/lib/domain/plafond-du-plan";
 
 /**
- * Les comptes un par un, nommés.
+ * Les comptes un par un, nommés (`administration.ts`, lui, agrège).
  *
- * Le bloc de chiffres d'à côté dit combien il y en a et combien s'en servent ;
- * il ne dit jamais **qui**. Tant qu'ils se comptent sur les doigts, c'est la
- * seule vue qui permette d'écrire à quelqu'un, de comprendre un retour, ou de
- * voir qu'un compte a déposé une fois puis n'est jamais revenu.
- *
- * Séparé de `administration.ts`, qui agrège : ce module-ci énumère, et les deux
- * n'ont ni la même forme de requête ni la même raison de changer.
- *
- * L'écran est derrière `exigerUnAdministrateur`. C'est le seul endroit du
- * produit où une adresse s'affiche en clair, et il n'y en aura pas d'autre.
+ * L'écran est derrière `exigerUnAdministrateur` : c'est le seul endroit du
+ * produit où une adresse s'affiche en clair.
  */
 
 /** Ce qu'on montre d'un compte. Les compteurs sont des totaux, pas des fenêtres. */
@@ -48,12 +40,8 @@ type Ligne = {
 };
 
 /**
- * Deux cents lignes au plus.
- *
- * La borne n'est pas de la pagination, c'est un garde-fou : cet écran se lit
- * d'un coup d'œil, et le jour où il faudra le paginer, c'est qu'il faudra aussi
- * le repenser. Mieux vaut qu'il tronque visiblement que de rendre une page de
- * quatre mille lignes en silence.
+ * Un garde-fou, pas de la pagination : le jour où il faudra paginer, l'écran
+ * sera à repenser.
  */
 export const COMPTES_AU_PLUS = 200;
 
@@ -90,8 +78,8 @@ export async function lireLaListeDesComptes(
     depots: ligne.depots,
     concepts: ligne.concepts,
     serie: ligne.serie,
-    // Le plan se juge ici et pas dans la requête : c'est la règle du domaine, et
-    // elle doit rendre la même chose qu'à l'écran de dépôt.
+    // Jugé par la règle du domaine et pas dans le SQL, pour rendre la même chose
+    // qu'ailleurs dans le produit.
     plan: planEffectif(
       { plan: ligne.plan ?? "GRATUIT", finDePeriode: ligne.currentPeriodEnd },
       maintenant,

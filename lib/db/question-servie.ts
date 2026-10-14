@@ -9,12 +9,9 @@ import { tagsSansReponse } from "@/lib/domain/tags-sans-reponse";
 import { phraseSansDevoilement } from "@/lib/domain/trou-devoile";
 
 /**
- * Une question telle qu'un écran la reçoit, quel que soit le mode.
- *
- * La session du jour et l'entraînement libre servent les mêmes questions : ce
- * qui les distingue est ce qu'on écrit après la réponse, jamais ce qu'on
- * affiche. Deux lectures du `payload` finiraient par diverger — un format
- * ajouté d'un côté et pas de l'autre —, alors il n'y en a qu'une.
+ * Une question telle qu'un écran la reçoit, quel que soit le mode. Session,
+ * entraînement et vitrine de l'essai lisent le `payload` ici et nulle part
+ * ailleurs : deux lectures finiraient par diverger.
  */
 
 /** Les options d'un QCM, telles que la génération les a écrites. */
@@ -30,8 +27,8 @@ const PAYLOAD_VRAI_FAUX = z.object({ expected: z.boolean() });
 const PAYLOAD_CLOZE = z.object({
   sentence: z.string().min(1),
   accepted: z.array(z.string().min(1)).min(1),
-  // Les questions écrites avant que l'aide existe n'en portent pas : le tableau
-  // vide est une valeur normale, et l'écran n'offre alors rien.
+  // Une question peut ne pas en porter : le tableau vide est une valeur
+  // normale, et l'écran n'offre alors aucune aide.
   leurres: z.array(z.string().min(1)).default([]),
 });
 
@@ -58,21 +55,16 @@ export type QuestionServie = {
   correctIndex: number | null;
   cloze: { sentence: string; accepted: string[]; leurres: string[] } | null;
   /**
-   * Depuis combien de jours civils ce concept n'avait pas été reposé.
-   *
-   * Nul quand on le pose pour la première fois, et nul en entraînement : là, le
-   * planning ne bouge pas, et rappeler l'écart d'un cycle auquel on ne touche
-   * pas dirait l'inverse de ce que fait l'écran.
+   * Depuis combien de jours civils ce concept n'avait pas été reposé. Nul à la
+   * première fois, et nul en entraînement, qui ne touche pas au cycle.
    */
   vuIlYaJours: number | null;
 };
 
 /**
- * L'écart entre le dernier passage et maintenant, dans le calendrier de
- * l'utilisateur.
- *
- * Un écart de dix heures qui traverse minuit fait bien un jour : c'est ce que la
- * personne a vécu, et c'est ce que la planification a compté.
+ * L'écart entre le dernier passage et maintenant, en jours civils de
+ * l'utilisateur : dix heures qui traversent minuit font un jour, comme pour la
+ * planification.
  */
 function ecartDepuis(
   lastReview: Date | null | undefined,
@@ -91,10 +83,9 @@ function ecartDepuis(
 /**
  * Les choix à proposer, ou `null` si la question doit repartir en format ouvert.
  *
- * Un vrai ou faux ne porte pas d'options en base : ce sont toujours les deux
- * mêmes, et c'est le domaine qui les reconstruit. Sans ce passage, un vrai ou
- * faux tombait côté ouvert et demandait à l'utilisateur de se juger sur une
- * question dont la justesse est pourtant connue.
+ * Un vrai ou faux ne porte pas d'options en base : le domaine les reconstruit,
+ * sans quoi il tomberait en format ouvert et l'utilisateur devrait se juger sur
+ * une réponse pourtant connue.
  */
 function lireChoix(
   format: VariantFormat,
@@ -115,24 +106,16 @@ function lireChoix(
   // Un index hors des options viendrait d'une génération abîmée : mieux vaut
   // servir la question sans ses choix que proposer une bonne réponse fausse.
   if (lu.data.correctIndex >= lu.data.options.length) return null;
-  // Quatre fois la même proposition ne se choisissent pas : trois clics sur
-  // quatre comptent faux sans que personne puisse faire mieux. Un lot écrit le
-  // 23/09 en portait un, abrégé en « ... ». Voir `optionsDistinguables`.
+  // Des propositions identiques (abrégées en « ... », par exemple) ne se
+  // choisissent pas. Voir `optionsDistinguables`.
   if (!optionsDistinguables(lu.data.options)) return null;
 
   return lu.data;
 }
 
 /**
- * Les seules options d'un QCM, sans dire laquelle est la bonne.
- *
- * La vitrine de l'essai montre la question telle qu'elle sera posée, et un QCM
- * sans ses propositions n'est pas un QCM — on lit une question ouverte sous une
- * étiquette qui annonce autre chose. Elle n'a en revanche aucune raison de
- * connaître la réponse : `correctIndex` reste ici et ne descend pas au client.
- *
- * Le schéma est celui d'à côté, et c'est tout l'intérêt de le lire ici : une
- * seconde lecture du `payload` ailleurs finirait par diverger de celle-ci.
+ * Les seules options d'un QCM, pour la vitrine de l'essai : `correctIndex` ne
+ * descend pas au client.
  */
 export function optionsDUnQCM(format: VariantFormat, payload: unknown): string[] | null {
   if (format !== "MCQ") return null;
@@ -147,14 +130,10 @@ export function optionsDUnQCM(format: VariantFormat, payload: unknown): string[]
  * illisible, auquel cas la question repart en format ouvert plutôt que de poser
  * un champ de saisie que rien ne pourra vérifier.
  *
- * Deux réparations à la lecture, dans cet ordre — c'est le seul endroit qui
- * rattrape aussi les questions déjà écrites : le terme est rendu à sa juste
- * longueur quand il redit un mot posé contre le trou (`trouSansRedite`), puis
- * ce qu'il en reste est masqué partout où la phrase le réécrit en clair, sans
- * quoi il n'y a plus qu'à recopier (`phraseSansDevoilement`).
- *
- * **Exporté parce que la vitrine de l'essai lit les mêmes questions**, et qu'une
- * seconde lecture du même `payload` finirait par diverger de celle-ci.
+ * Deux réparations à la lecture, pour rattraper aussi les questions déjà
+ * écrites, dans cet ordre : `trouSansRedite` rogne le terme qui redit un mot
+ * posé contre le trou, puis `phraseSansDevoilement` masque ce qui en reste
+ * partout où la phrase le réécrit en clair.
  */
 export function texteATrouServi(format: VariantFormat, payload: unknown): QuestionServie["cloze"] {
   if (format !== "CLOZE") return null;
@@ -183,16 +162,9 @@ export function questionServie(
   return {
     atomId: concept.id,
     concept: concept.concept,
-    /*
-      Les étiquettes qui donnent la réponse ne sont pas montrées.
-
-      `TENNIS · EFFET-MAGNUS` au-dessus d'un QCM dont la bonne option était
-      « Effet Magnus » : la réponse était écrite en petites capitales trois
-      centimètres plus haut. Le filtrage se fait ici, au dernier moment, parce
-      que c'est ici qu'on sait à la fois ce qu'on affiche et ce qu'on attend —
-      et le concept, lui, garde ses étiquettes pour le classement et pour
-      l'alternance des sujets. Voir `tags-sans-reponse.ts`.
-    */
+    // Les étiquettes qui donnent la réponse sont cachées ici, seul endroit qui
+    // sait à la fois ce qu'on affiche et ce qu'on attend. Le concept garde les
+    // siennes pour le classement et l'alternance des sujets.
     tags: tagsSansReponse(concept.tags, [
       variante.answerKey,
       choix ? choix.options[choix.correctIndex] : null,

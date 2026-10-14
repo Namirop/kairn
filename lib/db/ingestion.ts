@@ -3,15 +3,8 @@ import type { Input, InputNature } from "@/lib/db/types";
 import { lireLangueUtilisateur } from "@/lib/db/user-settings";
 
 /**
- * Les écritures du pipeline d'ingestion, de la création du dépôt à son état
- * final.
- *
- * Rien n'est jeté de ce qui a coûté un appel : un dépôt dont l'extraction a
- * abouti garde ses concepts même si les questions échouent ensuite.
- *
- * Ce fichier écrit ce qui avance. Ce qui **arrête** un dépôt — rejet, panne,
- * clôture — vit dans `fin-de-depot.ts` : c'est là que se décide qui paie, et
- * cette décision-là mérite d'être lisible d'un seul tenant.
+ * Les écritures qui font avancer un dépôt. Ce qui l'arrête — rejet, panne,
+ * clôture — vit dans `fin-de-depot.ts`, où se décide qui paie.
  */
 
 export type DepotADeposer = {
@@ -79,10 +72,8 @@ export async function lireDepot(inputId: string): Promise<Input | null> {
 }
 
 /**
- * Ce que l'extraction a lu du dépôt lui-même, avant ses concepts.
- *
- * Écrit même quand le dépôt ne donne rien : un rejet a une nature lui aussi, et
- * c'est elle qui dira plus tard pourquoi un dépôt n'a rien rendu.
+ * Ce que l'extraction a lu du dépôt lui-même. Écrit même sur un rejet : sa
+ * nature dit pourquoi le dépôt n'a rien rendu.
  */
 export async function enregistrerLExtraction(
   inputId: string,
@@ -125,11 +116,9 @@ export async function oublierImage(inputId: string): Promise<void> {
 }
 
 /**
- * Écrit les concepts d'un dépôt, sous le même propriétaire que lui.
- *
- * Le propriétaire n'est pas passé par l'appelant mais relu sur le dépôt : un
- * concept qui n'appartiendrait pas à qui a déposé serait invisible pour lui, ou
- * pire, visible pour quelqu'un d'autre. Il n'y a qu'une source de vérité.
+ * Écrit les concepts d'un dépôt. Le propriétaire — compte ou session anonyme —
+ * est relu sur le dépôt plutôt que passé par l'appelant : il n'y a qu'une
+ * source de vérité.
  */
 export async function enregistrerConcepts(
   inputId: string,

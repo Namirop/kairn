@@ -3,27 +3,19 @@ import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { assezEspacee, JOURS_ENTRE_REGENERATIONS } from "@/lib/domain/rotation-variantes";
 
 /**
- * Le seul endroit d'où l'on peut redemander les questions d'un concept.
+ * Le seul endroit d'où l'on redemande les questions d'un concept — seuil
+ * d'usure, modification, confirmation d'un concept douteux. Tous passent par le
+ * plafond hebdomadaire : un chemin qui le contournerait laisserait vingt clics
+ * sur « modifier » acheter vingt appels.
  *
- * Il y avait trois chemins vers `creerJobsDeQuestions` — le seuil d'usure, la
- * modification, la confirmation d'un concept douteux — et un seul passait par
- * le plafond hebdomadaire. Les deux autres ouvraient une boucle : vingt clics
- * sur « modifier » achetaient vingt appels, de quoi fermer la journée du
- * produit pour tout le monde. Une règle qu'un seul chemin peut contourner n'est
- * pas une règle.
- *
- * Le découpage d'un dépôt ne passe pas par ici, et c'est voulu : ses concepts
- * n'ont jamais eu de questions, il n'y a rien à plafonner, et il groupe trois
- * concepts par appel là où cette fonction en sert un seul.
+ * Le découpage d'un dépôt ne passe pas par ici : ses concepts n'ont jamais eu de
+ * questions, il n'y a rien à plafonner.
  */
 
 /**
- * Ce concept a-t-il déjà eu des questions ?
- *
- * C'est la question qui sépare une réécriture d'un premier jeu — retirées
- * comprises, puisque `relancerLesQuestions` les retire juste avant d'appeler
- * ici. Un concept douteux qu'on confirme n'en a jamais eu : ses questions
- * arrivent par ce chemin, mais elles sont sa première fois, pas sa deuxième.
+ * Sépare une réécriture d'un premier jeu. Les questions retirées comptent,
+ * puisque `relancerLesQuestions` les retire juste avant d'appeler ici ; un
+ * concept douteux qu'on confirme n'en a jamais eu.
  */
 async function aDejaEuDesQuestions(atomId: string): Promise<boolean> {
   return (await prisma.variant.count({ where: { atomId } })) > 0;
@@ -32,17 +24,12 @@ async function aDejaEuDesQuestions(atomId: string): Promise<boolean> {
 /**
  * Quand ce concept a consommé sa place hebdomadaire pour la dernière fois.
  *
- * On lit les jobs et non les questions écrites : c'est la dépense qu'on
- * plafonne, pas le résultat. Un job qui a échoué a quand même coûté un appel.
+ * On lit les jobs, pas les questions : c'est la dépense qu'on plafonne, et un
+ * job échoué a coûté un appel. Seules les réécritures comptent — compter le
+ * premier jeu interdirait pendant une semaine la correction qui suit un dépôt.
  *
- * Seules les réécritures comptent. Le premier jeu de questions d'un concept
- * n'est pas une réécriture, et le compter revenait à interdire pendant une
- * semaine la correction qui suit un dépôt — le geste le plus normal du produit,
- * puni comme un abus.
- *
- * `notBefore` prime sur `createdAt` quand il existe : une demande reportée est
- * écrite aujourd'hui mais ne dépense qu'au jour où elle part, et c'est ce
- * jour-là qui ouvre la fenêtre suivante.
+ * `notBefore` prime sur `createdAt` : une demande reportée ne dépense qu'au jour
+ * où elle part, et c'est ce jour-là qui ouvre la fenêtre suivante.
  */
 async function derniereReecriture(atomId: string): Promise<Date | null> {
   const jobs = await prisma.generationJob.findMany({
@@ -79,22 +66,16 @@ export type DemandeDeQuestions =
 /**
  * Ce qu'on fait d'une demande que le plafond hebdomadaire refuse.
  *
- * `reporter` sert les chemins qui viennent de retirer les questions du concept :
- * là, refuser sans rien écrire laisserait le concept sans une seule question,
- * pour toujours, sans que rien ne vienne jamais y remédier. La demande est donc
- * écrite avec sa date et part toute seule ce jour-là.
+ * `reporter` sert les chemins qui viennent de retirer les questions : refuser
+ * sans rien écrire laisserait le concept sans question pour toujours. La demande
+ * est écrite avec sa date et part seule ce jour-là.
  *
- * Le seuil d'usure, lui, ne reporte pas. Ses questions existent encore et
- * fonctionnent : rien n'est cassé, et il se redéclenchera de lui-même au
- * passage suivant. Écrire une demande différée reviendrait à payer dans une
- * semaine le renouvellement d'un concept que la personne aura peut-être arrêté
- * de travailler — on ne dépense que pour un usage constaté.
+ * Le seuil d'usure ne reporte pas : ses questions fonctionnent encore, il se
+ * redéclenchera au passage suivant, et on ne dépense que pour un usage constaté.
  */
 export type OptionsDeDemande = { reporter?: boolean };
 
-/**
- * Demande des questions pour un concept, ou dit quand elles viendront.
- */
+/** Demande des questions pour un concept, ou dit quand elles viendront. */
 export async function demanderDesQuestions(
   atome: { id: string; inputId: string },
   maintenant: Date = new Date(),

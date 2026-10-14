@@ -2,39 +2,28 @@ import { prisma } from "@/lib/db/client";
 import { localDay } from "@/lib/domain/local-day";
 
 /**
- * La limite de débit des gestes de révision.
+ * La limite de débit des gestes de révision (répondre, s'entraîner, demander un
+ * tour) : ils ne coûtent aucun appel modèle, mais écrivent en base, et une
+ * boucle côté client n'aurait rien devant elle. Elle protège le serveur à la
+ * minute.
  *
- * Répondre, s'entraîner, demander un tour de plus : aucun de ces gestes ne coûte
- * un appel modèle, et aucun n'était borné. Deux écritures par réponse, sans
- * limite, et un tour d'entraînement qui lit tout le corpus du compte — une
- * boucle côté client n'avait rien devant elle.
- *
- * Le quota protège le budget sur la journée, cette limite protège le serveur sur
- * la minute. Les deux sont nécessaires et ne se remplacent pas.
- *
- * Même mécanisme que la fenêtre des dépôts, et pour la même raison : la fenêtre
- * vit sur la ligne qu'on verrouille, donc compter et refuser tiennent dans une
- * seule instruction. Un compteur lu puis écrit laisse passer tout ce qui part
- * ensemble.
+ * Même mécanisme que la fenêtre des dépôts : la fenêtre vit sur la ligne qu'on
+ * verrouille, pour que compter et refuser tiennent dans une seule instruction.
  */
 
 /** Fenêtre courte, et ce qu'on y tolère. */
 export const FENETRE_GESTES_SECONDES = 60;
 
 /**
- * Large à dessein. Une session plafonne à vingt questions et un tour
- * d'entraînement à douze : personne n'approche ce chiffre au clavier, et une
- * boucle le franchit à la première seconde. Une limite de débit n'a pas à
- * arbitrer l'usage, seulement à casser ce qui n'en est pas.
+ * Large à dessein : une session plafonne à vingt questions par défaut et un tour
+ * à douze. Personne n'approche ce chiffre au clavier, une boucle le franchit à
+ * la première seconde.
  */
 export const GESTES_PAR_FENETRE = 120;
 
 /**
- * Prend une place dans la fenêtre des gestes, ou la refuse.
- *
- * Le jour de la ligne est celui de l'utilisateur, comme pour les dépôts : c'est
- * son minuit qui remet les compteurs à zéro. La fenêtre, elle, glisse — elle ne
- * s'aligne sur rien.
+ * Prend une place dans la fenêtre des gestes, ou la refuse. La ligne est celle
+ * du jour local de l'utilisateur ; la fenêtre, elle, glisse.
  */
 export async function prendreUnGeste(
   userId: string,

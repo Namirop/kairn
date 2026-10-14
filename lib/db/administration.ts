@@ -3,22 +3,14 @@ import { prisma } from "@/lib/db/client";
 import { debutDuJourUtc, ilYA } from "@/lib/domain/fenetre-utc";
 
 /**
- * Les chiffres de l'écran d'administration, en lecture seule.
- *
- * Tout est daté en **UTC**. Mélanger deux calendriers sur un même écran rendrait
- * les lignes incomparables entre elles, et l'écart ne se verrait qu'aux heures où
- * les deux jours ne coïncident pas — c'est-à-dire tard, et mal.
- *
- * La dépense vit dans `administration-depense.ts` : c'est la seule des trois
- * mesures qui porte de la logique, et elle en porte assez pour son fichier.
+ * Les chiffres de l'écran d'administration, en lecture seule. Tout est daté en
+ * UTC : deux calendriers sur un même écran rendraient les lignes incomparables.
+ * La dépense vit dans `administration-depense.ts`.
  */
 
 /**
- * Nombre de jours montrés par les séries et les tableaux.
- *
- * La même fenêtre partout, et pas une par écran : deux séries de longueurs
- * différentes posées sur le même écran se comparent à l'œil sans qu'on remarque
- * qu'elles ne couvrent pas la même chose.
+ * Nombre de jours montrés par les séries et les tableaux. Une seule fenêtre
+ * pour tous, sinon deux séries côte à côte se comparent à tort.
  */
 export const JOURS_MONTRES = 14;
 
@@ -65,13 +57,11 @@ type LigneDeComptes = {
 };
 
 /**
- * « Actif » se lit sur les passages et non sur la connexion : ouvrir l'écran ne
- * dit rien, réviser dit tout. C'est la seule définition qui distingue quelqu'un
- * qui se sert du produit de quelqu'un qui l'a ouvert.
+ * « Actif » se lit sur les passages et non sur la connexion : ouvrir l'écran
+ * ne dit pas qu'on se sert du produit.
  *
- * Le passage est daté par `reviewedAt` et non par un `createdAt` que `Review`
- * n'a pas — c'est aussi la colonne que porte l'index `[userId, reviewedAt]`,
- * donc celle qui rend le décompte des actifs gratuit.
+ * `Review` n'a pas de `createdAt` : le passage est daté par `reviewedAt`, que
+ * couvre l'index `[userId, reviewedAt]`.
  */
 export async function lireLesComptes(maintenant: Date = new Date()): Promise<BlocComptes> {
   const sept = ilYA(maintenant, 7);
@@ -102,9 +92,8 @@ export async function lireLesComptes(maintenant: Date = new Date()): Promise<Blo
 type LigneDeVolume = { jour: string; depots: number; concepts: number };
 
 /**
- * Les jours sont engendrés par la base plutôt que déduits des lignes trouvées :
- * un jour sans dépôt doit apparaître à zéro. Une série de jours qui saute les
- * jours vides se lit comme une activité continue.
+ * Les jours sont engendrés par la base (`generate_series`) plutôt que déduits
+ * des lignes trouvées : un jour sans dépôt doit apparaître à zéro.
  */
 export async function lireLesVolumes(maintenant: Date = new Date()): Promise<LigneDeJour[]> {
   const premier = debutDuJourUtc(ilYA(maintenant, JOURS_MONTRES - 1));
@@ -130,12 +119,8 @@ export async function lireLesVolumes(maintenant: Date = new Date()): Promise<Lig
 }
 
 /**
- * Combien de questions ont été signalées, et combien récemment.
- *
- * La liste des signalements dit lesquels ; elle ne dit pas si le rythme change.
- * Un total qui monte de deux en un mois et un total qui monte de deux en une
- * journée se lisent pareil dans une liste triée par date, et ne veulent pas dire
- * du tout la même chose — le second est un prompt qui vient de casser.
+ * Combien de questions ont été signalées, et combien récemment : la liste dit
+ * lesquelles, pas si le rythme s'emballe (un prompt qui vient de casser).
  */
 export async function compterLesSignalements(
   maintenant: Date = new Date(),

@@ -41,12 +41,9 @@ export async function listerDepots(userId: string, limite = 50): Promise<DepotLi
 
   return lignes.map((ligne) => ({
     id: ligne.id,
-    // Une capture n'a souvent pas de texte déposé : c'est ce qu'on y a lu qui
-    // la décrit, et rien tant qu'elle n'est pas lue.
-    //
-    // Mis à plat, parce qu'une ligne de liste ne peut pas porter une structure :
-    // l'écran du dépôt lit ses titres et ses tableaux, ici on n'a que les mots.
-    // Voir `apercuDeProse`.
+    // Une capture n'a souvent pas de texte déposé : c'est ce qu'on y a lu qui la
+    // décrit. Mis à plat (`apercuDeProse`) : une ligne de liste ne porte pas de
+    // structure.
     apercu: apercuDeProse(ligne.rawContent.trim() || ligne.extractedText || "", APERCU),
     sourceType: ligne.sourceType,
     etat: etatDuDepot({
@@ -60,13 +57,7 @@ export async function listerDepots(userId: string, limite = 50): Promise<DepotLi
   }));
 }
 
-/**
- * Combien de dépôts ce compte a écrits.
- *
- * Sert à reconnaître le premier : c'est le seul moment où l'écran de dépôt doit
- * dire ce qu'on attend de lui, et le seul où les exemples servent à quelque
- * chose. Après, ils encombreraient le geste qu'ils étaient censés déclencher.
- */
+/** Combien de dépôts ce compte a écrits. */
 export async function compterLesDepots(userId: string): Promise<number> {
   return prisma.input.count({ where: { userId } });
 }

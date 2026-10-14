@@ -1,11 +1,10 @@
 import { prisma } from "@/lib/db/client";
 
 /**
- * Les réglages d'exploitation posés en base, et ce qui a changé.
+ * Les réglages d'exploitation posés en base, et leur journal.
  *
- * Une valeur absente n'est pas une valeur à zéro : c'est « non surchargé », et
- * l'environnement reprend la main. C'est ce qui permet de revenir au défaut sans
- * avoir à se souvenir de ce qu'il valait.
+ * Une valeur absente veut dire « non surchargé » : l'environnement reprend la
+ * main, et on revient au défaut sans avoir à se souvenir de ce qu'il valait.
  *
  * `ADMIN_EMAILS` n'est pas ici et n'y sera pas : c'est la liste qui décide qui
  * ouvre l'écran depuis lequel on écrit cette table.
@@ -46,12 +45,10 @@ const VIDE: ReglagesPosés = {
 };
 
 /**
- * Les réglages comparés au moment de journaliser.
- *
- * Énumérés plutôt que déduits de l'objet : `Object.keys` rend des chaînes, et
- * les retyper demanderait une assertion que le projet interdit. Un réglage
- * ajouté sans l'inscrire ici passerait sans laisser de trace — mais il faudrait
- * aussi l'oublier dans `colonnes` plus bas, où le typage, lui, s'en apercevrait.
+ * Les réglages comparés au moment de journaliser. Énumérés à la main :
+ * `Object.keys` rend des chaînes qu'il faudrait retyper par assertion. Un
+ * réglage ajouté sans l'inscrire ici changerait sans laisser de trace, et rien
+ * dans le typage ne le signale.
  */
 const CLES: (keyof ReglagesPosés)[] = [
   "enabled",
@@ -80,11 +77,8 @@ export async function lireLesReglagesPosés(): Promise<ReglagesPosés> {
 }
 
 /**
- * Les surcharges, sous la forme que la configuration attend.
- *
- * Les nuls sont retirés plutôt que rendus : une clé absente et une clé à `null`
- * ne veulent pas dire la même chose pour l'appelant, et c'est l'absence qui
- * signifie « prends l'environnement ».
+ * Les surcharges, sous la forme que la configuration attend : les nuls sont
+ * retirés, car c'est l'absence de clé qui signifie « prends l'environnement ».
  */
 export async function lireLesSurcharges(): Promise<Surcharges> {
   const posés = await lireLesReglagesPosés();
@@ -108,12 +102,9 @@ function enTexte(valeur: boolean | number | string | null): string | null {
 }
 
 /**
- * Pose les réglages et journalise ce qui a bougé.
- *
- * Seuls les écarts sont journalisés : un enregistrement qui ne change rien ne
- * doit pas encombrer la trace, sinon la trace cesse d'être lue. L'écriture et le
- * journal partent dans la même transaction — un changement sans trace serait
- * pire que pas de changement du tout.
+ * Pose les réglages et journalise les seuls écarts, pour que la trace reste
+ * lisible. Écriture et journal dans la même transaction : pas de changement
+ * sans trace.
  */
 export async function poserLesReglages(
   voulus: ReglagesPosés,

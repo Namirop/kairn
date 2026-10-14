@@ -6,7 +6,7 @@ import { PrismaClient } from "@/lib/db/generated/client";
  * fonctions d'accès de `lib/db/`.
  *
  * Prisma 7 compile les requêtes côté client et exige un driver adapter : c'est
- * `pg` qui tient la connexion, plus un moteur natif.
+ * `pg` qui tient la connexion, pas un moteur natif.
  */
 function createPrismaClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL;
