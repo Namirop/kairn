@@ -1,27 +1,19 @@
-// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
 import { EMAIL_STYLE as S, renderShell } from "./shell";
 import type { RenderedEmail } from "./daily-reminder";
 
 /**
  * Un retour vient d'arriver.
  *
- * Elle part **à chaque retour**, et pas une fois par jour comme les deux autres
- * alertes d'exploitation. La différence tient à ce qu'elle annonce : une bascule
- * ou un plafond sont des états qui durent, dont on lit le compte du jour ; un
- * retour est un événement unique, écrit par quelqu'un qui a pris la peine de
- * s'arrêter, et le résumer avec quatorze autres le lendemain lui ferait perdre
- * précisément ce qui le rend utile. Le plafond de vingt par compte et par jour
- * borne le pire cas.
+ * Elle part à chaque retour, pas une fois par jour comme les autres alertes
+ * d'exploitation : un plafond ou une bascule sont des états qui durent, un
+ * retour est un événement. `RETOURS_PAR_JOUR` borne le pire cas.
  *
- * Elle porte le message en entier, ou presque : ouvrir l'écran pour lire deux
- * phrases est le genre de friction qui fait qu'on ne les lit pas. Le reste — la
- * capture, l'auteur — attend dans l'administration, et le bouton y mène.
+ * Elle porte le message presque entier ; la capture et l'auteur attendent dans
+ * l'administration. L'adresse de l'auteur n'y figure pas : un email transite
+ * par un tiers, autant qu'il porte le défaut et pas la personne.
  *
- * **L'adresse de qui a écrit n'y figure pas.** Elle ne change rien à ce qu'il y
- * a à corriger, et un email transite par un tiers : autant qu'il porte le
- * défaut, pas la personne. Elle est dans l'écran, pour qui en a besoin.
- *
- * Aucun désabonnement, même règle que les autres alertes d'exploitation.
+ * Aucun désabonnement, comme les autres alertes d'exploitation.
  */
 
 export type AlerteDeRetourPayload = {

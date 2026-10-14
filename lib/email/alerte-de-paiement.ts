@@ -7,9 +7,8 @@ import {
 /**
  * L'envoi d'une alerte de webhook de paiement en échec.
  *
- * Même règle que les alertes de plafond et de bascule : ne passe pas par
- * `sendNotification`, destinataire = `EMAIL_ALERTES` en variable
- * d'environnement, silence propre si la variable est absente.
+ * Comme les autres alertes d'exploitation : hors de `sendNotification`, vers
+ * `EMAIL_ALERTES`, et un simple avertissement si la variable manque.
  */
 export async function envoyerLAlerteDePaiement(payload: AlerteDePaiementPayload): Promise<void> {
   const destinataire = process.env.EMAIL_ALERTES?.trim();

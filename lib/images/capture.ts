@@ -8,16 +8,11 @@ import {
 /**
  * Ce qu'on accepte d'une capture, et ce qu'on en fait avant de l'envoyer.
  *
- * Le type est décidé par le contenu, jamais par l'extension ni par ce que le
- * navigateur annonce : ces deux-là se falsifient. Ce qui décide, c'est la
- * capacité du décodeur à lire l'image.
+ * Le type se décide par le décodeur, jamais par l'extension ni le type annoncé,
+ * qui se falsifient.
  *
- * L'image est ensuite réduite : au-delà de la largeur utile au modèle, chaque
- * pixel coûte des tokens sans rien apporter à la lecture. Le navigateur l'a en
- * principe déjà fait — voir `reduireLaCapture` —, et cette passe-ci ne change
- * alors plus rien : `withoutEnlargement` laisse passer ce qui tient déjà dans
- * la mesure. C'est voulu. Ce qui arrive ici n'a pas forcément vu un navigateur
- * : un partage du système, une reprise, un outil interne. Le serveur décide.
+ * La réduction double celle du navigateur (`reduireLaCapture`) : ce qui arrive
+ * ici n'a pas forcément vu de navigateur (partage du système, outil interne).
  */
 
 const FORMATS_LISIBLES = new Set(["jpeg", "png", "webp", "gif"]);

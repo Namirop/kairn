@@ -5,16 +5,8 @@ import type { RenderedEmail } from "./daily-reminder";
 
 /**
  * L'alerte de série, envoyée le soir et seulement quand il y a quelque chose à
- * perdre.
- *
- * Elle ne motive pas plus que le rappel : elle constate qu'une série existe, que
- * la journée n'a rien enregistré, et qu'il reste du temps. C'est la seule
- * occurrence de l'ember dans les emails, comme c'est la seule dans l'interface —
- * cet accent n'appartient qu'à la série.
- *
- * Ce qu'elle ne dit pas : « ne casse pas ta série », « plus que quelques
- * heures », ni rien qui presse. Le fait suffit ; qui tient une série de douze
- * sessions sait déjà ce qu'il en coûte de sauter un soir.
+ * perdre. Elle constate, elle ne presse pas. Seule occurrence de l'ember dans
+ * les emails : cet accent n'appartient qu'à la série.
  */
 
 export type AlerteDeStreakPayload = {

@@ -2,15 +2,12 @@ import { differer } from "@/lib/hors-chemin-critique";
 import { envoyerLAlerteDeRetour, type RetourAAnnoncer } from "./alerte-de-retour";
 
 /**
- * Prévenir qu'un retour vient d'arriver, sans faire attendre qui l'a écrit.
+ * Prévenir qu'un retour vient d'arriver, sans faire attendre qui l'a écrit. Ce
+ * fichier connaît l'attente et la panne ; `alerte-de-retour.ts` ne connaît
+ * qu'un email.
  *
- * Le câblage est séparé de l'envoi pour la même raison qu'ailleurs : ce fichier
- * connaît l'attente et la panne, `alerte-de-retour.ts` ne connaît qu'un email.
- *
- * **Un email qui échoue ne fait pas échouer le retour.** Le retour est déjà
- * écrit quand on arrive ici ; le perdre parce que Resend a hoqueté serait perdre
- * la seule chose qui avait de la valeur dans ce geste. L'échec est journalisé —
- * il n'est pas avalé —, et l'écran des retours, lui, l'a de toute façon.
+ * Un email qui échoue ne fait pas échouer le retour, déjà écrit : l'échec est
+ * journalisé, et l'écran des retours l'a de toute façon.
  */
 export function signalerUnRetour(retour: RetourAAnnoncer): void {
   differer(async () => {

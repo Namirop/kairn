@@ -7,18 +7,16 @@ import { promptDeQuestions } from "./generate-variants";
 import { OCR_EXTRACT_PROMPT } from "./ocr-extract";
 
 /**
- * Prompts système, un par intention **du produit**.
+ * Prompts système, un par intention du produit. Ceux du banc voyagent avec
+ * leur juge, dans `scripts/evaluation/`.
  *
- * Les intentions du banc n'y sont pas : leur prompt voyage avec le juge qui
- * l'émet, dans `scripts/evaluation/`. Un prompt de mesure n'a rien à faire dans
- * la réserve du produit, et l'y mettre obligerait à le maintenir au même titre.
- *
- * Aucun ne contient de consigne « réponds en JSON » : la forme de la sortie est
- * portée par l'outil dérivé du schéma Zod, pas par le texte.
+ * Aucun ne dit « réponds en JSON » : la forme est portée par le schéma de
+ * sortie dérivé de Zod (seul le pont OpenRouter ajoute un préambule, pour les
+ * modèles qu'il ne contraint pas).
  *
  * La langue est celle du dépôt, jamais celle de la personne au moment de
  * l'appel : une question régénérée parle la langue de ses sœurs. La lecture
- * d'une image n'en prend pas — elle transcrit, elle n'écrit rien.
+ * d'image n'en prend pas, elle transcrit.
  */
 export function promptsSysteme(langue: Langue): Record<AiPurposeProduit, string> {
   return {
@@ -32,15 +30,9 @@ export function promptsSysteme(langue: Langue): Record<AiPurposeProduit, string>
 export const SYSTEM_PROMPTS = promptsSysteme("FR");
 
 /**
- * L'empreinte d'un prompt, pour savoir plus tard sous quel réglage une question
- * a été écrite.
- *
- * Une empreinte du texte, et pas un numéro qu'on incrémente : elle change
- * exactement quand le prompt change, et jamais parce qu'on a pensé à la bumper.
- * C'est la donnée qu'on oublie de garder, et la seule qui dise si un défaut
- * signalé vient d'un réglage qu'on a déjà corrigé.
- *
- * Douze caractères hexadécimaux : de quoi distinguer sans encombrer un écran.
+ * L'empreinte d'un prompt, pour savoir sous quel réglage une question a été
+ * écrite — et donc si un défaut signalé vient d'un réglage déjà corrigé. Une
+ * empreinte plutôt qu'un numéro : elle change exactement quand le texte change.
  */
 function empreinte(prompt: string): string {
   return createHash("sha256").update(prompt).digest("hex").slice(0, 12);

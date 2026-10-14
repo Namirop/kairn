@@ -5,44 +5,24 @@ import { PaiementError } from "./erreurs";
 /**
  * Prévenir quand un webhook de paiement n'aboutit pas.
  *
- * **C'est la seule panne du produit qui coûte de l'argent à quelqu'un
- * d'autre.** Tout le reste se rattrape : un dépôt qui échoue se redépose, un
- * rappel manqué revient le lendemain. Ici, Stripe a encaissé et la ligne
- * `Subscription` n'a pas bougé — le compte reste gratuit alors qu'il est payé,
- * et la personne n'a aucune raison de penser à écrire : son écran affiche
- * « Gratuit », ce qui ressemble à un paiement perdu et non à une panne de notre
- * côté.
+ * La seule panne qui coûte de l'argent à quelqu'un : Stripe a encaissé, la
+ * ligne `Subscription` n'a pas bougé, et l'écran affiche « Gratuit » sans
+ * raison d'écrire. Stripe relance trois jours puis renonce ; la réparation
+ * (renvoyer la livraison depuis le tableau de bord Stripe) tient en un clic,
+ * encore faut-il le savoir.
  *
- * Le seul signe existant était une ligne de journal chez l'hébergeur, que
- * personne n'ouvre spontanément. Stripe relance pendant trois jours puis
- * renonce ; passé ce délai, plus rien ne rappelle qu'il s'est passé quelque
- * chose. La réparation, elle, tient en un clic — le tableau de bord Stripe
- * garde chaque livraison et sait la renvoyer —, encore faut-il savoir qu'il y a
- * quelque chose à réparer.
+ * Mêmes règles que les autres alertes d'exploitation :
+ * 1. Elle ne casse jamais ce qu'elle surveille : toute erreur est journalisée et
+ *    avalée, le webhook doit rendre son 500 à Stripe pour qu'il relance.
+ * 2. Hors du chemin critique : Stripe compte le temps de réponse de l'endpoint.
+ * 3. Une par jour au plus — sinon trois jours de relances horaires feraient
+ *    soixante-douze emails pour une panne.
  *
- * Cette alerte vient de la lecture de DevisRapide, où le même chemin appelle
- * `reportIncident` sur chaque cas d'argent encaissé sans contrepartie. Le canal
- * diffère — Kairn alerte par email, pas par heartbeat — mais la règle est la
- * même : ce qui ne se rattrape pas tout seul doit réveiller quelqu'un.
+ * La signature refusée n'arrive pas ici : c'est du bruit (scan, rotation de
+ * secret), écarté dans le route handler.
  *
- * Mêmes trois règles que les autres alertes d'exploitation du produit :
- *
- * 1. **Elle ne casse jamais ce qu'elle surveille.** Toute erreur est journalisée
- *    et avalée. Le webhook doit rendre son 500 à Stripe pour qu'il relance, quoi
- *    qu'il arrive à Resend.
- * 2. **Elle attend son tour.** Hors du chemin critique : Stripe compte le temps
- *    de réponse d'un endpoint, et le nôtre n'a pas à porter un envoi d'email.
- * 3. **Elle ne parle qu'une fois.** Une par jour au maximum — sans quoi une
- *    relance toutes les heures pendant trois jours ferait soixante-douze emails
- *    pour une seule panne.
- *
- * **La signature refusée n'en est pas une.** C'est du bruit : un scan sur une
- * route publique, ou une relance pendant une rotation de secret. Elle est
- * écartée avant d'arriver ici — voir le route handler.
- *
- * **Les collaborateurs sont reçus, jamais importés**, comme dans
- * `alerte-de-plafond.ts` : ce fichier ne connaît que des types, il se teste sans
- * base ni réseau. Le câblage vit dans `signalement-de-webhook.ts`.
+ * Les collaborateurs sont reçus, jamais importés : le fichier se teste sans base
+ * ni réseau. Le câblage vit dans `signalement-de-webhook.ts`.
  */
 
 /** Sert de `cible` dans la clé d'alerte — distincte des cibles de plafond et de bascule. */
@@ -63,10 +43,8 @@ export type OutilsDAlerteDePaiement = {
 /**
  * Le code de l'échec, quand le produit en a posé un.
  *
- * `PaiementError` en porte un stable — `PAIEMENT_RAPPORT_ILLISIBLE`,
- * `PAIEMENT_CONFIG` — et c'est ce qui distingue « Stripe a changé de forme » de
- * « une variable manque ». Tout le reste est une panne quelconque, et le motif
- * dira ce qu'elle raconte.
+ * `PaiementError` en porte un stable, qui distingue « Stripe a changé de
+ * forme » de « une variable manque ». Le reste passe par le motif.
  */
 export function codeDeLEchec(erreur: unknown): string {
   return erreur instanceof PaiementError ? erreur.code : "INCONNU";
@@ -86,9 +64,8 @@ export async function signalerLEchecDuWebhook(
 ): Promise<void> {
   try {
     const pris = await outils.reserver(
-      // Le seuil ne mesure rien ici — il n'y a pas de palier, il y a une panne.
-      // Il fait partie de la clé primaire de `AlerteQuota`, donc il vaut zéro et
-      // ne bouge pas : c'est ce qui donne « une par jour ».
+      // Pas de palier ici : le seuil fait partie de la clé primaire
+      // d'`AlerteQuota` et reste à zéro, ce qui donne « une par jour ».
       { compteur: "GLOBAL", cible: CIBLE_PAIEMENT, seuil: 0 },
       maintenant,
     );

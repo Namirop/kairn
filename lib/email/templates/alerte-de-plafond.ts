@@ -1,4 +1,4 @@
-// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
 import type { CompteurDeQuota } from "@/lib/db/types";
 import { EMAIL_STYLE as S, renderShell } from "./shell";
 import type { RenderedEmail } from "./daily-reminder";
@@ -6,20 +6,13 @@ import type { RenderedEmail } from "./daily-reminder";
 /**
  * L'alerte d'exploitation quand un compteur d'appels se remplit.
  *
- * Elle ne s'adresse pas à un utilisateur mais à qui tient le produit, et elle a
- * un seul travail : permettre de décider sans ouvrir le tableau de bord. D'où
- * ce qu'elle porte — où en est le compteur, quelle heure il est en UTC, ce que
- * la journée a déjà coûté, et le nom exact de la variable à changer. Une alerte
- * qui oblige à aller chercher ces quatre chiffres ailleurs est une alerte qu'on
- * traite le lendemain.
+ * Elle s'adresse à qui tient le produit et doit permettre de décider sans
+ * ouvrir le tableau de bord : le compteur, l'heure UTC (36/50 à 2 h ou à 23 h
+ * ne dit pas la même chose, la journée se compte en UTC), la dépense du jour et
+ * le nom exact de la variable à changer.
  *
- * **L'heure UTC est dedans, et c'est le renseignement qu'on oublie.** « Trente-
- * six sur cinquante » ne veut pas dire la même chose à deux heures du matin qu'à
- * vingt-trois heures : dans un cas la journée fait que commencer et le plafond
- * sautera, dans l'autre elle se termine et il ne se passera rien.
- *
- * Aucun désabonnement, comme le lien de connexion : ce n'est pas un envoi
- * périodique, et le destinataire est une adresse d'exploitation, pas un compte.
+ * Aucun désabonnement : ce n'est pas un envoi périodique, et le destinataire est
+ * une adresse d'exploitation, pas un compte.
  */
 
 export type AlerteDePlafondPayload = {
@@ -40,15 +33,9 @@ export type AlerteDePlafondPayload = {
 /**
  * Ce que chaque compteur s'appelle, et ce qu'on en dit quand il est plein.
  *
- * `plein` s'écrit en bas de casse : il ne commence jamais une phrase, il suit
- * toujours « Kairn — » dans un objet d'email.
- *
- * La phrase du plafond atteint est écrite entière plutôt que composée. Assemblée
- * — « … est atteint » collé derrière le nom — elle accordait au masculin sur
- * deux compteurs féminins sur trois : « la part du trafic public est atteint ».
- * Une alerte d'exploitation qui se lit de travers est une alerte qu'on relit
- * deux fois avant d'agir, et les trois phrases écrites à la main disent chacune
- * quelque chose de plus juste que la formule commune.
+ * `plein` s'écrit en bas de casse : il suit toujours « Kairn — » dans un objet
+ * d'email. Il est écrit entier plutôt que composé à partir de `nom`, pour
+ * l'accord : deux compteurs sur trois sont féminins.
  */
 const COMPTEURS: Record<CompteurDeQuota, { nom: string; plein: string; protege: string }> = {
   GLOBAL: {
@@ -82,8 +69,8 @@ function dollars(montant: string): string {
 }
 
 /**
- * Le plafond atteint n'annonce pas, il constate — et c'est le seul des trois qui
- * décrive quelque chose qui se casse pendant qu'on lit.
+ * À 100 %, l'objet constate ce qui se casse pendant qu'on lit : des dépôts
+ * échouent.
  */
 function sujet({ compteur, cible, seuil }: AlerteDePlafondPayload): string {
   const { nom, plein } = COMPTEURS[compteur];
@@ -129,9 +116,8 @@ ${compteConcerne}
 <p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">${constat} ${COMPTEURS[compteur].protege}</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0;">${tableau}</table>`;
 
-  // Les lignes vides sont des séparations voulues : seul `null` disparaît. Les
-  // filtrer toutes collait les quatre blocs les uns aux autres, et la version
-  // texte est celle que lisent les clients mail qui refusent le HTML.
+  // Les lignes vides séparent les blocs de la version texte : seul `null`
+  // disparaît.
   const text = [
     `${COMPTEURS[compteur].nom} : ${seuil} %.`,
     compteur === "COMPTE" && cible ? `Compte ${cible}.` : null,

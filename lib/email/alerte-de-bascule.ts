@@ -2,9 +2,9 @@ import { sendEmail } from "./client";
 import { renderAlerteDeBascule, type AlerteDeBasculePayload } from "./templates/alerte-de-bascule";
 
 /**
- * L'envoi d'une alerte de bascule Luna → Sonnet. Même règle que l'alerte de
- * plafond : ne passe pas par `sendNotification`, destinataire = `EMAIL_ALERTES`
- * en variable d'environnement, silence propre si la variable est absente.
+ * L'envoi d'une alerte de bascule Luna → Sonnet. Comme les autres alertes
+ * d'exploitation : hors de `sendNotification`, vers `EMAIL_ALERTES`, et un
+ * simple avertissement si la variable manque.
  */
 export async function envoyerLAlerteDeBascule(payload: AlerteDeBasculePayload): Promise<void> {
   const destinataire = process.env.EMAIL_ALERTES?.trim();

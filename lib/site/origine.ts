@@ -1,12 +1,7 @@
 /**
- * L'origine publique du site, en absolu.
- *
- * Deux endroits en ont besoin et ne peuvent pas s'en passer : les métadonnées,
- * qui annoncent l'image de partage, et le manifeste, qui doit se désigner
- * lui-même par une URL entière pour que le navigateur reconnaisse l'application
- * déjà installée. Recopier la constante à deux endroits, c'est accepter qu'elle
- * diverge le jour où le domaine change — et le symptôme serait muet des deux
- * côtés.
+ * L'origine publique du site, en absolu, pour les métadonnées (l'image de
+ * partage) et le manifeste, qui doit se désigner par une URL entière pour que
+ * le navigateur reconnaisse l'application installée.
  *
  * En préproduction, l'origine du déploiement courant : l'aperçu d'une branche
  * montre la branche.

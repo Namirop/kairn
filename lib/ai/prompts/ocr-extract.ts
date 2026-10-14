@@ -1,32 +1,13 @@
 /**
  * Lecture d'une capture d'écran déposée par l'utilisateur.
  *
- * Texte fourni, recopié mot pour mot. Le prompt nomme `usable` et
- * `extractedText` : ce sont les champs du schéma de `lib/ai/schemas.ts`.
+ * Le prompt nomme `usable` et `extractedText` : ce sont les champs de
+ * `lib/ai/schemas/ocr-extract.ts`.
  *
- * **La convention de code a été énoncée le 13/09/2026, parce qu'elle ne tenait
- * pas toute seule.** Le prompt demandait de préserver l'indentation d'un
- * extrait, et rien de plus : le modèle entourait donc son code de barrières une
- * fois sur deux, par habitude de markdown. Mesuré sur les deux captures de code
- * de la production, déposées à une heure et demie d'intervalle — la première
- * rendait ` ```js `, la seconde rendait les mêmes lignes nues au milieu de la
- * prose.
- *
- * Ce n'est pas un détail de forme. L'écran d'un dépôt rend un extrait barrière
- * en bloc — mono, sur la roche, défilant dans sa boîte, ouvrable en grand — et
- * le même extrait sans barrière en lignes de texte ordinaire, recollées comme
- * de la prose s'il a le malheur d'avoir des lignes pleines. La mise en forme
- * dépendait donc de l'humeur du modèle sur ce tirage-là.
- *
- * C'est la sixième propriété que ce projet aurait tenue par l'implicite, après
- * le plafond de concepts, la langue, la position de la bonne réponse, la part
- * d'affirmations fausses et l'ordre des concepts. Comme les cinq autres, elle
- * est maintenant **demandée** au lieu d'être espérée.
- *
- * La convention est celle que tout le monde écrit, et c'est aussi celle que les
- * concepts emploient déjà pour leurs termes en ligne — voir `segmentsDeCode`,
- * qui relève les accents graves simples depuis le début. Les deux côtés de la
- * chaîne parlent enfin la même langue.
+ * La convention de code est demandée explicitement : sans elle, le modèle met
+ * ou non des barrières selon le tirage, et l'écran d'un dépôt rend un extrait
+ * sans barrière comme de la prose. Les accents graves simples sont ceux que
+ * relève `segmentsDeCode` pour les termes en ligne.
  */
 export const OCR_EXTRACT_PROMPT = `Tu lis une image déposée par quelqu'un qui veut retenir ce qu'elle contient.
 

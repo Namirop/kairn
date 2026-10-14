@@ -5,31 +5,20 @@ import { seuilAtteint } from "@/lib/domain/seuil-de-plafond";
 import { variableDuPlafond } from "./config";
 
 /**
- * Prévenir avant que ça bloque.
+ * Prévenir quand un plafond d'appels au modèle approche, avant que des dépôts
+ * échouent sans que personne le sache.
  *
- * Aujourd'hui un plafond atteint fait échouer des dépôts et personne n'est au
- * courant : on l'apprend si quelqu'un écrit. C'est le vrai défaut — pas la
- * valeur des plafonds, qu'on ne peut de toute façon pas régler sans avoir
- * observé un pic.
+ * Trois règles, dans cet ordre :
+ * 1. Ne jamais casser ce qu'on surveille : toute erreur est journalisée et
+ *    avalée. Une alerte perdue coûte moins qu'un dépôt perdu.
+ * 2. Rester hors du chemin critique : le dépôt n'attend pas un email, et rien ne
+ *    tient de verrou sur le compteur qu'on vient d'incrémenter.
+ * 3. Ne parler qu'une fois : une alerte par seuil, par compteur et par jour,
+ *    sinon chaque appel au-delà du seuil enverrait un email.
  *
- * Trois règles gouvernent ce fichier, dans cet ordre :
- *
- * 1. **Il ne casse jamais ce qu'il surveille.** Toute erreur est journalisée et
- *    avalée. Un Resend en panne ne fait pas échouer une extraction, et une
- *    alerte perdue coûte infiniment moins qu'un dépôt perdu.
- * 2. **Il attend son tour.** Le travail sort du chemin critique : le dépôt ne
- *    patiente pas derrière un email, et rien de tout ceci ne tient un verrou sur
- *    le compteur qu'on vient d'incrémenter.
- * 3. **Il ne parle qu'une fois.** Une alerte par seuil, par compteur et par
- *    jour. Sans ça, un plafond franchi au trente-cinquième appel enverrait un
- *    email à chaque appel suivant.
- *
- * **Les collaborateurs sont reçus, jamais importés**, et c'est ce qui rend
- * l'enchaînement vérifiable : les deux comportements qui peuvent mal tourner en
- * silence — le doublon et l'erreur avalée — se testent avec des doublures, sans
- * base ni réseau. Le câblage réel vit dans `signalement-de-plafond.ts` ; ce
- * fichier-ci ne connaît que des types, et il ne charge donc ni client de base ni
- * client d'emails.
+ * Les collaborateurs sont reçus, jamais importés : le doublon et l'erreur
+ * avalée se testent avec des doublures. Le câblage réel vit dans
+ * `signalement-de-plafond.ts`.
  */
 
 /** Ce qu'une réservation vient de constater sur son compteur. */
@@ -54,18 +43,13 @@ const VARIABLE_DU_COMPTEUR: Record<CompteurDeQuota, string> = {
 };
 
 /**
- * Regarde où en est le compteur, et prévient si un seuil est atteint.
+ * Prévient si le compteur atteint un seuil. Ne lève jamais : elle est appelée
+ * depuis le chemin d'un dépôt.
  *
- * **Cette fonction ne lève jamais.** C'est sa raison d'être : elle est appelée
- * depuis le chemin d'un dépôt, et la seule chose qu'elle a le droit de faire en
- * cas de problème est de l'écrire dans les journaux.
- *
- * Le verrou est pris **avant** l'envoi et non après. L'ordre inverse serait plus
- * juste — on ne noterait comme envoyée qu'une alerte réellement partie — mais il
- * rouvre la fenêtre entre deux réservations simultanées, et surtout il ferait
- * réessayer à chaque appel tant que Resend est en panne : quinze tentatives dans
- * l'heure au lieu d'une. On préfère perdre une alerte le jour où le fournisseur
- * est à terre plutôt que de risquer la rafale qu'on est venu empêcher.
+ * Le verrou est pris avant l'envoi, pas après : l'ordre inverse rouvrirait la
+ * fenêtre entre deux réservations simultanées et réessaierait à chaque appel
+ * tant que Resend est en panne. On préfère perdre une alerte que d'envoyer la
+ * rafale qu'on est venu empêcher.
  */
 export async function surveillerLePlafond(
   etat: EtatDuCompteur,
@@ -78,8 +62,8 @@ export async function surveillerLePlafond(
     if (seuil === null) return;
 
     // La chaîne vide et non `null` : une clé primaire de Postgres n'accepte pas
-    // de valeur nulle, et sans distinction par compte le premier à franchir un
-    // seuil aurait consommé l'alerte de tous les autres pour la journée.
+    // de valeur nulle. La cible distingue les comptes, sinon le premier à
+    // franchir un seuil consommerait l'alerte de tous les autres.
     const pris = await outils.reserver(
       { compteur: etat.compteur, cible: etat.cible ?? "", seuil },
       maintenant,
@@ -98,9 +82,8 @@ export async function surveillerLePlafond(
       instant: maintenant,
     });
   } catch (erreur) {
-    // Le contexte, pas le contenu : un identifiant de compte, jamais de texte
-    // déposé. Et `error` et non `warn` — une alerte qui ne part pas est
-    // silencieuse par construction, c'est le journal qui doit crier.
+    // `error` et non `warn` : une alerte qui ne part pas est silencieuse par
+    // construction, c'est le journal qui doit crier.
     console.error(
       `[plafond] alerte ${etat.compteur} non envoyée (${etat.utilisees}/${etat.plafond})`,
       erreur,

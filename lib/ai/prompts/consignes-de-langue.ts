@@ -3,23 +3,17 @@ import type { Langue } from "@/lib/db/types";
 /**
  * Ce qui change d'une langue de sortie à l'autre dans les consignes au modèle.
  *
- * Les consignes restent écrites en français, une seule fois : les traduire
- * doublerait ce qu'il faut tenir à jour, et chaque règle qu'on y ajoute a été
- * mesurée sur ce texte-là. Seuls bougent les passages qui nomment la langue
- * d'écriture — et ils la nomment toujours sans condition, « tu écris en … ».
- * La consigne « écris dans la langue du dépôt » demandait une décision au
- * modèle, et c'est cette décision qui se trompait jusqu'au 09/09.
+ * Les consignes restent en français, une seule fois : chaque règle a été
+ * mesurée sur ce texte. Seuls varient les passages qui nomment la langue, et
+ * toujours sans condition (« tu écris en … ») : laisser le modèle choisir la
+ * langue le faisait se tromper.
  *
- * **Les passages français sont recopiés à l'octet près** de ce qu'étaient les
- * consignes avant qu'elles ne prennent une langue : leur empreinte, et donc le
- * cache du fournisseur et la traçabilité des questions déjà écrites, n'en ont
- * pas bougé.
+ * Les passages français ne doivent pas bouger d'un octet : leur empreinte porte
+ * le cache du fournisseur et la traçabilité des questions déjà écrites.
  *
- * Les passages anglais disent deux choses de plus : que les exemples de la
- * consigne sont en français sans que la sortie le soit, et que les tournures
- * interdites valent pour leurs équivalents anglais. Sans la seconde, une règle
- * qui cite « Le terme attendu est… » ne retient rien d'un « The expected term
- * is… ». Ils n'ont pas encore été passés au banc.
+ * Les passages anglais précisent que les exemples sont en français et que les
+ * tournures interdites valent pour leurs équivalents anglais. Ils n'ont pas
+ * encore été passés au banc.
  */
 
 export interface LangueDExtraction {

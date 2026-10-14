@@ -8,25 +8,17 @@ import { renderCodeDeConnexion } from "./templates/code-de-connexion";
 /**
  * L'envoi d'un code de connexion.
  *
- * Il ne passe **pas** par `sendNotification`, et c'est le point important de ce
- * fichier : cette fonction-là vérifie le refus d'emails de l'utilisateur, ce qui
- * est juste pour un rappel quotidien et catastrophique ici. Quelqu'un qui a
- * coupé ses rappels doit évidemment pouvoir encore entrer dans son compte — le
- * contraire l'enfermerait dehors avec un bouton qu'il a cliqué en toute bonne
- * foi.
+ * Il ne passe pas par `sendNotification`, qui respecte le refus d'emails :
+ * quelqu'un qui a coupé ses rappels doit pouvoir entrer dans son compte.
  *
- * Il n'écrit rien non plus dans `EmailDelivery` : cette table existe pour rendre
- * un cron idempotent, un par type et par jour. Un code de connexion se demande
- * autant de fois qu'on veut, et deux demandes dans la même journée doivent
- * partir toutes les deux.
+ * Il n'écrit rien dans `EmailDelivery`, qui rend un cron idempotent par type et
+ * par jour : deux demandes de code le même jour doivent partir toutes les deux.
  */
 
 /**
- * Durée de validité d'un code, en minutes.
- *
- * Plus courte que celle du lien qu'il remplace : six chiffres se devinent, là où
- * un jeton signé ne se devine pas. La fenêtre étroite fait le gros du travail,
- * le compte de tentatives fait le reste — voir `lib/auth/config.ts`.
+ * Durée de validité d'un code, en minutes. Courte parce que six chiffres se
+ * devinent : la fenêtre étroite fait le gros du travail, le compte de
+ * tentatives le reste (voir `lib/auth/config.ts`).
  */
 export const MINUTES_DE_VALIDITE = 10;
 
@@ -40,11 +32,8 @@ export type Provenance = {
 
 /**
  * La langue du code : celle du compte s'il existe, sinon celle de la requête.
- *
- * À l'inscription, personne n'a encore de réglage : le code part avant le
- * compte. On parle alors la langue que la personne a choisie sur le site — le
- * cookie posé par le lien de langue —, à défaut celle de son navigateur. Sans
- * requête du tout, le français, comme partout ailleurs.
+ * À l'inscription, le code part avant le compte : on lit alors le cookie de
+ * langue, à défaut le navigateur, à défaut le français.
  */
 async function langueDuCode({ userId, entetes }: Provenance): Promise<Langue> {
   const duCompte = userId ? (await findUserSettings(userId))?.langue : undefined;
@@ -60,8 +49,8 @@ export async function envoyerLeCodeDeConnexion(
   provenance: Provenance,
 ): Promise<void> {
   if (code.length !== LONGUEUR_DU_CODE) {
-    // Un code de longueur inattendue veut dire que la configuration du plugin a
-    // divergé de ce que l'écran de saisie attend : il vaut mieux ne pas partir.
+    // La configuration du plugin a divergé de ce que l'écran de saisie attend :
+    // mieux vaut ne pas envoyer un code impossible à saisir.
     throw new Error(`Code de connexion de longueur inattendue : ${code.length}.`);
   }
 
@@ -75,6 +64,6 @@ export async function envoyerLeCodeDeConnexion(
     subject: email.subject,
     html: email.html,
     text: email.text,
-    // Aucun en-tête de désabonnement : voir `code-de-connexion.ts`.
+    // Aucun en-tête de désabonnement : voir `ShellContent.unsubscribeUrl`.
   });
 }

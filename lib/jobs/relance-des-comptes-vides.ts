@@ -6,17 +6,10 @@ import { journaliser, passage, type Passage } from "./passage-de-notification";
 /**
  * La relance des comptes restés vides, depuis le même passage horaire.
  *
- * Le troisième envoi, et le seul qui s'adresse à quelqu'un dont le produit ne
- * sait rien. Les deux autres supposent quelque chose d'échu ; un compte qui n'a
- * jamais déposé n'a rien d'échu, et sortait du produit sans qu'aucun message ne
- * le rattrape.
- *
- * **Pas d'écart des déjà-notifiés ici**, contrairement aux deux autres passages.
- * `aNotifier` écarte sur `(compte, type, jour local)`, ce qui empêche un
- * doublon dans la journée mais autoriserait une relance par jour pendant toute
- * la fenêtre. La lecture qui sélectionne les candidats écarte déjà, en SQL, tout
- * compte portant **une** relance quelle qu'en soit la date — c'est strictement
- * plus fort, et c'est ce qui rend l'envoi unique dans une vie de compte.
+ * Pas d'`aNotifier` ici, contrairement aux autres passages : il écarte sur
+ * `(compte, type, jour local)`, ce qui autoriserait une relance par jour. La
+ * sélection des candidats écarte déjà en SQL tout compte portant une relance,
+ * quelle qu'en soit la date : l'envoi est unique dans la vie d'un compte.
  *
  * Les journaux ne portent que des comptes, jamais une adresse ni un contenu.
  */

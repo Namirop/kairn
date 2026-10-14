@@ -4,12 +4,9 @@ import type { GenerationJob, GenerationKind } from "@/lib/db/types";
 import { runJob } from "./runner";
 
 /**
- * Mise en file d'un travail. L'utilisateur n'attend jamais un appel modèle dans
- * sa requête : on écrit le job, on rend la main, et `after()` lance le
- * traitement une fois la réponse envoyée.
- *
- * Si le traitement ne part pas — hors contexte de requête, processus recyclé —
- * le job reste simplement en attente et le cron de reprise le récupère.
+ * Mise en file d'un travail : on écrit le job, on rend la main, et `after()`
+ * lance le traitement une fois la réponse envoyée. Si le traitement ne part pas
+ * (hors requête, processus recyclé), le cron de reprise récupère le job.
  */
 export async function enqueueJob(inputId: string, kind: GenerationKind): Promise<GenerationJob> {
   const job = await createGenerationJob(inputId, kind);
@@ -20,10 +17,8 @@ export async function enqueueJob(inputId: string, kind: GenerationKind): Promise
 }
 
 /**
- * Lance un job déjà écrit, derrière la réponse.
- *
- * Séparé de la création parce que les jobs de questions sont écrits en groupe,
- * par `creerJobsDeQuestions`, avant d'être lancés un à un.
+ * Lance un job déjà écrit, derrière la réponse. Séparé de la création parce
+ * que `creerJobsDeQuestions` écrit les jobs en groupe.
  */
 export function declencher(jobId: string): void {
   try {

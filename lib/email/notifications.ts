@@ -20,26 +20,17 @@ import {
 import { createUnsubscribeToken } from "./unsubscribe";
 
 /**
- * Point d'entrée unique des notifications. Un seul canal, l'email. Le refus de
+ * Point d'entrée unique des notifications, par email. Le refus de
  * l'utilisateur est vérifié ici, pas chez l'appelant : aucun chemin ne peut le
  * contourner.
  *
- * Trois types partent du passage horaire — le rappel, l'alerte de série et la
- * relance d'un compte vide. Le quatrième, l'accueil, part du hook d'inscription :
- * même enveloppe, même vérification du refus, même trace dans `EmailDelivery`,
- * mais déclenché par un geste et non par une heure.
+ * Le rappel, l'alerte de série et la relance partent du passage horaire ;
+ * l'accueil part du hook d'inscription. L'unicité de l'accueil et de la relance
+ * est garantie chez l'appelant (pour la relance, une lecture d'`EmailDelivery`
+ * sur le type, sans condition de jour).
  *
- * L'accueil et la relance n'ont pas d'interrupteur : on les reçoit une fois. Ce
- * qui garantit cette unicité n'est pas ici mais chez l'appelant — pour la
- * relance, une lecture d'`EmailDelivery` sur le type, sans condition de jour.
- *
- * Le lien de connexion, lui, ne passe pas par ici — c'est un envoi
- * transactionnel qui doit partir même à quelqu'un qui a coupé ses emails. Voir
- * `connexion.ts`.
- *
- * Le type et sa charge voyagent ensemble, en union discriminée : c'est ce qui
- * permet au compilateur de savoir quel gabarit reçoit quoi, sans une seule
- * assertion de type.
+ * Le lien de connexion ne passe pas par ici : transactionnel, il doit partir
+ * même à qui a coupé ses emails (`connexion.ts`).
  */
 
 export type Notification =
@@ -57,16 +48,13 @@ export type NotificationOutcome =
 type Liens = { sessionUrl: string; depotUrl: string; unsubscribeUrl: string };
 
 /**
- * Le réglage qui gouverne ce type-là. Chacun a le sien, et il est respecté ici.
+ * Le réglage qui gouverne ce type-là.
  *
- * Une table plutôt qu'un ternaire : avec deux types, « sinon » voulait dire
- * l'alerte de série ; avec trois, il ferait hériter le nouveau venu d'un
- * interrupteur qui ne le concerne pas, sans que rien ne le signale. Ici, un type
- * ajouté sans sa ligne ne compile pas.
+ * Une table plutôt qu'un ternaire : un type ajouté sans sa ligne ne compile
+ * pas, au lieu d'hériter d'un interrupteur qui ne le concerne pas.
  *
- * L'accueil et la relance n'ont pas d'interrupteur : on les reçoit une fois, et
- * il n'y a pas d'instant où l'on aurait pu les refuser à l'avance. Le refus
- * global, lui, les arrête comme les autres — il est vérifié avant cette table.
+ * L'accueil et la relance n'ont pas d'interrupteur, puisqu'on les reçoit une
+ * fois ; le refus global, vérifié avant, les arrête comme les autres.
  */
 function estActive(
   type: NotificationType,
@@ -126,9 +114,8 @@ export async function sendNotification(
     subject: email.subject,
     html: email.html,
     text: email.text,
-    // Ce que les clients mail attendent d'un envoi périodique : un
-    // désabonnement en un clic, sans passer par une page. Sans ces en-têtes,
-    // Gmail range plus volontiers l'envoi en indésirable.
+    // Désabonnement en un clic (RFC 8058) : sans ces en-têtes, Gmail range
+    // plus volontiers l'envoi en indésirable.
     headers: {
       "List-Unsubscribe": `<${unsubscribeUrl}>`,
       // i18n-ignore — valeur d'en-tête fixée par la RFC 8058.

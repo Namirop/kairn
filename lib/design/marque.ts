@@ -2,47 +2,29 @@ import { empiler, tailler, type Empilement } from "@/lib/domain/cairn-stack";
 import { tirageDe } from "@/lib/domain/tirage-deterministe";
 
 /**
- * La géométrie de la marque, dérivée de celle du cairn et de rien d'autre.
+ * La géométrie de la marque, dérivée de celle du cairn : le logo sort
+ * d'`empiler()` comme le cairn du tableau de bord, pour que symbole, pastille,
+ * favicon et cairn ne puissent pas diverger.
  *
- * **Le logo n'est pas redessiné à côté du produit, il est appelé.** C'est la
- * seule construction qui garantisse que le symbole de l'en-tête, la pastille
- * d'application, la favicon et le cairn du tableau de bord ne puissent pas
- * diverger : ils sortent tous d'`empiler()`. Le jour où la taille des pierres est
- * retouchée, tout suit sans qu'on ouvre un outil de dessin.
- *
- * Ce module rend des **données**, jamais du balisage. Le composant les traduit en
- * classes Tailwind, le script d'export en couleurs littérales — parce qu'un
- * fichier `.png` ne sait pas lire une variable CSS. Deux traductions d'une même
- * géométrie, et non deux géométries.
- *
- * Rien ici n'est testé, et c'est délibéré : tout y est soit une constante, soit
- * une projection totale d'un entier sur trois valeurs. Il n'y a pas de cas limite
- * à couvrir qu'un coup d'œil à l'écran ne trancherait pas mieux.
+ * Ce module rend des données, jamais du balisage : le composant les traduit en
+ * classes Tailwind, le script d'export en couleurs littérales (un `.png` ne lit
+ * pas une variable CSS).
  */
 
 /**
- * La graine du logo. **Elle ne change jamais : elle changerait le logo.**
+ * La graine du logo. Elle ne change jamais : elle changerait le logo.
  *
- * Choisie sur planche parmi une douzaine de candidates, et la seule à tenir les
- * trois critères d'un symbole qui doit vivre à seize pixels : l'affinement est
- * monotone — chaque pierre est plus étroite que celle du dessous, sans exception —,
- * le plus faible écart de largeur entre deux voisines fait onze pour cent, et
- * l'empilement ne penche que de trois pour cent de sa base. Partout ailleurs, ou
- * bien une pierre s'élargissait en montant, ou bien deux voisines se confondaient
- * dans la favicon.
- *
- * Son rapport hauteur/largeur de 0,80 rentre dans un carré d'icône sans marge
- * perdue.
+ * Choisie pour tenir à seize pixels : chaque pierre plus étroite que celle du
+ * dessous, au moins 11 % d'écart entre voisines, 3 % d'inclinaison au plus, et
+ * un rapport hauteur/largeur de 0,80 qui remplit un carré d'icône.
  */
 export const GRAINE_DU_LOGO = "kairn-logo";
 
 /**
  * Les graines des `nombre` premières pierres.
  *
- * Le rang est dans la graine, donc `empiler(3)` et `empiler(5)` partagent leurs
- * trois premières pierres : mêmes silhouettes, seule la largeur se recalcule
- * parce que l'affinement se répartit sur moins d'étages. Ce n'est pas un second
- * logo, c'est le même à densité réduite.
+ * Le rang est dans la graine : les densités 3 et 5 partagent leurs trois
+ * premières silhouettes, c'est le même logo à densité réduite.
  */
 export function grainesDuLogo(nombre: number): string[] {
   return Array.from({ length: nombre }, (_, rang) => `${GRAINE_DU_LOGO}-${rang}`);
@@ -53,11 +35,8 @@ export const PIERRES_DENSE = 5;
 export const PIERRES_REDUITE = 3;
 
 /**
- * En dessous, le symbole passe à trois pierres.
- *
- * À seize pixels, cinq étages font quatre pixels chacun : il n'y a plus
- * d'empilement, il y a un pâté. Trois pierres tiennent jusqu'en bas parce que
- * chaque étage garde de quoi se distinguer du suivant.
+ * En dessous, le symbole passe à trois pierres : à seize pixels, cinq étages
+ * ne se distinguent plus.
  */
 export const SEUIL_SYMBOLE_DENSE = 64;
 
@@ -71,18 +50,12 @@ export function empilementDuLogo(pierres: number): Empilement {
 }
 
 /**
- * Le cadre serré sur les pierres, et non la vue d'`empiler()`.
+ * Le cadre serré sur les pierres, et non la vue d'`empiler()` : celle-ci garde
+ * du vide sur les côtés pour la chute des pierres, qui décalerait tout ce qui
+ * touche le symbole.
  *
- * La vue du cairn fait cent unités de large parce qu'elle laisse aux pierres de
- * quoi tomber quand on renverse l'empilement sur la page publique. Le logo ne
- * tombe jamais : ces vingt unités de vide de chaque côté ne sont pas de la marge,
- * c'est du blanc invisible qui décale tout ce qui touche le symbole — l'écart
- * entre lui et le mot dans le verrouillage, son remplissage dans la pastille, sa
- * place dans un en-tête. On le cadre donc sur ce qu'il dessine.
- *
- * Une unité de jeu de chaque côté absorbe l'inclinaison des pierres : à trois
- * degrés et demi, un coin dépasse de sa demi-hauteur multipliée par le sinus, soit
- * moins d'une unité.
+ * Une unité de jeu de chaque côté absorbe l'inclinaison des pierres (moins
+ * d'une unité à 3,5°).
  */
 const JEU = 1;
 
@@ -107,15 +80,9 @@ export function cadreDuSymbole(pierres: number): CadreDuSymbole {
 }
 
 /**
- * La nuance d'une pierre du logo, imposée par le rang.
- *
- * `empiler()` tire la nuance au hasard, ce qui est juste pour le cairn du tableau
- * de bord — c'est ce qui rend chaque empilement personnel. Un logo demande
- * l'inverse : une dégradation franche, la plus sombre en bas, en s'éclaircissant
- * vers le haut. Trois pierres sombres qui se suivent, dans une marque, ressemblent
- * à un bug.
- *
- * Le rang du sommet ne passe pas par ici : il est entièrement lichen.
+ * La nuance d'une pierre du logo, imposée par le rang : sombre en bas, plus
+ * claire en montant. `empiler()` la tire au hasard, ce qui convient au cairn
+ * mais pas à une marque. Le sommet ne passe pas par ici : il est lichen.
  */
 export function nuanceDuRang(rang: number, total: number): 0 | 1 | 2 {
   if (total <= 1) return 0;
@@ -129,14 +96,9 @@ export function nuanceDuRang(rang: number, total: number): 0 | 1 | 2 {
 }
 
 /**
- * La pierre qui remplace le point du i, taillée comme les autres.
- *
- * Elle occupe la place optique du point : sa boîte est carrée, et c'est
- * l'appelant qui la pose. `tailler()` plutôt qu'un rectangle arrondi, sinon elle
- * jure avec les cinq de l'empilement — l'irrégularité des flancs et des coins est
- * exactement ce qui fait lire « pierre » plutôt que « puce ».
- *
- * Le chemin est centré sur l'origine, dans une boîte de 10 sur 10.
+ * La pierre qui remplace le point du i, taillée par `tailler()` comme les
+ * autres : un rectangle arrondi se lirait « puce » plutôt que « pierre ».
+ * Chemin centré sur l'origine, boîte de 10 sur 10 ; l'appelant la pose.
  */
 export const COTE_DU_POINT = 10;
 

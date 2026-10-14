@@ -4,18 +4,11 @@ import { stripe } from "./client";
 import { RapportIllisibleError } from "./erreurs";
 
 /**
- * Le catalogue Stripe, adressé par clé de recherche et non par identifiant.
- *
- * Un `price_…` est propre à un environnement : celui du mode test n'existe pas
- * en production. Les inscrire dans le code obligerait à une variable
- * d'environnement par prix, et à se souvenir de la changer le jour du passage
- * en production — c'est-à-dire au moment précis où l'on a le plus de choses en
- * tête. Une clé de recherche, elle, est la même des deux côtés : le catalogue
- * de production porte les mêmes que celui de test, et le code ne connaît qu'un
- * nom.
+ * Le catalogue Stripe, adressé par clé de recherche et non par identifiant : un
+ * `price_…` est propre au mode test ou production, une clé de recherche est la
+ * même des deux côtés.
  */
 
-/** Les clés portées par les prix Stripe. Elles sont identiques en test et en production. */
 export const CLE_DU_PRIX: Record<CadenceStripe, string> = {
   month: "kairn_mensuel",
   year: "kairn_annuel",
@@ -30,16 +23,10 @@ const CENTIMES_ANNONCES: Record<CadenceStripe, number> = {
 /**
  * L'identifiant du prix d'une cadence, vérifié contre ce que la page annonce.
  *
- * **La vérification n'est pas une précaution de plus, c'est la promesse.** La
- * page de tarifs affiche `PRIX_MENSUEL` ; ce qui est débité est ce que Stripe a
- * enregistré. Les deux vivent dans deux systèmes que rien ne synchronise, et le
- * jour où ils divergent, la seule issue acceptable est de ne pas vendre :
- * encaisser un montant différent de celui qui est affiché n'est pas un bug
- * d'affichage.
- *
- * Le refus est bruyant et arrive au clic sur « Payer ». C'est le bon endroit —
- * il vaut mieux un achat qui échoue devant une personne qu'un prélèvement
- * qu'elle découvre après.
+ * La page affiche `PRIX_MENSUEL`, Stripe débite ce qu'il a enregistré, et rien
+ * ne synchronise les deux. S'ils divergent, on refuse de vendre, au clic sur
+ * « Payer » : mieux vaut un achat qui échoue qu'un prélèvement différent de
+ * l'affiché.
  */
 export async function prixDeLaCadence(cadence: CadenceStripe): Promise<string> {
   const cle = CLE_DU_PRIX[cadence];

@@ -1,7 +1,7 @@
 /**
  * La page des tarifs et ses deux offres.
  *
- * Premium n'est pas vendu en anglais (décision du 08/10). Les clés
+ * Premium n'est pas vendu en anglais. Les clés
  * `indisponible` ne servent donc qu'à l'anglais, et `complet`, `arreter`,
  * `quand` qu'au français ; elles existent des deux côtés parce que la forme de
  * cet objet est le contrat entre les deux langues.

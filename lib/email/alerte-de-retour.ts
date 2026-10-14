@@ -4,13 +4,12 @@ import { sendEmail } from "./client";
 import { renderAlerteDeRetour, type AlerteDeRetourPayload } from "./templates/alerte-de-retour";
 
 /**
- * L'envoi d'une alerte de retour. Même règle que les deux autres alertes
- * d'exploitation : elle ne passe pas par `sendNotification`, le destinataire est
- * `EMAIL_ALERTES` en variable d'environnement, et son absence fait un silence
- * propre plutôt qu'une erreur.
+ * L'envoi d'une alerte de retour. Comme les autres alertes d'exploitation :
+ * hors de `sendNotification`, vers `EMAIL_ALERTES`, et un simple avertissement
+ * si la variable manque.
  *
- * Le lien est construit ici et pas dans le gabarit : c'est le seul endroit qui
- * connaisse à la fois l'adresse de l'application et le nom de l'écran.
+ * Le lien se construit ici, seul endroit qui connaisse l'adresse de
+ * l'application et la route de l'écran.
  */
 export type RetourAAnnoncer = Omit<AlerteDeRetourPayload, "lien">;
 

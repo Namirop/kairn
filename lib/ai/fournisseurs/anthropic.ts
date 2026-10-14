@@ -4,19 +4,16 @@ import { toSdkMessage } from "../message";
 import type { EmissionParams, EmissionResult, PontFournisseur } from "./interface";
 
 /**
- * Le pont Anthropic — chemin historique du produit, extrait de `client.ts`
- * sans changement de comportement. C'est **le seul endroit du projet qui
- * importe le SDK Anthropic** ; la règle du point d'entrée unique tient
- * toujours (client.ts est l'entrée métier, ce fichier est l'entrée réseau).
+ * Le pont Anthropic, seul endroit du projet qui importe le SDK. Le point
+ * d'entrée unique tient : `client.ts` est l'entrée métier, ce fichier l'entrée
+ * réseau.
  *
- * Le prompt système reste avec `cache_control: ephemeral` — il est identique
- * d'un appel à l'autre, seul devant le point de cache depuis que l'outil a
- * disparu du préfixe. Sous le minimum de mise en cache du modèle, rien ne
- * sera mis en cache — le registre le dira.
+ * Le prompt système porte `cache_control: ephemeral` : il est identique d'un
+ * appel à l'autre. Sous le minimum de mise en cache du modèle, rien n'est mis
+ * en cache — le registre le dit.
  *
- * `thinking: disabled` : les trois intentions du produit n'ont rien montré
- * qui demande du raisonnement. Le rouvrir est une décision à prendre sur une
- * mesure, pas un réglage à laisser glisser.
+ * `thinking: disabled` : aucune des trois intentions n'a montré besoin de
+ * raisonnement. Le rouvrir se décide sur une mesure.
  */
 
 let cachedClient: { key: string; sdk: Anthropic } | null = null;

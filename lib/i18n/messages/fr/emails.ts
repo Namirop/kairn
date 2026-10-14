@@ -1,12 +1,11 @@
 /**
  * Les emails : sujets, corps, pieds de page.
  *
- * Seuls les emails reçus par les personnes passent ici. Les alertes
- * d'exploitation adressées à l'administrateur restent en français, dans leurs
- * gabarits : elles n'ont qu'un lecteur.
+ * Seuls les emails reçus par les personnes passent ici : les alertes
+ * d'exploitation restent en français dans leurs gabarits.
  *
- * Un paragraphe par clé : la version HTML et la version texte d'un même email
- * se composent des mêmes phrases, et ne peuvent donc pas diverger.
+ * Un paragraphe par clé : les versions HTML et texte d'un même email se
+ * composent des mêmes phrases et ne peuvent pas diverger.
  */
 export const emails = {
   commun: {

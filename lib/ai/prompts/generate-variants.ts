@@ -3,208 +3,44 @@ import type { LangueDesQuestions } from "./consignes-de-langue";
 /**
  * Écriture des quatre Variants d'un Atom.
  *
- * Texte fourni, recopié mot pour mot. Les formats et les facettes cités ici
- * sont ceux des enums `VariantFormat` et `VariantFacet` du schéma Prisma : le
- * prompt et la base nomment les mêmes valeurs.
+ * Les formats et les facettes cités sont ceux des enums `VariantFormat` et
+ * `VariantFacet` du schéma Prisma : le prompt et la base nomment les mêmes
+ * valeurs.
  *
- * **L'ordre des options d'un QCM rendu ici n'est pas celui qui sera montré.**
- * Le serveur les remet en ordre à l'écriture du Variant — le modèle plaçait la
- * bonne réponse en première position 92 % du temps, et une consigne de prompt ne
- * tient pas une propriété de distribution. N'ajoute donc pas ici de « varie la
- * position de la bonne réponse » : ce serait un mieux invérifiable par-dessus
- * une correction, elle, mesurée. Voir `lib/domain/ordre-des-options.ts`.
+ * Ce que le prompt ne doit pas demander, parce que le serveur le tient :
+ * - la position de la bonne option d'un QCM — le modèle la mettait en tête
+ *   92 % du temps ; les options sont remises en ordre à l'écriture
+ *   (`lib/domain/ordre-des-options.ts`) ;
+ * - la part d'affirmations fausses — demandée en prose, elle sortait à 88 % ;
+ *   la cible est tirée par question et transmise dans l'envoi
+ *   (`lib/domain/vrai-ou-faux.ts`).
+ * Une consigne de proportion ne tient pas et masquerait la mesure. Les règles
+ * catégoriques (langue, tutoiement, renvoi au concept), elles, tiennent.
  *
- * **Même chose pour la part d'affirmations fausses.** Elle a été demandée en
- * prose — « à peu près une fois sur deux » — et mesurée à 88 % de fausses sur
- * 125 questions. La cible est maintenant tirée par le serveur, question par
- * question, et transmise dans l'envoi. Ne réintroduis pas ici de consigne de
- * proportion : elle ne tiendrait pas et masquerait la mesure. Voir
- * `lib/domain/vrai-ou-faux.ts`.
+ * Plusieurs consignes ont un filet côté lecture ou contrôle, qui répare le stock
+ * ou écarte la question ; la consigne évite d'en produire :
+ * `etalonUtile` (étalon qui recopie l'option mot pour mot — d'où « mot pour
+ * mot » : une paraphrase n'est pas effacée), `unParFormat` (un seul CLOZE),
+ * `sansAffirmationMuette` (vrai ou faux sans `estVraie`), `trouSansRedite`
+ * (terme qui borde son trou), `phraseSansDevoilement` et `trouDevoileSaReponse`
+ * (terme répété dans sa phrase), `renvoiAuConcept` et `controlerRenvoi`
+ * (question qui renvoie au concept, y compris par le participe seul),
+ * `releverLeCodeCite` (code entre guillemets).
  *
- * **La section « LA FIDÉLITÉ AU CONCEPT » a été réécrite le 19 août 2026** à la
- * lecture des 89 questions infidèles mesurées sur 660 par le juge de fidélité
- * (~13 %). La règle globale « Chaque question se répond avec le concept fourni
- * et rien d'autre » a été remplacée par des règles par facette, plus fermes
- * sur MECHANISM — où le modèle comblait le vide d'un concept-fait avec sa
- * propre connaissance — et par une consigne explicite d'arbitrer en faveur de
- * la fidélité quand le concept est pauvre, même au prix d'un léger radotage
- * intra. Le radotage intra est mesuré, moins grave que l'infidélité.
+ * Sur un concept pauvre, la fidélité prime sur la variété : un étalon ou une
+ * question qui radote coûte du bruit, une invention coûte une fausse certitude.
  *
- * **Une ligne a été ajoutée le 27 août 2026 sur le tutoiement**, à contre-courant
- * de l'avertissement ci-dessous, et voici pourquoi. Ce n'est pas une propriété de
- * distribution comme les deux précédentes : c'est une règle catégorique, du même
- * genre que la langue, et le prompt d'extraction en tient une identique sans
- * peine. Elle a été posée quand l'essai de la landing s'est mis à montrer une
- * question : « Expliquez pourquoi… » sur la page qui convertit, alors que le
- * tutoiement est un engagement de marque non négociable. Un relevé en base
- * donnait 1,4 % de questions vouvoyantes — rare, mais servi à tout le monde.
+ * Les leurres du texte à trou se demandent dans ce même appel : les fabriquer
+ * au besoin voudrait un appel modèle pendant une session
+ * (`lib/domain/aide-du-trou.ts`).
  *
- * **Le contrat de l'étalon a été étendu au QCM le 28 août 2026.** Il n'existait
- * que pour le vrai ou faux — « commence par Vrai ou Faux, puis dit en une phrase
- * ce qui le justifie » — et rien n'était demandé au QCM : le modèle y reformulait
- * donc la bonne option, qui est déjà surlignée à l'écran quand la correction
- * s'affiche. Sur trente-neuf questions à choix servies en production, quinze
- * étalons ne disaient rien de plus que leur option.
+ * Aucun étalon n'ouvre par un verdict : le bloc « Pourquoi » ne s'affiche
+ * qu'après une mauvaise réponse. `estVraie` décrit l'affirmation écrite, pas la
+ * cible demandée : le contrôle tolère une cible manquée, mais un verdict faux
+ * fait corriger quelqu'un qui a raison.
  *
- * La consigne se referme sur la fidélité plutôt que de l'ouvrir : sans cause
- * dans le concept, le modèle recopie l'option. C'est `etalonUtile` qui efface
- * alors le bloc à l'affichage — un étalon qui radote coûte une ligne de bruit,
- * un étalon inventé coûte une fausse certitude, et on préfère le premier.
- *
- * **Le verdict a été interdit en tête d'étalon le 29 août 2026.** Un étalon de
- * QCM servi en production ouvrait par « Correct », et le bloc « Pourquoi » ne
- * s'affiche qu'après une **mauvaise** réponse : on félicitait quelqu'un que
- * l'écran venait de corriger. La consigne du vrai ou faux — « commence par Vrai
- * ou Faux » — est la source la plus probable de la tournure, et elle est
- * maintenant désignée comme une exception plutôt que comme un modèle.
- *
- * **Une ligne a été ajoutée le 28 août 2026 sur le renvoi au concept.** « Quel
- * effet, mentionné dans le concept, courbe la trajectoire de la balle ? » a été
- * servi en session : l'écran de révision ne montre jamais le concept — l'afficher
- * donnerait la réponse avec l'exercice —, donc la question désignait le vide, et
- * il ne restait que deux étiquettes en petites capitales pour deviner le sujet.
- * C'est une règle catégorique de plus, du même genre que la langue et le
- * tutoiement, et `controlerRenvoi` mesure si elle prend.
- *
- * **Les leurres du texte à trou ont été demandés le 28 août 2026.** L'écran de
- * révision propose un coup de pouce à qui sèche : trois ou quatre termes dont un
- * seul est juste. Ils se demandent ici, au même appel que la phrase, parce que
- * les fabriquer au moment du besoin voudrait dire un appel modèle pendant une
- * session — ce que le produit s'interdit. Voir `lib/domain/aide-du-trou.ts`.
- *
- * **Le texte à trou a été rendu unique le 28 août 2026.** « Deux questions au
- * plus partagent le même format » autorisait deux CLOZE, et l'essai de la
- * landing en a servi deux d'affilée sur le même concept — deux fois la même
- * phrase, à un mot masqué près, sur la page qui convertit. La règle générale
- * reste : sans code à citer, il ne reste que trois formats vérifiables pour
- * trois facettes, et exiger quatre formats distincts ferait inventer un format
- * plutôt que tenir la fidélité. L'unicité du CLOZE, elle, est toujours
- * satisfiable — son emplacement est déjà imposé par l'envoi.
- *
- * L'affichage ne s'y fie pas pour autant : `unParFormat` garde une question par
- * format sur la landing, parce qu'une consigne de prompt n'est pas une garantie.
- *
- * **La phrase du concept a été rendue non recopiable le 23 septembre 2026.** Le
- * défaut est le même que celui du double CLOZE, par un autre chemin : sur un
- * concept d'une phrase, le modèle servait un vrai ou faux dont l'affirmation
- * était cette phrase **mot pour mot**, et un texte à trou construit sur la même
- * phrase. Deux onglets côte à côte montraient donc le même texte, à un trou
- * près, sur la page qui convertit — et l'on se dit que les quatre formats ne
- * changent rien à l'affaire. La règle du vrai ou faux interdisait déjà « son
- * résumé » ; elle ne disait pas qu'une copie exacte est pire qu'un résumé, parce
- * que le format prétend alors faire juger ce qu'il vient d'affirmer. Le trou,
- * lui, garde le droit de reprendre une phrase du concept : c'est son format, et
- * le masquage est ce qui la transforme en question.
- *
- * **Le verdict d'un vrai ou faux est devenu obligatoire le 4 septembre 2026**, et
- * cette ligne-là répare un écran cassé. `estVraie` désigne laquelle des deux
- * propositions est la bonne ; elle n'était écrite nulle part en base, et la seule
- * trace du verdict restait le mot « Vrai » ou « Faux » en tête d'étalon — que la
- * correction du 02/09 vient d'interdire, à raison. Toute affirmation réécrite
- * depuis a perdu ses deux boutons et a été servie en question ouverte : une
- * phrase posée à plat, qu'on lit comme le concept à retenir, alors qu'une sur
- * deux est fausse par construction. Le verdict s'écrit maintenant dans le
- * `payload`, et une affirmation qui ne le dit pas n'est plus écrite du tout —
- * voir `sansAffirmationMuette`.
- *
- * **Le terme masqué ne borde plus sa propre phrase, depuis le 4 septembre 2026.**
- * « une fenêtre de \_\_\_ semaines » avec « 52 semaines » pour terme affichait
- * « 52 semaines semaines » une fois le trou comblé, et comptait « 52 » — la bonne
- * réponse — comme fausse, la comparaison exigeant le même nombre de mots. La
- * lecture répare le stock (`trouSansRedite`), le contrôle mesure, et cette
- * consigne arrête d'en produire.
- *
- * **Deux étalons qui redisaient ce qui est déjà à l'écran, corrigés le 4
- * septembre 2026.** Le texte à trou n'avait aucune règle — le tour du 02/09 a mis
- * les autres formats à l'indicatif et l'a oublié —, et « Le terme attendu est
- * « collectivise » : … » annonçait un mot qui venait de se poser dans la phrase,
- * souligné, deux centimètres plus haut. Le QCM, lui, avait la sienne mais trop
- * lâche : « recopie l'option » est devenu « recopie l'option mot pour mot »,
- * parce que `etalonUtile` efface une redite exacte et pas une paraphrase.
- *
- * **Le renvoi au concept se fait aussi par le participe seul, relevé le 4
- * septembre 2026.** « Compare les deux indicateurs mentionnés et précise lequel
- * prédit le mieux l'issue d'un match » a été servi en session : aucun des deux
- * n'est nommé, et l'écran ne montre pas le concept. `renvoiAuConcept` le relève
- * maintenant, donc la question serait écartée sans être écrite — cette consigne
- * évite d'en perdre une pour rien.
- *
- * **Le trou ne se pose plus sur une relation, depuis le 8 septembre 2026.** Un
- * texte à trou servi en session masquait « effet inverse » dans « Le gazon
- * produit l'\_\_\_, en accélérant la balle » : le terme est bien porteur du sens
- * de la phrase, et c'est exactement ce qui le rendait impossible — il ne se
- * retrouve qu'en ayant le concept de la terre battue sous les yeux, que cet
- * écran ne montre pas. La cause première est en amont, dans le découpage, et
- * elle y est corrigée le même jour (voir `extract-atoms.ts`) ; cette consigne-ci
- * est la seconde barrière, pour le stock déjà découpé.
- *
- * **Les questions sont passées au français inconditionnel le 9 septembre 2026.**
- * La consigne disait « dans la langue du concept », et un concept français citant
- * une expression anglaise a suffi à faire basculer les quatre questions en
- * anglais. Sur la liste d'expressions de production — six concepts tous rédigés
- * en français, chacun citant sa tournure —, les vingt-quatre questions sont
- * sorties en anglais, énoncés, options et étalons compris. Le concept disait
- * « L'expression anglaise « to put up with » signifie « supporter » » et la
- * question demandait « Which meaning best matches “to put up with” ? ».
- *
- * Même cause qu'à l'extraction, corrigée le même jour et de la même manière : la
- * consigne demandait une décision, la décision se trompait, il n'y a plus de
- * décision. Ce qui reste est la distinction entre le texte qui **porte** la
- * question — français — et ce sur quoi elle porte, cité tel quel. Une option de
- * QCM peut donc être une forme étrangère, et c'est même ce qu'on veut sur du
- * vocabulaire : l'énoncé donne le sens en français, les options donnent les
- * formes, et la question se pose enfin dans le sens où elle est difficile.
- *
- * La ligne sur le trou d'un terme étranger vient de là. Sans elle, le modèle
- * masque indifféremment la forme ou la glose ; masquer la glose française d'un
- * mot anglais fait réviser du français à quelqu'un qui apprend l'anglais.
- *
- * **Le terme masqué a été interdit d'apparaître ailleurs dans sa phrase, le
- * 24 septembre 2026.** La consigne existait — « vérifie qu'on ne pourrait pas le
- * retrouver en lisant seulement le reste de la phrase » — et `trouDevoileSaReponse`
- * mesurait sans couper. Deux textes à trou servis en session le 23/09 sur un même
- * dépôt Android l'ont enfreinte de la même manière, par répétition littérale :
- * « \_\_\_ et Java utilisent la même plateforme, mais Kotlin n'est pas le même
- * langage que Java », « Google recommande \_\_\_ pour Android depuis 2019 avec
- * l'approche « Kotlin first » ». La consigne générale parlait de paraphrase et de
- * grammaire prévisible ; elle ne disait pas qu'un mot recopié tel quel est le cas
- * le plus simple et le plus fréquent. Elle le dit maintenant.
- *
- * La lecture répare le stock de son côté, et masque les autres occurrences à leur
- * tour plutôt que de jeter la question — voir `phraseSansDevoilement`.
- *
- * **Le verdict d'un vrai ou faux a cessé de recopier la cible, le 24 septembre
- * 2026.** Servi en session le 23/09 : « Kotlin est limité au développement mobile
- * et n'est pas utilisé pour le backend ni pour le multiplateforme », donnée vraie,
- * avec pour étalon « Kotlin n'est pas limité au mobile : il est aussi utilisé pour
- * le backend… ». L'affirmation est fausse, l'étalon le dit, et l'écran surlignait
- * « Vrai » en marquant « Faux » en rouge — on corrigeait quelqu'un qui avait
- * raison, avec une explication qui lui donnait raison.
- *
- * La consigne poussait à ça. Elle disait de recopier la cible dans `estVraie` et
- * qu'« une affirmation rendue à l'envers de ce qui est demandé est un défaut » :
- * un modèle qui n'arrive pas à écrire une affirmation vraie sur le point visé a
- * alors intérêt à mentir sur le verdict plutôt qu'à manquer la cible. Le contrôle,
- * lui, tolère l'écart depuis toujours — « un manquement et jamais un refus ». Le
- * prompt le dit enfin, et nomme le verdict pour ce qu'il est : une description de
- * ce qui vient d'être écrit, pas un accusé de réception.
- *
- * Un relevé du 24/09 donnait un cas sur soixante-huit affirmations vraies en
- * production. C'est rare, et c'est le seul défaut du produit qui enseigne le
- * contraire de ce qu'il faut retenir.
- *
- * **Si la cible ne tient pas malgré tout, teste la longueur d'abord.** Ce prompt
- * est passé de 4 771 à 5 748 caractères en posant cette correction, pendant que
- * celui d'extraction redescendait. Une consigne locale se dilue dans un texte
- * trop long, et la première hypothèse à éprouver sera celle-là — avant d'ajouter
- * encore des lignes pour se faire mieux comprendre.
- *
- * **Le code cité a quitté les guillemets le 30 septembre 2026**, ici comme à
- * l'extraction, et pour la même raison : le rendu en jetons ne voit que les
- * accents graves, et soixante questions vivantes de la production citaient un
- * terme de code entre guillemets contre vingt qui l'écrivaient comme il faut.
- * La règle est posée dans LA LANGUE, où vit déjà ce qui se recopie tel quel ;
- * la lecture relève le stock de son côté — voir `releverLeCodeCite`.
+ * Si une consigne locale ne prend pas, teste la longueur avant d'ajouter des
+ * lignes : le prompt dépasse 13 000 caractères et une règle s'y dilue.
  */
 export function promptDeQuestions(langue: LangueDesQuestions): string {
   return `On te donne un ou plusieurs concepts issus d'un même dépôt. Tu écris quatre questions

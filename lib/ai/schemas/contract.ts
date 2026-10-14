@@ -1,16 +1,10 @@
 import type { ZodType } from "zod";
 
 /**
- * Un contrat porte deux schémas, et c'est tout l'intérêt de le séparer en deux.
- *
- * `forme` est ce qu'on montre au modèle : la structure, les types, les
- * énumérations. C'est de là, et de nulle part ailleurs, qu'on dérive
- * l'`input_schema` de l'outil.
- *
- * `validation` est ce qu'on applique à sa réponse : la même forme, plus les
- * contraintes croisées entre champs. Une contrainte croisée ne s'exprime pas
- * en JSON Schema — la montrer au modèle ne l'aiderait pas, et la faire
- * traverser la dérivation risquerait d'appauvrir ce qu'il voit.
+ * Un contrat porte deux schémas. `forme` est ce qu'on montre au modèle : seule
+ * source de l'`input_schema` de l'outil. `validation` s'applique à sa réponse :
+ * la même forme plus les contraintes croisées entre champs, que JSON Schema
+ * n'exprime pas et qui appauvriraient la dérivation.
  */
 export type AiContract<T> = {
   purpose: AiPurpose;
@@ -19,27 +13,23 @@ export type AiContract<T> = {
 };
 
 /**
- * Les intentions du produit. Ce sont elles qui ont un prompt système en réserve
- * et une fixture de mode mock, parce que ce sont elles qui doivent tourner sans
- * un seul appel réel.
+ * Les intentions du produit : chacune a un prompt système en réserve et une
+ * fixture de mode mock, pour tourner sans un seul appel réel.
  */
 export const AI_PURPOSES = ["extract_atoms", "generate_variants", "ocr_extract"] as const;
 
 export type AiPurposeProduit = (typeof AI_PURPOSES)[number];
 
 /**
- * Les intentions du banc : les trois juges de l'instrument de mesure.
+ * Les intentions du banc : les juges de l'instrument de mesure.
  *
- * Elles passent par `callAI()` comme tout le reste — la règle du point d'entrée
- * unique ne souffre pas d'exception, et le registre `AiCall` doit voir ces
- * appels comme les autres. Mais elles sont déclarées à part, et elles n'ont ni
- * prompt en réserve ni fixture : leur prompt voyage avec le juge qui l'émet, et
- * **le banc refuse de démarrer en mode mock**. Juger des fixtures ne mesurerait
- * rien ; c'est le seul endroit du projet dont l'objet est de dépenser.
+ * Elles passent par `callAI()` comme tout le reste (point d'entrée unique,
+ * traçabilité dans `AiCall`), mais sans prompt en réserve ni fixture : le
+ * prompt voyage avec le juge, et le banc refuse de démarrer en mode mock, juger
+ * des fixtures ne mesurant rien.
  *
- * Les recenser ici plutôt qu'ailleurs a une raison : `purpose` est la colonne
- * par laquelle on relit la dépense, et une intention inconnue du registre
- * arriverait dans les comptes sous une chaîne libre.
+ * Recensées ici parce que `purpose` est la colonne par laquelle on relit la
+ * dépense : une intention inconnue y arriverait en chaîne libre.
  */
 export const AI_PURPOSES_BANC = [
   "juge_residu",

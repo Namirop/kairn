@@ -1,30 +1,24 @@
-// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
 import { EMAIL_STYLE as S, renderShell } from "./shell";
 import type { RenderedEmail } from "./daily-reminder";
 
 /**
  * L'alerte d'exploitation quand les bascules Luna → Sonnet s'accumulent.
  *
- * Elle ne s'adresse pas à un utilisateur mais à qui tient le produit, et elle
- * dit ce qu'il faut savoir sans ouvrir le tableau de bord :
+ * Elle dit, sans ouvrir le tableau de bord, le nombre de bascules du jour
+ * contre le seuil, le motif de la dernière, et la variable qui change de
+ * lignée sans commit : `AI_FOURNISSEUR=anthropic` restaure Sonnet natif.
  *
- * - combien de fois on a basculé aujourd'hui, contre le seuil
- * - un motif court (le premier échec du jour, en pratique)
- * - le nom des variables à toucher pour changer de lignée le temps de
- *   comprendre : `AI_FOURNISSEUR=anthropic` restaure Sonnet natif en une
- *   variable, sans commit
+ * Le repli tient les dépôts, mais au-delà du seuil c'est le fournisseur qu'il
+ * faut regarder.
  *
- * Le repli sert : les dépôts continuent de partir, mais si Luna tombe six fois
- * par jour, ce n'est plus un incident isolé — c'est un fournisseur qu'on ne
- * peut plus tenir sans le regarder.
- *
- * Aucun désabonnement, même règle que l'alerte de plafond.
+ * Aucun désabonnement, comme l'alerte de plafond.
  */
 
 export type AlerteDeBasculePayload = {
   /** Combien de bascules aujourd'hui, seuil compris. */
   bascules: number;
-  /** Le seuil dépassé — 5 par défaut, écrit ici pour que l'email n'ait pas à le deviner. */
+  /** Le seuil dépassé (`SEUIL_BASCULES`). */
   seuil: number;
   /**
    * Motif de la dernière bascule (l'échec Luna qui a déclenché l'alerte).

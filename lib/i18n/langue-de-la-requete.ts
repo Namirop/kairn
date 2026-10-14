@@ -9,13 +9,9 @@ import { COOKIE_DE_LANGUE, EN_TETE_DE_LANGUE } from "./langues";
 /**
  * La langue dans laquelle rendre cette requête.
  *
- * Une page publique dont l'adresse porte la langue la suit, même pour
- * quelqu'un de connecté : l'adresse est ce qu'on partage, elle doit montrer la
- * même chose à tout le monde. Ailleurs, c'est le réglage du compte, et pour
- * qui n'en a pas encore — la connexion, l'inscription —, le choix retenu en
- * cookie ou à défaut le navigateur.
- *
- * Mémoïsée sur le rendu, comme la session dont elle dépend.
+ * Une page publique dont l'adresse porte la langue la suit, même connecté :
+ * une adresse partagée montre la même chose à tous. Ailleurs, le réglage du
+ * compte ; sans compte, le cookie, puis le navigateur.
  */
 export const langueDeLaRequete = cache(async (): Promise<Langue> => {
   const enTetes = await headers();
