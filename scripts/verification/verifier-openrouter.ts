@@ -32,8 +32,8 @@ async function main(): Promise<void> {
 }
 
 async function verifier(): Promise<void> {
-  const { CHALLENGERS, JUGES_CANDIDATS } = await import("./evaluation/openrouter/modeles");
-  const { verifierLeListing } = await import("./evaluation/openrouter/verification");
+  const { CHALLENGERS, JUGES_CANDIDATS } = await import("../evaluation/openrouter/modeles");
+  const { verifierLeListing } = await import("../evaluation/openrouter/verification");
 
   const tous = [...CHALLENGERS, ...JUGES_CANDIDATS];
   if (tous.length === 0) {
@@ -72,8 +72,8 @@ function esVariantePratique(id: string): boolean {
 }
 
 async function lister(): Promise<void> {
-  const { lireLeCatalogue } = await import("./evaluation/openrouter/catalogue");
-  const { REFERENCE } = await import("./evaluation/openrouter/modeles");
+  const { lireLeCatalogue } = await import("../evaluation/openrouter/catalogue");
+  const { REFERENCE } = await import("../evaluation/openrouter/modeles");
 
   const catalogue = await lireLeCatalogue();
   const eligibles = catalogue

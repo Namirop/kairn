@@ -1,12 +1,8 @@
 import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { lireFige, type ConceptFige, type DepotFige, type VariantFige } from "./evaluation/fige";
-import {
-  jugerLaFideliteVia,
-  jugerLesDoublonsVia,
-  type Facture,
-} from "./evaluation/openrouter/juges";
+import { lireFige, type ConceptFige, type DepotFige, type VariantFige } from "./fige";
+import { jugerLaFideliteVia, jugerLesDoublonsVia, type Facture } from "./openrouter/juges";
 import {
   /**
    * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
@@ -17,7 +13,7 @@ import {
   JUGES_CANDIDATS,
   KIMI_K2_0905_ECARTE,
   type ModeleOpenRouter,
-} from "./evaluation/openrouter/modeles";
+} from "./openrouter/modeles";
 
 /**
  * Arrêt 1 de la campagne — la validation du juge candidat avant toute
@@ -43,8 +39,8 @@ import {
  *
  * Deux modes :
  *
- *   npx tsx scripts/valider-le-juge.ts                              # JUGE_PRINCIPAL (Haiku)
- *   npx tsx scripts/valider-le-juge.ts -- --candidat=<id>           # un candidat OpenRouter
+ *   npx tsx scripts/evaluation/valider-le-juge.ts                              # JUGE_PRINCIPAL (Haiku)
+ *   npx tsx scripts/evaluation/valider-le-juge.ts -- --candidat=<id>           # un candidat OpenRouter
  *
  * L'identifiant `<id>` doit correspondre à une constante déclarée dans
  * `modeles.ts` — soit `JUGE_PRINCIPAL`, soit un des `JUGES_ECARTES` conservés
@@ -52,7 +48,7 @@ import {
  * constante et son commentaire d'une ligne, puis lancer.
  */
 
-const FIGE = join(import.meta.dirname, "evaluation", "concepts", "2026-08-20-11h58.json");
+const FIGE = join(import.meta.dirname, "concepts", "2026-08-20-11h58.json");
 
 /**
  * L'arrêt 1 relève les 4000 tokens par défaut du juge à 8000 le temps du
@@ -344,10 +340,7 @@ async function volet2Fidelite(
 const VERDICTS_HAIKU: {
   depots: Record<string, { fidelite: Record<string, { juste: boolean | null }[]> }>;
 } = JSON.parse(
-  readFileSync(
-    join(import.meta.dirname, "evaluation", "verdicts", "2026-08-20-11h58.json"),
-    "utf8",
-  ),
+  readFileSync(join(import.meta.dirname, "verdicts", "2026-08-20-11h58.json"), "utf8"),
 );
 
 /** Les verdicts Haiku d'un lot, tels que sauvegardés dans `verdicts/…json`. */

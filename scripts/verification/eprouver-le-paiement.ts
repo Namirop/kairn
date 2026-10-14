@@ -12,8 +12,8 @@ import { fermerLAbonnementDuCompte } from "@/lib/paiement/fermeture-du-compte";
 import { ouvrirLePortail } from "@/lib/paiement/portail";
 import { lireLeRapport } from "@/lib/paiement/rapport";
 import { arreterLAbonnement, reprendreLAbonnement } from "@/lib/paiement/resiliation";
-import { comparerAvecStripe } from "./verification/etat-du-paiement";
-import { conclure, record } from "./verification/journal";
+import { comparerAvecStripe } from "./cases/etat-du-paiement";
+import { conclure, record } from "./cases/journal";
 
 /**
  * Le parcours de paiement, exercé contre le vrai Stripe en mode test.

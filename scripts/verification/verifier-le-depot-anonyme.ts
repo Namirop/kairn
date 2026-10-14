@@ -5,7 +5,7 @@ import { deposerSansCompte } from "@/lib/depots/deposer-sans-compte";
 import { CARACTERES_MAXIMUM_ANONYME } from "@/lib/depots/bornes-du-depot";
 import { readAiConfig } from "@/lib/ai/config";
 import { computeCostUsd } from "@/lib/ai/pricing";
-import { executerToutLePipeline } from "./verification/depot-simule";
+import { executerToutLePipeline } from "./cases/depot-simule";
 
 /**
  * Vérification du chemin public du dépôt anonyme.
@@ -39,7 +39,7 @@ import { executerToutLePipeline } from "./verification/depot-simule";
  * À sec par défaut. `--emettre` pour appeler le modèle pour de vrai.
  */
 
-const CORPUS = "docs/corpus-test-landing.md";
+const CORPUS = "scripts/verification/corpus-depot-anonyme.md";
 
 /** Ce que le corpus déclare comme vérifiable à la ligne près. */
 type Controle =

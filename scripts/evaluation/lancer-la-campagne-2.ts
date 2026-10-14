@@ -2,30 +2,30 @@ import "dotenv/config";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
-import { dernierFige, lireFige } from "./evaluation/fige";
-import { chargerCache } from "./evaluation/juges/cache";
-import { plonger } from "./evaluation/mesures/embeddings";
-import { estimerColonne } from "./evaluation/campagne/plan-questions";
+import { dernierFige, lireFige } from "./fige";
+import { chargerCache } from "./juges/cache";
+import { plonger } from "./mesures/embeddings";
+import { estimerColonne } from "./campagne/plan-questions";
 import {
   passerParColonneQuestions,
   scoreReferenceSonnet,
   type ScoreDeColonneQuestions,
-} from "./evaluation/campagne/execution-questions";
+} from "./campagne/execution-questions";
 import {
   rendreLaCorrespondanceQuestions,
   rendreLeTableauAveugleQuestions,
   type Etiquette,
   type ReferenceSonnetQuestions,
-} from "./evaluation/campagne/tableau-questions";
-import { BUDGET_SORTIE_CAMPAGNE } from "./evaluation/openrouter/campagne";
+} from "./campagne/tableau-questions";
+import { BUDGET_SORTIE_CAMPAGNE } from "./openrouter/campagne";
 import {
   CHALLENGERS,
   JUGE_PRINCIPAL,
   REFERENCE,
   type ModeleOpenRouter,
-} from "./evaluation/openrouter/modeles";
-import { verifierLeListing } from "./evaluation/openrouter/verification";
-import type { Vecteur } from "./evaluation/mesures/espace";
+} from "./openrouter/modeles";
+import { verifierLeListing } from "./openrouter/verification";
+import type { Vecteur } from "./mesures/espace";
 
 /**
  * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
@@ -44,14 +44,14 @@ import type { Vecteur } from "./evaluation/mesures/espace";
  *
  * Trois garde-fous :
  * 1. `--emettre` obligatoire, sans quoi le script se contente du plan à sec
- *    (préférer `npx tsx scripts/planifier-la-campagne-2.ts` pour la vue chiffrée seule).
+ *    (préférer `npx tsx scripts/evaluation/planifier-la-campagne-2.ts` pour la vue chiffrée seule).
  * 2. Garde-fou de dérive **2×** appliqué séparément à génération et fidélité
  *    (voir `passerParColonneQuestions` + mémoire `garde-fou-derive-2x`).
  * 3. Cache d'embeddings Voyage réutilisé pour les questions Sonnet déjà
  *    plongées au corpus.
  */
 
-const RAPPORTS = join(import.meta.dirname, "evaluation", "rapports", "campagne");
+const RAPPORTS = join(import.meta.dirname, "rapports", "campagne");
 
 const FINALISTES_IDS = new Set(["google/gemini-3.7-flash", "openai/gpt-5.6-luna"]);
 

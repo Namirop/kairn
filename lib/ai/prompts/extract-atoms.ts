@@ -4,7 +4,7 @@ import type { LangueDExtraction } from "./consignes-de-langue";
  * Découpage d'un Input en concepts unitaires.
  *
  * Ce texte est fourni par Romain et se recopie mot pour mot : il ne se
- * reformule pas sans un passage au banc (`scripts/evaluer-generation.ts`).
+ * reformule pas sans un passage au banc (`scripts/evaluation/evaluer-generation.ts`).
  * Les noms de champs cités ici — `nature`, `uncertain`, `rejected` — sont ceux du
  * schéma de `lib/ai/schemas.ts` ; les deux ne peuvent pas diverger. Les valeurs
  * de `nature` sont celles de l'enum Prisma `InputNature`, aux mêmes lettres.

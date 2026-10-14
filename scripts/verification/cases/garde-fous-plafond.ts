@@ -13,7 +13,7 @@ import { expectFailure, record } from "./journal";
  * Le compteur du jour est amené à saturation puis remis exactement dans l'état
  * où il était : la vérification ne doit consommer aucune vraie place. La tenue
  * sous concurrence est prouvée séparément, sur un jour sentinelle, par
- * scripts/verifier-plafond-concurrent.ts.
+ * scripts/verification/verifier-plafond-concurrent.ts.
  */
 
 const SATURE = 3;

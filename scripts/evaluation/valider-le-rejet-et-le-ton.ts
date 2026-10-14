@@ -2,7 +2,7 @@ import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { prisma } from "@/lib/db/client";
 import { deposerSansCompte } from "@/lib/depots/deposer-sans-compte";
-import { executerToutLePipeline } from "./verification/depot-simule";
+import { executerToutLePipeline } from "../verification/cases/depot-simule";
 
 /**
  * Le prompt d'extraction tient-il ses deux promesses au lecteur ?
@@ -37,7 +37,7 @@ import { executerToutLePipeline } from "./verification/depot-simule";
  * À sec par défaut. `--emettre` pour appeler le modèle.
  */
 
-const CORPUS = "docs/corpus-test-landing.md";
+const CORPUS = "scripts/verification/corpus-depot-anonyme.md";
 
 type Attendu = "rejet" | "concepts";
 type Cas = { code: string; passages: number; attendu: Attendu };

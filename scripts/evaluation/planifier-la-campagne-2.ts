@@ -1,14 +1,14 @@
 import "dotenv/config";
 import { basename } from "node:path";
-import { dernierFige, lireFige } from "./evaluation/fige";
-import { BANDEAU_DE_CAMPAGNE, BUDGET_SORTIE_CAMPAGNE } from "./evaluation/openrouter/campagne";
+import { dernierFige, lireFige } from "./fige";
+import { BANDEAU_DE_CAMPAGNE, BUDGET_SORTIE_CAMPAGNE } from "./openrouter/campagne";
 import {
   CHALLENGERS,
   JUGE_PRINCIPAL,
   REFERENCE,
   type ModeleOpenRouter,
-} from "./evaluation/openrouter/modeles";
-import { conceptsQuestionnables, estimerColonne } from "./evaluation/campagne/plan-questions";
+} from "./openrouter/modeles";
+import { conceptsQuestionnables, estimerColonne } from "./campagne/plan-questions";
 
 /**
  * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;

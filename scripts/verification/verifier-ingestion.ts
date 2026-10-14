@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { conclure, record } from "./verification/journal";
-import { versUnFournisseurDeModele } from "./verification/hotes-des-fournisseurs";
+import { conclure, record } from "./cases/journal";
+import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
 
 /**
  * Preuve, à l'exécution, que l'ingestion tient de bout en bout : un dépôt entre,
@@ -44,11 +44,11 @@ async function main(): Promise<void> {
 
   const { prisma } = await import("@/lib/db/client");
   const { repartirDeZero, utilisateurDeTest, UTILISATEUR_DE_TEST } =
-    await import("./verification/depot-simule");
-  const pipeline = await import("./verification/ingestion-pipeline");
-  const reprise = await import("./verification/ingestion-reprise");
-  const limites = await import("./verification/ingestion-limites");
-  const anonyme = await import("./verification/depot-anonyme");
+    await import("./cases/depot-simule");
+  const pipeline = await import("./cases/ingestion-pipeline");
+  const reprise = await import("./cases/ingestion-reprise");
+  const limites = await import("./cases/ingestion-limites");
+  const anonyme = await import("./cases/depot-anonyme");
 
   const userId = await utilisateurDeTest();
   await repartirDeZero(userId);

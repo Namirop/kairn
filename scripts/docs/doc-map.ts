@@ -25,6 +25,7 @@ export const DOC_MAP: DocMap = {
   ],
   "DESIGN.md": [
     "app/globals.css",
+    "app/styles/",
     "app/shadcn-tokens.css",
     "app/fonts.ts",
     "components/ui/",
@@ -33,7 +34,7 @@ export const DOC_MAP: DocMap = {
     "lib/design/",
   ],
   "PRODUCT.md": ["app/(marketing)/", "lib/paiement/catalogue.ts"],
-  "docs/DEPLOIEMENT.md": [
+  "docs/deploiement.md": [
     ".env.example",
     "vercel.json",
     "next.config.ts",

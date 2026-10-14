@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import { appliquerCapDuBanc } from "./evaluation/cap-du-banc";
-import type { ConceptFige, DepotFige } from "./evaluation/fige";
+import { appliquerCapDuBanc } from "./cap-du-banc";
+import type { ConceptFige, DepotFige } from "./fige";
 
 appliquerCapDuBanc();
 
@@ -32,7 +32,7 @@ appliquerCapDuBanc();
  * dépense qu'à l'ajout de `--emettre`.
  */
 
-const RAPPORTS = join(import.meta.dirname, "evaluation", "rapports");
+const RAPPORTS = join(import.meta.dirname, "rapports");
 
 function refuser(motif: string): never {
   console.error(`Le complément ne démarre pas : ${motif}`);
@@ -52,9 +52,9 @@ async function main(): Promise<void> {
     refuser("les appels au modèle sont coupés (AI_ENABLED=false).");
   }
 
-  const { lireCorpus } = await import("./evaluation/corpus");
-  const { evaluerDepot, rejouerDepot } = await import("./evaluation/execution");
-  const { dernierFige, lireFige, retenirVariant } = await import("./evaluation/fige");
+  const { lireCorpus } = await import("./corpus");
+  const { evaluerDepot, rejouerDepot } = await import("./execution");
+  const { dernierFige, lireFige, retenirVariant } = await import("./fige");
   const { join: joinChemin } = await import("node:path");
   const { sumAiCalls } = await import("@/lib/db/ai-call");
   const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
@@ -206,7 +206,7 @@ async function main(): Promise<void> {
   // il attend des `DepotEvalue` frais, et on repart de `DepotFige` déjà
   // convertis. Le format JSON est le même, contrôlé par `figeSchema`.
   const depotsFinaux = [...parNomDuFige.values()].sort((a, b) => a.nom.localeCompare(b.nom));
-  const DOSSIER = joinChemin(import.meta.dirname, "evaluation", "concepts");
+  const DOSSIER = joinChemin(import.meta.dirname, "concepts");
   const cheminNouveau = joinChemin(
     DOSSIER,
     `${debut.toISOString().slice(0, 16).replace("T", "-").replace(":", "h")}.json`,

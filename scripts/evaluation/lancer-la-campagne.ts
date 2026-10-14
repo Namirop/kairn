@@ -1,17 +1,17 @@
 import "dotenv/config";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import { lireCorpus } from "./evaluation/corpus";
-import { dernierFige, lireFige } from "./evaluation/fige";
-import { chargerCache, type CacheDeMesure } from "./evaluation/juges/cache";
-import { BUDGET_SORTIE_CAMPAGNE } from "./evaluation/openrouter/campagne";
+import { lireCorpus } from "./corpus";
+import { dernierFige, lireFige } from "./fige";
+import { chargerCache, type CacheDeMesure } from "./juges/cache";
+import { BUDGET_SORTIE_CAMPAGNE } from "./openrouter/campagne";
 import {
   CHALLENGERS,
   JUGE_PRINCIPAL,
   REFERENCE,
   type ModeleOpenRouter,
-} from "./evaluation/openrouter/modeles";
-import { verifierLeListing } from "./evaluation/openrouter/verification";
+} from "./openrouter/modeles";
+import { verifierLeListing } from "./openrouter/verification";
 import {
   ajouterPlans,
   couterPlan,
@@ -19,12 +19,8 @@ import {
   planDoublon,
   planExtraction,
   planResidu,
-} from "./evaluation/campagne/plan";
-import {
-  passerParColonne,
-  type ScoreDeColonne,
-  type ScoreDepot,
-} from "./evaluation/campagne/execution";
+} from "./campagne/plan";
+import { passerParColonne, type ScoreDeColonne, type ScoreDepot } from "./campagne/execution";
 import {
   /**
    * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
@@ -35,7 +31,7 @@ import {
   rendreLeTableauAveugle,
   type Etiquette,
   type ReferenceSonnet,
-} from "./evaluation/campagne/tableau";
+} from "./campagne/tableau";
 
 /**
  * L'émission de la campagne 1 — les quatre challengers désignés jouent
@@ -59,7 +55,7 @@ import {
  *   → challenger. Ne pas ouvrir avant l'arrêt 2.
  */
 
-const RAPPORTS = join(import.meta.dirname, "evaluation", "rapports", "campagne");
+const RAPPORTS = join(import.meta.dirname, "rapports", "campagne");
 
 function refuser(motif: string): never {
   console.error(`La campagne ne démarre pas : ${motif}`);

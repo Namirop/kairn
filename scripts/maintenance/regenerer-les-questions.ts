@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { prisma } from "@/lib/db/client";
 import { demanderDesQuestions } from "@/lib/db/demande-de-questions";
-import { conclure, record } from "./verification/journal";
+import { conclure, record } from "../verification/cases/journal";
 
 /**
  * Réécrire les questions déjà en base sous un prompt qui a changé.

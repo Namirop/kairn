@@ -3,7 +3,7 @@ import "dotenv/config";
 // avant que l'environnement soit posé, contrairement aux imports dynamiques
 // qui suivent.
 import type { StatutStripe } from "@/lib/domain/rapport-de-stripe";
-import { conclure, record } from "./verification/journal";
+import { conclure, record } from "./cases/journal";
 
 /**
  * Preuve que l'abonnement ne se laisse pas remonter le temps.
@@ -34,7 +34,7 @@ const decale = (secondes: number) => new Date(T0.getTime() + secondes * 1000);
 
 async function main(): Promise<void> {
   const { prisma } = await import("@/lib/db/client");
-  const { creerCompte, effacerComptes } = await import("./verification/abus-fabrique");
+  const { creerCompte, effacerComptes } = await import("./cases/abus-fabrique");
   const { attacherLeClientStripe, enregistrerLEtatDeLAbonnement } =
     await import("@/lib/db/ecriture-de-labonnement");
   const { lireLOffreDuCompte } = await import("@/lib/db/abonnement");

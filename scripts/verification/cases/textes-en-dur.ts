@@ -7,7 +7,7 @@
  * moins deux mots, en écartant ce qui n'est jamais montré — classes, imports,
  * clés de traduction, journaux.
  *
- * Usage : `npx tsx scripts/verification/textes-en-dur.ts components/revision app/(app)/reviser`
+ * Usage : `npx tsx scripts/verification/cases/textes-en-dur.ts components/revision app/(app)/reviser`
  * Sans argument : `app`, `components`, `lib/email`. Rend un code non nul s'il
  * reste quelque chose, pour servir de critère de fin à une zone traduite.
  *
