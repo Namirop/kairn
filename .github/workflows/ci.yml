@@ -20,7 +20,7 @@ env:
 
 jobs:
   checks:
-    name: Lint, types, format, tests
+    name: Lint, types, format, tests, dead code
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -34,6 +34,8 @@ jobs:
       - run: npm run typecheck
       - run: npm run format:check
       - run: npm test
+      # Unused files, exports and dependencies (config in knip.json).
+      - run: npm run knip
 
   build:
     name: Build
