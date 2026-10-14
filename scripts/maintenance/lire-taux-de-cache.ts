@@ -30,7 +30,6 @@ type Ligne = {
   cacheCreationTokens: number;
   outputTokens: number;
   coutUsd: number;
-  bascules: number;
 };
 
 async function main(): Promise<void> {
@@ -69,7 +68,6 @@ async function main(): Promise<void> {
     cacheCreationTokens: g._sum.cacheCreationTokens ?? 0,
     outputTokens: g._sum.outputTokens ?? 0,
     coutUsd: Number(g._sum.costUsd ?? 0),
-    bascules: 0,
   }));
 
   console.info(`| Fournisseur | Appels | Entrée totale | Cache read | Taux cache | Coût total   |`);

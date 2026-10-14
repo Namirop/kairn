@@ -212,7 +212,7 @@ async function passerUnCas(cas: Cas, adresse: string): Promise<Ligne> {
   }
 
   for (const controle of cas.controles) {
-    ecarts.push(...verifier(controle, input, questions));
+    ecarts.push(...verifier(controle, input));
   }
 
   return {
@@ -247,7 +247,7 @@ type Depot = {
 };
 
 /** Les seuls jugements que ce script porte : binaires, et tirés du corpus. */
-function verifier(controle: Controle, input: Depot, questions: number): string[] {
+function verifier(controle: Controle, input: Depot): string[] {
   const ecarts: string[] = [];
 
   if (controle === "uncertain-sans-question") {
@@ -286,10 +286,6 @@ function verifier(controle: Controle, input: Depot, questions: number): string[]
 
   if (controle === "non-rejete" && input.status === "REJECTED") {
     ecarts.push("rejeté alors que c'est une note de contenu, pas d'organisation");
-  }
-
-  if (controle === "pas-de-doublement" && questions >= 0) {
-    // Le doublement se juge contre D11, dans `principal`, après la série.
   }
 
   return ecarts;

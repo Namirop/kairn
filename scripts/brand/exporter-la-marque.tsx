@@ -186,4 +186,7 @@ async function main(): Promise<void> {
   console.log(`\nLe seuil de la pierre du i est à ${CORPS_MINIMAL_DE_LA_PIERRE} px de corps.`);
 }
 
-void main();
+main().catch((erreur: unknown) => {
+  console.error("L'export de la marque a échoué.", erreur);
+  process.exitCode = 1;
+});

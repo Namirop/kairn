@@ -194,15 +194,21 @@ export function lireFige(chemin: string): CorpusFige {
 
 /** Le figé le plus récent, quand on ne dit pas lequel rejouer. */
 export function dernierFige(): string | undefined {
+  const fichiers = lireLeDossier()
+    .filter((nom) => nom.endsWith(".json"))
+    .sort();
+
+  const dernier = fichiers.at(-1);
+
+  return dernier === undefined ? undefined : join(DOSSIER, dernier);
+}
+
+/** Un dossier absent veut dire « aucun figé encore » ; toute autre erreur remonte. */
+function lireLeDossier(): string[] {
   try {
-    const fichiers = readdirSync(DOSSIER)
-      .filter((nom) => nom.endsWith(".json"))
-      .sort();
-
-    const dernier = fichiers.at(-1);
-
-    return dernier === undefined ? undefined : join(DOSSIER, dernier);
-  } catch {
-    return undefined;
+    return readdirSync(DOSSIER);
+  } catch (erreur: unknown) {
+    if (erreur instanceof Error && "code" in erreur && erreur.code === "ENOENT") return [];
+    throw erreur;
   }
 }

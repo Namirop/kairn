@@ -166,11 +166,15 @@ export async function verifierPlafond(): Promise<void> {
     update: { reserved: SATURE },
   });
 
+  const reglages = {
+    AI_ENABLED: process.env.AI_ENABLED,
+    MOCK_AI: process.env.MOCK_AI,
+    AI_DAILY_CALL_CAP: process.env.AI_DAILY_CALL_CAP,
+  };
+
   try {
     process.env.AI_ENABLED = "true";
-    process.env.MOCK_AI = "true";
     process.env.AI_DAILY_CALL_CAP = String(SATURE);
-
     // Hors mock, sinon `callAI` rend la fixture avant la réservation. Rien ne
     // sort : le piège sur `fetch` de `verifier-garde-fous.ts` le garantit.
     process.env.MOCK_AI = "false";
@@ -200,6 +204,11 @@ export async function verifierPlafond(): Promise<void> {
       `compteur à ${await lireReservationsDuJour()} après une demande sur un plafond nul`,
     );
   } finally {
+    for (const [nom, valeur] of Object.entries(reglages)) {
+      if (valeur === undefined) delete process.env[nom];
+      else process.env[nom] = valeur;
+    }
+
     // Le compteur peut avoir été effacé au-dessus : on le repose tel qu'il était.
     if (avant) {
       await prisma.aiCallQuota.upsert({

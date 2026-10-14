@@ -42,7 +42,11 @@ async function scenarioDepot(page: Page, marquer: (label: string) => number): Pr
 
   await tapBouton(page, ["Déposer"]);
   const debut = marquer("attente-debut");
-  await page.waitForURL(/\/depots\/[a-z0-9]+$/i, { timeout: 15000 }).catch(() => undefined);
+  // La vidéo peut continuer sans la redirection, mais un enregistrement qui ne
+  // l'a pas vue risque de filmer autre chose que le dépôt : il doit se voir.
+  await page.waitForURL(/\/depots\/[a-z0-9]+$/i, { timeout: 15000 }).catch((erreur: unknown) => {
+    console.warn(`Le dépôt n'a pas mené à sa page (URL : ${page.url()}).`, erreur);
+  });
   await page.waitForSelector("main li", { timeout: 90000 });
   const fin = marquer("attente-fin");
   await page.waitForTimeout(2000);
