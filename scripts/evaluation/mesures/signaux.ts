@@ -1,4 +1,4 @@
-import type { ConceptFige, DepotFige } from "../fige";
+import type { ConceptFige, DepotFige, VariantFige } from "../fige";
 import type { Vecteur } from "./espace";
 import { mediane, pairesTriees, plusProche } from "./geometrie";
 import { segmenter } from "./segmentation";
@@ -88,7 +88,7 @@ type QuestionSituee = { texte: string; concept: number; contexte: ContexteDeQues
  * Sans `cloze` (vieux figés), on retombe sur `question` : mesure bruitée, que
  * le rapport signale par les manquements du banc.
  */
-function texteARadoter(variant: NonNullable<ConceptFige["variants"]>[number]): string {
+export function texteARadoter(variant: VariantFige): string {
   if (variant.format === "CLOZE" && variant.cloze) return variant.cloze.sentence;
   return variant.question;
 }

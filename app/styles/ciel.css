@@ -81,9 +81,6 @@
   height: auto;
   padding-block: 0.9rem;
   padding-inline: 1.9rem;
-}
-
-.geste-du-ciel {
   background: var(--geste-ciel);
   color: var(--geste-ciel-encre);
   border-color: transparent;

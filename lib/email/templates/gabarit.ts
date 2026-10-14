@@ -21,6 +21,8 @@ const PALETTE = {
    * une maîtrise. Du blanc sur le lichen saturé tomberait à 1,9 pour 1.
    */
   accent: "#1B4FC4",
+  /** Le libellé posé sur l'accent : le seul blanc pur des emails, jamais une surface. */
+  surAccent: "#FFFFFF",
   ember: "#B4552F",
   /// Sémantique, et pas la couleur du produit : un échec n'est pas un accent.
   alerte: "#9A3B2C",
@@ -31,6 +33,11 @@ const SANS = "ui-sans-serif, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif
 const MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 
 export const STYLE_DES_EMAILS = { ...PALETTE, SANS, MONO } as const;
+
+/** Le bouton porte le mot de l'interface, et le même dans tout le flux. */
+export function bouton(href: string, libelle: string): string {
+  return `<a href="${href}" style="display:inline-block;background:${PALETTE.accent};color:${PALETTE.surAccent};text-decoration:none;padding:12px 20px;font-size:15px;">${libelle}</a>`;
+}
 
 /** Ce que rend chaque modèle : l'objet, la version HTML et la version texte. */
 export type EmailRendu = { subject: string; html: string; text: string };

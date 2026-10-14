@@ -1,4 +1,4 @@
-import { appelerViaOpenRouter, type ConsommationOpenRouter } from "./client";
+import { appelerViaOpenRouter } from "./client";
 import type { ModeleOpenRouter } from "./modeles";
 import {
   type AttenduSoumis,
@@ -9,25 +9,12 @@ import {
 } from "../juges/attendus";
 import { MOTIF_ABSTENTION_JUGE } from "../juges/residu";
 import { TOKENS_DES_JUGES } from "../juges/modele";
-import type { Facture } from "./juges";
+import { facturer, type Facture } from "./facture";
 
 /**
  * Le juge d'attendus via OpenRouter, pendant de `jugerLesAttendus` pour la
  * campagne. Un appel par dépôt qui porte des attendus, aucun pour les autres.
  */
-
-function facturer(modele: ModeleOpenRouter, consommation: ConsommationOpenRouter): Facture {
-  const coutUsd =
-    (consommation.inputTokens * modele.prixInParM +
-      consommation.outputTokens * modele.prixOutParM) /
-    1_000_000;
-  return {
-    inputTokens: consommation.inputTokens,
-    outputTokens: consommation.outputTokens,
-    coutUsd,
-    latencyMs: consommation.latencyMs,
-  };
-}
 
 export async function jugerLesAttendusVia(
   modele: ModeleOpenRouter,

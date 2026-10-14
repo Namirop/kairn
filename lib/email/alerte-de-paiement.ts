@@ -1,4 +1,4 @@
-import { envoyerLEmail } from "./client";
+import { envoyerUneAlerte } from "./envoi-d-alerte";
 import {
   composerLAlerteDePaiement,
   type AlerteDePaiementPayload,
@@ -11,19 +11,5 @@ import {
  * `EMAIL_ALERTES`, et un simple avertissement si la variable manque.
  */
 export async function envoyerLAlerteDePaiement(payload: AlerteDePaiementPayload): Promise<void> {
-  const destinataire = process.env.EMAIL_ALERTES?.trim();
-
-  if (!destinataire) {
-    console.warn("[paiement] alerte non envoyée : EMAIL_ALERTES absente de l'environnement.");
-    return;
-  }
-
-  const email = composerLAlerteDePaiement(payload);
-
-  await envoyerLEmail({
-    to: destinataire,
-    subject: email.subject,
-    html: email.html,
-    text: email.text,
-  });
+  await envoyerUneAlerte("paiement", () => composerLAlerteDePaiement(payload));
 }

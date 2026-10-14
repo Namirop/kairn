@@ -70,8 +70,9 @@ export type Corps = {
 
 export type Impulsion = { vx: number; vy: number };
 
-export function initialiser(pierres: Pierre[]): Corps[] {
-  return pierres.map((pierre) => ({
+/** Un corps posé sur sa pierre, immobile. */
+export function poser(pierre: Pierre): Corps {
+  return {
     x: pierre.x,
     y: pierre.y,
     rotation: pierre.rotation,
@@ -80,7 +81,11 @@ export function initialiser(pierres: Pierre[]): Corps[] {
     vr: 0,
     libre: false,
     repos: true,
-  }));
+  };
+}
+
+export function initialiser(pierres: Pierre[]): Corps[] {
+  return pierres.map(poser);
 }
 
 /**

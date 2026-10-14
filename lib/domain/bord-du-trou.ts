@@ -1,4 +1,5 @@
 import { TROU } from "./reponse-cloze";
+import { aplati } from "./texte-aplati";
 
 /**
  * Le terme masqué qui déborde sur la phrase qui l'entoure.
@@ -13,16 +14,12 @@ import { TROU } from "./reponse-cloze";
  */
 
 /** Minuscules, sans accents, sans ponctuation : de quoi comparer deux mots. */
-function aplati(mot: string): string {
-  return mot
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "");
+function motNu(mot: string): string {
+  return aplati(mot).replace(/[^a-z0-9]+/g, "");
 }
 
 function mots(texte: string): string[] {
-  return texte.split(/\s+/).filter((mot) => aplati(mot).length > 0);
+  return texte.split(/\s+/).filter((mot) => motNu(mot).length > 0);
 }
 
 /**
@@ -41,7 +38,7 @@ function bords(phrase: string): { avant: string[]; apres: string[] } {
 function memesMots(gauche: readonly string[], droite: readonly string[]): boolean {
   return (
     gauche.length === droite.length &&
-    gauche.every((mot, rang) => aplati(mot) === aplati(droite[rang] ?? ""))
+    gauche.every((mot, rang) => motNu(mot) === motNu(droite[rang] ?? ""))
   );
 }
 

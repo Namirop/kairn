@@ -1,3 +1,5 @@
+import { aplati } from "./texte-aplati";
+
 /**
  * Les choix qu'une question ferme propose.
  *
@@ -23,10 +25,7 @@ const INDEX_FAUX = 1;
 /** Le premier mot de la réponse, sans ponctuation, sans accent, en minuscules. */
 function premierMot(answerKey: string): string {
   return (
-    answerKey
-      .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
-      .toLowerCase()
+    aplati(answerKey)
       .replace(/^[^a-z]+/, "")
       .split(/[^a-z]/)[0]
       ?.trim() ?? ""

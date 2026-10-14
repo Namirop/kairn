@@ -1,3 +1,5 @@
+import { sansAccents } from "./texte-aplati";
+
 /**
  * Détecte les questions qui renvoient à un texte que la personne ne voit pas
  * (« quel effet, mentionné dans le concept, … »). L'écran de révision ne montre
@@ -17,7 +19,7 @@ function minuscule(texte: string): string {
 
 /** La même chose, accents ôtés : c'est la forme que lisent les motifs ci-dessous. */
 function aplati(texte: string): string {
-  return minuscule(texte).normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return sansAccents(minuscule(texte));
 }
 
 /**

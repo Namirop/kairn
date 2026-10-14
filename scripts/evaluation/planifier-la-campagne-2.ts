@@ -1,13 +1,9 @@
 import "dotenv/config";
 import { basename } from "node:path";
+import { finalistes } from "./campagne/finalistes";
 import { dernierFige, lireFige } from "./fige";
 import { BANDEAU_DE_CAMPAGNE, BUDGET_SORTIE_CAMPAGNE } from "./openrouter/campagne";
-import {
-  CHALLENGERS,
-  JUGE_PRINCIPAL,
-  REFERENCE,
-  type ModeleOpenRouter,
-} from "./openrouter/modeles";
+import { JUGE_PRINCIPAL, REFERENCE } from "./openrouter/modeles";
 import { conceptsQuestionnables, estimerColonne } from "./campagne/plan-questions";
 
 /**
@@ -24,18 +20,6 @@ import { conceptsQuestionnables, estimerColonne } from "./campagne/plan-question
  *
  * Tokens estimés à chars/4 pour le français, marge ~20 %.
  */
-
-/** Les finalistes désignés à l'arrêt 2. */
-const FINALISTES_IDS = new Set(["google/gemini-3.7-flash", "openai/gpt-5.6-luna"]);
-
-function finalistes(): ModeleOpenRouter[] {
-  const trouves = CHALLENGERS.filter((c) => FINALISTES_IDS.has(c.id));
-  if (trouves.length !== FINALISTES_IDS.size) {
-    const attendus = [...FINALISTES_IDS].join(", ");
-    throw new Error(`Finalistes introuvables dans CHALLENGERS. Attendus : ${attendus}.`);
-  }
-  return trouves;
-}
 
 async function main(): Promise<void> {
   console.info("# Plan à sec — campagne 2\n");

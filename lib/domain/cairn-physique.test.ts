@@ -4,6 +4,7 @@ import { sommets } from "./cairn-collision";
 import {
   avancer,
   initialiser,
+  poser,
   renverser,
   SANS_BORDS,
   toutEstPose,
@@ -49,6 +50,25 @@ describe("initialiser", () => {
     expect(corps).toHaveLength(PIERRES.length);
     expect(corps.every((c) => c.repos && !c.libre)).toBe(true);
     expect(corps.map((c) => c.x)).toEqual(PIERRES.map((p) => p.x));
+  });
+});
+
+describe("poser", () => {
+  it("rend le corps immobile de la pierre, celui qu'initialiser met à son rang", () => {
+    PIERRES.forEach((pierre, rang) => {
+      const corps = poser(pierre);
+
+      expect(corps).toMatchObject({ x: pierre.x, y: pierre.y, rotation: pierre.rotation });
+      expect(corps).toMatchObject({ vx: 0, vy: 0, vr: 0, libre: false, repos: true });
+      expect(initialiser(PIERRES)[rang]).toEqual(corps);
+    });
+  });
+
+  it("rend un objet neuf à chaque appel", () => {
+    const pierre = PIERRES[0];
+
+    if (!pierre) throw new Error("PIERRES est vide");
+    expect(poser(pierre)).not.toBe(poser(pierre));
   });
 });
 

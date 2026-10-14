@@ -1,4 +1,4 @@
-import { appelerViaOpenRouter, type ConsommationOpenRouter } from "./client";
+import { appelerViaOpenRouter } from "./client";
 import type { ModeleOpenRouter } from "./modeles";
 import {
   CONTRAT_RESIDU,
@@ -12,7 +12,7 @@ import {
 } from "../juges/residu";
 import { TOKENS_DES_JUGES } from "../juges/modele";
 import type { Rapproche } from "../mesures/signaux";
-import type { Facture } from "./juges";
+import { facturer, type Facture } from "./facture";
 
 /**
  * Le juge du résidu servi via OpenRouter, pendant de `jugerLeResidu` pour la
@@ -21,19 +21,6 @@ import type { Facture } from "./juges";
  *
  * Un dépôt sans manque ni invention ne fait pas d'appel.
  */
-
-function facturer(modele: ModeleOpenRouter, consommation: ConsommationOpenRouter): Facture {
-  const coutUsd =
-    (consommation.inputTokens * modele.prixInParM +
-      consommation.outputTokens * modele.prixOutParM) /
-    1_000_000;
-  return {
-    inputTokens: consommation.inputTokens,
-    outputTokens: consommation.outputTokens,
-    coutUsd,
-    latencyMs: consommation.latencyMs,
-  };
-}
 
 export async function jugerLeResiduVia(
   modele: ModeleOpenRouter,

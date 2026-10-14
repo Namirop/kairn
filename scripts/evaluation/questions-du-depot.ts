@@ -8,10 +8,9 @@ import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
 import { messageDuGroupe } from "@/lib/domain/envoi-de-questions";
 import type { LangueDuProduit } from "@/lib/domain/langue-du-produit";
 import { conceptsAQuestionner, type NatureDuDepot } from "@/lib/domain/nature-du-depot";
-import { ordonnerLesOptions } from "@/lib/domain/ordre-des-options";
-import { cibleDuVraiOuFaux } from "@/lib/domain/vrai-ou-faux";
 import type { Concept, ConceptEvalue, VariantEvalue, VariantRendu } from "./depot-evalue";
 import { decrire } from "./echec-d-appel";
+import { mettreEnService } from "./questions-au-service";
 import { avecUneReprise } from "./reprise-d-appel";
 
 /**
@@ -21,7 +20,7 @@ import { avecUneReprise } from "./reprise-d-appel";
 
 /**
  * La conversation qui porte l'envoi du groupe, construit par le code du
- * produit. La graine est le texte du concept (voir `servir`).
+ * produit. La graine est le texte du concept (voir `mettreEnService`).
  */
 function conversationDuGroupe(groupe: Concept[]): MessageIa[] {
   const contenu = messageDuGroupe(
@@ -41,24 +40,12 @@ function grouper(concepts: Concept[]): Concept[][] {
   return groupes;
 }
 
-/**
- * Les options remises dans l'ordre où elles seront montrées. La graine est le
- * texte du concept, pas un identifiant : le banc n'écrit rien en base, et un
- * concept figé garde son texte, donc deux rejeux se comparent question par
- * question.
- */
+/** Les questions telles qu'elles seront servies (voir `mettreEnService`). */
 function servir(variants: VariantRendu[], concept: string): VariantEvalue[] {
   return variants.map((variant) => {
-    const graine = `${concept}:${variant.facet}`;
-    // La cible se sème sur le concept seul, sans la facette : l'envoi n'en
-    // annonce qu'une, et n'importe laquelle des quatre questions peut la porter.
-    const cible = variant.format === "TRUE_FALSE" ? cibleDuVraiOuFaux(concept) : null;
+    const { cible, servi } = mettreEnService(concept, variant);
 
-    if (variant.options === null || variant.correctIndex === null) {
-      return { ...variant, rangBrut: null, cible };
-    }
-
-    const servi = ordonnerLesOptions(variant.options, variant.correctIndex, graine);
+    if (!servi) return { ...variant, rangBrut: null, cible };
 
     return { ...variant, ...servi, rangBrut: variant.correctIndex, cible };
   });

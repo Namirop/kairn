@@ -1,6 +1,6 @@
 import { ROUTES } from "@/lib/auth/routes";
 import { adresseDeLApp } from "@/lib/site/adresse-de-lapp";
-import { envoyerLEmail } from "./client";
+import { envoyerUneAlerte } from "./envoi-d-alerte";
 import { composerLAlerteDeRetour, type AlerteDeRetourPayload } from "./templates/alerte-de-retour";
 
 /**
@@ -14,22 +14,10 @@ import { composerLAlerteDeRetour, type AlerteDeRetourPayload } from "./templates
 export type RetourAAnnoncer = Omit<AlerteDeRetourPayload, "lien">;
 
 export async function envoyerLAlerteDeRetour(retour: RetourAAnnoncer): Promise<void> {
-  const destinataire = process.env.EMAIL_ALERTES?.trim();
-
-  if (!destinataire) {
-    console.warn("[retour] alerte non envoyée : EMAIL_ALERTES absente de l'environnement.");
-    return;
-  }
-
-  const email = composerLAlerteDeRetour({
-    ...retour,
-    lien: `${adresseDeLApp()}${ROUTES.adminRetours}`,
-  });
-
-  await envoyerLEmail({
-    to: destinataire,
-    subject: email.subject,
-    html: email.html,
-    text: email.text,
-  });
+  await envoyerUneAlerte("retour", () =>
+    composerLAlerteDeRetour({
+      ...retour,
+      lien: `${adresseDeLApp()}${ROUTES.adminRetours}`,
+    }),
+  );
 }

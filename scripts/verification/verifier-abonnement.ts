@@ -30,10 +30,9 @@ const decale = (secondes: number) => new Date(T0.getTime() + secondes * 1000);
 async function main(): Promise<void> {
   const { prisma } = await import("@/lib/db/client");
   const { creerCompte, effacerComptes } = await import("./cases/abus-fabrique");
-  const { attacherLeClientStripe, enregistrerLEtatDeLAbonnement } =
+  const { attacherLeClientStripe, compteDuClientStripe, enregistrerLEtatDeLAbonnement } =
     await import("@/lib/db/ecriture-de-labonnement");
   const { lireLOffreDuCompte } = await import("@/lib/db/abonnement");
-  const { compteDuClientStripe } = await import("@/lib/db/ecriture-de-labonnement");
   const { etatDepuisStripe } = await import("@/lib/domain/rapport-de-stripe");
   // Les plafonds viennent de la règle et ne se recopient pas : recopiés, ils
   // finiraient par faire échouer la vérification sur un défaut inexistant.

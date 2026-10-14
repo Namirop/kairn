@@ -1,4 +1,5 @@
-import { appelerViaOpenRouter, type ConsommationOpenRouter } from "./client";
+import { appelerViaOpenRouter } from "./client";
+import { facturer, type Facture } from "./facture";
 import type { ModeleOpenRouter } from "./modeles";
 import type { VariantFige } from "../fige";
 import {
@@ -25,31 +26,6 @@ import type { Paire } from "../mesures/signaux";
  * `juges/fidelite.ts`, sans rien dupliquer : un prompt qui divergerait au banc
  * rendrait la référence et les challengers incomparables.
  */
-
-export type Facture = {
-  inputTokens: number;
-  outputTokens: number;
-  coutUsd: number;
-  latencyMs: number;
-};
-
-/**
- * Le coût au prix catalogue épinglé, pas `consommation.costUsd` : OpenRouter
- * ne le rend que pour une partie des modèles, et la règle de coût du banc se
- * lit sur les prix épinglés, pas sur une ristourne du fournisseur.
- */
-function facturer(modele: ModeleOpenRouter, consommation: ConsommationOpenRouter): Facture {
-  const coutUsd =
-    (consommation.inputTokens * modele.prixInParM +
-      consommation.outputTokens * modele.prixOutParM) /
-    1_000_000;
-  return {
-    inputTokens: consommation.inputTokens,
-    outputTokens: consommation.outputTokens,
-    coutUsd,
-    latencyMs: consommation.latencyMs,
-  };
-}
 
 /**
  * Un appel juge doublon sur une liste de paires du même dépôt, via le modèle

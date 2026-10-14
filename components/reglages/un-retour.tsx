@@ -1,11 +1,11 @@
 "use client";
 
-import { Paperclip, X } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { envoyerUnRetourAction, type EtatDuRetour } from "@/app/(app)/reglages/retour-action";
 import { ChoixDuSujet } from "@/components/reglages/choix-du-sujet";
 import { Button } from "@/components/ui/button";
+import { ChampDePieceJointe } from "@/components/formulaires/champ-de-piece-jointe";
 import { Input } from "@/components/ui/input";
 import type { SujetDeRetour } from "@/lib/db/types";
 import { MESSAGE_MAX } from "@/lib/domain/retour-sur-le-produit";
@@ -88,7 +88,12 @@ export function UnRetour() {
         />
       </div>
 
-      <PieceJointe capture={capture} onCapture={setCapture} fichier={fichier} enCours={enCours} />
+      <CaptureDuRetour
+        capture={capture}
+        onCapture={setCapture}
+        fichier={fichier}
+        enCours={enCours}
+      />
 
       <input type="hidden" name="largeur" value={fenetre.largeur} />
       <input type="hidden" name="hauteur" value={fenetre.hauteur} />
@@ -107,11 +112,8 @@ export function UnRetour() {
   );
 }
 
-/**
- * La capture, facultative. Le champ natif sort du parcours clavier : c'est le
- * bouton qui porte l'action, pour un seul arrêt de tabulation.
- */
-function PieceJointe({
+/** La capture, facultative : on n'en garde que le nom, le champ porte le fichier. */
+function CaptureDuRetour({
   capture,
   onCapture,
   fichier,
@@ -125,46 +127,20 @@ function PieceJointe({
   const t = useTranslations("compte.retour");
 
   return (
-    <div className="gap-pas-3 flex flex-wrap items-center">
-      <input
-        ref={fichier}
-        id="retour-capture"
-        name="capture"
-        type="file"
-        accept="image/*"
-        tabIndex={-1}
-        aria-hidden
-        className="sr-only"
-        onChange={(evenement) => onCapture(evenement.target.files?.[0]?.name ?? null)}
-      />
-
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={enCours}
-        onClick={() => fichier.current?.click()}
-      >
-        <Paperclip aria-hidden />
-        {capture ? t("changerCapture") : t("joindreCapture")}
-      </Button>
-
-      {capture ? (
-        <span className="gap-pas-2 text-petit flex items-center text-stone-500">
-          <span className="max-w-48 truncate">{capture}</span>
-          <button
-            type="button"
-            aria-label={t("retirerCapture")}
-            className="rounded-xs text-stone-500 transition-colors hover:text-stone-900"
-            onClick={() => {
-              onCapture(null);
-              if (fichier.current) fichier.current.value = "";
-            }}
-          >
-            <X aria-hidden className="size-4" />
-          </button>
-        </span>
-      ) : null}
-    </div>
+    <ChampDePieceJointe
+      champ={fichier}
+      id="retour-capture"
+      name="capture"
+      nom={capture}
+      libelle={capture ? t("changerCapture") : t("joindreCapture")}
+      libelleRetirer={t("retirerCapture")}
+      onChoisir={(choisi) => onCapture(choisi?.name ?? null)}
+      onRetirer={() => {
+        onCapture(null);
+        if (fichier.current) fichier.current.value = "";
+      }}
+      desactive={enCours}
+      className="flex-wrap"
+    />
   );
 }

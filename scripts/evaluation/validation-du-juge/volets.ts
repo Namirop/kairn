@@ -1,6 +1,7 @@
 import type { DepotFige } from "../fige";
 import type { VerdictFidelite } from "../juges/fidelite";
-import { jugerLaFideliteVia, jugerLesDoublonsVia, type Facture } from "../openrouter/juges";
+import type { Facture } from "../openrouter/facture";
+import { jugerLaFideliteVia, jugerLesDoublonsVia } from "../openrouter/juges";
 import { JUGE_PRINCIPAL, KIMI_K2_0905_ECARTE, type ModeleOpenRouter } from "../openrouter/modeles";
 import {
   LOTS_FIDELITE,

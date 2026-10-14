@@ -1,3 +1,4 @@
+import { aplati } from "./texte-aplati";
 import { tirageDe } from "./tirage-deterministe";
 
 /**
@@ -21,8 +22,8 @@ const PISTES_MAXIMUM = 4;
 const PISTES_MINIMUM = 3;
 
 /** Minuscules, sans accents : deux formes du même mot ne s'affichent pas deux fois. */
-function aplati(terme: string): string {
-  return terme.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+function cleDuTerme(terme: string): string {
+  return aplati(terme).trim();
 }
 
 /**
@@ -44,15 +45,15 @@ export function pistesDuTrou(
 
   if (propre.length === 0) return [];
 
-  const vus = new Set([aplati(propre)]);
+  const vus = new Set([cleDuTerme(propre)]);
   const retenus = [propre];
 
   for (const leurre of leurres) {
     const candidat = leurre.trim();
 
-    if (candidat.length === 0 || vus.has(aplati(candidat))) continue;
+    if (candidat.length === 0 || vus.has(cleDuTerme(candidat))) continue;
 
-    vus.add(aplati(candidat));
+    vus.add(cleDuTerme(candidat));
     retenus.push(candidat);
 
     if (retenus.length === PISTES_MAXIMUM) break;

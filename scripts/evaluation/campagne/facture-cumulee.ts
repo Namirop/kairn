@@ -1,4 +1,4 @@
-import type { Facture } from "../openrouter/juges";
+import type { Facture } from "../openrouter/facture";
 
 /** Le cumul d'une étape de colonne, que le garde-fou 2× compare à son estimation. */
 export type FactureCumulee = { in: number; out: number; usd: number; appels: number };

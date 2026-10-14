@@ -18,6 +18,7 @@ import {
 import type { EtatDuDepot, MesuresDuDepot } from "./signaux";
 import { signaler, totaliser, type SignalementsDuDepot } from "./signalements";
 import { rendreLesDeciles } from "./tableaux-de-calibration";
+import { nombre } from "../nombre-en-francais";
 
 /**
  * L'agrégation du rapport « Mesures » : en-tête, tableau par dépôt, rendement
@@ -28,10 +29,6 @@ import { rendreLesDeciles } from "./tableaux-de-calibration";
  * signalement qui double vient d'un vrai défaut ou d'une distribution qui a
  * glissé sous les seuils.
  */
-
-function nombre(valeur: number): string {
-  return valeur.toLocaleString("fr-FR");
-}
 
 function noteEtat(etat: EtatDuDepot): string {
   if (etat.statut === "rejete") return " · *rejet du produit*";

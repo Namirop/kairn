@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { conclure, noter } from "./cases/journal";
-import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
+import { armerLePiegeReseau, noterLesTentativesReseau } from "./cases/piege-reseau";
 
 /**
  * Preuve que l'ingestion tient de bout en bout : un dépôt entre, ses concepts
@@ -13,17 +13,7 @@ import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
  *   npm run verifier:ingestion
  */
 
-const tentativesReseau: string[] = [];
-const vraiFetch = globalThis.fetch;
-
-globalThis.fetch = function fetchPiege(input: RequestInfo | URL, init?: RequestInit) {
-  const url = typeof input === "string" ? input : input.toString();
-
-  if (!versUnFournisseurDeModele(url)) return vraiFetch(input, init);
-
-  tentativesReseau.push(url);
-  return Promise.reject(new Error(`Requête sortante interdite pendant la vérification : ${url}`));
-};
+const tentativesReseau = armerLePiegeReseau();
 
 /** Une capture minuscule mais réelle : c'est sharp qui la relit ensuite. */
 async function captureDeTest(): Promise<File> {
@@ -98,11 +88,7 @@ async function main(): Promise<void> {
       `${appelsEnregistres} ligne(s)`,
     );
 
-    noter(
-      "Aucune requête n'est sortie vers l'API",
-      tentativesReseau.length === 0,
-      tentativesReseau.length === 0 ? "zéro tentative" : tentativesReseau.join(", "),
-    );
+    noterLesTentativesReseau(tentativesReseau);
   } finally {
     await repartirDeZero(userId);
     await prisma.user.deleteMany({ where: { email: UTILISATEUR_DE_TEST } });

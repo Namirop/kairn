@@ -77,19 +77,33 @@ export async function reprendreCeQuiManque(
   atomIds: string[],
   motif: string,
 ): Promise<boolean> {
+  if ((await tentativesEpuisees(jobId)) || atomIds.length === 0) return false;
+
+  await remettreEnFile(jobId, atomIds, motif);
+
+  return true;
+}
+
+/** Vrai quand le job n'existe plus ou n'a plus de tentative à donner. */
+export async function tentativesEpuisees(jobId: string): Promise<boolean> {
   const job = await prisma.generationJob.findUnique({
     where: { id: jobId },
     select: { attempts: true },
   });
 
-  if (!job || job.attempts >= TENTATIVES_MAX || atomIds.length === 0) return false;
+  return !job || job.attempts >= TENTATIVES_MAX;
+}
 
-  await prisma.generationJob.update({
+/**
+ * Rend le job à la file, rétréci à `atomIds`, sans toucher au compte de ses
+ * tentatives. Rendue sans être attendue, pour pouvoir entrer dans une
+ * transaction.
+ */
+export function remettreEnFile(jobId: string, atomIds: string[], motif: string) {
+  return prisma.generationJob.update({
     where: { id: jobId },
     data: { atomIds, status: "QUEUED", startedAt: null, lastError: motif },
   });
-
-  return true;
 }
 
 export async function terminerLeJob(

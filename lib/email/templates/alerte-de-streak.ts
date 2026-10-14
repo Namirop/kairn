@@ -1,6 +1,6 @@
 import type { Langue } from "@/lib/db/types";
 import { textesDEmail } from "../traduction";
-import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
+import { STYLE_DES_EMAILS as S, bouton, envelopper, type EmailRendu } from "./gabarit";
 
 /**
  * L'alerte de série, envoyée le soir et seulement quand il y a quelque chose à
@@ -28,7 +28,7 @@ export function composerLAlerteDeStreak(
   const corps = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.ember};">${currentStreak}</p>
 <p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.ember};">${unite}</p>
 <p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.secondaire};">${constat}</p>
-<a href="${liens.lienDeSession}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${t("commun.commencer")}</a>`;
+${bouton(liens.lienDeSession, t("commun.commencer"))}`;
 
   const nePlusRecevoir = t("serie.nePlusRecevoir", { url: liens.lienDeDesinscription });
   const text = `${currentStreak} ${unite}.\n\n${constat}\n\n${liens.lienDeSession}\n\n${nePlusRecevoir}`;

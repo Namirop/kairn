@@ -1,6 +1,7 @@
 import type { Vecteur } from "../mesures/espace";
 import { pairesTriees } from "../mesures/geometrie";
 import { PLANCHER_RADOTAGE_INTER, PLANCHER_RADOTAGE_INTRA } from "../mesures/seuils";
+import { texteARadoter } from "../mesures/signaux";
 import type { VariantServi } from "./questions-servies";
 
 /**
@@ -21,12 +22,6 @@ export type MesuresDuDepot = {
 
 /** Une question située dans son concept, pour distinguer intra/inter. */
 type QuestionSituee = { texte: string; concept: number };
-
-/** Pour un CLOZE, la phrase à trou : voir `mesures/signaux.ts`. */
-function texteARadoter(variant: VariantServi): string {
-  if (variant.format === "CLOZE" && variant.cloze) return variant.cloze.sentence;
-  return variant.question;
-}
 
 /** Toutes les questions d'un dépôt à mesurer, avec leur rang de concept. */
 export function questionsARadoter(variantsParConcept: readonly VariantServi[][]): QuestionSituee[] {

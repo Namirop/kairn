@@ -1,5 +1,6 @@
 import { deciles } from "./geometrie";
 import type { MesuresDuDepot } from "./signaux";
+import { nombre } from "../nombre-en-francais";
 
 /**
  * Les deux tableaux du rapport de calibration : la distribution de chaque
@@ -9,10 +10,6 @@ import type { MesuresDuDepot } from "./signaux";
 
 function proximite(valeur: number): string {
   return valeur.toFixed(3);
-}
-
-function nombre(valeur: number): string {
-  return valeur.toLocaleString("fr-FR");
 }
 
 function ouTiret(valeur: number | null): string {

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import { TENTATIVES_MAX } from "@/lib/db/jobs-de-generation";
+import { remettreEnFile, tentativesEpuisees } from "@/lib/db/jobs-de-generation";
 import type { GenerationJob } from "@/lib/db/types";
 
 /**
@@ -70,18 +70,10 @@ export async function scinderLeJobDeQuestions(
   reporte: string[],
   motif: string,
 ): Promise<boolean> {
-  const suite = await prisma.generationJob.findUnique({
-    where: { id: job.id },
-    select: { attempts: true },
-  });
-
-  if (!suite || suite.attempts >= TENTATIVES_MAX) return false;
+  if (await tentativesEpuisees(job.id)) return false;
 
   await prisma.$transaction([
-    prisma.generationJob.update({
-      where: { id: job.id },
-      data: { atomIds: garde, status: "QUEUED", startedAt: null, lastError: motif },
-    }),
+    remettreEnFile(job.id, garde, motif),
     prisma.generationJob.create({
       data: {
         inputId: job.inputId,

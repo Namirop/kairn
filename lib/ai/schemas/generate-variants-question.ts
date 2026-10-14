@@ -76,6 +76,19 @@ function cloze() {
 }
 
 /**
+ * L'énoncé et la réponse attendue, communs à toute question écrite. Une
+ * instance neuve à chaque appel, pour la même raison que `z.enum()` plus bas :
+ * une instance partagée partirait dans `$defs`.
+ */
+function enonce() {
+  return z.string().min(10).max(800);
+}
+
+function reponseAttendue(description: string) {
+  return z.string().min(1).max(2000).describe(description);
+}
+
+/**
  * Les formats ouverts à chaque facette.
  *
  * Le quota « au plus une question à s'auto-noter » est tenu par la grammaire,
@@ -107,12 +120,10 @@ export function question(formats: readonly [VariantFormat, ...VariantFormat[]], 
   return z
     .object({
       format: z.enum(formats),
-      question: z.string().min(10).max(800),
-      answerKey: z
-        .string()
-        .min(1)
-        .max(2000)
-        .describe("La réponse attendue en clair. Pour SHORT_ANSWER et EXPLAIN, de quoi se juger."),
+      question: enonce(),
+      answerKey: reponseAttendue(
+        "La réponse attendue en clair. Pour SHORT_ANSWER et EXPLAIN, de quoi se juger.",
+      ),
       mcq: mcq().nullish().describe("À renseigner si et seulement si format vaut MCQ."),
       cloze: cloze().nullish().describe("À renseigner si et seulement si format vaut CLOZE."),
       estVraie: z
@@ -137,14 +148,10 @@ export function questionATrou(facette: string) {
   return z
     .object({
       format: z.enum(["CLOZE"]),
-      question: z.string().min(10).max(800),
-      answerKey: z
-        .string()
-        .min(1)
-        .max(2000)
-        .describe(
-          "Ce qu'il fallait avoir compris pour trouver le terme masqué. Ne le réannonce pas : il s'affiche dans la phrase au moment où ce texte est lu.",
-        ),
+      question: enonce(),
+      answerKey: reponseAttendue(
+        "Ce qu'il fallait avoir compris pour trouver le terme masqué. Ne le réannonce pas : il s'affiche dans la phrase au moment où ce texte est lu.",
+      ),
       cloze: cloze(),
     })
     .describe(facette);
