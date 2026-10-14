@@ -22,11 +22,8 @@ function sujet(concept: ConceptAAlterner): string {
   return concept.tags[0] ?? concept.inputId;
 }
 
-export function alternerLesSujets<T extends ConceptAAlterner>(
-  concepts: T[],
-  /** Le geste que servirait ce concept. Sans lui, seuls les sujets alternent. */
-  gesteDe: (concept: T) => string = () => "",
-): T[] {
+/** Une file par sujet, dans l'ordre d'arrivée des concepts. */
+function filesParSujet<T extends ConceptAAlterner>(concepts: T[]): Map<string, T[]> {
   const files = new Map<string, T[]>();
 
   for (const concept of concepts) {
@@ -37,11 +34,28 @@ export function alternerLesSujets<T extends ConceptAAlterner>(
     else files.set(cle, [concept]);
   }
 
+  return files;
+}
+
+export function alternerLesSujets<T extends ConceptAAlterner>(
+  concepts: T[],
+  /** Le geste que servirait ce concept. Sans lui, seuls les sujets alternent. */
+  gesteDe: (concept: T) => string = () => "",
+): T[] {
+  return alternerLesFiles(filesParSujet(concepts), concepts.length, gesteDe);
+}
+
+/** Vide les files en servant à chaque tour le sujet le plus fourni qui change. */
+function alternerLesFiles<T>(
+  files: Map<string, T[]>,
+  total: number,
+  gesteDe: (concept: T) => string,
+): T[] {
   const ordonnes: T[] = [];
   let precedent: string | null = null;
   let gestePrecedent: string | null = null;
 
-  while (ordonnes.length < concepts.length) {
+  while (ordonnes.length < total) {
     const restants = [...files.entries()].filter(([, file]) => file.length > 0);
     const autres = restants.filter(([cle]) => cle !== precedent);
     // Quand il ne reste qu'un sujet, il repasse plutôt que de tronquer la session.

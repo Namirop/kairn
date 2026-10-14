@@ -1,15 +1,10 @@
 import { prisma } from "@/lib/db/client";
 import { questionServie, type QuestionServie } from "@/lib/db/question-servie";
 import { lireCadreDeSession, lireFuseauUtilisateur } from "@/lib/db/user-settings";
-import { gesteDeReponse } from "@/lib/domain/geste-de-reponse";
 import { jourSuivant, localDay } from "@/lib/domain/local-day";
-import { questionServable } from "@/lib/domain/question-servable";
-import { repartirLesFormats } from "@/lib/domain/repartition-des-formats";
-import { variantesEquivalentes } from "@/lib/domain/rotation-variantes";
-import { alternerLesSujets } from "@/lib/domain/alternance-des-sujets";
+import { composerLaJournee } from "@/lib/domain/journee-de-session";
 import {
   chargeDuJour,
-  conceptsDeLaJournee,
   estServableAujourdhui,
   jourOuIlRevient,
   plafondRestant,
@@ -106,40 +101,12 @@ export async function lireSessionDuJour(
   // Le plafond est journalier : ce qui a déjà été revu aujourd'hui en fait partie.
   const reste = plafondRestant(plafond, faits);
 
-  /*
-    La journée est composée avant de choisir les formulations : la requête
-    ramène 36 h d'avance, et répartir les formats sur tous les candidats ferait
-    consommer des QCM par des concepts dus demain.
-
-    Le répartiteur reçoit l'ordre des identifiants, pas celui de l'urgence : le
-    glouton en dépend, et une session doit se recomposer à l'identique.
-  */
-  const proposables = candidats.flatMap((atome) => {
-    // Une formulation vide se trie ici : un `not: ""` en SQL laisserait passer
-    // une espace.
-    const equivalentes = variantesEquivalentes(
-      atome.variants.filter(questionServable),
-      atome.reviews[0]?.variant.facet ?? null,
-    );
-
-    return equivalentes.length > 0 ? [{ ...atome, equivalentes }] : [];
-  });
-
-  const dus = proposables.filter((concept) => estServableAujourdhui(concept, maintenant, fuseau));
-  const retenus = conceptsDeLaJournee(proposables, maintenant, fuseau, reste);
-
-  const ordreStable = [...retenus].sort((une, deux) => une.id.localeCompare(deux.id));
-  const choisies = repartirLesFormats(ordreStable.map((concept) => concept.equivalentes));
-  const parConcept = new Map(ordreStable.map((concept, rang) => [concept.id, choisies[rang]]));
-
-  const servis = alternerLesSujets(
-    retenus.flatMap((concept) => {
-      const variante = parConcept.get(concept.id);
-
-      // Écarté plus haut en principe ; on ne pose pas une carte vide au cas où.
-      return variante ? [{ ...concept, variante }] : [];
-    }),
-    (concept) => gesteDeReponse(concept.variante.format),
+  const { servis, dus } = composerLaJournee(
+    candidats,
+    (atome) => atome.reviews[0]?.variant.facet ?? null,
+    maintenant,
+    fuseau,
+    reste,
   );
 
   const questions = servis.map((concept) =>
@@ -152,7 +119,7 @@ export async function lireSessionDuJour(
     totalConcepts,
     conceptsEnAttenteDeQuestions: enAttente,
     prochainJourServi: prochainJourServi(prochain, maintenant, fuseau),
-    reporteAuLendemain: dus.length - questions.length,
+    reporteAuLendemain: dus - questions.length,
   };
 }
 
