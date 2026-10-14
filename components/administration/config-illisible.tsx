@@ -5,15 +5,8 @@ import { ROUTES } from "@/lib/auth/routes";
 /**
  * Ce qui s'affiche quand la configuration du modèle est refusée.
  *
- * Le diagnostic est rendu tel quel, en fonte de données : il nomme la variable
- * et montre ce qui a été reçu, et c'est la seule chose qui abrège vraiment la
- * recherche. Le reformuler en prose rassurante coûterait le nom de la variable,
- * c'est-à-dire tout ce qui a de la valeur ici.
- *
- * La couleur est celle des alertes, pas l'accent du produit : cet écran est
- * interne, et `--ember` appartient au streak. C'est un aplat, et rien de plus :
- * il portait en outre un filet d'alerte à gauche, qui redisait sur deux pixels
- * ce que la surface entière disait déjà.
+ * Le diagnostic est rendu tel quel : il nomme la variable et montre ce qui a
+ * été reçu, ce qu'une reformulation perdrait.
  */
 export function ConfigIllisible({ motif }: { motif: string }) {
   return (

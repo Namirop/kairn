@@ -3,40 +3,22 @@ import { COTE_DU_POINT, pierreDuPoint } from "@/lib/design/marque";
 /**
  * « Kairn » composé, avec ou sans la pierre sur le i.
  *
- * Le mot se compose en display et en nom propre : une capitale, le reste en bas
- * de casse. Pas dans une grotesque générique — c'est ce qui fait ressembler un
- * logotype à une enseigne de banque.
- *
- * **Le i est un i sans point**, U+0131, et la pierre prend la place que le point
- * occupait. Ce n'est pas un point recouvert : superposer laisserait le point
- * dépasser d'un cheveu tout autour, ce qui se voit d'autant plus que la pierre est
- * irrégulière. Le glyphe existe dans le sous-ensemble latin de Bricolage
- * Grotesque, donc il ne tombe pas sur une police de repli.
- *
- * La pierre est **taillée**, pas dessinée : même fonction que les cinq de
- * l'empilement. Un rectangle arrondi à cette place jurerait avec elles — c'est
- * l'irrégularité des flancs et des coins qui fait lire « pierre » plutôt que
- * « puce ».
- *
- * Elle est posée en `em`, donc elle suit le corps sans jamais se dérégler. Mais
- * elle **disparaît sous un certain corps** : à dix-huit pixels elle en ferait
- * trois, et trois pixels de vert ne sont plus une pierre, c'est une salissure. Le
- * mot reste alors nu, ce qui est un logotype parfaitement valide.
+ * Le i est un i sans point (U+0131) et la pierre prend la place du point : un
+ * point recouvert dépasserait d'un cheveu autour d'une pierre irrégulière. Le
+ * glyphe existe dans le sous-ensemble latin de Bricolage Grotesque, donc il ne
+ * tombe pas sur une police de repli.
  */
 
 /**
- * Sous ce corps, la pierre du i devient une tache. En pixels, parce que c'est une
- * limite de perception et pas une proportion : le seuil ne change pas avec le
- * corps, il le borne.
+ * Sous ce corps, la pierre du i n'est plus qu'une tache de quelques pixels, et le
+ * mot reste nu. En pixels, parce que c'est une limite de perception et pas une
+ * proportion.
  */
 export const CORPS_MINIMAL_DE_LA_PIERRE = 40;
 
 /**
- * La place optique du point, en parts de corps.
- *
- * Relevées sur Bricolage Grotesque : le point d'un i sied un peu au-dessus de la
- * hauteur d'x, et sa largeur suit celle du fût. La pierre reprend ces deux
- * mesures et rien d'autre — ni plus haute, ni décalée, ni plus lourde.
+ * La place optique du point, en parts de corps, relevée sur Bricolage
+ * Grotesque : un peu au-dessus de la hauteur d'x, et de la largeur du fût.
  */
 const LARGEUR_EM = 0.14;
 const BASE_EM = 0.63;
@@ -73,18 +55,10 @@ export function MotDeMarque({
   return (
     <span
       /*
-        La correction optique du mot.
-
-        « Kairn » n'a aucun jambage descendant : à interligne nul, son encre
-        occupe le haut de sa boîte et laisse vide le quart du bas, celui que le
-        jambage aurait pris. Tout ce qui centre cette boîte — le verrouillage
-        avec son symbole, l'en-tête avec son lien — centre donc du vide autant
-        que des lettres, et le mot monte de deux ou trois pixels. Ça ne se nomme
-        pas au premier regard, ça se voit au second.
-
-        Le décalage vaut l'écart mesuré entre le milieu de l'encre et le milieu
-        de la boîte, et il est en `em` : il suit le corps sans jamais se
-        dérégler, du logotype d'un en-tête à celui d'une page légale.
+        Correction optique : « Kairn » n'a aucun jambage descendant, donc tout
+        ce qui centre sa boîte centre aussi le vide du bas, et le mot paraît
+        monter. Le décalage vaut l'écart mesuré entre le milieu de l'encre et
+        celui de la boîte, en `em` pour suivre le corps.
       */
       className={`font-display translate-y-[0.06em] leading-none font-semibold tracking-[-0.02em] ${
         clair ? "text-stone-50" : "text-stone-900"

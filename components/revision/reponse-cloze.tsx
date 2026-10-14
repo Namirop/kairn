@@ -10,32 +10,17 @@ import type { TexteATrou } from "@/components/revision/use-suite-de-questions";
 import { LONGUEUR_MAX_SAISIE } from "@/lib/domain/reponse-cloze";
 
 /**
- * Le texte à trou.
+ * Le texte à trou. La phrase est l'énoncé, porté par la carte ; ici, la
+ * consigne, le champ et la vérification.
  *
- * La phrase est en titre — c'est l'énoncé, la carte s'en charge — et son trou se
- * remplit à la frappe. Ici on ne pose que ce qu'il faut pour le combler : la
- * consigne, un champ, la vérification.
+ * La vérification est locale : les formes acceptées sont écrites avec la
+ * question. Juste, l'écran le dit et attend un clic, pour qu'on sache que la
+ * réponse a été lue — le passage est déjà écrit, la confirmation ne retient
+ * rien. Raté, on montre le terme attendu et on laisse dire « je l'avais » : un
+ * synonyme absent de la liste n'est pas une erreur.
  *
- * Cette vérification est locale et instantanée : les formes acceptées ont été
- * écrites en même temps que la question, il n'y a rien à demander à personne.
- * C'est le seul format qui fait produire une réponse sans faire attendre un
- * jugement.
- *
- * Juste, l'écran le dit et attend un clic. Enchaîner sans rien montrer était le
- * geste le plus rapide et le plus inquiétant du produit : la question suivante
- * s'affichait, et rien ne disait si la réponse avait été lue, comptée, ou même
- * juste. Le passage, lui, est déjà écrit — la confirmation ne retient rien.
- *
- * À côté, on montre le terme attendu dans la phrase et on laisse dire « je
- * l'avais » : on écrit parfois un synonyme que la liste ne porte pas. C'est le
- * seul jugement demandé sur ce format, et seulement dans ce cas.
- *
- * **Et on peut sécher.** C'est le seul format qui demande de produire la réponse
- * plutôt que de la reconnaître, ce qui le rend le plus utile — et parfois
- * infranchissable : on a le concept en tête, le terme exact ne vient pas, et il
- * ne reste qu'à s'avouer vaincu sur quelque chose qu'on savait à moitié. Trois ou
- * quatre pistes réduisent le champ sans donner la réponse : c'est encore un
- * rappel, plus facile, et compté comme tel. Le prix est dit avant qu'on le paie.
+ * Le coup de pouce donne des pistes sans la réponse : c'est encore un rappel,
+ * plus facile, et compté comme tel. Le prix est dit avant qu'on le paie.
  */
 export function ReponseCloze({
   trou,
@@ -55,8 +40,7 @@ export function ReponseCloze({
   if (trou.verdict === "JUSTE") {
     return (
       <SuiteDeLaQuestion>
-        {/* Un constat, pas un compliment : la récompense est l'espacement qui
-            s'allonge, et le terme qui vient de se poser dans la phrase. */}
+        {/* Un constat, pas un compliment. */}
         <p className="text-corps text-stone-900">{t("cloze.termeAttendu")}</p>
 
         {trou.aide ? <p className="mt-pas-2 text-petit text-stone-500">{t("cloze.aide")}</p> : null}
@@ -80,9 +64,8 @@ export function ReponseCloze({
           })}
         </p>
 
-        {/* Deux issues nommées comme la graduation des formats ouverts : c'est la
-            même question posée en deux boutons. « Continuer » ne disait pas ce
-            qu'il enregistrait. */}
+        {/* Deux issues nommées comme la graduation des formats ouverts : chaque
+            bouton dit ce qu'il enregistre. */}
         <div className="gap-pas-2 mt-pas-6 flex flex-wrap">
           <Button
             type="button"
@@ -108,8 +91,8 @@ export function ReponseCloze({
         onVerifier();
       }}
     >
-      {/* La consigne est ce qu'on demande, pas une légende du champ : elle porte
-          le poids du corps, comme « Où en étais-tu ? » sur les autres formats. */}
+      {/* La consigne au poids du corps, comme sur les autres formats : c'est ce
+          qu'on demande, pas une légende du champ. */}
       <label htmlFor="trou" className="text-corps block text-stone-900">
         {t("cloze.consigne")}
       </label>
@@ -121,15 +104,9 @@ export function ReponseCloze({
           autoCapitalize="off"
           spellCheck={false}
           maxLength={LONGUEUR_MAX_SAISIE}
-          /* `flex-1` seul écrasait le champ sur téléphone. La rangée passe en
-             colonne sous `sm`, et dans une colonne c'est la **hauteur** que
-             `flex-1` gouverne : le champ tombait à une vingtaine de pixels,
-             deux fois moins qu'un bouton, pour le geste central de ce format.
-             Il prend la largeur en colonne, la place restante en rangée.
-
-             Et il monte à quarante-huit pixels sur téléphone, comme le bouton
-             qui le suit : c'est le seul champ de l'écran, et la seule chose
-             qu'on ait à faire. */
+          /* Pas de `flex-1` sous `sm` : la rangée y passe en colonne, où
+             `flex-1` gouverne la hauteur et écrase le champ. 48 px sur
+             téléphone, comme le bouton qui le suit. */
           className="w-full max-sm:h-12 sm:flex-1"
           value={trou.saisie}
           onChange={(evenement) => trou.saisir(evenement.target.value)}
@@ -148,21 +125,12 @@ export function ReponseCloze({
 /**
  * Le coup de pouce : la porte, puis les pistes.
  *
- * Il ne s'affiche que si la question porte de quoi le donner — les formulations
- * écrites avant qu'il existe n'ont pas de leurres, et proposer une aide qui
- * n'arrive pas serait pire que ne rien proposer.
+ * Absent si la question n'a pas de leurres (formulations anciennes) : une aide
+ * proposée qui n'arrive pas serait pire. Une fois ouvert, il dit son prix avec
+ * ce qu'il donne, et vient en vue car il se pose sous le pli d'un téléphone.
  *
- * Discret tant qu'on n'en a pas besoin : c'est une sortie de secours, pas une
- * option du geste. Une fois ouvert, il dit son prix dans la même phrase que ce
- * qu'il donne — on ne découvre pas après coup que le passage a été dégradé.
- *
- * Les termes ne sont pas cliquables, et c'est délibéré : on continue de les
- * écrire. C'est produire la réponse qui fixe le souvenir, et une liste à cliquer
- * transformerait le seul format qui le demande en un QCM de plus.
- *
- * Il vient à l'écran comme la réponse d'un format ouvert, et pour la même
- * raison : ce qu'on vient de demander se pose sous le pli d'un téléphone, et son
- * prix avec.
+ * Les termes ne sont pas cliquables, délibérément : produire la réponse fixe le
+ * souvenir, une liste à cliquer en ferait un QCM de plus.
  */
 function CoupDePouce({ trou }: { trou: TexteATrou }) {
   const pistes = useVenirEnVue<HTMLDivElement>(trou.aide);
@@ -172,13 +140,8 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
 
   if (!trou.aide) {
     return (
-      /* Le même registre que l'autre sortie, et la même verticale.
-
-         Elle était en lien souligné, à l'encre du corps : la plus douce des
-         deux sorties se présentait donc plus fort que celle qui renonce pour
-         de bon, et deux pixels d'indentation les séparaient en plus. Un geste
-         de secours se dit en gris, et deux gestes de même nature partent du
-         même bord. */
+      /* Même registre et même bord que l'autre sortie de secours : elle ne
+         doit pas se présenter plus fort que celle qui renonce. */
       <div className="sortie-de-secours mt-pas-6">
         <Button
           type="button"
@@ -194,20 +157,8 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
   }
 
   return (
-    /*
-      Les pistes sont l'objet du moment, et elles doivent le montrer.
-
-      Alignées en ligne dans un paragraphe gris, elles avaient le poids du texte
-      qui les entoure : on venait de demander de l'aide, et l'aide arrivait au
-      rang d'une légende. Elles sont donc posées sur leur propre surface, comme
-      la carte de la question — c'est un objet qu'on lit, pas une note de bas de
-      page —, et chaque terme porte le jeton du produit.
-
-      Le jeton, et pas la pilule : dans l'échelle des formes, la pilule est un
-      geste. Or ces termes ne se cliquent pas, et c'est délibéré — on continue de
-      les écrire. Leur donner la forme d'un bouton reviendrait à transformer le
-      seul format qui fait produire la réponse en un QCM de plus.
-    */
+    /* Le jeton, pas la pilule : dans l'échelle des formes la pilule est un
+       geste, et ces termes ne se cliquent pas. */
     <div
       ref={pistes}
       className="rounded-carte bg-surface-papier px-pas-4 py-pas-3 mt-pas-4 max-w-xl"
@@ -217,10 +168,8 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
         {t("pistes")}
       </p>
 
-      {/* La taille du jeton est en `em` : c'est la liste qui la fixe, pas le
-          jeton. Lui poser une classe de corps par-dessus la sienne mettrait
-          deux règles de `font-size` sur le même élément, et laquelle gagne ne se
-          lit nulle part dans le code. */}
+      {/* Le jeton est en `em` : la taille se pose sur la liste, jamais sur le
+          jeton (deux `font-size` sur un élément, le gagnant ne se lit pas). */}
       <ul className="gap-pas-2 mt-pas-3 text-corps flex flex-wrap">
         {trou.pistes.map((piste) => (
           <li

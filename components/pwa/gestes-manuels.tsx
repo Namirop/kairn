@@ -3,18 +3,10 @@ import { useTranslations } from "next-intl";
 import type { GesteManuel } from "./environnement-dinstallation";
 
 /**
- * Les chemins d'installation que le navigateur ne sait pas déclencher.
- *
- * Ils ne se ressemblent pas, et c'est pour ça qu'ils sont deux : sur un
- * téléphone d'Apple, l'entrée est cachée dans le menu de partage sous un nom qui
- * ne contient pas le mot « installer » ; sur un Mac, elle est dans le menu
- * Fichier. Décrire l'un à qui tient l'autre, c'est envoyer chercher un bouton
- * qui n'existe pas.
- *
- * **Les icônes remplacent les numéros sur le geste de partage**, et pas par
- * coquetterie : ce sont exactement les deux glyphes qu'on cherche des yeux dans
- * la barre du navigateur, et les nommer vaut mieux que les décrire. Le geste du
- * Mac n'a rien de tel à montrer — un menu s'y lit en toutes lettres — donc il se
+ * Les chemins d'installation que le navigateur ne sait pas déclencher : sur
+ * iPhone, le menu de partage, sous un nom sans le mot « installer » ; sur Mac,
+ * le menu Fichier. Le partage montre les deux glyphes qu'on cherche dans la
+ * barre du navigateur ; le Mac, dont le menu se lit en toutes lettres, se
  * numérote.
  */
 export function GesteManuel({ geste }: { geste: GesteManuel }) {

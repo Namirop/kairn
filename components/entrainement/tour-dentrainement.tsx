@@ -19,20 +19,13 @@ import { ROUTES } from "@/lib/auth/routes";
 import type { QuestionServie } from "@/lib/db/question-servie";
 
 /**
- * Un tour d'entraînement, puis le suivant si on en redemande.
- *
- * Aucun compte de fin, aucun score : ce qu'on fait ici ne se cumule nulle part.
- * L'écran dit simplement que le tour est fini et laisse le choix de continuer.
+ * Un tour d'entraînement, puis le suivant si on en redemande. Aucun compte de
+ * fin, aucun score : rien ici ne se cumule.
  */
 
 /**
- * Ce qui encadre les écrans hors tour : le principe, et la fin.
- *
- * Un panneau ordinaire, comme le reste de l'application. La scène à deux
- * colonnes n'a de sens que tant qu'il y a un chemin à montrer.
- *
- * La fin d'un tour est un palier et se centre ; le principe est un texte qu'on
- * lit avant de commencer, et il se lit de haut en bas comme n'importe quel texte.
+ * Ce qui encadre les écrans hors tour (le principe, la fin) : un panneau
+ * ordinaire. La fin, un palier, se centre ; le principe se lit de haut en bas.
  */
 function Cadre({ centre = false, children }: { centre?: boolean; children: ReactNode }) {
   return (
@@ -116,9 +109,8 @@ export function TourDentrainement({
   }
 
   return (
-    // Pas de rail, et donc pas de pile : un tour ne se finit pas, il s'arrête
-    // quand on veut. Une pile à monter aurait promis une fin, et le cairn
-    // appartient à ce qui balise vraiment le chemin — la session du jour.
+    // Pas de rail ni de pile : un tour s'arrête quand on veut, une pile à
+    // monter promettrait une fin. Le cairn appartient à la session du jour.
     <SceneDeSession
       enTete={
         <EnTeteDeScene

@@ -16,13 +16,9 @@ import { ZoneDeReponse } from "@/components/revision/zone-de-reponse";
 import type { QuestionServie } from "@/lib/db/question-servie";
 
 /**
- * Le déroulé d'une suite de questions, commun aux deux modes.
- *
- * Il pose une question et donne à voir ce qu'elle attend ; c'est
- * `useSuiteDeQuestions` qui tient le compte, le temps et les notes. Il ne sait
- * rien non plus des formats : `ZoneDeReponse` décide qu'un QCM se clique et
- * qu'un texte à trou se saisit, et `EnonceDeQuestion` décide de ce que la carte
- * met en titre.
+ * Le déroulé d'une suite de questions, commun à la session et à
+ * l'entraînement. La mécanique vit dans `useSuiteDeQuestions`, les formats dans
+ * `ZoneDeReponse` et `EnonceDeQuestion`.
  */
 
 export type { PassageDonne, Valider };
@@ -46,11 +42,8 @@ export function DerouleQuestions({
   onAvance?: (faites: number) => void;
   /**
    * Signale la réponse qui est sous les yeux sans être notée, et donne de quoi
-   * l'écrire avant de partir.
-   *
-   * Rend `null` dès qu'il n'y a plus rien en suspens. Le mode qui replanifie s'en
-   * sert pour ne pas laisser une question vue s'échapper de la porte de sortie ;
-   * un mode qui ne touche à rien n'a pas à s'en soucier.
+   * l'écrire avant de partir ; `null` dès qu'il n'y a plus rien en suspens.
+   * Seul le mode qui replanifie s'en sert.
    */
   onSuspens?: (abandonner: (() => Promise<void>) | null) => void;
   /** Ce que ce mode-là autorise sous la question. Rien, par défaut. */
@@ -65,12 +58,9 @@ export function DerouleQuestions({
   const enSuspens = suite.enSuspens;
 
   /*
-    On ne signale que le **basculement**, jamais la fermeture qui l'exécute.
-
-    Prendre `abandonner` en dépendance rendait l'effet dépendant d'une identité
-    qui change à chaque rendu, et l'appel remontait alors un état au parent, qui
-    re-rendait, qui re-rendait l'enfant : la page se figeait sur son écran
-    d'attente. Le drapeau, lui, ne change que deux fois par question.
+    On ne signale que le basculement du drapeau, jamais la fermeture. Prendre
+    `abandonner` en dépendance (identité neuve à chaque rendu) relancerait
+    l'effet, qui remonte un état au parent, qui re-rend l'enfant : boucle infinie.
   */
   const dernierAbandon = useRef(suite.abandonner);
 
@@ -117,9 +107,8 @@ export function DerouleQuestions({
             onNoter={(note) => void suite.suivre(note)}
           />
 
-          {/* Renoncer n'a de sens que là où il faut produire quelque chose —
-              un choix à cliquer, un terme à saisir. Sur une question ouverte,
-              « Voir la réponse » est déjà la sortie, et ne coûte rien. */}
+          {/* Renoncer n'a de sens que là où il faut produire quelque chose ;
+              sur une question ouverte, « Voir la réponse » est déjà la sortie. */}
           {suite.engage || !demandeUneProduction(question) ? null : (
             <JeterLaPierre enCours={suite.enCours} onJeter={suite.jeter} />
           )}

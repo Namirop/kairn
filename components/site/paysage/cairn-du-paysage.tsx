@@ -3,10 +3,9 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 /**
  * Un cairn du paysage.
  *
- * `SilhouetteDeCairn` tire toujours les mêmes neuf pierres : posée treize fois
- * elle donnerait treize fois le même dessin, c'est-à-dire un motif répété — la
- * seule chose que ce composant-là s'interdit. Celui-ci prend sa graine, donc
- * aucun cairn du paysage n'est le même que son voisin.
+ * Pas `SilhouetteDeCairn`, qui tire toujours les mêmes neuf pierres et ferait
+ * du paysage un motif répété : celui-ci prend une graine, et chaque cairn est
+ * différent de son voisin.
  */
 export function CairnDuPaysage({
   graine,
@@ -36,9 +35,9 @@ export function CairnDuPaysage({
           key={pierre.cle}
           transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}
         >
-          {/* La dernière pierre est celle du sommet. Elle peut porter le lichen
-              comme le grand cairn — `--sommet-paysage` est vide par défaut, donc
-              elle reste de la couleur de son empilement. */}
+          {/* La pierre du sommet prend la variable `sommet` du plan
+              (`--pierre-proche-sommet` porte le lichen) ; non définie, elle
+              garde la teinte de son empilement. */}
           <path
             d={pierre.chemin}
             fill={

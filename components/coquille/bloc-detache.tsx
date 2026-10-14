@@ -1,31 +1,11 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Un bloc qui se détache du flux, ouvert par un filet horizontal court.
+ * Un bloc qui se détache du flux, ouvert par un filet horizontal court — le
+ * même geste, à la même mesure, que sous le compteur du jour. Pas de filet
+ * vertical : c'est la forme d'une citation de documentation.
  *
- * **Il remplace le filet vertical de lichen**, qui longeait huit blocs du
- * produit pour cinq intentions différentes — distinguer, lister, alerter,
- * signaler une dette, marquer une offre. Trois défauts s'y empilaient. Le
- * lichen est l'accent unique et il était dépensé en bordure décorative, si bien
- * qu'il ne signalait plus rien nulle part. Un trait qui court sur cinq lignes
- * est la forme exacte du bloc de citation d'une documentation, et c'est ce qui
- * le faisait lire comme un motif générique plutôt que comme une décision. Et il
- * était redondant : presque tous ces blocs portent déjà leur libellé en petites
- * capitales, qui les annonce.
- *
- * Le filet passe donc à l'horizontale et se raccourcit : il **ouvre** le bloc au
- * lieu de le border. C'est le geste qui existe déjà sous le compteur du jour, à
- * la même mesure, et il lit comme une couche qui commence — la métaphore du
- * produit prise au mot.
- *
- * **Une seule forme, et c'est sa couleur qui dit le registre.** Le gris de
- * pierre pose un bloc à part ; la couleur d'alerte pose un bloc à part qui
- * alerte. Un second dessin pour les alertes aurait rendu au produit le problème
- * qu'on vient de lui retirer : deux marqueurs pour une seule séparation.
- *
- * Le filet est un `span` et non un pseudo-élément, comme celui du compteur :
- * c'est la même chose dessinée deux fois dans le produit, autant qu'elle
- * s'écrive pareil.
+ * Une seule forme ; c'est la couleur qui dit le registre (pierre ou alerte).
  */
 export function BlocDetache({
   ton = "pierre",
@@ -36,13 +16,9 @@ export function BlocDetache({
   /** `alerte` pour ce qui prévient d'un défaut. `pierre` partout ailleurs. */
   ton?: "pierre" | "alerte";
   /**
-   * Le filet se centre tant que le bloc est seul dans la largeur.
-   *
-   * Sur téléphone, les chapeaux du produit se centrent et reprennent le fer à
-   * gauche dès que la grille s'ouvre — c'est déjà ce que fait le filet sous le
-   * compteur du jour. Un bloc posé dans un chapeau centré avec son filet resté à
-   * gauche donne deux axes de lecture pour quatre lignes de texte, et c'est ce
-   * qu'on voyait sur l'écran d'un dépôt.
+   * Le filet se centre sur téléphone et revient à gauche à partir de `md`,
+   * pour suivre un chapeau centré qui fait de même : sinon, deux axes de
+   * lecture pour quatre lignes.
    */
   filetCentre?: boolean;
   className?: string;

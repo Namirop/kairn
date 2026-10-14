@@ -3,16 +3,11 @@ import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 
 /**
- * La coquille commune aux six écrans internes.
+ * La coquille commune aux écrans d'administration : chaque page ne porte que
+ * sa garde, ses lectures et ses blocs.
  *
- * Elle existe pour que chaque écran tienne en vingt lignes et ne porte que ce
- * qu'il a de particulier — sa garde, ses lectures, ses blocs. Six pages qui
- * recopient chacune leur titre et leur panneau finissent par diverger sur des
- * détails que personne n'a décidés.
- *
- * Le registre reste celui de l'interne : pas de police display, pas d'élément
- * signature, pas d'accent du produit. Les seules couleurs qui s'ajoutent ici
- * sont celles des marques de graphique, et elles encodent une grandeur.
+ * Registre interne : pas de police display, pas d'élément signature, pas
+ * d'accent du produit.
  */
 export function PageAdmin({
   titre,

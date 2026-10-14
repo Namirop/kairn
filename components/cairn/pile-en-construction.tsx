@@ -7,21 +7,9 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 import { cn } from "@/lib/utils";
 
 /**
- * L'attente : un empilement qui se construit.
- *
- * Trois pierres se posent l'une après l'autre, en boucle. Ça dit la même chose
- * qu'un rond qui tourne, dans la langue du produit — et ça dit en plus ce qui
- * est en train de se passer : quelque chose s'empile.
- *
- * La géométrie vient de `empiler`, comme le cairn et le compteur de session.
- * Sous `prefers-reduced-motion`, les pierres restent posées : une attente
- * immobile vaut mieux qu'une animation qu'on n'a pas demandée.
- *
- * `clair` existe parce que l'attente a gagné un fond sombre : dans la fenêtre de
- * l'essai, les pierres par défaut — des gris de `stone-700` à `stone-900` —
- * disparaissaient dans la roche. C'est la même bascule que partout ailleurs dans
- * le cairn, et elle manquait ici seulement parce qu'aucune attente sombre
- * n'existait encore.
+ * L'attente : trois pierres qui se posent l'une après l'autre, en boucle. La
+ * géométrie vient de `empiler`. Sous `prefers-reduced-motion`, les pierres
+ * restent posées.
  */
 
 const PIERRES = 3;

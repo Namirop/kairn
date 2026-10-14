@@ -14,20 +14,10 @@ import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
  * Ce qu'un compte peut décider : la longueur de sa session, et ce qu'on lui
- * envoie.
- *
- * Deux groupes, parce que ce sont deux sujets — ce qu'on fait dans le produit, et
- * ce que le produit fait sans nous. Un seul bouton pour les deux : ils
- * s'enregistrent ensemble, et rien ne s'écrit tant qu'une saisie est illisible.
- *
- * Ce bouton unique a un prix, et c'est le formulaire qui le paie : entre la
- * valeur qu'on change et le geste qui l'écrit, il y a la hauteur de tout le
- * reste. `BarreDEnregistrement` s'en charge — ici on ne tient que la question
- * qu'elle pose : est-ce que quelque chose a bougé depuis la dernière écriture.
- *
- * Chaque décision à deux états est un interrupteur et non une valeur écrite :
- * « activé » demandait de chercher où on le change, et ne disait pas ce qui allait
- * arriver. L'explication de ce que la décision change est collée à elle.
+ * envoie. Un seul bouton pour les deux groupes : rien ne s'écrit tant qu'une
+ * saisie est illisible. La distance entre la valeur changée et ce bouton,
+ * c'est `BarreDEnregistrement` qui la rattrape ; ici on ne tient que
+ * « quelque chose a-t-il bougé ».
  */
 
 const GROUPE = "text-mono font-mono tracking-[0.14em] text-stone-500 uppercase";
@@ -59,20 +49,16 @@ export function FormulaireDeReglages({
   const heureEcrite = ecrireHeureDeRappel(heureDuRappel, useLangue());
 
   /*
-    Une écriture réussie remet le formulaire au repos, un refus non.
-
-    Un refus laisse une valeur en attente — celle qu'on vient de taper de
-    travers — et la barre doit rester là pour le dire, avec le message qui
-    explique quoi corriger. La ranger reviendrait à annoncer que c'est écrit
-    alors que la saisie a été rejetée.
+    Une écriture réussie remet le formulaire au repos, un refus non : la barre
+    doit rester pour dire quoi corriger, sinon elle annoncerait écrite une
+    saisie rejetée.
   */
   useEffect(() => {
     if (etat.message) setModifie(false);
   }, [etat]);
 
-  // Une frappe suffit à ouvrir l'attente : `input` remonte des deux champs de
-  // texte. Les interrupteurs, eux, n'émettent rien qui remonte jusqu'ici, et le
-  // disent chacun dans son geste.
+  // `input` remonte des champs de texte ; les interrupteurs n'émettent rien qui
+  // remonte jusqu'ici, d'où leur `setModifie` explicite.
   return (
     <form action={envoyer} onInput={() => setModifie(true)} className="gap-pas-8 flex flex-col">
       <fieldset className="gap-pas-2 flex flex-col border-0 p-0">

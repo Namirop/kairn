@@ -18,12 +18,11 @@ import type { ConceptLu } from "@/lib/db/depot-detaille";
 /**
  * Un concept, son état, et ce qu'on peut en faire.
  *
- * Ses questions ne sont pas affichées : les lire hors session revient à se
- * gâcher la surprise, et une question qu'on a lue la veille ne mesure plus
- * rien. Seul leur nombre apparaît — c'est ce qui dit que le travail est fait.
+ * Ses questions ne sont pas affichées, seulement leur nombre : une question lue
+ * hors session ne mesure plus rien.
  *
- * Un concept douteux dit pourquoi il est signalé sans donner la version
- * « juste » : on ne l'a pas vérifiée, et affirmer serait pire que douter.
+ * Un concept douteux dit pourquoi il est signalé sans donner de version
+ * « juste » : elle n'est pas vérifiée, et affirmer serait pire que douter.
  */
 
 function Questions({ nombre }: { nombre: number }) {
@@ -53,8 +52,8 @@ export function ConceptCorrigeable({
   const [texte, setTexte] = useState(concept.concept);
 
   return (
-    // Le dégagement de l'ancre vaut la barre du haut, qui est collante : sans
-    // lui, le concept visé arrive sous elle et on croit avoir atterri ailleurs.
+    // Le dégagement de l'ancre vaut la barre collante du haut, qui sinon
+    // recouvrirait le concept visé.
     <li id={ancre} className="p-pas-6 rounded-carte bg-surface-papier scroll-mt-20 md:scroll-mt-24">
       {edition ? (
         <form action={modifierConceptAction} className="gap-pas-3 flex flex-col">
@@ -92,10 +91,8 @@ export function ConceptCorrigeable({
             {concept.archivedByUser ? <Badge>{t("sortiDuCycle")}</Badge> : null}
           </div>
 
-          {/* Un concept n'a jamais porté d'extrait de plusieurs lignes en
-              production, et le prompt n'en demande pas. `TexteRiche` est là pour
-              le jour où : le même texte, lu de la même façon qu'au-dessus, dans
-              la carte du dépôt dont il sort. */}
+          {/* `TexteRiche` pour lire le concept comme le dépôt dont il sort, si
+              un extrait de plusieurs lignes y apparaît un jour. */}
           <div className="mt-pas-2 text-corps text-stone-900">
             <TexteRiche>{concept.concept}</TexteRiche>
           </div>
@@ -108,8 +105,8 @@ export function ConceptCorrigeable({
             <Questions nombre={concept.questions} />
           )}
 
-          {/* L'archivage se défait, et l'écran le dit là où le concept se
-              trouve — sans quoi « je maîtrise ça » serait un aller sans retour. */}
+          {/* L'archivage se défait ici, sinon « je maîtrise ça » serait un aller
+              sans retour. */}
           {concept.archivedByUser ? (
             <div className="mt-pas-4 gap-pas-3 flex flex-wrap items-center">
               <p className="text-petit text-stone-500">{t("declareSu")}</p>
@@ -123,11 +120,8 @@ export function ConceptCorrigeable({
             </div>
           ) : null}
 
-          {/* La suppression passe par la même confirmation que celle d'un dépôt.
-              Elle partait ici d'un seul clic, alors qu'elle emporte autant : les
-              questions écrites sur ce concept et tous les passages qui les
-              citent. Un doigt sur un téléphone n'a aucun moyen de revenir en
-              arrière. */}
+          {/* Confirmation en deux temps, comme pour un dépôt : la suppression
+              emporte les questions du concept et tous leurs passages. */}
           <div className="mt-pas-4">
             <SuppressionEnDeuxTemps
               action={supprimerConceptAction}

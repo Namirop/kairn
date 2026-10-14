@@ -2,20 +2,13 @@ import { useTranslations } from "next-intl";
 import type { SujetDeRetour } from "@/lib/db/types";
 
 /**
- * De quoi le retour parle : quatre choix, en un coup d'œil.
+ * De quoi le retour parle : quatre choix, de quoi trier sans faire hésiter.
  *
- * Ils servent à trier une pile, pas à qualifier finement — au-delà de quatre, on
- * hésite au moment d'écrire, et hésiter c'est renoncer. Les libellés disent la
- * chose du point de vue de qui la rencontre, jamais celui de qui la corrigera :
- * personne ne se dit « je vais signaler un défaut de comportement ».
- *
- * Des boutons radio natifs, dessinés, comme dans la fenêtre de signalement : la
- * sélection se voit, les flèches du clavier circulent, et le focus reste
- * visible. Un arrondi de champ et non de pilule — dans l'échelle des formes, la
- * pilule est un geste, et ceci est une saisie.
+ * Des boutons radio natifs masqués et dessinés : les flèches du clavier
+ * circulent, et le focus reste visible par `has-[:focus-visible]`.
  */
 
-/** L'ordre de lecture, du plus concret au plus vague. Les messages disent les mots. */
+/** L'ordre de lecture, du plus concret au plus vague. */
 const ORDRE: SujetDeRetour[] = ["BUG", "COMPORTEMENT", "TEXTE", "AUTRE"];
 
 export function ChoixDuSujet({

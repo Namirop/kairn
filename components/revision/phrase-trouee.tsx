@@ -8,33 +8,19 @@ import { TROU } from "@/lib/domain/reponse-cloze";
  * La phrase d'un texte à trou : son trou vide, comblé de ce qu'on saisit, ou du
  * terme attendu une fois la réponse vérifiée.
  *
- * Elle se compose en ligne, dans l'énoncé, et pas dans un paragraphe à elle :
- * c'est la question, et elle n'est dite qu'une fois.
+ * Le découpage en termes de code passe avant la recherche du trou : dans
+ * l'ordre inverse, « `valeurs.___` » laisserait deux accents graves orphelins
+ * au lieu d'un jeton. Le trou peut ainsi se creuser dans un jeton.
  *
- * Le découpage passe par les termes de code **avant** de chercher le trou, et
- * l'ordre inverse cassait tout : sur « on écrit `valeurs.___` », couper d'abord
- * au trou laissait un accent grave orphelin de chaque côté, donc deux accents
- * affichés tels quels et pas de jeton. Le trou peut se trouver dans un terme de
- * code — c'est même le cas intéressant, celui où l'on masque un appel — et il se
- * creuse alors dans le jeton.
- *
- * Ses mesures sont en `em`. Le même composant sert dans un titre de quarante
- * pixels comme dans une ligne de corps, et un emplacement calé en pixels y
- * serait un trait perdu dans un cas et une barre dans l'autre.
+ * Les mesures sont en `em` : le même composant sert dans un titre et dans une
+ * ligne de corps.
  */
 
 /**
- * Les surfaces sur lesquelles un trou peut se creuser.
- *
- * Un creux est une **ombre**, et une ombre ne va pas dans le même sens selon la
- * lumière. Sur du clair, le trou est plus sombre que ce qui l'entoure ; sur la
- * dalle sombre de la fenêtre de l'essai, il l'est encore — mais il lui faut
- * descendre jusqu'à `stone-900`, sinon il remonte vers le clair et se lit comme
- * un surlignage plutôt que comme un manque.
- *
- * `ombre` sert aussi de repli sur du papier quand le trou tombe dans un jeton de
- * code : l'encre diluée du jeton mange le gris du papier, et il faut le cran de
- * plus pour que le creux se voie.
+ * Les surfaces sur lesquelles un trou peut se creuser. Le creux est toujours
+ * plus sombre que son fond ; sur la roche il descend jusqu'à `stone-900`, sinon
+ * il se lit comme un surlignage. `ombre` sert aussi sur du papier quand le trou
+ * tombe dans un jeton de code, dont l'encre diluée mange le gris du papier.
  */
 export type FondDuTrou = "papier" | "ombre" | "roche";
 
@@ -55,29 +41,16 @@ function Trou({
   fond: FondDuTrou;
 }) {
   if (comble === null) {
-    // Un emplacement, pas un soulignement : c'est le geste central de ce format,
-    // et un trait fin sous une ligne de texte se remarquait à peine. Dans un
-    // jeton, l'encre diluée du fond mange le gris de l'ombre : il en faut un cran
-    // de plus pour que le creux se voie.
-    //
-    // Sa hauteur est celle d'une capitale, sa largeur celle de trois lettres :
-    // c'est un mot manquant, et un mot est plus haut que long. Large et plat, il
-    // redevenait le trait qu'on voulait éviter — la forme disait « souligne ici »
-    // là où elle doit dire « il manque un terme ».
+    // Un emplacement de la hauteur d'une capitale et de la largeur de trois
+    // lettres : plus large et plat, il se lirait comme un soulignement.
     return (
       <span
         aria-hidden
-        // Le creux est une ombre sur le papier de la carte de révision. Posé sur
-        // une carte d'ombre — la vitrine de l'essai — il disparaîtrait dans son
-        // propre fond : il lui faut alors le cran de plus qui sert déjà dans un
-        // jeton, pour la même raison.
         className={`rounded-champ mx-[0.14em] inline-block h-[0.96em] w-[2.9em] translate-y-[0.06em] align-baseline ${CREUX[fond === "papier" && dansDuCode ? "ombre" : fond]}`}
       />
     );
   }
 
-  // Le terme prend la place du trou, souligné de lichen : c'est le mot qu'on est
-  // venu chercher, et l'accent est là pour le signaler.
   return <span className="border-lichen-deep mx-[0.06em] border-b-2 px-[0.1em]">{comble}</span>;
 }
 
@@ -88,7 +61,7 @@ export function PhraseTrouee({
 }: {
   phrase: string;
   comble: string | null;
-  /** La surface qui porte la phrase. Le creux s'y creuse dans le bon sens. */
+  /** La surface qui porte la phrase, pour que le creux s'y voie. */
   fond?: FondDuTrou;
 }) {
   return (
@@ -116,18 +89,9 @@ export function PhraseTrouee({
               ));
 
         return segment.code ? (
-          // Un jeton court ne se coupe pas en bout de ligne, qu'il porte un trou
-          // ou non : deux cadres pleins se lisent comme deux termes, et la moitié
-          // d'un terme troué se retrouve au-dessus de son emplacement. Voir
-          // `jetonInsecable`.
-          //
-          // **Un jeton long se coupe, même troué.** Il ne l'a pas toujours fait,
-          // et c'est le seul extrait de plusieurs mots du produit qui en a
-          // souffert : `function dernier(valeurs) { return ___; }` tenait sur une
-          // ligne insécable de quarante signes, donc il sortait de la carte par la
-          // droite sur un téléphone — on lisait la moitié d'une question. Un trou
-          // qui ouvre la ligne suivante est un défaut de composition ; un énoncé
-          // coupé au milieu n'est plus un énoncé.
+          // Un jeton court ne se coupe pas en bout de ligne : coupé, il se lit
+          // comme deux termes. Un jeton long se coupe, même troué — insécable, il
+          // sortirait de la carte sur un téléphone. Voir `jetonInsecable`.
           <code
             key={rang}
             className={`${JETON} ${jetonInsecable(segment.texte) ? "whitespace-nowrap" : ""}`}

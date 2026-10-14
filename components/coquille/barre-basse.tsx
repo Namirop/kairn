@@ -7,28 +7,17 @@ import { destinationsPour, estActive, railInterne } from "./destinations";
 import { cn } from "@/lib/utils";
 
 /**
- * Navigation mobile : une barre basse, dans la zone du pouce. Ce n'est pas le
- * rail comprimé — les cibles font 56 px de haut sur toute la largeur
- * disponible, et l'état actif se lit à la pastille claire posée sous
- * l'icône : la destination active porte la surface de la page.
+ * Navigation mobile : une barre basse, dans la zone du pouce. Le rembourrage bas
+ * suit l'encoche gestuelle (`safe-area-inset-bottom`).
  *
- * Le rembourrage bas suit l'encoche gestuelle plutôt qu'une constante.
+ * Sa hauteur totale est reprise par `--barre-basse` dans
+ * `app/styles/tokens/scale.css`, auquel se réfère ce qui se pose au-dessus
+ * d'elle : une cible ou un rembourrage qui change ici se reporte là-bas.
  *
- * Sa hauteur totale est reprise par `--barre-basse` dans `app/styles/tokens/scale.css` : ce qui
- * doit se poser au-dessus d'elle s'y réfère. Une cible ou un rembourrage qui
- * change ici se reporte là-bas.
- *
- * L'administration en compte sept, et sept parts égales sur trois cent
- * soixante-quinze pixels ne laissent pas la place d'écrire « Signalements ». Ses
- * onglets défilent donc, plutôt que d'abréger des mots qui sont le vocabulaire
- * du produit. Le défilement est acceptable là où il ne l'est pas dans le
- * produit : cet écran a un seul lecteur, qui connaît ses sections.
- *
- * Leur largeur est un **plancher**, pas une mesure. Fixée, elle donnait la même
- * boîte à « Contenu » et à « Signalements » : le second débordait de sa pastille
- * des deux côtés, et l'état actif — qui est justement cette pastille — cessait
- * de désigner l'onglet qu'il colorait. Un onglet qui défile n'a aucune raison
- * d'être plus étroit que son mot.
+ * Le rail de l'administration a trop d'entrées pour des parts égales sur un
+ * téléphone : ses onglets défilent plutôt que d'abréger. Leur largeur est un
+ * plancher (`min-w-20`) et non une mesure, sinon un long libellé déborde de la
+ * pastille qui marque l'état actif.
  */
 export function BarreBasse({ administrateur }: { administrateur: boolean }) {
   const chemin = usePathname();

@@ -5,34 +5,16 @@ import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "mo
 import type { MotionValue } from "motion/react";
 
 /**
- * Le sentier qui se trace pendant qu'on le descend.
+ * Le sentier qui se trace pendant qu'on le descend, à la vitesse du défilement.
+ * Un ressort le suit, sinon chaque cran de molette se verrait comme un saut.
  *
- * C'est la seule animation du site qui ne soit pas une entrée, et c'est ce qui la
- * rend juste ici : le trait relie trois étapes qui s'enchaînent, on le lit de haut
- * en bas, et il avance à la vitesse à laquelle on avance. Un trait qui se
- * dessinerait tout seul à l'arrivée dans la vue serait une animation posée sur le
- * contenu ; celui-là **est** le contenu.
+ * Un segment par intervalle entre deux pierres : les étapes n'ont pas la même
+ * hauteur, et un trait continu ne saurait pas où s'arrêter sans mesurer la page.
  *
- * La traversée est **serrée sur la position de lecture** et non sur l'entrée et la
- * sortie complètes du bloc : mesurée du moment où la liste touche le bas de la
- * fenêtre à celui où elle en sort par le haut, elle dure une fenêtre et demie, si
- * bien que le trait était encore à la moitié alors que la section était lue depuis
- * longtemps. Il se dessine donc pendant que la liste vient se placer, et il est
- * fini quand elle est en face de l'œil. Un ressort le suit, sinon chaque cran de
- * molette se verrait comme un saut.
+ * Les pierres grandissent depuis leur axe plutôt qu'en fondu, qui aurait l'air
+ * d'un chargement.
  *
- * Le trait est découpé en segments, un par intervalle entre deux pierres, parce
- * que les étapes n'ont pas la même hauteur : un seul trait continu ne saurait pas
- * où s'arrêter sans qu'on mesure la page. Les jointures ne se voient pas — les
- * segments sont contigus, de la même teinte, et chacun finit là où le suivant
- * commence.
- *
- * Les pierres sont des marqueurs et non des décorations : chacune se pose quand le
- * trait l'atteint. L'échelle part de zéro plutôt que l'opacité — une pierre qui
- * apparaît en fondu a l'air d'un état de chargement, une pierre qui grandit depuis
- * son axe a l'air d'être posée.
- *
- * Mouvement refusé : le trait est entier et les pierres sont posées dès le premier
+ * Mouvement réduit : le trait est entier et les pierres posées dès le premier
  * rendu. Rien de ce qui se lit ne dépend de l'animation.
  */
 
@@ -45,10 +27,8 @@ const FIN_DU_TRACE = 0.9;
 const RESSORT = { stiffness: 90, damping: 24, restDelta: 0.001 };
 
 /**
- * De combien une pierre se pose avant que le trait la touche.
- *
- * L'œil suit la tête du trait et non son extrémité exacte : une pierre qui attend
- * le contact paraît en retard.
+ * De combien une pierre se pose avant que le trait la touche : l'œil suit la
+ * tête du trait, et une pierre qui attend le contact paraît en retard.
  */
 const AVANCE_DE = 0.12;
 
@@ -56,15 +36,9 @@ export function TraceDuSentier({ etapes }: { etapes: EtapeDuSentier[] }) {
   const colonne = useRef<HTMLOListElement>(null);
   const immobile = useReducedMotion() ?? false;
 
-  // La traversée retenue : de la liste qui commence à paraître à la liste
-  // entièrement en vue — et non son entrée et sa sortie complètes.
-  //
-  // Elle était mesurée jusqu'à ce que la liste **sorte** par le haut, si bien
-  // que le trait n'était fini qu'une fois la section presque quittée : on
-  // arrivait à la suivante avec une animation encore en cours derrière soi.
-  // Elle se termine maintenant quand le bas de la liste atteint le bas de la
-  // fenêtre, c'est-à-dire au moment où l'on a tout sous les yeux — la seule
-  // définition de « lu » qui vaille pour ce trait-là.
+  // La traversée va de la liste qui commence à paraître à la liste entièrement
+  // en vue, pas jusqu'à sa sortie par le haut : le trait doit être fini quand
+  // on a tout sous les yeux, pas une fois la section quittée.
   const { scrollYProgress } = useScroll({
     target: colonne,
     offset: ["start 0.8", "end 0.9"],
@@ -90,9 +64,7 @@ export function TraceDuSentier({ etapes }: { etapes: EtapeDuSentier[] }) {
             />
           ) : null}
 
-          {/* Posée sur l'axe optique du titre, pas sur son bord haut : à `pas-2`
-              la pierre flottait trois pixels au-dessus de la ligne qu'elle est
-              censée marquer, et l'œil le voyait sans savoir le nommer. */}
+          {/* Posée sur l'axe optique du titre, pas sur son bord haut. */}
           <Marqueur avance={avance} anime={!immobile} part={rang / intervalles} />
 
           <div>

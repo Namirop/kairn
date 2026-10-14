@@ -11,35 +11,16 @@ import { useAvancementDeLEssai } from "@/components/site/use-avancement-de-lessa
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
 /**
- * L'essai, sur la landing : on dépose, et les concepts arrivent pour de vrai.
+ * L'essai, sur la landing : on dépose sans compte, et les concepts arrivent pour
+ * de vrai. Le compte n'est demandé qu'après, pour garder ce qu'on a vu.
  *
- * C'est le cœur de la conversion, et la raison de tout le mécanisme de session
- * anonyme derrière. Montrer le découpage convainc ; le promettre fait fermer
- * l'onglet. Le compte n'est demandé qu'après, pour garder ce qu'on vient de voir
- * apparaître — à ce moment-là, on sait ce qu'on garde.
+ * La bande rend le formulaire ou le rappel d'un essai ; le reste se joue dans
+ * `FenetreDeLEssai`.
  *
- * **Ce fichier est l'aiguillage, l'attente, et depuis peu l'ouverture de la
- * fenêtre.** La bande ne rend plus que deux choses — le formulaire, ou le rappel
- * de ce qu'un essai a donné — et tout le reste se joue dans `FenetreDeLEssai`.
- * La bande devait être quatre mises en page à elle seule, et aucune ne pouvait
- * être bien composée ; elle n'en a plus qu'une par état, et les deux ont la même
- * charpente.
- *
- * **La fenêtre s'ouvre sur le geste, pas sur un effet.** C'est le formulaire qui
- * le dit, au moment où il envoie vraiment — après ses propres refus de longueur.
- * Ouvrir depuis un effet monté sur `enCours` aurait demandé de retenir que le
- * visiteur l'avait fermée, faute de quoi elle se serait rouverte au rendu
- * suivant, pendant que le découpage tournait encore.
- *
- * **Elle s'ouvre aussi au chargement d'un découpage déjà en route**, et
- * seulement dans ce cas. Quelqu'un qui recharge la page pendant l'extraction
- * était au milieu d'un geste : le lui rendre n'est pas une interruption. Un
- * essai déjà abouti, lui, n'ouvre rien — on trouve son rappel dans la bande, et
- * on rouvre si on veut.
- *
- * L'extraction est asynchrone, donc l'écran redemande où elle en est. C'est le
- * seul endroit du produit qui interroge en boucle, et il s'arrête dès que la
- * chaîne s'est arrêtée.
+ * La fenêtre s'ouvre sur le geste (`surDepot`, après les refus de longueur du
+ * formulaire), pas dans un effet sur `enCours` : un effet la rouvrirait au rendu
+ * suivant si le visiteur l'avait fermée pendant le découpage. Au chargement,
+ * elle ne s'ouvre que sur un découpage encore en route.
  */
 export function EssaiDeDepot({
   invite,
@@ -64,17 +45,10 @@ export function EssaiDeDepot({
     depart: essaiPrecedent,
   });
 
-  // Un essai vient de partir : l'écran repart de zéro.
-  //
-  // Ajusté pendant le rendu plutôt que dans un effet, parce qu'un effet aurait
-  // laissé une image afficher le verdict du **premier** essai — « ce texte n'a
-  // rien donné » sur un dépôt qui vient tout juste d'être envoyé. React
-  // recommence le rendu sans rien poser à l'écran entre les deux.
-  //
-  // `recommence` en particulier n'était jamais remis à faux nulle part : une
-  // fois « Réessayer » cliqué, le composant rendait le formulaire pour toujours
-  // et le second essai, qui avait bien tourné et bien coûté, ne s'affichait
-  // jamais.
+  // Un essai vient de partir : l'écran repart de zéro, et `recommence` retombe
+  // (sinon le formulaire masquerait le second essai pour toujours). Ajusté
+  // pendant le rendu et non dans un effet, qui laisserait passer une image avec
+  // le verdict de l'essai précédent.
   if (etat.inputId && etat.inputId !== dernierEssai) {
     setDernierEssai(etat.inputId);
     setRecommence(false);
@@ -93,11 +67,7 @@ export function EssaiDeDepot({
     setRecommence(true);
   };
 
-  /*
-    Un dépôt en vol efface le verdict du précédent. Sans ça, le temps de
-    l'aller-retour, la fenêtre affiche « ce texte n'a rien donné » à propos d'un
-    texte qu'on vient d'envoyer.
-  */
+  // Un dépôt en vol masque le verdict du précédent, le temps de l'aller-retour.
   const montre = enCours ? null : avancement;
   const concepts = montre?.concepts ?? [];
   // Le rappel ne vaut que pour un essai qui a produit quelque chose. Un échec

@@ -9,14 +9,7 @@ import { cn } from "@/lib/utils";
 /**
  * Navigation de bureau : un rail vertical étroit, icône et libellé visibles.
  *
- * Le rail est une surface d'ombre, la page une surface de papier : la
- * séparation vient du fond, pas d'un trait. La destination active porte la
- * surface de la page — elle appartient à ce qu'on est en train de regarder,
- * et c'est ce que dit sa pastille claire.
- *
- * L'accent a quitté la navigation. Il signale ce qui est dû et le sommet du
- * cairn ; un état de navigation se lit très bien sans lui, et chaque
- * occurrence de lichen en moins rend les autres plus fortes.
+ * La destination active porte la surface de la page, qu'elle désigne.
  */
 export function Rail({ administrateur }: { administrateur: boolean }) {
   const chemin = usePathname();
@@ -29,12 +22,8 @@ export function Rail({ administrateur }: { administrateur: boolean }) {
          page : c'est ce que lit la règle qui l'efface pendant un passage, et
          c'est aussi par là qu'il reçoit son filet — voir `app/styles/shell.css`. */
       data-coquille="rail"
-      /* Les icônes commencent en haut. Le rembourrage valait la hauteur de
-         l'en-tête, pour que la première s'aligne sous lui ; mais le rail
-         traverse toute la fenêtre et l'en-tête, lui, vit dans la colonne à
-         droite. L'alignement se faisait donc avec une ligne qui n'est pas en
-         face, au prix de soixante-quatre pixels de rail vides en haut de
-         l'écran. */
+      /* Les icônes commencent en haut, sans s'aligner sur l'en-tête : il vit
+         dans la colonne de droite, pas en face du rail. */
       className="pt-pas-4 px-pas-2 gap-pas-1 bg-surface-ombre fixed inset-y-0 left-0 z-30 hidden w-28 flex-col items-center md:flex"
     >
       {destinationsPour(chemin, administrateur).map((destination) => {

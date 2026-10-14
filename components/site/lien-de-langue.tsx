@@ -4,15 +4,9 @@ import { usePathname } from "next/navigation";
 import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
- * Le passage d'une langue à l'autre, sur les pages publiques.
- *
- * Il vit dans le pied de la landing, avec les autres liens qu'on cherche en
- * bas de page : dans l'en-tête il pesait autant que « Se connecter », qui est
- * le geste. Il propose l'autre langue, nommée dans cette langue — quelqu'un qui ne lit
- * pas la page doit encore reconnaître la sienne. Un lien ordinaire et non un
- * menu : il n'y a que deux langues, et un menu pour un seul choix serait un
- * détour. Il mène à `/fr…` ou `/en…`, que le middleware retient en cookie
- * avant de servir la page : le choix vaut ensuite pour tout le site.
+ * Le passage à l'autre langue, sur les pages publiques. L'autre langue est
+ * nommée dans cette langue : qui ne lit pas la page doit reconnaître la sienne.
+ * Il mène à `/fr…` ou `/en…`, que le middleware retient en cookie.
  *
  * `<a>` et non `Link` : le changement de langue doit repasser par le
  * middleware et recharger les textes, ce qu'une navigation client ne ferait pas.

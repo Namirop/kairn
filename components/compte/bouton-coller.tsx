@@ -4,23 +4,14 @@ import { useEffect, useState } from "react";
 import { ClipboardPaste } from "lucide-react";
 
 /**
- * Colle le presse-papier dans le champ qui le porte.
+ * Colle le presse-papier dans le champ qui le porte, posé au bout du champ.
  *
- * Il vit **dans** le champ, au bout à droite, et pas au-dessus en toutes
- * lettres : c'est un geste sur ce champ-là, et une action posée à côté de son
- * étiquette se lit comme une seconde étiquette. À l'intérieur, sa place dit
- * déjà sur quoi elle agit — c'est la convention de tous les champs qui portent
- * une action, et elle n'a pas besoin d'un mot.
+ * `readText` n'existe pas partout (Firefox ne l'expose pas aux pages, Chrome
+ * peut refuser la permission) : le bouton ne s'affiche que là où l'API existe.
+ * C'est un raccourci ; le clavier mobile propose le code, la frappe reste.
  *
- * `readText` n'existe pas partout — Firefox ne l'expose pas aux pages, et Chrome
- * peut demander une permission puis se voir refuser. Le bouton ne s'affiche donc
- * que là où il marche, et disparaît ailleurs plutôt que d'échouer sous le doigt.
- * Ce n'est pas le seul chemin vers le champ : le clavier mobile propose le code
- * de lui-même, et la frappe reste possible. C'est un raccourci, pas un passage.
- *
- * La détection est faite après le montage : la même page rendue sur le serveur
- * ne sait rien du presse-papier, et afficher puis retirer le bouton ferait
- * sauter la mise en page.
+ * Détection après le montage : le serveur ne connaît pas le presse-papier, et
+ * l'interroger au rendu ferait diverger l'hydratation.
  */
 export function BoutonColler({
   onTexte,
@@ -46,8 +37,7 @@ export function BoutonColler({
     try {
       onTexte(await navigator.clipboard.readText());
     } catch (erreur: unknown) {
-      // Un refus de permission n'est pas une panne : le champ reste là, et la
-      // frappe aussi. On trace sans rien afficher — il n'y a rien à corriger.
+      // Un refus de permission n'est pas une panne : tracé, rien à afficher.
       console.info("Le presse-papier n'a pas pu être lu.", erreur);
     }
   }

@@ -12,21 +12,14 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
 /**
  * Ce qui suit une réponse à choix.
  *
- * Le passage est déjà écrit — il l'a été au clic sur l'option, en une seule
- * action. Ce bouton ne note plus rien, il enchaîne.
+ * Le passage est déjà écrit au clic sur l'option : ce bouton ne note rien, il
+ * enchaîne.
  *
- * Une bonne réponse n'est pas félicitée : l'écran dit ce qui est, et la
- * récompense est l'espacement qui s'allonge. Une mauvaise réponse donne la
- * réponse attendue — sans elle, l'échec n'apprend rien.
+ * Le verdict n'est écrit que pour les lecteurs d'écran : à l'écran, les options
+ * le portent déjà.
  *
- * Le verdict n'est pas écrit. Les options le portent déjà : la bonne est
- * surlignée, la sienne marquée quand elle est fausse. Le redire en toutes lettres
- * juste au-dessus du bouton faisait une ligne qui n'ajoutait rien à qui voit
- * l'écran. Elle reste, muette, pour qui l'entend.
- *
- * Juste, on enchaîne tout de suite. Faux, le bouton attend le temps de lire le
- * pourquoi — et il dit qu'il attend : un bouton mort sans raison se clique trois
- * fois avant qu'on comprenne.
+ * Faux, le bouton attend le temps de lire le pourquoi, et dit qu'il attend : un
+ * bouton inerte sans raison se clique plusieurs fois avant qu'on comprenne.
  */
 export function CorrectionFermee({
   juste,

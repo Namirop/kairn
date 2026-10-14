@@ -11,71 +11,19 @@ import type { QuestionDeVitrine } from "@/lib/db/depot-de-visite";
 import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
 /**
- * Les questions écrites sur l'un des concepts de l'essai, et leurs formats.
+ * Les questions écrites sur l'un des concepts de l'essai, derrière leurs noms
+ * de format : le visiteur clique, la question change, et il comprend la
+ * rotation sans explication. Les quatre sont déjà écrites (un seul appel), en
+ * montrer une seule n'économiserait rien.
  *
- * **C'est ici que se prouve la moitié du produit qu'on ne montrait pas.** Le
- * bloc précédent s'intitulait « Ce qu'on te reposera » et posait une question,
- * une seule, en corps de texte, sous les concepts : on lisait un paragraphe de
- * plus. Rien ne disait qu'un concept en porte quatre, ni qu'elles changent de
- * forme d'un passage à l'autre — or c'est très exactement ce qui sépare Kairn
- * d'un paquet de cartes, et c'est écrit dans le positionnement du produit.
+ * Un format n'y paraît qu'une fois (`unParFormat`), dans un ordre fixe
+ * (`parOrdreDeFormat`) : deux formats identiques côte à côte contrediraient la
+ * démonstration. L'attente s'arrête avec l'interrogation, à 90 s, pour ne pas
+ * battre indéfiniment sous des concepts déjà affichés.
  *
- * Les quatre sont déjà écrites et déjà payées : le lot part en un appel, sur le
- * premier concept questionnable. N'en montrer qu'une ne faisait économiser
- * rien du tout.
- *
- * On les donne donc toutes, derrière leurs noms de format. Le visiteur clique,
- * la question change, et il vient de comprendre la rotation sans qu'on ait eu à
- * la lui expliquer. Le geste est le message.
- *
- * **L'attente montre la forme de ce qui arrive**, comme celle du découpage.
- * Elle ne disait qu'une ligne grise — « On les écrit, deux secondes. » — sous
- * une liste de concepts qui, elle, venait d'apparaître : rien ne bougeait, et
- * une phrase immobile sur une page qui vient de se remplir se lit comme une fin,
- * pas comme une suite. On pose donc les emplacements des quatre formats et celui
- * de la carte, aux mesures de ce qui va les remplacer.
- *
- * **Un format n'y paraît qu'une fois.** Deux « TEXTE À TROU » côte à côte —
- * servis en production le 28/08 — cassent la démonstration au moment même où
- * elle se fait : on vient de dire que les formulations changent de forme, et on
- * en montre deux de la même. Voir `unParFormat`, qui dit pourquoi la sélection
- * se fait ici et non à la génération.
- *
- * **L'attente d'ici s'arrête comme celle du découpage.** L'interrogation cesse à
- * quatre-vingt-dix secondes ; sans le dire, les emplacements des formats
- * continuaient de battre pour toujours sous des concepts déjà affichés, et rien
- * n'indiquait qu'il fallait un geste pour aller voir. Le cas demande un job
- * reporté — les questions n'ont jamais dépassé quarante-trois secondes en
- * production —, mais c'est le même mensonge que celui qu'on venait de corriger
- * à l'autre bout de la chaîne.
- *
- * **L'ordre des formats est fixe**, et ne suit plus celui du lot : voir
- * `parOrdreDeFormat`. Un QCM montre en plus ses propositions — annoncé sans
- * elles, il se lisait comme une question ouverte sous une étiquette qui promet
- * autre chose, et c'est le format le plus reconnaissable du lot qu'on rendait
- * illisible.
- *
- * **Des boutons à deux états, pas des onglets.** Le motif ARIA des onglets
- * impose la navigation aux flèches et un `tabindex` mouvant ; à demi
- * implémenté, il retire au clavier ce que la souris garde. Quatre boutons
- * `aria-pressed` disent la même chose, se tabulent tout seuls, et ne mentent
- * pas sur ce qu'ils sont.
- *
- * **Ce n'est plus une étiquette, c'est une étape.** Le bloc s'annonçait par un
- * libellé mono de douze pixels en capitales grises — le même traitement que
- * « CE QUE TU VEUX RETENIR » au-dessus du champ et que « EN ATTENDANT » à côté
- * du jeu. Trois étiquettes identiques sur un même écran ne hiérarchisent plus
- * rien : elles font un gabarit. Ce qui arrive ici est le second temps de la
- * démonstration, après les concepts, et il porte donc un titre comme eux.
- *
- * Ce qui l'en sépare est du **vide**, pas un filet : deux sujets ne se séparent
- * jamais par une ligne dans ce système. L'écart est celui de deux temps d'un
- * même écran, et il suffit à dire qu'on change de sujet.
- *
- * La phrase qui explique la rotation est passée **au-dessus** des formats.
- * Posée sous la carte, elle expliquait après coup ce que les boutons venaient
- * de faire ; posée avant, elle dit à quoi ils servent — et les deux temps de la
- * fenêtre prennent la même forme, titre puis sous-titre puis contenu.
+ * Des boutons `aria-pressed`, pas des onglets : le motif ARIA des onglets
+ * impose les flèches et un `tabindex` mouvant, et à demi implémenté il retire
+ * au clavier ce que la souris garde.
  */
 
 export function EchantillonDeQuestions({
@@ -114,14 +62,9 @@ export function EchantillonDeQuestions({
           {t("echantillon.titre", { nombre: montrables.length })}
         </h3>
 
-        {/* Sans mesure maximale, et c'est le seul texte de la fenêtre dans ce
-            cas. La règle du produit borne une colonne de lecture à une
-            soixantaine de signes ; celle-ci en fait cent quatre, mais c'est une
-            phrase unique sous un titre, pas un paragraphe — pliée en deux, elle
-            fabrique un bloc de texte là où il n'y a qu'une légende, et pousse
-            les formats d'une ligne vers le bas. Elle tient dans la fenêtre
-            (sept cent dix-sept points pour huit cents) et se plie d'elle-même
-            sur un téléphone. */}
+        {/* Sans mesure maximale, par exception : c'est une légende d'une ligne
+            (717 px dans une fenêtre de 800), pas un paragraphe. Pliée, elle
+            ferait un bloc et pousserait les formats vers le bas. */}
         <p className="text-petit text-stone-300">{t("echantillon.rotation")}</p>
       </header>
 
@@ -130,16 +73,9 @@ export function EchantillonDeQuestions({
           {/* Le bouton actif partage la surface de la carte qu'il commande :
               c'est ce qui les relie sans qu'aucune bordure ait à le dire. */}
           {montrables.length > 1 ? (
-            /* Quatre formats tiennent sur une ligne dans la fenêtre, et sur
-               aucun téléphone : « QCM TEXTE À TROU RÉPONSE COURTE CODE » fait
-               le double de la largeur disponible. Plié en `flex-wrap`, il
-               donnait trois noms puis un seul en dessous — la ligne orpheline
-               qu'on lit comme un oubli plutôt que comme une suite.
-
-               Deux colonnes de la largeur de leur contenu rendent le pli
-               régulier : deux et deux, chaque colonne réglée sur son nom le
-               plus long, et le bloc entier serré à gauche. Le même geste sert
-               aux propositions d'un QCM, pour la même raison. */
+            /* Sur téléphone, quatre formats ne tiennent pas sur une ligne et
+               `flex-wrap` laisserait un nom orphelin : deux colonnes de la
+               largeur de leur contenu plient deux et deux. */
             <div
               role="group"
               aria-label={t("echantillon.formats")}

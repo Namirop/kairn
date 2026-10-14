@@ -10,36 +10,12 @@ import { useLangue } from "@/lib/i18n/use-langue";
 /**
  * L'offre du compte, et le geste qui la change.
  *
- * Ici on paie ; sur la page de tarifs, on décide. La comparaison des deux
- * colonnes a déjà eu lieu — quelqu'un qui arrive sur cet écran a choisi, il lui
- * reste à cliquer. Refaire la grille comparative ici serait redemander une
- * décision déjà prise, et donner à un panneau de réglages l'allure d'une page
- * de vente.
+ * Ici on paie ; la comparaison des offres vit sur la page de tarifs. Le
+ * registre est donc celui des réglages, pas celui d'une page de vente.
  *
- * Le registre est donc celui des réglages : pas de display, pas d'accent, les
- * chiffres en mono comme partout où ce produit affiche une donnée.
- *
- * **Le nom de l'offre et son plafond sont un couple, et ils se touchent.** Ils
- * vivaient aux deux extrémités d'une rangée en `justify-between` : sur un écran
- * large, « Complet » et « 500 concepts par mois » se retrouvaient à neuf cents
- * pixels l'un de l'autre, et l'un des deux se lisait sans l'autre. Ce qu'on vient
- * vérifier sur cet écran, c'est justement leur rapport.
- *
- * **Un filet sépare l'offre de ce qu'on en fait.** Sans lui, l'identité, l'état
- * et les gestes s'empilaient à intervalle égal, et la carte n'avait pas de
- * structure — trois blocs de la même importance dont aucun n'ouvrait.
- *
- * **Les deux gestes tiennent la même rangée.** « Arrêter le renouvellement » et
- * « Factures et moyen de paiement » étaient séparés de soixante pixels de vide,
- * fabriqués par la place que chaque bouton réservait à un message d'erreur qui
- * n'arrive jamais. Ils appartiennent au même sujet — ce que je fais de mon
- * abonnement —, ils se lisent ensemble.
- *
- * **En anglais, rien ne se vend.** Premium n'est pas ouvert dans cette langue
- * (décision du 08/10/2026) : ni offre à prendre, ni lien vers les tarifs, ni
- * portail pour qui n'a jamais payé — la limite du plan gratuit est dite, et le
- * fait que Premium n'existe pas encore en anglais aussi. Un compte qui paie déjà
- * garde ses gestes et son portail : ce sont les siens, pas une vente.
+ * En anglais, rien ne se vend : Premium n'y est pas ouvert. Ni offre à prendre,
+ * ni lien vers les tarifs, ni portail pour qui n'a jamais payé. Un compte qui
+ * paie déjà garde ses gestes et son portail.
  */
 
 type Props = {
@@ -54,11 +30,8 @@ type Props = {
   /** On revient de Stripe, paiement accepté — le webhook n'est peut-être pas encore passé. */
   retourDePaiement: boolean;
   /**
-   * Le compte a un dossier chez Stripe.
-   *
-   * Vrai dès qu'il a approché le paiement une fois, même sans jamais avoir payé.
-   * C'est ce qui décide d'afficher le portail : sans dossier, il n'y a ni
-   * facture ni carte à y voir, et le lien mènerait à une erreur.
+   * Le compte a un dossier chez Stripe, même sans avoir jamais payé. Sans
+   * dossier, le lien vers le portail mènerait à une erreur.
    */
   dossier: boolean;
 };
@@ -131,13 +104,8 @@ export function TonOffre({
         ) : null}
       </div>
 
-      {/* L'offre à prendre est une carte sœur, pas un bloc dans la première.
-
-          Ce sont deux sujets — ce que tu as, ce que tu peux prendre — et les
-          emboîter donnait une surface teintée posée sur du papier, deux tons
-          qui ne se séparent que de quelques centièmes de luminance : le bloc qui
-          devait ressortir se fondait dans celui qui le contenait. Sur l'ombre du
-          panneau, le lichen tranche. */}
+      {/* Une carte sœur et non un bloc dans la première : emboîtées, les deux
+          surfaces sont trop proches en luminance pour se séparer. */}
       {!paye && ouvert && vend ? <OffreComplete /> : null}
     </section>
   );
@@ -160,9 +128,8 @@ function Etat({
 
   if (paye) return <>{t("renouvele", { terme: terme ?? "" })}</>;
 
-  // Le retour de Stripe et l'arrivée du webhook sont deux chemins distincts, et
-  // le navigateur gagne souvent la course. Sans cette phrase, quelqu'un qui
-  // vient de payer lit « Gratuit » et croit son paiement perdu.
+  // Le navigateur revient souvent de Stripe avant le webhook : sans cette
+  // phrase, on lirait « Gratuit » juste après avoir payé.
   if (retourDePaiement) return <>{t("enRoute")}</>;
 
   // En anglais, la fermeture du paiement ne se dit pas : il n'y a rien à

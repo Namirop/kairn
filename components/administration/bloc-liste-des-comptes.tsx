@@ -4,20 +4,9 @@ import { ABSENT, nombre } from "@/components/administration/formats";
 import type { CompteInscrit } from "@/lib/db/liste-des-comptes";
 
 /**
- * Les comptes nommés, un par ligne.
- *
- * Le bloc de chiffres au-dessus dit combien ils sont ; celui-ci dit qui. À
- * quatre comptes comme à quarante, c'est la seule vue qui permette d'écrire à
- * quelqu'un ou de rapprocher un retour de son auteur.
- *
- * Un vrai tableau, parce que les données sont homogènes et qu'on les compare
- * colonne par colonne — combien de comptes sans un seul passage, lesquels
- * approchent de leur plafond. Une liste de cartes rendrait cette comparaison
- * impossible.
- *
- * L'adresse porte le poids : c'est la colonne qu'on cherche, les autres se
- * lisent une fois la ligne trouvée. Les compteurs sont à droite en `tabular-nums`
- * pour que les hauteurs se comparent sans relire les chiffres.
+ * Les comptes nommés, un par ligne : la seule vue qui permette d'écrire à
+ * quelqu'un ou de rapprocher un retour de son auteur. Un tableau, pour comparer
+ * colonne par colonne.
  */
 const JOUR = new Intl.DateTimeFormat("fr-BE", { dateStyle: "medium" });
 const JOUR_ET_HEURE = new Intl.DateTimeFormat("fr-BE", { dateStyle: "medium", timeStyle: "short" });
@@ -40,9 +29,8 @@ export function BlocListeDesComptes({ comptes }: { comptes: CompteInscrit[] }) {
       intitule="Qui a un compte"
       contexte="Du plus récent au plus ancien. Les compteurs sont des totaux depuis l'inscription, pas des fenêtres."
     >
-      {/* Sept colonnes ne tiennent pas dans un téléphone, et les compresser les
-          rendrait illisibles toutes les sept. Le tableau défile donc seul, à
-          l'intérieur de sa boîte, sans emporter la page avec lui. */}
+      {/* Sept colonnes ne tiennent pas sur téléphone : le tableau défile dans
+          sa boîte, sans emporter la page. */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[46rem] border-collapse text-left">
           <thead>
@@ -61,9 +49,8 @@ export function BlocListeDesComptes({ comptes }: { comptes: CompteInscrit[] }) {
               <tr key={compte.id} className="border-b border-stone-300 last:border-b-0">
                 <td className="py-pas-2 pr-pas-4 text-petit text-stone-900">
                   <span className="font-medium">{compte.email}</span>
-                  {/* Une adresse non vérifiée est un compte qui n'a peut-être
-                      jamais ouvert son courrier : ça explique un rappel qui ne
-                      produit rien, et ça ne se devine nulle part ailleurs. */}
+                  {/* Une adresse non vérifiée explique un rappel qui ne produit
+                      rien. */}
                   {compte.emailVerifie ? null : (
                     <span className="text-mono ml-pas-2 font-mono text-stone-500">
                       non vérifiée

@@ -7,30 +7,13 @@ import { Popover as PopoverPrimitive, Tooltip as TooltipPrimitive } from "radix-
 import { cn } from "@/lib/utils";
 
 /**
- * Une explication qui s'ouvre au survol, ou au doigt.
+ * Une explication qui s'ouvre au survol, ou au doigt : une info-bulle seule ne
+ * s'ouvre jamais sur un téléphone.
  *
- * **L'info-bulle seule ne s'ouvrait pas sur un téléphone, et c'est par
- * construction.** Une info-bulle répond à un survol ; un doigt ne survole rien.
- * Trois explications du tableau de bord — ce que compte le cairn, ce qu'est une
- * série, d'où vient le niveau — n'existaient donc que sur un ordinateur, sur le
- * seul écran que tout le monde ouvre, et sur un produit qui s'installe d'abord
- * sur un téléphone.
- *
- * **Au doigt, c'est une tape, pas un appui long.** L'appui long appartient déjà
- * au système sur iOS comme sur Android — sélection, menu contextuel, aperçu de
- * lien — et le disputer donne un geste qui marche une fois sur deux. Il n'est
- * annoncé nulle part, en plus : personne n'appuie longuement sur un chiffre pour
- * voir ce qui se passe. Une tape s'essaie.
- *
- * **L'appareil décide, pas la largeur de la fenêtre.** Un point d'interrogation
- * ouvert à `md` aurait donné le comportement tactile à une fenêtre étroite sur un
- * ordinateur, et le comportement de survol à une tablette tenue à l'horizontale.
- * Ce qui compte ici est la présence d'un pointeur fin, et le navigateur sait le
- * dire.
- *
- * Au premier rendu, on suppose le survol possible : c'est le cas où une
- * hésitation se verrait — un indice tactile qui clignote au chargement sur un
- * ordinateur. Sur un téléphone, la bascule se fait avant que le doigt n'arrive.
+ * Au doigt, une tape et non un appui long, qui appartient déjà au système sur
+ * iOS comme sur Android. C'est l'appareil qui décide (pointeur fin), pas la
+ * largeur de la fenêtre. Au premier rendu, on suppose le survol possible :
+ * sinon un indice tactile clignoterait au chargement sur ordinateur.
  */
 
 const POINTEUR_FIN = "(hover: hover) and (pointer: fine)";
@@ -52,13 +35,8 @@ export function useSurvolPossible(): boolean {
 }
 
 /**
- * La marque qui dit qu'il y a quelque chose à ouvrir, et seulement au doigt.
- *
- * Sur un ordinateur, le survol est sa propre découverte : on passe dessus, la
- * fiche s'ouvre, personne n'avait besoin d'être prévenu. Au doigt il n'y a pas
- * de survol, donc pas de découverte — sans cette marque, la tape existe mais
- * personne ne l'essaie. Elle est petite, grise, et se pose contre l'étiquette
- * qu'elle concerne.
+ * La marque qui dit qu'il y a quelque chose à ouvrir, au doigt seulement : sans
+ * survol, rien d'autre ne fait découvrir la tape.
  */
 export function IndiceTactile({ className }: { className?: string }) {
   const survol = useSurvolPossible();
@@ -111,9 +89,8 @@ export function Infobulle({
         <PopoverPrimitive.Content
           sideOffset={8}
           collisionPadding={16}
-          /* Le focus reste où il était. Le porter dans la fiche fait remonter la
-             page sur un téléphone, et referme le clavier virtuel s'il était
-             ouvert — pour deux lignes qu'on vient seulement de lire. */
+          /* Le focus reste où il était : le porter dans la fiche fait remonter
+             la page sur un téléphone et referme le clavier virtuel. */
           onOpenAutoFocus={(evenement) => evenement.preventDefault()}
           className={FICHE}
         >

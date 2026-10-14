@@ -7,15 +7,11 @@ import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
- * Le gabarit des deux pages légales.
- *
- * Elles ne sont pas du marketing : registre sobre, une colonne de lecture, pas
- * d'élément signature. Quelqu'un qui les ouvre cherche une information précise
- * et veut la trouver, pas être impressionné.
+ * Le gabarit des deux pages légales : registre sobre, une colonne de lecture.
  *
  * Les rubriques à compléter sont marquées visiblement plutôt que remplies d'un
- * texte plausible. Une fausse adresse dans des mentions légales est pire que pas
- * de mentions : elle a l'air d'un engagement.
+ * texte plausible : une fausse adresse dans des mentions légales a l'air d'un
+ * engagement.
  */
 
 export type RubriqueLegale = {
@@ -23,14 +19,9 @@ export type RubriqueLegale = {
   /** Ce qui est déjà vrai du produit et se dit sans attendre. */
   corps?: string[];
   /**
-   * Des couples à mettre en regard : une finalité et sa base légale, une durée et
-   * ce qu'elle borne.
-   *
-   * Une liste de définitions et non des phrases : « la finalité X repose sur la
-   * base Y » répété huit fois est illisible, alors que c'est exactement le genre
-   * d'information qu'on vient chercher par balayage. Et pas un tableau — deux
-   * colonnes dont l'une fait une ligne et l'autre trois se lisent moins bien
-   * qu'un terme suivi de sa définition.
+   * Des couples à mettre en regard (une finalité et sa base légale, une durée et
+   * ce qu'elle borne), rendus en liste de définitions : c'est une information
+   * qu'on cherche par balayage.
    */
   couples?: { terme: string; valeur: string }[];
   /** Ce que Romain doit renseigner. Rendu comme un trou, pas comme du texte. */

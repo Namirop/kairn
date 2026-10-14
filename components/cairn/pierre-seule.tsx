@@ -3,15 +3,8 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
 import { cn } from "@/lib/utils";
 
 /**
- * Une pierre posée au sol, seule.
- *
- * C'est l'empilement à un : la géométrie vient de `empiler`, comme le cairn du
- * tableau de bord et le compteur de session. Aucune forme de pierre n'est
- * redessinée ailleurs dans le produit — le jour où le logo arrivera, tout
- * dérivera de la même source.
- *
- * Elle sert les états vides : ce n'est pas une icône, c'est le premier état de
- * l'empilement. Rien n'est encore construit, mais la première pierre est là.
+ * Une pierre posée au sol, seule, pour les états vides : l'empilement à un,
+ * dont la géométrie vient de `empiler` comme toutes les pierres du produit.
  */
 export function PierreSeule({ graine, className }: { graine?: string; className?: string }) {
   const { pierres, hauteur, ySol } = empiler(1, graine ? [graine] : undefined);

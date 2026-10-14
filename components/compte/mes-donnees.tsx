@@ -8,15 +8,9 @@ import { MOT_DE_CONFIRMATION } from "@/lib/domain/confirmation-de-suppression";
 import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
- * Emporter ses données, ou les effacer.
- *
- * Deux droits, et ils ne se présentent pas pareil. L'export est un geste banal :
- * un lien, on clique, le fichier arrive. La suppression est irréversible, donc
- * elle demande de recopier un mot — pas de cocher une case, qui se coche sans
- * lire.
- *
- * Le formulaire de suppression ne s'ouvre qu'au clic. Laissé déplié dans les
- * réglages, il ferait du bouton rouge un élément de décor qu'on finit par frôler.
+ * Emporter ses données, ou les effacer. La suppression, irréversible, demande
+ * de recopier un mot (une case se coche sans lire), et son formulaire ne se
+ * déplie qu'au clic.
  */
 export function MesDonnees() {
   const [ouvert, setOuvert] = useState(false);
@@ -36,8 +30,6 @@ export function MesDonnees() {
       <p className="mt-pas-4 text-petit max-w-prose text-stone-500">{t("texte")}</p>
 
       <div className="mt-pas-4">
-        {/* Un lien et non un bouton : c'est une navigation vers un fichier, et
-            le navigateur sait déjà quoi en faire. */}
         <a
           href="/api/mon-compte/export"
           download

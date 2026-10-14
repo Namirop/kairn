@@ -4,26 +4,14 @@ import type { ReactNode } from "react";
 import { motion, useReducedMotion, type Transition } from "motion/react";
 
 /**
- * Comment la page publique arrive : en plusieurs temps, et une seule fois.
+ * Comment la page publique arrive : en plusieurs temps, une seule fois. Le
+ * mouvement ne sert qu'à donner un ordre de lecture (le constat, puis son
+ * retournement) : pas d'échelle, de rotation ni de flou, et `once` pour qu'un
+ * panneau ne rejoue pas son entrée à chaque remontée.
  *
- * Rien n'y clignote et rien n'y rebondit. Le mouvement fait une chose et une
- * seule : il **donne un ordre de lecture**. « Tu lis beaucoup » puis « Tu retiens
- * peu » n'est pas un titre de deux lignes, c'est un constat et son retournement ;
- * les afficher ensemble laisse l'œil choisir par où commencer, les décaler d'un
- * dixième de seconde ne lui laisse pas le choix. C'est la seule chose que cette
- * animation-là achète, et c'est assez.
- *
- * D'où les réglages : quatorze pixels de montée, pas cinquante — un déplacement
- * qu'on sent sans le regarder ; aucune échelle, aucune rotation, aucun flou ;
- * `once`, parce qu'un panneau qui rejoue son entrée à chaque remontée devient un
- * carrousel. Et rien ne part avant d'être en vue : au chargement, l'ouverture est
- * déjà dans le pli, donc elle joue tout de suite, et les panneaux du dessous
- * attendent qu'on descende jusqu'à eux.
- *
- * **Quand le mouvement est refusé, il n'y a pas d'animation dégradée : il n'y en a
- * pas.** Les deux composants rendent alors un simple bloc, sans opacité initiale
- * ni transformation — pas même une transition « instantanée », qui laisse toujours
- * une classe et un style à zéro sur chaque élément de la page.
+ * Mouvement réduit : un simple bloc, sans opacité initiale ni transformation —
+ * même une transition « instantanée » laisserait un style à zéro sur chaque
+ * élément.
  */
 
 /** Un déplacement qu'on sent sans le regarder. */
@@ -45,19 +33,10 @@ const TEMPS = {
 };
 
 /**
- * Le temps d'une ligne de titre : une pierre qu'on pose.
- *
- * **Elle vient d'en haut, et c'est ce qui fait l'empilement.** Le reste de la
- * page monte de quatorze pixels — un contenu qui arrive. Une pierre, elle,
- * descend sur celle d'en dessous : c'est le geste du cairn, et l'inverser
- * suffisait à ce qu'on ne le reconnaisse pas. Elle tombe de cinquante-six
- * pixels, quatre fois la course ordinaire, et s'arrête franchement — sans
- * rebond, parce qu'une pierre calée ne rebondit pas.
- *
- * **Et elle prend son temps.** À un dixième de seconde d'écart, les deux lignes
- * arrivaient presque ensemble et l'effet passait sans se voir. L'écart des
- * titres est donc réglé à part, dans `Apparition` : c'est le seul endroit de la
- * page où l'on veut voir le geste plutôt que le subir.
+ * Le temps d'une ligne de titre : elle descend sur la précédente, comme une
+ * pierre sur le cairn, là où le reste de la page monte. Inverser le sens
+ * suffit à ce qu'on ne reconnaisse plus le geste. Son écart, plus long, se
+ * règle par `ecart` sur l'`Apparition`.
  */
 const CHUTE_PIERRE_PX = 56;
 
@@ -72,10 +51,8 @@ const PIERRE = {
 
 /**
  * La suite : elle ne bouge pas elle-même, elle cadence ses `Temps`.
- *
- * `attente` retarde le premier temps. Elle sert quand deux suites se répondent
- * dans la même vue — la colonne de texte de l'ouverture et l'empilement à côté
- * d'elle, qui ne doivent pas démarrer ensemble.
+ * `attente` retarde le premier temps, pour deux suites qui se répondent dans la
+ * même vue.
  */
 export function Apparition({
   attente = 0,
@@ -109,11 +86,8 @@ export function Apparition({
 /**
  * Un temps de la suite. Hors d'une `Apparition`, il ne fait rien.
  *
- * `balise` existe pour les temps qui vivent **dans** un texte : le modèle de
- * contenu d'un titre n'admet que du texte, et y glisser une division produit un
- * document invalide. Les deux lignes de l'ouverture sont dans son `h1`, donc ce
- * sont des `span` — à charge de l'appelant de les passer en bloc s'il veut deux
- * lignes.
+ * `balise="span"` pour un temps à l'intérieur d'un titre, dont le modèle de
+ * contenu n'admet pas de `div` ; à l'appelant de le passer en bloc.
  */
 export function Temps({
   balise = "div",

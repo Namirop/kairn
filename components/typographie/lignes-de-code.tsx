@@ -3,24 +3,12 @@ import { cn } from "@/lib/utils";
 import { debutDuCommentaire } from "@/lib/domain/commentaire-de-code";
 
 /**
- * Les lignes d'un extrait, peintes.
+ * Les lignes d'un extrait, peintes. Une seule nuance, le commentaire : pas de
+ * coloration syntaxique, la palette n'a pas de couleurs à y consacrer.
  *
- * **Une seule nuance, et c'est le commentaire.** Un thème complet peindrait sept
- * couleurs là où le produit n'en porte qu'une, et cet accent-là appartient au
- * lichen et à l'ember. Le commentaire n'est pas une catégorie de plus : c'est la
- * seule partie d'une ligne qui ne s'exécute pas, et sur l'extrait qui a fait
- * écrire ce composant, c'était lui qui portait l'explication. Il s'écarte donc
- * d'un ton, et rien d'autre ne bouge.
- *
- * **L'extrait défile dans sa boîte, jamais la page.** Une ligne de code est
- * aussi longue qu'elle l'est, et la couper à la fenêtre en fait une ligne
- * différente de celle qu'on a déposée. C'est le seul endroit du produit où l'on
- * accepte un défilement horizontal, et il est borné à ce cadre — avec son propre
- * ascenseur, parce que celui du système est un rail clair en travers d'un bloc
- * sombre.
- *
- * À part, parce que deux cadres les montrent : la carte dans le flux du texte,
- * et la même en grand par-dessus la page.
+ * L'extrait défile dans sa boîte, jamais la page : couper une ligne de code
+ * à la fenêtre la changerait. Seul défilement horizontal du produit, avec son
+ * propre ascenseur — celui du système est un rail clair sur un bloc sombre.
  */
 export function LignesDeCode({
   texte,

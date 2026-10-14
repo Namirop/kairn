@@ -5,39 +5,18 @@ import { useLangue } from "@/lib/i18n/use-langue";
 import { cn } from "@/lib/utils";
 
 /**
- * Les deux offres, côte à côte.
+ * Les deux offres, côte à côte, de forme identique pour que la seule
+ * différence saute aux yeux : le nombre de concepts, seule chose que le produit
+ * lit du plan. C'est lui qui porte la display, le prix passe dessous.
  *
- * Deux colonnes parce qu'on achète en comparant, et qu'une comparaison sur deux
- * écrans n'en est pas une. C'est le seul endroit du produit où deux blocs de
- * même forme se répondent : ailleurs, une grille de cartes identiques serait le
- * signe qu'on n'a pas su hiérarchiser. Ici, l'égalité de forme est le propos —
- * ce qui diffère entre les deux doit sauter aux yeux, donc tout le reste doit
- * être identique.
- *
- * **Une seule ligne les sépare vraiment** : le nombre de concepts. Le dire est
- * plus honnête que d'aligner sept fonctions cochées des deux côtés pour donner
- * du volume à la colonne payante — et ça se vérifie, puisque rien d'autre dans
- * le produit ne lit le plan.
- *
- * **C'est donc lui qui porte la display, et le prix qui passe dessous.** Les
- * deux colonnes ouvraient sur leur prix en grand : sept euros contre zéro, ce
- * qui met en avant la seule chose dont le visiteur se méfie et enterre la seule
- * qu'il compare. Le rapport de un à dix se lit maintenant de loin, et le prix
- * arrive après, à la taille d'un renseignement — ce qu'il est, à sept euros.
- *
- * **La colonne vendue est posée sur du papier, l'autre reste à plat sur
- * l'ombre.** Elle se désignait par un filet de lichen, qui était le seul accent
- * de la page ; le contraste de matière dit la même chose plus fort, sans dépenser
- * la couleur, et c'est la forme que ce produit donne partout à ce qui compte. Le
- * rembourrage est le même des deux côtés — sans quoi les deux colonnes ne se
- * liraient plus sur les mêmes lignes, et une comparaison désalignée n'en est pas
- * une.
+ * Le rembourrage est le même des deux côtés, posée ou non : sans quoi les deux
+ * colonnes ne se liraient plus sur les mêmes lignes.
  */
 
 export function Offres() {
   const t = useTranslations("site.tarifs.offres");
-  // Premium n'est pas vendu en anglais (décision du 08/10) : la colonne payante
-  // y dit la limite, sans prix en euros ni rien qui mène à une caisse.
+  // Premium n'est pas vendu en anglais : la colonne payante y dit la limite,
+  // sans prix en euros ni rien qui mène à une caisse.
   const vendable = useLangue() === "FR";
 
   return (
@@ -114,11 +93,6 @@ function Offre({
     <div className={cn("p-pas-6 md:p-pas-8", vendue && "rounded-carte bg-surface-papier")}>
       <p className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">{nom}</p>
 
-      {/* Le nombre est la seule chose qui distingue les deux offres. Il prend
-          donc la display et l'échelle des grands nombres du produit — la même
-          que le compteur du jour, qui est l'autre chiffre qu'on vient lire. La
-          colonne gratuite le porte en gris : elles ne se valent pas, et le dire
-          par la teinte évite de le dire par un badge. */}
       <p
         className={cn(
           "mt-pas-4 font-display text-nombre leading-none font-medium tabular-nums",

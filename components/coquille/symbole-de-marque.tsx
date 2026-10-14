@@ -1,20 +1,15 @@
 import { cadreDuSymbole, empilementDuLogo, nuanceDuRang } from "@/lib/design/marque";
 
 /**
- * L'empilement du logo.
+ * L'empilement du logo. Il diffère du cairn du tableau de bord sur deux points.
  *
- * Il appelle la même fonction que le cairn du tableau de bord, et en dispose
- * autrement sur deux points seulement.
+ * La nuance est imposée par le rang, pas tirée : un logo demande une
+ * dégradation franche, la plus sombre en bas.
  *
- * **La nuance est imposée par le rang, pas tirée.** Le cairn du tableau de bord
- * garde le tirage — c'est ce qui rend chaque empilement personnel. Un logo demande
- * l'inverse : une dégradation franche, la plus sombre en bas.
- *
- * **Le sommet est une pierre entièrement lichen.** Dans `Cairn`, seule son arête
- * l'est ; à seize pixels, une arête d'un pixel et demi disparaît. C'est le seul
- * point de couleur de toute l'identité, et il ne s'inverse pas sur fond sombre —
- * les pierres passent en gris clairs, le sommet reste lichen. Il porte 3,7 contre
- * 1 sur la roche, au-dessus des trois pour un exigés d'un objet graphique.
+ * Le sommet est une pierre entièrement lichen, et non une arête : à 16 px, une
+ * arête d'un pixel et demi disparaît. Il ne s'inverse pas sur fond sombre ; sur
+ * la roche, il porte environ 7 contre 1, au-dessus des 3 exigés d'un objet
+ * graphique.
  */
 
 const NUANCES = ["fill-stone-900", "fill-stone-800", "fill-stone-700"] as const;

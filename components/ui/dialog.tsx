@@ -46,10 +46,9 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "gap-pas-4 p-pas-6 rounded-carte bg-surface-papier fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 outline-none",
-          // Une fenêtre plus haute que l'écran défile en elle-même. Sans ça elle
-          // est centrée puis coupée aux deux bouts, et ce qu'on perd en bas est
-          // toujours le bouton qui valide. Le contenu doit tenir sans défiler —
-          // c'est un garde-fou, pas une permission de grandir.
+          // Garde-fou : une fenêtre plus haute que l'écran défile en elle-même,
+          // sinon centrée elle serait coupée en bas, là où est le bouton qui
+          // valide. Le contenu doit quand même tenir sans défiler.
           "max-h-[calc(100dvh-2rem)] overflow-y-auto",
           "data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
           className,

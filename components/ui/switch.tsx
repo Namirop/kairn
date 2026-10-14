@@ -6,15 +6,8 @@ import { Switch as SwitchPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 /**
- * Interrupteur retokenisé.
- *
- * Un réglage qui a deux états se présente comme un interrupteur, pas comme une
- * valeur à lire : « activé » écrit dans une liste demande de chercher où on le
- * change. La piste est un galet, le curseur une pierre claire, et l'état actif
- * porte l'accent — c'est un signal, ce que cet accent est censé faire.
- *
- * Le contour reste visible en position éteinte : une piste sans bord sur une
- * surface claire ne se lit plus comme un objet cliquable.
+ * Interrupteur retokenisé. Le contour reste visible en position éteinte : sans
+ * bord sur une surface claire, la piste ne se lit plus comme cliquable.
  */
 function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimitive.Root>) {
   return (

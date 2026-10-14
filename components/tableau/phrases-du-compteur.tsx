@@ -4,22 +4,12 @@ import { ROUTES } from "@/lib/auth/routes";
 import { PLAFOND_SESSION } from "@/lib/domain/selection-session";
 
 /**
- * La phrase du compteur, quand il est à zéro.
+ * La phrase du compteur, quand il est à zéro. Quatre zéros distincts : rien
+ * déposé, questions en cours d'écriture, journée faite, rien à revoir.
  *
- * **Quatre zéros, pas un.** Rien n'a jamais été déposé ; les concepts sont là
- * mais leurs questions s'écrivent ; la journée est faite ; ou il n'y a
- * simplement rien à revoir. Les trois premiers se disaient déjà ; le troisième,
- * non — et c'est le seul qui se lisait faux.
- *
- * **« Les prochains concepts reviendront d'eux-mêmes » était un mensonge une
- * fois sur deux.** Cette phrase s'affichait aussi quand vingt-sept concepts
- * attendaient derrière un plafond atteint : ils ne revenaient pas d'eux-mêmes,
- * ils étaient au bout d'une file. Un écran qui annonce le calme au-dessus d'un
- * paragraphe qui annonce l'attente n'est pas seulement fouillis, il est faux.
- *
- * La journée faite se reconnaît à ce qu'on a revu quelque chose : le plafond est
- * journalier, donc un compteur à zéro derrière des passages faits ne veut dire
- * qu'une chose.
+ * La journée faite se reconnaît à ce qu'on a revu quelque chose : le plafond
+ * est journalier, et la phrase « calme » serait fausse si des concepts
+ * attendent derrière lui.
  */
 export function PhraseDuJour({
   aDesAtoms,
@@ -42,17 +32,9 @@ export function PhraseDuJour({
 }
 
 /**
- * Pourquoi des concepts dus ne seront pas servis aujourd'hui.
- *
- * L'écran disait « une session s'arrête à vingt », en toutes lettres, et c'était
- * faux deux fois. Faux sur le nombre — le plafond se règle, et quelqu'un qui l'a
- * mis à dix lisait vingt. Faux sur la raison — on peut être arrêté à deux parce
- * qu'on en a déjà revu dix-huit, et « une session s'arrête à vingt » sous un
- * compteur affichant deux ne s'explique pas tout seul.
- *
- * **Il ne parle plus de la journée entamée.** C'est maintenant la phrase du
- * compteur qui le dit, et le redire ici faisait lire deux fois le même fait à
- * trois lignes d'écart — la moitié du fouillis de cet écran tenait là.
+ * Pourquoi des concepts dus ne seront pas servis aujourd'hui. Le plafond cité
+ * est celui de la personne, qui se règle. La journée entamée n'est pas redite
+ * ici : c'est `PhraseDuJour` qui la porte.
  */
 export function PourquoiCertainsAttendent({
   enAttente,

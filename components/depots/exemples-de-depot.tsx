@@ -6,19 +6,10 @@ import { useLangue } from "@/lib/i18n/use-langue";
 import { cn } from "@/lib/utils";
 
 /**
- * L'onboarding, et il tient là.
- *
- * Pas de visite guidée au premier lancement : trois fenêtres qu'on enchaîne sans
- * lire ne laissent rien, et retardent le seul moment qui compte — voir le
- * produit fonctionner. Le premier écran de dépôt fait le travail tout seul.
- *
- * Les trois exemples sont volontairement sans rapport entre eux. C'est le
- * contraste qui porte le message « on peut déposer n'importe quoi », et il le
- * porte mieux qu'une phrase qui le dirait, parce qu'on le comprend en cliquant
- * plutôt qu'en lisant.
- *
- * Ils remplissent le champ au lieu de déposer directement : le geste reste
- * celui de l'utilisateur, et il peut encore modifier ou renoncer.
+ * L'onboarding tient là : pas de visite guidée, le premier dépôt fait le
+ * travail. Les trois exemples sont volontairement sans rapport entre eux, pour
+ * dire qu'on peut déposer n'importe quoi. Ils remplissent le champ sans
+ * l'envoyer : le dépôt reste le geste de l'utilisateur.
  */
 export function ExemplesDeDepot({ onChoisir }: { onChoisir: (texte: string) => void }) {
   const t = useTranslations("depots.formulaire");
@@ -33,13 +24,9 @@ export function ExemplesDeDepot({ onChoisir }: { onChoisir: (texte: string) => v
 }
 
 /**
- * Les trois puces seules, sans la phrase qui les introduit.
- *
- * Elles servent deux fois : au premier dépôt de l'application, sous la consigne
- * d'onboarding, et sous le champ de l'essai public, où le panneau a déjà dit ce
- * qu'on attend et où il ne reste qu'à lever la panne d'inspiration. Deux
- * contextes, deux phrases d'introduction ; les puces, elles, ne changent pas —
- * c'est le même contraste de trois natures sans rapport qui porte le message.
+ * Les trois puces seules, sans la phrase qui les introduit : elles servent au
+ * premier dépôt de l'application et sous le champ de l'essai public, chacun
+ * avec sa propre introduction.
  */
 export function PucesDExemples({
   onChoisir,

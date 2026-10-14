@@ -3,22 +3,15 @@
 import { useEffect, useState, type RefObject } from "react";
 
 /**
- * L'encre qui s'efface au bas d'une zone dont le texte continue.
+ * L'encre qui s'efface au bas d'une zone dont le texte continue : ce qui
+ * remplace l'ascenseur masqué par `sans-ascenseur`, sans quoi plus rien ne dit
+ * qu'il reste du contenu.
  *
- * C'est ce qui remplace l'ascenseur du champ de dépôt, et l'utilitaire
- * `sans-ascenseur` pose la condition : on ne retire pas la barre sans mettre
- * autre chose à sa place, sinon plus rien ne dit qu'il reste du contenu. Ici
- * c'est un fondu, et il ne ment pas — il ne paraît que lorsqu'il y a vraiment
- * quelque chose sous le pli, et il s'en va dès qu'on est descendu au bout.
+ * Il ne paraît que s'il y a vraiment quelque chose sous le pli : posé sans
+ * condition, il délaverait la dernière ligne d'un texte entier.
  *
- * **Il lui fallait donc un état, et un fondu permanent n'aurait pas suffi.** Posé
- * sans condition, il délave la dernière ligne d'un texte court qui tombe pile au
- * bas de la zone : on lit un texte coupé là où il est entier, ce qui est
- * exactement le mensonge inverse de celui qu'on corrige.
- *
- * Le fondu part de la couleur du creux, donc il se confond avec lui et ne se
- * voit que sur ce qu'il recouvre. Il est haut de deux lignes : au-dessous, il ne
- * mord que sur le rembourrage et ne se voit pas du tout.
+ * Le fondu part de la couleur du creux (`surface-ombre`) : il ne se voit que
+ * sur ce qu'il recouvre.
  */
 export function VoileDeFin({
   zone,
@@ -36,8 +29,7 @@ export function VoileDeFin({
 
     const mesurer = () => {
       // Un pixel de tolérance : les hauteurs de défilement sont fractionnaires,
-      // et l'égalité stricte laisserait un voile allumé au bas d'une zone dont on
-      // a atteint la fin.
+      // et l'égalité stricte laisserait le voile allumé en fin de zone.
       setReste(champ.scrollTop + champ.clientHeight < champ.scrollHeight - 1);
     };
 

@@ -5,26 +5,15 @@ import { PhraseQuiTourne, usePhraseQuiTourne } from "@/components/site/phrase-qu
 import type { EtapeDeLAttente } from "@/lib/domain/catalogue-dattente";
 
 /**
- * Ce qu'on montre d'un dépôt tant qu'il n'a rien donné.
+ * Ce qu'on montre d'un dépôt tant qu'il n'a rien donné : la phrase qui tourne
+ * de l'essai, pour qu'une chaîne qui travaille ne ressemble pas à un écran
+ * coincé.
  *
- * **Le même dispositif que l'essai de la landing, sur l'écran d'un dépôt.** La
- * voix de l'attente existait déjà, et elle ne servait qu'aux visiteurs : qui
- * dépose depuis son compte voyait une étiquette grise et deux phrases immobiles,
- * pendant quinze à quarante secondes. Rien ne distinguait une chaîne qui tourne
- * d'un écran resté coincé, et c'est précisément à ce moment-là qu'on se demande
- * si le produit a planté.
+ * La mise en page reprend celle d'`EtatVide` sans le composer : son constat est
+ * une chaîne, celui-ci un paragraphe qui se remplace en fondu.
  *
- * La mise en page est celle d'`EtatVide` — la pierre au sol, le constat, le
- * contexte — parce que c'est bien la même chose qu'on regarde : un écran qui n'a
- * encore rien à montrer. Seule la première ligne change, et c'est tout ce qu'on
- * lui demande. Elle n'est pas composée avec `EtatVide` pour autant : son constat
- * est un paragraphe qui se remplace en fondu, là où `EtatVide` attend une chaîne
- * de caractères, et lui faire accepter les deux aurait coûté plus de détours que
- * la ligne de balisage qu'on répète ici.
- *
- * La place de la phrase est réservée : deux lignes sur téléphone, une sur écran
- * large. Sans ça, une phrase qui passe de une à deux lignes pousse le contexte
- * vers le bas au milieu de l'attente, ce qui se lit comme un défaut d'affichage.
+ * La place de la phrase est réservée (deux lignes sur téléphone, une sur écran
+ * large), sinon le contexte saute quand elle change de longueur.
  */
 export function AttenteDuDepot({
   etape,

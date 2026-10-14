@@ -10,25 +10,14 @@ import { ABANDON_MS, AVEU_MS, pauseApres } from "@/lib/depots/rythme-de-lattente
 /**
  * L'écran de détail se recharge tout seul quand le découpage aboutit.
  *
- * Il fallait rafraîchir à la main pour voir ses concepts arriver, sur le seul
- * écran où l'on va justement pour les attendre. La landing savait déjà le faire
- * pour l'essai ; c'était le même besoin, à un écran près.
+ * Il ne rend rien lui-même : `router.refresh()` rejoue le composant serveur,
+ * pour ne pas tenir deux fois le rendu d'un dépôt. Il n'interroge que l'état et
+ * le nombre de concepts ; tant qu'ils n'ont pas bougé, un tour ne coûte qu'une
+ * requête.
  *
- * **Il ne rend rien lui-même, il recharge la page.** L'alternative aurait été de
- * lui faire afficher les concepts à mesure, et il aurait alors fallu tenir deux
- * fois le rendu d'un dépôt : une fois côté serveur pour l'arrivée sur la page,
- * une fois ici pour la mise à jour. `router.refresh()` rejoue le composant
- * serveur avec des données fraîches — un seul rendu, celui qui existe déjà.
- *
- * **Il n'interroge que ce qui bouge.** L'état de la chaîne et le nombre de
- * concepts, jamais le texte ni les questions. Tant que ces deux valeurs sont
- * celles qu'on a servies, il n'y a rien à recharger, et le tour n'aura coûté
- * qu'une requête.
- *
- * **Il s'arrête**, aux mêmes bornes que l'essai (voir `rythme-de-lattente`) :
- * il ralentit à quinze secondes et renonce à quatre-vingt-dix, où ce n'est plus
- * une extraction lente mais un job perdu que le cron reprendra. Un écran qui
- * interroge pour l'éternité est un onglet qui chauffe dans une poche.
+ * Il s'arrête aux mêmes bornes que l'essai (`rythme-de-lattente`) : il avoue la
+ * lenteur à 15 s et renonce à 90 s, où c'est un job perdu que le cron
+ * reprendra, plus une extraction lente.
  */
 export function SuivreLAvancement({
   inputId,
@@ -56,8 +45,7 @@ export function SuivreLAvancement({
 
       if (!vivant) return;
 
-      // Le dépôt a disparu sous nos pieds — supprimé dans un autre onglet. La
-      // page s'en rendra compte mieux que nous en se rechargeant.
+      // Dépôt supprimé ailleurs (un autre onglet) : la page rechargée le dira.
       if (!suite) {
         router.refresh();
         return;
@@ -84,9 +72,8 @@ export function SuivreLAvancement({
     };
   }, [inputId, etat, concepts, router]);
 
-  // Le seul moment où ce composant a quelque chose à dire : l'attente dure plus
-  // que d'habitude. Le reste du temps il travaille sans se montrer, et l'état
-  // du dépôt est déjà écrit au-dessus par la page.
+  // Il ne se montre que si l'attente s'allonge : l'état du dépôt est déjà
+  // écrit par la page.
   if (!lent) return null;
 
   return (

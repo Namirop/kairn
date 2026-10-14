@@ -5,26 +5,13 @@ import { densiteDuSymbole } from "@/lib/design/marque";
 /**
  * La marque : un empilement, un mot, ou les deux.
  *
- * **Tout ce qui affiche la marque passe par ici.** Aucun écran ne redessine les
- * pierres ni ne réécrit le mot à côté d'un symbole — c'est la promesse que ce
- * fichier porte depuis le début, et elle est maintenant tenue par construction :
- * la géométrie vient d'`empiler()`, pas d'un tracé recopié à la main.
+ * Tout ce qui affiche la marque passe par ici ; la géométrie vient
+ * d'`empiler()`. Seule exception : `app/opengraph-image.tsx` recompose le
+ * verrouillage en styles en ligne, son moteur de rendu ne lisant pas de classes.
+ * Le symbole y reste partagé (`symboleSeul()`).
  *
- * Une exception, et elle est nommée : `app/opengraph-image.tsx` recompose le
- * verrouillage à la main. Son moteur de rendu n'est pas un navigateur — il ne lit
- * ni classe utilitaire ni feuille de style, seulement des styles en ligne. Le
- * symbole y reste partagé (`symboleSeul()`, donc `empiler()`) ; seul l'assemblage
- * est refait. C'est le prix d'une image cuite, et il n'y en a qu'une.
- *
- * « Kairn » se compose en nom propre : une capitale, le reste en bas de casse.
- * Les capitales espacées d'avant en faisaient une étiquette de section, du même
- * registre que « AUJOURD'HUI » ou « SESSION » — un nom de produit ne se range pas
- * parmi ses propres intertitres.
- *
- * **La pierre sur le i et le symbole ne coexistent jamais.** Mot seul, le point du
- * i est une pierre : c'est ce qui rattache le mot à l'identité quand rien d'autre
- * ne le fait. Dans le verrouillage, le symbole est déjà là, et deux pierres
- * raconteraient deux fois la même chose. La règle vaut dans les deux sens.
+ * La pierre sur le i et le symbole ne coexistent jamais : le point du i en
+ * pierre n'existe que pour le mot seul.
  */
 
 export type VarianteDeMarque = "symbole" | "mot" | "verrouillage";
@@ -56,14 +43,9 @@ export function Marque({
     return <SymboleDeMarque clair={clair} taille={taille} pierres={densiteDuSymbole(taille)} />;
   }
 
-  // Le verrouillage suit **la même règle de densité** que le symbole seul, et ce
-  // n'est pas la consigne d'origine : elle voulait cinq pierres partout, au motif
-  // que le verrouillage est un usage de grande taille. Le motif est juste, la
-  // règle ne l'était pas — un verrouillage se pose aussi dans un en-tête, où son
-  // symbole fait vingt-quatre pixels et où cinq étages de cinq pixels donnent un
-  // pâté. Le seuil dit la même chose que l'intention, mais il la vérifie :
-  // au-dessus de soixante-quatre pixels le verrouillage porte bien ses cinq
-  // pierres, en dessous il en porte trois et reste lisible.
+  // Le verrouillage suit la même règle de densité que le symbole seul : il se
+  // pose aussi dans un en-tête, où cinq pierres sur vingt-quatre pixels feraient
+  // un pâté.
   return (
     <span className="gap-pas-2 inline-flex items-center">
       <SymboleDeMarque clair={clair} taille={taille} pierres={densiteDuSymbole(taille)} />

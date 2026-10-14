@@ -16,17 +16,12 @@ import { cn } from "@/lib/utils";
  * des Atoms rend l'empilement propre à chacun et stable dans le temps. Sans
  * graines, le composant reste utilisable à partir d'un simple compteur.
  *
- * **Ce n'est plus un seul empilement.** Au-delà d'une dizaine de pierres, une
- * pile unique se rétrécissait en aiguille dans une boîte de largeur fixe ; passé
- * le palier, la pierre suivante ouvre donc un cairn de plus à droite. La règle
- * et la géométrie vivent dans `tracerLeSentier` — ici on ne fait que la
- * dessiner.
+ * Passé un palier, la pierre suivante ouvre un cairn de plus à droite, pour
+ * qu'une pile unique ne devienne pas une aiguille. La règle et la géométrie
+ * vivent dans `tracerLeSentier`.
  *
- * La pierre du sommet du **dernier** cairn se pose en arrivant : c'est celle
- * qu'on vient de gagner, et son arête porte le lichen.
- *
- * L'animation est un supplément, jamais un préalable : c'est ce que dit
- * `useAnimationPossible`, et le geste de la pose vit dans `PoseDePierre`.
+ * L'animation est un supplément, jamais un préalable : voir
+ * `useAnimationPossible` et `PoseDePierre`.
  */
 export function Cairn({
   nombre,
@@ -44,7 +39,6 @@ export function Cairn({
   const immobile = useReducedMotion() ?? false;
   const anime = useAnimationPossible(immobile);
   const { cairns, largeur, hauteur, ySol, total } = tracerLeSentier(nombre, graines);
-  // Ce que le dessin dit à qui ne le voit pas.
   const legende =
     total === 0
       ? t("legendeVide")
@@ -61,9 +55,8 @@ export function Cairn({
     >
       <SolDuCairn clair={clair} largeur={largeur} />
       {cairns.map((cairn) => (
-        // Le décalage du cairn est porté par ce groupe, et la place de la pierre
-        // dans son empilement par le sien : chacun sa translation, aucune à
-        // recomposer.
+        // Le décalage du cairn est porté ici, la place de la pierre par son
+        // propre groupe : aucune translation à recomposer.
         <g key={cairn.premierRang} transform={`translate(${cairn.decalage} 0)`}>
           {cairn.pierres.map((pierre, rang) => (
             <PierrePosee
