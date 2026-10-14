@@ -28,17 +28,12 @@ function ligneeDuCache(model: string): LigneeCache {
   return "anthropic";
 }
 
-/** Un envoi groupé est facturé moitié prix, entrée comme sortie. */
-const REMISE_GROUPEE = 0.5;
-
 /** Ce qu'un appel a consommé. Les tokens de cache sont comptés à part. */
 export type Consommation = {
   inputTokens: number;
   outputTokens: number;
   cacheCreationTokens?: number;
   cacheReadTokens?: number;
-  /** Vrai si la requête est partie dans un envoi groupé. */
-  groupe?: boolean;
 };
 
 export function pricingFor(model: string): ModelPricing {
@@ -59,9 +54,7 @@ export function computeCostUsd(model: string, consommation: Consommation): strin
     consommation.inputTokens +
     (consommation.cacheCreationTokens ?? 0) * multiplicateurs.ecriture +
     (consommation.cacheReadTokens ?? 0) * multiplicateurs.lecture;
-  const remise = consommation.groupe ? REMISE_GROUPEE : 1;
-  const dollars =
-    ((entree * entreePerMillion + consommation.outputTokens * sortiePerMillion) * remise) / 1e6;
+  const dollars = (entree * entreePerMillion + consommation.outputTokens * sortiePerMillion) / 1e6;
 
   return dollars.toFixed(8);
 }

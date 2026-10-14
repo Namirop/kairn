@@ -3,7 +3,7 @@ import { callAI } from "@/lib/ai/client";
 import { prisma } from "@/lib/db/client";
 import { readAiConfig } from "@/lib/ai/config";
 import { reserverLesDeuxPlaces } from "@/lib/ai/reservation";
-import { lireReservationsDuJour, reserverAppelsModele } from "@/lib/db/ai-quota";
+import { lireReservationsDuJour, reserverAppelModele } from "@/lib/db/ai-quota";
 import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
 import { expectFailure, record } from "./journal";
 
@@ -188,26 +188,16 @@ export async function verifierPlafond(): Promise<void> {
       `compteur à ${await lireReservationsDuJour()}`,
     );
 
-    // Une réservation multiple prend ses places toutes ensemble ou aucune : à
-    // deux places libres, une demande de trois est refusée en entier.
-    const troisSurDeux = await reserverAppelsModele(SATURE + 2, 3);
-    const deuxSurDeux = await reserverAppelsModele(SATURE + 2, 2);
-    record(
-      "Une réservation multiple prend ses places d'un bloc, ou aucune",
-      !troisSurDeux.obtenue && deuxSurDeux.obtenue && deuxSurDeux.utilisees === SATURE + 2,
-      `trois refusées, puis deux accordées jusqu'à ${deuxSurDeux.utilisees}`,
-    );
-
     // La première réservation d'une journée UTC insère sa ligne sans passer par
-    // la condition de plafond : une demande plus grosse que le plafond entier
-    // s'y installerait juste après minuit.
+    // la condition de plafond : un plafond à zéro laisserait passer un appel
+    // juste après minuit.
     await prisma.aiCallQuota.deleteMany({ where: { day: jour } });
 
-    const plusGrosQueLePlafond = await reserverAppelsModele(SATURE, SATURE + 1);
+    const surPlafondNul = await reserverAppelModele(0);
     record(
-      "Une demande plus grosse que le plafond est refusée, même sur une journée vierge",
-      !plusGrosQueLePlafond.obtenue && (await lireReservationsDuJour()) === 0,
-      `compteur à ${await lireReservationsDuJour()} après une demande de ${SATURE + 1} sur ${SATURE}`,
+      "Un plafond à zéro refuse tout, même sur une journée vierge",
+      !surPlafondNul.obtenue && (await lireReservationsDuJour()) === 0,
+      `compteur à ${await lireReservationsDuJour()} après une demande sur un plafond nul`,
     );
   } finally {
     // Le compteur peut avoir été effacé au-dessus : on le repose tel qu'il était.
