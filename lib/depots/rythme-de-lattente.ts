@@ -1,26 +1,11 @@
 /**
- * Le rythme auquel un écran redemande où en est une extraction.
+ * Le rythme auquel un écran redemande où en est une extraction, partagé par
+ * l'essai de la landing et le détail d'un dépôt.
  *
- * Deux écrans attendent la même chose : l'essai de la landing, et le détail
- * d'un dépôt. Ils partagent donc les mêmes valeurs — deux cadences qui doivent
- * être égales et qui vivraient à deux endroits finiraient par diverger, et
- * c'est l'un des deux écrans qui abandonnerait trop tôt sans que personne
- * l'ait décidé.
- *
- * **Une seconde d'abord.** Le résultat apparaît au plus tard une seconde après
- * être prêt, l'appel est léger, et une demi-seconde de retard se voit sur cinq.
- *
- * **À quinze secondes, on le dit.** Une minute de tourniquet est une minute où
- * plus personne ne regarde — quelqu'un qui attend cinq secondes d'habitude est
- * parti bien avant. Mais on ne s'arrête pas pour autant : un pavé de quatre
- * mille caractères peut mettre vingt secondes sans que rien n'aille mal, et
- * couper à quinze condamnerait une extraction qui allait aboutir. On ralentit,
- * l'écran dit qu'il ne sait plus, et si le résultat tombe il s'affiche de
- * lui-même.
- *
- * **À quatre-vingt-dix secondes, on arrête vraiment.** Au-delà, ce n'est plus
- * une extraction lente, c'est un job reporté ou perdu : le cron le reprendra,
- * et l'écran n'a plus rien à apprendre en insistant.
+ * - Toutes les secondes d'abord : l'appel est léger.
+ * - À 15 s, l'écran dit que c'est long et ralentit, sans s'arrêter : un long
+ *   texte peut prendre 20 s sans que rien n'aille mal.
+ * - À 90 s, il s'arrête : c'est un job reporté ou perdu, le cron le reprendra.
  */
 
 export const RYTHME_VIF_MS = 1000;
@@ -34,21 +19,13 @@ export function pauseApres(ecouleMs: number): number {
 }
 
 /**
- * Ce que l'écran a le droit de dire de son attente.
+ * Ce que l'écran peut dire de son attente.
  *
- * Les trois états sont là parce que **deux d'entre eux se disaient de la même
- * façon**, et que ça mentait. Passé quinze secondes, l'écran affichait « reviens
- * plus tard » et retirait tout signe de vie ; il continuait pourtant à
- * interroger toutes les cinq secondes, et le résultat s'affichait tout seul s'il
- * tombait. Quelqu'un qui lisait cet écran croyait donc que le travail s'était
- * arrêté alors qu'il tournait, et l'écran de l'attente longue était impossible à
- * distinguer de celui de l'abandon.
- *
- * - `NORMALE` : on attend, et c'est l'attente ordinaire.
- * - `LONGUE` : c'est plus long que la normale, on le dit, **et on cherche
- *   encore**. Le résultat arrivera de lui-même.
- * - `ABANDONNEE` : l'interrogation s'est arrêtée. Là seulement, il faut un geste
- *   pour reprendre — et là seulement, « reviens plus tard » est vrai.
+ * - `NORMALE` : l'attente ordinaire.
+ * - `LONGUE` : plus long que d'habitude, mais l'écran interroge encore et le
+ *   résultat s'affichera de lui-même. Ne pas la confondre avec l'abandon.
+ * - `ABANDONNEE` : l'interrogation s'est arrêtée ; il faut un geste pour
+ *   reprendre.
  */
 export type EtatDeLAttente = "NORMALE" | "LONGUE" | "ABANDONNEE";
 
