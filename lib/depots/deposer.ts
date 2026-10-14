@@ -4,7 +4,6 @@ import { reserverDepot, rendreDepot } from "@/lib/db/quota-depots";
 import {
   CARACTERES_MAXIMUM,
   CONSIGNE_MAXIMUM,
-  IMAGE_TROP_LOURDE,
   longueurEnClairAvec,
   TAILLE_MAXIMALE_OCTETS,
   type TraduireLesRefus,
@@ -103,10 +102,9 @@ export async function deposer(
 
   if (capture && !capture.ok) {
     await rendreDepot(userId, fuseau);
-    // Le lecteur d'images refuse en français : on traduit son refus ici.
     return {
       ok: false,
-      motif: capture.motif === IMAGE_TROP_LOURDE ? t("imageTropLourde") : t("imageIllisible"),
+      motif: capture.refus === "lourde" ? t("imageTropLourde") : t("imageIllisible"),
     };
   }
 
