@@ -2,7 +2,6 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import {
   type Abonnement,
-  estPayant,
   PLAFOND_GRATUIT,
   PLAFOND_PAYANT,
   type Plan,
@@ -106,39 +105,6 @@ describe("plafondDeConcepts", () => {
 
           expect(plafondDeConcepts(abonnement, tard)).toBeLessThanOrEqual(
             plafondDeConcepts(abonnement, tot),
-          );
-        },
-      ),
-    );
-  });
-});
-
-describe("estPayant", () => {
-  it("dit non à qui n'a rien payé, et à qui a fini de payer", () => {
-    expect(estPayant(SANS_ABONNEMENT, LE_12_A_MIDI)).toBe(false);
-    expect(
-      estPayant({ plan: "ANNUEL", finDePeriode: new Date("2026-01-01T00:00:00Z") }, LE_12_A_MIDI),
-    ).toBe(false);
-  });
-
-  it("dit oui pendant que le terme court", () => {
-    expect(
-      estPayant({ plan: "ANNUEL", finDePeriode: new Date("2027-01-01T00:00:00Z") }, LE_12_A_MIDI),
-    ).toBe(true);
-  });
-
-  it("dit exactement ce que le plafond dit", () => {
-    fc.assert(
-      fc.property(
-        fc.constantFrom<Plan>("GRATUIT", "MENSUEL", "ANNUEL"),
-        fc.option(fc.date({ noInvalidDate: true }), { nil: null }),
-        fc.date({ noInvalidDate: true }),
-        (plan, finDePeriode, maintenant) => {
-          const abonnement: Abonnement = { plan, finDePeriode };
-          const paye = estPayant(abonnement, maintenant);
-
-          expect(plafondDeConcepts(abonnement, maintenant)).toBe(
-            paye ? PLAFOND_PAYANT : PLAFOND_GRATUIT,
           );
         },
       ),

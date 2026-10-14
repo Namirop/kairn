@@ -163,6 +163,7 @@ droit, et où en est le dossier TVA.
 | `npm run test:watch`             | Vitest en veille                                                                                                 |
 | `npm run format`                 | Prettier en écriture                                                                                             |
 | `npm run format:check`           | Prettier en vérification                                                                                         |
+| `npm run knip`                   | Liste le code mort : fichiers, exports et dépendances inutilisés                                                 |
 | `npm run docs:check`             | Liste les docs dont le code couvert a changé sur la branche                                                      |
 | `npm run db:migrate`             | `prisma migrate dev`                                                                                             |
 | `npm run db:deploy`              | `prisma migrate deploy`, pour un environnement déployé                                                           |

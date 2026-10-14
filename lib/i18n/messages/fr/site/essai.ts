@@ -59,7 +59,7 @@ export const essai = {
       "Tes concepts sont déjà là, c’est l’échantillon qui manque. Il s’écrit toujours, et il s’affichera ici la prochaine fois que tu passes.",
     verifier: "Vérifier maintenant",
   },
-  /** Les noms de format, recopiés de `LIBELLE_FORMAT` : la landing en démontre la rotation. */
+  /** Les noms de format, recopiés de `depots.formats` : la landing en démontre la rotation. */
   libelleFormat: {
     MCQ: "QCM",
     CLOZE: "Texte à trou",

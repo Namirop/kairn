@@ -173,6 +173,12 @@ describe("mediane", () => {
     expect(mediane([])).toBe(null);
   });
 
+  it("rend un zéro sans signe, quel que soit l'ordre de 0 et -0", () => {
+    expect(mediane([0, -0])).toBe(0);
+    expect(mediane([-0, 0])).toBe(0);
+    expect(mediane([-0])).toBe(0);
+  });
+
   it("ne dépend pas de l'ordre d'entrée", () => {
     fc.assert(
       fc.property(

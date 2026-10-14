@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { anciennete, delaiAvant, delaiAvantLeJour, joursAvant, type Duree } from "./echeance";
+import { anciennete, delaiAvantLeJour, joursAvant, type Duree } from "./echeance";
 import { localDay } from "./local-day";
 import { unFuseau, unInstant } from "./local-day.test";
 
@@ -94,7 +94,6 @@ describe("propriété : le jour civil de l'utilisateur fait foi", () => {
           // jour civil : c'est la prémisse de la propriété, pas son objet.
           fc.pre(localDay(echeance, fuseau) === localDay(maintenant, fuseau));
 
-          expect(delaiAvant(echeance, maintenant, fuseau)).toEqual(jours(0));
           expect(joursAvant(echeance, maintenant, fuseau)).toBe(0);
         },
       ),
@@ -146,42 +145,6 @@ describe("propriété : joursAvant est antisymétrique", () => {
   });
 });
 
-describe("delaiAvant", () => {
-  const maintenant = new Date("2026-01-15T09:00:00Z");
-
-  it("dit demain pour le jour suivant", () => {
-    expect(delaiAvant(new Date("2026-01-16T08:00:00Z"), maintenant, PARIS)).toEqual(jours(1));
-  });
-
-  it("compte en jours civils, pas en heures", () => {
-    // Douze heures plus tard mais déjà le lendemain à Paris : c'est « demain »,
-    // pas « aujourd'hui ».
-    expect(delaiAvant(new Date("2026-01-15T23:30:00Z"), maintenant, PARIS)).toEqual(jours(1));
-  });
-
-  it("dit aujourd'hui pour une échéance déjà passée", () => {
-    expect(delaiAvant(new Date("2026-01-10T08:00:00Z"), maintenant, PARIS)).toEqual(jours(0));
-    expect(delaiAvant(new Date("2026-01-15T02:00:00Z"), maintenant, PARIS)).toEqual(jours(0));
-  });
-
-  it("passe aux mois quand l'échéance est lointaine", () => {
-    expect(delaiAvant(new Date("2026-02-10T08:00:00Z"), maintenant, PARIS)).toEqual(jours(26));
-    expect(delaiAvant(new Date("2026-03-01T08:00:00Z"), maintenant, PARIS)).toEqual(mois(1));
-    expect(delaiAvant(new Date("2026-07-15T08:00:00Z"), maintenant, PARIS)).toEqual(mois(6));
-  });
-
-  it("ne dit jamais un retard, quel que soit l'écart", () => {
-    fc.assert(
-      fc.property(fc.integer({ min: -400, max: 400 }), (ecart) => {
-        const echeance = new Date(maintenant.getTime() + ecart * 24 * 60 * 60 * 1000);
-
-        return delaiAvant(echeance, maintenant, PARIS).nombre >= 0;
-      }),
-      { numRuns: 300 },
-    );
-  });
-});
-
 describe("delaiAvantLeJour", () => {
   const maintenant = new Date("2026-01-15T09:00:00Z");
 
@@ -201,7 +164,7 @@ describe("delaiAvantLeJour", () => {
     expect(delaiAvantLeJour("2026-01-17", tard, "UTC")).toEqual(jours(2));
   });
 
-  it("passe aux mois de la même façon que delaiAvant", () => {
+  it("passe aux mois quand le jour est lointain", () => {
     expect(delaiAvantLeJour("2026-07-15", maintenant, PARIS)).toEqual(mois(6));
   });
 });

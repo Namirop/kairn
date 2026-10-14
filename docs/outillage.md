@@ -15,6 +15,7 @@ une nouvelle. Le README, lui, liste ce qu'elles font. Les principes ci-dessous n
 | **Prettier**           | La forme du code, pour que les diffs ne portent que du sens                                                             |
 | **Vitest**             | La logique pure de `lib/domain/` et quelques modules purs de `lib/ai/`, `lib/paiement/` et du banc, sans base ni réseau |
 | **fast-check**         | Les règles vraies pour **toutes** les entrées, pas trois exemples choisis                                               |
+| **knip**               | Le code mort : fichiers, exports et dépendances que rien n'atteint (en CI)                                              |
 | **tsx**                | Exécute un `.ts` directement, sans étape de build — tous les scripts                                                    |
 | **Prisma CLI**         | Le schéma, les migrations, la console de base                                                                           |
 | **Stripe CLI**         | Le tunnel de webhooks vers la machine locale, et le catalogue                                                           |

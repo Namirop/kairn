@@ -57,11 +57,6 @@ export function plafondDeConcepts(abonnement: Abonnement, maintenant: Date): num
   return planEffectif(abonnement, maintenant) === "GRATUIT" ? PLAFOND_GRATUIT : PLAFOND_PAYANT;
 }
 
-/** Le compte paie-t-il, à cet instant ? */
-export function estPayant(abonnement: Abonnement, maintenant: Date): boolean {
-  return planEffectif(abonnement, maintenant) !== "GRATUIT";
-}
-
 /**
  * Combien de dépôts pour un plafond de concepts donné.
  *

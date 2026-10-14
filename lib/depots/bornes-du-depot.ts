@@ -1,5 +1,5 @@
-import { createTranslator } from "next-intl";
-import { depots } from "@/lib/i18n/messages/fr/depots";
+import type { createTranslator } from "next-intl";
+import type { depots } from "@/lib/i18n/messages/fr/depots";
 
 /**
  * Les bornes d'un dépôt, avec ou sans compte.
@@ -67,30 +67,6 @@ export function motsEnviron(caracteres: number): number {
 }
 
 /**
- * Le traducteur des refus figé en français, pour ce qui les affiche hors de la
- * zone du dépôt (l'essai de la landing, le lecteur d'images).
- */
-const enFrancais = createTranslator({
-  locale: "fr",
-  messages: { depots },
-  namespace: "depots.refus",
-});
-
-/**
- * @deprecated En français seulement. Hors de la zone du dépôt uniquement ;
- * ailleurs, `t("longueurEnClair", { caracteres, mots: motsEnviron(caracteres) })`.
- */
-export function longueurEnClair(caracteres: number): string {
-  return longueurEnClairAvec(enFrancais, caracteres);
-}
-
-/**
- * @deprecated En français seulement, pour `lib/images/capture.ts`. L'écran et le
- * dépôt disent `depots.refus.imageTropLourde` dans la langue de la personne.
- */
-export const IMAGE_TROP_LOURDE = enFrancais("imageTropLourde");
-
-/**
  * Ce qui cloche dans la longueur d'un essai, ou `null`.
  *
  * Le formulaire l'appelle pour refuser sur place, le serveur pour refuser
@@ -126,28 +102,12 @@ export function motifDeDefaut(defaut: DefautDeLongueur, t: TraduireLesRefus): st
   });
 }
 
-/** `longueurEnClair`, dite par le traducteur reçu. */
+/** Une longueur en signes et en mots, dite par le traducteur reçu. */
 export function longueurEnClairAvec(t: TraduireLesRefus, caracteres: number): string {
   return t("longueurEnClair", { caracteres, mots: motsEnviron(caracteres) });
 }
 
 /** Le traducteur de `depots.refus`, quel que soit le côté qui l'a fabriqué. */
-export type TraduireLesRefus = typeof enFrancais;
-
-/** @deprecated En français seulement, pour l'essai de la landing. Voir `motifDeDefaut`. */
-export const RIEN_A_DECOUPER = motifDeDefaut("vide", enFrancais);
-
-/** @deprecated En français seulement, pour l'essai de la landing. Voir `motifDeDefaut`. */
-export const TROP_COURT = motifDeDefaut("court", enFrancais);
-
-/** @deprecated En français seulement, pour l'essai de la landing. Voir `motifDeDefaut`. */
-export function tropLong(): string {
-  return motifDeDefaut("long", enFrancais);
-}
-
-/** @deprecated En français seulement, pour l'essai de la landing. Voir `defautDeLongueur`. */
-export function motifDeLongueur(texte: string): string | null {
-  const defaut = defautDeLongueur(texte);
-
-  return defaut ? motifDeDefaut(defaut, enFrancais) : null;
-}
+export type TraduireLesRefus = ReturnType<
+  typeof createTranslator<{ depots: typeof depots }, "depots.refus">
+>;

@@ -36,7 +36,7 @@ export const facettes: Record<VariantFacet, string> = {
 
 /**
  * Sous quelle forme une question est posée, dit à l'utilisateur. Le pendant de
- * `facettes` — voir `components/depots/libelle-format.ts`.
+ * `facettes`.
  */
 export const formats: Record<VariantFormat, string> = {
   MCQ: "QCM",

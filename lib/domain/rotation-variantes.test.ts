@@ -3,11 +3,11 @@ import fc from "fast-check";
 import {
   apresLePassage,
   assezEspacee,
-  choisirVariante,
   doitRegenerer,
   JOURS_ENTRE_REGENERATIONS,
   PASSAGES_AVANT_REGENERATION,
   type VarianteServable,
+  variantesEquivalentes,
 } from "./rotation-variantes";
 
 const JOUR_MS = 24 * 60 * 60 * 1000;
@@ -32,145 +32,6 @@ function variante(
 function lotNeuf(): VarianteServable[] {
   return FACETTES.map((facet) => variante(facet));
 }
-
-describe("choisirVariante", () => {
-  it("rend null quand le concept n'a aucune question active", () => {
-    expect(choisirVariante([], null)).toBeNull();
-  });
-
-  it("sert la facette la moins vue", () => {
-    const variantes = [
-      variante("RECOGNITION", 3, "2026-01-01"),
-      variante("MECHANISM", 1, "2026-01-02"),
-      variante("BOUNDARY", 2, "2026-01-03"),
-    ];
-
-    expect(choisirVariante(variantes, null)?.facet).toBe("MECHANISM");
-  });
-
-  it("départage deux facettes à égalité par la plus ancienne", () => {
-    const variantes = [
-      variante("RECOGNITION", 2, "2026-01-10"),
-      variante("MECHANISM", 2, "2026-01-03"),
-      variante("BOUNDARY", 2, "2026-01-07"),
-    ];
-
-    expect(choisirVariante(variantes, null)?.facet).toBe("MECHANISM");
-  });
-
-  it("fait passer une facette jamais servie avant une facette déjà vue", () => {
-    const variantes = [variante("RECOGNITION", 0, "2026-01-01"), variante("MECHANISM", 0, null)];
-
-    expect(choisirVariante(variantes, null)?.facet).toBe("MECHANISM");
-  });
-
-  it("ne sert jamais deux fois la même facette d'affilée", () => {
-    // La moins vue est aussi celle qui vient d'être servie : elle cède la place.
-    const variantes = [
-      variante("RECOGNITION", 0, "2026-01-10"),
-      variante("MECHANISM", 5, "2026-01-02"),
-    ];
-
-    expect(choisirVariante(variantes, "RECOGNITION")?.facet).toBe("MECHANISM");
-  });
-
-  it("repose la seule facette restante plutôt que de ne rien poser", () => {
-    const variantes = [variante("RECOGNITION", 4, "2026-01-10")];
-
-    expect(choisirVariante(variantes, "RECOGNITION")?.facet).toBe("RECOGNITION");
-  });
-
-  it("rend le même choix pour la même entrée", () => {
-    const variantes = lotNeuf();
-
-    expect(choisirVariante(variantes, null)).toEqual(choisirVariante(variantes, null));
-  });
-
-  it("parcourt les quatre facettes avant d'en répéter une", () => {
-    let variantes = lotNeuf();
-    let derniere: string | null = null;
-    const servies: string[] = [];
-
-    for (let tour = 0; tour < FACETTES.length; tour += 1) {
-      const choisie = choisirVariante(variantes, derniere);
-
-      if (!choisie) throw new Error("Une variante était attendue.");
-
-      servies.push(choisie.facet);
-      derniere = choisie.facet;
-      variantes = variantes.map((v) =>
-        v.id === choisie.id
-          ? { ...v, sessionCount: v.sessionCount + 1, lastSessionAt: new Date(2026, 0, tour + 1) }
-          : v,
-      );
-    }
-
-    expect(new Set(servies).size).toBe(FACETTES.length);
-  });
-
-  it("ne rend jamais la facette qu'on vient de servir tant qu'il en reste une autre", () => {
-    fc.assert(
-      fc.property(
-        fc.array(
-          fc.record({
-            facet: fc.constantFrom(...FACETTES),
-            sessionCount: fc.integer({ min: 0, max: 9 }),
-            trainingCount: fc.integer({ min: 0, max: 30 }),
-            vue: fc.integer({ min: 0, max: 40 }),
-          }),
-          { minLength: 1, maxLength: 12 },
-        ),
-        fc.constantFrom<string | null>(...FACETTES, null),
-        (entrees, derniere) => {
-          const variantes = entrees.map((entree, rang) => ({
-            id: `v-${rang}`,
-            facet: entree.facet,
-            sessionCount: entree.sessionCount,
-            trainingCount: entree.trainingCount,
-            lastSessionAt: new Date(2026, 0, 1 + entree.vue),
-          }));
-
-          const choisie = choisirVariante(variantes, derniere);
-
-          if (!choisie) return false;
-          if (choisie.facet !== derniere) return true;
-
-          // Elle n'a pu être reprise que parce qu'aucune autre facette n'existe.
-          return new Set(variantes.map((v) => v.facet)).size === 1;
-        },
-      ),
-      { numRuns: 300 },
-    );
-  });
-});
-
-describe("choisirVariante et les deux compteurs", () => {
-  it("ne regarde pas les passages d'entraînement pour choisir", () => {
-    // La première a été tournée vingt fois à l'entraînement, la seconde jamais.
-    // Si l'entraînement pesait sur la rotation, c'est la seconde qui sortirait.
-    const variantes = [
-      variante("RECOGNITION", 0, "2026-01-01", 20),
-      variante("MECHANISM", 1, "2026-01-02", 0),
-    ];
-
-    expect(choisirVariante(variantes, null)?.facet).toBe("RECOGNITION");
-  });
-
-  it("rend le même choix quel que soit l'usage en entraînement", () => {
-    fc.assert(
-      fc.property(
-        fc.array(fc.nat({ max: 50 }), { minLength: 4, maxLength: 4 }),
-        (entrainements) => {
-          const sans = FACETTES.map((facet, rang) => variante(facet, rang, "2026-01-01", 0));
-          const avec = sans.map((v, rang) => ({ ...v, trainingCount: entrainements[rang] ?? 0 }));
-
-          return choisirVariante(sans, null)?.id === choisirVariante(avec, null)?.id;
-        },
-      ),
-      { numRuns: 200 },
-    );
-  });
-});
 
 describe("doitRegenerer", () => {
   it("attend que chaque facette ait atteint le seuil", () => {
@@ -310,6 +171,153 @@ describe("apresLePassage", () => {
         return doitRegenerer(variantes);
       }),
       { numRuns: 50 },
+    );
+  });
+});
+
+/** La variante que l'appelant retiendrait sans départage : la première des équivalentes. */
+function premiereEquivalente(
+  variantes: VarianteServable[],
+  derniere: string | null,
+): VarianteServable | null {
+  return variantesEquivalentes(variantes, derniere)[0] ?? null;
+}
+
+describe("variantesEquivalentes, première retenue", () => {
+  it("rend null quand le concept n'a aucune question active", () => {
+    expect(premiereEquivalente([], null)).toBeNull();
+  });
+
+  it("sert la facette la moins vue", () => {
+    const variantes = [
+      variante("RECOGNITION", 3, "2026-01-01"),
+      variante("MECHANISM", 1, "2026-01-02"),
+      variante("BOUNDARY", 2, "2026-01-03"),
+    ];
+
+    expect(premiereEquivalente(variantes, null)?.facet).toBe("MECHANISM");
+  });
+
+  it("départage deux facettes à égalité par la plus ancienne", () => {
+    const variantes = [
+      variante("RECOGNITION", 2, "2026-01-10"),
+      variante("MECHANISM", 2, "2026-01-03"),
+      variante("BOUNDARY", 2, "2026-01-07"),
+    ];
+
+    expect(premiereEquivalente(variantes, null)?.facet).toBe("MECHANISM");
+  });
+
+  it("fait passer une facette jamais servie avant une facette déjà vue", () => {
+    const variantes = [variante("RECOGNITION", 0, "2026-01-01"), variante("MECHANISM", 0, null)];
+
+    expect(premiereEquivalente(variantes, null)?.facet).toBe("MECHANISM");
+  });
+
+  it("ne sert jamais deux fois la même facette d'affilée", () => {
+    // La moins vue est aussi celle qui vient d'être servie : elle cède la place.
+    const variantes = [
+      variante("RECOGNITION", 0, "2026-01-10"),
+      variante("MECHANISM", 5, "2026-01-02"),
+    ];
+
+    expect(premiereEquivalente(variantes, "RECOGNITION")?.facet).toBe("MECHANISM");
+  });
+
+  it("repose la seule facette restante plutôt que de ne rien poser", () => {
+    const variantes = [variante("RECOGNITION", 4, "2026-01-10")];
+
+    expect(premiereEquivalente(variantes, "RECOGNITION")?.facet).toBe("RECOGNITION");
+  });
+
+  it("rend le même choix pour la même entrée", () => {
+    const variantes = lotNeuf();
+
+    expect(premiereEquivalente(variantes, null)).toEqual(premiereEquivalente(variantes, null));
+  });
+
+  it("parcourt les quatre facettes avant d'en répéter une", () => {
+    let variantes = lotNeuf();
+    let derniere: string | null = null;
+    const servies: string[] = [];
+
+    for (let tour = 0; tour < FACETTES.length; tour += 1) {
+      const choisie = premiereEquivalente(variantes, derniere);
+
+      if (!choisie) throw new Error("Une variante était attendue.");
+
+      servies.push(choisie.facet);
+      derniere = choisie.facet;
+      variantes = variantes.map((v) =>
+        v.id === choisie.id
+          ? { ...v, sessionCount: v.sessionCount + 1, lastSessionAt: new Date(2026, 0, tour + 1) }
+          : v,
+      );
+    }
+
+    expect(new Set(servies).size).toBe(FACETTES.length);
+  });
+
+  it("ne rend jamais la facette qu'on vient de servir tant qu'il en reste une autre", () => {
+    fc.assert(
+      fc.property(
+        fc.array(
+          fc.record({
+            facet: fc.constantFrom(...FACETTES),
+            sessionCount: fc.integer({ min: 0, max: 9 }),
+            trainingCount: fc.integer({ min: 0, max: 30 }),
+            vue: fc.integer({ min: 0, max: 40 }),
+          }),
+          { minLength: 1, maxLength: 12 },
+        ),
+        fc.constantFrom<string | null>(...FACETTES, null),
+        (entrees, derniere) => {
+          const variantes = entrees.map((entree, rang) => ({
+            id: `v-${rang}`,
+            facet: entree.facet,
+            sessionCount: entree.sessionCount,
+            trainingCount: entree.trainingCount,
+            lastSessionAt: new Date(2026, 0, 1 + entree.vue),
+          }));
+
+          const choisie = premiereEquivalente(variantes, derniere);
+
+          if (!choisie) return false;
+          if (choisie.facet !== derniere) return true;
+
+          // Elle n'a pu être reprise que parce qu'aucune autre facette n'existe.
+          return new Set(variantes.map((v) => v.facet)).size === 1;
+        },
+      ),
+      { numRuns: 300 },
+    );
+  });
+});
+
+describe("variantesEquivalentes et les deux compteurs", () => {
+  it("ne regarde pas les passages d'entraînement pour choisir", () => {
+    // La première a été tournée vingt fois à l'entraînement, la seconde jamais.
+    // Si l'entraînement pesait sur la rotation, c'est la seconde qui sortirait.
+    const variantes = [
+      variante("RECOGNITION", 0, "2026-01-01", 20),
+      variante("MECHANISM", 1, "2026-01-02", 0),
+    ];
+
+    expect(premiereEquivalente(variantes, null)?.facet).toBe("RECOGNITION");
+  });
+
+  it("rend le même choix quel que soit l'usage en entraînement", () => {
+    fc.assert(
+      fc.property(
+        fc.array(fc.nat({ max: 50 }), { minLength: 4, maxLength: 4 }),
+        (entrainements) => {
+          const sans = FACETTES.map((facet, rang) => variante(facet, rang, "2026-01-01", 0));
+          const avec = sans.map((v, rang) => ({ ...v, trainingCount: entrainements[rang] ?? 0 }));
+
+          return premiereEquivalente(sans, null)?.id === premiereEquivalente(avec, null)?.id;
+        },
+      ),
+      { numRuns: 200 },
     );
   });
 });

@@ -44,15 +44,6 @@ export function startOfUtcDay(instant: Date): Date {
 }
 
 /**
- * Nombre d'appels émis depuis minuit UTC. Pour l'observation seulement :
- * l'autorisation passe par `reserverAppelModele()` (`lib/db/ai-quota.ts`), car
- * un compteur lu puis comparé laisse passer deux appels simultanés.
- */
-export async function countAiCallsToday(now: Date = new Date()): Promise<number> {
-  return prisma.aiCall.count({ where: { createdAt: { gte: startOfUtcDay(now) } } });
-}
-
-/**
  * Appels, tokens et dollars d'une fenêtre. Le banc d'évaluation s'en sert pour
  * chiffrer un dépôt : la dépense se lit au registre, elle ne s'estime pas.
  */
