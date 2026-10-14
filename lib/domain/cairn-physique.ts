@@ -1,6 +1,6 @@
 import { type Cadre } from "./cairn-collision";
 import { type Mobile } from "./cairn-impulsions";
-import { resoudre } from "./cairn-resolution";
+import { resoudre, type Appui } from "./cairn-resolution";
 import { LARGEUR_VUE, type Pierre } from "./cairn-stack";
 
 /**
@@ -155,6 +155,36 @@ function enMobile(solide: Corps, pierre: Pierre, pas: number): Mobile {
   };
 }
 
+/**
+ * Ce que devient une pierre libre une fois les contacts résolus : posée, freinée
+ * ou laissée à sa course.
+ */
+function apresLeContact(mobile: Mobile, appui: Appui, pas: number): Corps {
+  // Posée : le reste de vitesse est coupé net, sinon il vibre sous le seuil
+  // et la boucle ne s'arrête jamais.
+  const vitesse = Math.hypot(mobile.vx, mobile.vy);
+  const immobile = vitesse < SEUIL_REPOS && Math.abs(mobile.vr) < SEUIL_ROTATION;
+  const posee =
+    appui.touche && immobile && (appui.enfoncement < SEUIL_ENFONCEMENT || vitesse < SEUIL_FIGE);
+
+  // Appuyée et déjà lente, elle est freinée jusqu'à l'arrêt : sans ça, une
+  // pierre coincée vibre indéfiniment, trop lente pour se voir et trop vive
+  // pour être déclarée posée.
+  const parSeconde = immobile ? AMORTI_LENT : AMORTI_AU_CONTACT;
+  const freine = posee || !appui.touche ? 1 : parSeconde ** pas;
+
+  return {
+    x: mobile.boite.x,
+    y: mobile.boite.y,
+    rotation: mobile.boite.rotation,
+    vx: posee ? 0 : mobile.vx * freine,
+    vy: posee ? 0 : mobile.vy * freine,
+    vr: posee ? 0 : mobile.vr * freine,
+    libre: true,
+    repos: posee,
+  };
+}
+
 /** Avance la simulation d'un pas. `dt` est en secondes. */
 export function avancer(
   corps: Corps[],
@@ -180,29 +210,7 @@ export function avancer(
 
     if (!solide.libre || !mobile || !appui || !pierres[index]) return solide;
 
-    // Posée : le reste de vitesse est coupé net, sinon il vibre sous le seuil
-    // et la boucle ne s'arrête jamais.
-    const vitesse = Math.hypot(mobile.vx, mobile.vy);
-    const immobile = vitesse < SEUIL_REPOS && Math.abs(mobile.vr) < SEUIL_ROTATION;
-    const posee =
-      appui.touche && immobile && (appui.enfoncement < SEUIL_ENFONCEMENT || vitesse < SEUIL_FIGE);
-
-    // Appuyée et déjà lente, elle est freinée jusqu'à l'arrêt : sans ça, une
-    // pierre coincée vibre indéfiniment, trop lente pour se voir et trop vive
-    // pour être déclarée posée.
-    const parSeconde = immobile ? AMORTI_LENT : AMORTI_AU_CONTACT;
-    const freine = posee || !appui.touche ? 1 : parSeconde ** pas;
-
-    return {
-      x: mobile.boite.x,
-      y: mobile.boite.y,
-      rotation: mobile.boite.rotation,
-      vx: posee ? 0 : mobile.vx * freine,
-      vy: posee ? 0 : mobile.vy * freine,
-      vr: posee ? 0 : mobile.vr * freine,
-      libre: true,
-      repos: posee,
-    };
+    return apresLeContact(mobile, appui, pas);
   });
 }
 

@@ -1,18 +1,13 @@
-import type { ExtractAtomsOutput } from "@/lib/ai/schemas";
 import type { Depot } from "../corpus";
-import type { ConceptFige, DepotFige } from "../fige";
-import { attendusDuDepot, couvertureDesAttendus, tousLesAttendus } from "../attendus";
+import type { DepotFige } from "../fige";
+import { tousLesAttendus } from "../attendus";
 import { plonger } from "../mesures/embeddings";
 import { mesurerLeDepot, textesDuDepot } from "../mesures/signaux";
 import { signaler } from "../mesures/signalements";
-import { BUDGET_SORTIE_CAMPAGNE } from "../openrouter/campagne";
-import { extraireVia } from "../openrouter/extraction";
-import { jugerLesAttendusVia } from "../openrouter/juge-attendus";
-import { jugerLeResiduVia } from "../openrouter/juge-residu";
-import { jugerLesDoublonsVia, type Facture } from "../openrouter/juges";
-import { JUGE_PRINCIPAL, type ModeleOpenRouter } from "../openrouter/modeles";
-import { appelsPour } from "../juges/doublon";
-import { PAIRES_PAR_APPEL } from "./plan";
+import type { ModeleOpenRouter } from "../openrouter/modeles";
+import { extraireLaColonne } from "./extraction-de-colonne";
+import type { FactureCumulee } from "./facture-cumulee";
+import { jugerLeDepot, type VerdictsDesJuges } from "./juges-de-colonne";
 
 /**
  * L'émission d'une colonne de la campagne : extraction du challenger sur le
@@ -25,9 +20,6 @@ import { PAIRES_PAR_APPEL } from "./plan";
  * Le juge est `JUGE_PRINCIPAL` pour toutes les colonnes : seule l'extraction
  * varie.
  */
-
-/** Le fournisseur de Haiku refuse `reasoning` : voir `valider-le-juge.ts`. */
-const REASONING_HAIKU = false as const;
 
 export type ScoreDepot = {
   nom: string;
@@ -55,40 +47,35 @@ export type Statut =
 export type ScoreDeColonne = {
   challenger: ModeleOpenRouter;
   depots: ScoreDepot[];
-  factureExtraction: { in: number; out: number; usd: number; appels: number };
-  factureJuges: { in: number; out: number; usd: number; appels: number };
+  factureExtraction: FactureCumulee;
+  factureJuges: FactureCumulee;
   statut: Statut;
 };
 
-function ajouter(a: Facture, b: { in: number; out: number; usd: number; appels: number }): void {
-  b.in += a.inputTokens;
-  b.out += a.outputTokens;
-  b.usd += a.coutUsd;
-  b.appels += 1;
+type Arret = Exclude<Statut, { code: "complete" }>;
+
+function arreter(
+  code: Arret["code"],
+  libelle: string,
+  nom: string,
+  facture: FactureCumulee,
+  coutEstime: number,
+  loguer: (message: string) => void,
+): Arret {
+  const info = { code, nom, coutReel: facture.usd, coutEstime };
+  loguer(
+    `  ⨯ garde-fou dérive 2× ${libelle} déclenché après ${nom} — ${info.coutReel.toFixed(4)} $ contre ${info.coutEstime.toFixed(4)} $ estimés.`,
+  );
+  return info;
 }
 
-function motifCourt(erreur: unknown): string {
-  const cause = erreur instanceof Error && erreur.cause instanceof Error ? erreur.cause : null;
-  return erreur instanceof Error
-    ? cause
-      ? `${erreur.message} — cause : ${cause.message}`
-      : erreur.message
-    : String(erreur);
-}
-
-function faireDepotFige(nom: string, texte: string, extraction: ExtractAtomsOutput): DepotFige {
-  const concepts: ConceptFige[] = extraction.atoms.map((atome) => ({
-    concept: atome.concept,
-    tags: atome.tags,
-    uncertain: atome.uncertain,
-  }));
-  return {
-    nom,
-    texte,
-    nature: extraction.nature,
-    rejet: extraction.rejected,
-    concepts,
-  };
+/** Les attendus se plongent aussi, sinon `couvertureDesAttendus` casse à la première comparaison. */
+async function plongerLaColonne(figes: DepotFige[], loguer: (message: string) => void) {
+  const textes = [...figes.flatMap(textesDuDepot), ...tousLesAttendus()];
+  loguer(`  · plongée : ${textes.length} textes à faire vecteurs (doublons compris).`);
+  const passe = await plonger(textes);
+  loguer(`  · vecteurs : ${passe.calcules} calculés, ${passe.enCache} au cache.`);
+  return passe;
 }
 
 /**
@@ -105,187 +92,68 @@ export async function passerParColonne(
 ): Promise<ScoreDeColonne> {
   const factureExtraction = { in: 0, out: 0, usd: 0, appels: 0 };
   const factureJuges = { in: 0, out: 0, usd: 0, appels: 0 };
-  const figes: DepotFige[] = [];
-  const echecs = new Map<string, string>();
-
-  for (let rang = 0; rang < corpus.length; rang++) {
-    const depot = corpus[rang]!;
-    // Le texte du figé quand il existe, OCR déjà fait : rejouer l'OCR par
-    // challenger mesurerait autre chose que l'extraction.
-    const texte = textesDuFige.get(depot.nom) ?? depot.texte;
-    if (texte === "") {
-      echecs.set(depot.nom, "texte vide : ni figé ni corpus n'ont fourni de contenu");
-      figes.push({ nom: depot.nom, texte: "", rejet: null, concepts: [] });
-      continue;
-    }
-    try {
-      const { sortie, facture } = await extraireVia(challenger, texte, BUDGET_SORTIE_CAMPAGNE);
-      ajouter(facture, factureExtraction);
-      figes.push(faireDepotFige(depot.nom, texte, sortie));
-      loguer(
-        `  ✓ ${depot.nom} — ${sortie.atoms.length} concepts, ${(facture.coutUsd * 100).toFixed(2)} ¢ (cumul : ${factureExtraction.usd.toFixed(4)} $)`,
-      );
-    } catch (erreur) {
-      // `AICallFailedError` masque la cause d'origine (réponse du fournisseur,
-      // schéma refusé, timeout) : on journalise la chaîne complète.
-      const cause = erreur instanceof Error && erreur.cause instanceof Error ? erreur.cause : null;
-      const motif =
-        erreur instanceof Error
-          ? cause
-            ? `${erreur.message} — cause : ${cause.message}`
-            : erreur.message
-          : String(erreur);
-      echecs.set(depot.nom, motif);
-      figes.push({ nom: depot.nom, texte, rejet: null, concepts: [], echec: { motif } });
-      loguer(`  ✗ ${depot.nom} — échec : ${motif.slice(0, 400)}`);
-    }
-    // Ne coupe que s'il reste des dépôts : sur le dernier, le dépassement est
-    // consommé, et priver la colonne de ses juges effacerait la mesure.
-    const dernier = rang === corpus.length - 1;
-    if (!dernier && factureExtraction.usd > 2 * coutExtractionEstime) {
-      const info = {
-        code: "arret-2x-extraction" as const,
-        nom: depot.nom,
-        coutReel: factureExtraction.usd,
-        coutEstime: coutExtractionEstime,
-      };
-      loguer(
-        `  ⨯ garde-fou dérive 2× extraction déclenché après ${depot.nom} — ${info.coutReel.toFixed(4)} $ contre ${info.coutEstime.toFixed(4)} $ estimés.`,
-      );
-      return {
-        challenger,
-        depots: scoresPartiels(figes, echecs, new Map(), new Map(), new Map()),
+  const verdicts: VerdictsDesJuges = {
+    doublons: new Map(),
+    residus: new Map(),
+    attendus: new Map(),
+  };
+  const { figes, echecs, arretApres } = await extraireLaColonne(
+    challenger,
+    corpus,
+    textesDuFige,
+    coutExtractionEstime,
+    factureExtraction,
+    loguer,
+  );
+  const rendre = (statut: Statut): ScoreDeColonne => ({
+    challenger,
+    depots: scoresPartiels(figes, echecs, verdicts),
+    factureExtraction,
+    factureJuges,
+    statut,
+  });
+  if (arretApres !== null) {
+    return rendre(
+      arreter(
+        "arret-2x-extraction",
+        "extraction",
+        arretApres,
         factureExtraction,
-        factureJuges,
-        statut: info,
-      };
-    }
+        coutExtractionEstime,
+        loguer,
+      ),
+    );
   }
 
-  // Les attendus se plongent aussi, sinon `couvertureDesAttendus` casse à la
-  // première comparaison.
-  const textes = [...figes.flatMap(textesDuDepot), ...tousLesAttendus()];
-  loguer(`  · plongée : ${textes.length} textes à faire vecteurs (doublons compris).`);
-  const passe = await plonger(textes);
-  loguer(`  · vecteurs : ${passe.calcules} calculés, ${passe.enCache} au cache.`);
-
+  const passe = await plongerLaColonne(figes, loguer);
   const mesures = figes.map((depot) => mesurerLeDepot(depot, passe.vecteur));
   const signalements = mesures.map(signaler);
-
-  const doublons = new Map<string, number>();
-  const residus = new Map<string, { manques: number; inventions: number }>();
-  const attendus = new Map<string, { couverts: number; total: number }>();
 
   for (const signalement of signalements) {
     const depot = figes.find((f) => f.nom === signalement.nom);
     if (!depot || depot.echec) continue;
-
-    // En lots, pour tenir dans `TOKENS_DES_JUGES` sur un dépôt à beaucoup de
-    // paires (un challenger verbeux en signale 60 et plus).
-    if (signalement.doublons.length > 0) {
-      let confirmes = 0;
-      const nbLots = appelsPour(signalement.doublons.length);
-      for (let lot = 0; lot < nbLots; lot++) {
-        const debut = lot * PAIRES_PAR_APPEL;
-        const paires = signalement.doublons.slice(debut, debut + PAIRES_PAR_APPEL);
-        try {
-          const { verdicts, facture } = await jugerLesDoublonsVia(
-            JUGE_PRINCIPAL,
-            depot.nom,
-            paires,
-            undefined,
-            REASONING_HAIKU,
-          );
-          ajouter(facture, factureJuges);
-          confirmes += verdicts.filter((v) => v.independants === false).length;
-        } catch (erreur) {
-          const motif = motifCourt(erreur);
-          loguer(`  ✗ juge doublon ${depot.nom} lot ${lot + 1}/${nbLots} — ${motif.slice(0, 200)}`);
-        }
-      }
-      doublons.set(depot.nom, confirmes);
-    }
-
-    if (signalement.manques.length + signalement.inventions.length > 0) {
-      try {
-        const { sortie, facture } = await jugerLeResiduVia(
-          JUGE_PRINCIPAL,
-          depot.nom,
-          depot.texte,
-          signalement.manques,
-          signalement.inventions,
-          undefined,
-          REASONING_HAIKU,
-        );
-        if (facture) ajouter(facture, factureJuges);
-        residus.set(depot.nom, {
-          manques: sortie.manques.filter((m) => m.retenir === true).length,
-          inventions: sortie.inventions.filter((i) => i.soutenu === false).length,
-        });
-      } catch (erreur) {
-        loguer(`  ✗ juge résidu ${depot.nom} — ${motifCourt(erreur).slice(0, 200)}`);
-      }
-    }
-
-    if (attendusDuDepot(depot.nom).length > 0) {
-      try {
-        const couvertures = couvertureDesAttendus(depot.nom, depot.concepts, passe.vecteur);
-        const soumis = couvertures.map((c) => ({
-          attendu: c.attendu,
-          candidats: c.candidats.map((k) => k.concept),
-        }));
-        const { verdicts, facture } = await jugerLesAttendusVia(
-          JUGE_PRINCIPAL,
-          depot.nom,
-          soumis,
-          undefined,
-          REASONING_HAIKU,
-        );
-        if (facture) ajouter(facture, factureJuges);
-        attendus.set(depot.nom, {
-          couverts: verdicts.filter((v) => v.couvert === true).length,
-          total: verdicts.length,
-        });
-      } catch (erreur) {
-        loguer(`  ✗ juge attendus ${depot.nom} — ${motifCourt(erreur).slice(0, 200)}`);
-      }
-    }
-
+    await jugerLeDepot({
+      depot,
+      signalement,
+      vecteur: passe.vecteur,
+      verdicts,
+      facture: factureJuges,
+      loguer,
+    });
     if (factureJuges.usd > 2 * coutJugesEstime) {
-      const info = {
-        code: "arret-2x-juges" as const,
-        nom: depot.nom,
-        coutReel: factureJuges.usd,
-        coutEstime: coutJugesEstime,
-      };
-      loguer(
-        `  ⨯ garde-fou dérive 2× juges déclenché après ${depot.nom} — ${info.coutReel.toFixed(4)} $ contre ${info.coutEstime.toFixed(4)} $ estimés.`,
+      return rendre(
+        arreter("arret-2x-juges", "juges", depot.nom, factureJuges, coutJugesEstime, loguer),
       );
-      return {
-        challenger,
-        depots: scoresPartiels(figes, echecs, doublons, residus, attendus),
-        factureExtraction,
-        factureJuges,
-        statut: info,
-      };
     }
   }
 
-  return {
-    challenger,
-    depots: scoresPartiels(figes, echecs, doublons, residus, attendus),
-    factureExtraction,
-    factureJuges,
-    statut: { code: "complete" },
-  };
+  return rendre({ code: "complete" });
 }
 
 function scoresPartiels(
   figes: DepotFige[],
   echecs: Map<string, string>,
-  doublons: Map<string, number>,
-  residus: Map<string, { manques: number; inventions: number }>,
-  attendus: Map<string, { couverts: number; total: number }>,
+  { doublons, residus, attendus }: VerdictsDesJuges,
 ): ScoreDepot[] {
   return figes.map((f) => {
     const attendu = attendus.get(f.nom);
