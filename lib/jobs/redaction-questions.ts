@@ -5,7 +5,7 @@ import { lireLaConfigEffective } from "@/lib/ai/reglages-effectifs";
 import { contratDeGeneration } from "@/lib/ai/schemas";
 import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
 import { prisma } from "@/lib/db/client";
-import { finishJob, reprendreCeQuiManque } from "@/lib/db/generation-job";
+import { reprendreCeQuiManque } from "@/lib/db/generation-job";
 import type { GenerationJob } from "@/lib/db/types";
 import { ecrireQuestions } from "@/lib/db/variants";
 import { sansAffirmationMuette } from "@/lib/domain/affirmation-muette";
@@ -93,29 +93,6 @@ function conceptsSansQuestions(atomIds: string[], manquants: number[]): string[]
 
     return atomId ? [atomId] : [];
   });
-}
-
-/**
- * La relève d'un lot groupé : elle clôt le job, ou rend à la file ce qui
- * manque. Voir `reprendreCeQuiManque`.
- */
-export async function ecrireLesQuestionsDuJob(
-  jobId: string,
-  atomIds: string[],
-  lots: LotRendu[],
-): Promise<void> {
-  const manquants = await rangerLesLots(atomIds, lots);
-
-  if (manquants.length === 0) {
-    await finishJob(jobId, "DONE");
-    return;
-  }
-
-  const motif = `Aucune question rendue pour le concept ${manquants.join(", ")}.`;
-
-  if (await reprendreCeQuiManque(jobId, conceptsSansQuestions(atomIds, manquants), motif)) return;
-
-  await finishJob(jobId, "FAILED", motif);
 }
 
 /**

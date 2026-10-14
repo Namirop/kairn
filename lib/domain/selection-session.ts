@@ -1,4 +1,3 @@
-import { alternerLesSujets } from "./alternance-des-sujets";
 import { jourSuivant, localDay } from "./local-day";
 import { bornerLeNeuf } from "./part-de-nouveaute";
 import { parUrgence } from "./urgence-de-revision";
@@ -115,26 +114,6 @@ export function jourOuIlRevient(
 
   // Échéance passée ou du jour mais non servable : il a déjà servi, il revient demain.
   return echeance > aujourdhui ? echeance : jourSuivant(aujourdhui);
-}
-
-/**
- * La session du jour : ce qui est échu, borné, et mélangé.
- *
- * Le plafond s'applique après le tri par urgence et avant l'alternance : sinon
- * un concept solide passerait devant un fragile pour une raison d'affichage.
- *
- * `gesteDe` est facultatif parce que le geste dépend de la variante servie, que
- * les simples décomptes ne choisissent pas. Il départage l'alternance des sujets
- * sans la défaire.
- */
-export function composerSession<T extends ConceptDu>(
-  concepts: T[],
-  maintenant: Date,
-  fuseau: string,
-  plafond: number = PLAFOND_SESSION,
-  gesteDe?: (concept: T) => string,
-): T[] {
-  return alternerLesSujets(conceptsDeLaJournee(concepts, maintenant, fuseau, plafond), gesteDe);
 }
 
 /**

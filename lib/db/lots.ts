@@ -18,8 +18,6 @@ import type { GenerationJob } from "@/lib/db/types";
  */
 export const CONCEPTS_PAR_JOB = 3;
 
-export type JobDeQuestions = GenerationJob & { atomIds: string[] };
-
 /**
  * `partiraLe` diffère le départ ; `regeneration` fait compter le job dans le
  * plafond hebdomadaire du concept. Seul `lib/db/demande-de-questions.ts` les

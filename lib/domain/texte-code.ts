@@ -63,8 +63,3 @@ export function segmentsDeCode(texte: string): SegmentDeTexte[] {
 
   return segments;
 }
-
-/** Vrai dès qu'un terme de code est cité. Évite un rendu inutile. */
-export function porteDuCode(texte: string): boolean {
-  return segmentsDeCode(texte).some((segment) => segment.code);
-}

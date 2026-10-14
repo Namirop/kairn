@@ -29,17 +29,5 @@ export const ROUTES = {
   signalements: "/signalements",
 } as const;
 
-/** Chemins qui exigent une session. */
-export const PROTECTED_PATHS = [
-  ROUTES.aujourdhui,
-  ROUTES.reviser,
-  ROUTES.entrainement,
-  ROUTES.depots,
-  ROUTES.reglages,
-  ROUTES.commentCaMarche,
-  ROUTES.admin,
-  ROUTES.signalements,
-] as const;
-
 /** Paramètre qui mémorise où l'utilisateur voulait aller avant la connexion. */
 export const RETURN_TO_PARAM = "suite";

@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { porteDuCode, segmentsDeCode } from "./texte-code";
+import { segmentsDeCode } from "./texte-code";
 
 describe("segmentsDeCode", () => {
   it("rend un seul morceau quand il n'y a rien à relever", () => {
@@ -83,13 +83,5 @@ describe("segmentsDeCode", () => {
       ),
       { numRuns: 300 },
     );
-  });
-});
-
-describe("porteDuCode", () => {
-  it("distingue une phrase ordinaire d'une phrase qui cite du code", () => {
-    expect(porteDuCode("Rien à relever ici.")).toBe(false);
-    expect(porteDuCode("On appelle `revalidatePath`.")).toBe(true);
-    expect(porteDuCode("Un ` isolé ne compte pas.")).toBe(false);
   });
 });

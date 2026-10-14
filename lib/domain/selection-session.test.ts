@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import fc from "fast-check";
 import {
   chargeDuJour,
-  composerSession,
+  conceptsDeLaJournee,
+  type ConceptDu,
   dejaRevuAujourdhui,
   estDu,
   estServableAujourdhui,
@@ -11,56 +12,11 @@ import {
   PLAFOND_MAX,
   PLAFOND_MIN,
   plafondRestant,
-  type ConceptDu,
 } from "./selection-session";
 
 const PARIS = "Europe/Paris";
 const LOS_ANGELES = "America/Los_Angeles";
 const KATMANDOU = "Asia/Kathmandu";
-
-function concept(
-  id: string,
-  due: string,
-  tags: string[] = [],
-  inputId = "depot",
-  lastReview: string | null = null,
-  scheduledDays = 0,
-): ConceptDu {
-  return {
-    id,
-    due: new Date(due),
-    tags,
-    inputId,
-    lastReview: lastReview ? new Date(lastReview) : null,
-    scheduledDays,
-  };
-}
-
-const JOUR_MS = 24 * 60 * 60 * 1000;
-
-/**
- * Un concept déjà révisé, décrit par ce qui décide de son urgence : l'intervalle
- * qu'on lui avait promis, et le retard qu'il a pris dessus.
- */
-function revu(
-  id: string,
-  maintenant: string,
-  intervalleJours: number,
-  retardJours: number,
-  tags: string[] = [id],
-): ConceptDu {
-  const instant = new Date(maintenant).getTime();
-  const echeance = instant - retardJours * JOUR_MS;
-
-  return {
-    id,
-    due: new Date(echeance),
-    tags,
-    inputId: `depot-${id}`,
-    lastReview: new Date(echeance - intervalleJours * JOUR_MS),
-    scheduledDays: intervalleJours,
-  };
-}
 
 describe("estDu", () => {
   it("compare des jours civils, pas des instants", () => {
@@ -108,109 +64,6 @@ describe("estDu", () => {
   });
 });
 
-describe("composerSession", () => {
-  it("ne retient que ce qui est échu et ne complète jamais", () => {
-    const concepts = [
-      concept("du-1", "2026-01-10T08:00:00Z", ["a"]),
-      concept("du-2", "2026-01-14T08:00:00Z", ["b"]),
-      concept("futur", "2026-01-20T08:00:00Z", ["c"]),
-    ];
-
-    const session = composerSession(concepts, new Date("2026-01-15T09:00:00Z"), PARIS);
-
-    expect(session.map((c) => c.id).sort()).toEqual(["du-1", "du-2"]);
-  });
-
-  it("garde le plus en train d'être oublié quand le plafond coupe", () => {
-    const maintenant = "2026-01-15T09:00:00Z";
-    const concepts = [
-      // Trois jours de retard sur un intervalle de 90 : il ne risque rien.
-      revu("solide", maintenant, 90, 3),
-      // Trois jours de retard sur un intervalle de 3 : il est déjà oublié.
-      revu("fragile", maintenant, 3, 3),
-      revu("tiede", maintenant, 20, 3),
-    ];
-
-    const session = composerSession(concepts, new Date(maintenant), PARIS, 2);
-
-    expect(session.map((c) => c.id).sort()).toEqual(["fragile", "tiede"]);
-  });
-
-  /**
-   * Le cas qui justifie tout le tri : le solide est plus en retard en jours, le
-   * fragile est plus en retard par rapport à ce qu'il pouvait tenir. C'est le
-   * second qu'on est en train de perdre.
-   */
-  it("fait passer un intervalle court en léger retard devant un long en gros retard", () => {
-    const maintenant = "2026-01-15T09:00:00Z";
-    const concepts = [revu("solide", maintenant, 90, 10), revu("fragile", maintenant, 3, 1)];
-
-    const session = composerSession(concepts, new Date(maintenant), PARIS, 1);
-
-    expect(session.map((c) => c.id)).toEqual(["fragile"]);
-  });
-
-  it("ne laisse pas un arriéré enterrer un dépôt du jour", () => {
-    const maintenant = "2026-01-15T09:00:00Z";
-    const arriere = Array.from({ length: 40 }, (_, rang) =>
-      revu(`arriere-${rang}`, maintenant, 30, 4, ["arriere"]),
-    );
-    const neuf = concept("neuf", "2026-01-15T08:00:00Z", ["neuf"], "depot-neuf");
-
-    const session = composerSession([...arriere, neuf], new Date(maintenant), PARIS, 20);
-
-    expect(session.map((c) => c.id)).toContain("neuf");
-  });
-
-  it("rend le même ordre quel que soit celui de la requête", () => {
-    const maintenant = "2026-01-15T09:00:00Z";
-    const concepts = [
-      revu("un", maintenant, 3, 3),
-      revu("deux", maintenant, 90, 3),
-      revu("trois", maintenant, 3, 3),
-      concept("quatre", "2026-01-10T08:00:00Z", ["d"], "depot-d"),
-    ];
-
-    fc.assert(
-      fc.property(fc.shuffledSubarray(concepts, { minLength: 4 }), (melange) => {
-        const attendu = composerSession(concepts, new Date(maintenant), PARIS);
-        const obtenu = composerSession(melange, new Date(maintenant), PARIS);
-
-        return obtenu.map((c) => c.id).join() === attendu.map((c) => c.id).join();
-      }),
-      { numRuns: 100 },
-    );
-  });
-
-  it("rend une session vide plutôt que d'avancer sur du non échu", () => {
-    const concepts = [concept("futur", "2026-02-01T08:00:00Z", ["a"])];
-
-    expect(composerSession(concepts, new Date("2026-01-15T09:00:00Z"), PARIS)).toEqual([]);
-  });
-
-  it("ne dépasse jamais le plafond, quel que soit le lot", () => {
-    fc.assert(
-      fc.property(
-        fc.array(fc.integer({ min: -40, max: 40 }), { maxLength: 60 }),
-        fc.integer({ min: 0, max: 10 }),
-        (decalages, plafond) => {
-          const maintenant = new Date("2026-06-15T12:00:00Z");
-          const concepts = decalages.map((jours, rang) =>
-            concept(
-              `c-${rang}`,
-              new Date(maintenant.getTime() + jours * 24 * 60 * 60 * 1000).toISOString(),
-              [`s${rang % 4}`],
-            ),
-          );
-
-          return composerSession(concepts, maintenant, PARIS, plafond).length <= plafond;
-        },
-      ),
-      { numRuns: 300 },
-    );
-  });
-});
-
 describe("dejaRevuAujourdhui", () => {
   it("est faux pour un concept jamais passé", () => {
     expect(dejaRevuAujourdhui(null, new Date("2026-01-15T09:00:00Z"), PARIS)).toBe(false);
@@ -230,31 +83,6 @@ describe("dejaRevuAujourdhui", () => {
 
     expect(dejaRevuAujourdhui(passage, apresMinuitLocal, PARIS)).toBe(false);
     expect(dejaRevuAujourdhui(passage, apresMinuitLocal, "UTC")).toBe(true);
-  });
-});
-
-describe("composerSession et le passage du jour", () => {
-  it("ne repropose pas un concept déjà revu aujourd'hui", () => {
-    // ts-fsrs replanifie un concept en apprentissage à quelques minutes : son
-    // échéance est donc encore aujourd'hui, et il ne doit pas revenir pour autant.
-    const concepts = [
-      concept("revu", "2026-01-15T09:10:00Z", ["a"], "depot", "2026-01-15T09:00:00Z"),
-      concept("pas-revu", "2026-01-15T08:00:00Z", ["b"]),
-    ];
-
-    const session = composerSession(concepts, new Date("2026-01-15T09:30:00Z"), PARIS);
-
-    expect(session.map((c) => c.id)).toEqual(["pas-revu"]);
-  });
-
-  it("le repropose le lendemain", () => {
-    const concepts = [
-      concept("revu-hier", "2026-01-15T09:10:00Z", ["a"], "depot", "2026-01-15T09:00:00Z"),
-    ];
-
-    const session = composerSession(concepts, new Date("2026-01-16T09:30:00Z"), PARIS);
-
-    expect(session.map((c) => c.id)).toEqual(["revu-hier"]);
   });
 });
 
@@ -424,6 +252,149 @@ describe("plafondRestant", () => {
         return reste >= 0 && reste <= Math.max(0, p);
       }),
       { numRuns: 400 },
+    );
+  });
+});
+
+function concept(
+  id: string,
+  due: string,
+  tags: string[] = [],
+  inputId = "depot",
+  lastReview: string | null = null,
+  scheduledDays = 0,
+): ConceptDu {
+  return {
+    id,
+    due: new Date(due),
+    tags,
+    inputId,
+    lastReview: lastReview ? new Date(lastReview) : null,
+    scheduledDays,
+  };
+}
+
+const JOUR_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Un concept déjà révisé, décrit par ce qui décide de son urgence : l'intervalle
+ * qu'on lui avait promis, et le retard qu'il a pris dessus.
+ */
+function revu(
+  id: string,
+  maintenant: string,
+  intervalleJours: number,
+  retardJours: number,
+  tags: string[] = [id],
+): ConceptDu {
+  const echeance = new Date(maintenant).getTime() - retardJours * JOUR_MS;
+
+  return {
+    id,
+    due: new Date(echeance),
+    tags,
+    inputId: `depot-${id}`,
+    lastReview: new Date(echeance - intervalleJours * JOUR_MS),
+    scheduledDays: intervalleJours,
+  };
+}
+
+const ids = (concepts: ConceptDu[]): string[] => concepts.map((c) => c.id).sort();
+
+describe("conceptsDeLaJournee", () => {
+  it("ne retient que ce qui est échu et ne complète jamais", () => {
+    const concepts = [
+      concept("du-1", "2026-01-10T08:00:00Z", ["a"]),
+      concept("du-2", "2026-01-14T08:00:00Z", ["b"]),
+      concept("futur", "2026-01-20T08:00:00Z", ["c"]),
+    ];
+
+    expect(ids(conceptsDeLaJournee(concepts, new Date("2026-01-15T09:00:00Z"), PARIS))).toEqual([
+      "du-1",
+      "du-2",
+    ]);
+  });
+
+  it("garde le plus en train d'être oublié quand le plafond coupe", () => {
+    const maintenant = "2026-01-15T09:00:00Z";
+    const concepts = [
+      revu("solide", maintenant, 90, 3),
+      revu("fragile", maintenant, 3, 3),
+      revu("tiede", maintenant, 20, 3),
+    ];
+
+    expect(ids(conceptsDeLaJournee(concepts, new Date(maintenant), PARIS, 2))).toEqual([
+      "fragile",
+      "tiede",
+    ]);
+  });
+
+  /**
+   * Le solide est plus en retard en jours, le fragile plus en retard sur ce qu'il
+   * pouvait tenir : c'est le second qu'on est en train de perdre.
+   */
+  it("fait passer un intervalle court en léger retard devant un long en gros retard", () => {
+    const maintenant = "2026-01-15T09:00:00Z";
+    const concepts = [revu("solide", maintenant, 90, 10), revu("fragile", maintenant, 3, 1)];
+
+    expect(ids(conceptsDeLaJournee(concepts, new Date(maintenant), PARIS, 1))).toEqual(["fragile"]);
+  });
+
+  it("ne laisse pas un arriéré enterrer un dépôt du jour", () => {
+    const maintenant = "2026-01-15T09:00:00Z";
+    const arriere = Array.from({ length: 40 }, (_, rang) =>
+      revu(`arriere-${rang}`, maintenant, 30, 4, ["arriere"]),
+    );
+    const neuf = concept("neuf", "2026-01-15T08:00:00Z", ["neuf"], "depot-neuf");
+
+    expect(ids(conceptsDeLaJournee([...arriere, neuf], new Date(maintenant), PARIS, 20))).toContain(
+      "neuf",
+    );
+  });
+
+  it("retient les mêmes concepts quel que soit l'ordre de la requête", () => {
+    const maintenant = "2026-01-15T09:00:00Z";
+    const concepts = [
+      revu("un", maintenant, 3, 3),
+      revu("deux", maintenant, 90, 3),
+      revu("trois", maintenant, 3, 3),
+      concept("quatre", "2026-01-10T08:00:00Z", ["d"], "depot-d"),
+    ];
+
+    fc.assert(
+      fc.property(fc.shuffledSubarray(concepts, { minLength: 4 }), (melange) => {
+        const attendu = ids(conceptsDeLaJournee(concepts, new Date(maintenant), PARIS, 3));
+        const obtenu = ids(conceptsDeLaJournee(melange, new Date(maintenant), PARIS, 3));
+
+        return obtenu.join() === attendu.join();
+      }),
+      { numRuns: 100 },
+    );
+  });
+
+  it("rend une journée vide plutôt que d'avancer sur du non échu", () => {
+    const concepts = [concept("futur", "2026-02-01T08:00:00Z", ["a"])];
+
+    expect(conceptsDeLaJournee(concepts, new Date("2026-01-15T09:00:00Z"), PARIS)).toEqual([]);
+  });
+
+  it("ne dépasse jamais le plafond, quel que soit le lot", () => {
+    fc.assert(
+      fc.property(
+        fc.array(fc.integer({ min: -40, max: 40 }), { maxLength: 60 }),
+        fc.integer({ min: 0, max: 10 }),
+        (decalages, plafond) => {
+          const maintenant = new Date("2026-06-15T12:00:00Z");
+          const concepts = decalages.map((jours, rang) =>
+            concept(`c-${rang}`, new Date(maintenant.getTime() + jours * JOUR_MS).toISOString(), [
+              `s${rang % 4}`,
+            ]),
+          );
+
+          return conceptsDeLaJournee(concepts, maintenant, PARIS, plafond).length <= plafond;
+        },
+      ),
+      { numRuns: 300 },
     );
   });
 });

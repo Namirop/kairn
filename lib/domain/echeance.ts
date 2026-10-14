@@ -40,18 +40,9 @@ function enDuree(jours: number): Duree {
 }
 
 /**
- * Le délai avant une échéance à venir : « demain », « dans 3 jours ».
- *
- * Une échéance passée se dit « aujourd'hui » : elle est due, et annoncer un
- * retard serait un reproche.
- */
-export function delaiAvant(echeance: Date, maintenant: Date, fuseau: string): Duree {
-  return enDuree(joursAvant(echeance, maintenant, fuseau));
-}
-
-/**
- * Le même délai, vers un jour civil déjà connu : le prochain passage d'un
- * concept, qui n'est pas toujours son échéance (voir `jourOuIlRevient`).
+ * Le délai avant un jour civil déjà connu, « demain », « dans 3 jours » : le
+ * prochain passage d'un concept, qui n'est pas toujours son échéance (voir
+ * `jourOuIlRevient`).
  */
 export function delaiAvantLeJour(jour: string, maintenant: Date, fuseau: string): Duree {
   const vise = dayToUtcDate(jour).getTime();

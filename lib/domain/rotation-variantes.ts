@@ -101,19 +101,6 @@ export function variantesEquivalentes<T extends VarianteServable>(
 }
 
 /**
- * La variante à poser, ou `null` si le concept n'a aucune question active.
- *
- * L'identifiant tranche ici, ce qui suffit pour un concept seul. La session du
- * jour départage autrement, dans `repartition-des-formats.ts`.
- */
-export function choisirVariante(
-  variantes: VarianteServable[],
-  derniereFacette: string | null,
-): VarianteServable | null {
-  return variantesEquivalentes(variantes, derniereFacette)[0] ?? null;
-}
-
-/**
  * Les questions de ce concept ont-elles fait leur temps ?
  *
  * On compte par facette (l'angle interrogé), les deux modes additionnés : ce
