@@ -55,8 +55,13 @@ export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
     reprises: 0,
   };
 
+  // Les reprises des étapes déjà passées, pour qu'un échec à l'extraction ne
+  // perde pas celle de la lecture.
+  let reprisesAvantEchec = 0;
+
   try {
     const { texte, lecture, reprises: reprisesLecture } = await lireImage(depot);
+    reprisesAvantEchec += reprisesLecture;
     const { resultat: extraction, reprises: reprisesExtraction } = await avecUneReprise(() =>
       callAI({
         contract: EXTRACT_ATOMS,
@@ -82,7 +87,9 @@ export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
       reprises: reprisesLecture + reprisesExtraction + reprisesGeneration,
     };
   } catch (erreur) {
-    return { ...vide, echec: decrire(erreur), reprises: 1 };
+    // L'étape qui échoue compte 1, qu'il y ait eu reprise ou que le code
+    // l'excluait : la règle de `genererPourGroupe`.
+    return { ...vide, echec: decrire(erreur), reprises: reprisesAvantEchec + 1 };
   }
 }
 

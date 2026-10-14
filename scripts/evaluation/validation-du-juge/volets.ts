@@ -118,12 +118,14 @@ export async function volet2Fidelite(
     const koQwen = verdicts.filter((v) => v.juste === false).length;
     // Référence question par question : les verdicts Haiku du figé `11h58`.
     const verdictsHaiku = lireVerdictsHaiku(lot);
+    // Une question sans verdict compte comme un désaccord : le taux porte sur
+    // les questions soumises, pas sur ce que le juge a bien voulu rendre.
     let accordsLot = 0;
-    for (let i = 0; i < verdicts.length; i++) {
+    for (let i = 0; i < variants.length; i++) {
       const rendu = verdicts[i]?.juste;
       const attendu = verdictsHaiku[i];
       totalQuestions += 1;
-      if (rendu === attendu) {
+      if (rendu !== undefined && rendu === attendu) {
         accords += 1;
         accordsLot += 1;
       }

@@ -61,7 +61,7 @@ export async function jugerLesDoublonsVia(
   nom: string,
   paires: Paire[],
   /** Défaut = budget de sortie de la campagne (`BUDGET_SORTIE_CAMPAGNE`). Seul
-   * `valider-le-juge.ts` le dépasse : il groupe les six paires témoins en un
+   * `validation-du-juge/volets.ts` le dépasse : il groupe les six paires témoins en un
    * appel. */
   maxTokens: number = TOKENS_DES_JUGES,
   /** `false` pour un fournisseur qui ne supporte pas `reasoning` (Kimi via

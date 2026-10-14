@@ -112,7 +112,7 @@ async function main(): Promise<void> {
   const appels = compterLesAppelsDesJuges(signalements, depots);
   const total = appels.doublon + appels.residu + appels.fidelite + appels.attendus;
   console.info(
-    `Juges : ${appels.doublon} doublon · ${appels.residu} résidu · ${appels.fidelite} fidélité · ${appels.attendus} attendus — ${total} au total.`,
+    `Appels des juges : ${appels.doublon} doublon · ${appels.residu} résidu · ${appels.fidelite} fidélité · ${appels.attendus} attendus — ${total} au total.`,
   );
 
   const { chargerCache, compterEnCache } = await import("./juges/cache");
@@ -121,7 +121,7 @@ async function main(): Promise<void> {
     dejaEnCache.doublon + dejaEnCache.residu + dejaEnCache.fidelite + dejaEnCache.attendus;
   if (totalEnCache > 0) {
     console.info(
-      `En cache : ${dejaEnCache.doublon} doublon · ${dejaEnCache.residu} résidu · ${dejaEnCache.fidelite} fidélité · ${dejaEnCache.attendus} attendus — ${totalEnCache} déjà rendus, la relance reprend là où c'était.`,
+      `Appels en cache : ${dejaEnCache.doublon} doublon · ${dejaEnCache.residu} résidu · ${dejaEnCache.fidelite} fidélité · ${dejaEnCache.attendus} attendus — ${totalEnCache} déjà rendus, la relance reprend là où c'était.`,
     );
   }
 

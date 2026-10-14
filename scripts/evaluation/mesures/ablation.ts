@@ -6,10 +6,9 @@ import { cosinus } from "./geometrie";
  * on regarde si les phrases qui s'appuyaient sur lui tombent sous le plancher.
  * Sinon, la couverture ne mesure pas la couverture.
  *
- * Il faut les deux lectures :
- * - sur un dépôt sain, un retrait doit découvrir des phrases ;
- * - sur un dépôt à jumeaux, retirer un jumeau ne doit pas en découvrir, son
- *   double les couvre. Ce contrôle négatif valide aussi le signal de doublon.
+ * Un retrait doit déplacer la couverture : c'est ce que l'épreuve établit.
+ * Elle ne contrôle pas le doublon : retirer un jumeau peut découvrir des
+ * phrases, son double ne les couvre pas toujours.
  *
  * Coût zéro : tout vient du cache de vecteurs, déterministe.
  */

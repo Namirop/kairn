@@ -3,7 +3,7 @@ import type { DepotFige } from "../fige";
 import { tousLesAttendus } from "../attendus";
 import { plonger } from "../mesures/embeddings";
 import { mesurerLeDepot, textesDuDepot } from "../mesures/signaux";
-import { signaler } from "../mesures/signalements";
+import { signaler, type SignalementsDuDepot } from "../mesures/signalements";
 import type { ModeleOpenRouter } from "../openrouter/modeles";
 import { extraireLaColonne } from "./extraction-de-colonne";
 import type { FactureCumulee } from "./facture-cumulee";
@@ -97,6 +97,9 @@ export async function passerParColonne(
     residus: new Map(),
     attendus: new Map(),
   };
+  // Vide tant que la colonne n'a pas été plongée : un arrêt à l'extraction
+  // rend des dépôts sans aucun signalement mesuré.
+  const signalementsParDepot = new Map<string, SignalementsDuDepot>();
   const { figes, echecs, arretApres } = await extraireLaColonne(
     challenger,
     corpus,
@@ -107,7 +110,7 @@ export async function passerParColonne(
   );
   const rendre = (statut: Statut): ScoreDeColonne => ({
     challenger,
-    depots: scoresPartiels(figes, echecs, verdicts),
+    depots: scoresPartiels(figes, echecs, signalementsParDepot, verdicts),
     factureExtraction,
     factureJuges,
     statut,
@@ -128,6 +131,7 @@ export async function passerParColonne(
   const passe = await plongerLaColonne(figes, loguer);
   const mesures = figes.map((depot) => mesurerLeDepot(depot, passe.vecteur));
   const signalements = mesures.map(signaler);
+  for (const signalement of signalements) signalementsParDepot.set(signalement.nom, signalement);
 
   for (const signalement of signalements) {
     const depot = figes.find((f) => f.nom === signalement.nom);
@@ -153,20 +157,22 @@ export async function passerParColonne(
 function scoresPartiels(
   figes: DepotFige[],
   echecs: Map<string, string>,
+  signalements: Map<string, SignalementsDuDepot>,
   { doublons, residus, attendus }: VerdictsDesJuges,
 ): ScoreDepot[] {
   return figes.map((f) => {
     const attendu = attendus.get(f.nom);
+    const signalement = signalements.get(f.nom);
     return {
       nom: f.nom,
       nbConcepts: f.concepts.length,
       rejet: f.rejet,
       echec: echecs.get(f.nom) ?? null,
-      doublonsSignales: 0,
+      doublonsSignales: signalement?.doublons.length ?? 0,
       doublonsConfirmes: doublons.get(f.nom) ?? 0,
-      manquesSignales: 0,
+      manquesSignales: signalement?.manques.length ?? 0,
       manquesConfirmes: residus.get(f.nom)?.manques ?? 0,
-      inventionsSignalees: 0,
+      inventionsSignalees: signalement?.inventions.length ?? 0,
       inventionsConfirmees: residus.get(f.nom)?.inventions ?? 0,
       attendusCouverts: attendu?.couverts ?? 0,
       attendusTotal: attendu?.total ?? 0,

@@ -19,7 +19,7 @@ export const BANDEAU_DE_CAMPAGNE = `Juge : claude-haiku-4-5, même lignée (Anth
  *
  * Un modèle qui ne rend pas dans ce budget (qui épuise en reasoning avant la
  * sortie contrainte) est compté en échec de schéma, pas accommodé. Seul
- * `valider-le-juge.ts` le dépasse, parce qu'il groupe les six paires témoins
+ * `validation-du-juge/volets.ts` le dépasse, parce qu'il groupe les six paires témoins
  * en un appel.
  */
 export const BUDGET_SORTIE_CAMPAGNE = TOKENS_DES_JUGES;

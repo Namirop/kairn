@@ -41,7 +41,12 @@ async function genererPourUnGroupe(
     for (const lot of sortie.lots) {
       const rang = lot.rang - 1;
       const concept = groupe[rang];
-      if (!concept) continue;
+      if (!concept) {
+        loguer(
+          `  ⚠ ${nomDuDepot} · lot au rang ${lot.rang} hors du groupe de ${groupe.length}, ignoré`,
+        );
+        continue;
+      }
       parConcept.set(concept.concept, servirVariants(concept.concept, lot.variants));
     }
     // Un concept du groupe oublié par le modèle compte en échec.

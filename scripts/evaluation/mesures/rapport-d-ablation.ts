@@ -129,7 +129,7 @@ export function rendreLAblation(
     "",
     "On retire un concept, on recalcule la couverture, on regarde si les phrases qui s'appuyaient sur lui tombent sous le plancher. Rien n'est plongé : tout vient du cache, l'épreuve ne coûte rien et se rejoue à volonté.",
     "",
-    "Deux lectures opposées, et il faut les deux. Sur un dépôt sain, un retrait **doit** découvrir des phrases. Sur un dépôt à jumeaux, retirer un jumeau ne **doit pas** en découvrir — son double couvre les mêmes phrases, et c'est le signal de doublon vu de l'autre côté.",
+    "L'épreuve dit si la mesure réagit : chaque retrait doit déplacer la couverture. Elle ne contrôle pas le doublon : retirer un jumeau peut découvrir des phrases, et un concept redondant chute souvent plus qu'un concept distinct, car redondant entre concepts n'implique pas substituable au niveau de la phrase.",
     "",
     ...ablations.flatMap((ablation) => [...rendreUneAblation(ablation), "---", ""]),
   ].join("\n");
