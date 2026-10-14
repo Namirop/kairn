@@ -3,34 +3,20 @@ import { tirageDe } from "./tirage-deterministe";
 /**
  * Le coup de pouce d'un texte à trou : ce qu'on montre, et ce qu'il coûte.
  *
- * **Pourquoi il existe.** Le texte à trou est le seul format qui demande de
- * produire la réponse au lieu de la reconnaître, et c'est pour ça qu'il tient le
- * mieux en mémoire. C'est aussi ce qui le rend parfois infranchissable : on a le
- * concept en tête, le terme exact ne vient pas, et il ne reste qu'à cliquer
- * « je ne l'avais pas » sur quelque chose qu'on savait à moitié. Le passage
- * enregistre alors un échec complet là où il y avait un rappel partiel, et
- * l'espacement se règle sur une information fausse.
+ * Sans aide, un terme exact qui ne vient pas enregistre un échec complet là où
+ * il y avait un rappel partiel. Trois ou quatre pistes réduisent le champ sans
+ * donner la réponse.
  *
- * Trois ou quatre pistes rendent le trou franchissable sans le rendre gratuit :
- * on ne donne pas la réponse, on réduit le champ. C'est encore un rappel — plus
- * facile, et compté comme tel.
- *
- * **Ce que ça coûte, et c'est le point.** Une aide demandée fait descendre la
- * note d'un cran. Sans ce prix, l'aide serait le geste par défaut : on cliquerait
- * dessus par confort, la mémoire enregistrerait des réussites qui n'en sont pas,
- * et le produit se mentirait à lui-même — exactement ce que l'ordre des options
- * d'un QCM corrige de l'autre côté.
+ * L'aide fait descendre la note d'un cran : sans ce prix, elle deviendrait le
+ * geste par défaut et la mémoire enregistrerait de fausses réussites.
  */
 
 /** Au-delà, on ne réduit plus le champ, on donne une liste à parcourir. */
 const PISTES_MAXIMUM = 4;
 
 /**
- * En deçà, la piste **est** la réponse.
- *
- * Deux propositions dont l'une est juste, c'est un vrai ou faux déguisé qu'on
- * gagne une fois sur deux sans rien savoir. On ne propose donc rien tant qu'il
- * n'y a pas au moins deux leurres à mettre à côté du terme attendu.
+ * En deçà, l'aide est un vrai ou faux déguisé, gagné une fois sur deux sans
+ * rien savoir : il faut au moins deux leurres à côté du terme attendu.
  */
 const PISTES_MINIMUM = 3;
 
@@ -42,14 +28,11 @@ function aplati(terme: string): string {
 /**
  * Les termes proposés à qui sèche, dans un ordre stable.
  *
- * Le terme attendu est mélangé aux leurres par un tirage dérivé de la graine —
- * l'identifiant de la question —, pour la même raison que l'ordre des options
- * d'un QCM : sans ça, il serait toujours au même rang et se repérerait sans être
- * su. Stable, parce qu'une même question doit se présenter pareil d'un
- * affichage à l'autre.
+ * Le terme attendu est mélangé aux leurres par un tirage dérivé de la graine
+ * (l'identifiant de la question) : sinon il serait toujours au même rang, et
+ * une même question doit s'afficher pareil d'une fois à l'autre.
  *
- * Un leurre qui redit le terme attendu est retiré : il ferait deux bonnes
- * réponses dans la liste, et l'aide se retournerait contre celui qui la demande.
+ * Un leurre qui redit le terme attendu est retiré (deux bonnes réponses).
  * Vide quand il n'y a pas de quoi réduire honnêtement le champ.
  */
 export function pistesDuTrou(
@@ -89,17 +72,11 @@ export function pistesDuTrou(
 }
 
 /**
- * La note d'un passage, une fois le coup de pouce pris en compte.
+ * La note d'un passage, un cran plus bas si l'aide a été demandée : retrouver
+ * le terme parmi quatre reste un rappel, plus facile.
  *
- * Un cran plus bas, et un seul : retrouver le terme parmi quatre reste un
- * rappel, il est juste plus facile que de le produire de rien. « Je ne l'avais
- * pas » ne descend plus — c'est déjà le bas de l'échelle.
- *
- * `EASY` n'apparaît pas sur ce format : il est réservé à la sortie du cycle, où
- * la personne déclare maîtriser le concept, et on ne déclare pas ça après avoir
- * demandé de l'aide. On le fait quand même descendre, parce qu'une fonction qui
- * laisse passer un cas qu'elle ne connaît pas finit par le laisser passer le
- * jour où il arrive.
+ * `EASY` n'apparaît pas sur ce format (réservé à la sortie du cycle), mais il
+ * descend aussi, pour ne pas laisser passer un cas imprévu.
  */
 export type NoteDeTrou = "AGAIN" | "HARD" | "GOOD" | "EASY";
 

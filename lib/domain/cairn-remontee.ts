@@ -2,16 +2,12 @@ import { initialiser, type Corps } from "./cairn-physique";
 import type { Pierre } from "./cairn-stack";
 
 /**
- * Le retour du cairn à sa forme.
+ * Le retour du cairn à sa forme : une interpolation, pas une simulation. La
+ * chute est de la physique ; la reconstruction est une animation, sans
+ * collisions entre pierres qui remontent.
  *
- * Interpolation et non simulation, et c'est tout le sujet de ce fichier séparé :
- * on ne remonte pas un cairn en lançant des pierres vers le haut. La chute est
- * de la physique, la reconstruction est une animation. Les mélanger donnerait
- * des pierres qui se cognent en remontant, ce qui n'a aucun sens — personne n'a
- * jamais vu un éboulis se rassembler.
- *
- * Chaque pierre revient vers sa place à vitesse proportionnelle à ce qu'il lui
- * reste à parcourir : elles arrivent donc ensemble, sans course ni file.
+ * Chaque pierre revient à une vitesse proportionnelle à l'écart restant : elles
+ * arrivent ensemble.
  */
 
 /** Ce qu'il reste d'écart quand on considère qu'une pierre est rentrée. */

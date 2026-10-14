@@ -1,20 +1,11 @@
 import { lignesRecollees } from "./lignes-recollees";
 
 /**
- * Un texte déposé, séparé en ce qui se lit et ce qui se recopie.
+ * Un texte déposé, séparé en prose et en blocs de code entre barrières (```).
  *
- * **Le code cité en bloc n'était pas lu comme du code.** Une reconnaissance de
- * texte rend ce que tout le monde écrit — trois accents graves, la langue, les
- * lignes, trois accents graves — et `segmentsDeCode`, qui ne connaît que la
- * paire d'accents en ligne, y voyait une suite de jetons sans rapport : `js`
- * seul dans son cadre, puis une ligne entière dans un autre, puis le mot resté
- * au bout. Le seul dépôt de code de la production le montre en entier.
- *
- * Ce module tranche donc avant : ce qui est entre des barrières est du code, à
- * recopier tel quel — indentation, espaces, retours —, et tout le reste est de
- * la prose, qui se recolle et dont les termes en ligne se relèvent comme avant.
- *
- * Fonction pure : elle dit ce que le texte contient, jamais comment le peindre.
+ * Ce découpage passe avant `segmentsDeCode`, qui ne connaît que le code en
+ * ligne et lirait un bloc comme une suite de jetons sans rapport. Le code se
+ * garde tel quel ; la prose se recolle.
  */
 
 export type BlocDeTexte =
@@ -42,12 +33,9 @@ function poserLeCode(blocs: BlocDeTexte[], lignes: string[], langage: string | n
 }
 
 /**
- * Les blocs d'un texte, dans l'ordre où ils s'y trouvent.
- *
- * Une barrière ouverte et jamais refermée ferme au bout du texte. C'est le cas
- * d'une capture coupée en plein extrait : le rendre en code respecte ce qu'on
- * lisait à l'écran, là où le rendre en prose recollerait des lignes de code en
- * une phrase — le pire des deux résultats.
+ * Les blocs d'un texte, dans l'ordre. Une barrière jamais refermée (capture
+ * coupée en plein extrait) ferme au bout du texte : en prose, les lignes de code
+ * seraient recollées en une phrase.
  */
 export function blocsDeTexte(texte: string): BlocDeTexte[] {
   const blocs: BlocDeTexte[] = [];

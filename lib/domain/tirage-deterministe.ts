@@ -1,15 +1,12 @@
 /**
  * Le hasard reproductible du projet.
  *
- * Partout où quelque chose doit paraître irrégulier sans jamais changer entre
- * deux affichages — la taille d'une pierre du cairn, l'ondulation d'une strate,
- * l'ordre des options d'un QCM —, c'est d'ici que vient le tirage. Même graine,
- * même suite, pour toujours et sur n'importe quelle machine.
+ * Ce qui doit paraître irrégulier sans changer entre deux affichages (pierres
+ * du cairn, strates, ordre des options d'un QCM) tire d'ici : même graine, même
+ * suite, sur n'importe quelle machine.
  *
- * Les deux fonctions vivaient en double dans `cairn-stack.ts` et `strates.ts`,
- * la seconde signalant en commentaire qu'elle recopiait la première. Une
- * troisième copie aurait fini par diverger d'un caractère, et le jour où la
- * suite change, ce sont les cairns déjà construits qui se réarrangent.
+ * Ne pas modifier ces fonctions : changer la suite réarrangerait les cairns
+ * déjà construits.
  */
 
 /** FNV-1a 32 bits : une chaîne quelconque ramenée à un entier bien étalé. */

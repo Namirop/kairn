@@ -1,15 +1,8 @@
 /**
- * Ce qui est en train d'être oublié.
- *
- * La session servait le plus en retard d'abord, en jours. Sous un arriéré
- * important c'est un défaut : cent concepts solides en retard de trois jours
- * passent devant un concept fragile déposé la veille, et l'application cesse de
- * servir à ce qu'on vient d'apprendre. Le retard absolu ne dit rien tout seul —
- * trois jours ne pèsent pas pareil sur un intervalle de trois jours et sur un
- * intervalle de trois mois.
- *
- * Ce module ne connaît ni les échéances ni les sujets : il ne sait que classer
- * des concepts par ce qu'ils risquent.
+ * Ce qui est en train d'être oublié, classé par retard relatif à l'intervalle
+ * et non en jours : trois jours ne pèsent pas pareil sur un intervalle de trois
+ * jours et sur un de trois mois, et un tri en jours ferait passer un arriéré de
+ * concepts solides devant un concept fragile.
  */
 
 const JOUR_MS = 24 * 60 * 60 * 1000;
@@ -26,22 +19,17 @@ export type ConceptAOublier = {
 /**
  * Le temps écoulé depuis le dernier passage, en parts d'intervalle promis.
  *
- * Un concept d'intervalle 3 jours revu il y a 6 rend 2 : deux fois ce qu'il
- * pouvait tenir. Un concept d'intervalle 90 jours revu il y a 93 rend 1,03 : il
- * ne risque rien. Le premier passe devant, même s'il est arrivé plus tard.
+ * Intervalle de 3 jours revu il y a 6 : 2. Intervalle de 90 revu il y a 93 :
+ * 1,03. Le premier passe devant.
  *
- * **Un concept jamais revu passe avant tout le reste.** Il n'est pas « en
- * retard » : il n'a simplement jamais été retrouvé une seule fois, ce qui est la
- * définition même de fragile. Aucun intervalle ne lui a été promis, donc aucun
- * ratio ne le décrit — l'infini est la valeur juste, pas un cas limite qu'on
- * range.
+ * Un concept jamais revu vaut l'infini : jamais retrouvé, il est fragile par
+ * définition, et aucun intervalle promis ne permet de ratio.
  */
 export function retardRelatif(concept: Omit<ConceptAOublier, "id">, maintenant: Date): number {
   if (!concept.lastReview) return Number.POSITIVE_INFINITY;
 
-  // Un intervalle nul vient d'une carte encore en apprentissage, replanifiée à
-  // quelques minutes. Le plancher d'un jour lui donne l'unité de tout le reste
-  // sans lui inventer une promesse qu'elle n'a pas reçue.
+  // Un intervalle nul vient d'une carte en apprentissage, replanifiée à
+  // quelques minutes : le plancher d'un jour évite la division par zéro.
   const intervalle = Math.max(concept.scheduledDays, 1);
   const ecoules = (maintenant.getTime() - concept.lastReview.getTime()) / JOUR_MS;
 
@@ -51,11 +39,9 @@ export function retardRelatif(concept: Omit<ConceptAOublier, "id">, maintenant: 
 /**
  * L'ordre de service : le plus en train d'être oublié d'abord.
  *
- * L'identifiant départage, et il le fait aussi entre deux infinis — deux
- * concepts jamais revus portent la même urgence, et sans lui leur ordre
- * dépendrait de celui de la requête. La comparaison est explicite plutôt que
- * soustractive : `Infinity - Infinity` rend `NaN`, et un comparateur qui rend
- * `NaN` trie n'importe comment.
+ * L'identifiant départage, y compris entre deux concepts jamais revus. La
+ * comparaison n'est pas une soustraction : `Infinity - Infinity` rend `NaN`,
+ * et un comparateur qui rend `NaN` trie n'importe comment.
  */
 export function parUrgence<T extends ConceptAOublier>(
   maintenant: Date,

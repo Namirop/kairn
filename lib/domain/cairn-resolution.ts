@@ -8,24 +8,14 @@ import {
 import { appliquer, masseEffective, monde, vitesseAuPoint, type Mobile } from "./cairn-impulsions";
 
 /**
- * Résolution des contacts, par impulsions successives.
+ * Résolution des contacts par impulsions successives : à chaque image on liste
+ * les contacts, puis on corrige les vitesses relatives plusieurs fois. Une
+ * correction ne se propage que d'un étage par passe ; il en faut une quinzaine
+ * pour qu'une pile de sept tienne sans trembler.
  *
- * C'est ce qui manquait : chaque pierre tombait seule, ne connaissait que le
- * sol, et finissait à cheval sur ses voisines sans jamais les avoir vues. Ici
- * les pierres se poussent, se frottent et s'empilent — un éboulis, pas six
- * chutes parallèles.
- *
- * La méthode est celle des solveurs à impulsions : à chaque image on liste les
- * contacts, puis on corrige les vitesses relatives plusieurs fois de suite. Une
- * seule passe laisserait une pierre du haut traverser celle du bas ; il en faut
- * une quinzaine pour qu'une pile de sept tienne sans trembler, parce qu'une
- * correction ne se propage que d'un étage à la fois.
- *
- * `resoudre` écrit dans les mobiles qu'on lui donne. Ce n'est pas un effet de
- * bord caché : ils sont fabriqués pour l'image en cours par `avancer`, qui reste
- * pur pour l'extérieur. Recopier vingt fois sept corps par image pour tenir la
- * lettre d'une règle qui vise l'état partagé serait payer cher un principe mal
- * appliqué.
+ * `resoudre` écrit dans les mobiles qu'on lui donne, volontairement : `avancer`
+ * les fabrique pour l'image en cours et reste pur vu de l'extérieur. Les
+ * recopier à chaque passe coûterait cher pour rien.
  */
 
 /** Part de vitesse rendue à l'impact. Une pierre ne rebondit presque pas. */
@@ -43,12 +33,9 @@ const PASSES_DE_POSITION = 6;
 type Lien = { a: Mobile; b: Mobile; contact: Contact };
 
 /**
- * Ce qu'un mobile touche, et de combien il est entré dedans.
- *
- * L'appelant s'en sert pour décider du repos. Les deux comptent : une pierre
- * lente sans appui est au sommet d'un rebond, et une pierre lente encore
- * enfoncée d'une unité n'a pas fini d'être ressortie. L'endormir dans l'un ou
- * l'autre cas fige une image fausse.
+ * Ce qu'un mobile touche, et de combien il est entré dedans. Les deux décident
+ * du repos : lente sans appui, une pierre est au sommet d'un rebond ; lente
+ * mais enfoncée, elle n'est pas encore ressortie.
  */
 export type Appui = { touche: boolean; enfoncement: number };
 
@@ -148,17 +135,13 @@ function lister(mobiles: Mobile[], cadre: Cadre): { liens: Lien[]; appuis: Appui
 /**
  * Résout tous les contacts d'une image, et rend l'appui de chaque mobile.
  *
- * Les positions se corrigent en plusieurs passes, en refaisant la liste des
- * contacts entre chacune. Une passe unique ne remontait l'écartement que d'un
- * étage par image : dans une pile de six, la pierre du bas restait enfoncée de
- * deux unités dans le sol pendant que tout le reste avait l'air posé. Refaire
- * la liste est ce qui coûte, et pour sept pierres ça ne coûte rien.
+ * Les positions se corrigent en plusieurs passes, avec un relevé neuf des
+ * contacts entre chacune : une seule passe laisse le bas d'une pile enfoncé
+ * dans le sol.
  *
- * L'appui rendu mélange les deux bouts, et c'est voulu : le contact vient du
- * relevé d'entrée, l'enfoncement du relevé de sortie. Tout prendre à la sortie
- * faisait qu'une pierre bien dégagée par la correction se retrouvait sans
- * contact du tout — donc jamais posée, donc en vol perpétuel à un centième
- * d'unité par seconde, et la boucle d'animation ne s'arrêtait plus.
+ * L'appui rendu prend le contact au relevé d'entrée et l'enfoncement à celui de
+ * sortie. Tout prendre à la sortie laisse une pierre bien dégagée sans contact,
+ * donc jamais posée, et la boucle d'animation ne s'arrête plus.
  */
 export function resoudre(mobiles: Mobile[], cadre: Cadre): Appui[] {
   const entree = lister(mobiles, cadre);

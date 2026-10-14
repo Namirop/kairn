@@ -1,24 +1,10 @@
 /**
- * Les étiquettes d'un concept, moins celles qui donnent la réponse.
+ * Les étiquettes d'un concept, moins celles qui donnent la réponse
+ * (`EFFET-MAGNUS` au-dessus d'un QCM dont « Effet Magnus » est la bonne option).
  *
- * **Le cas vu en session :** `TENNIS · EFFET-MAGNUS` au-dessus d'un QCM dont les
- * quatre options étaient « Effet Coriolis », « Effet Venturi », « Effet Doppler »,
- * « Effet Magnus ». La bonne réponse était écrite en petites capitales à trois
- * centimètres au-dessus. La question ne mesurait plus rien.
- *
- * Ce n'est pas un accident de génération : les étiquettes nomment le sujet du
- * concept, et une question de reconnaissance demande précisément comment on
- * nomme ce sujet. Les deux font leur travail — c'est de les afficher ensemble
- * qui est fautif.
- *
- * On retire donc, à l'affichage seulement, l'étiquette qui se lit dans la
- * réponse. Le concept la garde : elle sert au classement, à l'alternance des
- * sujets dans une session, et aux trois autres facettes où elle ne trahit rien.
- *
- * **Une étiquette de trop retirée ne coûte rien, une étiquette de trop montrée
- * coûte la question.** En cas de doute on retire : c'est un repère de classement
- * qui disparaît, pas une information dont la réponse dépend — la question, elle,
- * se lit seule.
+ * Retirées à l'affichage seulement : le concept les garde pour le classement et
+ * l'alternance des sujets. En cas de doute on retire ; une étiquette de trop
+ * montrée coûte la question, une de trop retirée ne coûte rien.
  */
 
 /** Minuscules, sans accents, sans ponctuation : `EFFET-MAGNUS` et « effet Magnus ». */
@@ -32,11 +18,8 @@ function aplati(texte: string): string {
 }
 
 /**
- * Sous cette longueur, une étiquette se retrouve partout par hasard.
- *
- * « js », « ui », « bd » apparaissent dans n'importe quelle réponse un peu
- * longue sans rien y trahir. On ne retire que ce qui est assez spécifique pour
- * que sa présence dans la réponse veuille dire quelque chose.
+ * Sous cette longueur, une étiquette (« js », « ui ») se retrouve partout par
+ * hasard sans rien trahir.
  */
 const LONGUEUR_MINIMALE = 4;
 

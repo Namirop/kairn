@@ -1,27 +1,12 @@
 /**
  * Où commence le commentaire d'une ligne de code, s'il y en a un.
  *
- * **C'est la seule nuance qu'un bloc de code reçoive ici, et c'est la bonne.**
- * Un thème de coloration complet peindrait sept ou huit couleurs dans un produit
- * qui n'en porte qu'une, et cet accent-là est déjà pris. Le commentaire, lui,
- * n'est pas une catégorie grammaticale de plus : c'est la seule partie d'une
- * ligne qui ne s'exécute pas. La distinguer, c'est séparer ce qu'on lit de ce
- * qu'on recopie — et sur l'extrait qui a fait écrire ce module, le commentaire
- * portait toute l'explication.
+ * C'est la seule nuance d'un bloc de code : pas de thème de coloration, le
+ * produit n'a qu'un accent. Le commentaire est la partie d'une ligne qui ne
+ * s'exécute pas, ce qu'on lit plutôt que ce qu'on recopie.
  *
- * **Les guillemets sont suivis, pas ignorés.** Une recherche naïve de « // »
- * coupe `"https://exemple.fr"` en son milieu et peint la moitié d'une chaîne
- * comme un commentaire. On parcourt donc la ligne en sachant si l'on est dans
- * une chaîne, et une marque à l'intérieur d'une chaîne n'est pas une marque.
- *
- * **Les commentaires en bloc ne sont pas traités.** Ceux qu'ouvre une barre
- * suivie d'une étoile s'étendent sur plusieurs lignes, donc demanderaient de
- * porter un état d'une ligne à l'autre
- * pour un cas qui n'apparaît presque jamais dans un extrait de quelques lignes.
- * Une ligne qui en porte un reste de la couleur du code : lisible, simplement
- * pas mise à part.
- *
- * Fonction pure : elle rend une position, jamais une couleur.
+ * Les commentaires en bloc ne sont pas traités : ils demanderaient un état
+ * d'une ligne à l'autre, pour un cas presque absent des extraits courts.
  */
 
 /** Les marques de commentaire d'une ligne, par famille de langage. */
@@ -29,11 +14,9 @@ const DOUBLE_BARRE = ["//"];
 const DIESE = ["#"];
 
 /**
- * Les langages où le dièse ouvre un commentaire.
- *
- * Ailleurs il ne l'ouvre pas, et il y est même fréquent : un sélecteur
- * d'identifiant en CSS, une couleur, une directive de préprocesseur. Sans nom de
- * langage on s'en tient à la double barre, qui ne veut dire qu'une chose.
+ * Les langages où le dièse ouvre un commentaire. Ailleurs il est fréquent
+ * (sélecteur CSS, couleur, directive de préprocesseur) : sans langage, on s'en
+ * tient à la double barre.
  */
 const LANGAGES_A_DIESE = new Set([
   "bash",
@@ -73,10 +56,9 @@ function marques(langage: string | null): string[] {
 /**
  * L'indice où commence le commentaire de cette ligne, ou `-1`.
  *
- * La marque doit être hors de toute chaîne. Les trois délimiteurs des langages
- * courants sont suivis, et l'échappement par barre oblique inverse aussi : sans
- * lui, `"il a dit \\"bonjour\\""` rouvrirait une chaîne au milieu de la ligne et
- * tout ce qui suit passerait pour du texte.
+ * La marque doit être hors de toute chaîne, sinon `"https://exemple.fr"` serait
+ * coupé en deux. Les trois délimiteurs courants et l'échappement par barre
+ * oblique inverse sont suivis.
  */
 export function debutDuCommentaire(ligne: string, langage: string | null = null): number {
   const attendues = marques(langage);

@@ -1,62 +1,39 @@
 /**
  * Quelle question poser quand un concept remonte.
  *
- * La planification porte sur le concept ; la variante n'est que la porte par
- * laquelle on y entre. Ce fichier ne calcule donc aucune échéance, aucun
- * intervalle, aucune difficulté — il choisit une formulation, rien de plus.
- *
- * On sert la facette la moins vue, la plus ancienne pour départager, et jamais
- * celle qui vient d'être servie. C'est ce qui fait qu'un concept revu cinq fois
- * reste inconfortable : il faut connaître l'idée, pas se souvenir d'une phrase.
+ * La planification porte sur le concept : ce fichier ne calcule ni échéance, ni
+ * intervalle, ni difficulté, il choisit une formulation. On sert la facette la
+ * moins vue, la plus ancienne pour départager, et jamais celle qui vient d'être
+ * servie, pour qu'il faille connaître l'idée et non une phrase.
  */
 
 /**
- * **Quand les questions d'un concept sont réécrites.** Il n'y a pas d'intervalle,
- * pas de cron, pas de bouton : c'est l'usage qui déclenche, et deux règles le
- * bornent.
+ * Quand les questions d'un concept sont réécrites : c'est l'usage qui déclenche,
+ * borné par deux règles.
  *
- * 1. **L'usure.** `regenererSiUsees` est appelé après chaque passage, en session
- *    comme en entraînement. Quand **chaque** facette a été vue
- *    `PASSAGES_AVANT_REGENERATION` fois, les deux modes additionnés, le lot est
- *    déclaré usé et une écriture part en file.
- * 2. **Le plafond.** Un même concept ne redemande pas de questions plus d'une
- *    fois tous les `JOURS_ENTRE_REGENERATIONS` jours, quoi qu'il arrive. Sans
- *    lui, l'entraînement illimité permettrait d'atteindre le seuil dans l'heure
- *    et de rouvrir la dépense aussitôt.
+ * 1. L'usure : `regenererSiUsees`, appelé après chaque passage (session et
+ *    entraînement), déclare le lot usé quand chaque facette a été vue
+ *    `PASSAGES_AVANT_REGENERATION` fois, les deux modes additionnés.
+ * 2. Le plafond : pas plus d'une réécriture tous les `JOURS_ENTRE_REGENERATIONS`
+ *    jours par concept, sans quoi l'entraînement illimité rouvrirait la dépense
+ *    dans l'heure.
  *
- * Ce que ça donne en pratique : quatre facettes à trois passages font douze
- * passages avant la première réécriture. Sur la courbe d'espacement ordinaire —
- * un concept revu à des intervalles qui s'allongent —, c'est **des mois**. Pour
- * quelqu'un qui s'entraîne beaucoup sur les mêmes concepts, c'est le plafond
- * hebdomadaire qui devient la limite.
- *
- * La conséquence à connaître avant d'écarter une question à l'écriture : ce
- * qu'un lot perd, il ne le récupère pas la semaine suivante. Voir
- * `renvoi-au-concept.ts`, qui écarte en connaissance de cause.
- *
- * Les autres chemins vers une réécriture sont des gestes explicites — modifier
- * un concept, confirmer un concept douteux —, et ils passent par le même plafond
- * : voir `lib/db/demande-de-questions.ts`.
+ * Ce qu'un lot perd à l'écriture ne se récupère donc pas la semaine suivante
+ * (voir `renvoi-au-concept.ts`). Les réécritures explicites (modifier ou
+ * confirmer un concept) passent par le même plafond : voir
+ * `lib/db/demande-de-questions.ts`.
  */
 
 /**
- * Passages par facette au-delà desquels les questions sont usées.
- *
- * Quand chaque facette a été vue autant de fois, la personne reconnaît les
- * formulations plutôt que le concept, et il est temps d'en réécrire.
+ * Passages par facette au-delà desquels la personne reconnaît les formulations
+ * plutôt que le concept.
  */
 export const PASSAGES_AVANT_REGENERATION = 3;
 
 /**
- * Deux compteurs, deux usages.
- *
- * `sessionCount` est le seul que la rotation lit : c'est lui qui décide de la
- * formulation servie demain, et l'entraînement libre ne doit pas y toucher.
- * Quelqu'un qui tourne dix fois sur un concept en dix minutes ne doit pas voir
- * sa session du lendemain changer de forme pour autant.
- *
- * `trainingCount` ne pilote rien mais il use : c'est la somme des deux qui dit
- * quand les formulations ont fait leur temps.
+ * `sessionCount` est le seul que la rotation lit : l'entraînement ne doit pas
+ * changer la formulation servie en session le lendemain. `trainingCount` ne
+ * pilote rien mais compte dans l'usure.
  */
 export type VarianteServable = {
   id: string;
@@ -72,10 +49,8 @@ function vueLe(variante: VarianteServable): number {
 }
 
 /**
- * Passages par facette, sous le compteur qu'on lui demande de lire.
- *
- * La rotation compte les passages en session ; l'usure compte les deux modes.
- * C'est la même arithmétique, ce n'est pas la même question.
+ * Passages par facette, selon le compteur demandé : la rotation compte la
+ * session seule, l'usure les deux modes.
  */
 function vuesParFacette(
   variantes: VarianteServable[],
@@ -94,27 +69,16 @@ const enSession = (variante: VarianteServable) => variante.sessionCount;
 const enTout = (variante: VarianteServable) => variante.sessionCount + variante.trainingCount;
 
 /**
- * Les variantes que la rotation juge **également bonnes**, sans les départager.
+ * Les variantes que la rotation juge également bonnes, sans les départager :
+ * facette la moins servie, puis la plus ancienne. Au-delà, la rotation n'a pas
+ * d'avis.
  *
- * C'est le cœur de la règle, sorti de `choisirVariante` pour qu'on puisse le
- * lire sans en subir la conclusion. Une variante est retenue quand sa facette
- * est la moins servie du concept **et** qu'elle est la plus ancienne à égalité :
- * ce sont les deux critères qui disent quelque chose. Au-delà, la rotation n'a
- * plus d'avis — et c'est très exactement ce qu'on veut savoir.
+ * Exposé pour que l'appelant départage lui-même : l'identifiant ne veut rien
+ * dire, car les variantes naissent d'un même `createMany` dans l'ordre du
+ * modèle. S'il tranchait, tous les concepts neufs serviraient la même facette
+ * le même jour, et une session entière tomberait sur un seul format.
  *
- * **Parce que ce qui les départageait ne voulait rien dire, et se voyait.** Sur
- * un concept neuf, les quatre facettes sont à zéro passage et aucune n'a jamais
- * été servie : tout est à égalité, et c'était l'identifiant qui tranchait. Or les
- * quatre variantes naissent d'un même `createMany`, dans l'ordre où le modèle les
- * a écrites — donc le plus petit identifiant désigne toujours la même position
- * dans le lot. Tous les concepts d'un compte neuf servaient la même facette le
- * premier jour, la même deuxième le lendemain, et une session entière tombait sur
- * une seule famille de formats : que des textes à trou lundi, que des
- * explications mardi, jamais un vrai ou faux.
- *
- * `derniereFacette` est celle du passage précédent sur ce concept. Elle sort du
- * tirage — sauf s'il ne reste qu'elle, auquel cas la reposer vaut mieux que ne
- * rien poser du tout.
+ * `derniereFacette` sort du tirage, sauf s'il ne reste qu'elle.
  */
 export function variantesEquivalentes<T extends VarianteServable>(
   variantes: T[],
@@ -139,10 +103,8 @@ export function variantesEquivalentes<T extends VarianteServable>(
 /**
  * La variante à poser, ou `null` si le concept n'a aucune question active.
  *
- * Elle prend la première des équivalentes, donc l'identifiant tranche encore —
- * c'est sans importance pour qui n'a qu'un concept sous les yeux. La session du
- * jour, elle, en a douze : elle regarde le même ensemble et choisit autrement,
- * dans `repartition-des-formats.ts`.
+ * L'identifiant tranche ici, ce qui suffit pour un concept seul. La session du
+ * jour départage autrement, dans `repartition-des-formats.ts`.
  */
 export function choisirVariante(
   variantes: VarianteServable[],
@@ -154,17 +116,9 @@ export function choisirVariante(
 /**
  * Les questions de ce concept ont-elles fait leur temps ?
  *
- * On compte par facette et non par variante : c'est la facette qui est l'angle
- * interrogé, et deux variantes d'une même facette usent le même angle.
- *
- * Les deux modes s'additionnent. Ce qui use une formulation, c'est de l'avoir
- * lue, pas le mode sous lequel on l'a lue : quelqu'un qui tourne beaucoup en
- * entraînement épuise ses questions plus vite et déclenche leur renouvellement
- * sans avoir de bouton à trouver ni de décision à prendre.
- *
- * La condition porte sur les facettes présentes plutôt que sur un compte figé à
- * quatre : un concept qui en porterait trois serait épuisé avec trois, et le
- * jour où le lot change de taille cette fonction n'a pas à changer.
+ * On compte par facette (l'angle interrogé), les deux modes additionnés : ce
+ * qui use une formulation, c'est de l'avoir lue. La condition porte sur les
+ * facettes présentes, pas sur un compte figé à quatre.
  */
 export function doitRegenerer(variantes: VarianteServable[]): boolean {
   if (variantes.length === 0) return false;
@@ -177,10 +131,9 @@ export function doitRegenerer(variantes: VarianteServable[]): boolean {
 /**
  * L'état des variantes une fois le passage compté.
  *
- * Les compteurs sont lus avant d'être incrémentés en base. Sans ce recalcul, il
- * faudrait attendre le passage suivant pour s'apercevoir que le seuil vient
- * d'être franchi — et sur un concept qui n'est plus dû avant trois semaines,
- * « le passage suivant » veut dire trois semaines.
+ * Les compteurs sont lus avant leur incrément en base : sans ce recalcul, le
+ * seuil franchi ne se verrait qu'au passage suivant, parfois des semaines plus
+ * tard.
  */
 export function apresLePassage(
   variantes: VarianteServable[],
@@ -197,21 +150,16 @@ export function apresLePassage(
 }
 
 /**
- * Jours entre deux écritures de questions pour un même concept.
- *
- * Le seuil d'usure seul ne suffit pas depuis que l'entraînement est illimité :
- * quelqu'un qui tourne une heure sur ses trois concepts atteint le seuil le
- * jour même, et rien n'empêcherait la régénération de repartir aussitôt après.
- * Ce plafond borne la dépense d'un concept et casse la boucle.
+ * Jours entre deux écritures de questions pour un même concept. Le seuil
+ * d'usure seul ne suffit pas : l'entraînement illimité l'atteint le jour même.
  */
 export const JOURS_ENTRE_REGENERATIONS = 7;
 
 /**
  * Assez de temps a-t-il passé depuis la dernière écriture de questions ?
  *
- * `derniere` est la dernière fois qu'on a demandé des questions pour ce
- * concept, réussite ou échec — c'est la dépense qu'on plafonne, pas le
- * résultat. Un concept qui n'en a jamais eu n'attend pas.
+ * `derniere` compte les demandes réussies comme échouées : c'est la dépense
+ * qu'on plafonne, pas le résultat.
  */
 export function assezEspacee(derniere: Date | null, maintenant: Date): boolean {
   if (!derniere) return true;

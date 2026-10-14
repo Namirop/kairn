@@ -17,26 +17,18 @@ export type { VariantAControler } from "./controle-question";
 export const FACETTES_ATTENDUES = ["RECOGNITION", "MECHANISM", "BOUNDARY", "APPLICATION"] as const;
 
 /**
- * Formats distincts attendus sur un lot de quatre questions.
- *
- * Le prompt tolère qu'un format revienne une fois : deux questions au plus le
- * partagent, ce qui laisse au moins trois formats sur quatre questions. En
- * dessous, la facette a repris le pas sur le contenu.
+ * Formats distincts attendus sur un lot de quatre questions : le prompt tolère
+ * qu'un format revienne une fois.
  */
 export const FORMATS_MINIMUM = 3;
 
 /**
- * Les formats où la personne écrit puis se juge elle-même.
+ * Les formats où la personne écrit puis se juge elle-même. Plusieurs d'affilée
+ * ne se notent plus : on clique « je savais » pour avancer, et la planification
+ * enregistre du bruit.
  *
- * Trois questions à s'auto-noter d'affilée ne se notent plus : on clique « je
- * savais » pour avancer, et la planification enregistre du bruit. Le compte de
- * formats distincts ne voyait rien de ce défaut — un quatuor de quatre formats
- * dont trois sont auto-notés le satisfaisait.
- *
- * Depuis, le schéma de génération n'ouvre le texte libre que sur `MECHANISM` :
- * une sortie passée par `callAI()` ne peut plus déborder. Le contrôle reste,
- * parce que le banc doit pouvoir juger une génération d'hier ou un lot écrit à
- * la main — et parce qu'il mesure ce que la grammaire garantit.
+ * Le schéma de génération n'ouvre déjà le texte libre que sur `MECHANISM` ; le
+ * contrôle reste pour juger au banc un lot ancien ou écrit à la main.
  */
 export const FORMATS_LIBRES = ["SHORT_ANSWER", "EXPLAIN"];
 export const LIBRES_MAXIMUM = 1;
@@ -44,12 +36,10 @@ export const LIBRES_MAXIMUM = 1;
 /**
  * Le texte à trou qu'un lot doit porter, au moins.
  *
- * Fermer le texte libre par la grammaire a poussé le modèle vers le QCM et le
- * vrai ou faux : un lot typique montrait la réponse à l'écran trois fois sur
- * quatre. Or désigner la bonne option, c'est de la reconnaissance ; c'est
- * produire la réponse qui fait tenir un souvenir, et c'est ce que le produit
- * promet. `CODE` jouait ce rôle sur du contenu technique et n'existe pas
- * ailleurs — le texte à trou, lui, marche sur n'importe quel concept.
+ * Sans texte libre, le modèle glisse vers le QCM et le vrai ou faux, qui ne
+ * demandent que de reconnaître. Produire la réponse est ce qui fait tenir un
+ * souvenir, et le texte à trou est le seul format de rappel qui marche sur
+ * n'importe quel concept (`CODE` ne vaut que pour le technique).
  */
 export const CLOZE_MINIMUM = 1;
 
@@ -97,9 +87,8 @@ function controlerLot(variants: VariantAControler[]): Manquement[] {
 
 /**
  * Les manquements des quatre variantes d'un même Atom, dans l'ordre servi.
- *
- * Ceux qui visent une variante portent son rang : le rapport les affiche sous
- * elle, pas dans une liste à la fin qu'il faudrait recouper à la main.
+ * Ceux qui visent une variante portent son rang, pour que le rapport les
+ * affiche sous elle.
  */
 export function controlerVariants(variants: VariantAControler[]): Manquement[] {
   return [

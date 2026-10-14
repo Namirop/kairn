@@ -3,16 +3,12 @@ import { cibleDuVraiOuFaux } from "./vrai-ou-faux";
 /**
  * Le message qui part au modèle pour faire écrire les questions d'un groupe.
  *
- * Il vivait en double — une copie dans `lib/jobs/redaction-questions.ts` pour
- * le produit, une dans `scripts/evaluation/execution.ts` pour le banc — et les
- * deux devaient déjà numéroter les concepts de la même façon, puisque c'est ce
- * rang que la sortie référence. La cible du vrai ou faux part par le même
- * chemin : un troisième champ recopié deux fois aurait fini par diverger, et le
- * banc aurait alors mesuré autre chose que ce que le produit envoie.
+ * Partagé par le produit (`lib/jobs/redaction-questions.ts`) et le banc
+ * (`scripts/evaluation/`) : la sortie référence le rang des concepts, et le banc
+ * doit mesurer exactement ce que le produit envoie.
  *
- * La cible est **dans l'envoi et pas dans le prompt système**. C'est une
- * décision par question, elle n'a rien à faire dans un texte identique pour
- * tous les appels — et le prompt système est mis en cache, ce qui la figerait.
+ * La cible du vrai ou faux est dans l'envoi et non dans le prompt système :
+ * c'est une décision par question, et le prompt système est mis en cache.
  */
 
 export type ConceptAEnvoyer = {
@@ -26,12 +22,8 @@ export type ConceptAEnvoyer = {
 };
 
 /**
- * La cible, dite sans nommer de facette.
- *
- * La version précédente listait les trois facettes ouvertes au format, et cette
- * table se lisait comme une consigne d'en écrire : `TRUE_FALSE` a doublé sa part
- * du corpus en un passage. Une seule phrase, conditionnelle, qui ne désigne rien
- * et n'appelle rien.
+ * La cible, dite sans nommer de facette : une liste de facettes se lisait comme
+ * une consigne d'écrire des vrai ou faux, et leur part doublait.
  */
 function ligneDeLaCible(graine: string): string {
   const vraie = cibleDuVraiOuFaux(graine) ? "vraie" : "fausse";

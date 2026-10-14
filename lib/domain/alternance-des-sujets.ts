@@ -1,19 +1,13 @@
 /**
  * L'ordre de service d'une session : alterner les sujets, puis les gestes.
  *
- * Réviser par blocs est plus confortable sur le moment et retient moins bien.
- * On sert donc à chaque tour le sujet le plus fourni parmi ceux qui ne viennent
- * pas d'être servis : sans cette préférence au plus fourni, le sujet majoritaire
- * finirait la session d'un bloc, ce qu'on cherchait justement à éviter.
+ * Réviser par blocs retient moins bien. À chaque tour, on sert le sujet le plus
+ * fourni parmi ceux qui ne viennent pas d'être servis ; sans cette préférence,
+ * le sujet majoritaire finirait la session d'un bloc.
  *
- * Le geste de réponse départage ensuite, et jamais l'inverse. Cinq fois « choisis
- * ta réponse » d'affilée lassent ; cinq concepts du même sujet d'affilée retiennent
- * moins bien. La première est une affaire de confort, la seconde d'apprentissage —
- * et c'est pour l'apprentissage que le produit existe. Le geste ne change donc que
- * ce que l'alternance des sujets laissait indécis.
- *
- * Deux fois la même entrée rend deux fois la même sortie : rien ici n'est tiré
- * au hasard.
+ * Le geste de réponse ne départage qu'ensuite : enchaîner le même geste lasse,
+ * enchaîner le même sujet retient moins bien, et c'est l'apprentissage qui
+ * prime. Rien n'est tiré au hasard.
  */
 
 /** Le strict nécessaire pour ranger un concept sous un sujet. */
@@ -50,11 +44,9 @@ export function alternerLesSujets<T extends ConceptAAlterner>(
   while (ordonnes.length < concepts.length) {
     const restants = [...files.entries()].filter(([, file]) => file.length > 0);
     const autres = restants.filter(([cle]) => cle !== precedent);
-    // Répéter un sujet vaut mieux que tronquer la session : quand il ne reste
-    // que lui, il repasse.
+    // Quand il ne reste qu'un sujet, il repasse plutôt que de tronquer la session.
     const tirage = autres.length > 0 ? autres : restants;
-    // Et parmi ceux qui changent de sujet, ceux qui changent aussi de geste.
-    // Quand aucun ne le fait, le sujet garde la main : c'est lui qui compte.
+    // Parmi eux, ceux qui changent aussi de geste ; si aucun, le sujet prime.
     const varies = tirage.filter(([, file]) => {
       const tete = file[0];
 

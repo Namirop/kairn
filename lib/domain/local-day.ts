@@ -1,11 +1,10 @@
 /**
  * Passage d'un instant au calendrier de l'utilisateur.
  *
- * Toute échéance se calcule en UTC. Le fuseau ne sert qu'à deux choses : savoir
- * quel jour il est pour lui — un passage à 23 h 50 et un à 00 h 10 ne sont pas
- * le même jour — et savoir s'il est l'heure de lui écrire.
+ * Toute échéance se calcule en UTC. Le fuseau ne sert qu'à savoir quel jour il
+ * est pour lui, et s'il est l'heure de lui écrire.
  *
- * `en-CA` est utilisé pour son format de date : il rend `AAAA-MM-JJ`.
+ * `en-CA` est choisi pour son format de date : il rend `AAAA-MM-JJ`.
  */
 
 /** Jour civil de l'utilisateur, au format `AAAA-MM-JJ`. */
@@ -46,11 +45,8 @@ export function dayToUtcDate(day: string): Date {
 }
 
 /**
- * Le lendemain d'un jour civil.
- *
- * Le calcul passe par minuit UTC et non par l'heure locale : une journée locale
- * ne dure pas toujours 24 h — elle en fait 23 ou 25 aux changements d'heure —
- * alors que l'étiquette du jour, elle, avance toujours d'un cran.
+ * Le lendemain d'un jour civil. Par minuit UTC et non par l'heure locale : une
+ * journée locale fait 23 ou 25 h aux changements d'heure.
  */
 export function jourSuivant(day: string): string {
   const lendemain = new Date(dayToUtcDate(day).getTime() + 24 * 60 * 60 * 1000);
@@ -62,10 +58,8 @@ export function jourSuivant(day: string): string {
  * Combien de jours civils séparent deux jours locaux. Négatif si le second
  * précède le premier.
  *
- * Le calcul passe par les minuits UTC des deux étiquettes, et pas par l'écart
- * entre deux instants : « il y a un jour » est une affaire de calendrier, pas de
- * vingt-quatre heures. Un passage hier à 22 h et une lecture ce matin à 8 h font
- * dix heures d'écart et pourtant bien un jour.
+ * Par les étiquettes et non par l'écart entre deux instants : hier 22 h et ce
+ * matin 8 h font dix heures, mais bien un jour.
  */
 export function joursEntre(depuis: string, jusqua: string): number {
   const ecart = dayToUtcDate(jusqua).getTime() - dayToUtcDate(depuis).getTime();

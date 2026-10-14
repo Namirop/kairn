@@ -3,17 +3,13 @@ import { TROU } from "./reponse-cloze";
 /**
  * Le terme masqué qui déborde sur la phrase qui l'entoure.
  *
- * « Le classement ATP glisse sur une fenêtre de \_\_\_ semaines. », terme
- * attendu « 52 semaines ». Deux dégâts d'un coup : la personne écrit « 52 »,
- * qui est la bonne réponse, et la comparaison la refuse parce qu'elle compte les
- * mots ; puis l'écran comble le trou et affiche « de 52 semaines semaines ».
+ * « Une fenêtre de \_\_\_ semaines », terme « 52 semaines » : la réponse « 52 »
+ * est refusée par la comparaison, et l'écran affiche « 52 semaines semaines ».
+ * Le mot déjà écrit contre le trou est rendu à la phrase.
  *
- * Le mot en trop n'est pas une connaissance à vérifier — il est déjà écrit à
- * côté du trou, tout le monde le lit. On le rend donc à la phrase.
- *
- * **Réparé à la lecture, et pas à l'écriture**, comme `etalonLisible` : c'est le
- * seul endroit qui répare aussi les questions déjà en base, et il n'y en a
- * qu'un. La prévention vit dans le prompt, la mesure dans `controlerQuestion`.
+ * Réparé à la lecture, comme `etalonLisible`, pour couvrir aussi les questions
+ * déjà en base. La prévention vit dans le prompt, la mesure dans
+ * `controlerQuestion`.
  */
 
 /** Minuscules, sans accents, sans ponctuation : de quoi comparer deux mots. */
@@ -30,7 +26,7 @@ function mots(texte: string): string[] {
 }
 
 /**
- * Ce qui borde le trou, lu **depuis le trou** : les mots d'avant à reculons, les
+ * Ce qui borde le trou, lu depuis le trou : les mots d'avant à reculons, les
  * mots d'après dans l'ordre. Vide si la phrase n'en porte pas.
  */
 function bords(phrase: string): { avant: string[]; apres: string[] } {
@@ -52,14 +48,9 @@ function memesMots(gauche: readonly string[], droite: readonly string[]): boolea
 /**
  * Combien de mots le terme partage avec un bord, en partant du trou.
  *
- * On cherche le plus long recouvrement et non le premier mot venu : sur « un
- * effet \_\_\_ de bord » avec « effet indésirable de bord », le dernier mot du
- * terme est « bord » et le premier du bord est « de » — mot à mot, rien ne
- * correspond, alors que deux mots entiers sont en trop.
- *
- * Jamais tous les mots : un terme entièrement contenu dans ses bords n'existe
- * pas — ce serait une phrase où le trou ne masque rien —, et le rogner à vide
- * donnerait une réponse impossible à écrire.
+ * Le plus long recouvrement, pas le premier mot : « effet \_\_\_ de bord » avec
+ * « effet indésirable de bord » recouvre deux mots sans que « bord » et « de »
+ * correspondent. Jamais tous les mots, sinon la réponse serait vide.
  */
 function recouvrement(
   terme: readonly string[],
@@ -75,9 +66,7 @@ function recouvrement(
 
 /**
  * Le terme, débarrassé des mots que la phrase répète déjà de part et d'autre du
- * trou.
- *
- * On rogne à droite d'abord, puis à gauche sur ce qui reste.
+ * trou : à droite d'abord, puis à gauche sur ce qui reste.
  */
 export function sansLesBordsDuTrou(phrase: string, terme: string): string {
   const { avant, apres } = bords(phrase);
@@ -105,17 +94,11 @@ export type TexteATrouEnBase = {
 };
 
 /**
- * Le texte à trou tel qu'on le sert : son terme rendu à sa juste longueur, la
- * forme d'origine gardée parmi les réponses acceptées.
+ * Le texte à trou tel qu'on le sert.
  *
- * La forme longue reste acceptée parce qu'elle reste juste : quelqu'un qui écrit
- * « 52 semaines » a la bonne réponse, il en dit seulement un mot de plus que
- * nécessaire. C'est la première forme qui change, et elle seule — c'est elle que
- * l'écran affiche dans le trou.
- *
- * Les leurres sont rognés du même geste. Sans quoi la liste du coup de pouce
- * mettrait « 52 » à côté de « quarante-huit semaines » : le terme juste s'y
- * repérerait à sa forme, sans qu'on sache rien du concept.
+ * Seule la première forme acceptée, celle que l'écran affiche dans le trou, est
+ * rognée ; la forme longue reste acceptée parce qu'elle est juste. Les leurres
+ * sont rognés aussi, sans quoi le terme juste se repérerait à sa forme.
  */
 export function trouSansRedite(cloze: TexteATrouEnBase): TexteATrouEnBase {
   const [attendu, ...autres] = cloze.accepted;

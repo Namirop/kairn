@@ -1,18 +1,10 @@
 /**
- * Géométrie de contact entre pierres.
+ * Géométrie de contact entre pierres, sans masse ni vitesse (la réponse aux
+ * contacts vit dans `cairn-resolution`).
  *
- * Une pierre est traitée comme un rectangle orienté. Son dessin a des coins
- * mordus et des flancs pincés, mais la différence se compte en fractions
- * d'unité : le rectangle est ce qui décide où elle s'arrête, le chemin est ce
- * qu'on regarde.
- *
- * Fonctions pures, sans notion de masse ni de vitesse. Savoir que deux pierres
- * se chevauchent et savoir comment elles se repoussent sont deux questions
- * distinctes : la seconde vit dans `cairn-resolution`.
- *
- * Le repère est celui du viewBox : `y` croît **vers le bas**, le sol est le plan
- * `y = 0`. Une pierre posée a donc un `y` négatif, et un point sous le sol a un
- * `y` positif.
+ * Une pierre est un rectangle orienté : son dessin irrégulier n'en diffère que
+ * de fractions d'unité. Repère du viewBox : `y` croît vers le bas, le sol est
+ * `y = 0`, une pierre posée a un `y` négatif.
  */
 
 export type Vecteur = { x: number; y: number };
@@ -34,11 +26,8 @@ export type Contact = {
 };
 
 /**
- * Les bords entre lesquels les pierres tombent, en unités de viewBox.
- *
- * Le cairn du tableau de bord n'a pas à quitter son dessin. Celui de la page
- * publique, si : l'enfermer dans la largeur de son propre SVG le faisait
- * rebondir sur des murs qu'on ne voyait pas, ni contenu ni libre.
+ * Les bords entre lesquels les pierres tombent, en unités de viewBox. Le cairn
+ * de la page publique n'en a pas (`SANS_BORDS`).
  */
 export type Cadre = { gauche: number; droite: number };
 
@@ -78,11 +67,9 @@ function axes(boite: Boite): Vecteur[] {
 /**
  * Les quatre axes à tester, dans un ordre indépendant de celui des deux pierres.
  *
- * Deux axes peuvent donner exactement le même chevauchement, et le premier
- * rencontré gagnait — or « le premier » changeait selon qu'on demandait A vers
- * B ou B vers A, si bien que la même paire se repoussait dans deux directions
- * différentes. Ramener chaque axe à un demi-plan puis trier rend le choix
- * stable ; le sens se décide après, sur l'écart des centres.
+ * À chevauchement égal, le premier axe gagne : sans ce tri, A–B et B–A se
+ * repousseraient dans deux directions différentes. Le sens se décide après, sur
+ * l'écart des centres.
  */
 function axesTestes(a: Boite, b: Boite): Vecteur[] {
   return [...axes(a), ...axes(b)]
@@ -114,13 +101,10 @@ export function contient(boite: Boite, point: Vecteur): boolean {
 }
 
 /**
- * Contacts entre deux pierres, par le théorème de l'axe séparateur.
- *
- * Le plus petit chevauchement donne la normale : c'est la direction où il y a
- * le moins à défaire pour les séparer, donc celle par laquelle elles se
- * touchent vraiment. Les points de contact sont les sommets de l'une pris à
- * l'intérieur de l'autre — une pierre posée à plat en donne deux, ses coins
- * bas, et c'est ce qui l'empêche d'osciller sur place comme une bascule.
+ * Contacts entre deux pierres, par le théorème de l'axe séparateur : le plus
+ * petit chevauchement donne la normale. Les points de contact sont les sommets
+ * de l'une pris dans l'autre ; une pierre à plat en donne deux, ce qui
+ * l'empêche d'osciller comme une bascule.
  */
 export function contactsEntre(a: Boite, b: Boite): Contact[] {
   const sommetsA = sommets(a);
@@ -163,11 +147,8 @@ export function contactsEntre(a: Boite, b: Boite): Contact[] {
 }
 
 /**
- * Contacts avec le sol : les sommets passés sous le plan `y = 0`.
- *
- * La normale sort du sol, donc vers le haut. Prendre les sommets plutôt que la
- * demi-hauteur est ce qui empêche une pierre inclinée de s'enfoncer : c'est son
- * coin le plus bas qui touche, pas son centre.
+ * Contacts avec le sol : les sommets passés sous `y = 0`, et non la
+ * demi-hauteur, pour qu'une pierre inclinée touche par son coin le plus bas.
  */
 export function contactsAvecLeSol(boite: Boite): Contact[] {
   return sommets(boite)

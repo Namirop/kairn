@@ -29,12 +29,10 @@ export type VariantAControler = {
 };
 
 /**
- * Ce qu'on tolère entre la plus longue et la plus courte option d'un MCQ.
- *
- * Deux seuils, parce qu'un seul se trompe : sur des options courtes — quatre
- * expressions de code — le rapport s'envole sans que la bonne réponse se
- * repère, et sur des options longues c'est l'écart absolu qui ne dit rien.
- * Une option n'est signalée que si elle dépasse les deux.
+ * L'écart toléré entre la plus longue et la plus courte option d'un MCQ.
+ * Signalé seulement si les deux seuils sont dépassés : sur des options courtes
+ * le rapport s'envole sans trahir la réponse, sur des longues c'est l'écart
+ * absolu qui ne dit rien.
  */
 export const ECART_MAX_OPTIONS = 2;
 export const ECART_MINIMUM_SIGNIFICATIF = 30;
@@ -91,10 +89,9 @@ function controlerMcq(variant: VariantAControler): Manquement[] {
 /**
  * Le texte à trou : un seul trou, et ce qui manque tient en trois mots.
  *
- * La longueur se mesure sur la première forme acceptée — le terme masqué, que
- * le schéma demande en tête de liste. Un trou qui avale une proposition entière
- * ne se retrouve pas, il se reformule : la comparaison échouera sur une réponse
- * pourtant juste, et la personne apprendra à cliquer « je l'avais ».
+ * La longueur se mesure sur la première forme acceptée, le terme masqué. Un
+ * trou plus long se reformule au lieu de se retrouver, et la comparaison
+ * échoue sur une réponse juste.
  */
 function controlerCloze(variant: VariantAControler): Manquement[] {
   const cloze = variant.cloze ?? null;
@@ -123,13 +120,9 @@ function controlerCloze(variant: VariantAControler): Manquement[] {
   }
 
   /*
-    Un terme qui redit un mot posé contre le trou.
-
-    « une fenêtre de ___ semaines », terme « 52 semaines » : la phrase comblée
-    affiche « 52 semaines semaines », et « 52 » — la bonne réponse — est comptée
-    fausse parce que la comparaison exige le même nombre de mots. Réparé à la
-    lecture par `trouSansRedite` ; signalé ici pour que le banc dise si la
-    consigne du prompt prend.
+    Un terme qui redit un mot posé contre le trou (« de ___ semaines », terme
+    « 52 semaines ») : « 52 », juste, serait compté faux. Réparé à la lecture
+    par `trouSansRedite` ; signalé pour que le banc dise si le prompt tient.
   */
   if (termeDebordeSurLaPhrase(cloze.sentence, terme)) {
     return [
@@ -141,14 +134,9 @@ function controlerCloze(variant: VariantAControler): Manquement[] {
   }
 
   /*
-    Un terme qu'on peut lire ailleurs dans sa propre phrase.
-
-    « Dans « es ___ », la phrase signifie qu'il est ennuyeux, tandis que « está
-    aburrido » signifie qu'il s'ennuie. » : le mot masqué est écrit en clair six
-    mots plus loin, et le trou ne demande plus que de recopier. Rien n'est cassé
-    ici — la question marche, elle ne teste simplement plus rien —, donc rien à
-    réparer à la lecture, contrairement au débordement ci-dessus. Le prompt porte
-    la consigne depuis longtemps ; ceci dit enfin si elle prend.
+    Un terme écrit en clair ailleurs dans sa propre phrase : le trou ne demande
+    plus que de recopier. La question marche mais ne teste plus rien, donc rien
+    à réparer à la lecture ; le signalement dit si la consigne du prompt tient.
   */
   if (trouDevoileSaReponse(cloze.sentence, terme)) {
     return [
@@ -160,11 +148,9 @@ function controlerCloze(variant: VariantAControler): Manquement[] {
   }
 
   /*
-    Un leurre qui est une forme acceptée retourne l'aide contre celui qui la
-    demande : la liste porte alors deux bonnes réponses, il en choisit une, et
-    on lui compte un échec sur une réponse juste. Signalé plutôt que refusé —
-    `pistesDuTrou` retire le doublon à l'affichage — mais un modèle qui le fait
-    souvent doit se voir au banc.
+    Un leurre qui est une forme acceptée met deux bonnes réponses dans l'aide.
+    Signalé sans refus : `pistesDuTrou` retire le doublon à l'affichage, mais
+    un modèle qui le fait souvent doit se voir au banc.
   */
   const acceptees = new Set(cloze.accepted.map((forme) => motsNormalises(forme)));
   const doublons = (cloze.leurres ?? []).filter((leurre) => acceptees.has(motsNormalises(leurre)));
@@ -177,15 +163,11 @@ function controlerCloze(variant: VariantAControler): Manquement[] {
 }
 
 /**
- * Le vrai ou faux, relu contre la cible que l'envoi lui avait fixée.
+ * Le vrai ou faux, relu contre la valeur que l'envoi imposait à cette question :
+ * le modèle ne tient pas une proportion demandée globalement.
  *
- * Le modèle ne décide plus de la proportion — il ne l'a jamais tenue, 88 % de
- * fausses au passage du 14/08 — mais d'une valeur par question, imposée. Ce
- * contrôle est la seule chose qui dise si la consigne locale prend là où la
- * consigne de distribution n'a pas pris.
- *
- * L'écart est un manquement et jamais un refus : la question reste servable,
- * elle est juste comptée du mauvais côté de la répartition.
+ * Un écart est un manquement, jamais un refus : la question reste servable,
+ * elle est seulement comptée du mauvais côté de la répartition.
  */
 function controlerVraiOuFaux(variant: VariantAControler): Manquement[] {
   const rendue = variant.estVraie ?? null;
@@ -226,12 +208,9 @@ function controlerReponseCachee(variant: VariantAControler): Manquement[] {
 }
 
 /**
- * La charge écartée à la relecture.
- *
- * La sortie ne porte plus la trace de ce qui a été retiré — c'est le but — donc
- * le contrôle ne peut pas la retrouver. Il lit le drapeau posé par le schéma.
- * Sans ce manquement, un modèle qui joint systématiquement une phrase trouée à
- * la mauvaise question serait rattrapé en silence, indéfiniment.
+ * La charge écartée à la relecture. La sortie n'en garde pas trace, d'où le
+ * drapeau posé par le schéma ; sans lui, un modèle fautif serait rattrapé en
+ * silence indéfiniment.
  */
 function controlerCharge(variant: VariantAControler): Manquement[] {
   if (!variant.chargeIgnoree) return [];
@@ -240,19 +219,12 @@ function controlerCharge(variant: VariantAControler): Manquement[] {
 }
 
 /**
- * Un texte de question qui est une coquille — mot littéral « placeholder »,
- * ou consigne générique qui ne redit rien de la question réelle.
+ * Un texte de question qui est une coquille : « placeholder » ou consigne
+ * générique qui ne redit rien de la question réelle. Invisible à l'écran pour
+ * un CLOZE, elle fausse pourtant la mesure du radotage (paires identiques).
  *
- * Le figé du 18/08 en portait 71 sur 192 CLOZE : « placeholder », « Complète
- * la phrase du concept. », « Complète la phrase décrivant l'effet du X. ».
- * L'écran de révision d'un CLOZE affiche `cloze.sentence`, jamais ce champ,
- * donc l'utilisateur ne voit rien — mais la mesure du radotage, elle,
- * comparait ces coquilles entre elles et produisait des paires à 1,000.
- *
- * La dérivation dans `generate-variants.ts` couvre le cas CLOZE côté source ;
- * ce contrôle attrape le reste — coquille sur un autre format, ou régression
- * du fix. Signalé, pas refusé : la question part quand même en base, un
- * manquement au banc suffit à ne pas laisser le silence s'installer.
+ * `lib/ai/schemas/generate-variants.ts` dérive déjà la question d'un CLOZE ; ce
+ * contrôle attrape le reste. Signalé, pas refusé.
  */
 const COQUILLES = [
   /^placeholder\d*$/i,
@@ -266,9 +238,7 @@ function estCoquille(texte: string): boolean {
 }
 
 function controlerCoquille(variant: VariantAControler): Manquement[] {
-  // Pour un CLOZE, ce qui s'affiche c'est `cloze.sentence` (l'écran de
-  // révision ignore `question`). On regarde donc la charge quand elle est
-  // là — c'est elle qui doit porter la vraie question. Un cloze absent est
+  // Un CLOZE affiche `cloze.sentence`, pas `question`. Un cloze absent est
   // déjà signalé par `controlerCloze`.
   if (variant.format === "CLOZE") {
     if (!variant.cloze) return [];
@@ -292,20 +262,11 @@ function controlerCoquille(variant: VariantAControler): Manquement[] {
 }
 
 /**
- * La question qui renvoie à un texte que personne ne voit.
+ * La question qui renvoie au concept (« mentionné dans le concept »), que
+ * l'écran de révision ne montre jamais puisqu'il donnerait la réponse.
  *
- * L'écran de révision ne montre jamais le concept — l'afficher donnerait la
- * réponse avec l'exercice —, donc « mentionné dans le concept » désigne le vide.
- * Il ne reste au lecteur que deux étiquettes en petites capitales au-dessus de la
- * carte, et rien ne dit qu'elles sont ce à quoi la question renvoie.
- *
- * On lit ce qui **s'affiche** : la phrase trouée pour un texte à trou, le champ
- * `question` partout ailleurs. C'est la même distinction que pour les coquilles,
- * et pour la même raison — le `question` d'un CLOZE ne va nulle part.
- *
- * Signalé, jamais refusé : la question est maladroite, pas fausse, et jeter un
- * appel qui porte trois concepts pour une tournure coûterait plus que le défaut.
- * La correction vit dans le prompt ; ce contrôle dit si elle prend.
+ * On lit ce qui s'affiche, comme pour les coquilles. Signalé, jamais refusé :
+ * la tournure est maladroite, pas fausse, et jeter l'appel coûterait plus.
  */
 function controlerRenvoi(variant: VariantAControler): Manquement[] {
   const affiche = variant.format === "CLOZE" ? (variant.cloze?.sentence ?? "") : variant.question;

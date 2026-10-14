@@ -1,15 +1,12 @@
 /**
  * Ce que la personne fait pour répondre, indépendamment du format.
  *
- * Un QCM et un vrai ou faux sont deux formats et un seul geste : on choisit dans
- * une liste. Cinq questions d'affilée sur ce geste-là donnent l'impression d'être
- * resté sur la même question, alors que les formats variaient — c'est le geste
- * qui lasse, pas l'étiquette qu'on lui donne.
+ * Un QCM et un vrai ou faux sont deux formats et un seul geste : c'est le geste
+ * répété qui lasse, pas le format.
  *
- * C'est aussi le découpage de l'écran de réponse : choisir se clique, saisir
- * s'écrit dans un champ vérifiable, formuler se juge soi-même. Un format inconnu
- * tombe dans « formuler », comme la zone de réponse le fait déjà de son côté
- * quand elle ne sait pas quoi servir.
+ * Choisir se clique, saisir s'écrit dans un champ vérifiable, formuler se juge
+ * soi-même. Un format inconnu tombe dans « formuler », comme dans la zone de
+ * réponse.
  */
 export type GesteDeReponse = "CHOISIR" | "SAISIR" | "FORMULER";
 

@@ -1,7 +1,5 @@
 /**
- * Les langues que le produit parle, telles que le domaine les nomme.
- *
- * Les mêmes valeurs que l'enum `Langue` du schéma, redites ici parce que le
- * domaine n'importe rien de Prisma : les deux types sont interchangeables.
+ * Les langues du produit : les mêmes valeurs que l'enum Prisma `Langue`, redites
+ * parce que le domaine n'importe rien de Prisma.
  */
 export type LangueDuProduit = "FR" | "EN";

@@ -1,12 +1,8 @@
 import { dayToUtcDate } from "./local-day";
 
 /**
- * Quand le compteur repart.
- *
- * Depuis que le plafond se compte au mois, ce n'est plus minuit mais le jour
- * d'ancrage de la période — le 12 pour qui s'est inscrit un 12. Dire « à
- * minuit » à quelqu'un dont la période repart dans trois semaines serait faux de
- * trois semaines, et c'est le genre de phrase qu'on croit sur parole.
+ * Quand le compteur repart : au jour d'ancrage de la période (le 12 pour qui
+ * s'est inscrit un 12), pas à minuit.
  */
 
 const JOUR_MS = 24 * 60 * 60 * 1000;
@@ -24,10 +20,9 @@ export function joursAvantLaBascule(aujourdhui: string, finDePeriode: string): n
 /**
  * Le moment de la remise à zéro, prêt à être dit.
  *
- * Une échéance proche se compte en jours, une échéance lointaine se nomme : « le
- * 12 septembre » situe mieux que « dans 26 jours », qu'il faut convertir de tête.
- * Le domaine choisit la forme ; les mots sont dans `temps.remiseAZero`, et la
- * date se formate à l'écran, dans la langue de la personne.
+ * Une échéance proche se compte en jours, une lointaine se nomme : « le 12
+ * septembre » situe mieux que « dans 26 jours ». Le domaine choisit la forme ;
+ * les mots sont dans `temps.remiseAZero`, la date se formate à l'écran.
  */
 export type RemiseAZero =
   | { quand: "instant" }

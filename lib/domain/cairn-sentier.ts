@@ -3,33 +3,21 @@ import { empiler, LARGEUR_VUE, type Pierre } from "./cairn-stack";
 /**
  * Le sentier : plusieurs cairns côte à côte plutôt qu'un empilement sans fin.
  *
- * Un empilement compte une pierre par concept retenu, et sa boîte a une largeur
- * fixe pendant que sa hauteur, elle, grandit sans limite. Passé une douzaine de
- * pierres, le dessin se rétrécit en aiguille : à vingt c'est un bâton, à
- * cinquante un fil de deux pierres de large. Ce n'est plus un cairn, et surtout
- * on ne distingue plus ce qui est posé sur quoi.
+ * La boîte d'un empilement a une largeur fixe : au-delà d'une douzaine de
+ * pierres, le dessin s'amincit en aiguille et devient illisible. Passé
+ * `PIERRES_PAR_CAIRN`, la pierre suivante ouvre un cairn à droite.
  *
- * Un cairn n'a jamais grandi indéfiniment. On en bâtit un autre plus loin, et
- * c'est l'alignement qui balise le chemin — c'est la métaphore du produit,
- * prise au mot. Passé `PIERRES_PAR_CAIRN`, la pierre suivante ouvre donc un
- * cairn de plus, à droite du précédent.
- *
- * Le remplissage est **séquentiel**, jamais réparti : les dix premiers concepts
- * font le premier cairn, les dix suivants le second. Une répartition équilibrée
- * redistribuerait les pierres à chaque ajout, et comme la forme de chacune est
- * tirée de son concept, on verrait les pierres sauter d'un cairn à l'autre. Le
- * sentier de quelqu'un doit être stable dans le temps.
+ * Le remplissage est séquentiel, jamais réparti : une répartition équilibrée
+ * ferait sauter les pierres d'un cairn à l'autre à chaque ajout, et le sentier
+ * doit rester stable dans le temps.
  */
 
 /** Au-delà, la pierre suivante ouvre un cairn de plus. */
 export const PIERRES_PAR_CAIRN = 10;
 
 /**
- * L'écart entre deux cairns, en unités de vue.
- *
- * La pierre la plus large en fait soixante sur cent : un écart de quatorze
- * laisse donc respirer sans que les deux empilements aient l'air posés sur deux
- * sentiers différents.
+ * L'écart entre deux cairns, en unités de vue. La pierre la plus large fait
+ * soixante sur cent : quatorze laisse respirer sans séparer les deux cairns.
  */
 const ECART = 14;
 
@@ -51,12 +39,7 @@ export type Sentier = {
   total: number;
 };
 
-/**
- * Le découpage d'un total en cairns successifs.
- *
- * Séparé du tracé parce que c'est la seule règle qu'on aura envie de discuter :
- * le palier se règle ici, et le dessin suit.
- */
+/** Le découpage d'un total en cairns successifs. */
 export function repartirEnCairns(nombre: number, parCairn: number = PIERRES_PAR_CAIRN): number[] {
   const total = Math.max(0, Math.floor(nombre));
   const taille = Math.max(1, Math.floor(parCairn));
@@ -70,12 +53,9 @@ export function repartirEnCairns(nombre: number, parCairn: number = PIERRES_PAR_
 }
 
 /**
- * Les graines de chaque pierre, indexées sur le sentier entier.
- *
- * Sans elles, chaque cairn repartirait de la graine par défaut de son premier
- * rang : deux cairns identiques, et deux pierres portant la même clé. Les
- * indices restent donc globaux, ce qui rend aussi le premier cairn identique à
- * ce qu'`empiler` produisait seul.
+ * Les graines de chaque pierre, indexées sur le sentier entier : indexées par
+ * cairn, deux cairns seraient identiques et deux pierres porteraient la même
+ * clé. Le premier cairn reste ainsi identique à ce qu'`empiler` produit seul.
  */
 function grainesDuSentier(total: number, graines?: string[]): string[] {
   return Array.from({ length: total }, (_, rang) => graines?.[rang] ?? `cairn-pierre-${rang}`);

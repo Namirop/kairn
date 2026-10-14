@@ -3,21 +3,13 @@ import type { LangueDuProduit } from "./langue-du-produit";
 /**
  * Ce qu'on met dans le champ de dépôt quand il est vide.
  *
- * Le principe de Kairn n'est pas compliqué, mais il n'est pas devinable : la
- * première question de quelqu'un devant un champ vide est « qu'est-ce que je
- * suis censé mettre ? ». Une phrase d'explication au-dessus répond mal, parce
- * qu'on ne lit pas les explications avant d'agir.
+ * Des exemples volontairement disparates (cuisine, mot étranger, documentation)
+ * disent par contraste qu'on peut déposer n'importe quoi, mieux qu'une
+ * explication qu'on ne lit pas avant d'agir.
  *
- * Le message passe donc par le **contraste** entre des exemples volontairement
- * disparates : une astuce de cuisine, un mot d'une langue étrangère, une ligne
- * de documentation. Aucun des trois n'a de rapport avec les autres, et c'est
- * exactement ce qu'on veut faire comprendre — on peut déposer n'importe quoi.
- * Personne ne lit ça comme une consigne, tout le monde l'absorbe.
- *
- * **Chaque langue a ses propres exemples**, pas une traduction des mêmes : un
- * exemple déposé part réellement au découpage, et ce qu'il rend doit être dans
- * la langue de la personne. L'exemple de langue étrangère reste « doch » dans
- * les deux, parce que ni le français ni l'anglais n'ont de mot pour ça.
+ * Chaque langue a ses propres textes, pas une traduction : un exemple déposé
+ * part vraiment au découpage, dans la langue de la personne. « Doch » reste dans
+ * les deux, ni le français ni l'anglais n'ayant de mot pour ça.
  */
 
 export type ExempleDeDepot = {
@@ -28,22 +20,13 @@ export type ExempleDeDepot = {
 };
 
 /**
- * Les trois exemples du premier dépôt.
+ * Les trois exemples du premier dépôt, de trois natures qui ne se recouvrent
+ * pas : deux exemples techniques diraient « outil pour développeurs », cinq
+ * feraient une liste à lire.
  *
- * Trois, et de trois natures qui ne se recouvrent pas. Deux exemples techniques
- * diraient « c'est un outil pour développeurs » ; cinq exemples feraient une
- * liste qu'on lit au lieu d'un choix qu'on fait.
- *
- * **Les trois tiennent sur une ligne, et c'est une contrainte de mesure.** Sous
- * le champ de l'essai, la colonne fait cinq cent soixante-seize points ; les
- * étiquettes d'origine en demandaient cinq cent quatre-vingt-dix-neuf, donc la
- * troisième passait seule à la ligne. Une puce orpheline se lit comme un ajout
- * de dernière minute et non comme le troisième d'un choix de trois — la
- * démonstration passe par le contraste des trois natures, et on ne la voit que
- * si on les voit ensemble. « Un mot d'une autre langue » est donc devenu « Un
- * mot étranger » : même nature, soixante-sept points de moins, et la ligne tient
- * avec de la marge. Avant d'allonger l'une d'elles, vérifier qu'elles tiennent
- * encore.
+ * Les trois étiquettes doivent tenir sur une ligne de 576 px sous le champ de
+ * l'essai : une puce orpheline casse le contraste. Avant d'en allonger une,
+ * vérifier qu'elles tiennent encore.
  */
 const EXEMPLES_FR: readonly ExempleDeDepot[] = [
   {
@@ -64,11 +47,8 @@ const EXEMPLES_FR: readonly ExempleDeDepot[] = [
 ];
 
 /**
- * Les textes d'invite du champ, tirés à chaque chargement.
- *
- * C'est le meilleur véhicule du message « on peut déposer n'importe quoi »,
- * parce qu'il est là au moment du geste et non dans un écran qu'on a traversé.
- * Chacun nomme une matière différente ; aucun ne donne de consigne de forme.
+ * Les textes d'invite du champ, tirés à chaque chargement. Chacun nomme une
+ * matière différente ; aucun ne donne de consigne de forme.
  */
 const INVITES_FR: readonly string[] = [
   "Colle ici ce que tu veux retenir. Une phrase, un article, une explication qu'on vient de te donner.",
@@ -81,10 +61,7 @@ const INVITES_FR: readonly string[] = [
   "Une commande que tu retapes toujours de travers.",
 ];
 
-/**
- * Les mêmes, en anglais. La contrainte de mesure vaut aussi : les trois
- * étiquettes tiennent sur une ligne de cinq cent soixante-seize points.
- */
+/** Les mêmes en anglais, sous la même contrainte d'une ligne de 576 px. */
 const EXEMPLES_EN: readonly ExempleDeDepot[] = [
   {
     etiquette: "A cooking tip",
@@ -125,12 +102,8 @@ export const INVITES_DE_DEPOT: Record<LangueDuProduit, readonly string[]> = {
 };
 
 /**
- * Une invite, tirée d'un nombre entre 0 et 1.
- *
- * Le tirage est passé en paramètre plutôt que fait ici : c'est ce qui rend la
- * fonction pure, donc rejouable dans un test, et c'est aussi ce qui laisse
- * l'appelant tirer côté serveur — un tirage côté client ferait diverger le
- * rendu du serveur et casserait l'hydratation.
+ * Une invite, tirée d'un nombre entre 0 et 1. L'appelant tire côté serveur : un
+ * tirage côté client casserait l'hydratation.
  */
 export function inviteDeDepot(tirage: number, langue: LangueDuProduit): string {
   const invites = INVITES_DE_DEPOT[langue];

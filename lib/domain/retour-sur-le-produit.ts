@@ -1,24 +1,15 @@
 /**
  * Ce qu'on accepte d'un retour sur le produit, et ce qu'on en garde.
  *
- * Le formulaire demande peu, et c'est délibéré : un retour qu'on n'écrit pas
- * vaut zéro, et tout champ obligatoire supplémentaire fait renoncer une partie
- * des gens. Il ne reste donc que le message. Le sujet est un choix parmi quatre,
- * l'écran et la capture sont facultatifs.
+ * Seul le message est obligatoire : chaque champ imposé en plus fait renoncer
+ * une partie des gens.
  *
- * Les bornes ne sont pas là pour la qualité du retour — un « ça marche pas » de
- * douze signes est un retour utile — mais pour que le champ ne devienne pas une
- * porte d'entrée : c'est du texte libre écrit par n'importe quel compte, et il
- * finit dans un écran d'administration.
+ * Les bornes ne jugent pas la qualité du retour : elles empêchent que ce texte
+ * libre, écrit par n'importe quel compte et lu dans un écran d'administration,
+ * devienne une porte d'entrée.
  */
 
-/**
- * En deçà, ce n'est pas un retour, c'est un clic.
- *
- * Dix signes laissent passer « ça bug » et arrêtent une frappe accidentelle.
- * On ne cherche pas à imposer une phrase : c'est le genre d'exigence qui fait
- * fermer l'écran.
- */
+/** Laisse passer « ça bug », arrête une frappe accidentelle. */
 export const MESSAGE_MIN = 10;
 
 /** Au-delà, ce n'est plus un retour : c'est un fil de discussion. */
@@ -28,11 +19,9 @@ export const MESSAGE_MAX = 2000;
 export const ECRAN_MAX = 120;
 
 /**
- * Retours acceptés d'un même compte sur vingt-quatre heures glissantes.
- *
- * Assez haut pour qu'une session de test intensive ne bute jamais dedans — c'est
- * exactement le comportement qu'on veut encourager —, assez bas pour qu'un
- * script ne remplisse pas la table pendant la nuit.
+ * Retours acceptés d'un même compte sur vingt-quatre heures glissantes : assez
+ * pour une session de test intensive, trop peu pour qu'un script remplisse la
+ * table.
  */
 export const RETOURS_PAR_JOUR = 20;
 
@@ -40,12 +29,7 @@ export function peutEncoreEnvoyer(dejaEnvoyes: number): boolean {
   return dejaEnvoyes < RETOURS_PAR_JOUR;
 }
 
-/**
- * Le message, nettoyé, ou `null` s'il ne tient pas dans les bornes.
- *
- * Les espaces de bord ne comptent pas dans la mesure : une saisie de deux mots
- * suivie de trente retours à la ligne n'est pas un retour de trente-deux signes.
- */
+/** Le message sans ses espaces de bord, ou `null` s'il sort des bornes. */
 export function lireLeMessage(saisie: string): string | null {
   const propre = saisie.trim();
 
@@ -62,15 +46,11 @@ export function lireLEcran(saisie: string): string | null {
 }
 
 /**
- * Ce qui rend un défaut d'affichage reproductible, en une ligne.
+ * Ce qui rend un défaut d'affichage reproductible, en une ligne : la taille de
+ * la fenêtre, puis le navigateur coupé court.
  *
- * La largeur de la fenêtre d'abord, parce que c'est elle qui décide de tout ce
- * qui se casse sur téléphone, et c'est la chose qu'un rapport écrit à la main
- * n'inclut jamais. Le navigateur ensuite, coupé court : la chaîne complète est
- * illisible et ne dit rien de plus que son début.
- *
- * Ce n'est pas de la donnée personnelle et ça ne doit jamais le devenir : pas
- * d'adresse, pas de contenu déposé, pas d'identifiant. Deux nombres et un nom.
+ * Aucune donnée personnelle ne doit y entrer : ni adresse, ni contenu déposé,
+ * ni identifiant.
  */
 export function resumerLeContexte(largeur: number, hauteur: number, agent: string): string | null {
   const fenetre =

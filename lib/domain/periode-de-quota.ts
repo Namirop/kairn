@@ -3,22 +3,16 @@ import { dayToUtcDate, localDay } from "./local-day";
 /**
  * Le mois d'un compte, qui n'est pas celui du calendrier.
  *
- * Le plafond gratuit se compte sur un mois glissant **depuis l'inscription** :
- * quelqu'un qui s'inscrit le 12 voit son compteur repartir le 12 de chaque mois.
- * Un plafond calé sur le mois civil ferait qu'une inscription le 28 donne trois
- * jours de produit avant remise à zéro, ce qui est à la fois injuste et absurde
- * à expliquer.
+ * Le plafond gratuit se compte sur un mois glissant depuis l'inscription
+ * (inscrit le 12, remis à zéro le 12) : calé sur le mois civil, une inscription
+ * le 28 ne donnerait que trois jours. Rien ne se reporte d'une période à
+ * l'autre.
  *
- * Les concepts non consommés ne se reportent pas. C'est ce qui distingue ce
- * découpage d'une simple fenêtre de trente jours glissants : il y a un début et
- * une fin, et ce qui n'a pas servi dans la période est perdu avec elle.
- *
- * Tout se calcule sur des étiquettes `AAAA-MM-JJ` dans le calendrier de
- * l'utilisateur. Un décompte mensuel qui basculerait à minuit UTC rendrait à
- * quelqu'un le quota de sa période au milieu de sa soirée, ou la veille au soir.
+ * Calculé sur des étiquettes `AAAA-MM-JJ` dans le calendrier de l'utilisateur,
+ * pour que la bascule tombe à son minuit et non à celui de l'UTC.
  */
 
-/** Une période de facturation, bornes comprises pour le début, exclue pour la fin. */
+/** Une période de quota, début compris, fin exclue. */
 export type PeriodeDeQuota = {
   /** Premier jour de la période, au format `AAAA-MM-JJ`. */
   debut: string;
@@ -27,12 +21,9 @@ export type PeriodeDeQuota = {
 };
 
 /**
- * Le jour d'ancrage, ramené à un mois qui ne le porte pas.
- *
- * Une inscription le 31 janvier ancre au 31. Février n'a pas de 31 : la période
- * bascule alors le dernier jour du mois, et retrouve son 31 dès que le mois en
- * a un. Le contraire — glisser définitivement au 28 — ferait dériver la date
- * d'ancrage d'un compte de trois jours par an, sans que personne ne l'ait décidé.
+ * Le jour d'ancrage, ramené à un mois qui ne le porte pas : un ancrage au 31
+ * bascule le dernier jour de février, puis retrouve son 31. Glisser pour de bon
+ * au 28 ferait dériver l'ancrage.
  */
 function jourAncre(annee: number, mois: number, ancre: number): number {
   const dernierDuMois = new Date(Date.UTC(annee, mois + 1, 0)).getUTCDate();
@@ -45,10 +36,8 @@ function etiquette(annee: number, mois: number, jour: number): string {
 }
 
 /**
- * La période en cours pour ce compte.
- *
- * `inscription` et `maintenant` sont des instants ; le fuseau les ramène tous
- * les deux dans le calendrier de l'utilisateur avant toute comparaison.
+ * La période en cours pour ce compte. Les deux instants sont ramenés dans le
+ * calendrier de l'utilisateur avant toute comparaison.
  */
 export function periodeDeQuota(
   inscription: Date,
@@ -59,7 +48,7 @@ export function periodeDeQuota(
   const aujourdhui = localDay(maintenant, fuseau);
 
   // Une horloge qui recule, ou un compte lu avant son inscription : la première
-  // période commence à l'inscription, elle ne commence jamais avant.
+  // période ne commence jamais avant l'inscription.
   if (aujourdhui <= jourInscription) {
     return { debut: jourInscription, fin: moisSuivant(jourInscription, jourInscription) };
   }
@@ -70,7 +59,7 @@ export function periodeDeQuota(
     Number.parseInt(aujourdhui.slice(5, 7), 10) - 1,
   ];
 
-  // Le basculement de ce mois-ci. S'il est encore devant, la période courante a
+  // Si le basculement de ce mois-ci est encore devant, la période courante a
   // commencé le mois d'avant.
   const bascule = etiquette(
     anneeCourante,

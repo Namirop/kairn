@@ -2,28 +2,18 @@ import { gesteDeReponse, type GesteDeReponse } from "./geste-de-reponse";
 import type { VarianteServable } from "./rotation-variantes";
 
 /**
- * Ce que sert l'entraînement libre.
+ * Ce que sert l'entraînement libre. Il ne planifie rien : aucune échéance,
+ * stabilité ni état ne se calcule ici, même en lecture.
  *
- * Il existe parce qu'un compte neuf fait le tour de sa session en quatre
- * questions et tombe sur « reviens demain ». C'est le moment où on perd les
- * gens : deux concepts déposés, huit questions écrites, et une seule servie.
- *
- * Il ne planifie rien. Aucune échéance, aucune stabilité, aucun état ne se
- * calcule ici — pas même en lecture. Ce fichier choisit des questions à poser,
- * dans un ordre, et s'arrête là.
- *
- * Ce qu'il sert en premier : ce qui a le moins servi, tous modes confondus, et
- * ce qui a été vu il y a le plus longtemps. La question que la session vient de
- * poser porte donc une trace fraîche et part en fin de file — c'est comme ça
- * qu'on pioche « dans les autres facettes » sans avoir à les nommer.
+ * Il sert d'abord ce qui a le moins servi, tous modes confondus, puis ce qui a
+ * été vu il y a le plus longtemps : la question que la session vient de poser
+ * part en fin de file, et l'on pioche ainsi dans les autres facettes.
  */
 
 /**
- * Questions par tour d'entraînement.
- *
- * Illimité ne veut pas dire sans fin : on sert un tour, on annonce qu'il est
- * fini, et on laisse redemander. Une liste qui ne s'arrête jamais est une
- * liste qu'on quitte par lassitude plutôt qu'au moment choisi.
+ * Questions par tour d'entraînement. Illimité ne veut pas dire sans fin : un
+ * tour s'achève et se redemande, pour qu'on parte au moment choisi plutôt que
+ * par lassitude.
  */
 export const QUESTIONS_PAR_TOUR = 12;
 
@@ -55,10 +45,8 @@ function usage(variante: VarianteServable): number {
 }
 
 /**
- * L'ordre de service d'un concept : la question la moins usée d'abord.
- *
- * Le tri est total et déterministe — usage, puis ancienneté, puis identifiant.
- * Deux appels sur les mêmes données rendent la même file.
+ * L'ordre de service d'un concept : usage, puis ancienneté, puis identifiant,
+ * pour un tri total et déterministe.
  */
 function fileDunConcept(
   concept: ConceptEntrainable,
@@ -77,14 +65,11 @@ function fileDunConcept(
  * jamais deux fois le même concept d'affilée tant qu'un autre est disponible, et
  * sans deux fois le même geste de réponse tant qu'un autre est disponible.
  *
- * Le geste passe après le concept, dans cet ordre et pas l'inverse : revoir le
- * même concept coûte plus cher que refaire le même geste. Quand les deux sont
- * possibles, on prend les deux.
+ * Le concept prime sur le geste : revoir le même concept coûte plus cher que
+ * refaire le même geste.
  *
- * `derniersEntrainements` porte la date du dernier passage d'entraînement par
- * variante. Elle ne vit pas sur le Variant au moment du tirage — elle est lue
- * en base — mais elle est passée en paramètre pour que la fonction reste pure
- * et que le tri se rejoue à l'identique dans un test.
+ * `derniersEntrainements` : date du dernier entraînement par variante, lue en
+ * base par l'appelant.
  */
 export function composerEntrainement(
   concepts: ConceptEntrainable[],
@@ -108,18 +93,15 @@ export function composerEntrainement(
 
     if (restants.length === 0) break;
 
-    // Répéter un concept vaut mieux que raccourcir le tour : quand il ne reste
-    // que lui, il repasse — c'est le cas du compte à un seul concept. Et répéter
-    // un geste vaut mieux que répéter un concept, d'où l'ordre des deux filtres.
+    // Répéter un concept vaut mieux que raccourcir le tour (compte à un seul
+    // concept), et répéter un geste mieux que répéter un concept.
     const autres = restants.filter((entree) => entree.atomId !== precedent);
     const tirage = autres.length > 0 ? autres : restants;
     const varies = tirage.filter((entree) => rangDuGesteAutre(entree.file, gestePrecedent) >= 0);
     const retenus = varies.length > 0 ? varies : tirage;
     const choisi = retenus.reduce((une, deux) => (deux.file.length > une.file.length ? deux : une));
-    // Le geste peut faire passer une question devant une autre du même concept :
-    // l'ordre d'usure est une préférence, ne pas refaire le même geste deux fois
-    // de suite est une contrainte. Les deux questions seront servies de toute
-    // façon, la seule chose qui change est laquelle vient d'abord.
+    // L'ordre d'usure est une préférence, l'alternance des gestes une
+    // contrainte : le geste peut faire passer une question devant.
     const rang = Math.max(rangDuGesteAutre(choisi.file, gestePrecedent), 0);
     const [variante] = choisi.file.splice(rang, 1);
 
@@ -137,10 +119,9 @@ export function composerEntrainement(
  * Où se trouve, dans cette file, la première question d'un autre geste que
  * celui qu'on vient de servir. `-1` si la file n'en porte aucune.
  *
- * Chercher au-delà de la tête est ce qui fait vraiment alterner : les concepts
- * portent souvent les mêmes formats dans le même ordre, si bien qu'à ne regarder
- * que les têtes, tous les candidats proposaient « choisis ta réponse » et le tour
- * enchaînait cinq QCM.
+ * Chercher au-delà de la tête est nécessaire : les concepts portent souvent
+ * les mêmes formats dans le même ordre, et les têtes seules enchaîneraient
+ * les QCM.
  */
 function rangDuGesteAutre(
   file: VarianteEntrainable[],

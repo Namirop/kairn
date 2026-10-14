@@ -1,24 +1,14 @@
 /**
- * Ce qu'un partage du système dépose dans le champ, et ce qu'il faut en penser.
+ * Ce qu'un partage du système dépose dans le champ de dépôt.
  *
- * Android ne transporte pas « un texte » et « une adresse » : il transporte
- * `EXTRA_TEXT` et `EXTRA_SUBJECT`, et c'est le navigateur qui range le premier
- * dans `text` ou dans `url` selon qu'il ressemble ou non à une adresse. La même
- * conversation partagée depuis deux applications arrive donc dans deux champs
- * différents, et celle qui partage « regarde ça : <adresse> » remplit les deux
- * avec la même adresse dedans. Aucun des trois champs ne se croit sur parole :
- * on reconnaît l'adresse là où elle est, et on recompose.
+ * Android transporte `EXTRA_TEXT` et `EXTRA_SUBJECT`, et c'est le navigateur qui
+ * range le premier dans `text` ou `url` selon qu'il ressemble à une adresse :
+ * selon l'application, la même chose arrive dans des champs différents. Aucun
+ * champ ne se croit sur parole ; on reconnaît l'adresse là où elle est.
  *
- * **Le cas qui compte est l'adresse seule.** Le bouton « Partager » d'une
- * conversation ne partage pas la conversation : il partage son adresse
- * publique. Kairn ne va pas la lire — ce serait dépendre du HTML de quelqu'un
- * d'autre, et ça ne marcherait que sur les conversations rendues publiques. Ce
- * qui reste à faire, c'est le dire tout de suite, avant qu'un dépôt parte avec
- * une ligne dont personne ne tirera de concept.
- *
- * Le titre ne sert que de repli. C'est le nom de la conversation d'en face, pas
- * de la matière ; il vaut mieux qu'un champ vide, et moins que n'importe quelle
- * phrase partagée.
+ * Le cas qui compte est l'adresse seule (le « Partager » d'une conversation
+ * d'IA) : Kairn ne va pas la lire, il faut donc le dire avant qu'un dépôt parte
+ * sans rien à retenir. Le titre ne sert que de repli.
  */
 
 export type PartagePose = {
@@ -34,10 +24,8 @@ export type PartageCompose = {
   /** Ce qui remplit le champ de dépôt. Vide quand le partage ne portait rien. */
   texte: string;
   /**
-   * Le partage ne portait qu'une adresse.
-   *
-   * Il y a bien quelque chose à mettre dans le champ, et rien à en retenir :
-   * c'est l'écran qui doit le dire, pas le serveur une fois le dépôt parti.
+   * Le partage ne portait qu'une adresse : rien à en retenir, et c'est l'écran
+   * qui doit le dire, pas le serveur une fois le dépôt parti.
    */
   lienSeul: boolean;
 };
@@ -50,11 +38,9 @@ function propre(valeur: string | null | undefined): string {
 }
 
 /**
- * Le champ de dépôt tel qu'un partage le remplit.
- *
- * L'adresse se met **après** la prose et sur sa propre ligne : c'est la source,
- * pas le sujet. Et elle ne se répète pas — une sélection qui contient déjà son
- * lien l'aurait sinon deux fois, à deux lignes d'écart.
+ * Le champ de dépôt tel qu'un partage le remplit. L'adresse vient après la
+ * prose, sur sa ligne (c'est la source, pas le sujet), et seulement si la prose
+ * ne la contient pas déjà.
  */
 export function composerLePartage(partage: PartagePose): PartageCompose {
   const titre = propre(partage.titre);
@@ -74,11 +60,8 @@ export function composerLePartage(partage: PartagePose): PartageCompose {
 
   return {
     texte: morceaux.filter((morceau) => morceau.length > 0).join("\n\n"),
-    // On ajoute ce que le champ d'adresse portait quoi qu'il porte — rien de ce
-    // qui est partagé ne se perd —, mais on ne le déclare « lien seul » que si
-    // c'en est vraiment une. Ce champ est rempli par le navigateur, et le croire
-    // sur parole reviendrait à renvoyer quelqu'un sélectionner son passage parce
-    // qu'il a partagé un mot isolé.
+    // Le champ d'adresse est gardé quoi qu'il porte, mais ne vaut « lien seul »
+    // que s'il en est vraiment une : le navigateur peut y ranger un mot isolé.
     lienSeul: prose.length === 0 && ADRESSE_SEULE.test(adresse),
   };
 }

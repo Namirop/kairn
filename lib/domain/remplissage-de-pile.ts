@@ -1,26 +1,15 @@
 /**
  * Combien de pierres une pile compte, et jusqu'où elle est comblée.
  *
- * Une pierre par question tenait à six questions et s'effondrait à vingt : une
- * tour de vingt traits de quatre pixels. La pile a donc un plafond, et au-delà
- * une pierre ne vaut plus une question mais une part du chemin.
- *
- * Le plafond seul ne suffisait pas. Avec vingt questions pour sept pierres, une
- * pierre se posait toutes les trois réponses : deux réponses sur trois ne
- * déplaçaient rien, et un compteur qui ne bouge pas quand on avance ne se
- * regarde plus. La part comblée est donc continue — la pierre en cours se
- * remplit par le bas, et chaque réponse la fait monter.
- *
- * Sous le plafond, la part vaut exactement une question et la pierre en cours
- * est toujours vide ou pleine : les deux régimes n'en font qu'un, sans cas
- * particulier à écrire ni à tester à part.
+ * La pile est plafonnée ; au-delà, une pierre vaut une part du chemin et non une
+ * question. La part comblée est continue pour que chaque réponse fasse bouger
+ * quelque chose. Sous le plafond, une part vaut une question et la pierre en
+ * cours est vide ou pleine : un seul calcul pour les deux régimes.
  */
 
 /**
- * Au-delà, la pile cesse de se lire comme un empilement.
- *
- * Sept est le compte où l'on voit encore chaque pierre sans les compter, et
- * c'est aussi la hauteur qui tient dans une colonne sans dominer l'écran.
+ * Au-delà, la pile cesse de se lire comme un empilement : sept pierres se
+ * voient sans se compter et tiennent dans une colonne sans dominer l'écran.
  */
 export const PIERRES_MAX = 7;
 
@@ -42,9 +31,8 @@ export function remplissageDePile(
   const pierres = Math.max(Math.min(questions, Math.floor(max)), 1);
   const faites = Math.min(Math.max(Math.floor(rang), 0), questions);
 
-  // La multiplication d'abord, la division ensuite : `2 / 3 * 3` vaut
-  // 1,999...998 en flottant, ce qui posait une pierre de moins et la suivante
-  // remplie à 99,98 %. `(2 * 3) / 3` vaut deux.
+  // La multiplication avant la division : `2 / 3 * 3` vaut 1,999...998 en
+  // flottant et poserait une pierre de moins.
   const avance = (faites * pierres) / questions;
   const posees = Math.min(Math.floor(avance), pierres);
 

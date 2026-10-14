@@ -3,32 +3,20 @@ import { tirageDe } from "./tirage-deterministe";
 /**
  * L'ordre dans lequel les options d'un QCM sont montrées.
  *
- * Le modèle place la bonne réponse en première position 92 % du temps — mesuré
- * sur 52 QCM du banc, contre 25 % attendus d'un tirage uniforme. Quelqu'un qui
- * répond « la première » sans lire réussit donc un tiers des questions du
- * produit, et FSRS lit ces réussites comme des preuves de mémorisation : le
- * produit se ment à lui-même sur ce que la personne sait.
+ * Le modèle place la bonne réponse en premier 92 % du temps (52 QCM mesurés),
+ * et FSRS lirait comme mémorisées les réussites de qui répond « la première ».
+ * Une position aléatoire est une propriété de distribution, qu'un modèle ne
+ * tient pas par consigne : c'est le serveur qui décide de l'ordre.
  *
- * **Ça ne se corrige pas dans le prompt.** Une position tirée au hasard est une
- * propriété de distribution, la classe de contrainte qu'un modèle ne tient pas ;
- * ce projet s'y est déjà brûlé trois fois — le plafond de douze concepts, la
- * langue du dépôt, et ceci. Une consigne « varie la position » donnerait un
- * mieux instable, invérifiable, et qui repartirait à la première reformulation.
- * Le serveur décide de l'ordre montré, le modèle produit le sien comme il veut.
- *
- * La permutation est déterministe, dérivée d'une graine, comme la géométrie du
- * cairn l'est de l'id de l'Atom. Deux raisons : une même question ne change pas
- * d'ordre entre deux affichages — elle paraîtrait différente à qui la retrouve —
- * et le rejeu du banc reste comparable d'un passage à l'autre.
+ * La permutation est déterministe, semée : une question garde son ordre entre
+ * deux affichages, et le rejeu du banc reste comparable.
  */
 
 export type OptionsServies = { options: string[]; correctIndex: number };
 
 /**
- * Ce qui peut rester à côté du nombre pour que l'option reste une quantité.
- *
- * « 1793 », « 20 minutes », « 5 % » en sont ; « Le scénario tient en 3 actes »
- * n'en est pas, et la trier par ce 3 donnerait un ordre incompréhensible.
+ * Ce qui peut rester à côté du nombre pour que l'option reste une quantité :
+ * « 20 minutes » en est une, « Le scénario tient en 3 actes » non.
  */
 const RESTE_MAXIMUM = 12;
 
@@ -53,13 +41,9 @@ function quantite(option: string): number | null {
 type Option = { texte: string; estLaBonne: boolean };
 
 /**
- * Les quatre options triées, quand elles sont toutes des quantités distinctes.
- *
- * Un lecteur attend des nombres, des dates ou des durées dans l'ordre : les
- * mélanger ferait passer le désordre pour de l'étourderie. Le tri supprime le
- * biais de position aussi bien qu'une permutation, puisqu'il ne doit rien à la
- * position d'origine. Deux valeurs égales rendent l'ordre ambigu — on retombe
- * alors sur le mélange.
+ * Les options triées, quand elles sont toutes des quantités distinctes. Un
+ * lecteur attend des nombres dans l'ordre, et le tri ne doit rien non plus à la
+ * position d'origine. Deux valeurs égales : on retombe sur le mélange.
  */
 function triees(options: Option[]): Option[] | null {
   const mesurees = options.map((option) => ({ option, valeur: quantite(option.texte) ?? NaN }));
@@ -97,8 +81,6 @@ export function ordonnerLesOptions(
     );
   }
 
-  // Une option seule n'a pas d'ordre à recevoir, et son cas n'a pas à traverser
-  // le mélange pour en ressortir identique.
   if (options.length < 2) return { options: [...options], correctIndex };
 
   const marquees = options.map((texte, rang) => ({ texte, estLaBonne: rang === correctIndex }));
