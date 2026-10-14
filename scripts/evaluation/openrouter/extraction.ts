@@ -5,20 +5,14 @@ import { EXTRACT_ATOMS, type ExtractAtomsOutput } from "@/lib/ai/schemas";
 import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
 
 /**
- * L'extraction servie via OpenRouter — un appel `EXTRACT_ATOMS` sur le texte
- * d'un dépôt, avec le même prompt système que la production. Réservé au banc
- * de la campagne 1, où les quatre challengers doivent tourner sur le même
- * prompt que Sonnet — sinon on ne compare plus le même travail.
+ * L'extraction via OpenRouter pour le banc, avec le prompt système de la
+ * production : sans lui, les challengers ne feraient pas le même travail que
+ * Sonnet. Un modèle qui dépasse le budget de sortie échoue sur
+ * `finish_reason: "length"`, compté comme échec de schéma.
  *
- * Le budget de sortie est celui de la campagne (`BUDGET_SORTIE_CAMPAGNE`).
- * Un modèle qui déborde échoue au `finish_reason: "length"`, compté comme
- * échec de schéma et rangé au verdict du dépôt.
- *
- * Défaut `reasoning: false` — l'extraction n'est pas une tâche reasoning, et
- * certains fournisseurs (Mistral en tête, relevé campagne 1 du 2026-08-24)
- * renvoient 404 « No endpoints found that can handle the requested parameters »
- * si le paramètre est présent avec `provider.require_parameters: true`. Les
- * modèles non reasoning ne perdent rien à le retirer.
+ * `reasoning: false` par défaut : certains fournisseurs (Mistral) renvoient
+ * 404 « No endpoints found » quand le paramètre est présent avec
+ * `provider.require_parameters: true`, et l'extraction n'en a pas besoin.
  */
 
 function facturer(modele: ModeleOpenRouter, consommation: ConsommationOpenRouter): Facture {

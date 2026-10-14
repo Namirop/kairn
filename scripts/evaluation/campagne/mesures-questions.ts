@@ -4,21 +4,10 @@ import { PLANCHER_RADOTAGE_INTER, PLANCHER_RADOTAGE_INTRA } from "../mesures/seu
 import type { VariantServi } from "./questions-servies";
 
 /**
- * Les mesures internes de la campagne 2 — radotage, formats, cible du
- * vrai/faux. Aucun juge LLM ici : la géométrie et le décompte suffisent.
- *
- * **Radotage** : deux paires de questions au-dessus des planchers déjà posés
- * pour le corpus (voir `mesures/seuils.ts`). Séparé intra-lot / inter-concepts
- * — les deux distributions ne se ressemblent pas et n'ont pas le même seuil.
- *
- * **Formats** : combien de formats distincts couvrent les 4 facettes d'un
- * concept. Le prompt attend 4 facettes ; les formats varient selon la facette
- * (voir `FORMATS_VERIFIABLES` / `FORMATS_DU_MECANISME`). On compte donc la
- * diversité — un concept qui rend 4 CLOZE identiques est un signal.
- *
- * **Cible du vrai/faux** : sur chaque `TRUE_FALSE`, la cible imposée par le
- * serveur (`cibleDuVraiOuFaux`) doit être respectée. Un modèle qui rend
- * `estVraie` opposée à la cible manque la consigne — comptabilisé.
+ * Les mesures internes de la campagne 2, sans juge : radotage (paires au-dessus
+ * des planchers de `mesures/seuils.ts`, intra et inter séparés), diversité des
+ * formats sur les quatre facettes, et respect de la cible du vrai ou faux
+ * imposée par `cibleDuVraiOuFaux`.
  */
 
 export type MesuresDuDepot = {
@@ -33,19 +22,13 @@ export type MesuresDuDepot = {
 /** Une question située dans son concept, pour distinguer intra/inter. */
 type QuestionSituee = { texte: string; concept: number };
 
-/**
- * Texte de radotage — pour un CLOZE, la phrase à trou (jamais `question` qui
- * porte au mieux une consigne générique, cf. `mesures/signaux.ts`).
- */
+/** Pour un CLOZE, la phrase à trou : voir `mesures/signaux.ts`. */
 function texteARadoter(variant: VariantServi): string {
   if (variant.format === "CLOZE" && variant.cloze) return variant.cloze.sentence;
   return variant.question;
 }
 
-/**
- * Toutes les questions d'un dépôt à mesurer, avec leur rang de concept.
- * Un concept sans variants ne contribue pas.
- */
+/** Toutes les questions d'un dépôt à mesurer, avec leur rang de concept. */
 export function questionsARadoter(variantsParConcept: readonly VariantServi[][]): QuestionSituee[] {
   return variantsParConcept.flatMap((variants, rangConcept) =>
     variants.map((variant) => ({ texte: texteARadoter(variant), concept: rangConcept })),

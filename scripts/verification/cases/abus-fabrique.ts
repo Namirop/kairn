@@ -7,10 +7,9 @@ import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
  * Le décor des vérifications d'abus : des comptes, des concepts posés à la
  * main, et un mode compteur qui dit combien d'appels seraient réellement partis.
  *
- * Les concepts sont écrits directement en base plutôt que déposés : ces
- * vérifications éprouvent le cycle de vie et les compteurs, pas l'extraction.
- * Passer par un dépôt ferait dépendre chaque cas d'une fixture et du quota du
- * jour, pour un décor qu'on veut exact.
+ * Les concepts sont écrits en base plutôt que déposés : on éprouve le cycle de
+ * vie et les compteurs, et un dépôt ferait dépendre le décor d'une fixture et
+ * du quota du jour.
  */
 
 export const FACETTES = ["RECOGNITION", "MECHANISM", "BOUNDARY", "APPLICATION"] as const;
@@ -153,22 +152,17 @@ export type Comptage<T> = {
  * Le mode compteur : mock coupé, clés retirées, pont Anthropic imposé et sa base
  * renvoyée sur un port fermé.
  *
- * Le mode mock ne réserve rien et n'écrit rien au registre — il ne peut donc
- * pas dire combien d'appels seraient partis. On coupe donc le mock pour que
- * `callAI()` fasse ce qu'il fait en vrai : réserver sa place au plafond global,
- * émettre, écrire sa ligne. L'émission, elle, ne va nulle part — pas de clé,
- * et une base pointée sur `127.0.0.1:9`. Ce qui se compte ici, c'est ce que le
- * produit aurait facturé.
+ * Le mock ne réserve rien et n'écrit rien au registre ; coupé, `callAI()`
+ * réserve sa place, émet et écrit sa ligne comme en vrai, mais l'émission ne va
+ * nulle part (pas de clé, base sur `127.0.0.1:9`). On compte ce que le produit
+ * aurait facturé.
  *
- * Le pont Anthropic est imposé parce que c'est le seul dont la base se
- * redirige ; la clé OpenRouter est retirée quand même. Le modèle primaire est
- * posé sur le modèle de repli : chaque émission échoue ici, et laisser le repli
- * ouvert doublerait tous les comptages pour une panne qui n'existe pas. Le repli
- * a son propre cas, qui le rouvre (`casRepli`).
+ * Anthropic parce que c'est le seul pont dont la base se redirige. Le modèle
+ * primaire est posé sur celui de repli : chaque émission échoue ici, et un
+ * repli ouvert doublerait tous les comptages. `casRepli` éprouve le repli à part.
  *
- * Ce que ce mode touche au plafond global du jour est rendu à la fin, et les
- * lignes écrites au registre sont effacées : une vérification ne consomme pas
- * de vraies places.
+ * Le plafond global du jour est rendu et les lignes du registre effacées à la
+ * fin : une vérification ne consomme pas de vraies places.
  */
 export async function enModeCompteur<T>(
   plafond: number,
@@ -209,10 +203,8 @@ export async function enModeCompteur<T>(
     }
 
     await prisma.aiCall.deleteMany({ where: { createdAt: { gte: debut } } });
-    // Les parts de compte, elles, ne sont pas touchées ici : elles appartiennent
-    // à un compte, et c'est sa suppression qui les emporte. Les effacer par
-    // journée reviendrait à rendre leurs places à des comptes qu'on n'a pas
-    // regardés.
+    // Les parts de compte ne sont pas touchées : c'est la suppression du compte
+    // qui les emporte. Les effacer par journée rendrait des places à d'autres.
 
     if (avant) {
       await prisma.aiCallQuota.update({ where: { day: jour }, data: { reserved: avant.reserved } });

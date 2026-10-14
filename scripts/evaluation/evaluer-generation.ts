@@ -6,18 +6,13 @@ import { appliquerCapDuBanc } from "./cap-du-banc";
 appliquerCapDuBanc();
 
 /**
- * Le banc d'évaluation de la génération.
+ * Le banc d'évaluation de la génération. Le passage complet extrait les
+ * concepts du corpus, écrit leurs questions et fige le tout. Le rejeu repart
+ * d'un figé et ne refait que les questions : c'est le seul moyen de mesurer une
+ * modification sans que l'extraction bouge sous la mesure.
  *
- * Deux passages distincts. Le passage complet prend le corpus de
- * `scripts/evaluation/corpus/`, extrait les concepts, écrit quatre questions
- * par concept, et fige les concepts extraits pour plus tard. Le rejeu repart
- * d'un figé : mêmes concepts, seule la génération de questions bouge — c'est
- * le seul moyen de mesurer une modification sans que l'extraction bouge sous
- * la mesure.
- *
- * C'est le seul endroit du projet autorisé à dépenser. Il exige donc
- * `MOCK_AI=false` explicitement, annonce ce qu'il va émettre, et ne part qu'à
- * l'appel de `--emettre` :
+ * Il dépense : il exige `MOCK_AI=false`, annonce ce qu'il va émettre, et ne
+ * part qu'avec `--emettre`.
  *
  *   MOCK_AI=false npm run evaluer:generation                  # le plan
  *   MOCK_AI=false npm run evaluer:generation -- --emettre     # le passage complet
@@ -64,7 +59,6 @@ async function main(): Promise<void> {
   const { sumAiCalls } = await import("@/lib/db/ai-call");
   const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
 
-  // Trois dépôts ajoutés au corpus se passent en un appel : `--depot 08,09,10`.
   const fragments = (argument("--depot") ?? "").split(",").filter(Boolean);
   const rejeu = process.argv.includes("--rejeu");
   const figeDemande = rejeu ? (argument("--rejeu") ?? dernierFige()) : undefined;
@@ -95,7 +89,7 @@ async function main(): Promise<void> {
   const { CONCEPTS_PAR_APPEL } = await import("@/lib/ai/schemas");
   const appelsPour = (concepts: number) => Math.ceil(concepts / CONCEPTS_PAR_APPEL);
 
-  // Un concept douteux ne part pas en génération : il ne compte pas au plan.
+  // Un concept douteux ne part pas en génération.
   const aGenerer = figes.map(
     (depot) => depot.concepts.filter((concept) => !concept.uncertain).length,
   );
@@ -134,8 +128,8 @@ async function main(): Promise<void> {
   const debut = new Date();
   const passages = [];
 
-  // Le coût se relève dépôt par dépôt : un total ne dit pas lequel a coûté dix
-  // appels à lui seul.
+  // Le coût se relève dépôt par dépôt : un total ne dit pas lequel a coûté
+  // dix appels à lui seul.
   for (const entree of rejeu ? figes : corpus) {
     console.info(`… ${entree.nom}`);
     const ouverture = new Date();
@@ -156,12 +150,9 @@ async function main(): Promise<void> {
   console.info(`\n${total.calls} appels, ${Number(total.costUsd).toFixed(4)} $.`);
   console.info(`Rapport écrit dans ${chemin}`);
 
-  // Le rejeu fige lui aussi, désormais. Il ne change pas les concepts — c'est
-  // son objet — mais il rend des questions neuves, et les questions font partie
-  // du figé depuis qu'elles servent aux mesures : le radotage compare celles
-  // d'un même dépôt, le juge de fidélité lit un concept avec les siennes. Sans
-  // ça, il fallait repayer une extraction complète pour recalculer un seuil qui
-  // ne portait que sur des questions déjà écrites.
+  // Le rejeu fige aussi : ses questions sont neuves, et les mesures (radotage,
+  // fidélité) les lisent dans le figé. Sinon, recalculer un seuil sur des
+  // questions déjà écrites coûterait une extraction complète.
   const figeEcrit = ecrireFige(
     passages.map((passage) => passage.evaluation),
     modele,

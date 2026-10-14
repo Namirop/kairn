@@ -3,14 +3,13 @@ import { progressionPourXp, xpDuPassage } from "@/lib/domain/progression";
 import type { SeedInput } from "@/prisma/seed/corpus-types";
 
 /**
- * Les compteurs du compte de démonstration, calculés par les vraies formules du
- * domaine — pas la formule placeholder du seed de développement.
+ * Les compteurs du compte de démonstration, par les vraies formules du domaine
+ * (`xpDuPassage`, `progressionPourXp`), pas la formule simplifiée du seed de
+ * développement.
  *
- * L'XP suit `xpDuPassage` passage par passage, le niveau `progressionPourXp`. La
- * série est le nombre de jours consécutifs révisés jusqu'à aujourd'hui : sur un
- * historique sans rendez-vous manqué — celui qu'on construit —, c'est exactement
- * ce que la logique de série du produit rend. Le nombre de pierres, lui, n'est
- * pas calculé ici : il se compte en base après écriture (CONSOLIDATED + ARCHIVED).
+ * La série compte les jours consécutifs révisés : sur un historique sans
+ * rendez-vous manqué, comme celui-ci, c'est ce que rend la logique du produit.
+ * Les pierres se comptent en base après écriture (CONSOLIDATED + ARCHIVED).
  */
 
 export type StatsDeDemo = {

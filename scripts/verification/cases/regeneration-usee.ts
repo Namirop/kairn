@@ -7,13 +7,11 @@ import {
 import { record } from "./journal";
 
 /**
- * Le renouvellement des questions, éprouvé par l'usage réel.
- *
- * Deux garanties qui coûtent de l'argent si elles lâchent : le seuil d'usure
- * lit bien les deux modes additionnés, et un même concept ne redemande pas de
- * questions plus d'une fois par semaine. La seconde est ce qui empêche
- * quelqu'un qui tourne une heure d'affilée de déclencher une régénération par
- * tour.
+ * Le renouvellement des questions, éprouvé par l'usage. Deux garanties qui
+ * coûtent de l'argent si elles lâchent : l'entraînement compte dans l'usure, et
+ * un concept ne redemande pas de questions plus d'une fois par
+ * `JOURS_ENTRE_REGENERATIONS`, sans quoi une heure d'entraînement déclencherait
+ * une régénération par tour.
  */
 
 const JOUR_MS = 24 * 60 * 60 * 1000;
@@ -109,11 +107,9 @@ export async function casRegenerationParUsure(userId: string, maintenant: Date):
     `${await jobsDeQuestions(atomId)} demande(s) après deux fois plus de passages`,
   );
 
-  // Une semaine plus tard, le même usage redevient légitime.
-  //
-  // La demande déjà en file porte l'heure réelle de la machine, alors que ce
-  // script se déroule à une date fixe : on la recale sur l'instant logique où
-  // elle a été écrite, sans quoi le délai se mesurerait entre deux calendriers.
+  // Passé le délai, le même usage redevient légitime. La demande en file porte
+  // l'heure de la machine : on la recale sur l'instant logique du script, sinon
+  // le délai se mesurerait entre deux calendriers.
   const plusTard = new Date(apresLesTours.getTime() + (JOURS_ENTRE_REGENERATIONS + 1) * JOUR_MS);
   await prisma.generationJob.updateMany({
     where: { kind: "VARIANTS", atomIds: { has: atomId } },

@@ -18,15 +18,12 @@ import { TOKENS_DES_JUGES } from "../juges/modele";
 import type { Paire } from "../mesures/signaux";
 
 /**
- * Les juges du doublon et de la fidélité, servis via OpenRouter au lieu de
- * l'API Anthropic directe. Réservé au banc de comparaison des modèles —
- * l'arrêt 1 y valide un juge candidat avant de laisser partir la campagne.
+ * Les juges du doublon et de la fidélité, servis via OpenRouter, pour le banc
+ * de comparaison des modèles.
  *
- * Le prompt, le schéma et la lecture des questions sont ceux exportés par
- * `juges/doublon.ts` et `juges/fidelite.ts` : un seul endroit décide comment
- * on interroge un juge, quel que soit le fournisseur qui l'exécute. Ne rien
- * dupliquer garde la référence Sonnet et les challengers comparables — un
- * prompt qui divergerait au banc mesurerait autre chose que la production.
+ * Prompt, schéma et lecture des questions viennent de `juges/doublon.ts` et
+ * `juges/fidelite.ts`, sans rien dupliquer : un prompt qui divergerait au banc
+ * rendrait la référence et les challengers incomparables.
  */
 
 export type Facture = {
@@ -37,10 +34,9 @@ export type Facture = {
 };
 
 /**
- * Le coût catalogue de l'appel. On n'utilise pas `consommation.costUsd` :
- * OpenRouter ne le rend que pour une partie des modèles, et la mesure du banc
- * doit se lire à partir des prix épinglés — c'est cette borne-là qui gouverne
- * la règle §5, pas la ristourne éventuelle du fournisseur.
+ * Le coût au prix catalogue épinglé, pas `consommation.costUsd` : OpenRouter
+ * ne le rend que pour une partie des modèles, et la règle de coût du banc se
+ * lit sur les prix épinglés, pas sur une ristourne du fournisseur.
  */
 function facturer(modele: ModeleOpenRouter, consommation: ConsommationOpenRouter): Facture {
   const coutUsd =
@@ -64,14 +60,12 @@ export async function jugerLesDoublonsVia(
   modele: ModeleOpenRouter,
   nom: string,
   paires: Paire[],
-  /** Défaut = budget de sortie de la campagne, la même barre pour tous les
-   * challengers. Voir `BUDGET_SORTIE_CAMPAGNE` dans `campagne.ts` pour la
-   * règle : le seul appelant qui a le droit de dépasser est le script
-   * `valider-le-juge.ts`, où les six paires témoins sont groupées en un
-   * unique appel — l'arrêt 1 n'est pas la campagne. */
+  /** Défaut = budget de sortie de la campagne (`BUDGET_SORTIE_CAMPAGNE`). Seul
+   * `valider-le-juge.ts` le dépasse : il groupe les six paires témoins en un
+   * appel. */
   maxTokens: number = TOKENS_DES_JUGES,
-  /** Voir `AppelOpenRouterParams` — `false` pour un modèle dont le fournisseur
-   * ne supporte pas `reasoning` (Kimi via Novita), sinon défaut « low ». */
+  /** `false` pour un fournisseur qui ne supporte pas `reasoning` (Kimi via
+   * Novita) ; sinon « low » par défaut, voir `AppelOpenRouterParams`. */
   reasoning?: { effort: "low" | "medium" | "high" } | false,
 ): Promise<{ verdicts: VerdictDoublon[]; facture: Facture }> {
   const contenu = [

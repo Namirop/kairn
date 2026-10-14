@@ -8,33 +8,19 @@ import { computeCostUsd } from "@/lib/ai/pricing";
 import { executerToutLePipeline } from "./cases/depot-simule";
 
 /**
- * Vérification du chemin public du dépôt anonyme.
+ * Vérification du chemin public du dépôt anonyme, par `deposerSansCompte` (ce
+ * qu'appelle l'action de la landing ; seule la couche HTTP manque).
  *
- * **Ce que ce script mesure.** La tuyauterie que le banc n'emprunte jamais :
- * que les bornes refusent avant tout appel, que les rejets rejettent, que les
- * cas de contrôle binaires tiennent, que le plafond anonyme coupe sur un
- * message et non sur une exception. Il ne mesure pas la qualité du découpage —
- * elle l'est déjà, sur vingt-sept dépôts et cinq axes, et la refaire ici
- * reviendrait à payer deux fois la même réponse.
+ * Mesure la tuyauterie, pas la qualité du découpage (déjà au banc) : bornes qui
+ * refusent avant tout appel, rejets, contrôles binaires du corpus, plafond
+ * anonyme qui coupe sur un message et non sur une exception.
  *
- * **Par où il passe.** `deposerSansCompte`, la fonction que l'action de la
- * landing appelle, et rien d'autre. Pas `callAI` : le sujet est justement ce
- * qu'il y a autour — le schéma d'entrée, les deux verrous de l'essai, la
- * session anonyme, la mise en file. Seule la couche HTTP manque, et elle ne
- * fait que lire un cookie et une adresse.
+ * Chaque cas reçoit une adresse distincte, donc sa propre session : les verrous
+ * sont nourris, pas contournés. Ne pas allumer `ESSAI_ANONYME_SANS_LIMITE`, ce
+ * serait éprouver un chemin que personne n'emprunte.
  *
- * **Les verrous ne sont pas contournés, ils sont nourris.** Chaque cas reçoit
- * une adresse de visiteur distincte, ce qui lui ouvre sa propre session, comme
- * pour un visiteur différent. `ESSAI_ANONYME_SANS_LIMITE` reste donc hors du
- * dispositif : le drapeau sert à ouvrir la landing **en production**, pas à
- * tester en local, et un script qui l'allumerait éprouverait un chemin que
- * personne n'emprunte. Le plafond, lui, se teste en réutilisant volontairement
- * une adresse en fin de série.
- *
- * **Ce que la latence dit, et ce qu'elle ne dit pas.** Hors requête, `after()`
- * ne part pas : les jobs sont exécutés à la main, donc le chiffre relevé est
- * celui du modèle et du pipeline, pas celui que voit un visiteur — il manque la
- * prise en charge du job par le runtime. C'est le terme dominant, pas le total.
+ * La latence relevée exclut la prise en charge du job par le runtime : hors
+ * requête, `after()` ne part pas et les jobs sont exécutés à la main.
  *
  * À sec par défaut. `--emettre` pour appeler le modèle pour de vrai.
  */
@@ -70,9 +56,8 @@ const CONTROLES: Record<string, Controle[]> = {
 };
 
 /**
- * L'ordre de passage vient du corpus, pas d'ici : les refus gratuits d'abord,
- * le plafond en dernier. Les cas F sont écartés — ce sont deux textes frais
- * choisis au moment du test, donc un geste humain, pas une entrée de script.
+ * L'ordre prescrit par le corpus : les refus gratuits d'abord, le plafond en
+ * dernier. Les cas F sont des textes frais choisis à la main, hors script.
  */
 const ORDRE = [
   "A1",
@@ -94,12 +79,8 @@ const ORDRE = [
 ];
 
 /**
- * Lit les cas dans le corpus plutôt que de les recopier.
- *
- * Un corpus recopié dans un script diverge du corpus le jour où l'un des deux
- * change, et c'est toujours le script qui a raison à l'écran. Les textes sont
- * donc extraits des blocs de code, et les deux cas assemblés — D12 et D13 — se
- * construisent depuis D11, comme le fichier le prescrit.
+ * Lit les cas dans le corpus plutôt que de les recopier, pour qu'ils ne
+ * divergent pas. D12 et D13 s'assemblent depuis D11, comme le corpus le prescrit.
  */
 function lireLeCorpus(): Map<string, Cas> {
   const brut = readFileSync(CORPUS, "utf8");
@@ -152,12 +133,8 @@ type Ligne = {
 };
 
 /**
- * Une adresse par cas, tirée de son rang et non de son nom.
- *
- * Une empreinte calculée sur la première lettre et la longueur donnait la même
- * adresse à B3, B4 et B5 — et comme deux visites par adresse suffisent à fermer
- * la porte, le troisième cas de chaque famille était refusé par le verrou avant
- * d'avoir été testé. Le rang, lui, est unique par construction.
+ * Une adresse par cas, tirée de son rang : elle doit être unique, sinon deux
+ * visites suffisent à fermer le verrou avant que le troisième cas soit testé.
  */
 const adresseDe = (rang: number) => `203.0.113.${10 + rang}`;
 
@@ -196,8 +173,7 @@ async function passerUnCas(cas: Cas, adresse: string): Promise<Ligne> {
   };
 
   if (!depot.ok) {
-    // Un refus de borne ne doit rien avoir coûté : ni appel, ni essai. On le
-    // vérifie sur la table, pas sur la parole du code.
+    // Un refus de borne ne doit rien avoir coûté : vérifié sur la table.
     if (cas.controles.includes("aucun-appel")) {
       const depuis = new Date(depart);
       const appels = await prisma.aiCall.count({ where: { createdAt: { gte: depuis } } });
@@ -229,9 +205,8 @@ async function passerUnCas(cas: Cas, adresse: string): Promise<Ligne> {
   const appels = await appelsDuDepot(depot.inputId);
   const questions = input.atoms.reduce((total, atome) => total + atome._count.variants, 0);
 
-  // Un plafond atteint n'est pas un défaut du cas : c'est la série qui ne peut
-  // plus continuer. Le distinguer évite de parader des lignes en échec qui
-  // ressemblent à des régressions produit alors qu'il ne reste plus de budget.
+  // Un plafond atteint n'est pas un défaut du cas : le distinguer évite de
+  // lire une fin de budget comme une régression produit.
   if (await plafondAtteint(depot.inputId)) {
     return { ...vide, code: cas.code, statut: "plafond", ecarts: [] };
   }
@@ -280,11 +255,8 @@ function verifier(controle: Controle, input: Depot, questions: number): string[]
 
     if (incertains.length === 0) ecarts.push("aucun concept marqué uncertain");
 
-    // La seconde moitié du contrôle porte sur les **incertains**, et elle a
-    // cessé d'être vraie par construction : depuis que l'essai montre un
-    // échantillon, un concept anonyme reçoit ses questions. Un seul, et jamais
-    // un douteux — c'est ce qu'on vérifie, au lieu de vérifier qu'il n'y en a
-    // aucune, ce qui produisait un écart sur un chemin qui se porte bien.
+    // L'essai questionne un concept pour son échantillon, mais jamais un
+    // douteux : c'est ce qu'on vérifie, pas l'absence de toute question.
     const douteuxQuestionnes = incertains.filter((atome) => atome._count.variants > 0);
 
     if (douteuxQuestionnes.length > 0) {
@@ -293,8 +265,8 @@ function verifier(controle: Controle, input: Depot, questions: number): string[]
   }
 
   if (controle === "sortie-anglaise") {
-    // Deux marqueurs français fréquents suffisent : on cherche une sortie
-    // écrite dans la langue du dépôt, pas un score linguistique.
+    // Quelques mots-outils français suffisent : on cherche une sortie restée
+    // en français, pas un score linguistique.
     const francais = input.atoms.filter((atome) =>
       /\b(le|la|les|des|une|est|sont|qui|dans)\b/i.test(atome.concept),
     );
@@ -317,8 +289,7 @@ function verifier(controle: Controle, input: Depot, questions: number): string[]
   }
 
   if (controle === "pas-de-doublement" && questions >= 0) {
-    // Le doublement se juge contre D11, comparé par l'appelant : ici on ne
-    // fait que porter le compte.
+    // Le doublement se juge contre D11, dans `principal`, après la série.
   }
 
   return ecarts;
@@ -330,11 +301,8 @@ function message(erreur: unknown): string {
 }
 
 /**
- * Le plafond, en fin de série.
- *
- * Une même adresse rejoue jusqu'à ce que les verrous coupent. Ce qu'on vérifie
- * n'est pas qu'ils coupent — c'est **comment** : un motif lisible, pas une
- * exception qui remonterait en cinq cents à l'écran.
+ * Une même adresse rejoue jusqu'à ce que les verrous coupent. On vérifie
+ * comment ils coupent : un motif lisible, pas une exception qui finirait en 500.
  */
 async function eprouverLePlafond(texte: string): Promise<string[]> {
   const adresse = "203.0.113.250";
@@ -364,31 +332,16 @@ async function eprouverLePlafond(texte: string): Promise<string[]> {
 }
 
 /**
- * Le plan à sec.
- *
- * **Le coût n'est pas une moyenne globale**, et c'est tout l'écart entre une
- * estimation utile et un chiffre qui rassure à tort. La table `AiCall` compte
- * trois mille appels dominés par le banc — juges compris, sur des prompts sans
- * rapport avec ceux d'un dépôt. Leur moyenne annonçait vingt-cinq centimes pour
- * cette série, soit cinq fois la réalité attendue.
- *
- * On prend donc, par `purpose`, la consommation moyenne réellement observée —
- * entrée, cache, sortie —, et on la fait passer par le tarificateur du produit,
- * au modèle **configuré ici et maintenant**. Le même corpus coûte alors dix fois
- * moins sur Luna que sur Sonnet : ce n'est pas un détail d'estimation, c'est le
- * sujet du portage.
- */
-/**
- * Le dépôt anonyme appelle l'extraction, puis **un** lot de questions.
- *
- * Il n'appelait que l'extraction, et l'estimation ne comptait qu'elle. Depuis
- * que la landing montre un échantillon, `decoupage.ts` demande les questions du
- * premier concept questionnable : un appel de plus par visiteur, pas cinq. Ne
- * pas le compter revenait à annoncer la moitié du vrai prix — l'erreur exactement
- * inverse de celle que ce commentaire mettait en garde d'écrire.
+ * Le dépôt anonyme appelle l'extraction, puis un lot de questions pour
+ * l'échantillon de la landing : les deux comptent dans l'estimation.
  */
 const PURPOSES = ["extract_atoms", "generate_variants"] as const;
 
+/**
+ * Le coût estimé n'est pas la moyenne globale de `AiCall`, dominée par le banc
+ * et ses juges (elle surestimait d'un facteur cinq). On prend la consommation
+ * moyenne observée par `purpose`, tarifée au modèle configuré maintenant.
+ */
 async function planASec(cas: Cas[]): Promise<void> {
   const avecModele = cas.filter((c) => !c.controles.includes("aucun-appel"));
   const caracteres = avecModele.reduce((total, c) => total + c.texte.length, 0);

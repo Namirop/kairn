@@ -6,37 +6,25 @@ import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
 import { conclure, record } from "../verification/cases/journal";
 
 /**
- * Retirer les vrais ou faux qu'on ne sait plus poser, et redemander leur lot.
+ * Retire les vrais ou faux muets et redemande le lot de leur concept.
  *
- * **Ce qui s'est passé.** Un vrai ou faux ne porte pas ses options en base : ce
- * sont toujours les deux mêmes, et c'est le verdict qui dit laquelle est la
- * bonne. Ce verdict n'a jamais été écrit dans le `payload` — la génération le
- * rendait, l'écriture le jetait — et la seule trace qui restait était le mot
- * « Vrai » ou « Faux » en tête de la réponse-étalon. Le 02/09, le prompt a
- * interdit ce verdict en tête, à raison ; le stock a été réécrit sous ce prompt,
- * et chaque affirmation a perdu ses deux boutons du même coup. Elle est servie
- * depuis en question ouverte : une phrase posée à plat, qu'on lit comme le
- * concept à retenir — alors qu'une sur deux est fausse par construction.
+ * Un vrai ou faux ne porte pas ses options en base : c'est le verdict
+ * (`payload.expected`) qui dit laquelle est la bonne. Sans lui, l'affirmation
+ * retombe en question ouverte, posée à plat comme une vérité — alors qu'une sur
+ * deux est fausse par construction.
  *
- * **Ce que ce script fait.** Il les retire, et il redemande le lot du concept.
- * Les deux, parce qu'aucun des deux ne suffit : le plafond hebdomadaire retarde
- * souvent la réécriture d'une semaine, et pendant cette semaine-là il ne faut
- * plus rien servir. Un concept qui perd son affirmation garde ses trois autres
- * facettes ; c'est la même perte assumée que pour une question qui renvoie à un
- * concept qu'on ne montre pas.
+ * Retirer et redemander, parce qu'aucun des deux ne suffit : le plafond
+ * hebdomadaire retarde souvent la réécriture d'une semaine, et d'ici là rien ne
+ * doit être servi. `retiredAt` sort la formulation du tirage sans rien
+ * supprimer : les passages la citent encore, et la planification vit sur le
+ * concept.
  *
- * Rien n'est supprimé : `retiredAt` sort la formulation du tirage, les passages
- * passés continuent de la citer, et la planification vit sur le concept.
+ * Le retrait vaut pour tout le monde, la réécriture pour les comptes seulement :
+ * elle coûte un appel, et les essais sans compte s'éteignent d'eux-mêmes.
  *
- * **Le retrait vaut pour tout le monde, la réécriture pour les comptes.** Servir
- * une contre-vérité ne coûte rien à corriger et ne se négocie pas ; réécrire
- * coûte un appel, et les essais sans compte s'éteignent d'eux-mêmes.
- *
- * **Il se rejoue.** Les deux gestes ne se déduisent pas l'un de l'autre : ce
- * qu'on retire se lit sur les affirmations vivantes, ce qu'on redemande se lit
- * sur les concepts qui n'ont plus d'affirmation servable — retirée à l'instant
- * ou lors d'un passage précédent. Un second passage ne retire donc plus rien et
- * redemande ce qui manquait encore, au lieu de ne rien trouver du tout.
+ * Il se rejoue : ce qu'on redemande se lit sur un état (plus d'affirmation
+ * servable), pas sur ce qu'on vient de retirer, donc un second passage rattrape
+ * ce qu'un premier n'a pas pu redemander.
  *
  *   npm run reparer:affirmations                   # simulation, n'écrit rien
  *   npm run reparer:affirmations -- --pour-de-vrai
@@ -56,12 +44,9 @@ type Affirmation = {
 };
 
 /**
- * Toutes les affirmations, dites muettes ou non.
- *
- * Le test est celui de la lecture, et pas une règle recopiée : `choixDUnVraiOuFaux`
- * est la fonction que `questionServie` appelle pour reconstruire les deux
- * propositions. Ce qu'elle refuse ici est exactement ce qui retombe en question
- * ouverte à l'écran.
+ * Toutes les affirmations, dites muettes ou non. Le test est celui de la
+ * lecture (`choixDUnVraiOuFaux`, que `questionServie` appelle), pas une règle
+ * recopiée : ce qu'il refuse est exactement ce qui retombe en question ouverte.
  */
 async function affirmations(): Promise<Affirmation[]> {
   const vraisOuFaux = await prisma.variant.findMany({
@@ -91,12 +76,9 @@ async function affirmations(): Promise<Affirmation[]> {
 }
 
 /**
- * Les concepts qui n'ont plus d'affirmation servable, et qui en avaient une.
- *
- * On ne se fie pas à ce qu'on vient de retirer : un passage précédent a pu
- * retirer sans réussir à redemander, et ce concept-là doit rester rattrapable.
- * La condition est donc un état, pas un événement — au moins une affirmation
- * muette dans son histoire, et aucune affirmation vivante et servable.
+ * Les concepts de compte qui ont eu une affirmation muette et n'en ont plus de
+ * servable. Un état, pas un événement : un passage précédent a pu retirer sans
+ * réussir à redemander.
  */
 function conceptsSansAffirmation(toutes: readonly Affirmation[]): Concept[] {
   const servables = new Set(
@@ -144,10 +126,8 @@ async function main(): Promise<string> {
   const issues = new Map<string, number>();
 
   for (const concept of aReecrire) {
-    // `reporter` parce qu'on vient de retirer une question : refuser sans rien
-    // écrire laisserait le concept avec trois facettes pour toujours, alors que
-    // le plafond hebdomadaire n'est qu'un délai. La demande part toute seule le
-    // jour où elle devient légitime.
+    // `reporter` : un refus sans trace laisserait le concept à trois facettes
+    // pour toujours, alors que le plafond hebdomadaire n'est qu'un délai.
     const demande = await demanderDesQuestions(concept, new Date(), { reporter: true });
 
     issues.set(demande.etat, (issues.get(demande.etat) ?? 0) + 1);

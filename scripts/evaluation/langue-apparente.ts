@@ -1,17 +1,12 @@
 /**
  * Deviner la langue d'un texte, assez bien pour un instrument de mesure.
  *
- * C'est une **heuristique de banc**, pas de la logique produit : elle ne sert
- * qu'à dire si un rapport doit lever un manquement. Rien dans l'application ne
- * l'appelle, et rien ne doit l'appeler — un produit qui a besoin de connaître la
- * langue la fait déclarer, ce que l'extraction fait maintenant.
+ * Heuristique de banc, pas logique produit : l'application ne doit pas
+ * l'appeler, elle tient la langue de la personne.
  *
- * Elle compte des mots-outils, ceux qui reviennent dans n'importe quel texte et
- * qui ne se traduisent pas d'une langue à l'autre. C'est grossier, et c'est
- * suffisant : on ne cherche pas à classer un texte ambigu, on cherche à voir un
- * dépôt anglais rendre des concepts français. Dans le doute, elle ne dit rien —
- * un instrument qui crie au loup se fait ignorer, et un contrôle ignoré ne vaut
- * pas mieux que pas de contrôle.
+ * Elle compte des mots-outils. C'est grossier et suffisant : il s'agit de voir
+ * une sortie dans la mauvaise langue, pas de classer un texte ambigu. Dans le
+ * doute elle se tait : un instrument qui crie au loup se fait ignorer.
  */
 
 const MOTS_OUTILS: Record<string, string[]> = {
@@ -22,7 +17,7 @@ const MOTS_OUTILS: Record<string, string[]> = {
   it: ["il", "lo", "la", "che", "una", "per", "con", "non", "più", "come", "sono", "nella"],
 };
 
-/** En dessous, il n'y a pas assez de mots pour que le compte veuille dire quoi que ce soit. */
+/** En dessous, le compte ne veut rien dire. */
 const MOTS_MINIMUM = 25;
 
 /** Le gagnant doit devancer le second d'au moins ça, sinon on se tait. */
@@ -40,9 +35,9 @@ function mots(texte: string): string[] {
 /**
  * La langue la plus probable, ou rien quand le texte ne tranche pas.
  *
- * Les accents sont retirés avant comparaison, donc « plus » et « más » se
- * confondent — c'est voulu : les listes se recoupent déjà entre langues
- * romanes, et c'est l'écart entre les scores qui décide, pas un mot isolé.
+ * Sans accents, « plus » et « más » se confondent, et c'est voulu : les listes
+ * se recoupent déjà entre langues romanes, c'est l'écart entre les scores qui
+ * décide.
  */
 export function langueApparente(texte: string): string | null {
   const trouves = mots(texte);

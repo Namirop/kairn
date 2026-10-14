@@ -9,11 +9,6 @@ import { SYSTEM_DOUBLON } from "./juges/doublon";
 import { SYSTEM_RESIDU } from "./juges/residu";
 import { BANDEAU_DE_CAMPAGNE, BUDGET_SORTIE_CAMPAGNE } from "./openrouter/campagne";
 import {
-  /**
-   * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
-   * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
-   * « Les commandes retirées ».
-   */
   CHALLENGERS,
   JUGE_PRINCIPAL,
   REFERENCE,
@@ -21,42 +16,35 @@ import {
 } from "./openrouter/modeles";
 
 /**
- * Le plan à sec de la campagne 1 — extraction seule des quatre challengers
- * sur les 27 dépôts du corpus, plus les trois juges (doublon, résidu,
- * attendus) qui rejoueront Haiku via OpenRouter sur les concepts que chacun
- * aura rendus. Aucun appel modèle : le script lit le figé Sonnet `11h58` et
- * les verdicts déjà rendus par Haiku, et estime les tokens en prenant Sonnet
- * comme proxy du volume à produire.
+ * Campagne close, sans commande : voir `docs/outillage.md`, « Les commandes
+ * retirées ».
  *
- * Trois rappels s'affichent en tête, non négociables :
+ * Le plan à sec de la campagne 1 : extraction des challengers sur le corpus,
+ * plus les juges Haiku (doublon, résidu, attendus) sur leurs concepts. Aucun
+ * appel modèle : il lit le figé Sonnet `11h58` et ses verdicts, Sonnet
+ * servant de proxy du volume à produire.
  *
- * 1. **La colonne de référence Sonnet n'est pas rejouée.** Le figé `11h58` est
- *    valable tel quel — c'est justement pourquoi on garde Haiku comme juge de
- *    la campagne (voir arrêt 1 du 2026-08-21).
- * 2. **Budget de sortie unique** : `BUDGET_SORTIE_CAMPAGNE` tokens pour tous
- *    les challengers, la même barre que Sonnet. Un modèle qui déborde est
- *    compté comme échec de schéma, pas accommodé par un plafond plus haut.
- * 3. **La fidélité ne fait pas partie de la campagne 1.** Elle mesure les
- *    questions, or on ne génère pas de questions à ce passage — l'extraction
- *    suffit à trancher entre challengers sur manque, invention, doublon,
- *    attendus.
+ * - La référence Sonnet n'est pas rejouée : le figé `11h58` vaut tel quel, et
+ *   c'est pour ça que Haiku reste juge.
+ * - Un seul budget de sortie pour tous, celui de Sonnet : un modèle qui déborde
+ *   compte comme échec de schéma, on ne lui monte pas le plafond.
+ * - Pas de juge de fidélité : il mesure les questions, et ce passage n'en
+ *   génère pas.
  *
- * L'estimation des tokens utilise la règle de pouce chars/4 pour du français
- * — marge d'erreur ~20 % assumée, suffisante pour un plan à sec. Le coût
- * réel se lira sur les factures OpenRouter dépôt par dépôt à l'émission.
+ * Quatre signes par token en français : ~20 % d'erreur, assez pour un plan.
  */
 
 const CHARS_PAR_TOKEN = 4;
-/** Approximation surface JSON par item (accolades, guillemets, noms de champs). */
+/** L'enveloppe JSON d'un item : accolades, guillemets, noms de champs. */
 const SURCHARGE_JSON_ITEM = 30;
-/** Nombre de paires de doublon par appel juge, voir `PAIRES_PAR_APPEL` dans `doublon.ts`. */
+/** Recopie de `PAIRES_PAR_APPEL` dans `juges/doublon.ts`. */
 const PAIRES_PAR_APPEL = 20;
 
 function tok(texte: string): number {
   return Math.ceil(texte.length / CHARS_PAR_TOKEN);
 }
 
-/** Structure des verdicts déjà rendus au figé — sert de proxy pour dimensionner. */
+/** Les verdicts déjà rendus au figé, proxy pour dimensionner. */
 type VerdictsFige = {
   depots: Record<
     string,
@@ -88,15 +76,8 @@ function couter(plan: Plan, modele: ModeleOpenRouter): number {
 }
 
 /**
- * L'extraction, un appel par dépôt.
- *
- * Tokens d'entrée : SYSTEM `extract_atoms` + texte du dépôt (les images du
- * corpus, une seule, sont approximées par le texte OCR déjà présent au figé
- * Sonnet — le vrai OCR ferait un appel de plus, marginal en coût).
- *
- * Tokens de sortie : ce que Sonnet a rendu au figé (concepts + tags + petits
- * champs de structure). C'est le meilleur proxy du volume qu'un challenger
- * produira, à ~20 % près.
+ * L'extraction, un appel par dépôt. Une image compte pour son texte OCR au
+ * figé : l'appel OCR en plus est marginal en coût.
  */
 function planExtraction(corpus: Depot[], fige: { depots: DepotFige[] }): Plan {
   const parNom = new Map(fige.depots.map((d) => [d.nom, d]));
@@ -106,8 +87,6 @@ function planExtraction(corpus: Depot[], fige: { depots: DepotFige[] }): Plan {
 
   for (const depot of corpus) {
     const figeDepot = parNom.get(depot.nom);
-    // Le texte figé contient le résultat OCR pour les images — c'est ce que le
-    // challenger recevra en entrée après une lecture d'image faite en amont.
     const texte = figeDepot?.texte ?? depot.texte;
     tokensIn += promptTokens + tok(texte) + 50;
 
@@ -124,12 +103,7 @@ function planExtraction(corpus: Depot[], fige: { depots: DepotFige[] }): Plan {
   return { appels: corpus.length, tokensIn, tokensOut };
 }
 
-/**
- * Le juge du doublon — un appel par lot de 20 paires, un dépôt peut porter
- * plusieurs lots. Le contenu d'un appel : `SYSTEM_DOUBLON` + une entête + la
- * liste des paires (deux concepts par paire). La sortie : deux questions
- * (parfois `null`) par paire.
- */
+/** Le juge du doublon : un appel par lot de paires, deux questions par paire. */
 function planDoublon(fige: { depots: DepotFige[] }, verdicts: VerdictsFige): Plan {
   const promptTokens = tok(SYSTEM_DOUBLON);
   const parNom = new Map(fige.depots.map((d) => [d.nom, d]));
@@ -141,13 +115,11 @@ function planDoublon(fige: { depots: DepotFige[] }, verdicts: VerdictsFige): Pla
     const depot = parNom.get(nom);
     if (!depot) continue;
 
-    // On ne connaît pas la géométrie exacte des paires soumises, mais Sonnet a
-    // rendu des questions dont la longueur est un bon indicateur du texte des
-    // deux concepts confrontés (chaque question paraphrase A ou B).
+    // Les paires soumises ne sont pas au figé : la longueur des questions
+    // rendues, qui paraphrasent A et B, sert d'indicateur.
     const tokensParPaire = paires.reduce((s, p) => {
       const contenu = (p.questionSurA?.length ?? 0) + (p.questionSurB?.length ?? 0);
-      // Le prompt ajoute le texte des deux concepts — ~120 chars par concept
-      // en moyenne d'après le figé —, en plus des questions du verdict.
+      // Plus le texte des deux concepts, ~120 signes chacun d'après le figé.
       return s + Math.ceil(contenu / CHARS_PAR_TOKEN) + 60;
     }, 0);
 
@@ -168,11 +140,7 @@ function planDoublon(fige: { depots: DepotFige[] }, verdicts: VerdictsFige): Pla
   return plan;
 }
 
-/**
- * Le juge du résidu — un appel par dépôt qui a des manques ou des inventions.
- * L'appel contient le texte du dépôt en entier (règle de la fiche pour ce
- * juge-là) plus la liste numérotée des phrases et concepts à trancher.
- */
+/** Le juge du résidu : un appel par dépôt à trancher, texte du dépôt entier compris. */
 function planResidu(fige: { depots: DepotFige[] }, verdicts: VerdictsFige): Plan {
   const promptTokens = tok(SYSTEM_RESIDU);
   const parNom = new Map(fige.depots.map((d) => [d.nom, d]));
@@ -195,10 +163,7 @@ function planResidu(fige: { depots: DepotFige[] }, verdicts: VerdictsFige): Plan
   return plan;
 }
 
-/**
- * Le juge des attendus — un appel par dépôt qui a des attendus. Contenu court
- * : chaque attendu et ses concepts candidats désignés par la géométrie.
- */
+/** Le juge des attendus : un appel par dépôt qui en a. */
 function planAttendus(verdicts: VerdictsFige): Plan {
   const promptTokens = tok(SYSTEM_ATTENDUS);
   const plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
@@ -268,7 +233,6 @@ async function main(): Promise<void> {
     `|:-----------------------|-------------:|:-----------------------------|:--------------------------|-------:|-------:|`,
   );
 
-  // Ligne référence : rappel non facturé
   const prixRef = `${REFERENCE.prixInParM}/${REFERENCE.prixOutParM}`;
   console.info(
     ligne(

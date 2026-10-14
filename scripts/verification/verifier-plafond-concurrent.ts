@@ -4,13 +4,11 @@ import "dotenv/config";
  * Preuve que le plafond journalier tient quand plusieurs appels partent au même
  * instant.
  *
- * Cette vérification ne peut pas vivre dans la suite Vitest : la garantie n'est
- * pas dans le code TypeScript, elle est dans l'atomicité d'une instruction
- * Postgres. La prouver demande une vraie base — c'est pourquoi elle rejoint les
- * vérifications d'exécution plutôt que les tests de `lib/domain/`.
+ * La garantie tient à l'atomicité d'une instruction Postgres, pas au code
+ * TypeScript : la prouver demande une vraie base, hors de Vitest.
  *
- * Le décompte se fait sur un jour sentinelle très éloigné, jamais sur
- * aujourd'hui : la vérification ne doit pas consommer de vraies places.
+ * Le décompte se fait sur un jour sentinelle lointain, pour ne consommer aucune
+ * vraie place.
  *
  *   npm run verifier:ai
  */

@@ -24,10 +24,9 @@ import { resemerLeCompte } from "@/scripts/assets/scenarios";
  *   ASSETS_PREVIEW=1 npm run dev      # dans un terminal
  *   npm run assets:captures           # dans un autre
  *
- * `--langue en` capture l'interface anglaise, sur les seuls dépôts anglais : le
- * compte de démo passe en anglais le temps des captures, puis reprend sa langue.
- * Les fichiers prennent `.en` avant l'extension. Les pages publiques et la fin
- * de session restent françaises, elles ne sont pas capturées en anglais.
+ * `--langue en` capture l'interface anglaise sur les dépôts anglais (fichiers en
+ * `.en`) ; le compte de démo reprend sa langue ensuite. Les pages publiques et
+ * la fin de session ne sont capturées qu'en français.
  *
  * `--seulement` ne tire que les fichiers nommés, en `<viewport>/<ecran>/<sujet>` :
  *
@@ -97,8 +96,7 @@ async function capturerLesFinsDeSession(browser: Browser, selection: Selection):
   if (selection.langue !== "FR" || viewports.length === 0) return;
 
   // La fin de session consomme les échéances du jour : on ressème avant chaque
-  // viewport pour repartir d'une session pleine, puis une dernière fois pour
-  // laisser le compte prêt à montrer.
+  // viewport, puis une dernière fois pour laisser le compte prêt à montrer.
   for (const viewport of viewports) {
     console.info(`— fin de session (${viewport}) —`);
     resemerLeCompte();

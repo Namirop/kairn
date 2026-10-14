@@ -2,18 +2,10 @@ import type { CouvertureAttendu } from "../attendus";
 import type { VerdictsDuDepot } from "../juges/verdicts";
 
 /**
- * La section « Attendus par dépôt » du rapport.
- *
- * Deux dépôts seulement portent des attendus — les seuls où une référence
- * écrite à la main est légitime (fiche instrument §8). Chaque attendu passe
- * au juge d'attendus, systématiquement : la géométrie sélectionne les
- * concepts candidats, le juge tranche s'ils couvrent l'idée — chiffres,
- * seuils et conditions inclus.
- *
- * Le libellé nomme qui a tranché — le juge, toujours. La proximité de chaque
- * candidat reste visible sur ses lignes ↳ mais ne décide de rien. Les attendus
- * qui sortent non couverts restent visibles d'un passage à l'autre par
- * construction — ne pas les adoucir.
+ * La section « Attendus par dépôt » du rapport (voir `attendus.ts`). C'est le
+ * juge qui tranche, toujours : la proximité des candidats s'affiche mais ne
+ * décide de rien. Les attendus non couverts restent visibles d'un passage à
+ * l'autre — ne pas les adoucir.
  */
 
 const EXTRAIT = 300;

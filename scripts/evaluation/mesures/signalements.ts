@@ -8,18 +8,12 @@ import {
 import type { MesuresDuDepot, Paire, PaireDeQuestions, Rapproche } from "./signaux";
 
 /**
- * L'application des planchers aux signaux bruts.
+ * L'application des planchers aux signaux bruts, à part de `signaux.ts` pour
+ * que les signaux restent calculables sans seuil : c'est ce que `--calibrer`
+ * lit quand le modèle d'embedding change et que les planchers sautent.
  *
- * Séparé de `signaux.ts`, et ce n'est pas de la cérémonie : les signaux se
- * calculent sans seuil, et doivent pouvoir continuer à se calculer sans seuil.
- * C'est ce qui permet de recalibrer — `npm run evaluer:mesures -- --calibrer`
- * rend les mêmes listes, triées, sans rien signaler. Le jour où le modèle
- * d'embedding change, les planchers sautent et la géométrie, elle, ne bouge pas.
- *
- * **Un signalement est un candidat, jamais un verdict.** Rien n'est écarté ici :
- * une phrase signalée au manque attend le juge de résidu, une paire signalée au
- * doublon attend le juge du doublon. Le mot « signalé » du rapport veut dire
- * « à regarder », pas « fautif ».
+ * Un signalement est un candidat, jamais un verdict : il attend son juge, et
+ * « signalé » veut dire « à regarder », pas « fautif ».
  */
 
 export type SignalementsDuDepot = {
@@ -33,10 +27,8 @@ export type SignalementsDuDepot = {
   /** Paires de concepts au-dessus du plancher : candidates à la redite. */
   doublons: Paire[];
   /**
-   * Paires de questions, `null` quand le figé n'en porte pas — les figés
-   * antérieurs au gel des questions. Sinon, les paires filtrées par les deux
-   * planchers du radotage : intra-concept et inter-concepts n'ont pas la même
-   * distribution, donc pas le même seuil.
+   * Paires de questions, `null` quand le figé n'en porte pas. Intra-concept et
+   * inter-concepts n'ont pas la même distribution, donc pas le même plancher.
    */
   radotage: { intraLot: PaireDeQuestions[]; interConcepts: PaireDeQuestions[] } | null;
 };

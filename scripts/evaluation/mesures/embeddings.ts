@@ -4,42 +4,24 @@ import { lireLeCache, ecrireAuCache } from "./cache-de-vecteurs";
 import { MODELE_EMBEDDING, type Vecteur } from "./espace";
 
 /**
- * La passe de vecteurs du banc.
+ * La passe de vecteurs du banc, chez Voyage : le seul appel du projet à ce
+ * fournisseur. Hors production : clé propre au banc, hors `callAI()` et hors
+ * des plafonds de `reservation.ts`. Le modèle (`MODELE_EMBEDDING`) indexe le
+ * cache : en changer invalide les vecteurs comme les seuils.
  *
- * Anthropic ne fait pas d'embeddings : cette mesure passe donc par un
- * fournisseur dédié, et c'est le seul endroit du projet qui l'appelle. Rien de
- * ceci n'entre en production — la clé est propre au banc, les appels ne passent
- * pas par `callAI()` et ne comptent dans aucun plafond de `reservation.ts`.
- *
- * **Le nom du modèle est une constante, et il est écrit dans chaque rapport.**
- * Deux modèles produisent des espaces incompatibles : un plancher calibré sur
- * l'un ne veut rien dire sur l'autre. Changer cette ligne invalide tous les
- * seuils, et c'est voulu que ça se voie.
- *
- * Aucun `input_type` n'est envoyé. Voyage en propose deux, `query` et
- * `document`, qui déforment l'espace pour la recherche — on y gagne quand on
- * cherche un document à partir d'une question. Ici toutes les comparaisons sont
- * symétriques : une phrase contre un concept, un concept contre un concept. Un
- * espace asymétrique fausserait les distances dans les deux sens.
+ * Aucun `input_type` n'est envoyé : `query` et `document` rendent l'espace
+ * asymétrique, alors qu'ici toutes les comparaisons sont symétriques (phrase
+ * contre concept, concept contre concept).
  */
 
 const URL_VOYAGE = "https://api.voyageai.com/v1/embeddings";
 
 /**
- * Textes par requête, et attente entre deux requêtes.
- *
- * Ces deux valeurs sont calées sur le **palier gratuit** de Voyage : trois
- * requêtes et dix mille tokens par minute tant qu'aucun moyen de paiement n'est
- * enregistré. Un lot de vingt-quatre segments pèse autour de trois mille tokens,
- * et vingt et une secondes d'attente tiennent sous les trois requêtes.
- *
- * L'attente est **préventive**, jamais une reprise après échec : on ne réémet
- * pas une requête refusée, on s'arrange pour ne pas la faire refuser. Un 429
- * qui passerait quand même arrête la passe, et le cache garde ce qui précède.
- *
- * Un corpus entier à froid prend donc quelques minutes, une seule fois. La
- * deuxième passe ne rappelle rien. Ces bornes se relèvent le jour où un moyen
- * de paiement est posé sur le compte — les tokens offerts, eux, ne changent pas.
+ * Calés sur le palier gratuit de Voyage, sans moyen de paiement : trois requêtes
+ * et dix mille tokens par minute. Vingt-quatre segments pèsent ~3 000 tokens,
+ * et 21 s d'attente tiennent sous les trois requêtes. L'attente est préventive :
+ * un 429 arrête la passe, il n'est jamais réémis. À relever si un moyen de
+ * paiement est posé.
  */
 const PAR_REQUETE = 24;
 const ATTENTE_MS = 21_000;
@@ -78,8 +60,7 @@ async function appeler(textes: string[]): Promise<{ vecteurs: Vecteur[]; tokens:
   });
 
   if (!reponse.ok) {
-    // Pas de reprise automatique : un échec est un échec, il est dit et il
-    // arrête la passe. Le cache garde ce qui était déjà calculé.
+    // Pas de reprise : l'échec arrête la passe, le cache garde ce qui précède.
     throw new Error(
       `Voyage a refusé la requête (${reponse.status}) : ${(await reponse.text()).slice(0, 400)}`,
     );
@@ -113,21 +94,17 @@ export type Passe = {
 };
 
 /**
- * Plonge une liste de textes et rend de quoi les relire.
- *
- * Les doublons ne sont plongés qu'une fois — le même texte a la même empreinte,
- * donc la même entrée de cache. C'est fréquent : deux dépôts peuvent partager
- * une phrase, et un rejeu repose exactement les mêmes questions.
+ * Plonge une liste de textes et rend de quoi les relire. Un même texte n'est
+ * plongé qu'une fois (même empreinte), ce qui est fréquent sur un rejeu.
  */
 export async function plonger(textes: string[]): Promise<Passe> {
   const cache = lireLeCache();
   const parEmpreinte = new Map<string, Vecteur>();
   const aCalculer: string[] = [];
 
-  // Voyage refuse les chaînes vides. Un variant peut arriver avec `question`
-  // vide quand la sortie contrainte a hoqueté à la génération — c'est un vrai
-  // bug du figé, mais il n'a pas à faire tomber toute la mesure. On les
-  // enregistre comme vecteur vide, propagé en NaN par `cosinus`.
+  // Voyage refuse les chaînes vides, et un figé peut porter une `question`
+  // vide : vecteur vide, propagé en NaN par `cosinus`, plutôt qu'une mesure
+  // qui tombe.
   parEmpreinte.set(empreinte(""), []);
 
   for (const texte of new Set(textes)) {
@@ -161,9 +138,8 @@ export async function plonger(textes: string[]): Promise<Passe> {
       parEmpreinte.set(trace, vecteur);
     });
 
-    // Écrit lot par lot, et non à la fin. Une passe interrompue au milieu — un
-    // refus du fournisseur, un Ctrl-C — doit laisser derrière elle tout ce
-    // qu'elle avait déjà payé. Écrire à la fin l'a fait perdre une fois.
+    // Écrit lot par lot : une passe interrompue (refus, Ctrl-C) garde tout ce
+    // qu'elle a déjà payé.
     ecrireAuCache(neufs);
 
     const faits = Math.min(debut + PAR_REQUETE, aCalculer.length);

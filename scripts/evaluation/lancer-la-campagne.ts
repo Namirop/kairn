@@ -22,11 +22,6 @@ import {
 } from "./campagne/plan";
 import { passerParColonne, type ScoreDeColonne, type ScoreDepot } from "./campagne/execution";
 import {
-  /**
-   * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
-   * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
-   * « Les commandes retirées ».
-   */
   rendreLaCorrespondance,
   rendreLeTableauAveugle,
   type Etiquette,
@@ -34,25 +29,18 @@ import {
 } from "./campagne/tableau";
 
 /**
- * L'émission de la campagne 1 — les quatre challengers désignés jouent
- * l'extraction sur les 27 dépôts, Haiku via OpenRouter juge chaque colonne, et
- * le rapport aveuglé A/B/C/D part à l'arrêt 2.
+ * Campagne 1, close, sans commande : voir `docs/outillage.md`, « Les commandes
+ * retirées ». Les challengers jouent l'extraction sur le corpus, le juge note
+ * chaque colonne, et le rapport sort aveuglé A/B/C/D.
  *
- * Trois garde-fous :
+ * Garde-fous de dépense : sans `--emettre`, plan à sec seulement ; refus si le
+ * listing OpenRouter ne confirme pas la fiche (identifiants, prix) ; arrêt sec
+ * d'une colonne qui dépasse 2× son estimation (`passerParColonne`). Le cache
+ * d'embeddings est partagé avec `evaluer:mesures`.
  *
- * 1. `--emettre` obligatoire, comme partout dans `evaluation/`. Sans lui, le
- *    script se contente du plan à sec. Il ne se lance pas non plus si
- *    `OPENROUTERAI_KEY` est absente ou si le listing OR ne confirme pas la
- *    fiche (identifiants + prix ± 5 %).
- * 2. Garde-fou de dérive **2×** par colonne, arrêt sec, aucune reprise. Voir
- *    `passerParColonne` et la mémoire `garde-fou-derive-2x.md`.
- * 3. Cache d'embeddings partagé avec `eval:mesures` : les textes déjà plongés
- *    pour Sonnet ne repartent pas au fournisseur.
- *
- * Deux fichiers en sortie :
- * - `evaluation/rapports/campagne/1-<horodatage>.md` — aveuglé A/B/C/D
- * - `evaluation/rapports/campagne/1-<horodatage>-correspondance.md` — étiquette
- *   → challenger. Ne pas ouvrir avant l'arrêt 2.
+ * Sorties dans `rapports/campagne/` : `1-<horodatage>.md`, aveuglé, et
+ * `1-<horodatage>-correspondance.md`, à ne pas ouvrir avant la lecture du
+ * rapport.
  */
 
 const RAPPORTS = join(import.meta.dirname, "rapports", "campagne");
@@ -71,10 +59,8 @@ function melangerEtiquettes(
       `Le mélange attend ${etiquettes.length} challengers, il en a reçu ${challengers.length}.`,
     );
   }
-  // Fisher-Yates avec Math.random — la correspondance est écrite au disque
-  // immédiatement, une réémission tirerait un autre ordre et le rapport
-  // aveuglé s'y refléterait. Reproductibilité de la mesure = lire les deux
-  // fichiers côte à côte, pas rejouer le tirage.
+  // Tirage non semé : la correspondance est écrite sur disque aussitôt, et c'est
+  // elle qui fait foi, pas un rejeu du tirage.
   const ordre = [...challengers];
   for (let i = ordre.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -186,8 +172,7 @@ async function main(): Promise<void> {
   const horodatage = emisA.toISOString().slice(0, 16).replace("T", "-").replace(":", "h");
   mkdirSync(RAPPORTS, { recursive: true });
   const cheminCorrespondance = join(RAPPORTS, `1-${horodatage}-correspondance.md`);
-  // Correspondance provisoire : sans les scores encore, pour survivre à un
-  // crash au milieu de la passe. Réécrite en fin de course avec les scores.
+  // Écrite avant la passe pour survivre à un crash ; réécrite avec les scores.
   const correspondanceProvisoire = etiquetees.map(({ etiquette, challenger }) => ({
     etiquette,
     score: {

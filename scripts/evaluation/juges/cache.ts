@@ -7,21 +7,14 @@ import type { VerdictFidelite } from "./fidelite";
 import type { VerdictInvention, VerdictManque } from "./residu";
 
 /**
- * Cache incrémental des verdicts d'une passe de mesure.
+ * Cache incrémental des verdicts d'une passe de mesure, écrit après chaque
+ * appel réussi : une mesure interrompue reprend sans repayer ce qui est rendu.
  *
- * Un juge qui a rendu un verdict n'a plus à le repasser. Le cache est écrit
- * après chaque appel réussi ; la relance repart d'ici au lieu de tout brûler.
- * Même principe que la complétion des figés après la panne de 27, à la
- * granularité d'un item juge — la panne de plafond a montré que sans cette
- * granularité, une mesure interrompue à mi-chemin coûte deux fois.
+ * Un fichier par figé, sous `scripts/evaluation/verdicts/`. Un champ présent
+ * signifie « terminé », absent « à faire ».
  *
- * Un fichier par figé, sous `scripts/evaluation/verdicts/`. La présence d'un
- * champ signifie « terminé » ; son absence, « à faire ». Écriture atomique
- * (temp + rename) pour qu'un `Ctrl-C` en plein milieu ne corrompe rien.
- *
- * ⚠️ Si tu modifies le prompt d'un juge, supprime le fichier de cache
- * correspondant : les verdicts d'hier n'ont pas été rendus par le juge
- * d'aujourd'hui.
+ * Le prompt d'un juge change : supprime le cache correspondant, ses verdicts
+ * viennent de l'ancien juge.
  */
 
 const DOSSIER = join(import.meta.dirname, "..", "verdicts");
@@ -39,16 +32,8 @@ export type CacheDeMesure = {
 };
 
 /**
- * Le cache est relu, donc il est validé.
- *
- * Il est écrit par ce module lui-même, ce qui rend la validation inutile en
- * marche normale — mais un cache se garde entre deux versions du banc, et c'est
- * précisément là qu'il ment : un verdict d'une forme antérieure passerait sans
- * bruit et casserait quinze appels plus loin, sur une ligne qui n'y est pour
- * rien. Le schéma le refuse tout de suite et nomme le fichier à supprimer.
- *
- * C'est aussi ce que le CLAUDE.md demande : un `JSON.parse` rend `unknown`, et
- * ce qui le transforme en type est un schéma, jamais une assertion.
+ * Le cache relu est validé : il survit aux versions du banc, et un verdict de
+ * forme antérieure casserait plus loin, sur une ligne qui n'y est pour rien.
  */
 const motive = z.object({ motif: z.string() });
 
@@ -109,10 +94,7 @@ Il a probablement été écrit par une version antérieure du banc. Supprime-le 
   return lu.data;
 }
 
-/**
- * Écriture atomique. Un `Ctrl-C` en pleine écriture ne laisse jamais un cache
- * tronqué — le rename est atomique sur les systèmes de fichiers usuels.
- */
+/** Écriture atomique (temp puis rename) : un `Ctrl-C` ne laisse pas de cache tronqué. */
 export function sauverCache(cache: CacheDeMesure, cheminFige: string): void {
   const chemin = cheminDuCache(cheminFige);
   const temp = `${chemin}.tmp`;

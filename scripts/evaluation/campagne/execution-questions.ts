@@ -11,18 +11,15 @@ import { mesurerLeDepotQuestions, type MesuresDuDepot } from "./mesures-question
 import { servirVariants, type VariantServi } from "./questions-servies";
 
 /**
- * L'émission d'une colonne de la campagne 2 : génération de questions par un
- * finaliste sur les concepts figés du 11h58, puis mesures internes (radotage,
- * formats, cible) et juge de fidélité Haiku via OpenRouter.
+ * Une colonne de la campagne 2 : génération de questions par un finaliste sur
+ * les concepts du figé `11h58`, puis mesures internes et juge de fidélité
+ * Haiku via OpenRouter.
  *
- * Le garde-fou 2× s'applique séparément à la génération et à la fidélité —
- * une colonne peut être coupée pendant l'une ou l'autre. Aucune reprise
- * automatique (règle campagne, arrêt du 2026-08-21).
- *
- * Haiku ne supporte pas `reasoning` chez son fournisseur OpenRouter — voir
- * `valider-le-juge.ts`, même règle ici.
+ * Le garde-fou de dérive 2× s'applique séparément à la génération et à la
+ * fidélité, et coupe la colonne sans reprise automatique.
  */
 
+/** Haiku ne supporte pas `reasoning` chez son fournisseur OpenRouter. */
 const REASONING_HAIKU = false as const;
 
 export type ScoreDepotQuestions = {
@@ -73,11 +70,7 @@ function grouper<T>(items: T[]): T[][] {
   return groupes;
 }
 
-/**
- * Fait tourner une colonne : génération dépôt par dépôt (groupes de 3 concepts
- * questionnables), puis mesures géo, puis juge fidélité Haiku. Retourne un
- * score utile pour le rapport aveuglé.
- */
+/** Fait tourner une colonne et rend son score pour le rapport aveuglé. */
 export async function passerParColonneQuestions(
   finaliste: ModeleOpenRouter,
   fige: CorpusFige,
@@ -113,7 +106,7 @@ export async function passerParColonneQuestions(
           if (!concept) continue;
           parConcept.set(concept.concept, servirVariants(concept.concept, lot.variants));
         }
-        // Rangs manquants dans la sortie (le modèle a oublié un concept du groupe) : comptés en échec.
+        // Un concept du groupe oublié par le modèle compte en échec.
         const rangsRendus = new Set(sortie.lots.map((l) => l.rang - 1));
         for (let i = 0; i < groupe.length; i++) if (!rangsRendus.has(i)) echecs += 1;
       } catch (erreur) {
@@ -124,7 +117,6 @@ export async function passerParColonneQuestions(
       }
     }
 
-    // Aligner sur l'ordre des concepts questionnables (concepts sans variants = tableau vide).
     const parConceptOrdonne: VariantServi[][] = questionnables.map(
       (c) => parConcept.get(c.concept) ?? [],
     );
@@ -149,7 +141,7 @@ export async function passerParColonneQuestions(
     }
   }
 
-  // 2. Plongée de toutes les questions de la colonne (cache utilisé).
+  // 2. Plongée de toutes les questions de la colonne.
   const textesQuestions = [...variantsParDepot.values()].flatMap((depot) =>
     depot.flatMap((variants) =>
       variants.map((v) => (v.format === "CLOZE" && v.cloze ? v.cloze.sentence : v.question)),
@@ -238,9 +230,8 @@ export async function passerParColonneQuestions(
 }
 
 /**
- * La référence Sonnet : mesures géo recalculées sur les variants du figé, et
- * fidélité lue depuis le cache verdicts existants (déjà rendue au passage
- * `11h58`, on ne rejoue pas).
+ * La référence Sonnet, sans rejouer : mesures recalculées sur les questions du
+ * figé, fidélité lue dans le cache des verdicts du passage `11h58`.
  */
 export function scoreReferenceSonnet(
   depot: DepotFige,

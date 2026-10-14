@@ -3,35 +3,20 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 
 /**
- * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
- * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
+ * Chantier clos, sans commande dans `package.json` : voir `docs/outillage.md`,
  * « Les commandes retirées ».
- */
-
-/**
- * L'épreuve de l'instrument par ablation.
  *
- * Elle répond à une question que la passe de mesure ne peut pas se poser
- * elle-même : **est-ce que la couverture réagit à ce qu'elle prétend mesurer ?**
- * On retire un concept d'un dépôt figé, on recalcule, et on regarde si les
- * phrases qui s'appuyaient sur lui tombent sous le plancher.
+ * L'épreuve de l'instrument par ablation : la couverture réagit-elle à ce
+ * qu'elle prétend mesurer ? On retire un concept d'un dépôt figé, on recalcule,
+ * et on regarde si les phrases qui s'appuyaient sur lui tombent sous le
+ * plancher.
  *
- * **Ce qu'elle prouve, et ce qu'elle ne prouve pas.** Le premier passage, le
- * 18 août, répond oui à la question ci-dessus : trente-sept retraits sur
- * trente-sept déplacent la couverture, d'une médiane de deux dixièmes. La mesure
- * réagit.
+ * Elle prouve que la mesure réagit (chaque retrait déplace la couverture). Elle
+ * ne contrôle pas le doublon : un concept redondant chute plus qu'un concept
+ * distinct, car redondant entre concepts n'implique pas substituable au niveau
+ * de la phrase.
  *
- * Elle ne prouve **pas** ce que la fiche en attendait par ailleurs. L'idée était
- * que retirer un jumeau ne devrait rien découvrir, son double couvrant les mêmes
- * phrases, et que l'ablation contrôlerait ainsi le signal de doublon « par
- * l'autre côté ». Les chiffres disent l'inverse : les jumeaux de `15` chutent de
- * 0,220 en médiane et les concepts imbriqués de `16` de 0,278, contre 0,195 pour
- * les concepts distincts de `23`. Un concept redondant chute **plus** qu'un
- * concept distinct. Redondant entre concepts n'implique pas substituable au
- * niveau de la phrase, et l'ablation ne dit rien du doublon.
- *
- * Rien n'est plongé : tous les vecteurs viennent du cache. Coût zéro, y compris
- * au vingtième rejeu.
+ * Tous les vecteurs viennent du cache : coût zéro.
  *
  *   npx tsx scripts/evaluation/eprouver-la-mesure.ts
  *   npx tsx scripts/evaluation/eprouver-la-mesure.ts -- --depot 22,26
@@ -41,15 +26,9 @@ import { basename, join } from "node:path";
 const RAPPORTS = join(import.meta.dirname, "rapports");
 
 /**
- * Les témoins de l'épreuve.
- *
- * La fiche n'en demandait que deux — `23`, le dépôt le plus sain, et `15`, celui
- * à jumeaux. Les deux autres sont entrés au premier passage, parce que `15` seul
- * ne permettait pas de conclure : ses six retraits ne franchissaient pas le
- * plancher, ce qui ressemblait au contrôle négatif attendu, alors que leurs
- * chutes étaient **plus fortes** que celles de `23`. Il fallait un second dépôt
- * redondant (`16`, les concepts imbriqués) et un dépôt ordinaire (`09`) pour
- * voir que la chute ne sépare pas le redondant du distinct.
+ * Les témoins : un dépôt sain (`23`), deux redondants (`15`, `16`) et un
+ * ordinaire (`09`). Il en faut deux redondants pour voir que la chute ne sépare
+ * pas le redondant du distinct.
  */
 const TEMOINS = [
   "23-pave-maximal",
@@ -98,9 +77,8 @@ async function main(): Promise<void> {
   const passe = await plonger(textes);
 
   if (passe.calcules > 0) {
-    // Attendu à zéro : l'épreuve tourne sur un figé déjà mesuré. Un chiffre
-    // non nul veut dire que le figé a changé depuis, et que ce qu'on éprouve
-    // n'est pas ce qu'on a mesuré.
+    // Attendu à zéro : non nul, le figé a changé depuis sa mesure, et ce qu'on
+    // éprouve n'est pas ce qu'on a mesuré.
     console.warn(
       `${passe.calcules} vecteurs ont dû être calculés : ce figé n'avait pas encore été mesuré en entier.`,
     );
@@ -139,8 +117,8 @@ async function main(): Promise<void> {
       .sort((un, deux) => un - deux);
     const mediane = chutes[Math.floor(chutes.length / 2)] ?? 0;
 
-    // La chute d'abord : c'est elle qui dit si la mesure réagit. Le compte des
-    // franchissements dépend d'un plancher posé pour une autre question.
+    // La chute d'abord : c'est elle qui dit si la mesure réagit. Les
+    // franchissements dépendent d'un plancher posé pour une autre question.
     console.info(
       `${ablation.nom.padEnd(28)} chute médiane ${mediane.toFixed(3)} sur ${chutes.length}/${ablation.retraits.length} retraits · ${avecEffet} franchissent le plancher`,
     );

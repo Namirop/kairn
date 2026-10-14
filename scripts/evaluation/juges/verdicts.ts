@@ -8,23 +8,16 @@ import { jugerLaFidelite, type VerdictFidelite } from "./fidelite";
 import { jugerLeResidu, type VerdictInvention, type VerdictManque } from "./residu";
 
 /**
- * L'orchestration des trois juges sur les signalements d'un passage.
+ * L'orchestration des juges sur les signalements d'un passage : le seul endroit
+ * qui décide de l'ordre et de la granularité des appels.
  *
- * Ce que gagne le regroupement : un seul endroit qui décide de l'ordre et de la
- * granularité des appels, un seul type qui aligne les verdicts sur les
- * candidats — le rapport ne fait plus que rendre ce qui lui arrive dans l'ordre.
+ * Granularité réglée sur ce qu'on paie : le doublon par lots de paires d'un
+ * dépôt, le résidu en un appel par dépôt (manques et inventions partagent le
+ * texte), la fidélité par concept (isolé exprès), les attendus par dépôt. Un
+ * dépôt sans candidat ne fait pas d'appel.
  *
- * Trois choix, tous rapportés à ce qu'on paie : un appel par dépôt pour le
- * doublon (une paire par item, groupées), un appel par dépôt pour le résidu
- * (manques + inventions groupés parce qu'ils partagent le texte), un appel par
- * concept pour la fidélité (chaque concept est isolé exprès). Les dépôts sans
- * candidat ne font pas d'appel — voir la logique de chaque juge.
- *
- * L'itération est **séquentielle** : les paires prises deux à deux ne se
- * doublent pas de temps quand le corpus tient dans un passage complet en moins
- * d'une minute, et la lecture des journaux d'erreur est plus simple à un appel
- * après l'autre. Le jour où la latence devient un mur, on parallélisera par
- * lots — pas avant.
+ * Séquentiel, pour lire les erreurs un appel après l'autre. Chaque verdict est
+ * sauvé au cache aussitôt : une relance reprend où elle s'est arrêtée.
  */
 
 export type VerdictsDuDepot = {
@@ -32,23 +25,13 @@ export type VerdictsDuDepot = {
   doublons: VerdictDoublon[];
   manques: VerdictManque[];
   inventions: VerdictInvention[];
-  /**
-   * Un verdict par question, groupé par concept, dans le même ordre que
-   * `depot.concepts`. Vide tant qu'aucun figé ne porte de questions.
-   */
+  /** Un verdict par question, groupé par concept, dans l'ordre de `depot.concepts`. */
   fidelite: { concept: string; questions: VerdictFidelite[] }[];
-  /**
-   * La couverture des attendus, avec verdict du juge pour ceux passés au
-   * repli. Vide pour les dépôts sans attendus — la plupart.
-   */
+  /** La couverture des attendus, avec le verdict du juge. Vide pour la plupart des dépôts. */
   attendus: CouvertureAttendu[];
 };
 
-/**
- * Envoie chaque attendu au juge — géométrie sélectionne, juge tranche. Un
- * appel par dépôt tant qu'il y a au moins un attendu ; le dépôt sans attendu
- * n'appelle rien.
- */
+/** Envoie les attendus au juge : la géométrie sélectionne, le juge tranche. */
 async function juger(nom: string, couvertures: CouvertureAttendu[]): Promise<CouvertureAttendu[]> {
   if (couvertures.length === 0) return [];
 
@@ -135,12 +118,9 @@ export async function jugerLesSignalements(
 }
 
 /**
- * Combien d'appels chaque juge fera sur ce corpus.
- *
- * Sert au plan chiffré : le rapport ne part qu'après avoir dit ce qu'il va
- * dépenser, comme `eval:generation`. Le doublon compte par lot (voir la
- * constante dans `doublon.ts`), le résidu par dépôt signalé, la fidélité par
- * concept qui porte des questions.
+ * Combien d'appels chaque juge fera sur ce corpus : le rapport dit ce qu'il va
+ * dépenser avant d'émettre. Doit rester aligné sur la granularité de
+ * `jugerLesSignalements`.
  */
 export function compterLesAppelsDesJuges(
   signalements: SignalementsDuDepot[],

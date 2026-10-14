@@ -8,9 +8,8 @@ import { manquementsDeGranularite } from "./controle-de-granularite";
 import { rendreTemoins } from "./temoins";
 
 /**
- * Le rapport. Les contrôles automatiques disent où regarder ; le reste — est-ce
- * que la question est bonne — se juge à l'œil, donc le rapport est fait pour
- * être lu en entier.
+ * Le rapport du banc. Les contrôles automatiques disent où regarder ; la qualité
+ * d'une question se juge à l'œil, donc le rapport est fait pour être lu en entier.
  */
 
 export type { Passage } from "./rapport-chiffres";
@@ -189,9 +188,8 @@ export function resumeConsole(passages: Passage[]): string[] {
     const { aboutis, misDeCote, generations, manquements } = compter([
       { evaluation, consommation },
     ]);
-    // La langue compte dans le verdict. Sans ça, `18-anglais` ressortait « ok,
-    // 0 manquement » en rendant des concepts français : le fichier prouvait le
-    // bug, et le score l'effaçait.
+    // Langue et granularité comptent dans le verdict, sinon un dépôt anglais
+    // rendu en français ressortirait « ok ».
     const langue = manquementsDeLangue(evaluation).length;
     const granularite = manquementsDeGranularite(evaluation).length;
     const total = manquements + langue + granularite;

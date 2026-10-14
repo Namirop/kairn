@@ -23,12 +23,9 @@ import { cookiesDeSession } from "@/scripts/assets/session";
 const DOSSIER_WEBM = path.join(tmpdir(), "kairn-webm");
 
 /**
- * Un halo lichen à chaque appui — l'indicateur de toucher, sur toutes les pages.
- *
- * Le script tourne au tout début du document : `document.documentElement` peut
- * être nul à cet instant. On enregistre donc les écouteurs tout de suite (ils
- * n'ont besoin que de `window`) et on ne touche au DOM qu'au moment de l'appui,
- * quand le corps existe.
+ * Un halo à chaque appui, sur toutes les pages. Le script tourne avant que
+ * `document.documentElement` existe : les écouteurs ne demandent que `window`,
+ * et le DOM n'est touché qu'au moment de l'appui.
  */
 const OVERLAY_TOUCH = `
 (function () {
@@ -75,8 +72,8 @@ export async function enregistrer(
     hasTouch: true,
     isMobile: true,
     baseURL: BASE_URL,
-    // La taille doit égaler le viewport, sinon Playwright pose la page dans un
-    // coin et remplit le reste de gris. On agrandit ensuite proprement à ffmpeg.
+    // Égale au viewport, sinon Playwright pose la page dans un coin sur fond
+    // gris. L'agrandissement se fait ensuite dans ffmpeg.
     recordVideo: { dir: DOSSIER_WEBM, size: { width: mobile.width, height: mobile.height } },
   });
 

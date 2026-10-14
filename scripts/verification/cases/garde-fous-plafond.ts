@@ -8,27 +8,21 @@ import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
 import { expectFailure, record } from "./journal";
 
 /**
- * Le plafond journalier, éprouvé sur l'appel au modèle.
- *
- * Le compteur du jour est amené à saturation puis remis exactement dans l'état
- * où il était : la vérification ne doit consommer aucune vraie place. La tenue
- * sous concurrence est prouvée séparément, sur un jour sentinelle, par
- * scripts/verification/verifier-plafond-concurrent.ts.
+ * Le plafond journalier, éprouvé sur l'appel au modèle. Le compteur du jour est
+ * saturé puis remis exactement dans son état : aucune vraie place n'est
+ * consommée. La tenue sous concurrence est prouvée par
+ * `verifier-plafond-concurrent.ts`.
  */
 
 const SATURE = 3;
 
 /**
- * Les deux populations ne s'affament pas l'une l'autre.
- *
- * Le trafic sans compte n'avait pas de part : il ne se confrontait qu'au plafond
- * global, et la landing pouvait donc fermer la journée aux comptes connectés —
- * l'inverse étant vrai aussi. Ce n'est pas un problème d'argent, le global s'en
- * charge ; c'est un déni de service croisé, et il ne se voit pas à la relecture.
+ * Les comptes et le trafic sans compte ne s'affament pas l'un l'autre : sans
+ * part propre, la landing pourrait fermer la journée aux comptes, et
+ * inversement. Un déni de service croisé, invisible à la relecture.
  *
  * Éprouvé sur `reserverLesDeuxPlaces` et non sur `callAI` : montrer qu'un appel
- * **passe** demanderait de l'émettre, et cette vérification ne sort pas sur le
- * réseau. C'est de toute façon la réservation qu'on met en cause.
+ * passe demanderait de l'émettre.
  */
 export async function verifierPartAnonyme(): Promise<void> {
   const jour = dayToUtcDate(localDay(new Date(), "UTC"));
@@ -67,7 +61,7 @@ export async function verifierPartAnonyme(): Promise<void> {
       () => reserverLesDeuxPlaces(config, { anonyme: true }),
     );
 
-    // Le point entier de la partition : la landing est pleine, et le reste sert.
+    // La landing est pleine, et le reste doit servir.
     if (compte) {
       await prisma.aiUserQuota.deleteMany({ where: { userId: compte.id, day: jour } });
     }
@@ -177,6 +171,8 @@ export async function verifierPlafond(): Promise<void> {
     process.env.MOCK_AI = "true";
     process.env.AI_DAILY_CALL_CAP = String(SATURE);
 
+    // Hors mock, sinon `callAI` rend la fixture avant la réservation. Rien ne
+    // sort : le piège sur `fetch` de `verifier-garde-fous.ts` le garantit.
     process.env.MOCK_AI = "false";
     await expectFailure("Le plafond journalier refuse avant d'émettre", "AI_QUOTA", () =>
       callAI({
@@ -202,10 +198,9 @@ export async function verifierPlafond(): Promise<void> {
       `trois refusées, puis deux accordées jusqu'à ${deuxSurDeux.utilisees}`,
     );
 
-    // La première réservation d'une journée UTC n'a aucune ligne à mettre à
-    // jour : l'insertion ne rencontre alors aucune condition de plafond. Une
-    // demande plus grosse que le plafond entier s'y installerait, juste après
-    // minuit.
+    // La première réservation d'une journée UTC insère sa ligne sans passer par
+    // la condition de plafond : une demande plus grosse que le plafond entier
+    // s'y installerait juste après minuit.
     await prisma.aiCallQuota.deleteMany({ where: { day: jour } });
 
     const plusGrosQueLePlafond = await reserverAppelsModele(SATURE, SATURE + 1);

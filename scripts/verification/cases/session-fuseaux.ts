@@ -3,11 +3,8 @@ import { lireSessionDuJour } from "@/lib/db/session-du-jour";
 import { record } from "./journal";
 
 /**
- * La même échéance, le même instant, deux fuseaux.
- *
- * C'est l'endroit où les bugs de ce projet seront silencieux : un concept dû
- * pour quelqu'un à Auckland ne l'est pas encore pour quelqu'un à Los Angeles,
- * et une comparaison faite en UTC se tromperait pour les deux.
+ * La même échéance, le même instant, deux fuseaux : un concept dû à Los Angeles
+ * ne l'est pas encore à Auckland, et une comparaison en UTC se tromperait.
  */
 
 const AUCKLAND = "Pacific/Auckland";
@@ -73,8 +70,7 @@ export async function casDeuxFuseaux(userId: string): Promise<void> {
     `Auckland : ${dueAAuckland ? "due" : "pas due"}, Los Angeles : ${dueALosAngeles ? "due" : "pas due"}`,
   );
 
-  // On remet le fuseau de travail et on retire le concept : les cas suivants
-  // comptent les questions dues, ils ne doivent pas hériter de celui-ci.
+  // Les cas suivants comptent les questions dues : ils n'héritent pas de celle-ci.
   await prisma.userSettings.update({ where: { userId }, data: { timezone: "Europe/Paris" } });
   await prisma.input.delete({ where: { id: input.id } });
 }

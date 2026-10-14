@@ -6,18 +6,14 @@ import { prisma } from "@/lib/db/client";
 import { SEED_USER_ID } from "@/prisma/seed/account";
 
 /**
- * Un cookie de session prêt pour Playwright, sans passer par l'email.
+ * Un cookie de session prêt pour Playwright, sans passer par l'email : la
+ * connexion se fait par code envoyé par email, aucun script ne peut la taper.
+ * La session est créée par le plugin `testUtils` de better-auth, dans une
+ * instance jetable — jamais la config de production.
  *
- * L'authentification de Kairn est un code à six chiffres envoyé par email : il
- * n'y a pas de mot de passe qu'un script puisse « taper ». On mint donc une vraie
- * session pour le compte de démonstration avec le plugin `testUtils` de
- * better-auth — dans une instance jetable, jamais la config de production — et on
- * pose son cookie dans le contexte du navigateur.
- *
- * Le secret et l'URL doivent être ceux du serveur dev (le même `.env`), sinon la
- * signature du cookie ne se vérifie pas et l'application renvoie sur l'écran de
- * connexion. Le compte de démonstration doit exister avant l'appel : `createSession`
- * référence un `User`.
+ * Le secret et l'URL doivent être ceux du serveur de dev (même `.env`), sinon
+ * la signature ne se vérifie pas et l'application renvoie à la connexion. Le
+ * compte de démonstration doit exister : la session référence un `User`.
  */
 
 export type CookieDeSession = {
@@ -48,8 +44,7 @@ export async function cookiesDeSession(userId: string = SEED_USER_ID): Promise<C
   const ctx = await instanceDeTest().$context;
   const cookies = await ctx.test.getCookies({ userId, domain: "localhost" });
 
-  // `getCookies` rend déjà la forme attendue par Playwright ; on ne fait que
-  // combler les champs optionnels avec leurs valeurs par défaut effectives.
+  // Les champs optionnels reçoivent les valeurs par défaut du navigateur.
   return cookies.map((cookie) => ({
     name: cookie.name,
     value: cookie.value,

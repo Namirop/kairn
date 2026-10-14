@@ -1,20 +1,11 @@
 /**
- * La découpe d'un dépôt en segments comparables.
+ * La découpe d'un dépôt en segments comparables. Déterministe et testée : un
+ * segment qui se scinde entre deux passages fait apparaître un manque qui
+ * n'existe pas, et deux rapports cessent de se comparer.
  *
- * Déterministe et volontairement simple. Les mesures de couverture n'ont de sens
- * que si cette découpe ne bouge pas entre deux passages : un segment qui se
- * scinde fait apparaître un manque qui n'existe pas, et deux rapports cessent
- * de se comparer. C'est pour ça qu'elle est ici, isolée et testée, plutôt
- * qu'écrite au fil du calcul.
- *
- * **Aucun filtrage de contenu.** On ne décide pas mécaniquement qu'une ligne est
- * du remplissage : `21-mixte-exploitable-et-organisation` a des lignes de tâches
- * qui doivent ressortir « anodines » chez le juge de résidu, pas disparaître
- * avant d'avoir été jugées. Une ligne écartée ici est une ligne qu'aucune mesure
- * ne verra jamais.
- *
- * Les titres markdown gardent leur texte sans leurs dièses : « ## Le principe »
- * porte du sens, et un dépôt collé depuis un article en est plein.
+ * Aucun filtrage de contenu : une ligne de remplissage doit ressortir
+ * « anodine » chez le juge de résidu, pas disparaître avant d'être jugée. Les
+ * titres markdown gardent leur texte, qui porte du sens.
  */
 
 /** Sous cette longueur, un fragment est recollé à son voisin plutôt que compté seul. */
@@ -33,18 +24,11 @@ const FIN_DE_PHRASE = /(?<=[.!?…])["»')\]]*\s+/;
 /**
  * Les unités du texte, avant la découpe en phrases.
  *
- * **Un retour à la ligne n'est pas une frontière.** `03-article-colle.md` est un
- * article collé tel quel, coupé dur autour de la soixante-dizième colonne : y
- * voir une unité par ligne en fabriquait quarante là où le texte en porte une
- * douzaine, dont « famine, pas un blocage, et elle se lit très mal dans un
- * profileur. » — un bout de phrase qu'aucun concept ne pouvait couvrir. La
- * couverture s'effondrait alors sur la mise en forme du fichier, et non sur ce
- * que le modèle avait oublié.
- *
- * Trois choses ferment une unité, et seulement trois : une ligne vide, un titre,
- * une puce. Tout le reste se recolle avec une espace — c'est du texte qui se
- * poursuit. Un titre forme une unité à lui seul ; une puce en ouvre une, et ses
- * propres lignes de continuation la rejoignent.
+ * Un retour à la ligne n'est pas une frontière : un article collé avec des
+ * retours durs (`03-article-colle.md`) donnerait des bouts de phrase
+ * qu'aucun concept ne couvre, et la couverture mesurerait la mise en forme.
+ * Seuls une ligne vide, un titre ou une puce ferment une unité ; un titre en
+ * forme une à lui seul, une puce en ouvre une que ses continuations rejoignent.
  */
 function unites(texte: string): string[] {
   const rendues: string[] = [];
@@ -91,12 +75,9 @@ function phrases(unite: string): string[] {
 }
 
 /**
- * Recolle les fragments trop courts à leur voisin.
- *
- * Au précédent de préférence — « Voir §3. » appartient à ce qui précède —, et au
- * suivant seulement quand il n'y a pas de précédent. Un fragment isolé entre
- * deux fragments courts finit donc dans un segment unique, ce qui est le
- * comportement voulu : trois bouts de titre valent un segment, pas trois.
+ * Recolle les fragments trop courts au précédent (« Voir §3. » appartient à ce
+ * qui précède), au suivant seulement s'il n'y a pas de précédent. Trois bouts
+ * courts d'affilée font un seul segment, c'est voulu.
  */
 function recoller(fragments: string[]): string[] {
   const segments: string[] = [];
@@ -112,8 +93,7 @@ function recoller(fragments: string[]): string[] {
     segments.push(fragment);
   }
 
-  // Le premier segment peut être resté trop court : rien ne le précédait au
-  // moment où il est entré. Il rejoint alors son suivant.
+  // Le premier segment n'avait pas de précédent : trop court, il rejoint le suivant.
   if (segments.length > 1) {
     const premier = segments[0];
     const second = segments[1];

@@ -12,13 +12,7 @@ import {
 import { ajouterAuManifeste } from "@/scripts/assets/manifest";
 import { cookiesDeSession } from "@/scripts/assets/session";
 
-/**
- * Le pilotage du navigateur pour les captures.
- *
- * Thème clair forcé, échelle rétine selon le viewport, et on attend le chargement
- * des polices avant chaque tir — sans quoi une capture prendrait le repli de
- * `display: swap` au lieu de Satoshi ou Bricolage.
- */
+/** Le pilotage du navigateur pour les captures. */
 
 /**
  * Le Chromium de Playwright, ou un navigateur installé nommé par
@@ -51,6 +45,7 @@ export async function contexte(
   return ctx;
 }
 
+/** Sans cette attente, une capture prendrait la police de repli de `display: swap`. */
 export async function attendrePolices(page: Page): Promise<void> {
   await page.evaluate(async () => {
     await document.fonts.ready;

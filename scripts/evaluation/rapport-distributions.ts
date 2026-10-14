@@ -2,18 +2,13 @@ import { MOTS_MAX_DU_TROU } from "@/lib/domain/controle-question";
 import type { Passage } from "./rapport-chiffres";
 
 /**
- * Les mesures qui ne portent pas sur une question mais sur leur ensemble.
+ * Les mesures sur l'ensemble des questions d'un passage : un défaut de
+ * distribution est invisible question par question. Une bonne réponse en
+ * première position n'a rien d'anormal — sauf quand c'est neuf fois sur dix.
  *
- * Ce sont les premiers contrôles du banc à l'échelle du passage, et ils
- * existent parce qu'un défaut de distribution est invisible question par
- * question : une bonne réponse en première position n'a rien d'anormal isolément
- * — elle l'est quand c'est le cas de neuf sur dix. Ce biais-là est passé onze
- * rapports sans être vu, alors que le contrôle des longueurs, lui, le voyait.
- *
- * Un rang est signalé quand il s'écarte de sa part attendue de plus de trois
- * écarts-types binomiaux. Le seuil suit donc la taille du passage au lieu d'être
- * un pourcentage fixe, qui crierait au loup sur vingt questions et ne verrait
- * rien sur trois cents.
+ * Un écart est signalé au-delà de trois écarts-types binomiaux : le seuil suit
+ * la taille du passage, là où un pourcentage fixe crierait au loup sur vingt
+ * questions et ne verrait rien sur trois cents.
  */
 
 const RANGS = [0, 1, 2, 3];
@@ -116,21 +111,15 @@ function affirmations(passages: Passage[]) {
 
 /**
  * La part des vrai ou faux dont l'affirmation est fausse, et l'obéissance à la
- * cible qui la décide.
+ * cible que le serveur tire avant l'appel (`lib/domain/vrai-ou-faux.ts`) — un
+ * prompt qui demande « à peu près la moitié » n'est pas tenu.
  *
- * Ce nombre a été à 88 % de fausses pendant que le prompt demandait « à peu près
- * la moitié » : c'est la mesure qui a montré qu'une consigne de proportion ne
- * tient pas. Depuis, la valeur est tirée par le serveur avant l'appel
- * (`lib/domain/vrai-ou-faux.ts`), et il y a donc deux choses à lire, pas une.
+ * La répartition servie est ce que rencontre la personne ; l'obéissance dit
+ * d'où vient un écart : un modèle qui suit ses cibles et une répartition qui
+ * dérive quand même accusent le tirage, pas le prompt.
  *
- * **La répartition servie** est celle qui compte pour le produit : c'est elle
- * que rencontre la personne qui révise. **L'obéissance** dit d'où vient un
- * écart — un modèle qui suit ses cibles et une répartition qui dérive quand même
- * accuseraient le tirage, pas le prompt.
- *
- * `estVraie` est la source ; le premier mot d'`answerKey` sert de recoupement,
- * parce qu'une question qui se déclare vraie et se répond « Faux » est
- * inexploitable même si sa cible est respectée.
+ * `estVraie` est la source ; le premier mot d'`answerKey` sert de recoupement :
+ * une affirmation qui se déclare vraie et se répond « Faux » est inexploitable.
  */
 function rendreVraiOuFaux(passages: Passage[]): string[] {
   const posees = affirmations(passages);
@@ -184,14 +173,10 @@ function rendreVraiOuFaux(passages: Passage[]): string[] {
 }
 
 /**
- * Ce que masquent les textes à trou.
- *
- * Le manquement par question existe et se déclenche, mais il se lit sous la
- * question fautive, au milieu de huit cents lignes. Le texte à trou est le seul
- * format du produit qui demande de **produire** la réponse plutôt que de la
- * désigner : si ses trous avalent des propositions entières, la comparaison
- * échoue sur des réponses pourtant justes, et la personne apprend à cliquer
- * « je l'avais ». Ce nombre-là se lit en tête.
+ * Ce que masquent les textes à trou, résumé en tête du rapport : le manquement
+ * par question se perd dans le détail. Seul format où l'on produit la réponse,
+ * un trou qui avale une proposition entière fait échouer la comparaison sur des
+ * réponses justes.
  */
 function rendreTrous(passages: Passage[]): string[] {
   const trous = passages

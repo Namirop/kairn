@@ -18,10 +18,8 @@ const DEPOTS_DUN_COMPTE_GRATUIT = plafondDeDepots(PLAFOND_GRATUIT);
 
 /**
  * Les quotas d'ingestion : l'atomicité, le moment du décompte, ce qui revient
- * au compteur et ce qui n'en revient jamais.
- *
- * Le fuseau est celui du compte de vérification, et il ne bouge pas : ce qui
- * est éprouvé ici, ce sont les compteurs, pas le calendrier.
+ * au compteur et ce qui n'en revient jamais. Le fuseau est fixe : on éprouve
+ * les compteurs, pas le calendrier.
  */
 
 const FUSEAU = "Europe/Paris";
@@ -70,7 +68,7 @@ export async function casDebitConcurrent(userId: string): Promise<void> {
   );
 }
 
-/** Le plafond de dépôts du jour, éprouvé sur les deux dernières places. */
+/** Le plafond de dépôts de la période, éprouvé sur les deux dernières places. */
 export async function casPlafondConcurrent(userId: string): Promise<void> {
   await viderLeCompte(userId);
   await poserLesDepotsDeLaPeriode(userId, DEPOTS_DUN_COMPTE_GRATUIT - 2);
@@ -103,10 +101,9 @@ export async function casDecompteApresExtraction(userId: string): Promise<void> 
   const usage = await lireUsageDeLaPeriode(userId, FUSEAU);
   const ecrits = await prisma.atom.count({ where: { inputId: depot.inputId } });
 
-  // Le débordement du dernier dépôt est assumé : refuser à mi-extraction serait
-  // pire, et réserver une estimation refuserait un dépôt d'une ligne parce
-  // qu'un article aurait pu tenir à sa place. Ce qui doit tenir, c'est qu'aucun
-  // dépôt ne parte au-delà, et que le chiffre annoncé se donne pour approximatif.
+  // Le débordement du dernier dépôt est assumé (refuser à mi-extraction serait
+  // pire). Ce qui doit tenir : aucun dépôt ne part au-delà, et le chiffre
+  // annoncé se donne pour approximatif.
   const suivant = await deposer(
     userId,
     formulaire({ texte: PARAGRAPHE, cleEnvoi: "verif-apres-debordement" }),
@@ -138,16 +135,10 @@ export async function casDecompteApresExtraction(userId: string): Promise<void> 
 }
 
 /**
- * Le point qui décide de tout : un dépôt qui n'a rien donné, pour quelle raison.
- *
- * Rejet — le modèle a lu et conclu qu'il n'y avait rien à retenir. L'appel a
- * été facturé : l'unité « dépôt » est due, les concepts non. Panne — timeout,
- * sortie invalide, plafond global atteint. L'utilisateur n'y est pour rien, et
- * lui facturer une panne du produit est le plus sûr moyen de le perdre : tout
- * doit lui revenir, l'unité « dépôt » comprise.
- *
- * Les deux fins sont bien distinctes en base — `REJECTED` et `FAILED`. Reste à
- * savoir si le compteur les distingue.
+ * Un dépôt qui n'a rien donné, et pourquoi. Rejet (`REJECTED`) : le modèle n'a
+ * rien trouvé à retenir, l'appel est facturé, l'unité « dépôt » est due.
+ * Panne (`FAILED`) : timeout, sortie invalide, plafond global ; l'utilisateur
+ * n'y est pour rien, tout lui revient, l'unité « dépôt » comprise.
  */
 export async function casRejetEtPanne(userId: string): Promise<void> {
   await viderLeCompte(userId);
@@ -218,12 +209,9 @@ export async function casRejetEtPanne(userId: string): Promise<void> {
 }
 
 /**
- * Les gestes de révision, en boucle.
- *
- * Ils ne coûtent aucun appel modèle, et c'est précisément pourquoi personne ne
- * les avait bornés : deux écritures par réponse et un tour d'entraînement qui
- * lisait tout le corpus, répétables autant qu'on voulait. Le quota tient le
- * budget sur la journée, la limite de débit tient le serveur sur la minute.
+ * Les gestes de révision, en boucle. Ils ne coûtent aucun appel mais chargent
+ * la base (deux écritures par réponse, un tour d'entraînement lit tout le
+ * corpus) : la limite de débit protège le serveur sur la minute.
  */
 export async function casGestesEnRafale(userId: string): Promise<void> {
   await viderLeCompte(userId);
@@ -232,10 +220,9 @@ export async function casGestesEnRafale(userId: string): Promise<void> {
   const variantId = concept.variantIds[0] ?? "";
   let acceptes = 0;
 
-  // La place d'abord, l'écriture ensuite — l'ordre de la Server Action, qui
-  // n'est pas appelable ici puisqu'elle lit une session HTTP. Seul le premier
-  // geste écrit vraiment : ce qui est mesuré, c'est la fenêtre, et écrire cent
-  // vingt passages ne prouverait rien de plus.
+  // La place d'abord, l'écriture ensuite : l'ordre de la Server Action, qui lit
+  // une session HTTP et n'est pas appelable ici. Seul le premier geste écrit :
+  // c'est la fenêtre qu'on mesure.
   if (await prendreUnGeste(userId, FUSEAU)) {
     await enregistrerEntrainement({
       userId,
@@ -265,9 +252,8 @@ export async function casGestesEnRafale(userId: string): Promise<void> {
     "refusé",
   );
 
-  // Le mécanisme est prouvé ci-dessus ; reste à prouver qu'il est branché. Les
-  // trois gestes coûteux doivent le traverser, et une relecture attentive laisse
-  // passer ce genre d'oubli — une assertion non.
+  // Le mécanisme est prouvé ci-dessus ; reste à prouver que les trois gestes
+  // coûteux le traversent. On lit le source des actions.
   const branchees = ["app/(app)/reviser/actions.ts", "app/(app)/entrainement/actions.ts"]
     .map((chemin) => readFileSync(chemin, "utf8"))
     .join("\n");

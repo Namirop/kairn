@@ -6,19 +6,15 @@ import { appliquerCapDuBanc } from "./cap-du-banc";
 appliquerCapDuBanc();
 
 /**
- * La passe de mesure du corpus.
+ * La passe de mesure du corpus : plonge phrases, concepts et questions du
+ * dernier figé en vecteurs, en tire les signaux, puis soumet les candidats aux
+ * juges, qui rendent chacun un verdict binaire. La mesure ne décide de rien :
+ * aucun concept écarté, aucune question supprimée.
  *
- * Elle plonge phrases, concepts et questions du dernier figé dans un espace de
- * vecteurs, tire quatre signaux, puis soumet les candidats à trois juges
- * (résidu, fidélité, doublon) qui rendent chacun un verdict binaire. Aucun
- * concept n'est écarté, aucune question supprimée, aucun prompt touché — la
- * mesure ne décide de rien.
- *
- * La passe des vecteurs est hors des garde-fous de `callAI()` : elle ne parle
- * pas au modèle de génération. Les juges, eux, sont des appels Haiku qui
- * passent par `callAI` comme tout le reste, et suivent donc les mêmes règles :
- * `MOCK_AI=false`, `AI_ENABLED=true`, et un gate `--emettre` pour ne rien payer
- * sans le vouloir.
+ * La plongée est hors des garde-fous de `callAI()` : elle ne parle pas au
+ * modèle. Les juges passent par `callAI` et exigent `MOCK_AI=false`,
+ * `AI_ENABLED=true` et `--emettre` : sans ce dernier, le nombre d'appels
+ * s'affiche et rien n'est payé.
  *
  *   npm run evaluer:mesures                       # signaux seuls, aucun appel
  *   npm run evaluer:mesures -- --emettre          # signaux + juges (dépense)
@@ -26,14 +22,9 @@ appliquerCapDuBanc();
  *   npm run evaluer:mesures -- --fige <chemin>    # un figé précis
  *   npm run evaluer:mesures -- --depot 15,23      # restreint à des dépôts
  *
- * Coût des juges : ~30 appels Haiku pour le corpus au 18 août, soit quelques
- * dizaines de centimes. Il tombera à ~130 appels et 0,40 $ le jour où les
- * questions seront gelées.
- *
- * `--calibrer` existe pour le jour où le modèle d'embedding change. Les
- * planchers de `seuils.ts` sont posés dans un espace donné et n'en sortent pas :
- * il faut alors relire les listes et les reposer à la main, comme la première
- * fois. C'est la seule raison de ce mode, et elle n'est pas hypothétique.
+ * `--calibrer` sert quand le modèle d'embedding change : les planchers de
+ * `mesures/seuils.ts` ne valent que dans l'espace où ils ont été posés, et se
+ * reposent à la main en relisant les listes triées.
  */
 
 const RAPPORTS = join(import.meta.dirname, "rapports");
@@ -84,11 +75,8 @@ async function main(): Promise<void> {
 
   console.info(`Mesure : ${source}, ${depots.length} dépôts.`);
 
-  // Un seul appel de plongée pour tout le corpus : les doublons de texte n'y
-  // sont plongés qu'une fois, et le cache absorbe ce qui a déjà été calculé.
-  // Les attendus des fichiers témoins entrent dans la même passe : ce sont des
-  // vecteurs à comparer aux concepts, et les stocker au cache leur évite d'être
-  // recalculés à chaque rejeu.
+  // Une seule passe de plongée, attendus des témoins compris : chaque texte
+  // n'y est plongé qu'une fois, et le cache absorbe les rejeux.
   const textes = [...depots.flatMap(textesDuDepot), ...tousLesAttendus()];
   console.info(`${textes.length} textes à plonger, doublons compris.`);
 

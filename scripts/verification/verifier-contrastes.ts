@@ -3,17 +3,12 @@ import { jetonsDeLaFeuille } from "./cases/jetons-de-la-feuille";
 import { conclure, record } from "./cases/journal";
 
 /**
- * Les contrastes, mesurés plutôt que regardés.
+ * Les contrastes, mesurés plutôt que regardés : ratios WCAG, lus dans
+ * `app/styles/tokens/`, des combinaisons que le produit pose réellement. Deux
+ * gris passables sur un écran calibré deviennent illisibles au soleil.
  *
- * « Ça se lit » n'est pas une vérification : deux gris passables à l'œil sur un
- * grand écran calibré deviennent illisibles au soleil, et personne ne s'en
- * aperçoit avant qu'un utilisateur le dise. Ce script lit les jetons dans
- * `app/styles/tokens/` et calcule les ratios WCAG des combinaisons que le produit pose
- * réellement.
- *
- * Le piège qu'il vient de rattraper : la surface nommée « ombre » est claire,
- * seule « roche » est sombre. Un composant écrit pour l'une et posé sur l'autre
- * y était invisible, et le nom suffisait à s'y tromper.
+ * Piège de nommage : la surface « ombre » est claire, seule « roche » est
+ * sombre.
  *
  *   npm run verifier:contrastes
  */
@@ -43,21 +38,17 @@ function contraste(texte: string, fond: string): number {
 type Combinaison = { texte: string; fond: string; role: string; seuil: number };
 
 /**
- * Ce que le produit pose vraiment, surface par surface.
- *
- * Les surfaces claires portent l'encre et le texte second du papier ; la roche,
- * seule surface sombre, porte les siens — dont un gris et un ember éclaircis,
- * parce qu'un accent réglé pour du clair ne tient pas sur du sombre.
+ * Ce que le produit pose, surface par surface. La roche, seule surface sombre,
+ * porte ses propres variantes éclaircies : un accent réglé pour du clair ne
+ * tient pas sur du sombre.
  */
 const COMBINAISONS: Combinaison[] = [
   { texte: "stone-900", fond: "surface-papier", role: "encre sur papier", seuil: AA_TEXTE },
   { texte: "stone-500", fond: "surface-papier", role: "texte second sur papier", seuil: AA_TEXTE },
   { texte: "stone-900", fond: "surface-ombre", role: "encre sur ombre", seuil: AA_TEXTE },
   { texte: "stone-500", fond: "surface-ombre", role: "texte second sur ombre", seuil: AA_TEXTE },
-  // Le sol de la session, le seul écran qui le prenne. Ce qui s'y pose
-  // directement est du texte second — les tags du concept, la consigne de
-  // réponse —, et c'est `stone-700` qui le porte : sur un aplat teinté, le gris
-  // du papier passe sous le seuil.
+  // Sur le sol de la session, le texte second (tags, consigne de réponse) est
+  // en `stone-700` : le `stone-500` du papier y passe sous le seuil.
   {
     texte: "stone-900",
     fond: "surface-session",
@@ -78,41 +69,35 @@ const COMBINAISONS: Combinaison[] = [
   { texte: "ember-clair", fond: "surface-roche", role: "série sur roche", seuil: AA_TEXTE },
   { texte: "alerte", fond: "surface-papier", role: "erreur sur papier", seuil: AA_TEXTE },
   { texte: "alerte", fond: "surface-ombre", role: "erreur sur ombre", seuil: AA_TEXTE },
-  // L'aplat d'alerte porte son propre texte : le badge, le bouton destructif et
-  // l'énoncé d'une configuration refusée. Il était posé partout sans jamais
-  // avoir été mesuré.
+  // L'aplat d'alerte porte son propre texte : badge, bouton destructif, énoncé
+  // d'une configuration refusée.
   { texte: "alerte", fond: "alerte-surface", role: "erreur sur aplat d'alerte", seuil: AA_TEXTE },
   { texte: "stone-800", fond: "alerte-surface", role: "texte sur aplat d'alerte", seuil: AA_TEXTE },
   { texte: "accent", fond: "surface-papier", role: "accent sur papier", seuil: AA_LARGE },
-  // La maîtrise est l'autre métier du lichen, et elle se pose sur du clair :
-  // le mot qui comble un trou, la bonne réponse. En production c'est la même
-  // couleur que l'accent ; sous une palette, c'est la seule qui reste verte,
-  // et rien ne garantissait plus qu'elle s'y voie.
+  // La maîtrise se pose sur du clair (le mot qui comble un trou, la bonne
+  // réponse) : c'est `lichen-deep` qui la porte, le lichen saturé y tombant
+  // sous le seuil.
   { texte: "lichen-deep", fond: "surface-papier", role: "maîtrise sur papier", seuil: AA_LARGE },
   { texte: "ember", fond: "surface-papier", role: "série sur papier", seuil: AA_LARGE },
-  // La dalle posée sur la roche : celle d'un concept dans la fenêtre de l'essai.
-  // `stone-800` y servait de surface d'objet et vaut exactement `surface-roche`
-  // — une dalle invisible sur son propre fond. C'est `stone-700` qui porte, et
-  // ce sont ses textes qu'il faut mesurer.
+  // La dalle d'un concept posée sur la roche, dans la fenêtre de l'essai : elle
+  // est en `stone-700`, `stone-800` étant trop proche de la roche pour s'en
+  // détacher.
   { texte: "stone-50", fond: "stone-700", role: "encre sur dalle de roche", seuil: AA_TEXTE },
   { texte: "stone-300", fond: "stone-700", role: "texte second sur dalle", seuil: AA_TEXTE },
-  // L'anneau de focus doit se voir sur ce qu'il entoure. `lichen-deep` est réglé
-  // pour le papier ; sur la roche, il fallait mesurer avant d'y poser le seul
-  // parcours de conversion du produit.
+  // L'anneau de focus doit se voir sur ce qu'il entoure, d'où une variante par
+  // surface.
   { texte: "accent-clair", fond: "surface-roche", role: "focus sur roche", seuil: AA_LARGE },
   { texte: "accent-profond", fond: "surface-papier", role: "focus sur papier", seuil: AA_LARGE },
-  // L'invite du champ de dépôt, posée sur le creux qui le dessine. Elle était en
-  // `stone-400`, qui n'y donne que 2,09 — et guère mieux sur le papier d'avant.
-  // C'est pourtant la seule phrase qui dise quoi mettre dans le champ : le pire
-  // endroit du produit où laisser du texte sous le seuil.
+  // L'invite du champ de dépôt, sur le creux qui le dessine. `stone-400` n'y
+  // donne que 1,7, et c'est la seule phrase qui dise quoi mettre dans le champ.
   {
     texte: "stone-500",
     fond: "surface-ombre",
     role: "invite du champ sur le creux",
     seuil: AA_TEXTE,
   },
-  // Le trait sous le champ, au repos puis au focus. Ce qu'un indicateur de focus
-  // doit franchir, ce n'est pas le fond : c'est **l'état d'avant**.
+  // Le trait sous le champ : un indicateur de focus doit se distinguer de son
+  // état de repos, pas seulement du fond.
   {
     texte: "accent-profond",
     fond: "stone-300",

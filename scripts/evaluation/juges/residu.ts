@@ -5,22 +5,13 @@ import type { Rapproche } from "../mesures/signaux";
 import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
 
 /**
- * Le juge du résidu — deux décisions pour un seul juge.
+ * Le juge du résidu tranche les deux sens de la fidélité d'extraction : une
+ * phrase qu'aucun concept ne couvre au-dessus du plancher est-elle à retenir ou
+ * du bruit ? Un concept qu'aucune phrase ne soutient ajoute-t-il un élément ?
  *
- * Il tranche les deux sens de la fidélité d'extraction. Une phrase du dépôt
- * qu'aucun concept ne couvre au-dessus du plancher : porte-t-elle quelque chose
- * qui mérite d'être retenu, ou est-ce du bruit — de la mise en forme, une
- * transition, un fragment de dialogue ? Un concept qu'aucune phrase ne soutient
- * au-dessus du plancher : est-il vraiment entièrement soutenu par ce texte, ou
- * ajoute-t-il un élément qui n'y figure pas ?
- *
- * Le juge reçoit le dépôt en entier, comme un relecteur qui a le texte sous les
- * yeux — c'est la règle de la fiche pour ce juge-là. Il ne reçoit **pas** les
- * autres concepts : c'est le rôle du signal, qui a déjà écarté les phrases
- * couvertes.
- *
- * Un appel par dépôt signalé, ses manques et ses inventions groupés. Le corpus
- * en compte ~15 au 18 août : quelques centimes.
+ * Il reçoit le dépôt entier, mais pas les autres concepts : le signal a déjà
+ * écarté les phrases couvertes. Un appel par dépôt signalé, manques et
+ * inventions groupés.
  */
 
 const verdictManque = z.object({
@@ -73,12 +64,8 @@ const residuForme = sortieLue.extend({
 const residuValidation = sortieLue;
 
 /**
- * Le champ décisionnel est nullable pour porter l'**abstention** — le cas où
- * le juge a rendu un lot partiel et omis cet item. Une abstention n'est pas
- * un verdict, elle est comptée séparément dans le rapport et signalée dans
- * le motif. C'est la réponse structurelle à un modèle stochastique qui saute
- * parfois un item d'un lot ; la règle « pas de retry » reste entière, on
- * n'invente rien, on rend visible le trou.
+ * `null` porte l'abstention : le juge a omis cet item d'un lot. Elle se compte
+ * à part dans le rapport, sans retry ni verdict inventé.
  */
 export type VerdictManque = { retenir: boolean | null; motif: string };
 export type VerdictInvention = { soutenu: boolean | null; motif: string };
@@ -135,13 +122,7 @@ function apparier<V extends { numero: number }, T>(
   });
 }
 
-/**
- * Rend un verdict par candidat, dans l'ordre.
- *
- * Un dépôt sans candidat ne fait pas d'appel — le juge ne voit que ce qu'il y a
- * à juger, et un rapport écrit « aucun candidat » ne demande pas de dépenser un
- * centime pour le confirmer.
- */
+/** Un verdict par candidat, dans l'ordre. Sans candidat, aucun appel. */
 export async function jugerLeResidu(
   nom: string,
   texte: string,

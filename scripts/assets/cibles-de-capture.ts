@@ -6,10 +6,8 @@ import { lireFigeDAssets } from "@/scripts/assets/fige";
 
 /**
  * Ce que les captures visent en base : les dépôts du compte de démo rattachés à
- * leur sujet, et une bonne question par format pour la vitrine.
- *
- * « Bonne » au sens de la consigne : on choisit, parmi les vraies questions
- * générées, celle qui illustre le mieux le format — jamais on n'en invente une.
+ * leur sujet, et une question par format pour la vitrine, toujours choisie
+ * parmi les vraies questions générées.
  */
 
 export type DepotDeDemo = {
@@ -62,10 +60,8 @@ function servable(format: string, payload: unknown, answerKey: string): boolean 
 }
 
 /**
- * Une question par format, celle dont la longueur d'énoncé approche le mieux une
- * cible lisible — assez pour être claire, pas au point d'être tronquée à l'écran.
- * Seulement parmi les dépôts de la langue capturée : une question anglaise n'a
- * rien à faire dans l'interface française.
+ * Une question par format, dans la langue capturée : celle dont l'énoncé
+ * approche le mieux une longueur lisible, claire sans être tronquée à l'écran.
  */
 export async function variantesParFormat(langue: Langue): Promise<CibleDeFormat[]> {
   const LONGUEUR_CIBLE = 90;

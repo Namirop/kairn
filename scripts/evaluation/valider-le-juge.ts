@@ -4,11 +4,6 @@ import { join } from "node:path";
 import { lireFige, type ConceptFige, type DepotFige, type VariantFige } from "./fige";
 import { jugerLaFideliteVia, jugerLesDoublonsVia, type Facture } from "./openrouter/juges";
 import {
-  /**
-   * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
-   * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
-   * « Les commandes retirées ».
-   */
   JUGE_PRINCIPAL,
   JUGES_CANDIDATS,
   KIMI_K2_0905_ECARTE,
@@ -16,56 +11,41 @@ import {
 } from "./openrouter/modeles";
 
 /**
- * Arrêt 1 de la campagne — la validation du juge candidat avant toute
- * campagne, ~0,10 $ les douze appels.
+ * Arrêt 1 : validation d'un juge candidat avant campagne (~0,10 $ les douze
+ * appels). Campagne close, sans commande : voir `docs/outillage.md`, « Les
+ * commandes retirées ».
  *
  * Deux volets contre le figé `2026-08-20-11h58` :
  *
- * 1. Six paires témoins au juge du doublon, contre la colonne Attendu écrite
- *    à la main dans la fiche `designation-challengers.md`. Critère : ≥ 5/6, et
- *    les deux paires non indépendantes (`15` jumeaux du rassasiement, `16`
- *    règle-plus-instance) sont **obligatoires** — un juge qui libère les
- *    jumeaux est disqualifié quel que soit son score. La leçon du 20 août :
- *    les jumeaux sont ce que la géométrie ne sait pas trancher, ils sont donc
- *    la raison d'être du juge.
+ * 1. Six paires témoins au juge du doublon, contre l'attendu écrit à la main.
+ *    Critère : ≥ 5/6, et les deux paires non indépendantes (15, 16) sont
+ *    obligatoires : ces jumeaux sont ce que la géométrie ne sait pas trancher,
+ *    donc la raison d'être du juge.
  *
- * 2. Six lots au juge de la fidélité, sondage complémentaire — deux lots
- *    propres (04, 18) qui doivent rester à zéro, deux lots portant des
- *    infidèles connues au rapport `11h58`, deux moyens. Critère : accord
- *    ≥ 80 % par question, aucun faux positif sur les lots propres. Un juge
- *    qui invente des KO sur un lot propre est un juge qui coûte cher : il
- *    dégrade la fidélité mesurée sans qu'aucune correction en aval puisse
- *    rattraper l'erreur.
+ * 2. Six lots au juge de la fidélité : deux propres (04, 18), deux portant des
+ *    infidèles connues, deux moyens. Critère : accord ≥ 80 % par question avec
+ *    les verdicts Haiku, aucun faux positif sur les propres — un KO inventé
+ *    dégrade la fidélité mesurée sans rattrapage possible en aval.
  *
- * Deux modes :
+ *   npx tsx scripts/evaluation/valider-le-juge.ts                     # JUGE_PRINCIPAL
+ *   npx tsx scripts/evaluation/valider-le-juge.ts -- --candidat=<id>  # un de JUGES_CANDIDATS
  *
- *   npx tsx scripts/evaluation/valider-le-juge.ts                              # JUGE_PRINCIPAL (Haiku)
- *   npx tsx scripts/evaluation/valider-le-juge.ts -- --candidat=<id>           # un candidat OpenRouter
- *
- * L'identifiant `<id>` doit correspondre à une constante déclarée dans
- * `modeles.ts` — soit `JUGE_PRINCIPAL`, soit un des `JUGES_ECARTES` conservés
- * comme trace de l'arrêt 1. Ajouter un nouveau candidat = ajouter la
- * constante et son commentaire d'une ligne, puis lancer.
+ * Un nouveau candidat se déclare d'abord comme constante dans `modeles.ts`.
  */
 
 const FIGE = join(import.meta.dirname, "concepts", "2026-08-20-11h58.json");
 
 /**
- * L'arrêt 1 relève les 4000 tokens par défaut du juge à 8000 le temps du
- * sondage. Certains modèles OpenRouter — GLM-5 sur les six paires groupées —
- * dépensent en tokens de raisonnement invisibles avant de rendre la sortie
- * contrainte ; la campagne réelle passe un dépôt à la fois avec moins de
- * paires, elle n'est pas concernée. Marge conservatrice, la campagne repartira
- * sur `TOKENS_DES_JUGES` inchangé.
+ * Le double de `TOKENS_DES_JUGES` : sur six paires groupées, certains modèles
+ * (GLM-5) épuisent le budget en raisonnement invisible avant de rendre. La
+ * campagne, un dépôt à la fois, reste sur `TOKENS_DES_JUGES`.
  */
 const MAX_TOKENS_VALIDATION = 8000;
 
 /**
- * Le paramètre `reasoning` à passer à OpenRouter pour un juge donné. Le défaut
- * du client est `{ effort: "low" }` — bon pour les modèles reasoning (GLM),
- * refusé avec 404 par les fournisseurs qui ne supportent pas ce paramètre
- * (Kimi via Novita) et sans effet sur les modèles non reasoning (Haiku).
- * `false` désactive proprement pour ces derniers.
+ * `undefined` garde le défaut du client, `{ effort: "low" }`. `false` pour les
+ * fournisseurs qui refusent le paramètre en 404 (Kimi via Novita) et les
+ * modèles sans raisonnement (Haiku).
  */
 function reasoningPour(
   juge: ModeleOpenRouter,
@@ -208,16 +188,9 @@ async function volet1Doublon(
 ): Promise<{ passe: boolean; factures: Facture[] }> {
   console.info("\n## Volet 1 — juge du doublon, 6 paires témoins\n");
 
-  // Un seul appel avec les six paires. Deux raisons :
-  //
-  // - c'est ce que fait déjà le juge en campagne, où un dépôt présente 1 à 20
-  //   paires au même appel — appeler une paire à la fois testerait autre chose
-  //   que ce qu'on va lancer plus tard ;
-  // - Alibaba (fournisseur unique de Qwen sur OpenRouter) ne respecte pas le
-  //   wrapping `{paires: [...]}` du schéma strict quand un seul item est
-  //   soumis : il rend l'objet à plat, la validation Zod refuse, le juge
-  //   passe pour cassé alors que c'est le format qui déraille. Un lot déclenche
-  //   le wrapping.
+  // Un seul appel pour les six paires : c'est ce que fait le juge en campagne,
+  // et Alibaba (Qwen) aplatit `{paires: [...]}` quand un seul item est soumis,
+  // ce que Zod refuse.
   const paires = PAIRES_TEMOINS.map((temoin) => extrairePaire(fige, temoin));
   const { verdicts, facture } = await jugerLesDoublonsVia(
     juge,
@@ -289,8 +262,7 @@ async function volet2Fidelite(
     factures.push(facture);
 
     const koQwen = verdicts.filter((v) => v.juste === false).length;
-    // Le rapport 11h58 sert de référence question par question. On lit les
-    // verdicts Haiku directement au fichier de verdicts pour l'accord fin.
+    // Référence question par question : les verdicts Haiku du figé `11h58`.
     const verdictsHaiku = lireVerdictsHaiku(lot);
     let accordsLot = 0;
     for (let i = 0; i < verdicts.length; i++) {

@@ -15,14 +15,11 @@ import type { Rapproche } from "../mesures/signaux";
 import type { Facture } from "./juges";
 
 /**
- * Le juge du résidu servi via OpenRouter — pendant de `jugerLeResidu` pour la
- * campagne 1, où Haiku passe par OpenRouter (voir `openrouter/juges.ts` pour
- * la raison). Prompt, schéma et mise en scène (`### Phrase #N`, `### Concept
- * #N`) sont ceux exportés par `juges/residu.ts` : un seul endroit décide de la
- * consigne, quel que soit le fournisseur qui l'exécute.
+ * Le juge du résidu servi via OpenRouter, pendant de `jugerLeResidu` pour la
+ * campagne. Prompt, schéma et mise en scène viennent de `juges/residu.ts` :
+ * un seul endroit décide de la consigne, quel que soit le fournisseur.
  *
- * Un dépôt sans manque ni invention ne fait pas d'appel — le juge ne voit que
- * ce qu'il y a à juger.
+ * Un dépôt sans manque ni invention ne fait pas d'appel.
  */
 
 function facturer(modele: ModeleOpenRouter, consommation: ConsommationOpenRouter): Facture {

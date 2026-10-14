@@ -72,9 +72,8 @@ export async function casDepotTexte(userId: string): Promise<void> {
     `${depot.status}, ${depot.atoms.length} concepts, ${questions} questions`,
   );
 
-  // Le cœur du §7 : les questions sont là et plus rien n'attend derrière. Ce qui
-  // se lisait ici à l'absence de lot se lit maintenant à la file — il n'y a plus
-  // de second chemin d'où elles pourraient venir des heures plus tard.
+  // Les questions arrivent avec le dépôt : aucun job de questions ne doit
+  // rester en file derrière.
   const enAttente = await prisma.generationJob.count({
     where: { inputId, kind: "VARIANTS", status: { in: ["QUEUED", "RUNNING"] } },
   });
@@ -92,9 +91,8 @@ export async function casDepotTexte(userId: string): Promise<void> {
     `${planifie} questions actives`,
   );
 
-  // Ce que le format ajoute doit traverser le pipeline entier. Un texte à trou
-  // dont les formes acceptées se perdent en route ne se vérifie plus : il
-  // redevient une question à s'auto-noter, exactement ce qu'on cherche à éviter.
+  // Un texte à trou qui perd ses formes acceptées en route ne se vérifie plus :
+  // il redevient une question à s'auto-noter.
   const trous = await prisma.variant.findMany({
     where: { atom: { inputId }, format: "CLOZE" },
     select: { payload: true },
@@ -187,15 +185,10 @@ export async function casConceptDouteux(userId: string): Promise<void> {
 }
 
 /**
- * Un dépôt dont les énoncés n'ont pas à être vrais du monde.
- *
- * C'était le chemin mort du produit : les règles d'un jeu, la chronologie d'un
- * univers de fiction ou une procédure interne ressortaient toutes marquées
- * douteuses, donc sans une seule question. Le dépôt était accepté, il comptait
- * au quota, et il ne produisait rien.
- *
- * Les deux concepts de la fixture sont douteux, et c'est le point : ce cas
- * échoue si le doute reprend la main sur autre chose que du factuel.
+ * Un dépôt dont les énoncés n'ont pas à être vrais du monde (fiction, règles
+ * d'un jeu) : marqué douteux, il serait accepté, compté au quota, et sans une
+ * question. Les deux concepts de la fixture sont douteux à dessein : le cas
+ * échoue si le doute bloque autre chose que du factuel.
  */
 export async function casDepotDeFiction(userId: string): Promise<void> {
   const inputId = await deposerEtDerouler(userId, { texte: FICTION, cleEnvoi: "verif-fiction-01" });
@@ -225,11 +218,9 @@ export async function casCorrectionDeConcept(userId: string): Promise<void> {
     data: { state: "REVIEWING", reps: 4, lapses: 1, stability: 12 },
   });
 
-  // Ce concept vient d'être découpé, donc ses questions viennent d'être
-  // demandées : une correction dans la foulée tomberait sous le plafond
-  // hebdomadaire et partirait en demande différée. On vieillit la demande
-  // précédente pour éprouver ici ce que ce cas éprouve — la réécriture — et non
-  // le plafond, qui a ses propres lignes dans `verify:abus`.
+  // Ses questions viennent d'être demandées : une correction dans la foulée
+  // tomberait sous le plafond hebdomadaire. On vieillit la demande pour
+  // éprouver la réécriture ; le plafond a ses cas dans `verifier:abus`.
   await prisma.generationJob.updateMany({
     where: { kind: "VARIANTS", atomIds: { has: atome.id } },
     data: { createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
@@ -241,9 +232,8 @@ export async function casCorrectionDeConcept(userId: string): Promise<void> {
     "Une reformulation écrite à la main, assez longue pour passer.",
   );
 
-  // Retirées, pas supprimées : `Review.variantId` est en cascade, et les
-  // effacer emporterait tous les passages donnés sur ce concept. Ce qui doit
-  // disparaître, c'est leur présence dans le tirage, pas leur existence.
+  // Retirées, pas supprimées : `Review.variantId` est en cascade, les effacer
+  // emporterait les passages donnés sur ce concept.
   const servables = await prisma.variant.count({
     where: { id: { in: avant }, retiredAt: null },
   });

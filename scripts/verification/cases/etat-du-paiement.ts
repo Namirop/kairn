@@ -7,16 +7,12 @@ import { lireLeRapport } from "@/lib/paiement/rapport";
 import { record } from "./journal";
 
 /**
- * Notre ligne et celle de Stripe, mises côte à côte.
+ * Notre ligne et celle de Stripe, côte à côte, contre un vrai abonnement.
  *
- * Les tests unitaires prouvent que `etatDepuisStripe` traduit correctement un
- * rapport ; ils ne peuvent rien dire de ce qui arrive **avant** lui — la forme
- * réelle de l'objet que Stripe envoie. Le terme d'un abonnement a changé de
- * place dans l'API (il vit sur la ligne depuis que la facturation peut être
- * découpée), et c'est le genre de déplacement qu'aucune fixture ne signale :
- * elle a été écrite d'après la même lecture que le code.
- *
- * D'où cette comparaison-ci, qui ne vaut qu'exécutée contre un vrai abonnement.
+ * Les tests unitaires prouvent la traduction d'`etatDepuisStripe`, pas la forme
+ * réelle de l'objet Stripe : le terme d'un abonnement vit sur la ligne, pas sur
+ * l'abonnement, et une fixture écrite d'après la même lecture que le code ne
+ * signalerait pas ce genre de déplacement.
  */
 export async function comparerAvecStripe(userId: string): Promise<void> {
   const offre = await lireLOffreDuCompte(userId);

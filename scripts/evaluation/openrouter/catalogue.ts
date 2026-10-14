@@ -1,12 +1,9 @@
 import { z } from "zod";
 
 /**
- * Le catalogue OpenRouter, lu depuis l'endpoint documentaire `/models`.
- *
- * Gratuit et sans effet de bord — la campagne s'en sert au démarrage pour
- * vérifier que ses modèles existent au bon prix, et le helper `--lister` du
- * script de vérification s'en sert pour proposer une liste éligible depuis
- * laquelle le pilote désigne les challengers.
+ * Le catalogue OpenRouter (`/models`), gratuit et sans effet de bord. La
+ * campagne y vérifie au démarrage que ses modèles existent au bon prix, et
+ * `verifier-openrouter.ts` en tire la liste des challengers éligibles.
  */
 
 const ENDPOINT = "https://openrouter.ai/api/v1/models";
@@ -60,8 +57,7 @@ export async function lireLeCatalogue(): Promise<EntreeDuCatalogue[]> {
     return {
       id: entree.id,
       fournisseur,
-      // Prix rendus par million de tokens depuis le listing, en dollars. La
-      // plateforme les rend par token en chaîne — on multiplie.
+      // Le listing donne un prix par token, en chaîne : ramené au million.
       prixInParM: Number.parseFloat(entree.pricing.prompt) * 1_000_000,
       prixOutParM: Number.parseFloat(entree.pricing.completion) * 1_000_000,
       supporteSortiesStructurees,

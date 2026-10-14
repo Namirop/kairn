@@ -15,20 +15,18 @@ import { appelsPour } from "../juges/doublon";
 import { PAIRES_PAR_APPEL } from "./plan";
 
 /**
- * L'émission d'une colonne de la campagne : extraction du challenger sur les
- * 27 dépôts, puis Haiku sur les signalements et attendus de sa colonne.
+ * L'émission d'une colonne de la campagne : extraction du challenger sur le
+ * corpus, puis les juges sur ses signalements et attendus.
  *
- * Le garde-fou de dérive s'applique dépôt par dépôt : si le coût cumulé de
- * l'extraction ou des juges dépasse **2 × son estimation**, la colonne s'arrête
- * là et l'appelant le voit dans `statut`. Aucune reprise automatique — c'est la
- * règle de campagne posée le 2026-08-21, pas un événement à rattraper au vol.
+ * Garde-fou de dérive, dépôt par dépôt : si le coût cumulé de l'extraction ou
+ * des juges dépasse 2 × son estimation, la colonne s'arrête et l'appelant le
+ * voit dans `statut`. Aucune reprise automatique.
  *
- * Le juge est fixé à `JUGE_PRINCIPAL` (Haiku via OpenRouter), même pour tous les
- * challengers. Ce qui varie d'une colonne à l'autre, c'est l'extraction ; les
- * juges sont la même règle pour tout le monde.
+ * Le juge est `JUGE_PRINCIPAL` pour toutes les colonnes : seule l'extraction
+ * varie.
  */
 
-/** Le juge Haiku ne supporte pas `reasoning` chez son fournisseur — voir `valider-le-juge.ts`. */
+/** Le fournisseur de Haiku refuse `reasoning` : voir `valider-le-juge.ts`. */
 const REASONING_HAIKU = false as const;
 
 export type ScoreDepot = {
@@ -94,9 +92,8 @@ function faireDepotFige(nom: string, texte: string, extraction: ExtractAtomsOutp
 }
 
 /**
- * Fait tourner une colonne : extraction dépôt par dépôt (garde-fou 2×), puis
- * juges Haiku sur chaque dépôt (garde-fou 2× à part). Retourne un score utile
- * pour bâtir le tableau aveuglé, indépendamment de la nature du challenger.
+ * Les deux garde-fous 2× sont distincts : extraction et juges ont chacun leur
+ * estimation.
  */
 export async function passerParColonne(
   challenger: ModeleOpenRouter,
@@ -111,13 +108,10 @@ export async function passerParColonne(
   const figes: DepotFige[] = [];
   const echecs = new Map<string, string>();
 
-  // 1. Extraction dépôt par dépôt, avec garde-fou 2× cumulé.
   for (let rang = 0; rang < corpus.length; rang++) {
     const depot = corpus[rang]!;
-    // Le texte de la campagne : figé Sonnet si dispo (l'OCR y est déjà fait),
-    // sinon le texte brut du corpus. On ne rejoue pas l'OCR par challenger —
-    // le plan à sec l'a acté, et une image OCR-ée deux fois mesurerait autre
-    // chose que ce qu'on compare.
+    // Le texte du figé quand il existe, OCR déjà fait : rejouer l'OCR par
+    // challenger mesurerait autre chose que l'extraction.
     const texte = textesDuFige.get(depot.nom) ?? depot.texte;
     if (texte === "") {
       echecs.set(depot.nom, "texte vide : ni figé ni corpus n'ont fourni de contenu");
@@ -132,10 +126,8 @@ export async function passerParColonne(
         `  ✓ ${depot.nom} — ${sortie.atoms.length} concepts, ${(facture.coutUsd * 100).toFixed(2)} ¢ (cumul : ${factureExtraction.usd.toFixed(4)} $)`,
       );
     } catch (erreur) {
-      // Un `AICallFailedError` masque la cause d'origine (réponse du fournisseur,
-      // 400 sur schéma refusé, timeout). Sans elle on diagnostique à l'aveugle —
-      // l'arrêt 1 avait montré que les fournisseurs Alibaba/Novita mentent sur
-      // ce qu'ils supportent. On journalise donc la chaîne complète.
+      // `AICallFailedError` masque la cause d'origine (réponse du fournisseur,
+      // schéma refusé, timeout) : on journalise la chaîne complète.
       const cause = erreur instanceof Error && erreur.cause instanceof Error ? erreur.cause : null;
       const motif =
         erreur instanceof Error
@@ -147,10 +139,8 @@ export async function passerParColonne(
       figes.push({ nom: depot.nom, texte, rejet: null, concepts: [], echec: { motif } });
       loguer(`  ✗ ${depot.nom} — échec : ${motif.slice(0, 400)}`);
     }
-    // Garde-fou : ne coupe **que s'il reste des dépôts à traiter**. Sur le
-    // dernier dépôt, le dépassement est déjà consommé — poursuivre coûte zéro
-    // en extraction, et priver les juges de la colonne effacerait la mesure.
-    // Le rapport annonce alors que le seuil a été franchi malgré tout.
+    // Ne coupe que s'il reste des dépôts : sur le dernier, le dépassement est
+    // consommé, et priver la colonne de ses juges effacerait la mesure.
     const dernier = rang === corpus.length - 1;
     if (!dernier && factureExtraction.usd > 2 * coutExtractionEstime) {
       const info = {
@@ -172,19 +162,16 @@ export async function passerParColonne(
     }
   }
 
-  // 2. Plongée du figé simulé + tous les attendus — même règle que
-  // `mesurer-le-corpus`. Sans les attendus, `couvertureDesAttendus` casse à
-  // la première comparaison. Le cache absorbe ce qui a déjà été calculé.
+  // Les attendus se plongent aussi, sinon `couvertureDesAttendus` casse à la
+  // première comparaison.
   const textes = [...figes.flatMap(textesDuDepot), ...tousLesAttendus()];
   loguer(`  · plongée : ${textes.length} textes à faire vecteurs (doublons compris).`);
   const passe = await plonger(textes);
   loguer(`  · vecteurs : ${passe.calcules} calculés, ${passe.enCache} au cache.`);
 
-  // 3. Mesures et signalements par dépôt.
   const mesures = figes.map((depot) => mesurerLeDepot(depot, passe.vecteur));
   const signalements = mesures.map(signaler);
 
-  // 4. Juges Haiku sur chaque dépôt, garde-fou 2× cumulé.
   const doublons = new Map<string, number>();
   const residus = new Map<string, { manques: number; inventions: number }>();
   const attendus = new Map<string, { couverts: number; total: number }>();
@@ -193,9 +180,8 @@ export async function passerParColonne(
     const depot = figes.find((f) => f.nom === signalement.nom);
     if (!depot || depot.echec) continue;
 
-    // Doublons — découpés en lots comme `jugerLesDoublons` du produit, pour
-    // ne pas dépasser TOKENS_DES_JUGES sur un dépôt à beaucoup de paires (un
-    // Mistral verbeux peut sortir 20 concepts et 60+ paires signalées).
+    // En lots, pour tenir dans `TOKENS_DES_JUGES` sur un dépôt à beaucoup de
+    // paires (un challenger verbeux en signale 60 et plus).
     if (signalement.doublons.length > 0) {
       let confirmes = 0;
       const nbLots = appelsPour(signalement.doublons.length);
@@ -220,7 +206,6 @@ export async function passerParColonne(
       doublons.set(depot.nom, confirmes);
     }
 
-    // Résidu
     if (signalement.manques.length + signalement.inventions.length > 0) {
       try {
         const { sortie, facture } = await jugerLeResiduVia(
@@ -242,7 +227,6 @@ export async function passerParColonne(
       }
     }
 
-    // Attendus
     if (attendusDuDepot(depot.nom).length > 0) {
       try {
         const couvertures = couvertureDesAttendus(depot.nom, depot.concepts, passe.vecteur);

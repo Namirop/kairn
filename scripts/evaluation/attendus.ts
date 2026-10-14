@@ -4,21 +4,15 @@ import { plusProches } from "./mesures/geometrie";
 import { PLANCHER_COUVERTURE } from "./mesures/seuils";
 
 /**
- * Les idées qu'on attend d'un dépôt.
+ * Les idées qu'on attend d'un dépôt : le seul endroit du banc où une référence
+ * est légitime, sur deux fichiers écrits par nous dont les idées clefs sont
+ * énumérables. Le reste du corpus n'en a pas, sinon on mesurerait ce qu'on a
+ * déjà écrit.
  *
- * C'est le **seul endroit du banc où une référence est légitime** (fiche
- * instrument §8) : deux fichiers seulement, écrits par nous, dont les idées
- * clefs sont énumérables. Le reste du corpus n'a pas d'attendus, et n'en aura
- * pas — sinon on mesurerait ce qu'on a déjà écrit.
- *
- * `27-idee-enfouie.txt` est le cas d'école du manque : l'idée principale
- * (l'irréversibilité de la perte d'arôme sous 12 °C) est glissée en
- * subordonnée, au milieu d'une phrase dont le sujet apparent est ailleurs.
- *
- * `22-article-long.md` porte six mécanismes énumérables sur les feux de forêt.
- * Les attendus existent pour **garder les trous visibles d'un passage à
- * l'autre**, pas pour être satisfaits. Ne pas les adoucir pour les faire
- * passer.
+ * `27-idee-enfouie.txt` glisse son idée principale (la perte d'arôme sous
+ * 12 °C) en subordonnée ; `22-article-long.md` porte six mécanismes sur les feux
+ * de forêt. Les attendus gardent les trous visibles d'un passage à l'autre : ne
+ * pas les adoucir pour les faire passer.
  */
 
 export const ATTENDUS: Readonly<Record<string, readonly string[]>> = {
@@ -57,9 +51,9 @@ export type CouvertureAttendu = {
   /** Les concepts candidats retenus par proximité — jusqu'à `CANDIDATS_PAR_ATTENDU`. */
   candidats: { concept: string; proximite: number }[];
   /**
-   * Vrai si le plus proche candidat passe le plancher couverture. Utilisé en
-   * interne comme signal ; le rapport n'en fait plus mention — c'est le juge
-   * qui tranche, la proximité ne fait que sélectionner les candidats.
+   * Vrai si le plus proche candidat passe le plancher couverture. Persisté
+   * dans les verdicts, mais aucun rapport ne le lit : c'est le juge qui
+   * tranche, la proximité ne fait que sélectionner les candidats.
    */
   couvertParProximite: boolean;
   /**
@@ -70,15 +64,10 @@ export type CouvertureAttendu = {
 };
 
 /**
- * La couverture des attendus d'un dépôt par ses concepts, avant tout juge.
- *
- * On désigne les {@link CANDIDATS_PAR_ATTENDU} concepts les plus proches par
- * proximité — la géométrie sélectionne. Le verdict de couverture, lui, viendra
- * du juge (voir `juges/attendus.ts`) : le cosinus mesure le même sujet, pas
- * la même affirmation.
- *
- * Un dépôt sans attendu rend un tableau vide sans plonger quoi que ce soit —
- * la plupart des dépôts.
+ * La couverture des attendus d'un dépôt, avant tout juge : la géométrie
+ * désigne les {@link CANDIDATS_PAR_ATTENDU} concepts les plus proches, le juge
+ * (`juges/attendus.ts`) tranche, car le cosinus mesure le même sujet, pas la
+ * même affirmation.
  */
 export function couvertureDesAttendus(
   nom: string,

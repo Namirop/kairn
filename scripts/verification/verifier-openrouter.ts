@@ -1,19 +1,14 @@
 import "dotenv/config";
 
 /**
- * Deux modes :
- *
  *   npm run verifier:openrouter                 # vérifie CHALLENGERS + JUGES_CANDIDATS
  *   npm run verifier:openrouter -- --lister     # liste le catalogue OpenRouter
  *
- * En mode `--lister` : ne filtre que les modèles qui supportent les sorties
- * structurées, coupe au-dessus du prix de sortie de Sonnet 5 (la référence),
- * trie par prix de sortie croissant, rend fournisseur + identifiant exact +
- * prix in/out. C'est la liste depuis laquelle le pilote désigne les quatre
- * challengers et le juge candidat.
+ * `--lister` ne garde que les modèles à sorties structurées, pas plus chers que
+ * la référence en entrée ni en sortie, triés par prix de sortie : la liste où
+ * se désignent challengers et juges.
  *
- * L'endpoint `/models` est gratuit et documentaire — aucun des deux modes ne
- * consomme de solde.
+ * L'endpoint `/models` est gratuit : aucun des deux modes ne consomme de solde.
  */
 
 async function main(): Promise<void> {
@@ -62,9 +57,8 @@ async function verifier(): Promise<void> {
   process.exit(1);
 }
 
-/** Les variantes qu'on écarte de la liste : `:free` (rate limité, incomparable),
- * `:batch` (latence à plusieurs heures), `:beta` (versions en changement), et
- * les auto-routers d'OpenRouter (`openrouter/auto…`, prix rendu négatif). */
+/** Écartés : `:free` (débit limité, incomparable), `:batch` (latence en heures),
+ * `:beta` (instable), et les auto-routers (prix rendu négatif). */
 const TAGS_ECARTES = [":free", ":batch", ":beta"];
 function esVariantePratique(id: string): boolean {
   if (id.startsWith("openrouter/auto")) return false;

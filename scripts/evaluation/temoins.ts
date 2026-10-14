@@ -1,21 +1,14 @@
 import type { Passage } from "./rapport-chiffres";
 
 /**
- * Les dépôts du corpus dont on connaît le bon résultat, et lequel.
+ * Les dépôts du corpus dont on connaît le bon compte de concepts.
  *
- * Un banc de vingt-six dépôts se compare mal à l'œil : au passage du 14/08, la
- * comparaison des comptes s'est faite à la main, dans un terminal, et c'est
- * comme ça qu'on a failli conclure que la consigne anti-redondance marchait
- * parce que deux fichiers avaient baissé — pendant que le seul écrit pour
- * l'éprouver montait.
+ * Ce sont des témoins, pas des seuils de qualité : des dépôts écrits pour qu'un
+ * changement précis s'y voie, là où une comparaison à l'œil de tout le banc
+ * tromperait. Un témoin hors de sa fourchette désigne le fichier à ouvrir.
  *
- * Ces attentes ne sont pas des seuils de qualité, ce sont des **témoins** : des
- * dépôts écrits pour qu'un changement précis s'y voie. Un témoin hors de sa
- * fourchette ne condamne rien tout seul, il désigne le fichier à ouvrir.
- *
- * Ils portent tous sur `deriveDe` (doc du 14/08, §2) : chacun contient des
- * concepts qui n'existent qu'en tant qu'exemple ou illustration d'un autre, et
- * le compte attendu est celui qui reste une fois ceux-là rattachés.
+ * Tous portent sur `deriveDe` : le compte attendu est celui qui reste une fois
+ * rattachés les concepts qui ne sont qu'exemple ou illustration d'un autre.
  */
 
 export type Temoin = {

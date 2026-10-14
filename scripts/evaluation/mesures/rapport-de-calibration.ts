@@ -3,19 +3,15 @@ import type { MesuresDuDepot, Paire, Rapproche } from "./signaux";
 import { rendreLesDeciles, rendreLeTableau } from "./tableaux-de-calibration";
 
 /**
- * Le rapport du passage de calibration.
+ * Le rapport du passage de calibration. Aucun seuil n'y est appliqué : il rend
+ * des listes triées pour qu'on voie où la ressemblance s'arrête et qu'on y pose
+ * les planchers à la main, plutôt que de les décider avant de les avoir vus.
  *
- * **Aucun seuil n'y est appliqué, et c'est tout son objet.** Il rend des listes
- * triées pour qu'on regarde où la ressemblance s'arrête, et qu'on y pose des
- * planchers à la main. Les décider avant de les avoir vus reviendrait à inventer
- * la mesure qu'on prétend faire.
- *
- * Ce qu'il montre est borné, et il le dit à chaque fois : une liste de six cents
- * phrases ne se lit pas, mais une liste tronquée en silence se lit « il n'y en
- * avait que dix ». Le compte total accompagne donc chaque extrait.
+ * Chaque extrait est borné et porte le compte total : une liste tronquée en
+ * silence se lirait « il n'y en avait que dix ».
  */
 
-/** Paires montrées en tête de corpus. La fiche en demande cinquante. */
+/** Paires montrées en tête de corpus. */
 const PAIRES_MONTREES = 50;
 
 /** Phrases et concepts montrés par dépôt, les moins couverts d'abord. */

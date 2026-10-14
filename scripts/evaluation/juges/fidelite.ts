@@ -5,24 +5,15 @@ import type { VariantFige } from "../fige";
 import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
 
 /**
- * Le juge de fidélité — un concept, ses questions, sans le dépôt.
+ * Le juge de fidélité : un concept et ses questions, **jamais le dépôt** — ni
+ * concepts voisins, ni tags. Il doit savoir ce que saura la personne qui
+ * révise. Avec le texte sous les yeux, tout se justifie : une réponse-étalon
+ * absente du concept (`banane`, sur `08`) se complète mentalement et passe.
  *
- * C'est la règle absolue de ce juge, et elle vient d'une leçon précise. Avec le
- * dépôt sous les yeux, tout se justifie : c'est le mécanisme qui a laissé
- * passer, sur `08`, une question à trou dont la réponse-étalon (`banane`)
- * n'apparaissait pas dans le concept. Un relecteur qui avait le texte l'avait
- * complétée mentalement, et la fixture était devenue légitime rétrospectivement.
+ * La réponse-étalon est jugée au même titre que la question : un `answerKey`
+ * qui s'appuie sur des raisons absentes du concept est une violation.
  *
- * Le juge doit être dans le même état d'information que la personne qui
- * révisera. On lui donne le concept et ses questions, rien d'autre — pas le
- * dépôt, pas les concepts voisins, pas les tags.
- *
- * **La réponse-étalon fait partie du jugement**, au même titre que la question.
- * Un `answerKey` qui explique par des raisons absentes du concept (les cas `08`
- * et `25`) est une violation, même si la question elle-même paraît sage.
- *
- * Un appel par concept, ses questions groupées. ~65-130 appels Haiku par
- * passage complet, 0,10 à 0,40 $.
+ * Un appel par concept, ses questions groupées.
  */
 
 const verdictQuestion = z.object({
@@ -102,13 +93,7 @@ export function decrireQuestion(variant: VariantFige, rang: number): string {
   return lignes.join("\n");
 }
 
-/**
- * Rend un verdict par question, dans l'ordre.
- *
- * Un concept sans question ne fait pas d'appel. Le juge ne voit que ce qu'il y
- * a à juger, et un rapport écrit « aucune question » ne demande pas de
- * dépenser un centime pour le confirmer.
- */
+/** Rend un verdict par question, dans l'ordre. Un concept sans question ne fait pas d'appel. */
 export async function jugerLaFidelite(
   concept: string,
   variants: VariantFige[],

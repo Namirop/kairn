@@ -7,19 +7,13 @@ import type { Facture } from "./juges";
 import type { ModeleOpenRouter } from "./modeles";
 
 /**
- * La génération de questions servie via OpenRouter — un appel par groupe de
- * concepts (jusqu'à `CONCEPTS_PAR_APPEL`), avec le même prompt que Sonnet.
- * Réservé à la campagne 2, où les deux finalistes doivent tourner sur le même
- * envoi que la référence — sinon on ne compare plus le même travail.
+ * La génération de questions via OpenRouter pour la campagne 2 : même prompt et
+ * même envoi que la référence, sinon on ne compare plus le même travail.
+ * L'emplacement du trou est semé sur le premier concept du groupe, comme dans
+ * `lib/jobs/redaction-questions.ts`.
  *
- * Le contract de génération est dynamique : l'emplacement du texte à trou est
- * décidé par le premier concept du groupe (règle du produit dans
- * `evaluation/execution.ts` du banc, alignée sur `lib/jobs/redaction-questions`).
- *
- * Défaut `reasoning: false` — génération n'est pas une tâche de raisonnement,
- * et le paramètre déclenche 404 chez certains fournisseurs (Mistral au moins,
- * relevé campagne 1). Aucun des finalistes de la campagne 2 n'est un modèle
- * reasoning.
+ * `reasoning: false` par défaut : la génération n'en a pas besoin, et le
+ * paramètre déclenche un 404 chez certains fournisseurs (Mistral).
  */
 
 export type GroupeAGenerer = {

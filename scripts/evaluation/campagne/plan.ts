@@ -7,20 +7,19 @@ import { SYSTEM_RESIDU } from "../juges/residu";
 import type { ModeleOpenRouter } from "../openrouter/modeles";
 
 /**
- * L'estimation par colonne — extraction du challenger + trois juges Haiku sur
- * les signalements que produira cette colonne. Sert au plan à sec (aucun appel)
- * comme au garde-fou de dérive (règle 2× de la campagne).
+ * L'estimation par colonne : extraction du challenger et trois juges sur les
+ * signalements qu'elle produira. Sert au plan à sec (aucun appel) et au
+ * garde-fou de dérive (une colonne qui dépasse 2× son estimation s'arrête).
  *
- * Le proxy est Sonnet : ses tokens d'entrée sont les tokens qu'un challenger
- * verra sur le même texte, ses tokens de sortie sont un ordre de grandeur du
- * volume rendu. Marge d'erreur ~20 % assumée pour un plan à sec ; la facture
- * réelle se lit sur OpenRouter dépôt par dépôt à l'émission.
+ * Le proxy est la référence : mêmes tokens d'entrée qu'un challenger sur le
+ * même texte, ordre de grandeur pour la sortie. Marge d'environ 20 % assumée ;
+ * la facture réelle se lit dépôt par dépôt à l'émission.
  */
 
 const CHARS_PAR_TOKEN = 4;
 /** Approximation surface JSON par item (accolades, guillemets, noms de champs). */
 export const SURCHARGE_JSON_ITEM = 30;
-/** Nombre de paires de doublon par appel juge, voir `PAIRES_PAR_APPEL` dans `doublon.ts`. */
+/** Paires de doublon par appel juge ; doit rester égal à `PAIRES_PAR_APPEL` de `doublon.ts`. */
 export const PAIRES_PAR_APPEL = 20;
 
 export function tok(texte: string): number {
@@ -28,10 +27,9 @@ export function tok(texte: string): number {
 }
 
 /**
- * Structure minimale des verdicts figés — projection assez large pour accepter
- * les fichiers `verdicts/<figé>.json` et `CacheDeMesure` du module de cache.
- * On lit seulement les tailles et les questions du doublon ; le reste n'est
- * regardé que pour compter.
+ * Projection minimale des verdicts figés, assez large pour accepter
+ * `verdicts/<figé>.json` comme le `CacheDeMesure`. Seules les questions du
+ * doublon sont lues ; le reste ne sert qu'à compter.
  */
 export type VerdictsFige = {
   depots: Record<

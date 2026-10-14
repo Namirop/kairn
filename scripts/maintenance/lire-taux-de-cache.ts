@@ -2,22 +2,13 @@ import "dotenv/config";
 import { prisma } from "@/lib/db/client";
 
 /**
- * Lit le taux de cache read sur la période demandée — la question à laquelle
- * il faut répondre une semaine après le passage sur Luna en production.
+ * Le taux de lecture au cache par fournisseur, les bascules Luna → Sonnet et le
+ * coût total sur la période, lus dans `AiCall`.
  *
- * Le portage annonçait −55 à −75 % sur la facture totale contre Sonnet en
- * catalogue, sachant que Sonnet cachait 92 % de son entrée en prod (voir
- * `portage-luna.md`, §4). L'économie réelle dépend du cache OpenAI, qui est
- * automatique mais varie selon le trafic — un préfixe commun à beaucoup de
- * requêtes cache bien, un préfixe rare pas du tout.
- *
- * Ce que ce script rend :
- * - le taux de cache read (cacheReadTokens / entrée totale) par fournisseur
- * - le nombre de bascules Luna → Sonnet
- * - le coût total au registre
- *
- * Aucune décision automatique : on lit, on compare à la fourchette annoncée,
- * on ajuste `AI_FOURNISSEUR` si Luna ne tient pas ses promesses.
+ * L'économie de Luna contre Sonnet (−55 à −75 % annoncés) dépend du cache
+ * OpenAI, automatique mais sensible au trafic : un préfixe rare ne cache pas.
+ * Aucune décision automatique : on lit, on compare, on ajuste `AI_FOURNISSEUR`
+ * à la main.
  *
  *   npm run lire:cache               # 7 derniers jours
  *   npm run lire:cache -- --jours=30 # 30 derniers jours

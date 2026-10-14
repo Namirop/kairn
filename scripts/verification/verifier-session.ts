@@ -10,9 +10,9 @@ import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
  * repousse au lieu de supprimer, et le signal de maîtrise ne se lève que sur
  * une série qui accélère.
  *
- * Les passages sont écrits par le chemin réel — lecture de session, puis
- * `enregistrerRevision`. Aucun appel modèle n'est nécessaire : le moteur ne
- * dépend pas du modèle, et c'est justement ce que cette phase doit démontrer.
+ * Les passages suivent le chemin réel (lecture de session, puis
+ * `enregistrerRevision`). Le moteur ne doit pas dépendre du modèle : tout appel
+ * sortant vers un fournisseur est piégé et compté comme un échec.
  *
  *   npm run verifier:session
  */
@@ -32,19 +32,14 @@ globalThis.fetch = function fetchPiege(input: RequestInfo | URL, init?: RequestI
 const IDENTIFIANT = "verification-session";
 
 /**
- * L'entraînement tire dans tous les concepts du compte, sans regarder aucune
- * échéance. Il lui faut donc son propre compte : sur celui des autres cas, il
- * piocherait dans les concepts qu'ils viennent d'écrire et on ne saurait plus
- * ce qu'on mesure.
+ * L'entraînement tire dans tous les concepts du compte, sans échéance : il a
+ * son propre compte pour ne pas piocher dans ceux des autres cas.
  */
 const ENTRAINEMENT = "verification-entrainement";
 
 /**
- * La règle centrale du produit, vérifiée sur le schéma lui-même.
- *
- * Un intervalle, une difficulté ou une échéance posés sur `Variant` seraient un
- * bug d'architecture, pas un raccourci : la planification porte sur l'Atom. Une
- * relecture attentive laisse passer ce genre de champ ; une assertion non.
+ * La règle centrale du produit, vérifiée sur le schéma : la planification porte
+ * sur l'Atom, jamais sur `Variant`.
  */
 function verifierQueLaVarianteNePlanifiePas(): void {
   const schema = readFileSync("prisma/schema/learning.prisma", "utf8");
@@ -84,15 +79,10 @@ function fichiersDActions(dossier: string): string[] {
 }
 
 /**
- * Un fichier `"use server"` n'exporte que des fonctions async.
- *
- * Ni TypeScript ni ESLint ne connaissent cette règle : elle appartient à Next, et
- * elle ne se manifeste qu'au moment où le module est atteint depuis un composant
- * client — donc à la compilation, souvent longtemps après l'avoir écrite. Une
- * constante partagée entre l'action et son formulaire est la façon la plus
- * naturelle de tomber dedans, et c'est exactement ce qui est arrivé.
- *
- * Les `export type` sont effacés à la compilation et ne comptent pas.
+ * Un fichier `"use server"` n'exporte que des fonctions async. Règle de Next que
+ * ni TypeScript ni ESLint ne voient, et qui ne casse qu'au build ; le piège
+ * typique est une constante partagée avec le formulaire. Les `export type`,
+ * effacés à la compilation, ne comptent pas.
  */
 function verifierQueLesActionsNExportentQueDesFonctions(): void {
   const fautifs: string[] = [];
@@ -149,8 +139,7 @@ async function main(): Promise<void> {
   const utilisateur = await creerCompte(IDENTIFIANT, "Vérification session");
   const entraine = await creerCompte(ENTRAINEMENT, "Vérification entraînement");
 
-  // Un instant fixe : la vérification ne doit pas dépendre de l'heure qu'il est
-  // quand on la lance.
+  // Un instant fixe : la vérification ne dépend pas de l'heure du lancement.
   const maintenant = new Date("2026-06-15T12:00:00Z");
 
   try {
@@ -177,8 +166,8 @@ async function main(): Promise<void> {
     await administration.casJoursVidesMontres(maintenant);
     await administration.casMoyenneCalculee(utilisateur.id, maintenant);
 
-    // Les réglages posés l'emportent sur l'environnement : un oubli en base ne
-    // salirait pas un test, il ferait dépenser un poste de développement.
+    // Les réglages en base l'emportent sur l'environnement : un reste oublié
+    // ferait dépenser un poste de développement.
     await reglages.casSurchargeEtRetour();
     await reglages.casValeurAbsurdeRefusee();
     await reglages.casSurchargeRattrapeLEnvironnement();
@@ -206,10 +195,8 @@ async function main(): Promise<void> {
     await prisma.aiCall.deleteMany({ where: { userId: { in: comptes } } });
     await prisma.user.deleteMany({ where: { id: { in: comptes } } });
 
-    // Le signalement du cas de suppression survit au compte — c'est ce que le
-    // cas démontre —, donc il survit aussi à la vérification. Sans ce balayage,
-    // chaque exécution en laisse un de plus, détaché, et l'écran interne finit
-    // par compter des signalements qui ne viennent de personne.
+    // Le signalement du cas de suppression survit au compte, c'est ce que le
+    // cas démontre : sans ce balayage, chaque exécution en laisserait un.
     await prisma.signalement.deleteMany({ where: { concept: compte.CONCEPT_EFFACE } });
   }
 }

@@ -7,17 +7,15 @@ import { writeCorpus } from "@/prisma/seed/corpus-writer";
  * Ajoute le dépôt de code à un compte existant, pour regarder le rendu des
  * termes techniques sur de vraies questions.
  *
- * Il ne passe pas par le modèle : les concepts et les questions sont écrits dans
- * `corpus-code.ts`, comme ceux du seed. C'est le seul moyen d'avoir un corpus de
- * code stable — deux générations réelles ne rendraient pas les mêmes questions,
- * et on ne saurait plus si un affichage a changé ou si c'est le texte.
+ * Sans modèle : concepts et questions sont écrits dans `corpus-code.ts`, pour
+ * un corpus stable — deux générations réelles ne rendraient pas les mêmes
+ * questions, et on ne saurait plus si c'est l'affichage ou le texte qui change.
  *
  * Usage : `npm run depot:code -- moi@exemple.fr`
  *
- * Relancé, il remplace le dépôt qu'il avait écrit — reconnu à sa première ligne,
- * sur ce compte-là seulement — pour ne pas empiler les doublons. La première
- * ligne et non le contenu entier : corriger une phrase du corpus ne doit pas
- * laisser derrière lui la version d'avant.
+ * Relancé, il remplace le dépôt qu'il avait écrit sur ce compte, reconnu à sa
+ * première ligne : corriger une phrase du corpus ne doit pas laisser la
+ * version d'avant.
  */
 async function main(): Promise<void> {
   const email = process.argv[2];

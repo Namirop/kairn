@@ -11,33 +11,21 @@ import {
 import { conceptsQuestionnables, estimerColonne } from "./campagne/plan-questions";
 
 /**
- * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
- * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
- * « Les commandes retirées ».
+ * Le plan à sec de la campagne 2 (close, sans commande : voir
+ * `docs/outillage.md`, « Les commandes retirées »). N'émet aucun appel.
+ *
+ * Protocole :
+ * 1. La colonne de référence (Sonnet) n'est pas rejouée : ses questions et ses
+ *    verdicts de fidélité sont déjà au figé et dans `verdicts/`.
+ * 2. Un budget de sortie unique, `BUDGET_SORTIE_CAMPAGNE` : un modèle qui
+ *    déborde compte comme échec de schéma.
+ * 3. Radotage, cible vrai/faux et couverture des formats sont géométriques :
+ *    pas de juge, pas de dépense.
+ *
+ * Tokens estimés à chars/4 pour le français, marge ~20 %.
  */
 
-/**
- * Le plan à sec de la campagne 2 — génération de questions sur les concepts
- * figés du 11h58, par les deux finalistes désignés à l'arrêt 2 de la campagne
- * 1 (Gemini 3.7 Flash et GPT-5.6 Luna), puis juge Haiku via OpenRouter pour
- * la fidélité.
- *
- * Trois rappels affichés en tête, non négociables :
- *
- * 1. **La colonne de référence questions n'est pas rejouée.** Le figé `11h58`
- *    porte les questions de Sonnet ; les verdicts fidélité Haiku existent déjà
- *    dans `verdicts/2026-08-20-11h58.json` — pas de rejeu, on lit.
- * 2. **Budget de sortie unique** : `BUDGET_SORTIE_CAMPAGNE` tokens par appel,
- *    même barre que Sonnet. Un modèle qui déborde est compté comme échec de
- *    schéma, comme à la campagne 1.
- * 3. **Radotage, cible vrai/faux, couverture des formats** sont des mesures
- *    géométriques ou internes — pas de juge LLM, pas de dépense.
- *
- * Aucun appel n'est émis. Ce script lit le figé et rend les colonnes chiffrées.
- * L'estimation utilise la règle chars/4 pour le français — marge ~20 % assumée.
- */
-
-/** Les finalistes de l'arrêt 2 (2026-08-24) — désignés par leur identifiant. */
+/** Les finalistes désignés à l'arrêt 2. */
 const FINALISTES_IDS = new Set(["google/gemini-3.7-flash", "openai/gpt-5.6-luna"]);
 
 function finalistes(): ModeleOpenRouter[] {
@@ -69,7 +57,7 @@ async function main(): Promise<void> {
   if (!cheminFige) throw new Error("Aucun figé disponible.");
   const fige = lireFige(cheminFige);
 
-  // Concepts questionnables par dépôt (uncertain écartés selon la nature).
+  // Les `uncertain` s'écartent selon la nature du dépôt.
   const parDepot = fige.depots.map((d) => ({
     nom: d.nom,
     questionnables: conceptsQuestionnables(d),
@@ -96,7 +84,6 @@ async function main(): Promise<void> {
     `|:---------------------|---------------:|:---------------------------------|:---------------------------------|-------:|`,
   );
 
-  // Ligne référence : rappel non facturé
   const prixRef = `${REFERENCE.prixInParM}/${REFERENCE.prixOutParM}`;
   console.info(
     `| ${(REFERENCE.nom + " (référence)").padEnd(20)} | ${prixRef.padStart(14)} |     colonne déjà payée au figé |     verdicts fidélité déjà rendus |   0 $  |`,

@@ -7,28 +7,18 @@ import { PIERRES_DENSE, COTE_DU_POINT, pierreDuPoint } from "@/lib/design/marque
 import { symboleSeul } from "@/lib/design/symbole-svg";
 
 /**
- * Les trois variantes de la marque, en images, pour les usages hors application.
+ * Les trois variantes de la marque en images, pour les usages hors application
+ * (`npm run exporter:marque`). L'application ne les sert jamais : elle rend le
+ * composant.
  *
- * `npm run exporter:marque`. Ce sont des fichiers de référence : ce qu'on joint à un
- * magasin d'applications, ce qu'on colle dans une présentation, ce qu'on regarde
- * pour juger. L'application, elle, ne les sert jamais — elle rend le composant.
+ * Le mot demande une police, donc le moteur de rendu de Next, avec la fonte
+ * lue dans le dépôt et embarquée.
  *
- * Le symbole sort de la même géométrie que tout le reste. Le mot, lui, demande une
- * police, donc le moteur de rendu de Next : la fonte est lue dans le dépôt et
- * embarquée, et le rendu est le même partout.
- *
- * **La pierre du i n'est pas placée à l'estime.** Un premier jet la posait à une
- * fraction de la largeur du mot, relevée sur les avances des glyphes : elle
- * tombait à côté du fût, et la corriger à l'œil aurait donné un nombre juste pour
- * une taille et faux pour les autres.
- *
- * Elle est donc **mesurée par le moteur lui-même**. Le mot visible reste un seul
- * bloc de texte, pour que le crénage soit celui de la police ; par-dessus, une
- * copie invisible de « Ka » et du « ı » sert de gabarit, et la pierre se centre
- * dans la boîte du second. Ce sont les mêmes glyphes dans la même fonte : la
- * largeur du gabarit est exactement celle du mot en dessous, et le placement est
- * le même que celui du composant — au milieu de la boîte du `ı` — sans aucun
- * nombre à régler.
+ * La pierre du i est placée par le moteur, pas par un nombre réglé à l'œil
+ * (juste pour une taille, faux pour les autres). Le mot visible reste un seul
+ * bloc, pour garder le crénage de la police ; par-dessus, un gabarit invisible
+ * « Ka » + « ı » dans la même fonte, et la pierre se centre dans la boîte du
+ * `ı`, comme dans le composant.
  */
 
 /** Les mêmes mesures que le composant, en parts de corps. */
@@ -67,9 +57,8 @@ function symboleEnImage(clair: boolean, hauteur: number): React.ReactElement {
 function pierreEnImage(corps: number): React.ReactElement {
   const cote = COTE_DU_POINT;
   const largeur = Math.round(corps * LARGEUR_DE_LA_PIERRE_EM);
-  // Les dimensions sont écrites dans le SVG **et** sur l'image : ce moteur ne
-  // déduit pas de proportion intrinsèque d'une `viewBox`, et sans elles la pierre
-  // s'étirait en une écharde verticale.
+  // Les dimensions sont écrites dans le SVG et sur l'image : ce moteur ne déduit
+  // pas de proportion d'une `viewBox`, et la pierre s'étirerait verticalement.
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${largeur}" height="${largeur}" viewBox="${-cote / 2} ${-cote / 2} ${cote} ${cote}"><path d="${pierreDuPoint()}" fill="${LICHEN}"/></svg>`;
 
   return (
@@ -108,9 +97,8 @@ function mot(ton: Ton, avecPierre: boolean): React.ReactElement {
     <div style={{ display: "flex", position: "relative" }}>
       <div style={corpsDuMot(ton.encre)}>Kaırn</div>
 
-      {/* Le gabarit : les mêmes glyphes, transparents, superposés au mot. Sa
-          largeur est donc celle du mot, et la boîte du `ı` tombe pile sur le fût
-          qu'on voit dessous. */}
+      {/* Le gabarit : les mêmes glyphes, transparents, superposés au mot ; la
+          boîte du `ı` tombe pile sur le fût visible. */}
       <div style={{ position: "absolute", left: 0, top: 0, display: "flex" }}>
         <div style={{ ...corpsDuMot("transparent"), display: "flex" }}>Ka</div>
         <div style={{ position: "relative", display: "flex" }}>

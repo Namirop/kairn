@@ -2,24 +2,16 @@ import type { Vecteur } from "./espace";
 import { cosinus } from "./geometrie";
 
 /**
- * L'épreuve de l'instrument par ablation.
+ * L'épreuve de l'instrument par ablation : on retire un concept d'un dépôt et
+ * on regarde si les phrases qui s'appuyaient sur lui tombent sous le plancher.
+ * Sinon, la couverture ne mesure pas la couverture.
  *
- * Avant de croire un chiffre, on prouve que la mesure réagit à ce qu'elle
- * prétend mesurer. Le test est direct : **on retire un concept d'un dépôt et on
- * regarde si les phrases qui s'appuyaient sur lui tombent sous le plancher.**
- * Si elles ne tombent pas, la couverture ne mesure pas la couverture, et les
- * quarante-trois manques signalés ne valent rien.
+ * Il faut les deux lectures :
+ * - sur un dépôt sain, un retrait doit découvrir des phrases ;
+ * - sur un dépôt à jumeaux, retirer un jumeau ne doit pas en découvrir, son
+ *   double les couvre. Ce contrôle négatif valide aussi le signal de doublon.
  *
- * Deux lectures, opposées, et il faut les deux :
- *
- * - sur un dépôt sain, un retrait **doit** découvrir des phrases. Chaque concept
- *   y porte quelque chose, donc son absence doit se voir.
- * - sur un dépôt à jumeaux, retirer un jumeau **ne doit pas** en découvrir : son
- *   double couvre les mêmes phrases. Ce contrôle négatif valide du même coup le
- *   signal de doublon — c'est la même géométrie vue de l'autre côté.
- *
- * Coût zéro : rien n'est plongé ici, tout vient du cache. Les vecteurs sont
- * déterministes, donc l'épreuve se rejoue autant qu'on veut.
+ * Coût zéro : tout vient du cache de vecteurs, déterministe.
  */
 
 export type PhraseDecouverte = { texte: string; avant: number; apres: number };
@@ -32,15 +24,10 @@ export type Retrait = {
   /** Phrases dont ce concept était le plus proche — celles qu'il portait. */
   portees: number;
   /**
-   * La plus forte chute de couverture causée par ce retrait, franchissement du
-   * plancher ou non.
-   *
-   * C'est ce chiffre qui rend un « zéro découverte » interprétable, et sans lui
-   * l'épreuve ne conclut rien. Une chute de 0,85 à 0,72 dit que la mesure a
-   * parfaitement réagi et que le plancher est simplement plus bas que l'écart ;
-   * une chute de 0,85 à 0,84 dit que deux concepts sont interchangeables aux
-   * yeux de la géométrie. Les deux rendent « aucune phrase découverte », et il
-   * ne faut surtout pas les confondre.
+   * La plus forte chute de couverture causée par ce retrait, plancher franchi
+   * ou non. C'est elle qui rend un « zéro découverte » lisible : 0,85 → 0,72
+   * dit que la mesure a réagi sous un plancher plus bas ; 0,85 → 0,84 dit que
+   * deux concepts sont interchangeables pour la géométrie.
    */
   chuteMaximale: PhraseDecouverte | null;
 };
@@ -55,11 +42,8 @@ export type Ablation = {
 };
 
 /**
- * La matrice des proximités, phrases en lignes, concepts en colonnes.
- *
- * Calculée une fois pour toutes : chaque retrait n'est plus qu'un maximum pris
- * sur les colonnes restantes, et l'épreuve entière tient en quelques
- * millisecondes même sur le dépôt à vingt concepts.
+ * Les proximités, phrases en lignes, concepts en colonnes. Calculées une fois :
+ * chaque retrait n'est plus qu'un maximum sur les colonnes restantes.
  */
 function matrice(
   segments: string[],
@@ -110,16 +94,13 @@ export function eprouverParAblation(
 
       const apres = maximumSauf(ligne, colonne);
 
-      // Retirer le dernier concept d'un dépôt ne prouve rien : il ne reste
-      // aucune cible, et la phrase ne « tombe » pas, elle n'a plus d'espace.
+      // Retirer le seul concept ne prouve rien : il ne reste aucune cible.
       if (apres === null) return;
 
       const chute = { texte: segment, avant: proximiteAvant, apres };
 
-      // Ce concept portait la phrase si c'est lui qui donnait le maximum : sans
-      // lui, le maximum baisse. L'égalité stricte suffit — deux concepts à la
-      // même distance au flottant près ne se départagent pas, et compter les
-      // deux serait moins faux que d'en compter un au hasard.
+      // Ce concept portait la phrase si, sans lui, le maximum baisse. Deux
+      // concepts exactement à égalité ne la portent donc ni l'un ni l'autre.
       if (apres < proximiteAvant) {
         portees += 1;
 
@@ -131,7 +112,7 @@ export function eprouverParAblation(
         }
       }
 
-      // Une phrase déjà sous le plancher ne peut rien révéler : elle y était.
+      // Une phrase déjà sous le plancher ne peut rien révéler.
       if (proximiteAvant >= plancher && apres < plancher) decouvertes.push(chute);
     });
 

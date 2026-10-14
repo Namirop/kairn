@@ -64,11 +64,8 @@ async function cliquerLePremier(page: Page, libelles: string[]): Promise<boolean
 }
 
 /**
- * Répond à toutes les questions dues jusqu'à la fin de session.
- *
- * La session de démo ne sert que des textes à trou et des vrai/faux : on remplit
- * ou on choisit, puis on enchaîne. On note souvent faux à dessein — peu importe,
- * on veut atteindre l'écran de fin, pas un score.
+ * Répond à toutes les questions dues jusqu'à l'écran de fin. La session de démo
+ * ne sert que des textes à trou et des vrai/faux ; le score importe peu.
  */
 export async function deroulerLaSession(page: Page): Promise<void> {
   await aller(page, "/reviser");

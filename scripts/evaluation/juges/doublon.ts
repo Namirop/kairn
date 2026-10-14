@@ -5,36 +5,23 @@ import type { Paire } from "../mesures/signaux";
 import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
 
 /**
- * Le juge du doublon — le troisième juge, ajouté à l'arrêt 1.
+ * Le juge du doublon : deux concepts au-dessus du plancher disent-ils la même
+ * affirmation, ou seulement le même sujet ? La géométrie ne sépare pas : la
+ * paire la plus proche du corpus (0,810 sur `05`) porte deux affirmations
+ * contraires, et les jumeaux de `15` sont dessous, à 0,768.
  *
- * Il tranche ce que la géométrie ne sait pas trancher : deux concepts au-dessus
- * du plancher disent-ils la même affirmation, ou seulement le même sujet ? Le
- * premier relevé du 18 août avait prouvé que la paire la plus proche du corpus
- * (0,810 sur `05`) portait deux affirmations contraires, et que les jumeaux de
- * `15` plafonnaient à 0,768 en dessous — aucun plancher ne sépare.
- *
- * **La question posée est le test d'indépendance du produit lui-même**, celui
- * que le prompt d'extraction énonce déjà sans savoir se l'appliquer :
- *
- *   Quelqu'un qui connaît A mais ignore B : reste-t-il une question à lui poser
- *   sur B, sur laquelle il pourrait se tromper ? Et dans l'autre sens ?
- *
- * Cette formulation sépare correctement les trois familles du relevé : les
- * contradictoires sont indépendants (connaître le verrou ne dit rien de
- * l'interruption — il reste une question), les concepts distincts d'un même
- * sujet aussi, les jumeaux et la règle-plus-instance ne le sont pas.
+ * La question posée est le test d'indépendance du prompt d'extraction : qui
+ * connaît A mais ignore B, reste-t-il une question sur B où il pourrait se
+ * tromper ? Et dans l'autre sens ?
  */
 
 export const SENS_DOUBLON = ["A_couvre_B", "B_couvre_A", "equivalents"] as const;
 
 /**
- * La restructuration du 20 août : le juge n'écrit plus « independants oui/non »
- * ni son motif, il écrit les **deux questions concrètes** qui subsistent. Le
- * serveur en déduit l'indépendance et le sens. La leçon des mesures précédentes :
- * demander un verdict qualifié laisse le juge argumenter pour son biais (« B est
- * une instance de A », « connaître A entraîne B »). Lui demander la question
- * concrète l'oblige à la formuler — s'il ne la trouve pas, c'est qu'elle
- * n'existe pas ; s'il la trouve, il ne peut plus la nier.
+ * Le juge écrit les deux questions concrètes qui subsistent, et le serveur en
+ * déduit l'indépendance et le sens. Un verdict qualifié laisse le juge
+ * argumenter pour son biais ; une question à formuler, il doit la trouver ou
+ * reconnaître qu'elle n'existe pas.
  */
 const paireLue = z.object({
   numero: z.number().int().describe("Le numéro de la paire jugée, tel que présenté (### Paire N)."),
@@ -71,10 +58,7 @@ const doublonValidation = sortieLue;
 
 /**
  * `independants: null` = abstention (paire non rendue par le juge). Voir `residu.ts`.
- *
- * `questionSurA` et `questionSurB` sont ce que le juge a rendu tel quel. Les
- * champs `independants` et `sens` sont dérivés : le serveur les calcule à partir
- * des questions, il ne les demande plus.
+ * `independants` et `sens` sont dérivés des deux questions rendues.
  */
 export type VerdictDoublon = {
   independants: boolean | null;
@@ -133,17 +117,14 @@ Chaque paire porte un numéro (### Paire N). **Reporte ce numéro dans le
 verdict.** Un verdict par paire, jamais deux, jamais zéro. Pas d'introduction,
 pas de conclusion.`;
 
-/** Ce qu'on présente au juge pour une paire. `A` et `B` restent stables pour la lecture du motif. */
+/** Ce qu'on présente au juge pour une paire. `A` et `B` restent stables pour lire les questions rendues. */
 export function decrirePaire(paire: Paire, rang: number): string {
   return [`### Paire ${rang + 1}`, `A. ${paire.un}`, `B. ${paire.deux}`].join("\n");
 }
 
 /**
- * Le calcul du verdict à partir des deux questions rendues par le juge, sorti
- * de {@link jugerUnLot} pour être réutilisé par l'adaptateur OpenRouter du
- * banc de comparaison des modèles (`scripts/evaluation/openrouter/juges.ts`).
- * Un seul endroit qui décide comment lire les questions vaut mieux qu'un
- * doublon qui pourrait diverger.
+ * Le verdict déduit des deux questions. Partagé avec l'adaptateur OpenRouter
+ * (`openrouter/juges.ts`) pour qu'une seule lecture des questions existe.
  */
 export function deriverIndependance(
   questionSurABrute: string | null,
@@ -162,20 +143,15 @@ export function deriverIndependance(
 }
 
 /**
- * Combien de paires par appel.
- *
- * Découpé à vingt parce que `23-pave-maximal` porte 63 paires et que la sortie
- * contrainte s'est arrêtée à 57 sur un premier passage à quatre mille tokens :
- * la grammaire trouve un point d'arrêt valide avant d'avoir couvert le lot. Un
- * lot plus court laisse une marge confortable pour chaque motif, et le surcoût
- * est nul — les paires en trop iraient dans un appel supplémentaire au même
- * tarif par paire. Voir §4 de la fiche instrument.
+ * Combien de paires par appel. Sur les 63 paires de `23-pave-maximal`, la
+ * sortie contrainte s'est arrêtée à 57 : la grammaire trouve un point d'arrêt
+ * valide avant la fin du lot. Vingt laisse de la marge, sans surcoût par paire.
  */
 const PAIRES_PAR_APPEL = 20;
 
 /**
- * Combien d'appels le juge fera pour un dépôt donné. Exporté pour le plan
- * chiffré : `mesurer-le-corpus.ts` en a besoin avant d'émettre.
+ * Combien d'appels le juge fera pour un dépôt donné, pour chiffrer le plan avant
+ * d'émettre (`compterLesAppelsDesJuges`, `campagne/execution.ts`).
  */
 export function appelsPour(paires: number): number {
   return Math.ceil(paires / PAIRES_PAR_APPEL);
@@ -220,11 +196,8 @@ async function jugerUnLot(nom: string, paires: Paire[]): Promise<VerdictDoublon[
 }
 
 /**
- * Rend un verdict par paire soumise, dans l'ordre.
- *
- * Découpé en lots de {@link PAIRES_PAR_APPEL} paires par appel — voir la
- * constante pour la raison. Un dépôt sans paire ne fait aucun appel : le juge
- * ne voit que ce qu'il y a à juger.
+ * Rend un verdict par paire soumise, dans l'ordre, par lots de
+ * {@link PAIRES_PAR_APPEL}. Un dépôt sans paire ne fait aucun appel.
  */
 export async function jugerLesDoublons(nom: string, paires: Paire[]): Promise<VerdictDoublon[]> {
   const verdicts: VerdictDoublon[] = [];

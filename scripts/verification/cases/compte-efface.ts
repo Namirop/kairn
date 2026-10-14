@@ -11,30 +11,17 @@ import { fabriquerConcept } from "./abus-fabrique";
 import { record } from "./journal";
 
 /**
- * Ce qu'il reste d'un compte effacé, et ce qu'il ne doit plus rester.
- *
- * La suppression tient dans une seule instruction : ce sont les cascades du
- * schéma qui font le travail. C'est exactement pour ça qu'elle mérite une
- * vérification — le jour où une table s'ajoute avec un `userId` et un
- * `onDelete` mal choisi, rien ne le dira, et des données personnelles
- * survivront à une demande d'effacement.
- *
- * La liste des tables n'est donc pas écrite ici : elle est **relue dans le
- * schéma** à chaque exécution. Une table neuve entre dans la vérification sans
- * que personne n'ait à y penser.
+ * Ce qu'il reste d'un compte effacé. La suppression repose sur les cascades du
+ * schéma : une table neuve avec un `userId` et un mauvais `onDelete` laisserait
+ * survivre des données personnelles sans que rien ne le dise. La liste des
+ * tables est donc relue dans le schéma à chaque exécution.
  */
 
 /**
- * Les trois tables qui survivent volontairement, détachées de leur auteur.
- *
- * La comptabilité d'un appel déjà payé ne s'efface pas avec la personne qui l'a
- * déclenché ; un signalement porte une question à corriger et non une identité ;
- * un retour porte un défaut du produit, et l'effacer avec le compte perdrait le
- * travail restant au moment même où quelqu'un part. Dans les trois cas le lien
- * tombe à nul — c'est ce que la vérification exige.
- *
- * La capture d'un retour, elle, est effacée avant la suppression. Voir
- * `supprimerLeCompte`.
+ * Les tables qui survivent volontairement, lien vers l'auteur mis à nul : un
+ * appel payé reste en comptabilité, un signalement et un retour portent un
+ * défaut du produit, pas une identité. La capture d'un retour, elle, est
+ * effacée (voir `supprimerLeCompte`).
  */
 const DETACHES = new Set(["AiCall", "Retour", "Signalement"]);
 
@@ -61,13 +48,9 @@ function modelesAvecUserId(): { nom: string; cascade: boolean }[] {
 }
 
 /**
- * Combien de lignes de cette table portent encore ce compte.
- *
- * Le comptage passe par SQL et non par le client typé : les noms de tables sont
- * découverts à l'exécution, et le seul moyen de les adresser par le client
- * serait une assertion de type — que ce projet interdit, à raison. Les noms
- * viennent du schéma du dépôt et jamais d'une entrée : il n'y a rien à injecter
- * ici, seulement une table dont on ignorait le nom en écrivant ce fichier.
+ * Combien de lignes de cette table portent encore ce compte. En SQL brut parce
+ * que les tables sont découvertes à l'exécution : le client typé exigerait une
+ * assertion de type. Les noms viennent du schéma du dépôt, jamais d'une entrée.
  */
 async function compterPour(table: string, userId: string): Promise<number> {
   const lignes = await prisma.$queryRawUnsafe<{ lignes: bigint }[]>(
@@ -79,15 +62,10 @@ async function compterPour(table: string, userId: string): Promise<number> {
 }
 
 /**
- * Le libellé du concept que ce cas fabrique, et la seule prise qu'on ait sur ce
- * qu'il laisse derrière lui.
- *
- * Le signalement écrit ici **survit volontairement** à la suppression du compte
- * — c'est ce que le cas vérifie. Mais survivre à la suppression du compte veut
- * dire survivre à la vérification elle-même : chaque exécution en abandonnait un
- * de plus, détaché de tout, et l'écran d'administration a fini par en compter
- * vingt-six qui ne venaient de personne. Le nettoyage final s'appuie sur ce
- * libellé, et rattrape donc aussi ceux des exécutions passées.
+ * Le libellé du concept fabriqué ici. Le signalement de ce cas survit exprès à
+ * la suppression du compte, donc à la vérification : le nettoyage final de
+ * `verifier-session.ts` le retrouve par ce libellé, sinon chaque exécution en
+ * laisserait un orphelin dans l'écran d'administration.
  */
 export const CONCEPT_EFFACE = "Un concept à effacer";
 
@@ -156,8 +134,8 @@ export async function casSuppressionComplete(userId: string, fuseau: string): Pr
       : `restent : ${survivants.join(", ")}`,
   );
 
-  // Les deux qui survivent doivent survivre **détachées** : une ligne qui garde
-  // le `userId` d'un compte effacé serait une donnée personnelle orpheline.
+  // Les tables qui survivent doivent survivre détachées : un `userId` restant
+  // serait une donnée personnelle orpheline.
   const rattachees: string[] = [];
 
   for (const modele of modeles.filter((candidat) => !candidat.cascade)) {
@@ -209,8 +187,8 @@ export async function casExportComplet(userId: string, fuseau: string): Promise<
     `${donnees?.progression?.xp ?? 0} XP, niveau ${donnees?.progression?.niveau ?? 0}`,
   );
 
-  // Un export qu'on ne peut pas relire n'exerce aucun droit : il doit survivre à
-  // un aller-retour JSON sans perdre sa forme.
+  // Un export qu'on ne peut pas relire n'exerce aucun droit : il doit survivre
+  // à un aller-retour JSON.
   const relu: unknown = JSON.parse(JSON.stringify(donnees));
 
   record(

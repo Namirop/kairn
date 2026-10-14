@@ -2,23 +2,17 @@ import { lireLeCatalogue } from "./catalogue";
 import type { ModeleOpenRouter } from "./modeles";
 
 /**
- * Vérification du listing OpenRouter, à faire au démarrage de tout script de
- * campagne. Refuser tout de suite plutôt qu'au milieu d'un passage.
+ * Vérification du listing OpenRouter au démarrage de tout script de campagne,
+ * pour refuser avant le premier appel plutôt qu'au milieu d'un passage.
+ * Trois motifs de refus :
  *
- * Trois vérifications, chacune est un motif de refus :
+ * - le modèle a disparu du listing (renommé, retiré) ;
+ * - il ne supporte pas les sorties structurées : la grammaire ne contraindrait
+ *   plus la génération, et la mesure deviendrait inhomogène ;
+ * - son prix s'écarte de plus de 5 % de celui épinglé : la règle de coût se lit
+ *   en pourcentages.
  *
- * - le modèle existe : un identifiant tombé du listing depuis la fiche
- *   (fournisseur qui renomme, modèle retiré) empêche la campagne, autant le
- *   savoir tout de suite ;
- * - le modèle supporte les sorties structurées : sans elles, la grammaire ne
- *   contraint plus la génération, la mesure devient inhomogène. La fiche le
- *   dit : c'est un critère de sélection en amont, pas une correction en aval ;
- * - le prix du listing correspond au prix connu de la fiche à 5 % près : un
- *   écart plus grand signale que le catalogue a bougé sans qu'on l'ait vu, et
- *   les seuils de la règle §5 se lisent en pourcentages.
- *
- * L'endpoint `/models` d'OpenRouter est gratuit et documentaire — cette
- * vérification ne consomme pas de solde.
+ * L'endpoint `/models` est gratuit : la vérification ne consomme pas de solde.
  */
 
 const ECART_PRIX_TOLERE = 0.05;
@@ -34,8 +28,8 @@ export type Refus = {
 };
 
 /**
- * Renvoie la liste des modèles refusés — vide si tout va bien. Le script
- * appelant décide s'il s'arrête ou continue avec un sous-ensemble.
+ * Les modèles refusés, vide si tout va bien. L'appelant décide s'il s'arrête
+ * ou continue avec un sous-ensemble.
  */
 export async function verifierLeListing(modeles: ModeleOpenRouter[]): Promise<Refus[]> {
   const catalogue = await lireLeCatalogue();

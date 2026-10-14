@@ -1,33 +1,22 @@
 /**
- * Le modèle des juges, et ce qu'on lui accorde.
+ * Le modèle des juges : Haiku, pas le modèle d'extraction. Un juge ne cherche
+ * ni ne compose, il tranche sur un candidat déjà trouvé ; Sonnet coûterait
+ * trois fois plus pour la même réponse.
  *
- * Haiku, et non le modèle d'extraction. Ce ne sont pas des tâches de même
- * nature : un juge reçoit un candidat déjà trouvé et rend un booléen avec un
- * motif court. Il ne cherche pas, il ne compose pas, il tranche. Faire tourner
- * ça sur Sonnet coûterait trois fois plus pour la même réponse.
+ * Son nom est écrit dans chaque rapport : un verdict ne vaut rien si l'on
+ * ignore qui l'a rendu. Un juge de la même famille reste acceptable parce que
+ * les candidats viennent de la géométrie, sans prior du modèle ; une conclusion
+ * définitive demanderait un juge d'un autre fournisseur.
  *
- * **Le nom est écrit dans chaque rapport**, au même titre que le modèle
- * d'embedding. Un verdict ne veut rien dire si l'on ignore qui l'a rendu, et le
- * jour où l'on conclura définitivement, il faudra refaire un passage avec un
- * juge d'un autre fournisseur. En attendant, un juge de la même famille sur des
- * candidats trouvés par géométrie vaut mieux que pas de mesure : les candidats
- * ne portent aucun prior du modèle, seule la décision finale en porte un.
- *
- * L'alias sans date est délibéré : c'est la clé que connaît le catalogue de
- * tarifs de `lib/domain/tarifs.ts`. Une version datée y tomberait sur le tarif
- * par défaut, le plus cher de la table, et la dépense du banc serait
- * surestimée d'un facteur cinq.
+ * L'alias sans date est la clé du catalogue de `lib/domain/tarifs.ts` : une
+ * version datée tomberait sur le tarif par défaut, cinq fois plus cher.
  */
 export const MODELE_DES_JUGES = "claude-haiku-4-5";
 
 /**
- * De quoi rendre un verdict par candidat sur le plus gros lot.
- *
- * `23-pave-maximal` porte une vingtaine de concepts ; un dépôt peut donc
- * présenter autant de candidats au même juge, chacun avec son motif. Le corpus
- * n'a pas de texte qui approche le plafond de cinquante — s'il en gagne un, ce
- * budget est le premier à revoir. Explicite, comme
- * partout ailleurs — jamais laissé au défaut du SDK.
+ * De quoi rendre un verdict motivé par candidat sur le plus gros dépôt du
+ * corpus, une vingtaine de concepts (`23-pave-maximal`). Un dépôt qui
+ * approcherait `PLAFOND_CONCEPTS_PAR_DEPOT` (50) obligerait à le revoir.
  */
 export const TOKENS_DES_JUGES = 4000;
 

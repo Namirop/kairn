@@ -6,14 +6,12 @@ import { segmenter } from "./segmentation";
 /**
  * Les quatre signaux, tirés d'une seule passe de vecteurs.
  *
- * Tout se calcule **à l'intérieur d'un dépôt** : comparer une phrase de `18` à
- * un concept de `23` n'a aucun sens, et une moyenne tous dépôts confondus
- * mélangerait des textes qui n'ont rien à voir. Le seul niveau où l'on agrège
- * est le rapport, et il agrège des comptes, pas des distances.
+ * Tout se calcule à l'intérieur d'un dépôt : une distance entre textes de deux
+ * dépôts différents ne veut rien dire. Le rapport agrège des comptes, jamais des
+ * distances.
  *
- * Aucun seuil n'apparaît ici, et c'est le point de l'étape de calibration : ce
- * module rend des listes **triées**, pas des verdicts. Les planchers viendront
- * après qu'on aura regardé les listes, et ils vivront ailleurs.
+ * Aucun seuil ici : ce module rend des listes triées, pas des verdicts. Les
+ * seuils vivent dans `seuils.ts`.
  */
 
 export type Rapproche = { texte: string; voisin: string; proximite: number };
@@ -33,13 +31,8 @@ export type PaireDeQuestions = Paire & {
 };
 
 /**
- * L'état de l'extraction pour ce dépôt.
- *
- * Deux silences très différents à distinguer dans le rapport : un dépôt sans
- * concept parce que le produit l'a rejeté (comportement voulu, motif rendu par
- * l'extraction) vs. un dépôt sans concept parce que l'appel a planté (panne
- * réseau, sortie invalide — reprise consommée sans résultat). Aujourd'hui les
- * deux se lisaient pareil dans la colonne « concepts / candidats ».
+ * L'état de l'extraction pour ce dépôt. Distingue deux silences : un rejet du
+ * produit (voulu, avec motif) et un appel qui a planté (panne, sortie invalide).
  */
 export type EtatDuDepot =
   | { statut: "extrait" }
@@ -61,9 +54,8 @@ export type MesuresDuDepot = {
    * Paires de questions, la plus proche en tête, séparées selon qu'elles
    * viennent d'un même concept ou de deux concepts différents.
    *
-   * `null` quand le figé ne porte pas de questions — les figés antérieurs au
-   * gel des questions. Ce n'est pas « zéro radotage », c'est « pas mesuré », et
-   * le rapport doit pouvoir dire lequel des deux.
+   * `null` quand le figé ne porte pas de questions : « pas mesuré », que le
+   * rapport doit distinguer de « zéro radotage ».
    */
   radotage: { intraLot: PaireDeQuestions[]; interConcepts: PaireDeQuestions[] } | null;
   /** Médianes du dépôt, pour la ligne de tableau. `null` si rien à mesurer. */
@@ -73,10 +65,9 @@ export type MesuresDuDepot = {
 function etatDuDepot(depot: DepotFige): EtatDuDepot {
   if (depot.echec) return { statut: "en-echec", motif: depot.echec.motif };
   if (depot.rejet !== null) return { statut: "rejete", motif: depot.rejet };
-  // Filet : un dépôt sans concept, sans rejet et sans échec est un trou
-  // silencieux — les figés d'avant la persistance d'`echec` en portent (le
-  // 18/08 sur 27 : appel raté sans échec écrit). Il vaut mieux l'annoncer
-  // pour ce qu'il est plutôt que de le lire comme un dépôt extrait.
+  // Sans concept, sans rejet et sans échec : un appel raté dans un figé qui ne
+  // persistait pas encore `echec`. On l'annonce comme tel plutôt que de le lire
+  // comme extrait.
   if (depot.concepts.length === 0) {
     return {
       statut: "en-echec",
@@ -90,17 +81,12 @@ function etatDuDepot(depot: DepotFige): EtatDuDepot {
 type QuestionSituee = { texte: string; concept: number; contexte: ContexteDeQuestion };
 
 /**
- * Le texte à mesurer pour le radotage.
+ * Le texte à mesurer pour le radotage. Pour un CLOZE, la phrase à trou : le
+ * champ `question` n'y porte qu'une consigne générique, et toutes les paires à
+ * 1,000 en venaient.
  *
- * Pour un CLOZE, c'est la **phrase à trou** (`cloze.sentence`), pas le champ
- * `question` — celui-ci porte au mieux une consigne générique (« Complète la
- * phrase du concept. »), au pire un « placeholder » littéral. La preuve : sur
- * le figé du 18/08, les paires inter-concepts à 1,000 étaient toutes des
- * coquilles de ce champ. La charge, elle, est la vraie question.
- *
- * `cloze` est optionnel dans le schéma (les figés d'avant sa persistance n'en
- * portent pas). Sans lui, on retombe sur `question` — la mesure sera bruitée
- * comme avant, mais le rapport le signale par les manquements du banc.
+ * Sans `cloze` (vieux figés), on retombe sur `question` : mesure bruitée, que
+ * le rapport signale par les manquements du banc.
  */
 function texteARadoter(variant: NonNullable<ConceptFige["variants"]>[number]): string {
   if (variant.format === "CLOZE" && variant.cloze) return variant.cloze.sentence;
@@ -196,8 +182,7 @@ export function mesurerLeDepot(
   const concepts = depot.concepts.map((concept) => concept.concept);
   const questions = questionsDuDepot(depot.concepts);
 
-  // Un dépôt rejeté n'a pas de concept : couverture et soutien n'existent pas
-  // pour lui, et `rapprocher` rend une liste vide sans qu'on ait à le dire.
+  // Un dépôt rejeté n'a pas de concept : `rapprocher` rend alors une liste vide.
   const couverture = rapprocher(segments, concepts, vecteur);
   const soutien = rapprocher(concepts, segments, vecteur);
 

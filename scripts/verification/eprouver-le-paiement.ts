@@ -18,11 +18,9 @@ import { conclure, record } from "./cases/journal";
 /**
  * Le parcours de paiement, exercé contre le vrai Stripe en mode test.
  *
- * Ce que les tests unitaires ne peuvent pas prouver : que le catalogue répond,
- * que la session Checkout s'ouvre, que le webhook signé par Stripe traverse
- * notre route, et que ce qui en ressort atterrit dans la bonne colonne. Tout
- * cela tient à des formes d'objets et à des secrets qu'aucune fixture ne
- * vérifie — la seule preuve est un aller-retour réel.
+ * Prouve ce qu'aucune fixture ne vérifie : le catalogue répond, Checkout
+ * s'ouvre, le webhook signé traverse notre route et atterrit dans la bonne
+ * colonne.
  *
  * Il faut un tunnel ouvert dans un autre terminal, sans quoi rien ne revient :
  *
@@ -46,10 +44,9 @@ type Geste = (typeof GESTES)[number];
 type Compte = { id: string; email: string; name: string };
 
 /**
- * Ce script crée des objets chez Stripe et écrit en base. Les deux sont sans
- * conséquence en test, et aucun des deux ne l'est en production — d'où ce refus,
- * qui double celui de `lireConfigDePaiement` : lui protège la clé, celui-ci
- * protège le geste.
+ * Le script crée des objets chez Stripe et écrit en base : sans conséquence en
+ * test, pas en production. Ce refus protège le geste ; `lireConfigDePaiement`
+ * protège la clé.
  */
 function refuserLaProduction(): void {
   if (lireConfigDePaiement().live) {
@@ -89,18 +86,14 @@ async function lireLeCompte(): Promise<Compte> {
   return compte;
 }
 
-/** Ce que le script achète, faute d'indication contraire : la cadence la plus courante. */
+/** Mensuel par défaut, `--annuel` sinon. */
 function lireLaCadence(): CadenceStripe {
   return process.argv.includes("--annuel") ? "year" : "month";
 }
 
 /**
- * Ouvre un paiement, et rend l'adresse où le finir à la main.
- *
- * Le tunnel Checkout ne se traverse pas en ligne de commande, et c'est voulu :
- * la saisie de carte est chez Stripe. Le script s'arrête donc au seuil et rend
- * l'adresse — c'est le navigateur qui fait le reste, comme pour une vraie
- * personne.
+ * Ouvre un paiement et rend l'adresse où le finir à la main : la saisie de
+ * carte se fait chez Stripe, dans le navigateur.
  */
 async function ouvrir(compte: Compte): Promise<void> {
   const cadence = lireLaCadence();
@@ -131,12 +124,9 @@ async function ouvrir(compte: Compte): Promise<void> {
 }
 
 /**
- * Ouvre le portail, et vérifie qu'il ne propose que ce qu'on lui a laissé.
- *
- * Le partage des gestes est une décision de produit — résilier dans Kairn, la
- * carte chez Stripe — et elle vit dans un objet de configuration qui dort chez
- * eux. Rien dans le dépôt ne garantit qu'il n'a pas été modifié depuis le
- * tableau de bord : seule une lecture le dit.
+ * Ouvre le portail et vérifie qu'il ne propose que ce qu'on lui a laissé
+ * (résilier dans Kairn, la carte chez Stripe). Cette configuration vit chez
+ * Stripe et peut changer depuis leur tableau de bord : seule une lecture le dit.
  */
 async function portail(compte: Compte): Promise<void> {
   const adresse = await ouvrirLePortail(compte.id);
@@ -217,13 +207,9 @@ async function main(): Promise<string> {
 }
 
 /**
- * Efface les traces de l'épreuve.
- *
- * L'abonnement est annulé **tout de suite** et non à son terme : un abonnement
- * de test qui court, c'est une facture par mois et autant de webhooks dans les
- * journaux, pour un compte dont plus personne ne s'occupe. Le client Stripe,
- * lui, reste — il ne coûte rien, il porte l'historique, et le code sait le
- * retrouver.
+ * Efface les traces de l'épreuve. L'abonnement est annulé tout de suite, pas à
+ * son terme, pour ne pas laisser courir factures et webhooks de test. Le client
+ * Stripe reste : il ne coûte rien et le code sait le retrouver.
  */
 async function nettoyer(userId: string): Promise<void> {
   const ligne = await prisma.subscription.findUnique({
@@ -232,9 +218,8 @@ async function nettoyer(userId: string): Promise<void> {
   });
 
   if (ligne?.stripeSubscriptionId) {
-    // La fonction de production, et non un `cancel` écrit pour l'occasion :
-    // c'est elle qui coupe l'abonnement quand un compte est supprimé, et c'est
-    // le seul endroit où elle s'exerce contre un vrai abonnement.
+    // La fonction de production, pas un `cancel` ad hoc : c'est le seul endroit
+    // où elle s'exerce contre un vrai abonnement.
     await fermerLAbonnementDuCompte(userId);
 
     const apres = await stripe().subscriptions.retrieve(ligne.stripeSubscriptionId);
