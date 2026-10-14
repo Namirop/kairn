@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState, useCallback, useEffect, useRef, useState } from "react";
+import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { deposerAction, type EtatDepot } from "@/app/(app)/depots/actions";
 import { BoutonDeConsigne, ChampDeConsigne } from "@/components/depots/consigne-du-depot";
 import { ExemplesDeDepot } from "@/components/depots/exemples-de-depot";
-import { reprendreLePartage } from "@/components/depots/partage-recu";
 import { PieceJointe } from "@/components/depots/piece-jointe";
+import { useCaptureDuDepot } from "@/components/depots/use-capture-du-depot";
 import { Button } from "@/components/ui/button";
 import {
   CARACTERES_MAXIMUM,
@@ -14,7 +14,6 @@ import {
   TAILLE_MAXIMALE_OCTETS,
   type TraduireLesRefus,
 } from "@/lib/depots/bornes-du-depot";
-import { reduireLaCapture } from "@/lib/images/reduire-la-capture";
 
 /**
  * Le geste de dépôt : un champ, une pièce jointe facultative, un bouton.
@@ -23,11 +22,8 @@ import { reduireLaCapture } from "@/lib/images/reduire-la-capture";
  * formulaire n'écrivent qu'un dépôt. `useId()` ne convient pas, il rend la même
  * valeur à chaque chargement.
  *
- * Un partage du système, rangé par le service worker, est repris ici au montage
- * sans partir tout seul : on relit et on taille avant de déposer.
- *
- * Toute capture (sélecteur ou partage) est réduite avant d'entrer dans l'état :
- * le refus de poids et l'envoi ne voient que l'image qui part vraiment.
+ * La capture, choisie ou apportée par un partage du système, est tenue par
+ * `useCaptureDuDepot`.
  */
 
 /** Au-delà, on montre le compteur : avant, il n'apprend rien à personne. */
@@ -77,54 +73,10 @@ export function FormulaireDepot({
   const tRefus = useTranslations("depots.refus");
   const [etat, action, enCours] = useActionState<EtatDepot, FormData>(deposerAction, {});
   const [texte, setTexte] = useState("");
-  const [capture, setCapture] = useState<File | null>(null);
   const [consigne, setConsigne] = useState("");
   const [consigneOuverte, setConsigneOuverte] = useState(false);
-  const [preparation, setPreparation] = useState(false);
   const [lienSeul, setLienSeul] = useState(false);
-
-  /*
-    Le rang du choix en cours : la réduction prend du temps, et sans lui une
-    première capture pourrait s'installer après la seconde. Une réduction qui
-    n'est plus la dernière demandée est jetée.
-  */
-  const rang = useRef(0);
-
-  const choisirLaCapture = useCallback(async (fichier: File | null) => {
-    const moi = (rang.current += 1);
-
-    if (!fichier) {
-      setCapture(null);
-      setPreparation(false);
-      return;
-    }
-
-    setPreparation(true);
-
-    const reduite = await reduireLaCapture(fichier);
-
-    if (rang.current !== moi) return;
-
-    setCapture(reduite);
-    setPreparation(false);
-  }, []);
-
-  // Le partage attend sur l'appareil ; il est lu une fois, puis effacé.
-  useEffect(() => {
-    let monte = true;
-
-    void reprendreLePartage().then((partage) => {
-      if (!monte || !partage) return;
-
-      setTexte(partage.texte);
-      setLienSeul(partage.lienSeul);
-      void choisirLaCapture(partage.capture);
-    });
-
-    return () => {
-      monte = false;
-    };
-  }, [choisirLaCapture]);
+  const { capture, preparation, choisirLaCapture } = useCaptureDuDepot({ setTexte, setLienSeul });
 
   const refus = refusDuFormulaire(tRefus, etat.erreur, capture, texte, consigne);
 
