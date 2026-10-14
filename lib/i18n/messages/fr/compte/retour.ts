@@ -24,7 +24,7 @@ export const retour = {
   erreurs: {
     sujet: "Choisis de quoi il s'agit avant d'envoyer.",
     longueur: "Écris entre {min} et {max} signes. Même une phrase suffit.",
-    image: "Cette image dépasse 5 Mo. Recadre-la, ou envoie le retour sans elle.",
+    image: "Cette image dépasse 4 Mo. Recadre-la, ou envoie le retour sans elle.",
     plafond: "Tu as envoyé {nombre} retours aujourd'hui. Reviens demain — ils sont lus.",
   },
 };
