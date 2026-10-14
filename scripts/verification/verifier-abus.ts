@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { conclure, record } from "./verification/journal";
-import { versUnFournisseurDeModele } from "./verification/hotes-des-fournisseurs";
+import { conclure, record } from "./cases/journal";
+import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
 
 /**
  * La passe d'audit : abus, quotas, et cycle de vie des concepts.
@@ -37,13 +37,13 @@ async function main(): Promise<void> {
   process.env.MOCK_AI = "true";
 
   const { prisma } = await import("@/lib/db/client");
-  const { creerCompte, effacerComptes } = await import("./verification/abus-fabrique");
-  const cycle = await import("./verification/abus-cycle");
-  const regeneration = await import("./verification/abus-regeneration");
-  const quotas = await import("./verification/abus-quotas");
-  const propriete = await import("./verification/abus-propriete");
-  const global = await import("./verification/abus-plafond-global");
-  const repli = await import("./verification/abus-repli");
+  const { creerCompte, effacerComptes } = await import("./cases/abus-fabrique");
+  const cycle = await import("./cases/abus-cycle");
+  const regeneration = await import("./cases/abus-regeneration");
+  const quotas = await import("./cases/abus-quotas");
+  const propriete = await import("./cases/abus-propriete");
+  const global = await import("./cases/abus-plafond-global");
+  const repli = await import("./cases/abus-repli");
 
   await effacerComptes([COMPTE_A, COMPTE_B]);
 

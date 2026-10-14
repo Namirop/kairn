@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db/client";
 import { demanderDesQuestions } from "@/lib/db/demande-de-questions";
 import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
-import { conclure, record } from "./verification/journal";
+import { conclure, record } from "../verification/cases/journal";
 
 /**
  * Retirer les vrais ou faux qu'on ne sait plus poser, et redemander leur lot.

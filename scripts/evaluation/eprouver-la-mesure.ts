@@ -33,12 +33,12 @@ import { basename, join } from "node:path";
  * Rien n'est plongé : tous les vecteurs viennent du cache. Coût zéro, y compris
  * au vingtième rejeu.
  *
- *   npx tsx scripts/eprouver-la-mesure.ts
- *   npx tsx scripts/eprouver-la-mesure.ts -- --depot 22,26
- *   npx tsx scripts/eprouver-la-mesure.ts -- --fige <chemin>
+ *   npx tsx scripts/evaluation/eprouver-la-mesure.ts
+ *   npx tsx scripts/evaluation/eprouver-la-mesure.ts -- --depot 22,26
+ *   npx tsx scripts/evaluation/eprouver-la-mesure.ts -- --fige <chemin>
  */
 
-const RAPPORTS = join(import.meta.dirname, "evaluation", "rapports");
+const RAPPORTS = join(import.meta.dirname, "rapports");
 
 /**
  * Les témoins de l'épreuve.
@@ -71,12 +71,12 @@ function argument(drapeau: string): string | undefined {
 }
 
 async function main(): Promise<void> {
-  const { dernierFige, lireFige } = await import("./evaluation/fige");
-  const { plonger } = await import("./evaluation/mesures/embeddings");
-  const { eprouverParAblation } = await import("./evaluation/mesures/ablation");
-  const { segmenter } = await import("./evaluation/mesures/segmentation");
-  const { PLANCHER_COUVERTURE } = await import("./evaluation/mesures/seuils");
-  const { rendreLAblation } = await import("./evaluation/mesures/rapport-d-ablation");
+  const { dernierFige, lireFige } = await import("./fige");
+  const { plonger } = await import("./mesures/embeddings");
+  const { eprouverParAblation } = await import("./mesures/ablation");
+  const { segmenter } = await import("./mesures/segmentation");
+  const { PLANCHER_COUVERTURE } = await import("./mesures/seuils");
+  const { rendreLAblation } = await import("./mesures/rapport-d-ablation");
 
   const chemin = argument("--fige") ?? dernierFige();
 

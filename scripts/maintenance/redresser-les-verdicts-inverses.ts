@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { z } from "zod";
 import { prisma } from "@/lib/db/client";
-import { conclure, record } from "./verification/journal";
+import { conclure, record } from "../verification/cases/journal";
 
 /**
  * Remettre à l'endroit les affirmations dont le verdict contredit le texte.

@@ -51,12 +51,6 @@ next-env.d.ts
 /.agents
 /skills-lock.json
 /CLAUDE.md
-# Notes de fonctionnement tenues à la main : elles expliquent des règles que le
-# code porte déjà, elles ne font pas contrat.
-/limites-et-couts.md
-# Corpus de test personnel, tiré de conversations privées. Il était dans
-# `public/`, c'est-à-dire servi en ligne à qui devine son nom.
-/corpus-test-kairn.md
 # Ce qui a servi et ne sert plus : consignes de phase, fiches de chantier closes,
 # brouillons de documents remplacés. Ça dit comment le produit a été construit,
 # pas ce qu'il fait — donc ça reste sur la machine. Un seul dossier, et un seul

@@ -45,11 +45,26 @@ restent tant que le sujet existe. Chez Kairn : `verifier:ai`, `verifier:ingestio
 Une campagne d'évaluation, une migration de fournisseur, un banc de mesure mené une fois. Elles
 servent quelques jours, puis le chantier se ferme.
 
-**Une fois le chantier clos, la commande sort de `package.json`.** Pas le fichier — il reste dans
-`scripts/`, git le garde, et le remettre coûte une ligne. Ce qui sort, c'est la ligne du
+**Une fois le chantier clos, la commande sort de `package.json`.** Le fichier, lui, reste tant
+qu'un chantier du même genre peut le reprendre (une campagne suivante relance les mêmes scripts) ;
+il sort aussi quand plus rien ne le rappellera, et git le garde. Le remettre coûte une ligne. Ce qui sort, c'est la ligne du
 `package.json`, parce que `npm run` doit lister **ce qu'on peut faire aujourd'hui**, pas
 l'archéologie du projet. Une liste de quarante commandes dont dix sont mortes ne se lit plus, et
 la première conséquence est qu'on cesse de la lire — y compris pour les dix qui comptent.
+
+### Où vit chaque script
+
+`scripts/` se range par usage, un dossier par famille. Un script n'est jamais importé par
+l'application.
+
+| Dossier         | Ce qu'il contient                                                                    |
+| --------------- | ------------------------------------------------------------------------------------ |
+| `verification/` | Les vérifications durables, et dans `cases/` les cas et le carnet qu'elles partagent |
+| `evaluation/`   | Le banc d'évaluation des modèles : ses commandes, ses modules, son corpus            |
+| `maintenance/`  | Les réparations de données en production et les lectures de registre                 |
+| `brand/`        | L'export de la marque et des icônes depuis la géométrie du cairn                     |
+| `assets/`       | La banque de captures et de vidéos (voir son `README.md`)                            |
+| `docs/`         | Le contrôle des docs à relire                                                        |
 
 ---
 
@@ -78,7 +93,7 @@ Postgres, et seule une vraie base peut les prouver :
 - supprimer un compte ne doit laisser **aucune ligne** dans **aucune** table.
 
 Ces scripts créent un compte de vérification, jouent le scénario, puis effacent. Ils écrivent leurs
-constats dans un carnet (`scripts/verification/journal.ts`) et concluent d'un bloc : une
+constats dans un carnet (`scripts/verification/cases/journal.ts`) et concluent d'un bloc : une
 vérification se lit d'un coup, pas au fil de l'eau. Chaque constat est formulé comme la règle qu'on
 veut voir tenir — de sorte qu'une ligne en échec soit un **trou**, et non une panne du script.
 
@@ -137,12 +152,12 @@ Quatre commandes restent hors de ces registres parce qu'elles n'en forment pas u
 
 ## Les commandes retirées
 
-Huit commandes sont sorties du `package.json` en application de la règle ci-dessus. **Leurs
-fichiers sont restés dans `scripts/`**, chacun avec une note en tête qui renvoie ici. On les relance
-à la main :
+Six commandes sont sorties du `package.json` en application de la règle ci-dessus. **Leurs
+fichiers sont restés dans `scripts/evaluation/`**, parce qu'une campagne suivante les reprendra.
+On les relance à la main :
 
 ```bash
-npx tsx scripts/<le-fichier>.ts
+npx tsx scripts/evaluation/<le-fichier>.ts
 ```
 
 | Commande retirée                          | Pourquoi                                      |
@@ -150,11 +165,10 @@ npx tsx scripts/<le-fichier>.ts
 | `planifier:campagne`, `lancer:campagne`   | Campagne d'évaluation de modèles n°1, close   |
 | `planifier:campagne2`, `lancer:campagne2` | Campagne n°2, close — le modèle est arbitré   |
 | `valider:juge`                            | Le juge de ces campagnes                      |
-| `valider:staging`, `valider:bascule`      | Portage vers OpenRouter, livré                |
 | `eval:ablation` (`eprouver-la-mesure.ts`) | Épreuve de l'instrument de mesure, concluante |
 
-Ce ne sont pas des suppressions : une campagne suivante remettra ses deux lignes. Ce qui a été
-retiré, c'est leur présence dans une liste qu'on lit pour savoir ce qu'on peut faire aujourd'hui.
+Les deux scripts du portage vers OpenRouter (`valider:staging`, `valider:bascule`) ont été
+supprimés : le portage est livré, et rien ne les rappellera. L'historique git les garde.
 
 ---
 

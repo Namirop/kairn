@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { conclure, record } from "./verification/journal";
-import { versUnFournisseurDeModele } from "./verification/hotes-des-fournisseurs";
+import { conclure, record } from "./cases/journal";
+import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
 
 /**
  * Preuve, à l'exécution, que le moteur de révision tient : une session se joue
@@ -119,15 +119,15 @@ async function main(): Promise<void> {
   process.env.MOCK_AI = "true";
 
   const { prisma } = await import("@/lib/db/client");
-  const session = await import("./verification/session-revision");
-  const signaux = await import("./verification/session-signaux");
-  const fuseaux = await import("./verification/session-fuseaux");
-  const entrainement = await import("./verification/entrainement-etanche");
-  const usure = await import("./verification/regeneration-usee");
-  const phase4 = await import("./verification/progression-et-signalement");
-  const administration = await import("./verification/administration");
-  const reglages = await import("./verification/reglages");
-  const compte = await import("./verification/compte-efface");
+  const session = await import("./cases/session-revision");
+  const signaux = await import("./cases/session-signaux");
+  const fuseaux = await import("./cases/session-fuseaux");
+  const entrainement = await import("./cases/entrainement-etanche");
+  const usure = await import("./cases/regeneration-usee");
+  const phase4 = await import("./cases/progression-et-signalement");
+  const administration = await import("./cases/administration");
+  const reglages = await import("./cases/reglages");
+  const compte = await import("./cases/compte-efface");
 
   const comptes = [IDENTIFIANT, ENTRAINEMENT, "verification-effacement"];
 

@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { jetonsDeLaFeuille } from "./verification/jetons-de-la-feuille";
-import { conclure, record } from "./verification/journal";
+import { jetonsDeLaFeuille } from "./cases/jetons-de-la-feuille";
+import { conclure, record } from "./cases/journal";
 
 /**
  * Les contrastes, mesurés plutôt que regardés.

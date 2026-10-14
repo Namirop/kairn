@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import { appliquerCapDuBanc } from "./evaluation/cap-du-banc";
+import { appliquerCapDuBanc } from "./cap-du-banc";
 
 appliquerCapDuBanc();
 
@@ -28,7 +28,7 @@ appliquerCapDuBanc();
  * précis.
  */
 
-const RAPPORTS = join(import.meta.dirname, "evaluation", "rapports");
+const RAPPORTS = join(import.meta.dirname, "rapports");
 const MAX_CONCEPTS_PAR_DEPOT = 12;
 
 function refuser(motif: string): never {
@@ -57,10 +57,10 @@ async function main(): Promise<void> {
     refuser("les appels au modèle sont coupés (AI_ENABLED=false).");
   }
 
-  const { lireCorpus } = await import("./evaluation/corpus");
-  const { evaluerDepot, rejouerDepot } = await import("./evaluation/execution");
-  const { dernierFige, ecrireFige, lireFige } = await import("./evaluation/fige");
-  const { accorder, rendreRapport, resumeConsole } = await import("./evaluation/rapport");
+  const { lireCorpus } = await import("./corpus");
+  const { evaluerDepot, rejouerDepot } = await import("./execution");
+  const { dernierFige, ecrireFige, lireFige } = await import("./fige");
+  const { accorder, rendreRapport, resumeConsole } = await import("./rapport");
   const { sumAiCalls } = await import("@/lib/db/ai-call");
   const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
 

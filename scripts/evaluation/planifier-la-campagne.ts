@@ -2,12 +2,12 @@ import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { EXTRACT_ATOMS_PROMPT } from "@/lib/ai/prompts";
-import { lireCorpus, type Depot } from "./evaluation/corpus";
-import { dernierFige, lireFige, type DepotFige } from "./evaluation/fige";
-import { SYSTEM_ATTENDUS } from "./evaluation/juges/attendus";
-import { SYSTEM_DOUBLON } from "./evaluation/juges/doublon";
-import { SYSTEM_RESIDU } from "./evaluation/juges/residu";
-import { BANDEAU_DE_CAMPAGNE, BUDGET_SORTIE_CAMPAGNE } from "./evaluation/openrouter/campagne";
+import { lireCorpus, type Depot } from "./corpus";
+import { dernierFige, lireFige, type DepotFige } from "./fige";
+import { SYSTEM_ATTENDUS } from "./juges/attendus";
+import { SYSTEM_DOUBLON } from "./juges/doublon";
+import { SYSTEM_RESIDU } from "./juges/residu";
+import { BANDEAU_DE_CAMPAGNE, BUDGET_SORTIE_CAMPAGNE } from "./openrouter/campagne";
 import {
   /**
    * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
@@ -18,7 +18,7 @@ import {
   JUGE_PRINCIPAL,
   REFERENCE,
   type ModeleOpenRouter,
-} from "./evaluation/openrouter/modeles";
+} from "./openrouter/modeles";
 
 /**
  * Le plan à sec de la campagne 1 — extraction seule des quatre challengers

@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { conclure, expectFailure, record } from "./verification/journal";
-import { versUnFournisseurDeModele } from "./verification/hotes-des-fournisseurs";
+import { conclure, expectFailure, record } from "./cases/journal";
+import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
 
 /**
  * Preuve, à l'exécution, que les garde-fous d'appel modèle tiennent.
@@ -114,8 +114,7 @@ async function main(): Promise<void> {
     }),
   );
 
-  const { verifierPlafond, verifierPartAnonyme } =
-    await import("./verification/garde-fous-plafond");
+  const { verifierPlafond, verifierPartAnonyme } = await import("./cases/garde-fous-plafond");
   await verifierPlafond();
   await verifierPartAnonyme();
 

@@ -4,7 +4,7 @@ import { demanderDesQuestions } from "@/lib/db/demande-de-questions";
 import { optionsDUnQCM, texteATrouServi, type VarianteEnBase } from "@/lib/db/question-servie";
 import { optionsDistinguables } from "@/lib/domain/options-de-qcm";
 import { questionServable } from "@/lib/domain/question-servable";
-import { conclure, record } from "./verification/journal";
+import { conclure, record } from "../verification/cases/journal";
 
 /**
  * Retirer les questions que l'écran ne sait pas poser, et redemander leur lot.

@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import { appliquerCapDuBanc } from "./evaluation/cap-du-banc";
+import { appliquerCapDuBanc } from "./cap-du-banc";
 
 appliquerCapDuBanc();
 
@@ -36,7 +36,7 @@ appliquerCapDuBanc();
  * fois. C'est la seule raison de ce mode, et elle n'est pas hypothétique.
  */
 
-const RAPPORTS = join(import.meta.dirname, "evaluation", "rapports");
+const RAPPORTS = join(import.meta.dirname, "rapports");
 
 function refuser(motif: string): never {
   console.error(`La mesure ne démarre pas : ${motif}`);
@@ -51,16 +51,14 @@ function argument(drapeau: string): string | undefined {
 }
 
 async function main(): Promise<void> {
-  const { attendusDuDepot, couvertureDesAttendus, tousLesAttendus } =
-    await import("./evaluation/attendus");
-  const { dernierFige, lireFige } = await import("./evaluation/fige");
-  const { plonger } = await import("./evaluation/mesures/embeddings");
-  const { mesurerLeDepot, textesDuDepot } = await import("./evaluation/mesures/signaux");
-  const { signaler } = await import("./evaluation/mesures/signalements");
-  const { rendreLaCalibration } = await import("./evaluation/mesures/rapport-de-calibration");
-  const { rendreLesMesures } = await import("./evaluation/mesures/rapport-de-mesures");
-  const { compterLesAppelsDesJuges, jugerLesSignalements } =
-    await import("./evaluation/juges/verdicts");
+  const { attendusDuDepot, couvertureDesAttendus, tousLesAttendus } = await import("./attendus");
+  const { dernierFige, lireFige } = await import("./fige");
+  const { plonger } = await import("./mesures/embeddings");
+  const { mesurerLeDepot, textesDuDepot } = await import("./mesures/signaux");
+  const { signaler } = await import("./mesures/signalements");
+  const { rendreLaCalibration } = await import("./mesures/rapport-de-calibration");
+  const { rendreLesMesures } = await import("./mesures/rapport-de-mesures");
+  const { compterLesAppelsDesJuges, jugerLesSignalements } = await import("./juges/verdicts");
 
   const chemin = argument("--fige") ?? dernierFige();
 
@@ -129,7 +127,7 @@ async function main(): Promise<void> {
     `Juges : ${appels.doublon} doublon · ${appels.residu} résidu · ${appels.fidelite} fidélité · ${appels.attendus} attendus — ${total} au total.`,
   );
 
-  const { chargerCache, compterEnCache } = await import("./evaluation/juges/cache");
+  const { chargerCache, compterEnCache } = await import("./juges/cache");
   const dejaEnCache = compterEnCache(chargerCache(chemin));
   const totalEnCache =
     dejaEnCache.doublon + dejaEnCache.residu + dejaEnCache.fidelite + dejaEnCache.attendus;
