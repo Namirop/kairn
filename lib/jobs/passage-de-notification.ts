@@ -4,10 +4,6 @@ import type { NotificationType } from "@/lib/email/notifications";
 /**
  * Ce que tout passage d'envoi partage : son compte rendu, et l'écart de ceux
  * qu'on a déjà notifiés dans leur journée à eux.
- *
- * Extrait quand un troisième passage est arrivé. À deux, la duplication tenait
- * dans un fichier ; à trois, le fichier faisait trois choses — et c'est ce que
- * le compte rendu d'un passage n'a pas à savoir.
  */
 
 export type Passage = {
@@ -24,8 +20,6 @@ export function passage(candidats: number, retenus: number, dejaEnvoyes: number)
 }
 
 /**
- * Écarte ceux qu'on a déjà notifiés dans leur journée à eux.
- *
  * Le jour se lit chez la personne, pas sur le serveur : deux comptes notifiés à
  * la même seconde peuvent ne pas être le même jour.
  */

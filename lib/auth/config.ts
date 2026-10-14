@@ -30,19 +30,12 @@ function socialProviders() {
 export const isGoogleEnabled = Object.keys(socialProviders()).length > 0;
 
 /**
- * Les origines admises en plus de `baseURL` : celle du déploiement courant.
+ * Les origines admises en plus de `baseURL`. Celle du déploiement courant, sans
+ * quoi une preview Vercel refuse toute connexion en 403.
  *
- * Chaque déploiement Vercel porte son propre domaine, et le client vise
- * l'origine de la page. Sans cette ligne, une preview refuse toute connexion en
- * 403 — donc on ne peut pas éprouver une branche avant de la fusionner, ce qui
- * est précisément le moment où l'on voudrait le faire.
- *
- * Ce n'est pas la même chose que d'ajouter `www` à côté de l'apex, et il ne faut
- * surtout pas en conclure qu'on peut. Un cookie de session appartient à l'hôte
- * qui l'a posé : deux hôtes servant le **même** environnement donneraient deux
- * sessions distinctes, et on serait connecté sur l'un en étant déconnecté sur
- * l'autre. Une preview, elle, est un environnement séparé — sa session n'a
- * aucune raison d'être celle de la production.
+ * Ce n'est pas un précédent pour ajouter `www` à côté de l'apex : un cookie de
+ * session appartient à son hôte, et deux hôtes servant le même environnement
+ * donneraient deux sessions distinctes. Une preview est un environnement séparé.
  */
 function trustedOrigins(): string[] {
   const deploiement = process.env.VERCEL_URL;
@@ -51,20 +44,13 @@ function trustedOrigins(): string[] {
 }
 
 /**
- * Les adresses du réseau local, **en développement seulement**.
+ * L'adresse LAN du serveur de dev (`AUTH_ORIGINE_LOCALE`, qui change avec le
+ * réseau), pour tester depuis un téléphone. Sans elle, better-auth répond
+ * « Invalid origin » et l'écran dit « Le code n'a pas pu partir » : la panne
+ * semble venir de l'email.
  *
- * Le serveur de dev écoute aussi sur l'adresse LAN de la machine, et c'est le
- * seul moyen de regarder un écran depuis un téléphone ou un autre poste. Sans
- * cette ligne, better-auth y refuse toute connexion en 403 — « Invalid origin »
- * dans les journaux, « Le code n'a pas pu partir » à l'écran, et on cherche la
- * panne du côté de l'email alors qu'aucun email n'a jamais été demandé.
- *
- * `NODE_ENV` vaut `production` sur Vercel comme dans un build local : la liste
- * y reste donc exactement celle d'avant, et un poste voisin ne peut pas se
- * présenter comme une origine de confiance.
- *
- * `AUTH_ORIGINE_LOCALE` porte l'adresse du moment — elle change avec le réseau,
- * donc elle n'a rien à faire en dur. Absente, rien ne s'ouvre.
+ * `NODE_ENV` vaut `production` sur Vercel comme dans un build local : aucun
+ * poste voisin n'y devient une origine de confiance.
  */
 function originesDuReseauLocal(): string[] {
   if (process.env.NODE_ENV === "production") return [];
@@ -79,21 +65,13 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
   trustedOrigins: trustedOrigins(),
-  // Plus de mot de passe, nulle part. Kairn écrit tous les jours : l'adresse
-  // doit être valide et vérifiée dès le premier jour, et un code reçu par email
-  // le garantit par construction là où un mot de passe demande une étape de
-  // vérification séparée qu'on repousse toujours. Ça supprime au passage tout le
-  // code de réinitialisation, et la surface d'attaque qui va avec.
+  // Pas de mot de passe : Kairn écrit tous les jours, l'adresse doit être
+  // vérifiée dès le premier, et un code reçu par email le garantit par
+  // construction.
   emailAndPassword: { enabled: false },
 
-  /**
-   * Une session dure un mois et se renouvelle à l'usage.
-   *
-   * Quelqu'un qui vient tous les jours ne doit jamais se reconnecter : chaque
-   * visite repousse l'échéance, et seul un mois complet d'absence la fait
-   * expirer. C'est ce qui rend un produit quotidien supportable — redemander un
-   * code par email toutes les semaines ferait abandonner.
-   */
+  // Un mois, repoussé à chaque visite : un usage quotidien ne doit jamais
+  // redemander de code.
   session: {
     expiresIn: 60 * 60 * 24 * 30,
     updateAge: 60 * 60 * 24,
@@ -114,19 +92,13 @@ export const auth = betterAuth({
           // navigateur. Par Google comme par code, la requête porte les deux.
           await provisionAccount(user.id, timezone, langueDesEnTetes(context?.headers));
 
-          // Ce qu'un visiteur avait déposé avant de créer son compte lui revient
-          // ici, et c'est ici seulement : c'est le seul instant où l'on tient à
-          // la fois le compte neuf et le cookie de la visite. Les questions
-          // partent dans la foulée — c'est le moment où la dépense reprend, et
-          // il coïncide avec celui où quelqu'un s'engage.
+          // Seul instant où l'on tient à la fois le compte neuf et le cookie de
+          // la visite : le dépôt du visiteur lui revient ici.
           await reprendreLaVisite(user.id);
 
-          // L'accueil part en dernier, et il part d'ici plutôt que d'un passage
-          // horaire : c'est le seul endroit où l'on sait que le compte vient
-          // d'être créé. Il se lit après la reprise, parce que son contenu
-          // dépend de ce que le compte porte déjà — un essai repris n'a pas à
-          // s'entendre dire de déposer sa première chose. Son échec ne remonte
-          // pas : une inscription ne se perd pas pour un email.
+          // Après la reprise, parce que son contenu dépend de ce que le compte
+          // porte déjà. Son échec ne remonte pas : une inscription ne se perd
+          // pas pour un email.
           await envoyerLAccueil(user.id);
         },
       },
@@ -134,24 +106,15 @@ export const auth = betterAuth({
   },
   plugins: [
     /**
-     * Un code à six chiffres, et non le lien qu'il remplace.
+     * Un code plutôt qu'un lien : sur iOS, un lien s'ouvre dans Safari, dont le
+     * stockage est séparé de l'application installée, et la session n'y arrive
+     * jamais. Un code se retape là où on l'a demandé.
      *
-     * Un lien s'ouvre depuis le client mail, donc dans le navigateur par défaut,
-     * jamais dans l'application installée. Sur iOS c'est sans recours — une
-     * application posée sur l'écran d'accueil ne peut pas intercepter un lien,
-     * et son stockage est séparé de celui de Safari : la session créée par le
-     * lien ne l'atteint pas, et on reste dehors dans la fenêtre où l'on voulait
-     * entrer. Un code se retape là où on l'a demandé, et la session s'y crée.
+     * `disableSignUp` reste faux : entrer et s'inscrire sont le même geste, et
+     * le code part dans les deux cas, ce qui tait l'existence d'une adresse.
      *
-     * `disableSignUp` reste faux : sans mot de passe, entrer et s'inscrire sont
-     * le même geste, et le code crée le compte s'il n'existe pas. C'est aussi ce
-     * qui garde l'écran muet sur l'existence d'une adresse — le code part dans
-     * les deux cas, et la réponse est la même.
-     *
-     * Six chiffres se devinent, contrairement à un jeton signé. Deux garde-fous
-     * plutôt qu'un : trois tentatives par code, et dix minutes de validité. Le
-     * code est stocké haché, pour qu'une lecture de la table `Verification` ne
-     * suffise pas à entrer.
+     * Un code court se devine : trois tentatives, dix minutes de validité, et
+     * stocké haché pour qu'une lecture de `Verification` ne suffise pas.
      */
     emailOTP({
       otpLength: LONGUEUR_DU_CODE,
@@ -159,9 +122,8 @@ export const auth = betterAuth({
       allowedAttempts: 3,
       storeOTP: "hashed",
       sendVerificationOTP: async ({ email, otp, type }, ctx) => {
-        // Un seul type nous concerne : il n'y a ni mot de passe à réinitialiser
-        // ni changement d'adresse. Lever plutôt qu'envoyer un email dont le texte
-        // parlerait d'autre chose que ce qui a été demandé.
+        // Ni mot de passe ni changement d'adresse : tout autre type lève plutôt
+        // que d'envoyer un email au texte faux.
         if (type !== "sign-in") {
           throw new Error(`Type de code non pris en charge : ${type}.`);
         }

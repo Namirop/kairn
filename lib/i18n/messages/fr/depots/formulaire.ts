@@ -2,9 +2,8 @@
  * L'écran « Déposer » : le titre, le formulaire, ses deux facultatifs, et ce
  * qu'on montre quand la période est pleine.
  *
- * Les libellés courts de la capture et de la consigne commandent la rangée sur
- * un téléphone — 342 px de colonne pour les deux pilules. Un libellé plus long
- * ici ou dans une autre langue se vérifie à l'écran avant de partir.
+ * Les libellés courts de la capture et de la consigne tiennent à deux dans
+ * 342 px sur un téléphone : un libellé plus long se vérifie à l'écran.
  */
 export const formulaire = {
   metaTitre: "Déposer",
@@ -18,11 +17,8 @@ export const formulaire = {
   lectureDeLaCapture: "Lecture de la capture…",
   partageManque: "Le partage n'est pas arrivé jusqu'ici. Colle le texte, ou repartage-le.",
   /**
-   * Ce qu'on dit quand le partage n'a rapporté qu'une adresse.
-   *
-   * Elle nomme le geste qui marche plutôt que de constater l'échec : la sélection
-   * est le seul moyen, sur un téléphone, de choisir ce qu'on garde d'une
-   * conversation.
+   * Quand le partage n'a rapporté qu'une adresse : nommer le geste qui marche,
+   * la sélection étant le seul moyen sur un téléphone de choisir ce qu'on garde.
    */
   lienSansMatiere:
     "Un lien ne se retient pas. Retourne dans la conversation, sélectionne le passage, et repartage-le.",
@@ -53,10 +49,8 @@ export const formulaire = {
       "L'offre complète en ouvre <nombre>{plafond}</nombre> par mois, pour <nombre>{prix} €</nombre>. Ce que tu as déjà déposé ne bouge pas, et les révisions du jour continuent.",
     voirLOffre: "Voir l'offre",
     /**
-     * Premium n'est pas vendu en anglais (décision du 08/10/2026) : là où la
-     * langue de l'écran n'a pas de caisse, cette phrase suit le signalement à la
-     * place de l'offre. Elle n'est jamais montrée en français, où l'offre se
-     * propose.
+     * Premium n'est pas vendu en anglais : là où la langue de l'écran n'a pas
+     * de caisse, cette phrase remplace l'offre. Jamais montrée en français.
      */
     horsVente: "Premium n'est pas encore disponible dans cette langue.",
     signalement:

@@ -5,10 +5,9 @@ import type { AiContract } from "./schemas";
 /**
  * La lecture d'une sortie structurée, une fois le texte en main.
  *
- * La grammaire garantit la forme, pas le contenu : le SDK rétrograde en
- * description ce qu'elle ne sait pas contraindre, et une réponse peut être bien
- * empaquetée et fausse. La validation Zod reste donc, appel normal comme envoi
- * groupé — c'est le même contrat des deux côtés.
+ * La grammaire garantit la forme, pas le contenu : les bornes qu'elle ne sait
+ * pas imposer partent en description (voir `output-schema.ts`), et certains
+ * modèles ne sont pas contraints du tout. La validation Zod reste donc.
  */
 export function lireSortieStructuree<T>(contract: AiContract<T>, texte: string): T {
   let rendu: unknown;

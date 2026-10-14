@@ -3,10 +3,8 @@ import { pontOpenRouter } from "./openrouter";
 import type { Fournisseur, PontFournisseur } from "./interface";
 
 /**
- * Le résolveur de pont. Un seul appelant : `client.ts`. La lignée choisie
- * dépend de la configuration (`AI_FOURNISSEUR`), la clé dépend de la lignée
- * — deux comptes séparés côté hébergeur, pas un compte qui sert deux
- * routes.
+ * Le résolveur de pont, appelé par `client.ts` seul. La lignée vient de
+ * `AI_FOURNISSEUR`, et chacune a sa propre clé.
  */
 
 export type ClesFournisseur = {

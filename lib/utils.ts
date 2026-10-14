@@ -4,23 +4,16 @@ import { extendTailwindMerge } from "tailwind-merge";
 /**
  * Fusion de classes Tailwind.
  *
- * Toute notre échelle porte des noms maison, et tailwind-merge ne connaît que
- * la sienne. Ce qu'il ne reconnaît pas, il le laisse passer — les deux classes
- * survivent, et c'est alors l'ordre de la feuille de style qui tranche, pas
- * l'ordre d'appel. Le symptôme n'est jamais une erreur : c'est une surcharge qui
- * ne prend pas.
+ * Notre échelle porte des noms maison que tailwind-merge ne connaît pas : sans
+ * les déclarer, il laisse passer les deux classes en conflit et c'est l'ordre
+ * de la feuille qui tranche — une surcharge qui ne prend pas, sans erreur.
  *
- * **Les tailles de police**, d'abord : sans elles, `text-corps` passe pour une
- * couleur de texte et supprime le `text-stone-50` qui le précède — un libellé de
- * bouton devient invisible sans qu'aucun outil ne le signale.
+ * Tailles de police : sans elles, `text-corps` passe pour une couleur et
+ * supprime le `text-stone-50` qui le précède.
  *
- * **Les pas d'espacement**, ensuite, et c'est le même piège d'un cran plus bas.
- * `px-pas-4` posé sur un bouton dont la taille dit `px-pas-8` ne l'écrasait pas :
- * les deux étaient rendues, et `pas-8` gagnait parce qu'il vient plus tard dans
- * la feuille. On croyait resserrer un bouton, on ne resserrait rien, et le seul
- * moyen de s'en apercevoir était de mesurer. `spacing` étant la clef de thème
- * que tailwind-merge consulte pour tout ce qui espace, la déclarer une fois
- * couvre les rembourrages, les marges, les gouttières et les écarts.
+ * Pas d'espacement : sans eux, `px-pas-4` n'écrase pas un `px-pas-8` posé avant.
+ * `spacing` est la clef de thème consultée pour tout ce qui espace (rembourrages,
+ * marges, gouttières, écarts).
  */
 const TAILLES = [
   "mono",

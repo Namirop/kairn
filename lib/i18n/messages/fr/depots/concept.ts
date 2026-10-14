@@ -23,14 +23,9 @@ export const concept = {
 };
 
 /**
- * Ce que chaque facette demande, dit à l'utilisateur.
- *
- * Les valeurs de l'enum sont la langue du schéma ; l'écran parle celle du
- * produit. Sans cette table, ce sont `RECOGNITION` et `MECHANISM` qui
- * s'affichent sous un concept, en anglais, au-dessus d'une question française.
- *
- * Le `Record` sur l'enum est volontaire : ajouter une facette sans son libellé
- * ne compile pas.
+ * Ce que chaque facette demande, dit à l'utilisateur : les valeurs de l'enum
+ * sont la langue du schéma, pas celle de l'écran. Le `Record` fait échouer la
+ * compilation d'une facette sans libellé.
  */
 export const facettes: Record<VariantFacet, string> = {
   RECOGNITION: "Reconnaître",
@@ -40,13 +35,8 @@ export const facettes: Record<VariantFacet, string> = {
 };
 
 /**
- * Sous quelle forme une question est posée, dit à l'utilisateur.
- *
- * Le pendant de `facettes` : les valeurs de l'enum sont la langue du schéma,
- * l'écran parle celle du produit — voir `components/depots/libelle-format.ts`.
- *
- * Le `Record` sur l'enum est volontaire : ajouter un format sans son libellé ne
- * compile pas.
+ * Sous quelle forme une question est posée, dit à l'utilisateur. Le pendant de
+ * `facettes` — voir `components/depots/libelle-format.ts`.
  */
 export const formats: Record<VariantFormat, string> = {
   MCQ: "QCM",

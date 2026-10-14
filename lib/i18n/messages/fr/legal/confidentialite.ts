@@ -1,9 +1,6 @@
 /**
- * La page de confidentialité.
- *
- * Les coordonnées arrivent en paramètres depuis `lib/site/editeur.ts`, et
- * jamais recopiées ici : une adresse écrite deux fois finit par n'être changée
- * qu'une fois.
+ * La page de confidentialité. Les coordonnées arrivent en paramètres depuis
+ * `lib/site/editeur.ts`, jamais recopiées ici.
  */
 export const confidentialite = {
   titre: "Confidentialité",

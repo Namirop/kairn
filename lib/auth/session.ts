@@ -6,9 +6,7 @@ import { auth } from "./config";
  * La session, côté serveur. Un `userId` vient toujours d'ici, jamais d'un
  * paramètre de requête ou d'un champ de formulaire.
  *
- * La lecture est mémoïsée sur le rendu : une mise en page et la page qu'elle
- * enveloppe demandent toutes les deux qui est là, et sans ça chacune paierait
- * son aller-retour en base pour la même réponse.
+ * Mémoïsée sur le rendu : la mise en page et sa page la demandent toutes deux.
  */
 
 export type SessionUser = {
@@ -42,10 +40,8 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 });
 
 /**
- * L'utilisateur de la session, ou une erreur. À utiliser dans les route
- * handlers et les Server Actions. Une page préfère `getCurrentUser()` suivi
- * d'une redirection, pour ne pas afficher un écran d'erreur à qui doit
- * simplement se reconnecter.
+ * Pour les route handlers et les Server Actions. Une page préfère
+ * `getCurrentUser()` suivi d'une redirection, plutôt qu'un écran d'erreur.
  */
 export async function requireUser(): Promise<SessionUser> {
   const user = await getCurrentUser();

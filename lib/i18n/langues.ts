@@ -21,10 +21,8 @@ export function langueDeLocale(locale: string): Langue {
 }
 
 /**
- * Le choix explicite d'une langue, retenu un an.
- *
- * Il ne sert qu'à qui n'a pas encore de compte : une fois inscrit, c'est le
- * réglage qui fait foi, et il se change dans les réglages.
+ * Le choix explicite d'une langue, retenu un an. Seulement sans compte : une
+ * fois inscrit, c'est le réglage qui fait foi.
  */
 export const COOKIE_DE_LANGUE = "kairn-langue";
 

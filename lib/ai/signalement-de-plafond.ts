@@ -7,25 +7,20 @@ import { differer } from "@/lib/hors-chemin-critique";
 /**
  * Le câblage de la surveillance des plafonds : la base, les emails, l'attente.
  *
- * Il est séparé de la décision pour une raison précise. `alerte-de-plafond.ts`
- * ne connaît que des types, donc il se charge et se teste sans client de base ni
- * client d'emails ; tout ce qui touche au monde réel est ici, dans un fichier
- * qui n'a aucune logique à vérifier.
+ * Séparé de la décision : `alerte-de-plafond.ts` ne connaît que des types et se
+ * teste sans base ni emails ; ce qui touche au monde réel est ici, sans logique.
  */
 
 const OUTILS: OutilsDAlerte = {
   reserver: reserverLAlerte,
-  // La dépense se lit au registre plutôt qu'elle ne s'estime : c'est ce que les
-  // appels ont réellement coûté, pas ce qu'on croit qu'ils coûtent.
+  // La dépense se lit au registre plutôt qu'elle ne s'estime.
   depenseDuJourUsd: async (maintenant) => (await sumAiCalls(startOfUtcDay(maintenant))).costUsd,
   envoyer: envoyerLAlerteDePlafond,
 };
 
 /**
- * Signale l'état d'un compteur sans faire attendre l'appelant.
- *
- * C'est la forme qu'utilise la réservation : elle rend la main tout de suite, et
- * le travail se fait après la réponse.
+ * Signale l'état d'un compteur sans faire attendre l'appelant : la réservation
+ * rend la main, le travail se fait après la réponse.
  */
 export function signalerLEtatDuCompteur(etat: EtatDuCompteur, maintenant = new Date()): void {
   differer(() => surveillerLePlafond(etat, maintenant, OUTILS));

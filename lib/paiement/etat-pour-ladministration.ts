@@ -4,20 +4,12 @@ import { CLE_DU_PRIX, prixDeLaCadence } from "./catalogue";
 import { modeDePaiement, type ModeDePaiement } from "./config";
 
 /**
- * Ce que l'écran de pilotage sait du paiement, et rien de plus.
+ * Ce que l'écran de pilotage sait du paiement : une lecture, jamais un levier
+ * (`PAIEMENT_LIVE` reste un geste chez l'hébergeur, voir `config.ts`).
  *
- * **Une lecture, jamais un levier.** L'écran d'administration manœuvre les
- * réglages du modèle ; le paiement, lui, ne s'y manœuvre pas — `PAIEMENT_LIVE`
- * reste un geste chez l'hébergeur, pour la raison qu'énonce `config.ts`. Ce
- * module ne sert donc qu'à répondre à deux questions qu'on se pose vraiment :
- * dans quel monde suis-je, et le catalogue répond-il ?
- *
- * La seconde est la plus utile. Un catalogue de production dont les clés ou les
- * montants divergeraient de la page ferait échouer chaque achat au clic sur
- * « Payer », et rien d'autre ne le signalerait avant le premier client.
- *
- * **Aucun secret ne sort d'ici.** Le mode se déduit du préfixe de la clé, jamais
- * de la clé elle-même.
+ * Il dit le mode et si le catalogue répond : des clés ou montants divergents
+ * feraient échouer chaque achat, sans autre signal avant le premier client.
+ * Aucun secret ne sort d'ici.
  */
 
 export type LigneDeCatalogue = {
@@ -42,8 +34,7 @@ const ANNONCE: Record<CadenceStripe, number> = {
 export async function lireLEtatDuPaiement(): Promise<EtatDuPaiement> {
   const mode = modeDePaiement();
 
-  // Paiement fermé : il n'y a personne à qui demander le catalogue, et le
-  // demander quand même remplirait l'écran d'une erreur qui n'en est pas une.
+  // Paiement fermé : demander le catalogue afficherait une fausse erreur.
   if (mode === "ferme") return { mode, catalogue: [] };
 
   const cadences: CadenceStripe[] = ["month", "year"];
@@ -58,9 +49,7 @@ async function resoudre(cadence: CadenceStripe): Promise<LigneDeCatalogue> {
   try {
     return { ...ligne, resolu: { prix: await prixDeLaCadence(cadence) } };
   } catch (erreur) {
-    // `prixDeLaCadence` refuse déjà pour la bonne raison — clé absente, montant
-    // divergent, cadence inattendue — et son message la nomme. On le montre tel
-    // quel : c'est exactement ce que verrait quelqu'un qui essaie d'acheter.
+    // Le refus de `prixDeLaCadence`, tel quel : c'est celui qu'aurait un achat.
     return { ...ligne, resolu: { erreur: erreur instanceof Error ? erreur.message : "illisible" } };
   }
 }

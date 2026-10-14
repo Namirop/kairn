@@ -11,16 +11,11 @@ import { emails } from "./emails";
 import { legal } from "./legal";
 
 /**
- * Les textes de l'interface, en français — la langue de référence.
+ * Les textes de l'interface en français, la langue de référence : la forme de
+ * cet objet est le contrat de l'anglais, une clé manquante ne compile pas.
  *
- * Un espace de noms par domaine de l'interface, un fichier par espace : deux
- * personnes qui traduisent deux écrans ne touchent jamais le même fichier. La
- * forme de cet objet est le contrat de l'anglais : une clé qui manque de l'autre
- * côté ne compile pas.
- *
- * Les textes suivent la syntaxe ICU de next-intl. Les pluriels s'y écrivent
- * `{n, plural, one {# concept} other {# concepts}}` : le français y met zéro
- * au singulier et l'anglais au pluriel, sans qu'on ait à s'en souvenir.
+ * Syntaxe ICU de next-intl. Avec `{n, plural, one {…} other {…}}`, le français
+ * met zéro au singulier et l'anglais au pluriel, sans rien à écrire de plus.
  */
 export const fr = {
   revision,

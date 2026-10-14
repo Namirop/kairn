@@ -3,13 +3,11 @@ import { textesDEmail } from "../traduction";
 import { EMAIL_STYLE as S, renderShell } from "./shell";
 
 /**
- * Le rappel quotidien. Il énonce ce qui attend, il ne motive pas : la
- * récompense est la progression affichée, pas un encouragement dans un email.
+ * Le rappel quotidien. Il énonce ce qui attend, il ne motive pas.
  *
- * Il n'existe pas de version « rien à revoir aujourd'hui » : le passage qui
- * envoie n'appelle pas ce gabarit quand rien n'est dû. Un message quotidien qui
- * annonce régulièrement qu'il n'y a rien à faire est un message qu'on apprend à
- * ne plus ouvrir, et cette habitude abîme la remise des suivants.
+ * Pas de version « rien à revoir aujourd'hui » : rien ne part quand rien n'est
+ * dû. Un message quotidien qui annonce qu'il n'y a rien à faire s'apprend à ne
+ * plus ouvrir, et abîme la remise des suivants.
  */
 
 export type DailyReminderPayload = {

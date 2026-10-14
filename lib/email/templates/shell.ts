@@ -5,13 +5,10 @@ import { textesDEmail } from "../traduction";
 /**
  * Gabarit commun des emails.
  *
- * Les couleurs sont écrites en dur ici, contrairement au reste du projet : les
- * clients mail ne savent pas lire une variable CSS, et beaucoup suppriment les
- * feuilles de style externes. Ce fichier est le seul endroit où elles sont
- * dupliquées ; il suit `app/styles/tokens/colors.css`.
- *
- * L'email reprend la composition du produit : un fond d'ombre, une surface de
- * papier posée dessus. Le blanc pur n'existe nulle part dans Kairn.
+ * Les couleurs sont en dur parce que les clients mail ne lisent pas les
+ * variables CSS ; elles suivent `app/styles/tokens/colors.css`. Composition du
+ * produit : un fond d'ombre, une surface de papier posée dessus, jamais de
+ * blanc pur.
  */
 const PALETTE = {
   paper: "#CFE3EC",
@@ -20,13 +17,8 @@ const PALETTE = {
   muted: "#345770",
   ink: "#0D2236",
   /**
-   * L'accent du produit, et c'est bien lui que portent les boutons.
-   *
-   * Il s'appelait `lichen`, et il peignait le seul geste de chaque email. Le
-   * lichen ne tient plus que la maîtrise : un bouton n'est pas une maîtrise,
-   * c'est ce que le produit demande. Le nom suit le métier — et au passage,
-   * du blanc sur le lichen saturé donnait 1,9 pour 1, c'est-à-dire un libellé
-   * illisible sur le seul lien qui compte.
+   * Les boutons portent l'accent : un geste est ce que le produit demande, pas
+   * une maîtrise. Du blanc sur le lichen saturé tomberait à 1,9 pour 1.
    */
   accent: "#1B4FC4",
   ember: "#B4552F",
@@ -44,22 +36,16 @@ export type ShellContent = {
   preheader: string;
   body: string;
   /**
-   * Absent sur un email dont on ne peut pas se désabonner.
-   *
-   * Un lien de connexion en est un : il ne s'envoie que sur demande, il est le
-   * moyen d'entrer, et proposer d'y renoncer n'aurait aucun sens. Y coller un
-   * `List-Unsubscribe` serait pire — le client mail rangerait un message
-   * transactionnel avec les envois de masse.
+   * Absent sur un email dont on ne peut pas se désabonner, comme le code de
+   * connexion : un `List-Unsubscribe` y ferait ranger un message transactionnel
+   * avec les envois de masse.
    */
   unsubscribeUrl?: string;
   /** Ce qui justifie l'envoi, dit au pied. Sans lui, le pied disparaît. */
   raisonDeLEnvoi?: string;
   /**
-   * La langue de la personne qui le reçoit : le `lang` du document et le pied
-   * la suivent.
-   *
-   * Facultative parce que les alertes d'exploitation ne la passent pas : elles
-   * n'ont qu'un lecteur, l'administrateur, et restent en français.
+   * La langue du destinataire, pour le `lang` du document et le pied.
+   * Facultative : les alertes d'exploitation n'ont qu'un lecteur, en français.
    */
   langue?: Langue;
 };

@@ -5,15 +5,10 @@ import type { AiContract } from "./contract";
 /**
  * Le texte tiré d'une capture d'écran.
  *
- * La borne de longueur était à 20 000 signes, deux fois et demie ce qu'un compte
- * a le droit de coller. Une capture d'une page dense injectait donc dans le
- * découpage un texte qu'aucun écran n'aurait laissé passer, et que rien ne
- * pouvait prévoir puisque la longueur n'est connue qu'après l'appel de lecture.
- *
- * Elle est maintenant celle d'un dépôt texte, et **elle tronque au lieu de
- * refuser**. Comme toutes les bornes chiffrées, elle n'est pas tenue par la
- * grammaire : la laisser rejeter aurait fait perdre la lecture entière d'une
- * capture trop bavarde, exactement le défaut corrigé sur l'extraction.
+ * Sa borne de longueur est celle d'un dépôt texte, pour que le découpage ne
+ * reçoive rien qu'un écran n'aurait laissé passer. Elle tronque au lieu de
+ * refuser : la grammaire ne la tient pas, et rejeter ferait perdre une lecture
+ * déjà payée (même règle que l'extraction).
  */
 
 function porteDuTexte(texte: string): boolean {
@@ -43,11 +38,8 @@ const sortieLue = ocrExtractForme.extend({ extractedText: z.string() });
 const ocrExtractValidation = sortieLue.transform((sortie) => ({
   extractedText: sortie.extractedText.slice(0, CARACTERES_MAXIMUM),
   language: sortie.language ?? null,
-  // `usable` se déduit du texte au lieu d'être cru sur parole. Les deux
-  // cohérences étaient vérifiées par des refus — un `usable` à vrai sur un texte
-  // vide jetait la lecture entière — alors que la réponse est sous nos yeux :
-  // une capture est exploitable si elle a rendu du texte. Le modèle n'a pas à
-  // trancher ce que le serveur peut lire.
+  // `usable` se déduit du texte plutôt que d'être cru : un désaccord avec le
+  // texte rendu jetterait sinon la lecture entière.
   usable: porteDuTexte(sortie.extractedText),
   /** La capture disait plus que ce qu'un dépôt peut porter : on l'a coupée. */
   tronque: sortie.extractedText.length > CARACTERES_MAXIMUM,

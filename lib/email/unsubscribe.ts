@@ -1,11 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 /**
- * Jeton de désinscription, signé et sans état.
- *
- * Le lien d'un email doit fonctionner sans session — la personne qui clique est
- * souvent déconnectée, voire ne veut plus rien avoir à faire avec le produit.
- * Le jeton porte l'identifiant du compte et sa signature ; rien n'est stocké.
+ * Jeton de désinscription, signé et sans état : le lien d'un email doit
+ * fonctionner sans session. Il porte l'identifiant du compte et sa signature.
  */
 
 function secret(): string {

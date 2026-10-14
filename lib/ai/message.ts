@@ -1,9 +1,7 @@
 /**
- * Forme des messages passés à `callAI()`.
- *
- * Volontairement indépendante du SDK Anthropic : le SDK ne s'importe que dans
- * `client.ts`, donc son type `MessageParam` ne peut pas circuler dans le reste
- * du projet. `client.ts` traduit ces messages au moment d'émettre.
+ * Forme des messages passés à `callAI()`, indépendante du SDK Anthropic : il ne
+ * s'importe que dans `fournisseurs/anthropic.ts`, et chaque pont traduit ces
+ * messages au moment d'émettre.
  */
 
 export type AiTextPart = {
@@ -27,9 +25,8 @@ export type AiMessage = {
 };
 
 /**
- * Forme attendue par le SDK, décrite ici sans l'importer : `client.ts` reste le
- * seul fichier qui le connaît, et la compilation vérifie que les deux formes
- * coïncident au moment de l'envoi.
+ * Forme attendue par le SDK, décrite sans l'importer ; la compilation du pont
+ * Anthropic vérifie que les deux coïncident.
  */
 export type SdkMessage = {
   role: "user" | "assistant";

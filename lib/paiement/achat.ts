@@ -9,39 +9,24 @@ import { AbonnementDejaOuvertError, objetIntrouvableChezStripe } from "./erreurs
 import { lireLeRapport } from "./rapport";
 
 /**
- * Ouvrir un paiement, et rendre l'adresse où l'envoyer.
- *
- * La saisie de carte se fait chez Stripe et pas chez nous, et c'est une
- * décision de sécurité avant d'être une décision de design : un numéro de carte
- * qui ne traverse jamais ce serveur est un numéro de carte qu'aucune faille
- * d'ici ne peut fuiter. Ce que ça coûte — une page qui n'est pas à nos
- * couleurs, le temps d'un formulaire — est le bon prix.
+ * Ouvrir un paiement, et rendre l'adresse où l'envoyer. La carte se saisit chez
+ * Stripe : un numéro qui ne traverse jamais ce serveur ne peut pas y fuiter.
  */
 
 /**
- * Le paramètre qui dit qu'on revient d'un paiement accepté.
- *
- * Il existe parce que le webhook et le navigateur reviennent par deux chemins
- * différents : la personne est souvent de retour sur l'écran avant que Stripe
- * nous ait dit quoi que ce soit. Sans ce paramètre, l'écran afficherait « offre
- * gratuite » à quelqu'un qui vient de payer, ce qui ressemble à un paiement
- * perdu.
+ * Le paramètre du retour d'un paiement accepté. Le navigateur revient souvent
+ * avant le webhook : sans lui, l'écran afficherait « offre gratuite » à qui
+ * vient de payer.
  */
 export const PARAMETRE_DE_RETOUR = "paiement";
 export const RETOUR_ACCEPTE = "fait";
 
 /**
- * Refuse d'ouvrir un paiement à qui en a déjà un.
+ * Refuse d'ouvrir un paiement à qui en a déjà un. Deux onglets suffisent à
+ * créer deux abonnements chez Stripe, dont un seul retenu par notre ligne :
+ * l'autre prélèverait sans que Kairn le voie.
  *
- * L'écran ne montre pas le bouton d'achat à un compte abonné — mais un écran
- * n'est pas une garantie. Deux onglets ouverts sur les réglages, dont l'un
- * affiche encore l'état d'avant, suffisent : les deux paiements aboutissent,
- * Stripe crée deux abonnements pour le même client, et notre ligne n'en retient
- * qu'un. Le premier devient alors invisible pour Kairn tout en continuant de
- * prélever tous les mois.
- *
- * La garde est ici et pas dans l'action, parce que c'est la fonction qui vend :
- * tout ce qui ouvre un paiement doit la traverser, y compris un script.
+ * Ici et pas dans l'action, pour que tout ce qui vend la traverse.
  */
 async function refuserSiDejaAbonne(userId: string): Promise<void> {
   const { abonnementId } = await lireDossierStripe(userId);
@@ -53,9 +38,8 @@ async function refuserSiDejaAbonne(userId: string): Promise<void> {
   try {
     abonnement = await stripe().subscriptions.retrieve(abonnementId);
   } catch (erreur) {
-    // Un abonnement que Stripe ne connaît pas ne peut rien facturer, donc il
-    // n'interdit rien. C'est le cas de tous ceux qu'une ligne a gardés d'un
-    // mode test après la bascule : les refuser bloquerait l'achat pour de bon.
+    // Un abonnement inconnu de Stripe (gardé du mode test, par exemple) ne
+    // facture rien, donc n'interdit rien.
     if (objetIntrouvableChezStripe(erreur)) return;
 
     throw erreur;
@@ -82,44 +66,18 @@ export async function ouvrirLePaiement(
     line_items: [{ price: prix, quantity: 1 }],
     locale: "fr",
     success_url: `${app}${ROUTES.reglages}?${PARAMETRE_DE_RETOUR}=${RETOUR_ACCEPTE}`,
-    // Abandonner ramène à l'écran d'où l'on vient, sans paramètre : il ne s'est
-    // rien passé, et l'écran n'a rien à raconter.
     cancel_url: `${app}${ROUTES.reglages}`,
     client_reference_id: compte.id,
-    // Le nom du titulaire, recopié du tunnel vers le client Stripe.
-    //
-    // Kairn ne demande pas de nom à l'inscription — c'est voulu, on ouvre un
-    // compte avec une adresse et rien d'autre. Mais Stripe, lui, demande le nom
-    // du titulaire de la carte : sans cette ligne il le garde pour le moyen de
-    // paiement, et les factures sortent au nom de personne. Ça ne gêne pas qui
-    // paie sept euros pour lui-même ; ça gêne qui veut passer l'abonnement en
-    // frais professionnels.
-    //
-    // « auto » plutôt qu'un champ de plus dans le tunnel : l'information est
-    // déjà saisie, il ne manquait que de dire où la ranger.
+    // Kairn ne demande pas de nom : on recopie sur le client celui du titulaire
+    // saisi dans le tunnel, sans quoi les factures sortent au nom de personne.
     customer_update: { name: "auto" },
-    // Portée par l'abonnement lui-même, donc présente sur tous les événements
-    // qu'il produira. Le rattachement, lui, passe par le client Stripe, qui est
-    // à nous : ces métadonnées servent au diagnostic, pas à la décision.
+    // Pour le diagnostic seulement : le rattachement passe par le client Stripe.
     subscription_data: { metadata: { userId: compte.id } },
-    // **Le vendeur, c'est Kairn.** Managed Payments est activé par défaut sur le
-    // compte Stripe et ferait de Stripe le marchand de référence : il
-    // collecterait et reverserait la TVA dans quatre-vingts pays, émettrait les
-    // factures et les emails à notre place, et prélèverait 3,5 % de plus par
-    // transaction. Sans ce refus, la session est simplement rejetée — le
-    // catalogue n'a pas de code de taxe, que Managed Payments exige.
-    //
-    // Le refus est écrit ici plutôt que laissé à une case du tableau de bord,
-    // parce que c'est une décision de facturation : elle doit se lire dans le
-    // code qui vend, et ne pas dépendre d'un réglage que personne ne relit.
-    //
-    // Décidée le 02/09/2026, sur la comparaison des deux coûts : 3,5 % dès le
-    // premier euro contre un service — la conformité de TVA multi-pays — qui ne
-    // sert qu'au-delà de 10 000 € de ventes annuelles aux particuliers du reste
-    // de l'UE, seuil auquel la franchise en base européenne répond sans
-    // commission. Rien n'est fermé : Managed Payments s'active plus tard, mais
-    // pour les seuls abonnements souscrits après. Ceux d'avant n'y sont jamais
-    // éligibles, et c'est ce qui fait que le choix se pose maintenant.
+    // Le vendeur, c'est Kairn. Managed Payments, actif par défaut sur le compte,
+    // ferait de Stripe le marchand de référence pour 3,5 % de plus par
+    // transaction, et rejette la session faute de code de taxe au catalogue.
+    // Sa conformité TVA ne sert qu'au-delà de 10 000 € de ventes UE ; activé
+    // plus tard, il ne couvrirait que les abonnements souscrits ensuite.
     managed_payments: { enabled: false },
   });
 

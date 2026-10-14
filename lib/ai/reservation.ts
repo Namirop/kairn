@@ -10,13 +10,10 @@ import type { AiConfig } from "./config";
 import { AIAnonymousQuotaError, AIQuotaError, AIUserQuotaError } from "./errors";
 
 /**
- * Qui paie un appel, et dans quel ordre.
- *
- * Trois compteurs protègent trois choses différentes : la part d'un compte le
- * protège de lui-même et protège les autres de lui, la part du trafic sans
- * compte empêche la landing et les comptes de s'affamer mutuellement, et le
- * plafond global protège le budget du produit. Les tenir ici, ensemble, évite
- * qu'un jour l'un des trois s'oublie sur un chemin.
+ * Qui paie un appel, et dans quel ordre. Trois compteurs : la part d'un compte
+ * protège les comptes entre eux, celle du trafic sans compte protège landing et
+ * comptes l'un de l'autre, le plafond global protège le budget. Ils vivent
+ * ensemble pour qu'aucun chemin n'en oublie un.
  */
 
 /** D'où vient l'appel, pour savoir à quel seau le facturer. */
@@ -32,24 +29,16 @@ export function provenanceDeLAppel(params: { userId?: string; anonyme?: boolean 
 /**
  * Les deux places d'un appel : la part de qui le demande, puis celle du produit.
  *
- * **Chaque compteur est regardé après son incrément, refus compris.** Le refus
- * surtout : c'est le seul moment où l'on sait qu'un plafond est atteint, et
- * jusqu'ici personne n'était prévenu — on l'apprenait si un utilisateur
- * écrivait. Le signalement ne bloque rien, ne lève jamais, et rend la main
- * avant de faire quoi que ce soit : voir `alerte-de-plafond.ts`.
+ * Chaque compteur est signalé après son incrément, refus compris : c'est le
+ * seul moment où l'on sait qu'un plafond est atteint. Le signalement ne bloque
+ * ni ne lève (voir `signalement-de-plafond.ts`).
  *
- * L'ordre n'est pas indifférent. La part se prend d'abord parce qu'elle se rend :
- * tant que rien n'a été émis, elle ne doit rien. La place globale, elle, ne se
- * rend jamais — un appel qui part et échoue a pu consommer des tokens. Prendre
- * la globale en premier ferait payer au produit les refus d'une part pleine.
+ * La part d'abord, parce qu'elle se rend tant que rien n'est émis ; la place
+ * globale ne se rend jamais, un appel échoué ayant pu consommer des tokens.
+ * L'inverse ferait payer au produit les refus d'une part pleine.
  *
- * **Trois provenances, et l'anonyme n'est plus confondue avec l'interne.** Le
- * commentaire d'avant disait qu'un appel sans utilisateur « n'appartient à
- * personne, il n'a pas de part à prendre » : c'était vrai d'une reprise par le
- * cron, faux d'un visiteur. Le trafic public appartient à un pool, et ce pool a
- * une part. Seul l'interne — une reprise, un outil, une évaluation — passe
- * directement au plafond global, parce qu'il n'y a personne derrière à protéger
- * de qui que ce soit.
+ * L'interne (reprise, outil, évaluation) n'a pas de part : personne derrière à
+ * protéger. Le trafic anonyme, lui, en a une.
  */
 export async function reserverLesDeuxPlaces(
   config: AiConfig,

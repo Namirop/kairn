@@ -2,10 +2,9 @@
  * L'essai sans compte : le formulaire, la fenêtre, l'attente, ce qu'il a donné
  * et le rappel qui reste dans la bande.
  *
- * Deux titres ont une mesure à tenir. « 1 concept t'attend. » est réglé pour
- * tenir sur une ligne de téléphone de trois cent quatre-vingt-dix points (voir
- * `EssaiRepris`) ; les noms de format se rangent deux par deux sur téléphone, et
- * la paire la plus longue doit tenir dans la fenêtre.
+ * Deux titres ont une mesure à tenir : « 1 concept t'attend. » tient sur une
+ * ligne de téléphone de 390 points (voir `EssaiRepris`), et la plus longue
+ * paire de noms de format doit tenir dans la fenêtre.
  */
 export const essai = {
   formulaire: {

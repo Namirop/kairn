@@ -5,13 +5,11 @@ import { cadreDuSymbole, empilementDuLogo, nuanceDuRang } from "@/lib/design/mar
  * Le symbole en SVG littéral, pour ce qui sort de l'application.
  *
  * Les icônes cuites, le fichier de partage et l'image Open Graph ne traversent
- * aucune feuille de style : il leur faut des couleurs écrites. Ce module rend donc
- * le même empilement que le composant, avec des valeurs plutôt que des classes.
+ * aucune feuille de style : il leur faut des couleurs écrites.
  *
- * **Ce n'est pas un second dessin.** La géométrie vient d'`empilementDuLogo()`, la
- * dégradation de `nuanceDuRang()`, les couleurs de `couleurs-hors-css`. Rien n'est
- * recopié : le jour où la forme des pierres bouge, ces fichiers bougent à la
- * prochaine exécution du script.
+ * Ce n'est pas un second dessin : géométrie (`empilementDuLogo`), dégradation
+ * (`nuanceDuRang`) et couleurs (`couleurs-hors-css`) viennent des mêmes
+ * sources que le composant. N'y recopie rien.
  */
 
 /** Les chemins des pierres, dans le repère de l'empilement. */
@@ -52,11 +50,10 @@ export function symboleSeul({
 /**
  * Le symbole posé sur un carré sombre.
  *
- * `part` est la fraction du côté que le symbole occupe en hauteur. Une icône
- * d'application respire : à un contre un, elle touche les bords et se fait rogner
- * par le masque de la plateforme.
+ * `part` : fraction du côté occupée en hauteur. À un contre un, l'icône se fait
+ * rogner par le masque de la plateforme.
  *
- * `rayon` est en fraction du côté, nul pour une icône que la plateforme masque
+ * `rayon` : fraction du côté, nul pour une icône que la plateforme masque
  * elle-même — arrondir deux fois laisse quatre coins vides.
  */
 export function symboleSurPastille({

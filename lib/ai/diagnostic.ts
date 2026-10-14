@@ -1,12 +1,8 @@
 import type { ZodError } from "zod";
 
 /**
- * Ce qu'on garde d'une sortie refusée.
- *
- * Lire la plainte de Zod sans voir ce que le modèle a rendu, c'est diagnostiquer
- * à l'aveugle : « expected array, received string » ne dit pas si le tableau est
- * arrivé en texte, ni quelle valeur d'énumération a été inventée. On journalise
- * donc les deux, la plainte et la valeur reçue à l'endroit exact du refus.
+ * Ce qu'on garde d'une sortie refusée : la plainte de Zod et la valeur reçue à
+ * l'endroit du refus. La plainte seule ne dit pas ce que le modèle a rendu.
  */
 
 const APERCU_MAX = 1000;

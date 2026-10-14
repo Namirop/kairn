@@ -4,28 +4,21 @@ import type { AiMessage } from "../message";
 import type { EmissionParams, EmissionResult, PontFournisseur } from "./interface";
 
 /**
- * Le pont OpenRouter — porté du module du banc
- * (`scripts/evaluation/openrouter/client.ts`) avec les réglages qui ont fait
- * tenir la campagne :
+ * Le pont OpenRouter, avec les réglages du banc
+ * (`scripts/evaluation/openrouter/client.ts`) :
  *
- * - **`strict: false` pour les modèles OpenAI** — leur validateur JSON Schema
- *   exige que `required` liste tous les champs, y compris `.nullish()` côté
- *   Zod. `toOutputSchema` du produit rend les optionnels comme optionnels
- *   (comportement respecté par Anthropic, Google, DeepSeek, Mistral). Corriger
- *   `toOutputSchema` casserait ces quatre. Sans `strict`, Zod côté nous
- *   rattrape une sortie non conforme.
- * - **Préambule schéma-en-clair** dans le message système, pour les
- *   fournisseurs qui rendent du JSON mais renomment les clés (relevé Alibaba
- *   pour Qwen à l'arrêt 1).
- * - **`provider.require_parameters: true`** — force OpenRouter à router
- *   uniquement vers un fournisseur qui déclare supporter `response_format`.
- * - **Pas de `reasoning`** — Mistral 404 sinon, et les modèles du produit ne
- *   sont pas des modèles reasoning de toute façon.
+ * - `strict: false` pour les modèles OpenAI : leur validateur exige que
+ *   `required` liste tous les champs, `.nullish()` compris, alors que
+ *   `toOutputSchema` rend les optionnels comme optionnels — ce que les autres
+ *   fournisseurs attendent. Zod rattrape côté nous une sortie non conforme.
+ * - Un préambule schéma-en-clair pour les modèles non stricts, qui sinon
+ *   renomment les clés.
+ * - `provider.require_parameters: true` : ne router que vers un fournisseur qui
+ *   supporte `response_format`.
+ * - Pas de `reasoning` : certains fournisseurs répondent 404.
  *
- * Clé lue depuis `OPENROUTER_API_KEY` (production), **distincte de la clé du
- * banc** `OPENROUTERAI_KEY` : le banc dépense sur ses propres crédits, la
- * production sur les siens. Une seule clé partagée ferait passer les deux
- * pour la même usage à OpenRouter — impossible de couper l'un sans couper
+ * La clé `OPENROUTER_API_KEY` est distincte de celle du banc
+ * (`OPENROUTERAI_KEY`) : chacun dépense sur ses crédits, et l'un se coupe sans
  * l'autre.
  */
 
@@ -90,9 +83,8 @@ export function pontOpenRouter(apiKey: string | undefined): PontFournisseur {
       }
 
       // Le schéma n'est pas imposé aux modèles OpenAI — leur mode strict refuse
-      // nos schémas —, alors on le leur dit en toutes lettres. Là où il l'est,
-      // ce préambule ne fait que répéter la contrainte : Sonnet, qui sert de
-      // repli, reçoit donc exactement la consigne que les campagnes ont validée.
+      // nos schémas —, alors on le leur dit en toutes lettres. Sonnet, imposé,
+      // n'en reçoit pas : sa consigne reste celle que les campagnes ont validée.
       const strict = !params.model.startsWith("openai/");
       const preambule = strict
         ? ""
@@ -102,11 +94,8 @@ ${JSON.stringify(params.formatSchema.schema)}
 
 `;
 
-      // Épingler le fournisseur pour les modèles OpenAI — sans ça, OpenRouter
-      // peut re-router vers Azure ou une passerelle alternative, qui a son
-      // propre cache (ou pas de cache du tout). Le cache OpenAI n'est efficace
-      // que si les requêtes atterrissent toujours chez OpenAI. Voir la fiche
-      // portage-luna, §4.
+      // Fournisseur épinglé pour les modèles OpenAI : re-routé vers Azure ou une
+      // autre passerelle, l'appel perdrait le cache d'OpenAI.
       const provider: Record<string, unknown> = { require_parameters: true };
       if (!strict) {
         provider.order = ["OpenAI"];
@@ -154,20 +143,9 @@ ${JSON.stringify(params.formatSchema.schema)}
         );
       }
 
-      /*
-        Le chronomètre s'arrête **après** la lecture du corps, et c'est tout le
-        sujet.
-
-        `fetch` rend la main dès l'arrivée des en-têtes ; le corps, lui, se
-        remplit au fil de la génération. Mesurer entre les deux ne chronométrait
-        donc pas l'appel mais la poignée de main — d'où des latences plates
-        autour de cinq cents millisecondes quelle que soit la longueur rendue,
-        quarante tokens comme mille deux cents, pendant que le job qui portait
-        l'appel en mettait dix fois plus. Le registre `AiCall` a sous-évalué
-        toutes les lignes OpenRouter depuis le portage. Le pont Anthropic n'a
-        jamais eu le défaut : son SDK ne rend la main qu'une fois le message
-        complet.
-      */
+      // Le chronomètre s'arrête après la lecture du corps : `fetch` rend la main
+      // dès les en-têtes, et le corps se remplit au fil de la génération. Mesuré
+      // avant, on chronométrerait la poignée de main.
       const brut: unknown = await reponse.json();
       const latencyMs = Date.now() - debut;
       const parseReponse = reponseSchema.safeParse(brut);
@@ -212,10 +190,9 @@ ${JSON.stringify(params.formatSchema.schema)}
 
 function consommationDepuisUsage(u: z.infer<typeof usage>): EmissionResult["consommation"] {
   const cacheRead = u.prompt_tokens_details?.cached_tokens ?? 0;
-  // OpenAI ne facture pas l'écriture du cache (contrairement à Anthropic ×1,25)
-  // — on ne rend donc pas de `cacheCreationTokens` non nul. `inputTokens`, ici,
-  // désigne les tokens **non cachés** : OpenRouter renvoie `prompt_tokens` en
-  // total, on retire la part cache pour la comptabilité.
+  // OpenAI ne facture pas l'écriture du cache, d'où `cacheCreationTokens` à 0.
+  // `prompt_tokens` est un total : `inputTokens` n'en garde que la part non
+  // cachée.
   return {
     inputTokens: Math.max(0, u.prompt_tokens - cacheRead),
     outputTokens: u.completion_tokens,

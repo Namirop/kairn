@@ -1,13 +1,7 @@
 /**
- * L'identité de l'éditeur, et les coordonnées qu'on publie.
- *
- * Écrites une fois. Les deux pages légales les répètent — c'est normal et c'est
- * attendu, une politique de confidentialité doit se lire seule — mais elles ne
- * doivent pas les **recopier** : le jour où l'adresse change, deux pages qui la
- * portent chacune de leur côté n'en changent qu'une, et c'est celle qui reste qui
- * fait foi aux yeux de qui la lit.
- *
- * Rien ici n'est un secret : ce sont des informations que la loi oblige à publier.
+ * L'identité de l'éditeur et les coordonnées publiées, écrites une fois pour
+ * que les deux pages légales ne puissent pas diverger. Rien ici n'est un
+ * secret : la loi oblige à les publier.
  */
 
 export const EDITEUR = {
@@ -15,9 +9,8 @@ export const EDITEUR = {
   nom: "Romain Maes",
 
   /**
-   * Obligatoire depuis la loi du 14 février 2022, sur tous les documents
-   * professionnels : le nom d'un entrepreneur individuel doit porter la mention
-   * « entrepreneur individuel » ou « EI ». L'omission est une contravention.
+   * Obligatoire sur tout document professionnel (loi du 14 février 2022) ;
+   * l'omission est une contravention.
    */
   // i18n-ignore — mention de droit français, dite en français ; la version anglaise la traduit dans ses messages.
   mentionEI: "Entrepreneur individuel (EI)",
@@ -34,35 +27,25 @@ export const EDITEUR = {
   siren: "941 599 383",
 
   /**
-   * Exigé par la loi pour un service de communication au public en ligne édité à
-   * titre professionnel, au même titre que l'adresse. Écrit avec des espaces
-   * insécables : un numéro coupé en fin de ligne ne se recompose pas de tête.
+   * Exigé par la loi pour un service en ligne édité à titre professionnel.
+   * Espaces insécables : un numéro ne doit pas se couper en fin de ligne.
    */
   telephone: "06 40 53 38 45",
 
   /**
-   * En franchise en base, on n'affiche pas de numéro de TVA : l'obligation ne
-   * vise que les assujettis, et publier un numéro qu'on n'utilise pas sème le
-   * doute chez qui lit une facture. C'est la mention de l'article 293 B qui est
-   * attendue à la place.
-   *
-   * Confirmé par Romain le 17 août 2026 : l'activité est sous les seuils. À
-   * revoir si elle les dépasse — trente-sept mille cinq cents euros de
-   * prestations de services, quarante et un mille deux cent cinquante en seuil
-   * majoré.
+   * En franchise en base, pas de numéro de TVA : c'est la mention de l'article
+   * 293 B qui est attendue. À revoir si l'activité dépasse les seuils (37 500 €
+   * de prestations de services, 41 250 € en seuil majoré).
    */
   // i18n-ignore — mention de droit français, dite en français ; la version anglaise la traduit dans ses messages.
   tva: "TVA non applicable, article 293 B du Code général des impôts.",
 
   /**
-   * La date à laquelle les engagements des sous-traitants ont été relus, et où
-   * leurs identités et adresses ont été reprises de leurs propres documents
-   * juridiques. Ce n'est pas une date de publication : c'est celle d'une
-   * vérification, et c'est exactement le genre de mention qu'on peut demander de
-   * justifier. À refaire une fois par an.
+   * La date de relecture des engagements des sous-traitants (identités et
+   * adresses reprises de leurs documents juridiques), pas une date de
+   * publication. À refaire une fois par an.
    *
-   * Une date et non un texte : les pages légales la disent dans la langue de
-   * qui les lit. Minuit UTC, et formatée en UTC — c'est un jour, pas un instant.
+   * Minuit UTC, formatée en UTC : c'est un jour, pas un instant.
    */
   verifieLe: new Date("2026-08-24T00:00:00Z"),
 } as const;
@@ -78,22 +61,17 @@ export function dateDeVerification(etiquetteIntl: string): string {
 }
 
 /**
- * L'adresse de contact, et elle seule.
- *
- * Une seule boîte pour tout — contact, signalements, demandes relatives aux
- * données. Annoncer trois alias dont deux n'existent pas serait promettre des
- * canaux qui rebondissent, et une demande d'accès qui rebondit est un manquement,
- * pas un détail de configuration.
+ * L'unique adresse de contact, y compris pour les signalements et les demandes
+ * relatives aux données : n'annoncer aucun alias qui n'existe pas, une demande
+ * d'accès qui rebondit est un manquement.
  */
 export const CONTACT = {
   email: "contact@kairn.me",
 } as const;
 
 /**
- * L'autorité de contrôle compétente. Coordonnées relevées sur cnil.fr.
- *
- * Elle doit figurer dans la politique de confidentialité : sans elle, le droit de
- * réclamation est mentionné sans qu'on sache où l'exercer.
+ * L'autorité de contrôle compétente, relevée sur cnil.fr. La politique de
+ * confidentialité doit dire où exercer le droit de réclamation.
  */
 export const AUTORITE = {
   // i18n-ignore — nom officiel de l'autorité ; la version anglaise le présente dans ses messages.

@@ -21,36 +21,26 @@ import { signalerUneBascule } from "./signalement-de-bascule";
 /**
  * Le seul point d'entrée vers le modèle. C'est lui qui protège le budget.
  *
- * Les appels réseau vivent dans `fournisseurs/` — un pont par lignée, derrière
- * une interface commune. Ici, on résout le pont depuis la config, on garde les
- * garde-fous (interrupteur, mode mock, réservation), et on écrit au registre —
- * succès comme échec. Aucun retry.
+ * Les appels réseau vivent dans `fournisseurs/`. Ici : garde-fous
+ * (interrupteur, mock, réservation), registre `AiCall` succès comme échec, et
+ * aucun retry.
  *
- * **Repli automatique.** Quand l'appel tombe — réseau, 5xx, sortie invalide ou
- * tronquée —, Sonnet prend le relais : mêmes prompts, même schéma, deux
- * campagnes ont validé qu'ils tiennent le même contrat. La bascule est marquée
- * dans `AiCall.basculee`, et au-delà de cinq bascules par jour, une alerte part
- * par email.
+ * Quand l'appel tombe — réseau, 5xx, sortie invalide ou tronquée —, Sonnet
+ * prend le relais sur le même pont, mêmes prompts, même schéma. La bascule est
+ * marquée dans `AiCall.basculee` et alerte au-delà de `SEUIL_BASCULES` par jour.
  *
- * **Le repli reste chez le fournisseur primaire**, sur un second modèle. Il
- * passait par Anthropic en direct, ce qui obligeait à financer un second compte
- * pour une dépense presque nulle. Ce que ce repli-là couvrait en plus — une
- * panne d'OpenRouter lui-même — n'est pas couvert autrement dans ce projet :
- * l'hébergeur et la base n'ont pas de second fournisseur non plus, et payer une
- * redondance ici pendant qu'elle manque là serait acheter l'assurance où elle
- * est facile, pas où elle sert. Le pont Anthropic reste dans le code : une
- * variable d'environnement suffit à basculer dessus le jour où il le faudrait.
+ * Le repli reste chez le fournisseur primaire : une panne d'OpenRouter lui-même
+ * n'est pas couverte, pas plus que celles de l'hébergeur ou de la base, et un
+ * second compte payé pour ce seul cas achèterait la redondance où elle est
+ * facile, pas où elle sert. Le pont Anthropic reste câblé pour une bascule
+ * manuelle par variable d'environnement.
  */
 
 const MOCK_LATENCY_MS = 300;
 
 /**
- * Le modèle du repli, par fournisseur — Sonnet des deux côtés, la ligne de fond
- * éprouvée.
- *
- * Deux entrées pour un seul modèle, parce que l'identifiant dépend de la route :
- * OpenRouter veut le nom préfixé, le SDK d'Anthropic le nom court. Il est nommé
- * ici et non lu dans `AI_MODEL`, qui porte le modèle primaire.
+ * Le modèle du repli. Deux entrées pour un seul modèle : OpenRouter veut le nom
+ * préfixé, le SDK d'Anthropic le nom court. `AI_MODEL` porte le primaire.
  */
 export const MODELE_DE_REPLI: Record<Fournisseur, string> = {
   openrouter: "anthropic/claude-sonnet-5",
@@ -71,40 +61,28 @@ export type CallAIParams<T> = {
   messages: AiMessage[];
   maxTokens?: number;
   /**
-   * Le modèle, quand il ne doit pas être celui de la configuration.
+   * Le modèle, quand il ne doit pas être celui de la configuration : les juges
+   * du banc, des décisions binaires qui coûteraient dix fois plus sur le modèle
+   * d'extraction.
    *
-   * Ajouté pour les juges du banc, qui sont des décisions locales et binaires :
-   * les faire tourner sur le modèle d'extraction coûterait dix fois plus pour
-   * la même réponse. Le modèle retenu part au registre `AiCall` et au rapport —
-   * un verdict ne veut rien dire si l'on ignore qui l'a rendu.
-   *
-   * N'en fais pas un réglage de confort. Le produit garde `AI_MODEL` : deux
-   * chemins d'ingestion sur deux modèles différents rendraient les mesures
-   * incomparables, ce qui est exactement ce que ce banc existe pour éviter.
-   *
-   * **Coupe aussi le repli automatique** : une surcharge de modèle par
-   * l'appelant est une décision locale, on ne veut pas la voir remise en
-   * silence sur Sonnet.
+   * Pas un réglage de confort : le produit garde `AI_MODEL`, sinon deux chemins
+   * d'ingestion sur deux modèles rendraient les mesures incomparables. Coupe
+   * aussi le repli automatique (voir `doitBasculer`).
    */
   model?: string;
   userId?: string;
   jobId?: string;
   /**
-   * L'appel sert un visiteur sans compte.
-   *
-   * Déclaré et non déduit de l'absence d'`userId` : celle-ci couvre aussi les
-   * reprises par le cron et les outils internes, qui n'ont personne derrière et
-   * ne doivent pas puiser dans la part du public.
+   * L'appel sert un visiteur sans compte. Déclaré et non déduit de l'absence
+   * d'`userId`, qui couvre aussi le cron et les outils internes : ceux-là ne
+   * doivent pas puiser dans la part du public.
    */
   anonyme?: boolean;
 };
 
-/** Ré-export : `batch.ts` en a besoin sans importer le paquet. */
 /**
  * Émet une seule fois via le pont donné et journalise dans `AiCall`.
- *
- * `basculee` marque la ligne quand ce pont sert de repli — l'appel initial a
- * échoué, celui-ci est la seconde tentative sur Sonnet. Utilisé par `emit`.
+ * `basculee` marque la ligne de l'émission de repli.
  */
 async function emettreEtJournaliser<T>(
   pont: PontFournisseur,
@@ -154,8 +132,8 @@ async function emettreEtJournaliser<T>(
   const costUsd = computeCostUsd(config.model, sortie.consommation);
 
   try {
-    // Une réponse coupée porte une sortie incomplète mais parfois valide :
-    // huit concepts demandés, cinq rendus, aucune erreur. C'est un échec.
+    // Une réponse coupée peut rester valide au schéma (cinq concepts sur
+    // huit) : c'est un échec quand même.
     if (sortie.finishReason === "length") {
       throw new AITruncatedOutputError(contract.purpose, maxTokens);
     }
@@ -187,13 +165,11 @@ async function emettreEtJournaliser<T>(
 
 /** Décide si l'échec de l'appel doit basculer sur le modèle de repli. */
 function doitBasculer<T>(erreur: unknown, config: AiConfig, params: CallAIParams<T>): boolean {
-  // Rien à quoi basculer si le primaire est déjà le modèle de repli : le même
-  // appel une seconde fois n'est pas un repli, c'est le retry que ce fichier
-  // s'interdit.
+  // Primaire déjà sur le modèle de repli : rejouer l'appel serait le retry que
+  // ce fichier s'interdit.
   if (config.model === MODELE_DE_REPLI[config.fournisseur]) return false;
-  // Une surcharge de modèle vient d'un appelant qui cible un modèle précis
-  // (les juges du banc). Le remettre en silence sur Sonnet fausserait la
-  // mesure et casserait le contrat de `CallAIParams.model`.
+  // Un appelant qui cible un modèle précis (les juges du banc) ne doit pas être
+  // remis en silence sur Sonnet : la mesure serait faussée.
   if (params.model !== undefined) return false;
   if (!(erreur instanceof AiError)) return false;
   return CODES_DE_REPLI.has(erreur.code);
@@ -215,11 +191,9 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
     if (!doitBasculer(erreur, config, params)) throw erreur;
     // Le repli est une seconde émission réelle : il prend sa place au plafond
     // global, sinon une panne du primaire doublerait les émissions sous le même
-    // plafond. Plafond atteint, pas de repli : l'échec du primaire remonte.
+    // plafond. Plafond atteint, l'échec du primaire remonte.
     if (!(await reserverLaPlaceDuRepli(config))) throw erreur;
-    // Bascule : Sonnet reprend sur le même pont, mêmes prompts, même schéma.
-    // Pas de retry derrière — si le repli échoue aussi, l'erreur remonte à
-    // l'appelant.
+    // Si le repli échoue aussi, l'erreur remonte : pas de troisième tentative.
     const configRepli: AiConfig = { ...config, model: MODELE_DE_REPLI[config.fournisseur] };
     const resultat = await emettreEtJournaliser(pont, params, configRepli, true);
     signalerUneBascule(motifDeBascule(erreur));
@@ -232,8 +206,7 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
  * interrupteur, mode mock, part du compte, plafond journalier, émission avec
  * `max_tokens` explicite et sortie contrainte par grammaire, refus d'une
  * réponse tronquée, validation stricte, puis écriture au registre — succès
- * comme échec. Aucun retry sur le même pont ; bascule automatique de Luna
- * vers Sonnet quand Luna tombe (voir `emit`).
+ * comme échec. Aucun retry ; un seul repli vers Sonnet (voir `emit`).
  */
 export async function callAI<T>(params: CallAIParams<T>): Promise<T> {
   const effective = await lireLaConfigEffective();

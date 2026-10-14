@@ -10,20 +10,12 @@ import { SignatureInvalideError } from "./erreurs";
 import { lireLeRapport } from "./rapport";
 
 /**
- * Le seul chemin par lequel un compte devient payant.
+ * Le seul chemin par lequel un compte devient payant : la page de retour et la
+ * session Checkout sont atteignables sans payer, le webhook seul est signé.
  *
- * Ni la page de retour, ni l'écran de l'offre, ni la session Checkout n'ouvrent
- * de droit : tous peuvent être atteints par quelqu'un qui n'a rien payé. Le
- * webhook, lui, porte une signature — c'est ce qui fait qu'on peut le croire, et
- * c'est pour ça que la vérification n'a pas d'échappatoire ici.
- *
- * **Ce qui n'est pas un abonnement est ignoré, pas refusé.** Stripe envoie ce
- * qu'on lui a demandé et un peu plus ; répondre en erreur à un événement dont on
- * n'a rien à faire ferait relancer Stripe pendant trois jours pour rien, et
- * finirait par faire couper l'endpoint.
+ * Ce qui n'est pas un abonnement est ignoré, pas refusé : une erreur ferait
+ * relancer Stripe pendant trois jours, puis couper l'endpoint.
  */
-
-/** Les trois événements qui disent l'état d'un abonnement portent l'objet entier. */
 
 /** Ce qu'un événement a produit, pour que le journal le dise en un mot. */
 export type Traitement =
@@ -42,11 +34,8 @@ function identifiantDuClient(client: Stripe.Subscription["customer"]): string {
 }
 
 /**
- * Vérifie la signature, puis applique.
- *
- * La signature est vérifiée sur le corps **brut**. C'est la seule raison pour
- * laquelle le route handler lit du texte et non du JSON : reformater l'objet,
- * même à l'identique, change les octets et casse la vérification.
+ * Vérifie la signature, puis applique. Sur le corps brut : le route handler lit
+ * du texte et non du JSON, car reformater changerait les octets signés.
  */
 export async function traiterLeWebhook(corps: string, signature: string): Promise<Traitement> {
   const { secretDuWebhook } = lireConfigDePaiement();
@@ -58,11 +47,8 @@ export async function traiterLeWebhook(corps: string, signature: string): Promis
     throw new SignatureInvalideError({ cause });
   }
 
-  // Un `switch` et non un test d'appartenance : c'est lui qui apprend au
-  // compilateur que ces trois types-là portent un abonnement, et pas l'un des
-  // quatre-vingts autres objets que `data.object` peut contenir. Aucune
-  // assertion de type n'est nécessaire, et un quatrième cas ajouté un jour sans
-  // son traitement ne compilera pas.
+  // Un `switch` et non un test d'appartenance : c'est lui qui fait savoir au
+  // compilateur que `data.object` est un abonnement, sans assertion de type.
   switch (evenement.type) {
     case "customer.subscription.created":
     case "customer.subscription.updated":
@@ -74,12 +60,9 @@ export async function traiterLeWebhook(corps: string, signature: string): Promis
 }
 
 /**
- * Écrit ce que l'abonnement dit, pour le compte qui porte ce client Stripe.
- *
- * Un client inconnu n'est pas une erreur : le même compte Stripe peut servir un
- * autre produit, et un abonnement créé à la main depuis le tableau de bord n'a
- * pas de ligne chez nous. On le dit au journal et on rend la main — relancer
- * n'y changerait rien.
+ * Écrit ce que l'abonnement dit, pour le compte qui porte ce client Stripe. Un
+ * client inconnu (autre produit, abonnement créé à la main) n'est pas une
+ * erreur : relancer n'y changerait rien.
  */
 async function appliquer(abonnement: Stripe.Subscription, evenementA: Date): Promise<Traitement> {
   const client = identifiantDuClient(abonnement.customer);

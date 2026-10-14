@@ -2,10 +2,9 @@
  * La landing hors de l'essai : l'ouverture, l'en-tête public, le sentier, le
  * panneau de roche et le pied de page.
  *
- * Les deux lignes de l'ouverture règlent la taille du titre : `--t-ouverture`
- * divise la colonne par la largeur de « Tu lis beaucoup. ». Une phrase plus
- * longue, ici ou dans une autre langue, se remesure avant de partir — sinon le
- * titre passe à la ligne.
+ * `--t-ouverture` est calibré sur la largeur de « Tu lis beaucoup. » : une
+ * ligne d'ouverture plus longue, ici ou traduite, se remesure, sinon le titre
+ * passe à la ligne.
  */
 export const accueil = {
   hero: {

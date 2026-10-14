@@ -6,13 +6,11 @@ import type { RenderedEmail } from "./daily-reminder";
 /**
  * La relance d'un compte resté vide, une fois, quelques jours après l'inscription.
  *
- * **Elle constate, elle ne reproche pas.** Quelqu'un qui s'est inscrit sans rien
- * déposer n'a rien fait de mal : le plus souvent il n'a pas vu quoi mettre dans
- * l'écran de dépôt. L'email répond à ça et à rien d'autre — il donne des
- * exemples assez ordinaires pour qu'on en ait un sous la main en lisant.
+ * Elle constate sans reprocher : le plus souvent, on n'a pas vu quoi déposer,
+ * et l'email donne des exemples assez ordinaires pour en avoir un sous la main.
  *
- * Pas de compteur, pas de série, pas de progression : ce compte n'en a aucune,
- * et lui en montrer une à zéro serait lui dire qu'il est en retard.
+ * Pas de compteur ni de série : à zéro, ils diraient au compte qu'il est en
+ * retard.
  */
 
 export type RelanceDuCompteVidePayload = Record<string, never>;

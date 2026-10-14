@@ -1,10 +1,6 @@
 /**
- * Le retour sur le produit, depuis les réglages.
- *
- * Les libellés des sujets sont redits ici plutôt que lus dans
- * `lib/retours/libelle-du-sujet.ts` : celui-là sert aussi l'écran interne et
- * l'email d'alerte, qui restent en français quelle que soit la langue de qui
- * écrit.
+ * Le retour sur le produit, depuis les réglages. Les sujets sont redits ici :
+ * `lib/retours/libelle-du-sujet.ts` sert l'exploitant, toujours en français.
  */
 export const retour = {
   sujet: "De quoi s'agit-il",

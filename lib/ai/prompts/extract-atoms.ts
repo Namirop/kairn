@@ -3,165 +3,43 @@ import type { LangueDExtraction } from "./consignes-de-langue";
 /**
  * Découpage d'un Input en concepts unitaires.
  *
- * Ce texte est fourni par Romain et se recopie mot pour mot : il ne se
- * reformule pas sans un passage au banc (`scripts/evaluation/evaluer-generation.ts`).
- * Les noms de champs cités ici — `nature`, `uncertain`, `rejected` — sont ceux du
- * schéma de `lib/ai/schemas.ts` ; les deux ne peuvent pas diverger. Les valeurs
- * de `nature` sont celles de l'enum Prisma `InputNature`, aux mêmes lettres.
+ * Ce texte se recopie mot pour mot : il ne se reformule pas sans un passage au
+ * banc (`scripts/evaluation/evaluer-generation.ts`). Plusieurs règles n'y sont
+ * pas passées et se jugent sur les dépôts réels. Les champs cités — `nature`,
+ * `uncertain`, `rejected`, `retenu` — sont ceux de
+ * `lib/ai/schemas/extract-atoms.ts`, et les valeurs de `nature` celles de
+ * l'enum Prisma `InputNature` : rien ne doit diverger.
  *
- * **La section « QUAND FUSIONNER » a été ajoutée le 19 août 2026** à la lecture
- * des 64 doublons confirmés par le juge du doublon, dont 43 hiérarchiques (A
- * couvre B). Le prompt disait déjà « autant que le contenu en porte » sans
- * jamais expliquer *quand ne pas en faire un nouveau*. Trois pièces ajoutées :
- * la règle de fusion (une conséquence directe entre dans son concept parent),
- * le contexte du coût (chaque concept produit 3-4 questions repassées pendant
- * des mois), et un rappel que la règle de tri existante reste — le plafond
- * serveur en dépendait alors.
+ * Ce qui paraîtrait superflu et ne l'est pas :
+ * - L'ordre du texte est demandé, pas un classement par importance : le modèle
+ *   rend l'ordre de lecture quoi qu'on lui dise, et c'est ce qui permet à
+ *   l'écran de dire où la lecture s'est arrêtée. Une propriété de distribution
+ *   ne se tient pas par de la prose.
+ * - « Une seule chose par concept » est bornée aux mécanismes différents : plus
+ *   zélée, elle ferait revenir les doublons que « QUAND FUSIONNER » écarte.
+ * - Le nombre de questions par concept n'est pas laissé au modèle : les quatre
+ *   facettes sont imposées, et le concept pauvre est traité dans
+ *   `generate-variants.ts` (« la fidélité prime sur la variété »).
+ * - Une comparaison doit porter ses deux termes parce que l'écran de révision
+ *   ne montre jamais les concepts voisins.
+ * - L'indicatif est exigé sur un contenu douteux : le doute est porté par
+ *   `uncertain`, et une tournure rapportée resterait gravée après confirmation.
+ * - Le contre-exemple `PERSONNEL` est là parce que la frontière est étroite :
+ *   une procédure d'équipe s'apprend, une intention sur cette équipe non.
+ * - La langue de sortie est imposée sans condition (`consignes-de-langue.ts`) :
+ *   « écris dans la langue du dépôt » se trompait dès qu'un texte citait une
+ *   langue étrangère. La seule règle restante est de ne pas traduire le cité.
+ * - Le code cité va entre accents graves parce que le rendu en jetons ne
+ *   relève que ceux-là ; le stock déjà écrit est réparé à la lecture par
+ *   `releverLeCodeCite`.
  *
- * **Cette règle de tri a été retirée le 4 septembre 2026.** Elle demandait de
- * classer du plus important au moins important, pour que le plafond serveur
- * puisse couper la queue sans rien perdre d'essentiel. Mesuré sur le seul dépôt
- * tronqué de la production : dix-huit des vingt concepts gardés se suivaient dans
- * l'ordre exact du texte, et le dernier tombait à 87 % de sa longueur. Le modèle
- * rendait l'ordre de lecture, pas un classement — c'est la cinquième propriété de
- * distribution que ce projet aurait tenue par de la prose, après le plafond de
- * concepts, la langue, la position de la bonne réponse et la part d'affirmations
- * fausses. Aucune n'a tenu.
- *
- * L'ordre du texte est donc **demandé** au lieu d'être subi : c'est ce que le
- * modèle fait déjà, c'est ce que la liste du dépôt affiche, et c'est ce qui
- * permet à l'écran de dire où la lecture s'est arrêtée quand elle s'arrête.
- *
- * **Deux règles ajoutées le 4 septembre 2026, à la relecture d'un dépôt de
- * 7 431 signes.**
- *
- * 1. *Le degré de certitude ne s'ajoute pas.* La source disait « le navigateur
- *    consulte sa liste HSTS », la sortie a écrit « peut consulter ». Le modèle
- *    se couvre tout seul, et « peut », « généralement », « typiquement »,
- *    « devraient idéalement » revenaient partout. Ce n'est pas de la prudence :
- *    c'est un concept rendu flou, donc une question dont la bonne réponse est
- *    floue — sur un format où l'on se note soi-même, personne ne sait plus s'il
- *    avait juste. La section interdisait déjà d'ajouter du **contenu** ; elle ne
- *    disait rien de la **nuance**.
- * 2. *Un concept affirme une seule chose.* Un des vingt empilait la limite de
- *    HTTP/1.1, le multiplexage de HTTP/2 et le blocage de tête de file qui
- *    persiste malgré lui — trois mécanismes en un. « QUAND FUSIONNER » disait
- *    quand ne pas séparer et n'avait pas son test symétrique ; le voici, et il
- *    est opérationnel : si l'énoncé a besoin de « mais » ou « tandis que » pour
- *    relier deux mécanismes, c'est deux concepts.
- *
- * **Une troisième le 4 septembre, relevée sur le premier dépôt qui en a produit.**
- * Le modèle marquait bien les affirmations douteuses — trois sur quatre justes au
- * contrôle —, mais il prenait aussi ses distances *dans le texte* : « le dépôt
- * affirme que », « X est présenté comme ». Quatre concepts sur trente-six. Le
- * doute est déjà porté par le drapeau, qui s'affiche à côté ; le redire dans le
- * concept le grave, et il y reste le jour où la personne confirme — une question
- * servie porte alors « la température est **présentée comme** plus déterminante »,
- * et interroge sur ce que dit le dépôt plutôt que sur le fait. La consigne
- * « telle qu'elle a été déposée » existait déjà ; elle dit maintenant ce qu'elle
- * veut dire.
- *
- * **La seconde peut faire pencher trop loin**, et c'est ce qu'il faudra
- * regarder : la section de fusion a été écrite sur 64 doublons mesurés, et un
- * test de découpe trop zélé les ferait revenir. Elle est volontairement bornée
- * aux *mécanismes différents* — pas à toute conjonction. Ces deux règles partent
- * en production sans passage au banc, sur décision de Romain : elles se jugeront
- * sur les dépôts réels.
- *
- * **Ce qui n'a pas été fait, et pourquoi.** Faire varier le nombre de questions
- * de deux à cinq selon les facettes « réellement trouvées » a été proposé et
- * écarté : les quatre facettes ne se trouvent pas, elles sont imposées, et c'est
- * cette contrainte qui empêche de servir quatre habillages du même angle. Le cas
- * du concept pauvre est déjà traité, en sens inverse et exprès — voir
- * `generate-variants.ts`, « la fidélité prime sur la variété ».
- *
- * **Le critère d'altérité a été ajouté le 27 août 2026**, à la demande de
- * Romain, après que E16 a été rejeté puis accepté sur deux tirages du même
- * texte. Accepté, il donnait un texte à trous sur le souhait que la personne
- * venait d'exprimer : « Tu veux améliorer ta communication au travail […] car
- * tu penses que cela réduirait les ___ ». « Trop vague » ne suffisait pas à
- * l'écarter — le texte n'est pas vague, il est invérifiable par un tiers. La
- * règle nomme donc ce qui manque vraiment : quelqu'un d'autre que l'auteur
- * peut-il se tromper dessus ? Le contre-exemple `PERSONNEL` est dans le prompt
- * parce que la frontière est étroite : une procédure d'équipe s'apprend, une
- * intention sur cette équipe non.
- *
- * **Une règle ajoutée le 8 septembre 2026, sur un concept servi en session.** « Le
- * gazon produit l'effet inverse, en accélérant la balle et en abaissant son
- * rebond » : la règle d'autoportance existait déjà, mais elle ne nommait que les
- * pronoms et les renvois explicites. « L'effet inverse » n'est ni l'un ni
- * l'autre — c'est une comparaison dont le terme de référence est le concept
- * d'à côté, et l'écran de révision ne montre jamais les concepts. La question
- * demandait donc de retrouver un mot qui ne se retrouve que si l'on a le voisin
- * sous les yeux. La règle nomme maintenant ce cas et donne la réécriture.
- *
- * Elle part en production sans passage au banc, sur décision de Romain, comme
- * les deux du 4 septembre : elle se jugera sur les dépôts réels.
- *
- * **La langue de sortie a été renversée le 9 septembre 2026, et `langue` retirée
- * avec elle.** La consigne disait « écris dans la langue du dépôt » ; trois dépôts
- * de production l'ont montrée intenable dès qu'un texte français cite une langue
- * étrangère. Une explication française de `ser` et `estar`, contenant « soy
- * francés » et « la sopa está fría », a rendu trois concepts intégralement en
- * espagnol — jusqu'aux étiquettes, `gramatica-espanola`. Une liste d'expressions
- * anglaises a rendu ses concepts en français et ses vingt-quatre questions en
- * anglais, options comprises.
- *
- * Le défaut n'est pas propre aux langues : il se déclenche sur tout dépôt dont la
- * langue apparente n'est pas celle dans laquelle la personne écrit. La cause est
- * la consigne elle-même — elle demandait une **décision** (quelle langue ?) avant
- * l'écriture, et c'est cette décision qui se trompait. Il n'y a plus de décision :
- * le français est inconditionnel, et la seule règle qui reste est de ne pas
- * traduire ce qui est cité.
- *
- * `langue` disparaît pour la même raison. Sa justification était « la déclarer et
- * l'écrire sont la même décision, prise une fois » ; sans décision, le champ n'a
- * plus d'objet, rien dans le produit ne le lisait — il n'existe pas de colonne
- * `langue` sur `Input` — et le laisser à côté d'une consigne inconditionnelle
- * rouvrait la porte qu'on ferme. Le banc s'en passe : `langueApparente` lit le
- * texte déposé directement, sans dépendre de ce que le modèle déclare. Le
- * contrôle y gagne — il ne pouvait pas voir un dépôt espagnol rendre des
- * concepts espagnols, les deux étant cohérents entre eux.
- *
- * **Une consigne facultative est acceptée depuis le 13/09/2026, à la demande de
- * Romain.** Elle répond à un besoin précis et étroit : une capture d'écran montre
- * souvent plus que ce qu'on voulait en garder — une barre latérale, un encart,
- * la moitié d'un autre sujet —, et recadrer l'image avant de la déposer n'est pas
- * toujours possible. Le champ vit à côté du dépôt, jamais dedans : voir
- * `depotADecouper`, qui ne pose des marques que lorsqu'il y a une consigne, et
- * laisse le message inchangé sinon.
- *
- * La section ci-dessous est écrite en **limites** et non en capacités, dans cet
- * ordre-là : ce qu'elle a le droit de faire tient en une ligne, et les quatre
- * suivantes disent ce qu'elle ne peut pas. C'est la seule entrée du produit par
- * laquelle une personne écrit dans un prompt, et la borne qui compte est la
- * première — elle retranche, elle n'ajoute pas. Sans elle, « ajoute que X »
- * ouvrirait une porte que tout le reste du prompt ferme depuis le début : un
- * concept doit être entièrement soutenu par ce qui a été déposé.
- *
- * Le risque d'injection est borné par construction et non par confiance : le
- * texte déposé est annoncé comme du contenu avant d'être posé entre ses marques,
- * la consigne ne peut atteindre ni le schéma de sortie ni les garde-fous de
- * dépense, et ce qu'on risque au pire est un découpage raté sur son propre
- * dépôt. Elle part en production sans passage au banc, comme les règles de
- * septembre : elle se jugera sur les dépôts réels.
- *
- * L'ironie du corpus : `18-anglais.txt` a été ajouté parce qu'il rendait des
- * concepts français là où on en voulait des anglais. C'est désormais le
- * comportement attendu, et le fichier devient un témoin de conformité.
- *
- * **Le code cité a quitté les guillemets le 30 septembre 2026.** « Tu les
- * recopies tels quels, entre guillemets » vise un mot étranger — « ser », « soy
- * francés » — et c'est la bonne façon de l'écrire. Elle attrapait aussi les
- * identifiants : sur les 531 questions vivantes de la production, soixante
- * citaient un terme de code entre guillemets contre vingt en accents graves.
- * Le rendu en jetons existe depuis longtemps, il ne voyait que les accents
- * graves, et trois citations de code sur quatre passaient donc à l'écran comme
- * de la ponctuation au milieu d'une phrase.
- *
- * La lecture répare le stock de son côté, et relève à sa place ce qui est cité
- * sans espace et porte un signe qu'aucun mot de prose ne porte — voir
- * `releverLeCodeCite`. La consigne, elle, vaut pour ce qui s'écrira.
+ * La consigne facultative vit à côté du dépôt, jamais dedans (voir
+ * `depotADecouper`). C'est la seule entrée par laquelle une personne écrit dans
+ * un prompt : sa section est rédigée en limites, et la première — elle
+ * retranche, elle n'ajoute pas — garde la règle qu'un concept est entièrement
+ * soutenu par le dépôt. L'injection est bornée par construction : le dépôt est
+ * annoncé comme du contenu, la consigne n'atteint ni le schéma ni les
+ * garde-fous de dépense, et le pire est un découpage raté sur son propre dépôt.
  */
 export function promptDExtraction(langue: LangueDExtraction): string {
   return `Tu découpes ce qu'une personne vient d'apprendre en concepts unitaires, pour qu'ils

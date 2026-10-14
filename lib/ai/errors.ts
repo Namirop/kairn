@@ -41,9 +41,8 @@ export class AIQuotaError extends AiError {
 /**
  * Ce compte a pris toute sa part de la journée.
  *
- * Distincte de la précédente, et il faut qu'elle le reste : l'une dit « le
- * produit est plein », l'autre « tu es plein ». La première se reporte au
- * lendemain sans rien coûter à personne ; la seconde regarde son auteur.
+ * Distincte d'`AIQuotaError` : l'une dit « le produit est plein » et se
+ * reporte au lendemain, l'autre « tu es plein » et regarde son auteur.
  */
 export class AIUserQuotaError extends AiError {
   readonly code = "AI_USER_QUOTA";
@@ -59,15 +58,10 @@ export class AIUserQuotaError extends AiError {
 /**
  * Part du jour épuisée pour le trafic **sans compte**.
  *
- * Volontairement **pas** une sous-classe d'`AIQuotaError` : l'exécuteur traite
- * cette dernière comme un report, ce qui laisse le dépôt annoncer un travail en
- * cours. Ce serait le bon comportement pour un compte, qui reviendra demain ;
- * pour un visiteur, ça veut dire une page d'attente sans fin sur la seule page
- * qui convertit.
- *
- * Elle tombe donc dans le chemin ordinaire de l'échec, et le dépôt part en
- * `FAILED` — c'est-à-dire en **panne**, qui ne consomme pas d'essai. La visite
- * garde ce qui lui est dû, et l'écran dit que ça ne vient pas de son texte.
+ * Volontairement pas une sous-classe d'`AIQuotaError` : l'exécuteur traite
+ * celle-ci comme un report, ce qui laisserait un visiteur devant une attente
+ * sans fin. Elle suit le chemin ordinaire de l'échec : le dépôt part en
+ * `FAILED`, une panne qui ne consomme pas d'essai.
  */
 export class AIAnonymousQuotaError extends AiError {
   readonly code = "AI_ANONYMOUS_QUOTA";
@@ -81,9 +75,8 @@ export class AIAnonymousQuotaError extends AiError {
 }
 
 /**
- * La sortie du modèle ne respecte pas le schéma. Elle n'est pas réparée — mais
- * elle est conservée telle quelle dans `raw` : sans elle, on diagnostique une
- * anomalie de génération à l'aveugle.
+ * La sortie du modèle ne respecte pas le schéma. Elle n'est pas réparée, mais
+ * conservée dans `raw` pour le diagnostic.
  */
 export class AIInvalidOutputError extends AiError {
   readonly code = "AI_INVALID_OUTPUT";
@@ -102,27 +95,15 @@ export class AIInvalidOutputError extends AiError {
  * présent et syntaxiquement valide, mais incomplet : c'est un échec, pas un
  * succès partiel.
  *
- * **Ce n'est pas le signal qu'il faut relever `AI_MAX_TOKENS`**, contrairement à
- * ce que cette note disait jusqu'au 09/09/2026. Mesuré sur la seule troncature
- * du projet — une sur 156 écritures de questions : un appel ordinaire rend 1 792
- * jetons en moyenne et 8 369 au grand maximum, quand celui-là a tapé les 10 000
- * du plafond en 69 secondes, puis **de nouveau** 10 000 en 96 secondes sur le
- * repli Sonnet. Deux lignées différentes, le même mur : ce n'est pas une sortie
- * un peu trop longue, c'est une génération qui part en vrille.
+ * **Ce n'est pas le signal qu'il faut relever `AI_MAX_TOKENS`.** Un appel
+ * ordinaire rend ~1 800 jetons (8 400 au plus) ; la troncature mesurée a tapé
+ * les 10 000 du plafond deux fois, sur deux modèles différents : une génération
+ * qui part en vrille, pas une sortie un peu longue. Relever le plafond brûlerait
+ * plus de jetons et ferait déborder les 60 s du passage de cron.
  *
- * Le plafond est donc le coupe-circuit, pas la gêne. Le relever ferait brûler
- * plus de jetons à un appel qui ne finira pas davantage, et le ferait déborder
- * des soixante secondes du passage de cron — un job qui ne peut plus jamais
- * aboutir, à la place d'un qu'on rattrape.
- *
- * Ce qui rattrape, c'est `scinderApresTroncature` : les deux moitiés du groupe
- * de trois qui avait débordé ont rendu 1 051 et 1 247 jetons, soit deux appels
- * parfaitement ordinaires. Le contenu n'était pas en cause, la taille du groupe
- * l'était — pour cet appel-là, et pas pour les 155 autres.
- *
- * Le plafond ne se relève que pour un **concept seul** qui déborde : là, aucun
- * découpage ne reste, et c'est le seul cas que `scinderLeGroupe` ne sait pas
- * traiter. Il n'est jamais arrivé.
+ * Ce qui rattrape, c'est `scinderApresTroncature` : le groupe repart coupé en
+ * deux, en appels ordinaires. Le plafond ne se relève que pour un concept seul
+ * qui déborde, le seul cas que `scinderLeGroupe` ne sait pas traiter.
  */
 export class AITruncatedOutputError extends AiError {
   readonly code = "AI_TRUNCATED";
@@ -173,9 +154,8 @@ export class AIConfigError extends AiError {
 /**
  * Une forme ne se traduit pas en schéma de sortie.
  *
- * Levée avant d'émettre, jamais après : perdre en silence un mot-clé qui décide
- * de ce que le modèle a le droit d'écrire, c'est se retrouver un jour avec une
- * énumération qui n'en est plus une, sans rien pour l'expliquer.
+ * Levée avant d'émettre : perdre en silence un mot-clé qui contraint la sortie
+ * (une énumération, par exemple) la laisserait sans contrainte.
  */
 export class AISchemaError extends AiError {
   readonly code = "AI_SCHEMA";

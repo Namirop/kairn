@@ -2,20 +2,16 @@ import { z, type ZodType } from "zod";
 import { AISchemaError } from "./errors";
 
 /**
- * Le schéma envoyé à `output_config.format`, dérivé de la forme.
+ * Le schéma de sortie contrainte, dérivé de la forme Zod.
  *
- * Le helper du SDK fait ce travail, mais il rétrograde `enum` et `const` en
- * simple texte de description alors que la plateforme les documente comme
- * contraignables. Sur nos sorties, c'est la différence entre un format inventé
- * impossible et un format inventé rattrapé après coup — trois échecs du premier
- * passage. On dérive donc nous-mêmes.
+ * Pas le helper du SDK : il rétrograde `enum` et `const` en description alors
+ * que la grammaire sait les imposer, et un format inventé passe alors la
+ * génération pour n'échouer qu'à la validation.
  *
- * Deux natures de mots-clés, deux traitements. Ceux qui bornent une valeur —
- * longueurs, minimum, maximum — ne se font pas respecter par la grammaire :
- * ils partent dans la description, où le modèle les lit comme des indications,
- * et la validation Zod continue de les appliquer. Ceux qui décident de la
- * structure — `$ref`, `allOf`, `not` — n'ont pas d'équivalent en description :
- * les y verser reviendrait à les perdre en silence, alors on lève.
+ * Les mots-clés qui bornent une valeur (longueurs, minimum, maximum) ne sont pas
+ * imposables : ils partent dans la description, et Zod les applique ensuite.
+ * Ceux qui décident de la structure (`$ref`, `allOf`, `not`…) n'ont pas
+ * d'équivalent en description : les y verser les perdrait en silence, on lève.
  */
 
 export type OutputSchema = { type: "json_schema"; schema: Record<string, unknown> };
@@ -40,13 +36,9 @@ const FORMATS_CONNUS = new Set([
 const CONTRAINTES = ["type", "enum", "const", "required"];
 
 /**
- * Ceux-là décident de ce qu'un document a le droit d'être. On ne sait pas les
- * traduire, et une description ne les remplace pas.
- *
- * `$ref` et `$defs` sont le cas concret : Zod les produit dès qu'une forme est
- * réutilisée, et l'objet de facette de `generate_variants` l'est quatre fois.
- * Il les inline aujourd'hui ; le jour où ce défaut change, la contrainte
- * disparaîtrait sans un bruit.
+ * Les mots-clés structurels, intraduisibles. `$ref` et `$defs` sont le cas
+ * concret : Zod inline aujourd'hui la facette de `generate_variants`, réutilisée
+ * quatre fois ; si ce défaut change, on veut l'apprendre par une erreur.
  */
 const STRUCTURELS = [
   "$ref",

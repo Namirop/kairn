@@ -3,21 +3,12 @@ import { EMAIL_STYLE as S, renderShell } from "./shell";
 import type { RenderedEmail } from "./daily-reminder";
 
 /**
- * L'alerte d'exploitation quand un webhook de paiement n'aboutit pas.
+ * L'alerte d'exploitation quand un webhook de paiement n'aboutit pas : Stripe a
+ * encaissé, le compte reste gratuit, et Stripe renonce après trois jours de
+ * relances. Sans cet email, le seul signe serait une ligne de journal.
  *
- * **C'est la seule panne du produit qui coûte de l'argent à quelqu'un
- * d'autre.** Quand le webhook échoue, Stripe a encaissé et Kairn n'a rien
- * écrit : le compte reste gratuit alors qu'il est payé. Stripe relance pendant
- * trois jours puis renonce, et pendant ce temps le seul signe est une ligne de
- * journal que personne n'ouvre. La personne, elle, voit « Gratuit » sur son
- * écran de réglages et n'a aucune raison de penser à écrire.
- *
- * L'email dit donc les trois choses qui permettent d'agir sans ouvrir quoi que
- * ce soit : quel type d'événement, ce que l'erreur raconte, et où aller le
- * rejouer. Le tableau de bord Stripe garde chaque livraison et sait la
- * renvoyer — c'est la réparation, et elle tient en un clic une fois qu'on sait.
- *
- * Aucun désabonnement, même règle que les autres alertes d'exploitation.
+ * Il dit de quoi agir sans rien ouvrir : le type d'événement, l'erreur, et où
+ * le rejouer depuis le tableau de bord Stripe.
  */
 
 export type AlerteDePaiementPayload = {

@@ -2,15 +2,12 @@ import { z } from "zod";
 import { PaiementConfigError, PaiementLiveNonAutoriseError } from "./erreurs";
 
 /**
- * Les deux secrets du paiement, lus et validés à chaque usage plutôt qu'au
- * chargement du module — même convention que les garde-fous du modèle : couper
- * le paiement chez l'hébergeur doit prendre effet sans redémarrage.
+ * Les secrets du paiement, lus et validés à chaque usage plutôt qu'au
+ * chargement : couper le paiement chez l'hébergeur prend effet sans
+ * redémarrage.
  *
- * **Le mode test est le défaut, et il l'est par construction.** Une clé de
- * production est refusée tant que `PAIEMENT_LIVE` ne vaut pas `true`. C'est
- * l'équivalent de `MOCK_AI` pour l'argent : le geste dangereux demande d'être
- * énoncé, il ne s'obtient pas en collant la mauvaise ligne dans la mauvaise
- * colonne d'une interface d'hébergeur.
+ * Le mode test est le défaut : une clé de production est refusée tant que
+ * `PAIEMENT_LIVE` ne vaut pas `true`, comme `MOCK_AI` pour le modèle.
  */
 
 const schema = z.object({
@@ -32,20 +29,14 @@ const VARIABLE: Record<string, string> = {
 };
 
 /**
- * Ce qui distingue une clé de production d'une clé de test.
- *
- * Stripe préfixe les deux, et c'est le seul signe disponible sans appeler
- * l'API — on ne va pas faire un aller-retour réseau pour savoir si l'on a le
- * droit de parler.
+ * Ce qui distingue une clé de production : le préfixe Stripe, seul signe
+ * disponible sans appeler l'API.
  */
 const CLE_DE_PRODUCTION = /^(sk|rk)_live_/;
 
 /**
- * La configuration, ou une erreur qui nomme la variable fautive.
- *
- * Lève plutôt que de rendre un état dégradé : un paiement à moitié configuré
- * n'a aucun comportement acceptable, et le seul endroit où l'absence de
- * configuration est une réponse valable est l'écran, qui demande
+ * La configuration, ou une erreur qui nomme la variable fautive : un paiement à
+ * moitié configuré n'a aucun comportement acceptable. L'écran, lui, demande
  * `paiementOuvert()`.
  */
 export function lireConfigDePaiement(): ConfigDePaiement {
@@ -70,12 +61,9 @@ export function lireConfigDePaiement(): ConfigDePaiement {
 }
 
 /**
- * Le paiement est-il configuré ?
- *
- * Ne lève pas : c'est la question que pose l'écran de l'offre pour savoir s'il
- * a le droit de proposer d'acheter. Un déploiement sans clés reste parfaitement
- * utilisable — il montre l'offre et dit que le paiement n'est pas encore
- * ouvert, ce qui est vrai, plutôt que d'exposer un bouton qui casse.
+ * Le paiement est-il configuré ? Ne lève pas : un déploiement sans clés montre
+ * l'offre et dit que le paiement n'est pas ouvert, plutôt qu'un bouton qui
+ * casse.
  */
 export function paiementOuvert(): boolean {
   try {
@@ -83,9 +71,8 @@ export function paiementOuvert(): boolean {
 
     return true;
   } catch {
-    // Le silence est volontaire et n'en est pas un : le paiement fermé est un
-    // état normal du produit, pas un incident. Ce qui doit crier, c'est un
-    // achat tenté sans configuration — et celui-là passe par `lireConfigDePaiement`.
+    // Le paiement fermé est un état normal, pas un incident. Un achat tenté
+    // sans configuration, lui, lève par `lireConfigDePaiement`.
     return false;
   }
 }
@@ -94,16 +81,9 @@ export function paiementOuvert(): boolean {
 export type ModeDePaiement = "ferme" | "test" | "live";
 
 /**
- * L'état du paiement, pour l'écran qui le regarde.
- *
- * **Il se lit, il ne se change pas.** `PAIEMENT_LIVE` est le dernier verrou
- * avant d'encaisser du vrai argent avec une vraie clé : le rendre pilotable
- * depuis un écran web le rendrait franchissable d'un clic distrait, pour un
- * geste qu'on ne pose qu'une fois dans la vie d'un produit. C'est la même règle
- * que celle déjà écrite pour `ADMIN_EMAILS` — la liste qui décide qui ouvre
- * l'écran d'administration ne se modifie pas depuis cet écran.
- *
- * Ce qui manquait n'était pas l'interrupteur, c'était de savoir où l'on est.
+ * L'état du paiement, pour l'écran qui l'affiche. Il se lit, il ne se change
+ * pas : `PAIEMENT_LIVE` est le dernier verrou avant d'encaisser, il ne doit pas
+ * se franchir d'un clic (même règle que `ADMIN_EMAILS`).
  */
 export function modeDePaiement(): ModeDePaiement {
   try {
@@ -111,8 +91,7 @@ export function modeDePaiement(): ModeDePaiement {
 
     return CLE_DE_PRODUCTION.test(cleSecrete) ? "live" : "test";
   } catch {
-    // Même silence volontaire que `paiementOuvert()`, et pour la même raison :
-    // un paiement fermé est un état normal du produit, pas un incident.
+    // Comme dans `paiementOuvert()` : fermé est un état normal.
     return "ferme";
   }
 }

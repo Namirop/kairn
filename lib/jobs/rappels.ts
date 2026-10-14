@@ -8,28 +8,18 @@ import { localDay } from "@/lib/domain/local-day";
 import { selectDueForReminder } from "@/lib/domain/reminder-selection";
 
 /**
- * Les deux envois du soir et du matin, depuis le passage horaire.
+ * Les envois du passage horaire : rappel quotidien et alerte de série.
  *
- * Le passage ne décide rien lui-même : il lit les candidats, laisse les
- * fonctions pures trancher qui est à l'heure et dont la série est en sursis, puis
- * appelle `sendNotification` — qui vérifie une dernière fois le refus d'emails et
- * le réglage du type. Aucun chemin ne contourne ce dernier contrôle.
- *
- * Rien n'est envoyé deux fois le même jour : `EmailDelivery` porte la clé
- * `(compte, type, jour local)`, et elle est consultée avant l'envoi comme écrite
- * après. Un passage rejoué à la même heure ne réécrit donc rien.
- *
- * Les journaux ne portent que des identifiants et des comptes, jamais une adresse
- * ni un contenu.
+ * Les fonctions pures tranchent qui est à l'heure ; `sendNotification` vérifie
+ * en dernier le refus d'emails et le réglage du type, et aucun chemin ne le
+ * contourne. `EmailDelivery` (clé compte, type, jour local) empêche un second
+ * envoi le même jour, même si le passage est rejoué.
  */
 
 /**
- * Le rappel quotidien, pour ceux dont l'heure locale est arrivée.
- *
- * Un compte sans rien à revoir ne reçoit rien. Le rappel dit ce qui est dû ; à
- * zéro il n'a rien à dire, et un message quotidien qui annonce régulièrement
- * qu'il n'y a rien à faire est un message qu'on apprend à ne plus ouvrir — ce qui
- * abîme aussi la remise des suivants.
+ * Le rappel quotidien, pour ceux dont l'heure locale est arrivée. Un compte
+ * sans rien à revoir ne reçoit rien : un rappel qui n'annonce rien apprend à ne
+ * plus ouvrir les suivants.
  */
 export async function envoyerLesRappels(maintenant: Date = new Date()): Promise<Passage> {
   const candidats = await findReminderCandidates();
@@ -65,15 +55,10 @@ export async function envoyerLesRappels(maintenant: Date = new Date()): Promise<
 }
 
 /**
- * L'alerte de série, pour ceux qui vont perdre la leur ce soir.
- *
- * Trois conditions, dans cet ordre : il est l'heure chez la personne, sa série
- * existe et rien n'a été revu aujourd'hui, et il reste quelque chose de dû —
- * sans quoi l'alerte annoncerait une perte qu'on ne peut pas éviter.
- *
- * Cette dernière condition dit aussi une limite du produit telle qu'il est
- * aujourd'hui : une journée sans rien à revoir casse la série, et personne ne
- * peut rien y faire. L'alerte se tait alors plutôt que d'annoncer l'inévitable.
+ * L'alerte de série, pour ceux qui vont perdre la leur ce soir : l'heure est
+ * venue, la série est en sursis, et il reste quelque chose de dû. Sans rien de
+ * dû, la série casse quoi qu'on fasse ; l'alerte se tait plutôt que d'annoncer
+ * l'inévitable.
  */
 export async function envoyerLesAlertesDeStreak(maintenant: Date = new Date()): Promise<Passage> {
   const candidats = await findReminderCandidates("STREAK_ALERT");

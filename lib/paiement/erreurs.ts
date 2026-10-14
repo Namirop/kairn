@@ -28,11 +28,9 @@ export class PaiementConfigError extends PaiementError {
 
 /**
  * Une clé de production a été posée sans que la production soit demandée.
- *
- * C'est le garde-fou qui empêche un aperçu de branche ou une machine de
- * développement d'encaisser de vraies cartes. Il n'a rien de théorique : la
- * clé test et la clé live se ressemblent, elles se copient depuis la même page,
- * et l'erreur ne se voit qu'au premier relevé bancaire d'un client.
+ * Empêche un aperçu de branche ou une machine de dev d'encaisser de vraies
+ * cartes : les clés test et live se copient depuis la même page, et l'erreur ne
+ * se verrait qu'au relevé bancaire d'un client.
  */
 export class PaiementLiveNonAutoriseError extends PaiementError {
   readonly code = "PAIEMENT_LIVE_NON_AUTORISE";
@@ -68,11 +66,8 @@ export class RapportIllisibleError extends PaiementError {
 }
 
 /**
- * Un geste d'abonnement a été demandé sur un compte qui n'en a pas.
- *
- * Ce n'est pas une faute de l'utilisateur : c'est un écran qui a proposé
- * d'arrêter un abonnement déjà fini, ou deux onglets ouverts dont l'un est en
- * retard sur l'autre. Le message le dit sans accuser.
+ * Un geste d'abonnement a été demandé sur un compte qui n'en a pas : un onglet
+ * en retard, pas une faute de l'utilisateur.
  */
 export class AucunAbonnementError extends PaiementError {
   readonly code = "PAIEMENT_AUCUN_ABONNEMENT";
@@ -84,12 +79,9 @@ export class AucunAbonnementError extends PaiementError {
 }
 
 /**
- * Un achat a été demandé sur un compte qui a déjà un abonnement vivant.
- *
- * Le symétrique du précédent, et le plus coûteux des deux : arrêter deux fois
- * ne fait rien, payer deux fois fait deux abonnements. L'écran n'affiche pas le
- * bouton dans ce cas, donc y arriver suppose un onglet en retard ou un second
- * clic — deux choses ordinaires, dont aucune ne doit pouvoir débiter deux fois.
+ * Un achat a été demandé sur un compte qui a déjà un abonnement vivant. L'écran
+ * cache le bouton, mais un onglet en retard ou un second clic y mènent, et payer
+ * deux fois ferait deux abonnements.
  */
 export class AbonnementDejaOuvertError extends PaiementError {
   readonly code = "PAIEMENT_ABONNEMENT_DEJA_OUVERT";
@@ -101,11 +93,8 @@ export class AbonnementDejaOuvertError extends PaiementError {
 }
 
 /**
- * Le portail a été demandé pour un compte qui n'a pas de dossier Stripe.
- *
- * Un compte qui n'a jamais approché le paiement n'a pas de client chez Stripe,
- * donc rien à voir dans un portail — pas de facture, pas de carte. L'écran ne
- * propose pas le lien dans ce cas ; y arriver suppose un onglet en retard.
+ * Le portail a été demandé pour un compte qui n'a jamais approché le paiement,
+ * donc sans client chez Stripe. L'écran ne propose pas le lien dans ce cas.
  */
 export class AucunDossierStripeError extends PaiementError {
   readonly code = "PAIEMENT_AUCUN_DOSSIER";
@@ -119,17 +108,10 @@ export class AucunDossierStripeError extends PaiementError {
 /**
  * Cet objet Stripe a-t-il disparu — ou n'a-t-il jamais existé dans ce mode ?
  *
- * **Le cas qui a motivé cette fonction est la bascule.** Test et production sont
- * deux jeux de données étanches : un client créé avec une clé de test n'existe
- * pas pour une clé de production. Le jour où l'on bascule, toutes les lignes
- * `Subscription` de la base pointent vers des identifiants d'un monde qui n'est
- * plus le nôtre, et chaque appel échoue en `resource_missing`.
- *
- * Le second cas est banal : un objet supprimé depuis le tableau de bord.
- *
- * Les deux appellent la même réponse — cet identifiant ne vaut plus rien, il
- * faut le remplacer ou l'oublier — et aucun des deux n'est transitoire, donc
- * réessayer ne servirait à rien.
+ * Test et production sont deux jeux de données étanches : un identifiant écrit
+ * en base sous une clé de test échoue en `resource_missing` sous une clé de
+ * production, comme un objet supprimé depuis le tableau de bord. Dans les deux
+ * cas l'identifiant est à remplacer ou oublier ; réessayer ne sert à rien.
  */
 export function objetIntrouvableChezStripe(erreur: unknown): boolean {
   return (

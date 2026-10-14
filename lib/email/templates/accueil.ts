@@ -4,26 +4,18 @@ import { EMAIL_STYLE as S, renderShell } from "./shell";
 import type { RenderedEmail } from "./daily-reminder";
 
 /**
- * L'accueil, une fois, à l'inscription.
+ * L'accueil, une fois, à l'inscription : il dit quoi faire maintenant, et rien
+ * d'autre.
  *
- * Il dit quoi faire maintenant, et rien d'autre. Pas de visite guidée des
- * fonctions, pas de bienvenue qui s'étale : quelqu'un qui vient de créer un
- * compte a une intention en tête, et le seul service à lui rendre est de la
- * laisser aboutir en un clic.
- *
- * **Deux corps, et c'est le point délicat.** Un compte peut naître déjà plein :
- * la reprise de visite rattache ce qu'un visiteur avait déposé avant de
- * s'inscrire. Lui dire « dépose ta première chose » serait faux, et ferait
- * douter de ce qu'il vient justement de voir arriver. Le corps se choisit donc
- * sur ce que le compte porte réellement, pas sur le fait qu'il soit neuf.
+ * Deux corps : un compte peut naître déjà plein, quand la reprise de visite
+ * rattache un essai. Le corps se choisit sur ce que le compte porte, pas sur le
+ * fait qu'il soit neuf.
  */
 
 export type AccueilPayload = {
   /**
-   * Concepts déjà au compte à l'instant de l'envoi.
-   *
-   * Zéro est le cas courant — on s'inscrit avant de déposer. Au-dessus de zéro,
-   * c'est un essai repris, et l'email pointe la session plutôt que le dépôt.
+   * Concepts déjà au compte à l'envoi. Au-dessus de zéro, c'est un essai
+   * repris, et l'email pointe la session plutôt que le dépôt.
    */
   conceptCount: number;
 };

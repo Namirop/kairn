@@ -3,20 +3,13 @@ import { Resend } from "resend";
 /**
  * Le seul fichier qui importe Resend.
  *
- * Sans `RESEND_API_KEY`, rien ne part : l'email est écrit dans les journaux avec
- * son destinataire et son objet, jamais son contenu. C'est ce qui permet de
- * développer toute la chaîne de notification sans compte fournisseur.
+ * En développement, sans `RESEND_API_KEY`, rien ne part : l'objet est
+ * journalisé, jamais le contenu. Celui du code de connexion porte le code,
+ * c'est là qu'on le lit pour se connecter en local.
  *
- * **Mais seulement en développement.** Une fois déployé, ce silence est un
- * piège : le code de connexion est la seule porte d'entrée du produit, l'écran
- * annonce « code envoyé » puisque rien n'a échoué, et personne ne peut entrer
- * sans que rien ne le signale nulle part. Une variable oubliée doit se voir
- * comme une panne, pas se déguiser en succès — c'est la règle du projet sur les
- * erreurs, appliquée à la seule qui rendrait le produit inaccessible.
- *
- * L'objet est journalisé, et celui du code de connexion **porte le code** : sans
- * compte Resend, c'est là qu'on le lit pour se connecter en local. Le chemin
- * lève en production, donc ce code ne peut pas s'y retrouver dans un journal.
+ * En production, ce chemin lève : l'écran annoncerait « code envoyé » et
+ * personne ne pourrait entrer sans que rien ne le signale. Le code ne peut donc
+ * pas s'y retrouver dans un journal.
  */
 
 export type OutgoingEmail = {

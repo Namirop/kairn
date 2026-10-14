@@ -9,16 +9,12 @@ import ocrExtract from "./fixtures/ocr-extract.json";
 import { promptsSysteme } from "./prompts";
 
 /**
- * Le mode mock. Chaque intention porte plusieurs cas, et la sélection est
- * déterministe : deux exécutions sur le même dépôt donnent le même résultat.
+ * Le mode mock, déterministe : un même dépôt rend toujours le même cas.
  *
- * Un cas se choisit de deux façons. Par mot-clé d'abord : c'est ce qui permet
- * de servir un rejet sur une liste de courses ou un `uncertain` sur une
- * affirmation fausse, que la longueur du texte ne distingue pas. Par longueur
- * ensuite : une phrase isolée ne rend qu'un concept, un article en rend huit.
- *
- * Les fixtures passent par le même schéma Zod que les vraies réponses : une
- * fixture mal formée échoue exactement comme une sortie de modèle invalide.
+ * Un cas se choisit par mot-clé d'abord — un rejet sur une liste de courses, un
+ * `uncertain` sur une affirmation fausse, que la longueur ne distingue pas —,
+ * puis par longueur. Les fixtures passent par le même schéma Zod que les vraies
+ * réponses et échouent de la même façon.
  */
 
 type FixtureCase = {
@@ -33,12 +29,9 @@ type FixtureCase = {
 type FixtureFile = { cases: FixtureCase[] };
 
 /**
- * Les fixtures, une par intention **du produit**.
- *
- * Le banc n'en a pas, et n'en aura pas : il refuse de démarrer en mode mock,
- * parce que juger des fixtures ne mesurerait rien. Un juge appelé sous
- * `MOCK_AI=true` doit donc échouer bruyamment plutôt que rendre un verdict
- * fabriqué — c'est ce que fait `loadFixture` ci-dessous.
+ * Une fixture par intention du produit. Le banc n'en a pas : juger des
+ * fixtures ne mesurerait rien, et `loadFixture` fait échouer un juge appelé
+ * sous `MOCK_AI=true` plutôt que de fabriquer un verdict.
  */
 const FIXTURES: Record<AiPurposeProduit, FixtureFile> = {
   extract_atoms: extractAtoms,
@@ -47,13 +40,11 @@ const FIXTURES: Record<AiPurposeProduit, FixtureFile> = {
 };
 
 /**
- * Les mêmes cas, écrits en anglais, pour un dépôt dont la consigne est la
- * consigne anglaise. La lecture d'image n'en a pas : elle transcrit ce qu'elle
- * voit, dans la langue de l'image, et sa consigne est la même dans les deux.
+ * Les mêmes cas en anglais. La lecture d'image n'en a pas : elle transcrit dans
+ * la langue de l'image, avec la même consigne dans les deux.
  *
  * La langue se lit sur la consigne reçue plutôt que sur un paramètre de plus :
- * c'est la seule chose qui distingue un appel anglais d'un appel français, et
- * c'est exactement ce que le modèle recevrait.
+ * c'est ce qui distingue l'appel, comme pour le modèle.
  */
 const FIXTURES_EN: Partial<Record<AiPurposeProduit, FixtureFile>> = {
   extract_atoms: extractAtomsEn,

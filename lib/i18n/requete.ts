@@ -6,9 +6,8 @@ import { MESSAGES } from "./messages";
 /**
  * Ce que next-intl sait de la requête : sa langue et ses textes.
  *
- * Pas de fuseau ici. Les dates s'affichent dans celui de la personne, qui vit
- * dans ses réglages et que chaque écran passe déjà là où il formate ; en poser
- * un par défaut ferait afficher une heure fausse à quiconque l'oublierait.
+ * Pas de fuseau : chaque écran passe celui de la personne là où il formate, et
+ * un défaut ferait afficher une heure fausse à qui l'oublierait.
  */
 export default getRequestConfig(async () => {
   const langue = await langueDeLaRequete();
