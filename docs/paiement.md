@@ -222,8 +222,9 @@ Le paiement est l'endroit du produit où une erreur coûte de l'argent réel à 
 verrous, dans le même esprit que `MOCK_AI` pour le modèle :
 
 1. **Le mode test est le défaut par construction.** Une clé `sk_live_` est refusée tant que
-   `PAIEMENT_LIVE=true` n'est pas posée. Le geste dangereux doit être énoncé ; il ne s'obtient pas
-   en collant la mauvaise ligne dans la mauvaise colonne d'une interface d'hébergeur.
+   `PAIEMENT_LIVE=true` n'est pas posée : le paiement reste fermé, et le journal dit pourquoi. Le
+   geste dangereux doit être énoncé ; il ne s'obtient pas en collant la mauvaise ligne dans la
+   mauvaise colonne d'une interface d'hébergeur.
 2. **Sans clés, le paiement est fermé et le dit.** `paiementOuvert()` rend faux, l'écran annonce que
    le paiement n'est pas ouvert — ce qui est vrai — plutôt que d'exposer un bouton qui casse.
 3. **La configuration est lue à chaque usage**, pas au chargement du module : couper le paiement
