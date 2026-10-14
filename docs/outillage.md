@@ -158,6 +158,23 @@ retiré, c'est leur présence dans une liste qu'on lit pour savoir ce qu'on peut
 
 ---
 
+## Les docs suivent le code
+
+Une doc fausse coûte plus cher qu'une doc absente : on la croit. Le risque est le plus fort pendant
+une série de modifications, quand le code bouge et que personne ne rouvre le document qui le décrit.
+
+`scripts/docs/doc-map.ts` dit quelle doc décrit quelle partie du code. `npm run docs:check` compare
+cette carte à ce qui a changé sur la branche (commits depuis `main`, fichiers modifiés et fichiers
+nouveaux) et nomme chaque doc dont le code a bougé sans qu'elle bouge. La commande signale aussi
+les chemins de la carte qui n'existent plus, pour que la carte ne pourrisse pas à son tour.
+
+Le contrôle dit « à relire », jamais « faux » : une correction au milieu d'une fonction change
+rarement ce qu'un document raconte. Il ne bloque donc ni le commit ni la CI. Il sert à
+l'assistant de code, qui le lance en fin de tour et relit la doc qu'il nomme ; chaque fichier n'est
+signalé qu'une fois par branche.
+
+Ajouter une doc, ou un dossier qu'une doc décrit, c'est ajouter une ligne à la carte.
+
 ## Ce qui se transpose ailleurs
 
 Quatre choses, indépendantes de Kairn :

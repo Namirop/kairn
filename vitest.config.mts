@@ -46,6 +46,7 @@ export default defineConfig({
       "lib/ai/schemas/**/*.test.ts",
       "lib/paiement/*.test.ts",
       "scripts/evaluation/mesures/**/*.test.ts",
+      "scripts/docs/*.test.ts",
     ],
     environment: "node",
   },
