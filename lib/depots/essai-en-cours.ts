@@ -3,13 +3,9 @@ import { lireLeDepotAnonyme, type QuestionDeVitrine } from "@/lib/db/depot-de-vi
 import { sessionDisponible } from "@/lib/db/essais-de-la-visite";
 
 /**
- * Où en est l'essai de ce visiteur, s'il en a un.
- *
- * Lu au chargement de la landing autant qu'en cours d'attente, et par le même
- * chemin : quelqu'un qui revient une heure plus tard doit retrouver ses concepts
- * à l'écran, pas un champ vide. Sans ça, le refus d'un second essai — « crée un
- * compte pour garder ces concepts » — désigne quelque chose que personne ne voit,
- * ce qui le fait passer pour une erreur plutôt que pour une invitation.
+ * Où en est l'essai de ce visiteur, s'il en a un. Lu au chargement de la landing
+ * comme pendant l'attente : un visiteur qui revient retrouve ses concepts, et le
+ * refus « crée un compte pour les garder » désigne quelque chose de visible.
  */
 
 export type AvancementDeLEssai = {
@@ -17,38 +13,22 @@ export type AvancementDeLEssai = {
   enCours: boolean;
   concepts: { id: string; concept: string; tags: string[] }[];
   /**
-   * Les quatre questions écrites sur le premier concept **questionnable** —
-   * l'échantillon de l'essai.
-   *
-   * Elles arrivent **après** les concepts : deux appels, deux temps. L'écran ne
-   * les attend donc pas pour montrer ce qu'il a déjà, sans quoi l'ajout des
-   * questions allongerait l'attente de tout le reste au lieu de l'enrichir.
-   *
-   * Elles peuvent aussi ne jamais venir : un dépôt factuel dont tous les
-   * concepts sont incertains n'a rien à questionner, et l'écran s'arrête aux
-   * concepts.
+   * Les questions du premier concept questionnable, l'échantillon de l'essai.
+   * Elles arrivent après les concepts (un second appel), et peuvent ne jamais
+   * venir si tous les concepts sont incertains : l'écran ne les attend pas.
    */
   questions: QuestionDeVitrine[];
   /** Renseigné quand la chaîne s'est arrêtée sans rien produire. */
   motifDechec: string | null;
   /**
-   * L'arrêt vient de nous et non du texte déposé.
-   *
-   * Les deux ne se disent pas de la même façon : un rejet demande de retenter
-   * avec autre chose, une panne ne demande rien du tout à qui n'y est pour rien.
+   * L'arrêt vient de nous, pas du texte : une panne ne demande rien au visiteur,
+   * un rejet l'invite à déposer autre chose.
    */
   panne: boolean;
   /**
-   * La visite garde-t-elle de quoi retenter ?
-   *
-   * Lu ici plutôt que déduit du nombre de concepts : c'est la base qui décide, et
-   * elle ne compte pas nos pannes. L'écran s'en sert pour ne proposer de déposer
-   * à nouveau que quand le geste aboutira — un bouton qui promet ce que le
-   * serveur refuse est pire que pas de bouton.
-   *
-   * Il se lit maintenant **aussi sur un essai réussi** : un découpage qui a
-   * abouti ne ferme plus la visite, et la page doit pouvoir rouvrir le champ à
-   * qui veut déposer autre chose.
+   * La visite garde-t-elle un essai, y compris après un découpage réussi ? Lu en
+   * base (qui ne compte pas nos pannes) : l'écran ne propose de redéposer que si
+   * le serveur l'acceptera.
    */
   peutRedeposer: boolean;
 };
@@ -76,8 +56,7 @@ export async function lireLEssaiEnCours(): Promise<AvancementDeLEssai | null> {
     questions: depot.questions,
     motifDechec: vide && arrete ? depot.motifDechec : null,
     panne: vide && depot.statut === "FAILED",
-    // Inutile de le demander tant que la chaîne tourne, et faux tant qu'elle
-    // tourne : le dépôt en cours compte déjà comme un essai pris.
+    // Pendant le découpage, le dépôt en cours compte déjà comme un essai pris.
     peutRedeposer: arrete ? await sessionDisponible(visite) : false,
   };
 }

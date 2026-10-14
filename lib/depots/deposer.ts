@@ -16,18 +16,13 @@ import { preparerCapture } from "@/lib/images/capture";
 import { enqueueJob } from "@/lib/jobs/queue";
 
 /**
- * Le geste de dépôt, côté serveur.
+ * Le geste de dépôt, côté serveur : validation, place du jour, image réduite,
+ * dépôt écrit, travail mis en file. Aucun appel modèle ici, l'utilisateur ne
+ * l'attend jamais dans sa requête.
  *
- * Dans l'ordre : validation, place du jour, image lue et réduite, dépôt écrit,
- * travail mis en file. Aucun appel modèle n'a lieu ici — l'utilisateur ne doit
- * jamais attendre le modèle dans sa requête.
- *
- * Une place prise sur un dépôt qui n'aboutit pas est rendue : le compteur suit
- * ce qui a été déposé, pas ce qui a été tenté.
- *
- * Les refus se disent dans la langue que porte `t` — celle de la requête pour
- * l'action, le français par défaut pour les scripts. Le schéma se construit donc
- * à l'appel : ses messages en dépendent.
+ * Une place prise pour un dépôt qui n'aboutit pas est rendue : le compteur suit
+ * ce qui a été déposé, pas ce qui a été tenté. Les refus sont dans la langue de
+ * `t` (français par défaut, pour les scripts).
  */
 
 function schemaDuDepot(t: TraduireLesRefus) {
@@ -37,13 +32,9 @@ function schemaDuDepot(t: TraduireLesRefus) {
     texte: z.string().max(CARACTERES_MAXIMUM, {
       error: t("depotTropLong", { longueur: longueurEnClairAvec(t, CARACTERES_MAXIMUM) }),
     }),
-    // L'utilisateur ne remplit jamais ce champ : s'il ne tient pas, c'est le
-    // formulaire qui est en défaut, pas ce qu'on a écrit dedans. Le message reste
-    // écrit ici pour les deux bornes — sans lui, c'est la phrase brute de Zod, en
-    // anglais, qui s'affiche sous le bouton.
+    // Champ technique rempli par le formulaire. Le message est explicite pour ne
+    // pas afficher la phrase brute de Zod, en anglais, sous le bouton.
     cleEnvoi: z.string().min(8, { error: cleIllisible }).max(64, { error: cleIllisible }),
-    // Facultative, et bornée court : c'est une phrase de cadrage, pas un second
-    // dépôt. Le message est écrit ici parce qu'il est le même que celui du champ.
     consigne: z.string().max(CONSIGNE_MAXIMUM, {
       error: (issue) =>
         t("consigneTropLongue", {
@@ -112,9 +103,7 @@ export async function deposer(
 
   if (capture && !capture.ok) {
     await rendreDepot(userId, fuseau);
-    // Le lecteur d'images n'est pas de cette zone et dit ses refus en français :
-    // ils sont redits ici dans la langue de la personne. Le poids est déjà
-    // refusé plus haut, il ne reste en pratique que l'image illisible.
+    // Le lecteur d'images refuse en français : on traduit son refus ici.
     return {
       ok: false,
       motif: capture.motif === IMAGE_TROP_LOURDE ? t("imageTropLourde") : t("imageIllisible"),
@@ -124,15 +113,14 @@ export async function deposer(
   const { input, nouveau } = await creerDepot({
     userId,
     texte,
-    // Vide vaut absente : une consigne faite d'espaces ne cadre rien, et la
-    // ranger obligerait le découpage à se demander ce qu'elle veut dire.
+    // Une consigne faite d'espaces vaut absente.
     consigne: valide.data.consigne.trim() || undefined,
     image: capture?.ok ? capture.capture : undefined,
     cleEnvoi: valide.data.cleEnvoi,
   });
 
   if (!nouveau) {
-    // Le même geste, envoyé deux fois. La place prise à tort est rendue.
+    // Le même envoi reçu deux fois : la place prise à tort est rendue.
     await rendreDepot(userId, fuseau);
     return { ok: true, inputId: input.id, nouveau: false };
   }

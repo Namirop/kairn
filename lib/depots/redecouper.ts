@@ -8,18 +8,11 @@ import { textesDesRefus } from "@/lib/depots/textes-des-refus";
 import { enqueueJob } from "@/lib/jobs/queue";
 
 /**
- * Relancer l'extraction sur un texte déjà déposé.
+ * Relance l'extraction sur un texte déjà déposé, quand le découpage n'a rien
+ * donné d'utilisable, sans dupliquer le texte en base.
  *
- * Le cas d'usage est celui-là et pas un autre : le découpage n'a rien donné
- * d'utilisable, on a supprimé les concepts un par un, et on veut retenter sur
- * le même texte plutôt que de le recoller. Sans ce geste, la seule issue était
- * de refaire un dépôt — donc de dupliquer le texte en base pour rien.
- *
- * Ça coûte une extraction, donc ça prend une place du jour, exactement comme un
- * dépôt. Un redécoupage gratuit serait une porte ouverte : quinze dépôts par
- * jour et autant de relances qu'on veut sur chacun.
- *
- * Les refus se disent dans la langue de `t`, le français par défaut.
+ * Ça coûte une extraction, donc une place du jour comme un dépôt : gratuit, le
+ * redécoupage contournerait le quota.
  */
 
 export type ResultatRedecoupage = { ok: true } | { ok: false; motif: string; quota?: boolean };
@@ -46,8 +39,7 @@ export async function redecouper(
 
   if (!place.accorde) return { ok: false, ...refusDeQuota(place.motif, place.plafond, t) };
 
-  // La place prise sur un redécoupage qui n'a pas lieu est rendue : le compteur
-  // suit ce qui a été lancé, pas ce qui a été tenté.
+  // Un redécoupage qui n'a pas lieu rend sa place.
   if (!(await repartirEnDecoupage(inputId, userId))) {
     await rendreDepot(userId, fuseau);
     return { ok: false, motif: t("introuvable") };
