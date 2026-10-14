@@ -11,11 +11,8 @@ export const metadata: Metadata = { title: "Signalements · Administration" };
 const PAR_PAGE = 5;
 
 /**
- * Les questions qu'on a signalées pendant une session.
- *
- * Le rang de page vient de l'URL, donc de n'importe qui : il est ramené dans
- * les bornes par la lecture plutôt que refusé, parce qu'une page vide serait un
- * cul-de-sac là où la dernière page est manifestement ce qu'on voulait.
+ * Les questions signalées pendant une session. Le rang de page vient de l'URL :
+ * la lecture le ramène dans les bornes plutôt que de rendre une page vide.
  */
 export const dynamic = "force-dynamic";
 

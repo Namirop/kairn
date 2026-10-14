@@ -4,15 +4,10 @@ import { requireUser, UnauthenticatedError } from "@/lib/auth/session";
 import { exporterLeCompte } from "@/lib/db/compte";
 
 /**
- * L'export des données, en un fichier.
- *
- * Une route et non une Server Action : ce qu'on veut ici est un téléchargement,
- * et une action rendrait la donnée au navigateur sans jamais lui donner de nom
- * de fichier. L'identité vient de la session, jamais de l'URL — il n'y a pas de
- * paramètre à falsifier.
- *
- * `no-store` parce que ce sont les données personnelles de quelqu'un : elles
- * n'ont rien à faire dans le cache d'un intermédiaire.
+ * L'export des données, en un fichier. Une route et non une Server Action : il
+ * faut un téléchargement avec un nom de fichier. L'identité vient de la
+ * session, jamais de l'URL. `no-store` : des données personnelles n'ont rien à
+ * faire dans le cache d'un intermédiaire.
  */
 export const dynamic = "force-dynamic";
 

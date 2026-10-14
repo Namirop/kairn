@@ -1,20 +1,13 @@
 import type { SeedInput } from "./corpus-types";
 
 /**
- * Un dépôt de code, écrit pour regarder le rendu des termes techniques.
+ * Un dépôt de code, écrit pour faire passer sous les yeux tout ce qui casse un
+ * affichage : identifiants courts et longs, directive entre guillemets,
+ * chevrons de génériques, trou dont la réponse est du code, options de QCM qui
+ * en portent aussi.
  *
- * Il ne cherche pas à enseigner quelque chose de rare : il cherche à faire passer
- * sous les yeux tout ce qui casse un affichage. Des identifiants courts et longs,
- * une directive entre guillemets, des chevrons de génériques, un extrait d'une
- * ligne dans un énoncé, un trou dont la réponse est du code, des options de QCM
- * qui en portent aussi, et un étalon qui en cite trois d'affilée.
- *
- * Le premier concept n'a aucun passage : il est donc dû tout de suite, et c'est
- * lui qui sert à ouvrir une session quand on n'a plus rien à réviser.
- *
- * Le dépôt lui-même cite ses termes entre accents graves, comme le ferait
- * n'importe quelle note collée depuis une doc : c'est ce qui permet de comparer
- * le rendu du texte déposé à celui des concepts qu'on en a tirés.
+ * Le premier concept n'a aucun passage : il est dû tout de suite, et sert à
+ * ouvrir une session quand on n'a plus rien à réviser.
  */
 export const CORPUS_CODE: SeedInput[] = [
   {

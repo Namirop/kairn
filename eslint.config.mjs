@@ -56,9 +56,8 @@ const eslintConfig = [
     },
   },
   {
-    // Le pont Anthropic est le détail d'implémentation qui parle au SDK.
-    // `client.ts` reste le point d'entrée métier (celui qui expose `callAI`),
-    // les autres appelants ne changent pas.
+    // `client.ts` reste le point d'entrée (`callAI`) ; le fournisseur Anthropic
+    // est le détail d'implémentation qui parle au SDK.
     files: ["lib/ai/client.ts", "lib/ai/fournisseurs/anthropic.ts"],
     rules: restrict(prismaClient, resend),
   },
@@ -80,9 +79,8 @@ const eslintConfig = [
   },
   prettier,
   {
-    // Ancrés sur `**/` et non sur la racine : un artefact de build qui atterrit
-    // ailleurs qu'à la racine — dossier dupliqué, build lancé depuis un parent —
-    // noyait le rapport sous des milliers d'erreurs venues de code généré.
+    // Ancrés sur `**/` et non sur la racine : un artefact de build hors de la
+    // racine noierait le rapport sous du code généré.
     ignores: [
       "**/node_modules/**",
       "**/.next/**",
@@ -90,10 +88,7 @@ const eslintConfig = [
       "**/build/**",
       "**/next-env.d.ts",
       "**/lib/db/generated/**",
-      // L'outillage des skills installés. Ce n'est pas le code de ce projet, il
-      // ne suit pas ses règles et n'a pas à les suivre : cent quatre-vingt-dix
-      // erreurs venues de là rendaient le rapport inutilisable, et donc le lint
-      // inutile comme garde-fou.
+      // L'outillage des skills installés : pas le code du projet, pas ses règles.
       "**/.claude/**",
     ],
   },

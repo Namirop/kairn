@@ -4,16 +4,9 @@ import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 
 /**
- * L'attente entre deux écrans de l'application.
- *
- * Une seule phrase et un empilement en cours : rien à lire, rien à compter. Un
- * squelette gris qui mime la page suivante promettrait une mise en page qu'on
- * ne connaît pas encore — celle de la révision n'a rien à voir avec celle des
- * dépôts.
- *
- * Elle occupe l'écran entier et se tient au milieu. Posée en haut à gauche,
- * elle ressemblait à un morceau de page arrivé avant les autres, ce qui est
- * exactement le contraire de ce qu'une attente doit dire.
+ * L'attente entre deux écrans de l'application. Pas de squelette : il
+ * promettrait une mise en page qu'on ne connaît pas encore, et celle de la
+ * révision n'a rien à voir avec celle des dépôts.
  */
 export default function Chargement() {
   const t = useTranslations("tableau.commun");

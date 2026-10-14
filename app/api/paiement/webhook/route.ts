@@ -5,37 +5,21 @@ import { signalerLePaiementEnEchec } from "@/lib/paiement/signalement-de-webhook
 import { traiterLeWebhook } from "@/lib/paiement/webhook";
 
 /**
- * Ce que Stripe vient nous dire.
+ * Le webhook Stripe.
  *
- * Pas de session : Stripe n'en a pas. C'est la signature du corps qui
- * authentifie la requête, et rien d'autre — la route est publique et doit le
- * rester, donc tout ce qui n'est pas signé par le secret est refusé avant
- * d'être lu.
+ * Pas de session : la route est publique, et seule la signature du corps
+ * l'authentifie. Le corps est lu en texte, jamais en JSON : la signature porte
+ * sur les octets exacts, et un aller-retour JSON suffit à la casser.
  *
- * Le corps est lu en texte et jamais en JSON. La signature porte sur les octets
- * exacts : les reparser puis les resérialiser, même à l'identique, suffit à la
- * casser.
- *
- * **Les codes de retour parlent à Stripe**, qui relance pendant trois jours ce
- * qu'il n'a pas réussi à livrer. 400 dit « n'insiste pas, ta requête est
- * mauvaise » ; 500 dit « réessaie, c'est moi » — et c'est le bon code quand
- * notre catalogue est cassé, parce que la relance réussira une fois réparé.
- *
- * **Et un 500 réveille quelqu'un**, depuis le 13/09/2026. Un webhook en échec
- * est la seule panne du produit qui coûte de l'argent à quelqu'un d'autre :
- * Stripe a encaissé, la ligne d'abonnement n'a pas bougé, et l'écran de la
- * personne affiche « Gratuit ». Elle n'a aucune raison de penser à écrire, et
- * les trois jours de relance s'écoulent sans que personne ne regarde le journal.
- * Voir `alerte-de-webhook.ts`.
+ * Les codes parlent à Stripe, qui relance trois jours : 400 dit « n'insiste
+ * pas », 500 dit « réessaie » — le bon code quand notre catalogue est cassé.
+ * Un 500 envoie aussi une alerte (`alerte-de-webhook.ts`) : Stripe a encaissé
+ * mais l'abonnement n'a pas bougé, et la personne n'a aucune raison d'écrire.
  */
 
 /**
- * Le type d'événement, lu dans le corps pour le seul besoin de l'alerte.
- *
- * Ce corps n'est pas authentifié à ce stade — l'échec a pu survenir avant même
- * la vérification de signature, quand c'est la configuration qui manque. Ce
- * qu'on en tire ne décide donc de rien : c'est une ligne dans un email qu'on
- * s'envoie à soi-même, pour savoir quel événement rejouer.
+ * Le type d'événement, pour l'alerte seulement. Le corps n'est pas encore
+ * authentifié ici : ce type ne décide de rien, il dit quel événement rejouer.
  */
 const corpsAnnonce = z.object({ type: z.string() });
 
@@ -45,8 +29,7 @@ function typeAnnonce(corps: string): string | null {
 
     return lu.success ? lu.data.type : null;
   } catch {
-    // Un corps qui n'est pas du JSON n'a pas de type à donner. Ce n'est pas un
-    // incident de plus : celui qu'on est en train de signaler suffit.
+    // Pas de type à donner ; l'incident en cours de signalement suffit.
     return null;
   }
 }
@@ -71,9 +54,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ recu: true });
   } catch (erreur) {
     if (erreur instanceof SignatureInvalideError) {
-      // Pas d'alerte : c'est du bruit. Une signature invalide, c'est un scan
-      // sur une route publique, ou une relance pendant une rotation de secret.
-      // Alerter dessus noierait le canal, et un canal noyé ne se lit plus.
+      // Pas d'alerte : une signature invalide est un scan ou une relance
+      // pendant une rotation de secret. Alerter dessus noierait le canal.
       console.warn("[paiement] signature refusée");
 
       // i18n-ignore — réponse à Stripe, jamais lue par une personne

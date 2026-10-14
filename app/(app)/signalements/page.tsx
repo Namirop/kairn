@@ -4,16 +4,10 @@ import { ROUTES } from "@/lib/auth/routes";
 import { getCurrentUser } from "@/lib/auth/session";
 
 /**
- * L'ancienne adresse de l'écran interne.
+ * Renvoi vers `/admin`, pour les favoris de l'ancienne adresse.
  *
- * L'écran a grossi au-delà des signalements — il porte la dépense, les comptes,
- * les volumes et les réglages —, et une route qui annonce une seule de ces
- * choses ment sur ce qu'elle ouvre. Elle est devenue `/admin` ; celle-ci n'est
- * plus qu'un renvoi, pour le favori qui existe déjà.
- *
- * Elle se garde exactement comme la vraie. Un renvoi non gardé serait une
- * confirmation gratuite : il apprendrait à n'importe qui que `/admin` existe,
- * ce que le 404 de la page d'arrivée s'applique justement à taire.
+ * Gardé exactement comme la vraie page : un renvoi non gardé apprendrait à
+ * n'importe qui que `/admin` existe, ce que son 404 s'applique à taire.
  */
 export const dynamic = "force-dynamic";
 

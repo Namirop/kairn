@@ -21,19 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * des emails, et une désinscription déclenchée par un robot serait une
  * désinscription qu'on n'a pas demandée. Seul le bouton écrit.
  *
- * **C'est une halte, et elle se dessine comme telle.** Elle posait son titre en
- * haut à gauche d'un panneau vide, hors de toute mesure — une colonne plus large
- * que l'écran d'un téléphone, donc sans une gouttière, le texte contre le bord —
- * et laissait les deux tiers de la hauteur en dessous. C'est le défaut que
- * `Palier` a corrigé côté révision, pour la même raison : quand un écran ne porte
- * que trois lignes, c'est le titre qui doit porter le vide, et le vide doit être
- * réparti autour de lui.
- *
- * Le lien mort a son propre titre. Quelqu'un qui arrive ici a cliqué sur une
- * intention, pas sur une page : lui répondre « Ne plus recevoir d'emails » puis
- * lui expliquer en petits caractères que ça ne marchera pas, c'est lui faire
- * lire deux fois avant de comprendre. L'écran dit ce qui s'est passé, puis ce
- * qu'il reste à faire — et il ouvre la porte plutôt que de la nommer.
+ * Un jeton invalide a son propre titre : l'écran dit d'abord ce qui s'est
+ * passé, puis ouvre les réglages.
  */
 export default async function PageDesinscription({
   searchParams,

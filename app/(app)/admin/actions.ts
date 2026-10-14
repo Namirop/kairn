@@ -1,5 +1,5 @@
 "use server";
-// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision.
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -11,13 +11,9 @@ import { poserLesReglages, type ReglagesPosés } from "@/lib/db/reglages";
 /**
  * Poser les réglages d'exploitation depuis l'écran interne.
  *
- * L'autorisation est revérifiée ici et pas seulement à l'affichage de la page :
- * une Server Action est une route, atteignable sans passer par l'écran qui la
- * propose. Vérifier au rendu ne protège que le rendu.
- *
- * Rien de ce qui touche à l'autorisation n'est modifiable par ce chemin —
- * `ADMIN_EMAILS` reste une variable d'environnement. Un écran d'administration
- * qui peut étendre la liste de ses propres administrateurs n'a plus de porte.
+ * L'autorisation est revérifiée ici : une Server Action est une route,
+ * atteignable sans passer par l'écran. `ADMIN_EMAILS` reste hors de portée de
+ * ce chemin : un écran qui étend ses propres administrateurs n'a plus de porte.
  */
 
 /** Un champ vide veut dire « rends la main à l'environnement ». */

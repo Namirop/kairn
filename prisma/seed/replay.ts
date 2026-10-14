@@ -5,9 +5,8 @@ import type { SeedAtom } from "./corpus-types";
 
 /**
  * Rejoue l'historique déclaré dans le corpus avec ts-fsrs, du plus ancien
- * passage au plus récent. Les échéances, stabilités et difficultés du seed sont
- * donc celles que l'algorithme aurait vraiment produites — pas des nombres
- * plausibles écrits à la main, qui seraient incohérents entre eux.
+ * passage au plus récent, pour que les échéances, stabilités et difficultés du
+ * seed soient cohérentes entre elles.
  *
  * Le brouillage aléatoire est coupé : deux exécutions du seed donnent la même base.
  */

@@ -16,33 +16,17 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Ce que Kairn collecte, et ce qu'on peut en faire.
  *
- * Tout ce qui décrit le fonctionnement réel est écrit, et ces phrases-là sont
- * vérifiables dans le code : les sept jours d'une visite sans compte sont
- * `JOURS_AVANT_OUBLI`, les six heures de restauration sont la fenêtre configurée
- * sur la base de production. Un chiffre inventé ici serait un mensonge daté.
+ * Les chiffres de la page suivent le code et la configuration : les sept jours
+ * d'une visite sans compte sont `JOURS_AVANT_OUBLI`, les six heures de
+ * restauration la fenêtre de la base de production. Ils se changent ensemble.
  *
- * Deux choses que la version précédente taisait, et qui sont exactement celles
- * qu'on vient chercher : **les cookies** — il y en a, ils sont strictement
- * nécessaires, et le dire est plus honnête que d'annoncer l'absence de traceurs
- * publicitaires ; et **l'empreinte d'adresse IP**, qui reste une donnée
- * personnelle même hachée, puisque hacher pseudonymise et n'anonymise pas.
+ * La mesure d'audience a sa rubrique : « aucun cookie de mesure » seul se lirait
+ * « aucune mesure ». L'empreinte d'IP y figure comme donnée personnelle :
+ * hacher pseudonymise, n'anonymise pas.
  *
- * **La mesure d'audience a sa propre rubrique depuis le 04/09/2026**, parce que
- * la page disait « aucun cookie de mesure d'audience » et que cette phrase, seule,
- * se lit comme « aucune mesure ». Elle reste vraie — la mesure de Vercel ne dépose
- * rien et ne recoupe rien d'un site à l'autre, et c'est ce qui dispense de
- * bandeau —, mais une vérité qui laisse croire autre chose ne vaut pas mieux
- * qu'une omission. Ce qui remonte est donc écrit, ligne par ligne.
- *
- * **La base du rappel quotidien est le contrat, pas le consentement**, et c'est un
- * choix qui suit le code : `dailyReminderEnabled` vaut vrai à la création du
- * compte. Un consentement pré-coché n'est pas un consentement — écrire
- * « consentement » ici, avec ce défaut-là, serait la seule ligne fausse de la
- * page. Le raisonnement tient parce que Kairn est un produit dont l'objet **est**
- * de reposer au bon moment : le rappel n'est pas une communication ajoutée au
- * service, il est le service. Basculer le défaut à faux ferait de la base un
- * consentement et retirerait toute discussion — c'est une décision de produit, pas
- * de page légale.
+ * La base du rappel quotidien est le contrat, pas le consentement, parce que
+ * `dailyReminderEnabled` vaut vrai à la création du compte : un consentement
+ * pré-coché n'en est pas un. Passer ce défaut à faux changerait cette ligne.
  */
 type Espace = Messages["legal"]["confidentialite"];
 type Cle = MessageKeys<Espace, NestedKeyOf<Espace>>;

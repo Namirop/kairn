@@ -16,23 +16,13 @@ import { PaiementError } from "@/lib/paiement/erreurs";
 import { fermerLAbonnementDuCompte } from "@/lib/paiement/fermeture-du-compte";
 
 /**
- * Les gestes irréversibles d'un compte.
- *
- * Il n'y en a qu'un, et c'est pour ça qu'il est ici plutôt que dans les gestes
- * de dépôt : effacer un compte n'a rien à voir avec le reste du produit, et
- * mélanger les deux ferait qu'une erreur d'import mette la suppression à portée
- * d'un écran qui ne la demande pas.
+ * Les gestes de l'écran des réglages : la suppression du compte et les
+ * réglages de notification. L'argent est à part, dans `paiement.ts`.
  */
 
 export type EtatSuppression = { erreur?: string };
 
-/**
- * Efface le compte, puis la session avec.
- *
- * L'ordre compte : la session est détruite par la cascade au moment où la ligne
- * `User` part, donc il n'y a rien à révoquer après. On redirige vers l'accueil,
- * qui est le seul écran qu'un compte effacé peut encore voir.
- */
+/** Efface le compte, et la session avec lui, puis renvoie à l'accueil. */
 export async function supprimerMonCompteAction(
   _precedent: EtatSuppression,
   donnees: FormData,
@@ -52,15 +42,10 @@ export async function supprimerMonCompteAction(
     return { erreur: t("confirmation", { mot: MOT_DE_CONFIRMATION[langue] }) };
   }
 
-  // **L'abonnement se coupe avant le compte, et jamais l'inverse.** La ligne
-  // `Subscription` part en cascade avec le compte, et elle emporte l'identifiant
-  // du client Stripe : après le `delete`, plus rien ici ne sait quel abonnement
-  // continue de prélever. C'est donc maintenant ou jamais.
-  //
-  // Un échec renonce à la suppression plutôt que de la forcer. Garder un compte
-  // de trop se répare d'un clic ; un prélèvement qui court sans plus aucune
-  // trace se répare en fouillant le tableau de bord Stripe, si tant est qu'on
-  // s'aperçoive qu'il court.
+  // L'abonnement se coupe avant le compte, jamais l'inverse : la ligne
+  // `Subscription` part en cascade et emporte l'identifiant du client Stripe,
+  // après quoi plus rien ne sait quel abonnement prélève. Un échec renonce donc
+  // à la suppression : un compte de trop se répare, un prélèvement orphelin non.
   try {
     await fermerLAbonnementDuCompte(utilisateur.id);
   } catch (erreur) {
@@ -77,20 +62,17 @@ export async function supprimerMonCompteAction(
 
   if (!efface) return { erreur: t("introuvable") };
 
-  // Rien à révoquer : la ligne `Session` est partie avec le compte, dans la même
-  // cascade. Le cookie que le navigateur garde ne désigne plus rien — la
-  // prochaine requête ne trouve pas de session et le barrage d'entrée renvoie à
-  // la connexion. Appeler une déconnexion ici donnerait l'illusion d'un ménage
-  // qui a déjà eu lieu.
+  // Rien à révoquer : la ligne `Session` est partie dans la même cascade, et le
+  // cookie restant ne désigne plus rien.
   redirect(ROUTES.accueil);
 }
 
 /**
  * Ce que le formulaire de notifications rend à l'écran : un mot, jamais les deux.
  *
- * `heure` et `plafond` portent les saisies refusées. React remet un formulaire à
- * ses valeurs par défaut quand l'action rend la main, donc sans elles une valeur
- * mal écrite disparaissait au moment où l'on demandait de la corriger.
+ * `heure` et `plafond` portent les saisies refusées : React remet un formulaire
+ * à ses valeurs par défaut quand l'action rend la main, et la saisie à corriger
+ * disparaîtrait.
  */
 export type EtatDesReglages = {
   message?: string;
@@ -100,16 +82,8 @@ export type EtatDesReglages = {
 };
 
 /**
- * Enregistre les réglages de notification.
- *
- * L'ordre des écritures compte. Couper les emails coupe aussi les deux réglages
- * de contenu — c'est ce que fait le lien de désinscription, et un compte coupé
- * depuis l'écran doit finir dans le même état que coupé depuis un email. Les
- * rendre lève le refus sans rien rallumer : ce qu'on veut recevoir se rechoisit,
- * ça ne se devine pas.
- *
- * L'identifiant vient de la session, jamais du formulaire, et l'écriture porte
- * sa propre clause de propriété.
+ * Enregistre les réglages de notification. Rendre les emails lève le refus sans
+ * rien rallumer : ce qu'on veut recevoir se rechoisit.
  */
 export async function enregistrerLesReglagesAction(
   _precedent: EtatDesReglages,
@@ -150,9 +124,8 @@ export async function enregistrerLesReglagesAction(
 
   const ecrit = await enregistrerLesReglages(utilisateur.id, {
     sessionCap: plafond,
-    // Emails coupés, les deux réglages de contenu le sont aussi : c'est ce que
-    // fait le lien de désinscription, et les deux chemins doivent laisser le
-    // compte dans le même état.
+    // Emails coupés, les deux réglages de contenu le sont aussi : comme le lien
+    // de désinscription, pour que les deux chemins laissent le même état.
     dailyReminderEnabled: emailsActifs && donnees.get("rappel") !== null,
     dailyReminderHour: heure,
     streakAlertEnabled: emailsActifs && donnees.get("alerte") !== null,

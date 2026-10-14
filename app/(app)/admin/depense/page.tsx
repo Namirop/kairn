@@ -10,12 +10,8 @@ import { lireLaDepenseDuJour, lireLaDepenseParJour } from "@/lib/db/administrati
 export const metadata: Metadata = { title: "Dépense · Administration" };
 
 /**
- * Ce que le modèle a coûté : la journée par intention, puis les jours par jour.
- *
- * Les deux mailles sont là parce qu'elles répondent à deux questions
- * différentes. « Qu'est-ce qui coûte » se lit par intention ; « est-ce que ça
- * dérape » se lit dans le temps. Un seul des deux tableaux laisserait toujours
- * l'autre question sans réponse.
+ * Ce que le modèle a coûté : la journée par intention (qu'est-ce qui coûte),
+ * puis jour par jour (est-ce que ça dérape).
  */
 export const dynamic = "force-dynamic";
 

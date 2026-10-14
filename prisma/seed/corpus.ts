@@ -6,11 +6,11 @@ import { CORPUS_REACT } from "./corpus-react";
 
 /**
  * Six dépôts, douze concepts, répartis sur les quatre états et sur deux mois
- * d'historique. De quoi regarder tous les écrans sans appeler le modèle.
+ * d'historique. La moitié ne parle pas d'informatique, à dessein : le produit
+ * sert à retenir n'importe quoi.
  *
- * La moitié ne parle pas d'informatique, et c'est délibéré : le produit sert à
- * retenir n'importe quoi, et une démonstration entièrement faite de code disait
- * le contraire de ce qu'on affirme sur la page d'accueil.
+ * `CORPUS_CODE` n'en fait pas partie : il s'ajoute à un compte par
+ * `scripts/maintenance/ajouter-depot-de-code.ts`.
  */
 export const CORPUS: SeedInput[] = [
   ...CORPUS_MONTAGNE,

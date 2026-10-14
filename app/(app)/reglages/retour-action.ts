@@ -23,15 +23,9 @@ import { redirect } from "next/navigation";
 /**
  * L'envoi d'un retour sur le produit.
  *
- * Dans son fichier plutôt que dans `actions.ts` : celui-là porte les gestes des
- * réglages — ce qu'on change de son compte — et celui-ci écrit dans une autre
- * table pour une autre raison. Les mélanger ferait grossir un fichier de gestes
- * irréversibles avec un formulaire qui n'en est pas un.
- *
- * Rien ne vient du client sauf ce que la personne a écrit : l'identifiant du
- * compte est lu dans la session, et le contexte est recomposé ici à partir de
- * deux nombres et d'une chaîne de navigateur — pas d'adresse, pas de contenu
- * déposé, pas d'identifiant.
+ * L'identifiant du compte est lu dans la session ; le contexte est recomposé
+ * ici à partir de deux nombres et d'une chaîne de navigateur — pas d'adresse,
+ * pas de contenu déposé, pas d'identifiant.
  */
 
 const CHAMPS = z.object({
@@ -82,9 +76,7 @@ export async function envoyerUnRetourAction(
     };
   }
 
-  // La capture est facultative, et son refus n'emporte pas le retour : quelqu'un
-  // qui a écrit trois phrases ne doit pas les perdre parce que son image est
-  // trop lourde. On le lui dit, et on lui rend son texte.
+  // Une capture refusée n'emporte pas le texte : on le rend avec le refus.
   const fichier = donnees.get("capture");
   const jointe = fichier instanceof File && fichier.size > 0 ? fichier : null;
 
@@ -123,9 +115,8 @@ export async function envoyerUnRetourAction(
     };
   }
 
-  // Après la réponse, jamais avant : quelqu'un qui vient d'écrire trois phrases
-  // n'a pas à attendre un aller-retour vers Resend, et un email qui échoue ne
-  // doit pas transformer un retour écrit en erreur à l'écran.
+  // Différé après la réponse : pas d'attente sur Resend, et un email qui échoue
+  // ne transforme pas un retour écrit en erreur à l'écran.
   signalerUnRetour({
     sujet: LIBELLE_DE_SUJET[champs.data.sujet],
     ecran: lireLEcran(champs.data.ecran),

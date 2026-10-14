@@ -13,15 +13,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Le fonctionnement en entier, pour la minorité qui veut le lire.
- *
- * Elle existe pour ne pas charger le reste de l'interface : sans elle, chaque
- * écran serait tenté d'expliquer un bout du principe à qui ne l'a pas demandé.
- * Ceux qui n'ouvrent jamais cette page doivent comprendre le produit sans elle,
- * et c'est le travail des exemples de dépôt et des deux explications ponctuelles.
- *
- * Du texte, en une colonne de lecture. Pas d'illustration, pas de schéma : ce
- * qui se dit en trois phrases n'a pas besoin d'un diagramme.
+ * Le fonctionnement en entier, pour qui veut le lire : elle évite que chaque
+ * écran explique un bout du principe à qui ne l'a pas demandé. Le produit doit
+ * rester compréhensible sans elle.
  */
 
 /** Les sections, dans l'ordre de la page ; leurs textes vivent dans les messages. */

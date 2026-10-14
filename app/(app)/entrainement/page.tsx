@@ -14,11 +14,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * L'entraînement libre.
- *
- * Recalculé à chaque visite comme la session : le tour dépend de ce qui a déjà
- * été travaillé, et deux ouvertures d'affilée ne doivent pas resservir les
- * mêmes questions.
+ * L'entraînement libre. Recalculé à chaque visite : deux ouvertures d'affilée
+ * ne doivent pas resservir les mêmes questions.
  */
 export const dynamic = "force-dynamic";
 
@@ -32,8 +29,6 @@ export default async function PageEntrainement() {
     lireReglages(utilisateur.id),
   ]);
 
-  // Le tour porte sa propre scène — colonne de questions et rail d'état —, et
-  // ce qui l'encadre reste une pile de panneaux comme le reste de l'application.
   return (
     <TourDentrainement premierTour={tour} principeVu={reglages.trainingIntroSeenAt !== null} />
   );

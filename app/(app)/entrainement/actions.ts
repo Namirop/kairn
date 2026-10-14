@@ -8,17 +8,11 @@ import { lireFuseauUtilisateur, marquerPrincipeVu } from "@/lib/db/user-settings
 import type { QuestionServie } from "@/lib/db/question-servie";
 
 /**
- * Les gestes de l'entraînement libre.
- *
- * Rien de ce qui est écrit ici ne déplace une échéance. La note donnée sert
- * l'historique, pas la planification — et c'est `lib/db/entrainement.ts` qui le
- * garantit, pas cette couche.
+ * Les gestes de l'entraînement libre. Rien ici ne déplace une échéance : c'est
+ * `lib/db/entrainement.ts` qui le garantit, pas cette couche.
  */
 
-/**
- * Borne haute du temps de réponse, la même qu'en session : un onglet laissé
- * ouvert une nuit ne doit pas écrire un nombre qui ne veut rien dire.
- */
+/** Même plafond qu'en session : un onglet ouvert une nuit ne mesure plus rien. */
 const TEMPS_MAXIMUM_MS = 15 * 60 * 1000;
 
 const passageSchema = z.object({
@@ -47,11 +41,8 @@ export async function sentrainerAction(donnees: PassageDonne): Promise<boolean> 
 }
 
 /**
- * Un tour de plus, sans quitter l'écran.
- *
- * Le geste le plus cher en lecture des trois — il parcourt les concepts du
- * compte pour en tirer douze questions. Il passe donc par la même limite de
- * débit, et la lecture qu'il déclenche est bornée côté base.
+ * Un tour de plus, sans quitter l'écran. Le geste le plus cher en lecture : il
+ * passe par la limite de débit, et sa lecture est bornée côté base.
  */
 export async function tourSuivantAction(): Promise<QuestionServie[]> {
   const utilisateur = await getCurrentUser();
@@ -65,12 +56,7 @@ export async function tourSuivantAction(): Promise<QuestionServie[]> {
   return lireTourDentrainement(utilisateur.id);
 }
 
-/**
- * L'explication du principe a été lue. Elle ne reviendra plus.
- *
- * Une fenêtre qui barre la route à chaque fois devient un péage : on apprend à
- * la cliquer sans la lire, et ce qu'elle disait est perdu pour de bon.
- */
+/** L'explication du principe a été vue : une fenêtre qui revient devient un péage. */
 export async function principeVuAction(): Promise<void> {
   const utilisateur = await getCurrentUser();
 

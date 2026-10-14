@@ -13,22 +13,14 @@ import { lireLaDepenseParJour } from "@/lib/db/administration-depense";
 export const metadata: Metadata = { title: "Administration" };
 
 /**
- * La synthèse : quatre chiffres et deux courbes, et rien d'autre.
+ * La synthèse : quatre chiffres et deux courbes ; le détail ligne par ligne
+ * vit dans les autres onglets.
  *
- * C'est l'écran qu'on ouvre sans question précise. Il doit donc répondre à
- * celles qu'on ne s'est pas encore formulées — est-ce que ça coûte plus que
- * d'habitude, est-ce qu'il entre encore quelque chose — et renvoyer au détail
- * pour le reste. Tout ce qui demande à être lu ligne par ligne vit dans les
- * cinq autres onglets.
+ * Les deux séries partagent la même fenêtre de jours, pour se comparer à l'œil
+ * sans piège.
  *
- * Les deux séries partagent la même fenêtre de jours. Deux longueurs
- * différentes posées côte à côte se comparent à l'œil sans qu'on remarque
- * qu'elles ne recouvrent pas la même chose.
- *
- * S'y ajoute, et seulement dans ce cas, l'énoncé d'une configuration refusée.
- * Cet écran la lisait pour un seul chiffre, le plafond, et une variable
- * manquante le faisait donc tomber en entier : l'écran où l'on vient chercher
- * ce qui ne va pas était le premier à disparaître, et il ne disait pas pourquoi.
+ * Une configuration illisible s'énonce ici au lieu de faire tomber l'écran :
+ * c'est celui où l'on vient chercher ce qui ne va pas.
  */
 export const dynamic = "force-dynamic";
 

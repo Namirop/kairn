@@ -9,19 +9,16 @@ import type { Langue } from "@/lib/db/types";
 /**
  * Deux barrages, l'un après l'autre.
  *
- * **La langue des pages publiques.** `/en/…` sert la page anglaise : l'adresse
- * est réécrite vers la page unique, avec la langue posée en en-tête, et le
- * choix retenu en cookie. `/fr/…` pose le choix inverse et renvoie à l'adresse
- * sans préfixe. Une adresse sans préfixe, enfin, renvoie vers `/en` quiconque
- * n'a rien choisi et dont le navigateur lit l'anglais avant le français — voir
- * `langueDevinee`. Jamais quelqu'un de connecté qui n'a rien choisi : son compte
- * a une langue que le middleware ne peut pas lire, et le renvoyer sur la foi
- * de son navigateur ferait basculer en anglais un compte français.
+ * La langue des pages publiques. `/en/…` est réécrit vers la page unique, la
+ * langue posée en en-tête et retenue en cookie ; `/fr/…` retient le français et
+ * renvoie à l'adresse sans préfixe. Sans préfixe ni choix, `langueDevinee`
+ * oriente selon le navigateur — sauf pour un compte connecté, dont la langue
+ * n'est pas lisible ici : on ne le bascule pas en anglais sur la foi du
+ * navigateur.
  *
- * **L'entrée du groupe authentifié.** Il ne regarde que la présence du cookie
- * de session : la vérification qui fait foi se fait côté serveur, dans les
- * pages et les route handlers. Ce test-ci évite d'afficher une coquille vide à
- * quelqu'un qui n'est pas connecté du tout.
+ * L'entrée du groupe authentifié ne regarde que la présence du cookie de
+ * session, pour ne pas afficher une coquille vide. La vérification qui fait
+ * foi est côté serveur, dans les pages et les route handlers.
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -44,12 +41,10 @@ export function middleware(request: NextRequest) {
 }
 
 /**
- * Les liens courts des bios TikTok, un par compte.
- *
- * Ils servent l'accueil dans la langue du compte **sans changer d'adresse** :
- * la page vue reste `/tt` ou `/en/tt`, et l'onglet Pages de Vercel Analytics
- * compte ainsi les visites venues de chaque bio, sur le plan gratuit. Une
- * redirection avec des paramètres UTM ne se lisait qu'avec l'offre payante.
+ * Les liens courts des bios TikTok, un par compte. Ils servent l'accueil sans
+ * changer d'adresse : l'onglet Pages de Vercel Analytics compte ainsi les
+ * visites de chaque bio sur le plan gratuit, où les paramètres UTM ne se
+ * lisent pas.
  */
 const LIENS_COURTS: Record<string, Langue> = { "/tt": "FR", "/en/tt": "EN" };
 

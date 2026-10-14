@@ -6,12 +6,10 @@ import { writeAiCalls, writeDailyUsage, writeFailedInput } from "./seed/ledger";
 import { writeStats } from "./seed/stats";
 
 /**
- * Remplit la base avec un compte de démonstration et trois mois d'usage
- * plausible : quatorze concepts sur les quatre états, des échéances dépassées et
- * à venir, un historique de passages rejoué par ts-fsrs, un dépôt en échec.
- *
- * C'est ce qui permet de développer et de regarder toute l'interface sans jamais
- * appeler le modèle.
+ * Remplit la base avec un compte de démonstration et deux mois d'usage
+ * plausible (voir `seed/corpus.ts`) : des échéances dépassées et à venir, un
+ * historique rejoué par ts-fsrs, un dépôt en échec. De quoi regarder toute
+ * l'interface sans appeler le modèle.
  */
 async function main(): Promise<void> {
   const now = new Date();

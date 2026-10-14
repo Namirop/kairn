@@ -4,17 +4,12 @@ import { lireLaCapture } from "@/lib/db/retour";
 
 /**
  * La capture jointe à un retour, servie à l'administration et à personne
- * d'autre.
- *
- * **C'est la seule route du produit qui rende des octets d'image**, et il faut
- * qu'elle le reste. Celle d'un dépôt n'existe pas : ses octets partent dès que
- * l'OCR a rendu son texte, précisément parce qu'une capture montre souvent plus
- * que ce que son auteur croit y montrer. Ici on la garde, puisque c'est elle
- * qu'on vient regarder — et le prix de la garder est cette garde-ci.
+ * d'autre. C'est la seule route qui rende des octets d'image, et elle doit le
+ * rester : ceux d'un dépôt sont effacés dès que l'OCR a rendu son texte.
  *
  * `exigerUnAdministrateur` rend un 404 plutôt qu'un 403 : l'existence d'une
  * capture n'a pas à se confirmer à qui n'y a pas droit. Aucune mise en cache
- * partagée non plus, pour la même raison.
+ * partagée non plus.
  */
 export async function GET(
   _requete: Request,
@@ -31,8 +26,8 @@ export async function GET(
     headers: {
       "Content-Type": capture.mediaType,
       "Cache-Control": "private, no-store",
-      // Elle s'affiche, elle ne s'exécute pas : une image servie depuis notre
-      // origine reste un fichier qu'on n'a pas écrit.
+      // Un fichier qu'on n'a pas écrit, servi depuis notre origine : il
+      // s'affiche, il ne s'exécute pas.
       "Content-Security-Policy": "default-src 'none'; sandbox",
       "X-Content-Type-Options": "nosniff",
     },

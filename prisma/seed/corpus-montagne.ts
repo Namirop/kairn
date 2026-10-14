@@ -1,12 +1,8 @@
 import type { SeedInput } from "./corpus-types";
 
 /**
- * Ce qui n'a rien à voir avec l'informatique : une observation de terrain, et
- * une carte qu'on apprend à lire.
- *
- * Le corpus de démonstration parlait de code d'un bout à l'autre, ce qui
- * donnait au produit l'air d'un outil de développeur. Il sert à retenir
- * n'importe quoi, et ce qu'on montre doit le dire avant qu'on l'explique.
+ * Hors informatique : une observation de terrain, et une carte qu'on apprend
+ * à lire. La démonstration doit montrer que Kairn ne sert pas qu'au code.
  */
 export const CORPUS_MONTAGNE: SeedInput[] = [
   {

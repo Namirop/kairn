@@ -21,11 +21,9 @@ import { declencher } from "@/lib/jobs/queue";
 import { etatDuDepot, type EtatDepot as EtatDeLaChaine } from "@/lib/domain/etat-depot";
 
 /**
- * Les gestes de l'ingestion.
- *
- * Chacun vérifie la session puis la propriété de la ressource : l'identifiant
- * de l'utilisateur vient de la session, jamais du formulaire. Une ressource qui
- * n'est pas à lui n'est pas trouvée, donc pas touchée.
+ * Les gestes de l'ingestion. Chacun vérifie la session puis la propriété :
+ * l'identifiant vient de la session, jamais du formulaire, et une ressource
+ * d'un autre compte n'est pas trouvée, donc pas touchée.
  */
 
 export type EtatDepot = { erreur?: string; quota?: boolean };
@@ -52,21 +50,14 @@ export async function deposerAction(_precedent: EtatDepot, donnees: FormData): P
 
   revalidatePath(ROUTES.depots);
 
-  // Sur le dépôt qu'on vient de faire, et non sur la liste. C'est le seul écran
-  // qui se recharge tout seul quand le découpage aboutit — la liste, elle, reste
-  // figée sur « en cours » jusqu'à ce qu'on pense à la recharger. On y regardait
-  // donc un dépôt qui n'avançait pas, alors que ses questions étaient écrites
-  // quinze secondes plus tard.
+  // Vers le dépôt et non la liste : c'est le seul écran qui se recharge tout
+  // seul quand le découpage aboutit ; la liste resterait figée sur « en cours ».
   redirect(`${ROUTES.depots}/${resultat.inputId}`);
 }
 
 /**
- * Lance les questions demandées par un geste, derrière la réponse.
- *
- * En appel direct, comme un dépôt depuis la phase 3.5 : corriger un concept est
- * un geste où l'on attend un résultat, et le chemin groupé rendait le lendemain
- * pour une remise de moitié qu'un lot d'une seule requête ne vaut pas. Un job
- * qui ne part pas reste en attente, et le cron le ramassera.
+ * Lance les questions demandées par un geste, après la réponse. Un job qui ne
+ * part pas reste en attente, et le cron le ramasse.
  */
 function lancer(jobs: string[]): void {
   for (const jobId of jobs) declencher(jobId);
@@ -97,12 +88,7 @@ export async function confirmerConceptAction(donnees: FormData): Promise<void> {
   }
 }
 
-/**
- * Remet dans le cycle un concept que l'utilisateur en avait sorti.
- *
- * Depuis la page du dépôt, où le concept est déjà listé : c'est là qu'on va le
- * chercher quand on s'aperçoit du geste plus tard.
- */
+/** Remet dans le cycle un concept sorti, depuis la page du dépôt. */
 export async function desarchiverConceptAction(donnees: FormData): Promise<void> {
   const userId = await utilisateurOuRefus();
   const atomId = (donnees.get("atomId") ?? "").toString();
@@ -114,20 +100,16 @@ export async function desarchiverConceptAction(donnees: FormData): Promise<void>
 }
 
 /**
- * Le même geste, défait dans la session, juste après l'avoir fait.
- *
- * Le mauvais clic le plus probable est celui qu'on vient de faire. Rend un
- * booléen parce que l'appelant est un bouton et non un formulaire : il a besoin
- * de savoir si la bande d'annulation peut disparaître.
+ * Le même geste, défait dans la session juste après l'avoir fait. Rend un
+ * booléen : l'appelant est un bouton, qui doit savoir si la bande d'annulation
+ * peut disparaître.
  */
 export async function annulerMaitriseAction(atomId: string): Promise<boolean> {
   const userId = await utilisateurOuRefus();
 
-  // Aucune revalidation ici, volontairement. Elle rafraîchirait la route
-  // courante, donc la session : le serveur recomposerait une autre liste de
-  // questions, et l'écran changerait de question sous les doigts en plein
-  // parcours. Le tableau de bord est rendu à la demande, il sera juste à la
-  // prochaine visite.
+  // Aucune revalidation, volontairement : elle rafraîchirait la session, le
+  // serveur recomposerait une autre liste de questions et l'écran changerait de
+  // question sous les doigts. Le tableau de bord est rendu à la demande.
   return desarchiverConcept(atomId, userId);
 }
 
@@ -139,13 +121,7 @@ export async function supprimerConceptAction(donnees: FormData): Promise<void> {
   }
 }
 
-/**
- * Efface le dépôt et tout ce qui en découle, puis renvoie à la liste.
- *
- * Distinct de « supprimer ce concept » : l'un corrige un découpage, l'autre dit
- * qu'on ne veut plus de ce texte du tout. Confondre les deux gestes obligerait à
- * vider un dépôt concept par concept pour s'en débarrasser.
- */
+/** Efface le dépôt et tout ce qui en découle, puis renvoie à la liste. */
 export async function supprimerDepotAction(donnees: FormData): Promise<void> {
   const userId = await utilisateurOuRefus();
   const inputId = (donnees.get("inputId") ?? "").toString();
@@ -174,13 +150,9 @@ export async function rejoindreListeDattenteAction(): Promise<void> {
 }
 
 /**
- * Où en est le découpage d'un dépôt, pour l'écran qui l'attend.
- *
- * Ne rend pas la page : rend l'état, les travaux ouverts et le nombre de
- * concepts. C'est l'écran qui décide de se recharger quand l'un des trois
- * bouge. La propriété est vérifiée comme partout ailleurs — un dépôt qui n'est
- * pas à lui n'est pas trouvé, et l'appelant reçoit `null` sans savoir s'il
- * s'agit d'un dépôt inexistant ou d'un dépôt qui appartient à un autre.
+ * Où en est le découpage d'un dépôt, pour l'écran qui l'attend : l'état et le
+ * nombre de concepts, et l'écran décide de se recharger quand l'un bouge.
+ * `null` ne distingue pas un dépôt inexistant d'un dépôt d'un autre compte.
  */
 export async function avancementDuDepotAction(inputId: string): Promise<EtatDepotSuivi | null> {
   const userId = await utilisateurOuRefus();

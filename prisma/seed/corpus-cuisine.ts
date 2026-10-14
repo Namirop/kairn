@@ -1,11 +1,9 @@
 import type { SeedInput } from "./corpus-types";
 
 /**
- * Ce qu'on retient d'un podcast et d'un livre de cuisine : du savoir ordinaire,
- * déposé tel quel, mal écrit pour l'un et propre pour l'autre.
- *
- * Le dépôt de notes décousues porte aussi l'état `ARCHIVED` : un concept sorti
- * du cycle doit se voir quelque part dans la démonstration.
+ * Un podcast et un livre de cuisine : du savoir ordinaire, mal écrit pour l'un,
+ * propre pour l'autre. Les notes décousues portent aussi l'état `ARCHIVED`,
+ * pour qu'il se voie dans la démonstration.
  */
 export const CORPUS_CUISINE: SeedInput[] = [
   {

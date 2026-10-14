@@ -3,36 +3,21 @@
     border-color: var(--border);
   }
 
-  /* Le défilement d'un lien d'ancre se fait en douceur : l'ouverture propose de
-     descendre à l'essai, et un saut sec fait croire à un changement de page.
-     Le bloc `prefers-reduced-motion` en fin de fichier le repasse en `auto`. */
   /*
-    L'ascenseur de la page, retokenisé plutôt que supprimé.
+    L'ascenseur de la page : mince, sans rail ni flèches, plutôt que supprimé —
+    c'est la seule chose qui dise qu'il reste du contenu.
 
-    Le retirer entièrement était l'autre option, et le commentaire de
-    `ascenseur-discret` dit déjà pourquoi on ne le fait pas : c'est la seule
-    chose qui dise qu'il reste du contenu, et une page qui ne le dit plus oblige
-    à essayer pour savoir. Ce qu'on lui reproche n'est pas d'exister, c'est
-    d'être le seul objet de l'écran dessiné par quelqu'un d'autre — sous Windows,
-    un rail gris pleine largeur au bord d'une page minérale.
-
-    Il devient donc mince, sans rail, avec un pouce en gris de sol. Il dit encore
-    où l'on est, il ne dit plus qui l'a dessiné.
-
-    **Et il faut deux écritures pour l'obtenir, pas une.** `scrollbar-width` et
-    `scrollbar-color` sont les propriétés standard, et c'est par elles qu'il faut
-    passer sur Firefox. Mais Chrome applique une règle d'exclusion : dès que
-    l'une des deux est posée, il ignore **toutes** les règles `::-webkit-` de
-    l'élément. Celles qui suivaient ici étaient donc mortes, et la barre restait
-    celle de Windows — rail compris, et surtout **les deux boutons fléchés** que
-    Chrome dessine depuis ses ascenseurs « Fluent », lesquels ne connaissent pas
-    `thin`. On repasse donc en `auto` là où `::-webkit-scrollbar` existe, ce qui
-    rend la main au chemin webkit ; Firefox, qui ne connaît pas le sélecteur,
-    garde les propriétés standard. Les deux ascenseurs du produit suivent la même
-    manœuvre, pour la même raison.
+    Deux écritures sont nécessaires. Chrome ignore toutes les règles
+    `::-webkit-` d'un élément dès que `scrollbar-width` ou `scrollbar-color` y
+    est posé, et garde alors les boutons fléchés de Windows. On repasse donc en
+    `auto` là où `::-webkit-scrollbar` existe ; Firefox, qui ne connaît pas le
+    sélecteur, garde les propriétés standard. `ascenseur-discret` fait de même.
   */
   html {
     -webkit-text-size-adjust: 100%;
+    /* L'ouverture propose de descendre à l'essai : un saut sec ferait croire à
+       un changement de page. `utilities/motion.css` le repasse en `auto` sous
+       `prefers-reduced-motion`. */
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: var(--stone-300) transparent;
@@ -69,27 +54,11 @@
   }
 
   /*
-    Les fins de ligne, réglées une fois pour toutes.
-
-    Le symptôme revenait sans cesse : un mot seul sur la dernière ligne d'un
-    paragraphe, un titre coupé en « trois mots / un mot ». Il avait été corrigé
-    six ou sept fois, à la main, au fil des écrans où on le remarquait — sur
-    deux cent quarante balises de texte du produit, onze portaient le garde-fou.
-    Corriger au cas par cas ne pouvait pas marcher : le défaut naît de chaque
-    nouvelle phrase écrite, pas des anciennes.
-
-    D'où une règle de base plutôt qu'une classe à ne pas oublier.
-
-    `balance` sur les titres : le navigateur y répartit les mots pour que les
-    lignes fassent la même longueur, ce qui est ce qu'on veut d'un titre court.
-    Il abandonne au-delà de quelques lignes, donc un titre long ne coûte rien.
-
-    `pretty` sur le texte courant : il ne cherche pas l'équilibre — ce serait
-    faux sur un paragraphe — mais il refuse la veuve, ce mot resté seul en bas
-    qui donne l'impression d'un texte mal coupé.
-
-    Une classe `text-balance` ou `text-pretty` posée sur un élément l'emporte
-    toujours : ces règles-ci sont le défaut, pas une contrainte.
+    Les fins de ligne par défaut, pour que chaque nouvelle phrase en profite
+    sans classe à ne pas oublier. `balance` sur les titres (le navigateur
+    abandonne au-delà de quelques lignes, un titre long ne coûte rien) ;
+    `pretty` sur le texte courant, qui refuse la veuve sans chercher
+    l'équilibre. Une classe `text-balance` ou `text-pretty` l'emporte toujours.
   */
   h1,
   h2,
@@ -118,15 +87,8 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /*
-    Le grain. Il doit se sentir sur les grandes surfaces sans se voir sur le
-    texte.
-
-    Il vivait en `fixed` par-dessus toute la page, lettres comprises, à une
-    opacité si basse qu'il fallait le chercher. Il descend d'un cran : chaque
-    panneau le porte derrière son contenu, ce qui permet de le monter jusqu'à
-    ce qu'il se sente vraiment.
-  */
+  /* Le grain : posé par chaque panneau derrière son contenu, pour se sentir
+     sur les grandes surfaces sans se voir sur le texte. */
   .grain::after {
     content: "";
     position: absolute;
@@ -150,32 +112,17 @@
   }
 
   /*
-    L'anneau de focus sur la roche, et c'est une correction d'accessibilité.
-
-    `accent-profond` est réglé pour le papier, où il donne 4,95 pour 1. Sur la
-    roche, mesuré, il tombe à **2,48** — sous le seuil de trois exigé d'un
-    indicateur de focus, et donc invisible pour qui navigue au clavier sur un
-    panneau sombre. Le défaut existait sur tous les panneaux de roche du
-    produit ; il devenait intenable au moment de poser la fenêtre de l'essai
-    dessus, qui est le seul parcours de conversion.
-
-    `accent-clair` remonte à 6,85. C'est le même accent, pas une couleur de
-    plus : sur un fond sombre, un accent doit s'éclaircir pour dire la même
-    chose — exactement ce que font déjà `ember-clair` et les pierres claires du
-    cairn.
-
-    Le crochet est un attribut et non une classe de fond : `Panneau` et la
-    fenêtre de l'essai posent `data-surface`, et la règle suit la surface
-    déclarée plutôt que la classe Tailwind qui la peint.
+    L'anneau de focus sur la roche : `accent-profond` y tombe à 2,48, sous le
+    seuil de 3 exigé d'un indicateur de focus ; `accent-clair` donne 6,85.
+    Crochet sur `data-surface`, que posent `Panneau` et la fenêtre de l'essai,
+    plutôt que sur la classe qui peint le fond.
   */
   [data-surface="roche"] :focus-visible {
     outline-color: var(--accent-clair);
   }
 
-  /* L'encre autant que le fond. Sans elle, la sélection héritait de la couleur
-     du texte : sur la roche, du texte clair se posait sur un fond clair et
-     disparaissait au moment précis où on le sélectionnait. Un fond de sélection
-     ne se choisit pas seul, il se choisit avec ce qui s'écrit dessus. */
+  /* L'encre autant que le fond : sinon la sélection garde la couleur du texte,
+     et du texte clair sur la roche disparaît sur ce fond clair. */
   ::selection {
     background: var(--stone-300);
     color: var(--stone-900);
