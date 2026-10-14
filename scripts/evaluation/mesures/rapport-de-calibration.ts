@@ -1,6 +1,7 @@
 import { MODELE_EMBEDDING } from "./espace";
 import type { MesuresDuDepot, Paire, Rapproche } from "./signaux";
 import { rendreLesDeciles, rendreLeTableau } from "./tableaux-de-calibration";
+import { nombre } from "../nombre-en-francais";
 
 /**
  * Le rapport du passage de calibration. Aucun seuil n'y est appliqué : il rend
@@ -27,10 +28,6 @@ function extrait(texte: string): string {
 
 function proximite(valeur: number): string {
   return valeur.toFixed(3);
-}
-
-function nombre(valeur: number): string {
-  return valeur.toLocaleString("fr-FR");
 }
 
 /** Toutes les paires du corpus, dépôt d'origine attaché, triées ensemble. */

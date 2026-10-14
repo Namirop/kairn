@@ -1,6 +1,6 @@
-import { appelerViaOpenRouter, type ConsommationOpenRouter } from "./client";
+import { appelerViaOpenRouter } from "./client";
 import type { ModeleOpenRouter } from "./modeles";
-import type { Facture } from "./juges";
+import { facturer, type Facture } from "./facture";
 import { CONTRAT_D_EXTRACTION, type SortieDExtraction } from "@/lib/ai/schemas";
 import { PROMPTS_SYSTEME_FR } from "@/lib/ai/prompts";
 
@@ -14,19 +14,6 @@ import { PROMPTS_SYSTEME_FR } from "@/lib/ai/prompts";
  * 404 « No endpoints found » quand le paramètre est présent avec
  * `provider.require_parameters: true`, et l'extraction n'en a pas besoin.
  */
-
-function facturer(modele: ModeleOpenRouter, consommation: ConsommationOpenRouter): Facture {
-  const coutUsd =
-    (consommation.inputTokens * modele.prixInParM +
-      consommation.outputTokens * modele.prixOutParM) /
-    1_000_000;
-  return {
-    inputTokens: consommation.inputTokens,
-    outputTokens: consommation.outputTokens,
-    coutUsd,
-    latencyMs: consommation.latencyMs,
-  };
-}
 
 export async function extraireVia(
   modele: ModeleOpenRouter,

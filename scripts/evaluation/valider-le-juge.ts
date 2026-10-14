@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { join } from "node:path";
 import { lireFige } from "./fige";
-import type { Facture } from "./openrouter/juges";
+import type { Facture } from "./openrouter/facture";
 import { JUGE_PRINCIPAL, JUGES_CANDIDATS, type ModeleOpenRouter } from "./openrouter/modeles";
 import { volet1Doublon, volet2Fidelite } from "./validation-du-juge/volets";
 

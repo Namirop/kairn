@@ -6,6 +6,7 @@ import { rendreDistributions } from "./rapport-distributions";
 import { manquementsDeLangue } from "./controle-de-langue";
 import { manquementsDeGranularite } from "./controle-de-granularite";
 import { rendreTemoins } from "./temoins";
+import { nombre } from "./nombre-en-francais";
 
 /**
  * Le rapport du banc. Les contrôles automatiques disent où regarder ; la qualité
@@ -15,10 +16,6 @@ import { rendreTemoins } from "./temoins";
 export type { Passage } from "./rapport-chiffres";
 
 const EXTRAIT_MAX = 220;
-
-function nombre(valeur: number): string {
-  return valeur.toLocaleString("fr-FR");
-}
 
 function dollars(montant: string): string {
   return `${Number(montant).toFixed(4)} $`;

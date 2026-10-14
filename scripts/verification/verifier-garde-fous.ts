@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { conclure, noterUnEchecAttendu, noter } from "./cases/journal";
-import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
+import { armerLePiegeReseau, noterLesTentativesReseau } from "./cases/piege-reseau";
 
 /**
  * Preuve, à l'exécution, que les garde-fous d'appel modèle tiennent.
@@ -12,18 +12,7 @@ import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
  *   npm run verifier:ai
  */
 
-const tentativesReseau: string[] = [];
-const vraiFetch = globalThis.fetch;
-
-function fetchPiege(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-  const url = typeof input === "string" ? input : input.toString();
-  if (!versUnFournisseurDeModele(url)) return vraiFetch(input, init);
-
-  tentativesReseau.push(url);
-  return Promise.reject(new Error(`Requête sortante interdite pendant la vérification : ${url}`));
-}
-
-globalThis.fetch = fetchPiege;
+const tentativesReseau = armerLePiegeReseau();
 
 async function main(): Promise<void> {
   const { callAI } = await import("@/lib/ai/client");
@@ -123,11 +112,7 @@ async function main(): Promise<void> {
   await verifierPlafond();
   await verifierPartAnonyme();
 
-  noter(
-    "Aucune requête n'est sortie vers l'API",
-    tentativesReseau.length === 0,
-    tentativesReseau.length === 0 ? "zéro tentative" : tentativesReseau.join(", "),
-  );
+  noterLesTentativesReseau(tentativesReseau);
 }
 
 main()

@@ -2,6 +2,7 @@ import "dotenv/config";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
+import { finalistes } from "./campagne/finalistes";
 import { dernierFige, lireFige } from "./fige";
 import { chargerCache } from "./juges/cache";
 import { plonger } from "./mesures/embeddings";
@@ -18,12 +19,7 @@ import {
   type ReferenceSonnetQuestions,
 } from "./campagne/tableau-questions";
 import { BUDGET_SORTIE_CAMPAGNE } from "./openrouter/campagne";
-import {
-  CHALLENGERS,
-  JUGE_PRINCIPAL,
-  REFERENCE,
-  type ModeleOpenRouter,
-} from "./openrouter/modeles";
+import { JUGE_PRINCIPAL, REFERENCE, type ModeleOpenRouter } from "./openrouter/modeles";
 import { verifierLeListing } from "./openrouter/verification";
 
 /**
@@ -40,16 +36,6 @@ import { verifierLeListing } from "./openrouter/verification";
  */
 
 const RAPPORTS = join(import.meta.dirname, "rapports", "campagne");
-
-const FINALISTES_IDS = new Set(["google/gemini-3.7-flash", "openai/gpt-5.6-luna"]);
-
-function finalistes(): ModeleOpenRouter[] {
-  const trouves = CHALLENGERS.filter((c) => FINALISTES_IDS.has(c.id));
-  if (trouves.length !== FINALISTES_IDS.size) {
-    throw new Error(`Finalistes introuvables. Attendus : ${[...FINALISTES_IDS].join(", ")}.`);
-  }
-  return trouves;
-}
 
 function refuser(motif: string): never {
   console.error(`La campagne 2 ne démarre pas : ${motif}`);

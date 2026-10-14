@@ -2,8 +2,8 @@ import { PROMPTS_SYSTEME_FR } from "@/lib/ai/prompts";
 import { contratDeGeneration, type SortieDeGeneration } from "@/lib/ai/schemas";
 import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
 import { messageDuGroupe } from "@/lib/domain/envoi-de-questions";
-import { appelerViaOpenRouter, type ConsommationOpenRouter } from "./client";
-import type { Facture } from "./juges";
+import { appelerViaOpenRouter } from "./client";
+import { facturer, type Facture } from "./facture";
 import type { ModeleOpenRouter } from "./modeles";
 
 /**
@@ -22,19 +22,6 @@ export type GroupeAGenerer = {
   /** Le texte du concept qui sera présenté au modèle. */
   concept: string;
 };
-
-function facturer(modele: ModeleOpenRouter, consommation: ConsommationOpenRouter): Facture {
-  const coutUsd =
-    (consommation.inputTokens * modele.prixInParM +
-      consommation.outputTokens * modele.prixOutParM) /
-    1_000_000;
-  return {
-    inputTokens: consommation.inputTokens,
-    outputTokens: consommation.outputTokens,
-    coutUsd,
-    latencyMs: consommation.latencyMs,
-  };
-}
 
 export async function genererVia(
   modele: ModeleOpenRouter,

@@ -2,7 +2,7 @@ import "dotenv/config";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { conclure, noter } from "./cases/journal";
-import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
+import { armerLePiegeReseau, noterLesTentativesReseau } from "./cases/piege-reseau";
 
 /**
  * Preuve, à l'exécution, que le moteur de révision tient : une session se joue
@@ -17,17 +17,7 @@ import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
  *   npm run verifier:session
  */
 
-const tentativesReseau: string[] = [];
-const vraiFetch = globalThis.fetch;
-
-globalThis.fetch = function fetchPiege(input: RequestInfo | URL, init?: RequestInit) {
-  const url = typeof input === "string" ? input : input.toString();
-
-  if (!versUnFournisseurDeModele(url)) return vraiFetch(input, init);
-
-  tentativesReseau.push(url);
-  return Promise.reject(new Error(`Requête sortante interdite pendant la vérification : ${url}`));
-};
+const tentativesReseau = armerLePiegeReseau();
 
 const IDENTIFIANT = "verification-session";
 
@@ -186,11 +176,7 @@ async function main(): Promise<void> {
       `${appels} appel(s) au registre`,
     );
 
-    noter(
-      "Aucune requête n'est sortie vers l'API",
-      tentativesReseau.length === 0,
-      tentativesReseau.length === 0 ? "zéro tentative" : tentativesReseau.join(", "),
-    );
+    noterLesTentativesReseau(tentativesReseau);
   } finally {
     await prisma.aiCall.deleteMany({ where: { userId: { in: comptes } } });
     await prisma.user.deleteMany({ where: { id: { in: comptes } } });
