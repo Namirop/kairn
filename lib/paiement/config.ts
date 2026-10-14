@@ -70,9 +70,10 @@ export function paiementOuvert(): boolean {
     lireConfigDePaiement();
 
     return true;
-  } catch {
+  } catch (erreur) {
     // Le paiement fermé est un état normal, pas un incident. Un achat tenté
     // sans configuration, lui, lève par `lireConfigDePaiement`.
+    signalerUneCleLiveBloquee(erreur);
     return false;
   }
 }
@@ -90,8 +91,20 @@ export function modeDePaiement(): ModeDePaiement {
     const { cleSecrete } = lireConfigDePaiement();
 
     return CLE_DE_PRODUCTION.test(cleSecrete) ? "live" : "test";
-  } catch {
+  } catch (erreur) {
     // Comme dans `paiementOuvert()` : fermé est un état normal.
+    signalerUneCleLiveBloquee(erreur);
     return "ferme";
+  }
+}
+
+/**
+ * Une clé de production posée sans `PAIEMENT_LIVE=true` ferme le paiement, ce qui
+ * est voulu, mais c'est une erreur de configuration et non un état normal : elle
+ * se journalise, sinon l'écran dit « fermé » sans que rien n'explique pourquoi.
+ */
+function signalerUneCleLiveBloquee(erreur: unknown): void {
+  if (erreur instanceof PaiementLiveNonAutoriseError) {
+    console.error("[paiement] clé de production posée sans PAIEMENT_LIVE=true : paiement fermé");
   }
 }
