@@ -1,0 +1,95 @@
+/* Une zone qui défile sans le dire par une barre.
+   Réservé aux endroits où autre chose porte l'information — un fondu, un
+   chevron. Retirer l'ascenseur sans le remplacer supprime la seule indication
+   qu'il reste du contenu, et le clavier n'y accède plus que si la zone est
+   focalisable : les deux vont ensemble, ou l'utilitaire ne s'emploie pas. */
+@utility sans-ascenseur {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* L'ascenseur qu'on garde, mais dans la palette.
+   Pour les zones où l'on écrit : là, la barre est la seule chose qui dise
+   qu'il reste du texte au-dessus ou en dessous du curseur, et un chevron ne
+   peut pas la remplacer puisqu'il faudrait le poser sur la ligne en cours de
+   frappe. Elle reste, débarrassée de son rail système — sous Windows, une
+   barre grise pleine largeur est le seul objet de la page qui vienne d'un
+   autre dessin que le sien. */
+@utility ascenseur-discret {
+  scrollbar-width: thin;
+  scrollbar-color: var(--stone-300) transparent;
+
+  /* Voir l'ascenseur de la page : sans ce retour en `auto`, Chrome ignore tout
+     ce qui suit et garde ses boutons fléchés. */
+  @supports selector(::-webkit-scrollbar) {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--stone-300);
+  }
+}
+
+/* Le même ascenseur, sur la roche.
+
+   `ascenseur-discret` est réglé pour le papier : son pouce en gris de sol y est
+   juste assez présent. Posé sur la roche, c'est l'inverse — un rail clair et
+   large en travers d'un bloc sombre, qui devient l'objet le plus visible de la
+   carte alors qu'il n'est qu'une indication. Le pouce y descend donc au gris de
+   lichen, et la barre à la moitié de son épaisseur par défaut.
+
+   Il ne disparaît pas : c'est la seule chose qui dise qu'une ligne de code
+   continue hors du cadre, et une ligne coupée sans le dire se lit comme une
+   ligne complète. */
+@utility ascenseur-sur-roche {
+  scrollbar-width: thin;
+  scrollbar-color: var(--stone-500) transparent;
+
+  /* Voir l'ascenseur de la page : sans ce retour en `auto`, Chrome ignore tout
+     ce qui suit et garde ses boutons fléchés. C'est ce rail à flèches qui
+     traversait la fenêtre de l'essai sur toute sa hauteur. */
+  @supports selector(::-webkit-scrollbar) {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+
+  &::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: var(--stone-500);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--stone-400);
+  }
+}

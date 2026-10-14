@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 
 /**
- * Les jetons de couleur de `globals.css`.
+ * Les jetons de couleur de la feuille, lus dans `app/styles/tokens/`.
  *
- * **Bornés au premier bloc `:root`.** C'est la palette du produit, celle qui
+ * **Bornés au premier bloc `:root` de chaque fichier.** C'est la palette du produit, celle qui
  * s'applique quand rien d'autre n'est posé, c'est-à-dire toujours. Une lecture
  * du fichier entier garderait la dernière valeur rencontrée et mesurerait un
  * jeton surchargé plus bas dans une règle — un échec sur un produit intact,
@@ -48,9 +48,20 @@ function alias(corps: string, resolus: Record<string, string>): Record<string, s
   return trouves;
 }
 
-export function jetonsDeLaFeuille(chemin = "app/globals.css"): Record<string, string> {
-  const css = readFileSync(chemin, "utf8");
-  const corps = /:root\s*\{([\s\S]*?)\n\}/.exec(css)?.[1] ?? "";
+/**
+ * Les fichiers qui posent la palette de base. `responsive.css` n'en fait pas
+ * partie : il ne surcharge que des tailles, et sous condition de largeur.
+ */
+const FEUILLES_DE_JETONS = [
+  "app/styles/tokens/colors.css",
+  "app/styles/tokens/scale.css",
+  "app/styles/tokens/landscape.css",
+];
+
+export function jetonsDeLaFeuille(chemins = FEUILLES_DE_JETONS): Record<string, string> {
+  const corps = chemins
+    .map((chemin) => /:root\s*\{([\s\S]*?)\n\}/.exec(readFileSync(chemin, "utf8"))?.[1] ?? "")
+    .join("\n");
   const hex = hexDuBloc(corps);
 
   return { ...hex, ...alias(corps, hex) };

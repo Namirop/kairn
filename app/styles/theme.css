@@ -1,0 +1,73 @@
+@theme inline {
+  --color-stone-50: var(--stone-50);
+  --color-stone-100: var(--stone-100);
+  --color-stone-300: var(--stone-300);
+  --color-stone-400: var(--stone-400);
+  --color-stone-500: var(--stone-500);
+  --color-stone-700: var(--stone-700);
+  --color-stone-800: var(--stone-800);
+  --color-stone-900: var(--stone-900);
+  --color-lichen: var(--lichen);
+  --color-lichen-deep: var(--lichen-deep);
+  --color-accent: var(--accent);
+  --color-accent-profond: var(--accent-profond);
+  --color-accent-clair: var(--accent-clair);
+  --color-ember: var(--ember);
+  --color-ember-deep: var(--ember-deep);
+  --color-ember-clair: var(--ember-clair);
+  --color-alerte: var(--alerte);
+  --color-alerte-surface: var(--alerte-surface);
+  --color-jeton: var(--jeton);
+  --color-jeton-bord: var(--jeton-bord);
+  --color-jeton-clair: var(--jeton-clair);
+  --color-jeton-bord-clair: var(--jeton-bord-clair);
+
+  --font-display: var(--police-display);
+  --font-sans: var(--police-texte);
+  --font-mono: var(--police-donnees);
+
+  --text-mono: var(--t-mono);
+  --text-petit: var(--t-petit);
+  --text-corps: var(--t-corps);
+  --text-h2-app: var(--t-h2-app);
+  --text-h1-app: var(--t-h1-app);
+  --text-enonce: var(--t-enonce);
+  --text-nombre: var(--t-nombre);
+  --text-compteur: var(--t-compteur);
+  --text-h2-site: var(--t-h2-site);
+  --text-h1-site: var(--t-h1-site);
+  --text-ouverture: var(--t-ouverture);
+
+  --spacing-pas-1: var(--pas-1);
+  --spacing-pas-2: var(--pas-2);
+  --spacing-pas-3: var(--pas-3);
+  --spacing-pas-4: var(--pas-4);
+  --spacing-pas-6: var(--pas-6);
+  --spacing-pas-8: var(--pas-8);
+  --spacing-pas-12: var(--pas-12);
+  --spacing-pas-16: var(--pas-16);
+  --spacing-pas-24: var(--pas-24);
+  --spacing-pas-campagne: var(--pas-campagne);
+  --spacing-pas-dedans: var(--pas-dedans);
+  --spacing-pas-scene: var(--pas-scene);
+
+  --color-data-mark: var(--data-mark);
+  --color-data-mark-zero: var(--data-mark-zero);
+
+  --color-surface-papier: var(--surface-papier);
+  --color-surface-ombre: var(--surface-ombre);
+  --color-surface-lichen: var(--surface-lichen);
+  --color-surface-session: var(--surface-session);
+  --color-surface-roche: var(--surface-roche);
+
+  --radius-plein: var(--r-plein);
+  --radius-pierre: var(--r-pierre);
+  --radius-champ: var(--r-champ);
+  --radius-carte: var(--r-carte);
+  --radius-galet: var(--r-galet);
+  --radius-xs: var(--r-champ);
+  --radius-sm: var(--r-champ);
+  --radius-md: var(--r-champ);
+  --radius-lg: var(--r-carte);
+  --radius-xl: var(--r-carte);
+}

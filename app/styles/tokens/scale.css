@@ -1,0 +1,146 @@
+/* Les formes, les espacements et l'échelle typographique, sur mobile. */
+
+:root {
+  /*
+    Trois formes, trois sens. Le panneau est le sol, la carte est un objet posé
+    dessus, la pilule est un geste. L'angle vif ne survit que sur les pleines
+    largeurs : ailleurs, une interface faite d'angles droits et de traits fins
+    se lit comme un document, pas comme une application.
+
+    `pierre` s'est ajoutée pour une chose qu'aucune des autres ne décrivait :
+    une **cible qu'on désigne dans une liste**, haute de trois lignes de texte.
+    Le galet en faisait une gélule dont les deux bouts mangeaient un mot ; le
+    champ, taillé pour une ligne de saisie, l'arrondissait encore trop pour une
+    boîte de cette taille. Six pixels, c'est un angle droit dont on a usé
+    l'arête — presque carré, jamais coupant. C'est la forme des pierres du
+    cairn, et c'est la seule raison pour laquelle il en fallait une quatrième.
+  */
+  --r-plein: 0;
+  --r-pierre: 6px;
+  --r-champ: 10px;
+  --r-carte: 20px;
+  --r-galet: 999px;
+
+  /* Rythme vertical. Le contraste entre paliers fait la structure. */
+  --pas-1: 0.25rem;
+  --pas-2: 0.5rem;
+  --pas-3: 0.75rem;
+  --pas-4: 1rem;
+  --pas-6: 1.5rem;
+  --pas-8: 2rem;
+  --pas-12: 3rem;
+  --pas-16: 4rem;
+  --pas-24: 6rem;
+
+  /*
+    La hauteur qu'occupe la navigation basse du téléphone.
+
+    Elle est fixée par-dessus la page, donc ce qui doit se poser au-dessus
+    d'elle a besoin de sa mesure. Recopiée en dur dans chaque composant, elle
+    finirait par mentir à l'un des deux endroits : la barre d'enregistrement des
+    réglages se rangerait sous la navigation, exactement là où elle est censée
+    se voir.
+
+    La somme suit `barre-basse.tsx` : deux rembourrages d'un demi-pas, une cible
+    de trois rem et demi, et l'encoche gestuelle. Elle vaut la même chose sur un
+    écran de bureau, où la navigation n'est pas là — ce qui s'en sert la reprend
+    donc à partir de `md`.
+  */
+  --barre-basse: calc(3.5rem + var(--pas-2) * 2 + env(safe-area-inset-bottom));
+
+  /*
+    Le rythme d'un panneau de campagne, qui se mesure à la fenêtre.
+
+    Six pas de haut et de bas font une ouverture ample sur un écran de quatorze
+    cents pixels de haut, et une ouverture qui déborde sur un écran de neuf
+    cents. Or c'est le même panneau, et il doit respirer dans les deux : c'est la
+    hauteur disponible qui change, pas l'intention. Le pas de campagne suit donc
+    la fenêtre, borné des deux côtés — jamais serré à moins de deux pas et demi,
+    jamais plus ample que les six d'origine.
+  */
+  --pas-campagne: 4rem;
+
+  /*
+    Les deux rythmes de l'application, qui se mesurent à la fenêtre comme celui de
+    la campagne, et pour la même raison.
+
+    `dedans` est ce qui sépare un contenu du bord de ce qui le porte : la marge
+    haute et basse d'un panneau, le dedans de la carte d'une question. `scene` est
+    l'écart entre deux temps d'un écran qui occupe toute la hauteur — la question,
+    puis la réponse, puis les gestes qui portent sur elle.
+
+    Deux pas et non un, parce que les deux échelles ne se confondent pas, et parce
+    que c'est la seconde qui décide si une session déborde du pli. Une correction
+    qui s'ouvre ou une réponse de référence qui s'affiche font grandir le contenu
+    d'un coup : ce qui dépasse passe sous le pli, et il faut défiler au milieu d'un
+    geste qui demandait déjà de la concentration.
+  */
+  --pas-dedans: 1.5rem;
+  --pas-scene: 3rem;
+
+  /* Échelle typographique. Deux registres : marketing et interne. */
+  --t-mono: 0.75rem;
+  --t-petit: 0.875rem;
+  --t-corps: 1rem;
+  --t-h2-app: 1.125rem;
+  --t-h1-app: 1.625rem;
+  /*
+    L'énoncé d'une question, et lui seul.
+
+    Il lui faut être le plus gros de l'écran sans en prendre la place : à la
+    taille d'un titre de page, une question de quinze mots tenait sur cinq
+    lignes, et un extrait de code cité dedans se coupait en deux. Un cran sous
+    `h1-app`, avec la mesure élargie, la même question tient sur deux lignes et
+    l'extrait passe entier.
+  */
+  --t-enonce: 1.5rem;
+  --t-nombre: 3.5rem;
+  /*
+    Le compteur du jour, et lui seul.
+
+    `nombre` sert aux chiffres posés dans une composition — un prix, une pierre
+    comptée. Celui-ci n'est pas un chiffre dans une page : **c'est le titre de
+    l'écran**. « 11 » est ce qu'on vient lire en ouvrant Kairn, et il se
+    présentait à la taille d'une statistique, dans une colonne trois fois plus
+    large que lui. Un écran auquel il manque quelque chose demande d'abord un
+    titre à sa taille, pas un ornement de plus.
+  */
+  --t-compteur: 4.5rem;
+  /* Les titres de section étaient timides face à l'ouverture : deux rems et
+     demi contre presque quatre, sur une page où ils portent chacun un temps du
+     récit. Ils passent à trois et demi — l'écart avec l'ouverture se referme
+     sans se combler, ce qui est exactement le rapport qu'on veut entre une
+     phrase qui ouvre et les trois qui la déroulent. */
+  --t-h2-site: 3.5rem;
+  /*
+    Le titre de campagne, calé sur ce qu'il a à écrire.
+
+    Il était fixe à quatre rem, puis proportionnel à la fenêtre — neuf virgule
+    cinq pour cent — et les deux réglages ratent la même chose : ils ignorent la
+    phrase. Un pourcentage de fenêtre casse le titre en quatre morceaux sur un
+    téléphone étroit, et le laisse trop petit sur un large. Or la contrainte
+    n'est pas « une fraction de l'écran », elle est « deux lignes, jamais
+    trois » — et ça, ça se calcule.
+
+    **Sept et quatre dixièmes est la mesure de la ligne la plus longue.** « Tu
+    lis beaucoup. » occupe 7,35 fois sa taille de police dans le display du
+    produit, resserré de trois centièmes d'em. Diviser la largeur disponible par
+    ce nombre donne donc la plus grande taille où la ligne tient encore entière,
+    et le titre grandit exactement jusque-là. Les quatre rem retranchés sont les
+    deux du rembourrage du panneau, plus deux de garde — pour la barre de
+    défilement d'une fenêtre étroite de bureau, et pour la police de secours qui
+    n'a pas tout à fait les mêmes chasses.
+
+    Le prix de la précision est un double couplage : ce diviseur vaut pour cette
+    phrase-là, et les cinq rems retranchés valent pour la gouttière du panneau.
+    Un titre d'ouverture plus long se remesure, sinon il passera à la ligne ; une
+    gouttière élargie se retranche ici aussi, sinon le titre déborde de la
+    colonne exactement de ce qu'on vient de donner aux marges. Trois rems de
+    gouttière, deux de garde. C'est un prix assumé — la contrainte demandée porte sur le nombre de
+    lignes, et le nombre de lignes dépend du texte.
+
+    Le relais est pris à quarante-huit rem par le clamp de grand écran, qui
+    repart plus haut.
+  */
+  --t-h1-site: clamp(2.25rem, calc((100vw - 5rem) / 7.4), 3.75rem);
+}

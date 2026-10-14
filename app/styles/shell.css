@@ -1,0 +1,128 @@
+/*
+  Le pied rejoint la dalle qui le précède.
+
+  Sur la maquette, le pied de page vit **dans** le bloc sombre : c'est la même
+  masse, et la page se ferme dessus. En production il est sur du papier, séparé
+  par une strate — ce qui va tant que les deux surfaces sont deux gris, et se
+  voit comme un ressaut dès que l'une est un aplat. La jointure disparaît donc,
+  et le pied prend la surface de la dalle.
+
+  Ciblé par la structure plutôt que par une classe : la page publique est la
+  seule à finir ainsi, et un attribut posé exprès pour ce seul cas serait un
+  jeton de plus à retenir pour une règle qui se lit déjà dans la pile.
+*/
+main > div:has(+ section[data-surface="papier"]:last-of-type) {
+  display: none;
+}
+
+main > section[data-surface="papier"]:last-of-type {
+  background: var(--surface-roche);
+  color: var(--stone-300);
+}
+
+main > section[data-surface="papier"]:last-of-type .text-stone-500 {
+  color: var(--stone-300);
+}
+
+/*
+  La matière descend sur les panneaux de roche de l'application.
+
+  Le « peint » s'arrêtait à la landing : passé la connexion, toutes les
+  surfaces redeviennent des aplats CSS, et c'est là qu'on passe ses journées.
+  Il ne peut pas se poser n'importe où pour autant — sur une surface de
+  lecture, une variation lente sous un paragraphe est du bruit.
+
+  La roche est le bon endroit, et le seul : c'est une masse, pas une page ;
+  elle est déjà la surface des deux panneaux par écran qui portent le cairn et
+  la progression ; et la lumière y vient de la droite, comme sur le ciel, donc
+  les deux se lisent comme le même temps du même paysage.
+
+  Posé sous le contenu, qui vit à `z-10` dans `Panneau` — le grain y est déjà
+  depuis toujours, par le même chemin.
+*/
+[data-surface="roche"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(118% 104% at 96% -14%, rgb(58 122 190 / 0.4), rgb(58 122 190 / 0) 60%),
+    radial-gradient(96% 86% at 4% 112%, rgb(4 12 26 / 0.46), rgb(4 12 26 / 0) 58%);
+}
+
+/*
+  Deux sorties de secours qui se suivent forment un groupe.
+
+  Sous la carte, l'écran enchaîne quatre natures de gestes : répondre, se faire
+  aider, renoncer, agir sur le concept. Le trait sépare déjà les deux
+  dernières ; au-dessus de lui, les deux sorties se présentaient avec le même
+  écart que celui qui les sépare de la réponse, donc rien ne disait qu'elles
+  vont ensemble.
+
+  Elles se serrent. Le crochet passe par le parent parce que les deux ne sont
+  pas sœurs dans le balisage — « Je sèche » appartient au formulaire, qu'il
+  aide à remplir, « Je jette la pierre » au déroulé, qui l'abandonne —, et
+  c'est très bien ainsi : ce sont deux moments différents du même renoncement.
+  Seul leur voisinage à l'écran fait le groupe, et c'est exactement ce que
+  cette règle décrit.
+
+  Quand la première n'est pas là — un QCM n'a pas de coup de pouce —, rien ne
+  s'applique et la seconde garde son écart plein.
+*/
+form:has(> .sortie-de-secours) + .sortie-de-secours,
+.sortie-de-secours + .sortie-de-secours {
+  margin-top: var(--pas-2);
+}
+
+/*
+  Un passage prend l'écran, et la coquille se retire.
+
+  Une session n'est pas une page de plus : c'est le seul moment où l'on ne
+  navigue pas. L'en-tête s'effaçait déjà sur téléphone pour cette raison, et le
+  rail n'y a jamais existé — mais au-delà de `md`, les deux restaient. La
+  décision d'alors est écrite : « une fenêtre de bureau sans sa barre
+  supérieure a l'air d'avoir perdu quelque chose. » Elle valait tant que tout
+  était gris.
+
+  Ce qui a changé, c'est que les surfaces portent maintenant des valeurs
+  distinctes. L'écran de session en montre quatre d'un coup — le rail,
+  l'en-tête, le sol, la bande d'état — et aucune ne commence là où la
+  précédente s'arrête : le rail descend du haut de la fenêtre, l'en-tête
+  traverse par-dessus, la bande d'état part sous lui. Ce ne sont pas quatre
+  couleurs de trop, c'est **deux cadres pour un travail qui n'en demandait
+  aucun**.
+
+  La scène se déclare donc passage, et la coquille lit cette déclaration. Il
+  reste le sol et la bande d'état, deux plans, une frontière. La sortie est
+  celle qui a toujours été écrite, en haut à droite : « Arrêter là ».
+
+  Sur téléphone, rien ne change : le rail n'y est pas, l'en-tête s'y effaçait
+  déjà, et la barre basse reste — c'est la seule navigation de cette largeur.
+*/
+body:has([data-passage]) [data-coquille] {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  body:has([data-passage]) [data-colonne] {
+    padding-left: 0;
+  }
+}
+
+/*
+  Le filet du rail, et c'est un cas où le trait est juste.
+
+  La règle du produit dit qu'un changement de fond sépare deux sujets, plus
+  jamais un filet d'un pixel. Elle porte sur des **panneaux** — deux sections
+  empilées d'une même page. Le rail n'est pas une section : c'est un autre
+  plan, posé devant la page, et il tombe régulièrement sur une surface de la
+  même valeur que la sienne — l'ombre du rail contre l'ombre d'un panneau de
+  liste, où les deux se fondent sans qu'aucune des deux soit en tort.
+
+  Un trait entre deux plans ne remplace donc pas une surface, il dit lequel est
+  devant.
+*/
+[data-coquille="rail"] {
+  border-right: 1px solid var(--filet-du-rail, transparent);
+}
