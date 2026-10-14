@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db/client";
 import type { Langue } from "@/lib/db/types";
 import { optionsDUnQCM, texteATrouServi } from "@/lib/db/question-servie";
-import { SEED_USER_ID } from "@/prisma/seed/account";
+import { ID_DE_DEMONSTRATION } from "@/prisma/seed/compte-de-demonstration";
 import { lireFigeDAssets } from "@/scripts/assets/fige";
 
 /**
@@ -22,7 +22,7 @@ export type DepotDeDemo = {
 export async function depotsDeDemo(): Promise<DepotDeDemo[]> {
   const fige = lireFigeDAssets();
   const inputs = await prisma.input.findMany({
-    where: { userId: SEED_USER_ID, status: "READY" },
+    where: { userId: ID_DE_DEMONSTRATION, status: "READY" },
     select: { id: true, rawContent: true, extractedText: true, langue: true },
     orderBy: { createdAt: "asc" },
   });
@@ -66,7 +66,7 @@ function servable(format: string, payload: unknown, answerKey: string): boolean 
 export async function variantesParFormat(langue: Langue): Promise<CibleDeFormat[]> {
   const LONGUEUR_CIBLE = 90;
   const variants = await prisma.variant.findMany({
-    where: { atom: { userId: SEED_USER_ID, input: { langue } }, retiredAt: null },
+    where: { atom: { userId: ID_DE_DEMONSTRATION, input: { langue } }, retiredAt: null },
     select: { id: true, format: true, question: true, answerKey: true, payload: true },
   });
 

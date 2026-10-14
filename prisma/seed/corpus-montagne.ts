@@ -1,13 +1,13 @@
-import type { SeedInput } from "./corpus-types";
+import type { InputDuCorpus } from "./types-du-corpus";
 
 /**
  * Hors informatique : une observation de terrain, et une carte qu'on apprend
  * à lire. La démonstration doit montrer que Kairn ne sert pas qu'au code.
  */
-export const CORPUS_MONTAGNE: SeedInput[] = [
+export const CORPUS_MONTAGNE: InputDuCorpus[] = [
   {
     sourceType: "TEXT",
-    createdDaysAgo: 34,
+    deposeIlYAJours: 34,
     rawContent:
       "Un lichen n'est pas une plante mais une association entre un champignon et une algue. Il pousse de quelques millimètres par an, ce qui permet de dater un éboulement en mesurant les plus gros.",
     atoms: [
@@ -16,7 +16,7 @@ export const CORPUS_MONTAGNE: SeedInput[] = [
           "Un lichen n'est pas une plante : c'est une symbiose entre un champignon, qui retient l'eau et abrite, et une algue, qui produit les sucres par photosynthèse. Aucun des deux ne survivrait seul là où le lichen s'installe.",
         tags: ["biologie", "montagne"],
         state: "CONSOLIDATED",
-        history: [
+        historique: [
           [33, "GOOD"],
           [27, "GOOD"],
           [12, "EASY"],
@@ -55,7 +55,7 @@ export const CORPUS_MONTAGNE: SeedInput[] = [
           "Un lichen pousse de quelques millimètres par an sur la roche nue. En mesurant le diamètre des plus grands lichens installés sur des blocs, on remonte à l'année où la roche s'est retrouvée à l'air libre — c'est la lichénométrie, qui sert à dater un éboulement.",
         tags: ["biologie", "montagne"],
         state: "REVIEWING",
-        history: [
+        historique: [
           [30, "HARD"],
           [22, "AGAIN"],
           [15, "GOOD"],
@@ -102,7 +102,7 @@ export const CORPUS_MONTAGNE: SeedInput[] = [
   },
   {
     sourceType: "TEXT",
-    createdDaysAgo: 9,
+    deposeIlYAJours: 9,
     rawContent:
       "Sur une carte de rando, les courbes de niveau relient les points de même altitude. L'écart entre deux courbes voisines est fixe : c'est l'équidistance. Ce qui compte, c'est l'espacement entre les courbes.",
     atoms: [
@@ -111,7 +111,7 @@ export const CORPUS_MONTAGNE: SeedInput[] = [
           "Sur une carte, les courbes de niveau relient les points de même altitude. L'écart d'altitude entre deux courbes voisines ne change jamais sur une même carte : c'est l'équidistance, indiquée dans la légende, souvent dix mètres.",
         tags: ["cartographie", "montagne"],
         state: "LEARNING",
-        history: [[3, "HARD"]],
+        historique: [[3, "HARD"]],
         variants: [
           {
             format: "CLOZE",

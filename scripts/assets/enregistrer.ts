@@ -19,7 +19,7 @@ import { resemerLeCompte } from "@/scripts/assets/scenarios";
 const TEXTE_DEPOT =
   "Le mot anglais « serendipity » désigne le fait de faire une découverte heureuse et inattendue en cherchant tout autre chose. On le doit à l'écrivain Horace Walpole, en 1754.";
 
-async function tapBouton(page: Page, libelles: string[]): Promise<boolean> {
+async function toucherLeBouton(page: Page, libelles: string[]): Promise<boolean> {
   for (const libelle of libelles) {
     const bouton = page.getByRole("button", { name: libelle, exact: false });
 
@@ -40,7 +40,7 @@ async function scenarioDepot(page: Page, marquer: (label: string) => number): Pr
   await page.locator('textarea[name="texte"]').fill(TEXTE_DEPOT);
   await page.waitForTimeout(800);
 
-  await tapBouton(page, ["Déposer"]);
+  await toucherLeBouton(page, ["Déposer"]);
   const debut = marquer("attente-debut");
   // La vidéo peut continuer sans la redirection, mais un enregistrement qui ne
   // l'a pas vue risque de filmer autre chose que le dépôt : il doit se voir.
@@ -66,13 +66,13 @@ async function scenarioSession(page: Page): Promise<Coupure[]> {
       await trou.first().tap();
       await trou.first().fill("réponse");
       await page.waitForTimeout(600);
-      await tapBouton(page, ["Vérifier"]);
+      await toucherLeBouton(page, ["Vérifier"]);
       await page.waitForTimeout(800);
-      await tapBouton(page, ["Continuer", "Terminer", "Je ne l'avais pas"]);
+      await toucherLeBouton(page, ["Continuer", "Terminer", "Je ne l'avais pas"]);
     } else {
       await page.locator("main li button").first().tap();
       await page.waitForTimeout(800);
-      await tapBouton(page, ["Continuer", "Terminer"]);
+      await toucherLeBouton(page, ["Continuer", "Terminer"]);
     }
 
     await page.waitForTimeout(1000);
@@ -90,7 +90,7 @@ async function scenarioCairn(page: Page): Promise<Coupure[]> {
 }
 
 /** Défilement de la liste des concepts. */
-function scenarioScroll(depotId: string): (page: Page) => Promise<Coupure[]> {
+function scenarioDefilement(depotId: string): (page: Page) => Promise<Coupure[]> {
   return async (page) => {
     await aller(page, `/depots/${depotId}`);
     await page.waitForTimeout(1200);
@@ -116,7 +116,7 @@ async function main(): Promise<void> {
 
   const scenes = [
     { nom: "cairn-gagne-une-pierre", connecte: true, deroule: scenarioCairn },
-    { nom: "defilement-concepts", connecte: true, deroule: scenarioScroll(listeRiche.id) },
+    { nom: "defilement-concepts", connecte: true, deroule: scenarioDefilement(listeRiche.id) },
     { nom: "session-trois-questions", connecte: true, deroule: scenarioSession },
     { nom: "depot-jusqu-aux-concepts", connecte: true, deroule: scenarioDepot },
   ];
@@ -126,12 +126,12 @@ async function main(): Promise<void> {
   const aFaire =
     filtres.length > 0 ? scenes.filter((s) => filtres.some((f) => s.nom.includes(f))) : scenes;
 
-  const browser = await ouvrirLeNavigateur();
+  const navigateur = await ouvrirLeNavigateur();
 
   try {
     for (const scene of aFaire) {
       console.info(`… ${scene.nom}`);
-      await enregistrer(browser, scene);
+      await enregistrer(navigateur, scene);
     }
 
     // La session et le dépôt modifient le compte : on ressème pour le laisser plein.
@@ -141,7 +141,7 @@ async function main(): Promise<void> {
 
     console.info("Vidéos terminées.");
   } finally {
-    await browser.close();
+    await navigateur.close();
     await prisma.$disconnect();
   }
 }

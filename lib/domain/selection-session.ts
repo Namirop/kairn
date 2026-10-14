@@ -1,4 +1,4 @@
-import { jourSuivant, localDay } from "./local-day";
+import { jourSuivant, jourLocal } from "./jour-local";
 import { bornerLeNeuf } from "./part-de-nouveaute";
 import { parUrgence } from "./urgence-de-revision";
 
@@ -59,7 +59,7 @@ export type ConceptDu = {
 /** Vrai si l'échéance tombe au plus tard dans la journée en cours chez l'utilisateur. */
 export function estDu(due: Date, maintenant: Date, fuseau: string): boolean {
   // Au format AAAA-MM-JJ, l'ordre lexicographique est l'ordre chronologique.
-  return localDay(due, fuseau) <= localDay(maintenant, fuseau);
+  return jourLocal(due, fuseau) <= jourLocal(maintenant, fuseau);
 }
 
 /**
@@ -76,7 +76,7 @@ export function dejaRevuAujourdhui(
 ): boolean {
   if (!lastReview) return false;
 
-  return localDay(lastReview, fuseau) === localDay(maintenant, fuseau);
+  return jourLocal(lastReview, fuseau) === jourLocal(maintenant, fuseau);
 }
 
 /**
@@ -106,11 +106,11 @@ export function jourOuIlRevient(
   maintenant: Date,
   fuseau: string,
 ): string {
-  const aujourdhui = localDay(maintenant, fuseau);
+  const aujourdhui = jourLocal(maintenant, fuseau);
 
   if (estServableAujourdhui(concept, maintenant, fuseau)) return aujourdhui;
 
-  const echeance = localDay(concept.due, fuseau);
+  const echeance = jourLocal(concept.due, fuseau);
 
   // Échéance passée ou du jour mais non servable : il a déjà servi, il revient demain.
   return echeance > aujourdhui ? echeance : jourSuivant(aujourdhui);

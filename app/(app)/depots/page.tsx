@@ -8,9 +8,9 @@ import { Strates } from "@/components/coquille/strates";
 import { ListeDepots } from "@/components/tableau/liste-depots";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { listerDepots } from "@/lib/db/depots";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("depots.liste");
@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PageDepots() {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 

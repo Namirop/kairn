@@ -11,7 +11,7 @@
  * panneau sombre qui hériterait des gris du papier serait illisible.
  */
 
-export type Surface = "papier" | "ombre" | "lichen" | "roche" | "session";
+export type Surface = "papier" | "ombre" | "givre" | "roche" | "session";
 
 type Habillage = {
   fond: string;
@@ -41,8 +41,8 @@ export const SURFACES: Record<Surface, Habillage> = {
     objet: "bg-surface-papier",
     sombre: false,
   },
-  lichen: {
-    fond: "bg-surface-lichen",
+  givre: {
+    fond: "bg-surface-givre",
     encre: "text-stone-900",
     second: "text-stone-500",
     grain: "grain",

@@ -8,7 +8,7 @@ import { signalerUneQuestion } from "@/lib/db/signalement";
 import { compterConceptsRetenus } from "@/lib/db/comptage-de-la-periode";
 import { reserverDepot } from "@/lib/db/quota-depots";
 import { fabriquerConcept } from "./abus-fabrique";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Ce qu'il reste d'un compte effacé. La suppression repose sur les cascades du
@@ -111,7 +111,7 @@ export async function casSuppressionComplete(userId: string, fuseau: string): Pr
 
   const remplies = modeles.filter((modele) => (avant[modele.nom] ?? 0) > 0).map((m) => m.nom);
 
-  record(
+  noter(
     "Suppression — le compte de vérification a bien vécu avant d'être effacé",
     remplies.length >= 6,
     `${remplies.length} table(s) remplies : ${remplies.join(", ")}`,
@@ -126,7 +126,7 @@ export async function casSuppressionComplete(userId: string, fuseau: string): Pr
     if (restant > 0) survivants.push(`${modele.nom} (${restant})`);
   }
 
-  record(
+  noter(
     `Suppression — aucune des ${modeles.length - DETACHES.size} tables du compte ne survit`,
     efface && survivants.length === 0,
     survivants.length === 0
@@ -146,7 +146,7 @@ export async function casSuppressionComplete(userId: string, fuseau: string): Pr
 
   const signalements = await prisma.signalement.count();
 
-  record(
+  noter(
     "Suppression — la comptabilité et les signalements restent, mais détachés",
     rattachees.length === 0 && signalements > 0,
     rattachees.length === 0
@@ -154,7 +154,7 @@ export async function casSuppressionComplete(userId: string, fuseau: string): Pr
       : `encore rattachées : ${rattachees.join(", ")}`,
   );
 
-  record(
+  noter(
     "Suppression — un compte effacé n'a plus rien à exporter",
     (await exporterLeCompte(userId)) === null,
     "export refusé",
@@ -167,7 +167,7 @@ export async function casExportComplet(userId: string, fuseau: string): Promise<
   const donnees = await exporterLeCompte(userId);
   const concepts = donnees?.depots.flatMap((depot) => depot.concepts) ?? [];
 
-  record(
+  noter(
     "Export — il porte les dépôts, les concepts, leurs questions et les passages",
     donnees !== null &&
       donnees.depots.length > 0 &&
@@ -179,7 +179,7 @@ export async function casExportComplet(userId: string, fuseau: string): Promise<
       `${concepts.reduce((somme, c) => somme + c.passages.length, 0)} passage(s)`,
   );
 
-  record(
+  noter(
     "Export — il porte la progression et l'identité du compte",
     donnees?.progression !== null &&
       (donnees?.progression?.xp ?? 0) > 0 &&
@@ -191,7 +191,7 @@ export async function casExportComplet(userId: string, fuseau: string): Promise<
   // à un aller-retour JSON.
   const relu: unknown = JSON.parse(JSON.stringify(donnees));
 
-  record(
+  noter(
     "Export — il se relit tel quel, sans identifiant interne",
     JSON.stringify(relu) === JSON.stringify(donnees) &&
       !JSON.stringify(donnees).includes('"userId"') &&

@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { extname, join } from "node:path";
-import type { AiImagePart } from "@/lib/ai/message";
+import type { PartieImage } from "@/lib/ai/message";
 import type { LangueDuProduit } from "@/lib/domain/langue-du-produit";
 
 /**
@@ -76,12 +76,12 @@ export function langueDuDepot(nom: string): LangueDuProduit {
 export type Depot = {
   nom: string;
   texte: string;
-  image?: { base64: string; mediaType: AiImagePart["mediaType"] };
+  image?: { base64: string; mediaType: PartieImage["mediaType"] };
 };
 
 const DOSSIER = join(import.meta.dirname, "corpus");
 
-const IMAGES: Record<string, AiImagePart["mediaType"]> = {
+const IMAGES: Record<string, PartieImage["mediaType"]> = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",

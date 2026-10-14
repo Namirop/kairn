@@ -1,4 +1,4 @@
-import { dayToUtcDate } from "./local-day";
+import { jourEnDateUtc } from "./jour-local";
 
 /**
  * Quand le compteur repart : au jour d'ancrage de la période (le 12 pour qui
@@ -12,7 +12,7 @@ export function joursAvantLaBascule(aujourdhui: string, finDePeriode: string): n
   return Math.max(
     0,
     Math.round(
-      (dayToUtcDate(finDePeriode).getTime() - dayToUtcDate(aujourdhui).getTime()) / JOUR_MS,
+      (jourEnDateUtc(finDePeriode).getTime() - jourEnDateUtc(aujourdhui).getTime()) / JOUR_MS,
     ),
   );
 }

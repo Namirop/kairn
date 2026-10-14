@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { z } from "zod";
 import { prisma } from "@/lib/db/client";
-import { conclure, record } from "../verification/cases/journal";
+import { conclure, noter } from "../verification/cases/journal";
 
 /**
  * Remet à l'endroit les vrai ou faux dont `payload.expected` contredit
@@ -153,7 +153,7 @@ async function main(): Promise<string> {
     });
   }
 
-  record("Verdicts redressés", true, `${pretes.length} affirmation(s)`);
+  noter("Verdicts redressés", true, `${pretes.length} affirmation(s)`);
 
   return "Les affirmations relues surlignent maintenant la proposition que leur étalon explique.";
 }

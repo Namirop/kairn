@@ -59,7 +59,7 @@ export function appliquer(mobile: Mobile, point: Vecteur, jx: number, jy: number
  * quand on pousse loin du centre, parce que la pierre peut tourner au lieu de
  * résister.
  */
-export function masseEffective(a: Mobile, b: Mobile, point: Vecteur, axe: Vecteur): number {
+export function masseEffectiveInverse(a: Mobile, b: Mobile, point: Vecteur, axe: Vecteur): number {
   const bras = (mobile: Mobile) =>
     (point.x - mobile.boite.x) * axe.y - (point.y - mobile.boite.y) * axe.x;
   const brasA = bras(a);

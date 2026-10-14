@@ -5,7 +5,7 @@ import {
   suiviApresObservation,
   type SuiviDeLArriere,
 } from "@/lib/domain/dette-de-revision";
-import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
+import { jourEnDateUtc, jourLocal } from "@/lib/domain/jour-local";
 
 /**
  * Le suivi de l'arriéré, d'un jour à l'autre.
@@ -28,13 +28,13 @@ export async function suivreLArriere(
   fuseau: string,
   maintenant: Date = new Date(),
 ): Promise<ArriereSuivi> {
-  const jour = localDay(maintenant, fuseau);
+  const jour = jourLocal(maintenant, fuseau);
   const stats = await prisma.userStats.findUnique({
     where: { userId },
     select: { backlogSince: true },
   });
 
-  // `provisionAccount` crée la ligne à l'inscription ; si elle manque, il n'y a
+  // `ouvrirLeCompte` crée la ligne à l'inscription ; si elle manque, il n'y a
   // rien à suivre, et ce n'est pas ici qu'on la crée.
   if (!stats) return { signaler: false, jours: 0 };
 
@@ -46,7 +46,7 @@ export async function suivreLArriere(
   if (apres.depuis !== avant.depuis) {
     await prisma.userStats.update({
       where: { userId },
-      data: { backlogSince: apres.depuis ? dayToUtcDate(apres.depuis) : null },
+      data: { backlogSince: apres.depuis ? jourEnDateUtc(apres.depuis) : null },
     });
   }
 

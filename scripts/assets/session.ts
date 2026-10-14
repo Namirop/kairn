@@ -3,7 +3,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { testUtils } from "better-auth/plugins";
 import { prisma } from "@/lib/db/client";
-import { SEED_USER_ID } from "@/prisma/seed/account";
+import { ID_DE_DEMONSTRATION } from "@/prisma/seed/compte-de-demonstration";
 
 /**
  * Un cookie de session prêt pour Playwright, sans passer par l'email : la
@@ -40,7 +40,9 @@ function instanceDeTest() {
   });
 }
 
-export async function cookiesDeSession(userId: string = SEED_USER_ID): Promise<CookieDeSession[]> {
+export async function cookiesDeSession(
+  userId: string = ID_DE_DEMONSTRATION,
+): Promise<CookieDeSession[]> {
   const ctx = await instanceDeTest().$context;
   const cookies = await ctx.test.getCookies({ userId, domain: "localhost" });
 

@@ -1,4 +1,4 @@
-import { LARGEUR_VUE } from "@/lib/domain/cairn-stack";
+import { LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
 
 /**
  * Le sol : un seul trait sous tout le sentier, pas un par cairn. Ses marges

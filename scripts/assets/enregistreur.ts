@@ -7,12 +7,12 @@ import type { Browser, Page } from "@playwright/test";
 import { ACCENT } from "@/lib/design/couleurs-hors-css";
 import {
   assurerLeDossier,
-  BASE_URL,
+  URL_DE_L_APPLICATION,
   cheminDeSortie,
   cheminRelatif,
   VIEWPORTS,
 } from "@/scripts/assets/config";
-import { ajouterAuManifeste } from "@/scripts/assets/manifest";
+import { ajouterAuManifeste } from "@/scripts/assets/manifeste";
 import { cookiesDeSession } from "@/scripts/assets/session";
 
 /**
@@ -28,7 +28,7 @@ const DOSSIER_WEBM = path.join(tmpdir(), "kairn-webm");
  * `document.documentElement` existe : les écouteurs ne demandent que `window`,
  * et le DOM n'est touché qu'au moment de l'appui.
  */
-const OVERLAY_TOUCH = `
+const HALO_DES_APPUIS = `
 (function () {
   var CSS = ".kairn-touch{position:fixed;z-index:2147483647;width:52px;height:52px;border-radius:50%;background:color-mix(in srgb,${ACCENT} 28%,transparent);border:2px solid color-mix(in srgb,${ACCENT} 75%,transparent);pointer-events:none;transition:opacity .45s ease-out,transform .45s ease-out;}";
   function poserLeStyle() {
@@ -60,46 +60,46 @@ export type Coupure = { debutMs: number; finMs: number };
 export type Deroule = (page: Page, marquer: (label: string) => number) => Promise<Coupure[]>;
 
 export async function enregistrer(
-  browser: Browser,
-  opts: { nom: string; connecte: boolean; deroule: Deroule },
+  navigateur: Browser,
+  options: { nom: string; connecte: boolean; deroule: Deroule },
 ): Promise<string> {
   mkdirSync(DOSSIER_WEBM, { recursive: true });
 
-  const mobile = VIEWPORTS.mobile;
-  const ctx = await browser.newContext({
-    viewport: { width: mobile.width, height: mobile.height },
+  const cadre = VIEWPORTS.mobile;
+  const ctx = await navigateur.newContext({
+    viewport: { width: cadre.width, height: cadre.height },
     deviceScaleFactor: 2,
     colorScheme: "light",
     hasTouch: true,
     isMobile: true,
-    baseURL: BASE_URL,
+    baseURL: URL_DE_L_APPLICATION,
     // Égale au viewport, sinon Playwright pose la page dans un coin sur fond
     // gris. L'agrandissement se fait ensuite dans ffmpeg.
-    recordVideo: { dir: DOSSIER_WEBM, size: { width: mobile.width, height: mobile.height } },
+    recordVideo: { dir: DOSSIER_WEBM, size: { width: cadre.width, height: cadre.height } },
   });
 
-  if (opts.connecte) await ctx.addCookies(await cookiesDeSession());
-  await ctx.addInitScript({ content: OVERLAY_TOUCH });
+  if (options.connecte) await ctx.addCookies(await cookiesDeSession());
+  await ctx.addInitScript({ content: HALO_DES_APPUIS });
 
   const page = await ctx.newPage();
   const depart = Date.now();
-  const coupures = await opts.deroule(page, () => Date.now() - depart);
+  const coupures = await options.deroule(page, () => Date.now() - depart);
   const video = page.video();
 
   await ctx.close();
 
-  const webm = video ? await video.path() : null;
-  if (!webm) throw new Error("Aucune vidéo n'a été enregistrée.");
+  const videoBrute = video ? await video.path() : null;
+  if (!videoBrute) throw new Error("Aucune vidéo n'a été enregistrée.");
 
-  const sortie = cheminDeSortie({ viewport: "mobile", ecran: opts.nom, ext: "mp4" });
+  const sortie = cheminDeSortie({ viewport: "mobile", ecran: options.nom, ext: "mp4" });
   assurerLeDossier(sortie);
-  monterLaVideo(webm, coupures, sortie);
+  monterLaVideo(videoBrute, coupures, sortie);
 
   const relatif = cheminRelatif(sortie);
   ajouterAuManifeste({
     fichier: relatif,
     type: "video",
-    ecran: opts.nom,
+    ecran: options.nom,
     sujet: null,
     viewport: "mobile",
     format: null,
@@ -123,13 +123,21 @@ const SORTIE_H264 = [
   "+faststart",
 ];
 
-function monterLaVideo(webm: string, coupures: Coupure[], sortie: string): void {
-  const args =
+function monterLaVideo(videoBrute: string, coupures: Coupure[], sortie: string): void {
+  const parametres =
     coupures.length > 0
-      ? ["-i", webm, "-filter_complex", filtreDeCoupures(coupures), "-map", "[out]", ...SORTIE_H264]
-      : ["-i", webm, "-vf", ECHELLE, ...SORTIE_H264];
+      ? [
+          "-i",
+          videoBrute,
+          "-filter_complex",
+          filtreDeCoupures(coupures),
+          "-map",
+          "[out]",
+          ...SORTIE_H264,
+        ]
+      : ["-i", videoBrute, "-vf", ECHELLE, ...SORTIE_H264];
 
-  const resultat = spawnSync("ffmpeg", ["-y", ...args, sortie], { stdio: "ignore" });
+  const resultat = spawnSync("ffmpeg", ["-y", ...parametres, sortie], { stdio: "ignore" });
 
   if (resultat.status !== 0) throw new Error(`ffmpeg a échoué pour ${sortie}`);
 }

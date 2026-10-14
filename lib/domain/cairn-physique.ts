@@ -1,7 +1,7 @@
 import { type Cadre } from "./cairn-collision";
 import { type Mobile } from "./cairn-impulsions";
 import { resoudre, type Appui } from "./cairn-resolution";
-import { LARGEUR_VUE, type Pierre } from "./cairn-stack";
+import { LARGEUR_VUE, type Pierre } from "./cairn-empilement";
 
 /**
  * Chute des pierres du cairn.

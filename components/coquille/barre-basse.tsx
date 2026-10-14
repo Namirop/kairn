@@ -4,14 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { destinationsPour, estActive, railInterne } from "./destinations";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * Navigation mobile : une barre basse, dans la zone du pouce. Le rembourrage bas
  * suit l'encoche gestuelle (`safe-area-inset-bottom`).
  *
  * Sa hauteur totale est reprise par `--barre-basse` dans
- * `app/styles/tokens/scale.css`, auquel se réfère ce qui se pose au-dessus
+ * `app/styles/tokens/echelle.css`, auquel se réfère ce qui se pose au-dessus
  * d'elle : une cible ou un rembourrage qui change ici se reporte là-bas.
  *
  * Le rail de l'administration a trop d'entrées pour des parts égales sur un

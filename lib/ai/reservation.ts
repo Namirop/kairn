@@ -6,8 +6,12 @@ import {
   reserverPlaceDeCompte,
 } from "@/lib/db/ai-quota";
 import { signalerLEtatDuCompteur } from "./signalement-de-plafond";
-import type { AiConfig } from "./config";
-import { AIAnonymousQuotaError, AIQuotaError, AIUserQuotaError } from "./errors";
+import type { ConfigIa } from "./config";
+import {
+  PartSansCompteEpuiseeError,
+  PlafondGlobalAtteintError,
+  PartDuCompteEpuiseeError,
+} from "./errors";
 
 /**
  * Qui paie un appel, et dans quel ordre. Trois compteurs : la part d'un compte
@@ -41,7 +45,7 @@ export function provenanceDeLAppel(params: { userId?: string; anonyme?: boolean 
  * protéger. Le trafic anonyme, lui, en a une.
  */
 export async function reserverLesDeuxPlaces(
-  config: AiConfig,
+  config: ConfigIa,
   provenance: Provenance,
 ): Promise<void> {
   if ("userId" in provenance) {
@@ -55,7 +59,7 @@ export async function reserverLesDeuxPlaces(
     });
 
     if (!part.obtenue) {
-      throw new AIUserQuotaError(part.utilisees, config.userDailyCallCap);
+      throw new PartDuCompteEpuiseeError(part.utilisees, config.userDailyCallCap);
     }
   }
 
@@ -70,7 +74,7 @@ export async function reserverLesDeuxPlaces(
     });
 
     if (!part.obtenue) {
-      throw new AIAnonymousQuotaError(part.utilisees, config.anonymousDailyCallCap);
+      throw new PartSansCompteEpuiseeError(part.utilisees, config.anonymousDailyCallCap);
     }
   }
 
@@ -88,7 +92,7 @@ export async function reserverLesDeuxPlaces(
   if ("userId" in provenance) await rendrePlacesDeCompte(provenance.userId);
   if ("anonyme" in provenance) await rendrePlaceAnonyme();
 
-  throw new AIQuotaError(reservation.utilisees, config.dailyCallCap);
+  throw new PlafondGlobalAtteintError(reservation.utilisees, config.dailyCallCap);
 }
 
 /**
@@ -99,7 +103,7 @@ export async function reserverLesDeuxPlaces(
  * Rend `false` quand le plafond est atteint, sans lever : l'appelant renonce au
  * repli et laisse remonter l'échec du modèle primaire.
  */
-export async function reserverLaPlaceDuRepli(config: AiConfig): Promise<boolean> {
+export async function reserverLaPlaceDuRepli(config: ConfigIa): Promise<boolean> {
   const reservation = await reserverAppelModele(config.dailyCallCap);
 
   signalerLEtatDuCompteur({

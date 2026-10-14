@@ -1,14 +1,18 @@
 import { callAI } from "@/lib/ai/client";
-import { AiError, AIQuotaError, AIUserQuotaError } from "@/lib/ai/errors";
-import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
-import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
+import {
+  AppelModeleError,
+  PlafondGlobalAtteintError,
+  PartDuCompteEpuiseeError,
+} from "@/lib/ai/errors";
+import { PROMPTS_SYSTEME_FR } from "@/lib/ai/prompts";
+import { CONTRAT_D_EXTRACTION } from "@/lib/ai/schemas";
 import { prisma } from "@/lib/db/client";
 import { lirePlacesDeCompte, lireReservationsDuJour } from "@/lib/db/ai-quota";
 import { lireUsageDeLaPeriode } from "@/lib/db/periode-du-compte";
 import { deposer } from "@/lib/depots/deposer";
 import { enModeCompteur, viderLeCompte } from "./abus-fabrique";
 import { executerToutLePipeline, formulaire } from "./depot-simule";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * `AI_DAILY_CALL_CAP` est global : il protège le budget, et fait de chaque
@@ -42,7 +46,7 @@ export async function casVoisinBloquant(premier: string, second: string): Promis
       formulaire({ texte: PARAGRAPHE, cleEnvoi: "verif-global-second" }),
     );
 
-    record(
+    noter(
       "Plafond global — le dépôt du voisin est accepté, le plafond ne se voit pas au dépôt",
       voisin.ok,
       voisin.ok ? "accepté" : voisin.motif,
@@ -62,19 +66,19 @@ export async function casVoisinBloquant(premier: string, second: string): Promis
     });
     const usage = await lireUsageDeLaPeriode(second, FUSEAU);
 
-    record(
+    noter(
       "Plafond global — le dépôt du voisin n'est pas déclaré en échec",
       depot.status !== "FAILED",
       `${depot.status} — « ${depot.failureReason ?? "aucun motif"} », au registre : ${jobs[0]?.lastError ?? "rien"}`,
     );
 
-    record(
+    noter(
       "Plafond global — le dépôt du voisin est remis en file, pas perdu",
       jobs.length > 0 && jobs.every((job) => job.status === "QUEUED"),
       jobs.map((job) => `${job.status} après ${job.attempts} tentative(s)`).join(", "),
     );
 
-    record(
+    noter(
       "Plafond global — un report ne consomme pas de tentative",
       jobs.every((job) => job.attempts === 0),
       jobs.map((job) => `${job.attempts} tentative(s)`).join(", "),
@@ -82,13 +86,13 @@ export async function casVoisinBloquant(premier: string, second: string): Promis
 
     // Sa place reste prise : son travail est à faire, pas perdu. Le
     // remboursement est pour ce qui ne se fera jamais.
-    record(
+    noter(
       "Plafond global — le voisin garde sa place puisqu'il garde son travail",
       usage.depots === 1,
       `${usage.depots} dépôt(s) comptés pour un dépôt qui attend`,
     );
 
-    record(
+    noter(
       "Plafond global — la part de compte prise pour rien est rendue",
       (await lirePlacesDeCompte(second)) === 0,
       `${await lirePlacesDeCompte(second)} place(s) de compte retenue(s)`,
@@ -124,27 +128,27 @@ export async function casPartDuCompte(gourmand: string, voisin: string): Promise
       for (let tour = 0; tour < partDeCompte + 2; tour += 1) {
         try {
           await callAI({
-            contract: EXTRACT_ATOMS,
-            system: SYSTEM_PROMPTS.extract_atoms,
+            contract: CONTRAT_D_EXTRACTION,
+            system: PROMPTS_SYSTEME_FR.extract_atoms,
             userId: gourmand,
             messages: [{ role: "user", content: PARAGRAPHE }],
           });
         } catch (erreur) {
-          refus.push(erreur instanceof AiError ? erreur.code : "inconnu");
+          refus.push(erreur instanceof AppelModeleError ? erreur.code : "inconnu");
         }
       }
 
       const prisesParLeGourmand = await lirePlacesDeCompte(gourmand);
       const globales = (await lireReservationsDuJour()) - avant;
 
-      record(
+      noter(
         `Part de compte — un seul compte ne prend que ses ${partDeCompte} places`,
         prisesParLeGourmand === partDeCompte &&
           refus.filter((code) => code === "AI_USER_QUOTA").length === 2,
         `${prisesParLeGourmand} place(s) de compte, refus : ${refus.join(", ")}`,
       );
 
-      record(
+      noter(
         "Part de compte — le plafond global reste ouvert pour les autres",
         globales === partDeCompte,
         `${globales} place(s) globales ajoutées, sur ${large} ouvertes`,
@@ -154,18 +158,20 @@ export async function casPartDuCompte(gourmand: string, voisin: string): Promise
 
       try {
         await callAI({
-          contract: EXTRACT_ATOMS,
-          system: SYSTEM_PROMPTS.extract_atoms,
+          contract: CONTRAT_D_EXTRACTION,
+          system: PROMPTS_SYSTEME_FR.extract_atoms,
           userId: voisin,
           messages: [{ role: "user", content: PARAGRAPHE }],
         });
       } catch (erreur) {
         // En mode compteur l'émission échoue faute de clé ; seul compte qu'elle
         // ait été autorisée à partir.
-        voisinServi = !(erreur instanceof AIUserQuotaError) && !(erreur instanceof AIQuotaError);
+        voisinServi =
+          !(erreur instanceof PartDuCompteEpuiseeError) &&
+          !(erreur instanceof PlafondGlobalAtteintError);
       }
 
-      record(
+      noter(
         "Part de compte — le voisin passe malgré la gourmandise du premier",
         voisinServi && (await lirePlacesDeCompte(voisin)) === 1,
         voisinServi ? "servi" : "bloqué par le compte d'à côté",

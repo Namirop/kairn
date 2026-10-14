@@ -1,8 +1,8 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { estLHeureDeLAlerte, HEURE_DE_LALERTE, serieEnSursis } from "./alerte-de-streak";
-import { localDay, localHour } from "./local-day";
-import { unFuseau, unInstant } from "./local-day.test";
+import { jourLocal, heureLocale } from "./jour-local";
+import { unFuseau, unInstant } from "./jour-local.test";
 
 const utc = (iso: string) => new Date(`${iso}Z`);
 
@@ -52,7 +52,7 @@ describe("estLHeureDeLAlerte", () => {
       fc.property(unInstant, unFuseau, fc.integer({ min: 0, max: 20 }), (instant, fuseau, h) => {
         const alerte = estLHeureDeLAlerte(instant, { timezone: fuseau, dailyReminderHour: h });
 
-        return alerte === (localHour(instant, fuseau) === HEURE_DE_LALERTE);
+        return alerte === (heureLocale(instant, fuseau) === HEURE_DE_LALERTE);
       }),
       { numRuns: 400 },
     );
@@ -109,7 +109,7 @@ describe("serieEnSursis", () => {
   it("ne dépend que du jour local et de la série", () => {
     fc.assert(
       fc.property(unInstant, unFuseau, fc.nat({ max: 40 }), (instant, fuseau, serie) => {
-        const jour = localDay(instant, fuseau);
+        const jour = jourLocal(instant, fuseau);
         const sursis = serieEnSursis(instant, {
           timezone: fuseau,
           currentStreak: serie,

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * Une série de jours, en barres.

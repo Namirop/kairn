@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import { debutDuJourUtc, ilYA } from "@/lib/domain/fenetre-utc";
-import { localDay } from "@/lib/domain/local-day";
+import { jourLocal } from "@/lib/domain/jour-local";
 import { coutSelonConventions } from "@/lib/domain/tarifs";
 
 /**
@@ -134,7 +134,7 @@ export async function lireLaDepenseParJour(
  * modèle, maille où la conversion de tarif est juste, puis on replie.
  */
 export async function lireLaDepenseDuJour(maintenant: Date): Promise<BlocDepense> {
-  const jour = localDay(maintenant, "UTC");
+  const jour = jourLocal(maintenant, "UTC");
   const debut = debutDuJourUtc(maintenant);
   const fin = new Date(debut.getTime() + 24 * 60 * 60 * 1000);
 

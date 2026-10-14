@@ -1,6 +1,5 @@
 // i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
-import { EMAIL_STYLE as S, renderShell } from "./shell";
-import type { RenderedEmail } from "./daily-reminder";
+import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
 import { echapper } from "./echapper";
 
 /**
@@ -38,7 +37,7 @@ function sujet({ bascules }: AlerteDeBasculePayload): string {
   return `Kairn — ${bascules} bascules Luna → Sonnet aujourd'hui`;
 }
 
-export function renderAlerteDeBascule(payload: AlerteDeBasculePayload): RenderedEmail {
+export function composerLAlerteDeBascule(payload: AlerteDeBasculePayload): EmailRendu {
   const { bascules, seuil, motif, instant } = payload;
 
   const constat =
@@ -53,18 +52,18 @@ export function renderAlerteDeBascule(payload: AlerteDeBasculePayload): Rendered
   const tableau = lignes
     .map(
       ([valeur, legende]) =>
-        `<tr><td style="padding:0 12px 8px 0;font-family:${S.MONO};font-size:15px;color:${S.ink};white-space:nowrap;">${valeur}</td><td style="padding:0 0 8px;font-size:14px;color:${S.muted};">${legende}</td></tr>`,
+        `<tr><td style="padding:0 12px 8px 0;font-family:${S.MONO};font-size:15px;color:${S.encre};white-space:nowrap;">${valeur}</td><td style="padding:0 0 8px;font-size:14px;color:${S.secondaire};">${legende}</td></tr>`,
     )
     .join("");
 
   const motifCourt = motif.length > 500 ? `${motif.slice(0, 500)}…` : motif;
 
-  const body = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.alerte};">${bascules}</p>
+  const corps = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.alerte};">${bascules}</p>
 <p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.alerte};">bascules Luna → Sonnet aujourd'hui</p>
-<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">${constat}</p>
+<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.secondaire};">${constat}</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">${tableau}</table>
-<p style="margin:0 0 4px;font-size:14px;color:${S.muted};">Motif de la dernière bascule :</p>
-<p style="margin:0;font-family:${S.MONO};font-size:13px;line-height:19px;color:${S.ink};word-break:break-all;">${echapper(motifCourt)}</p>`;
+<p style="margin:0 0 4px;font-size:14px;color:${S.secondaire};">Motif de la dernière bascule :</p>
+<p style="margin:0;font-family:${S.MONO};font-size:13px;line-height:19px;color:${S.encre};word-break:break-all;">${echapper(motifCourt)}</p>`;
 
   const text = [
     `${bascules} bascules Luna → Sonnet aujourd'hui (seuil ${seuil}).`,
@@ -79,9 +78,9 @@ export function renderAlerteDeBascule(payload: AlerteDeBasculePayload): Rendered
 
   return {
     subject: sujet(payload),
-    html: renderShell({
-      preheader: `${bascules} bascules aujourd'hui, ${heureUtc(instant)}.`,
-      body,
+    html: envelopper({
+      preentete: `${bascules} bascules aujourd'hui, ${heureUtc(instant)}.`,
+      corps,
       raisonDeLEnvoi:
         "Alerte d'exploitation. Elle part une fois par jour au-delà du seuil, à l'adresse posée dans EMAIL_ALERTES.",
     }),

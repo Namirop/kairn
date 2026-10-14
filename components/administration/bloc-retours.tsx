@@ -4,7 +4,7 @@ import { Section } from "@/components/administration/section";
 import { LigneDeRetour } from "@/components/administration/ligne-de-retour";
 import { ROUTES } from "@/lib/auth/routes";
 import type { PageDeRetours } from "@/lib/db/retour";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * Les retours écrits par les comptes, sur tout sauf une question générée (ça,

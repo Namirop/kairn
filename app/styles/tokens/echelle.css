@@ -1,0 +1,86 @@
+/* Les formes, les espacements et l'échelle typographique, sur mobile. */
+
+:root {
+  /*
+    Chaque forme a un sens : le panneau est le sol (angle vif, pleine largeur
+    seulement), la carte un objet posé dessus, le galet un geste. `pierre` sert
+    une cible désignée dans une liste, haute de plusieurs lignes : le galet en
+    ferait une gélule qui mange un mot, le champ l'arrondirait trop.
+  */
+  --r-plein: 0;
+  --r-pierre: 6px;
+  --r-champ: 10px;
+  --r-carte: 20px;
+  --r-galet: 999px;
+
+  /* Rythme vertical. Le contraste entre paliers fait la structure. */
+  --pas-1: 0.25rem;
+  --pas-2: 0.5rem;
+  --pas-3: 0.75rem;
+  --pas-4: 1rem;
+  --pas-6: 1.5rem;
+  --pas-8: 2rem;
+  --pas-12: 3rem;
+  --pas-16: 4rem;
+  --pas-24: 6rem;
+
+  /*
+    La hauteur de la navigation basse du téléphone, fixée par-dessus la page,
+    pour ce qui doit se poser au-dessus d'elle. La somme suit `barre-basse.tsx`
+    (deux rembourrages d'un demi-pas, une cible de 3,5 rem, l'encoche) : les deux
+    se changent ensemble. Elle ne s'annule pas sur bureau, où la navigation est
+    absente : ce qui s'en sert la reprend à partir de `md`.
+  */
+  --barre-basse: calc(3.5rem + var(--pas-2) * 2 + env(safe-area-inset-bottom));
+
+  /*
+    Le rythme d'un panneau de campagne. Fixe sur mobile ; à partir de `md` il
+    suit la hauteur de la fenêtre (voir `grand-ecran.css`), parce que six pas
+    débordent sur un écran bas.
+  */
+  --pas-campagne: 4rem;
+
+  /*
+    Les deux rythmes de l'application, qui suivent aussi la fenêtre à partir de
+    `md`. `dedans` sépare un contenu du bord de ce qui le porte ; `scene` est
+    l'écart entre deux temps d'un écran plein (question, réponse, gestes). Deux
+    pas distincts parce que c'est `scene` qui décide si une session déborde du
+    pli quand une correction s'ouvre.
+  */
+  --pas-dedans: 1.5rem;
+  --pas-scene: 3rem;
+
+  /* Échelle typographique. Deux registres : marketing et interne. */
+  --t-mono: 0.75rem;
+  --t-petit: 0.875rem;
+  --t-corps: 1rem;
+  --t-h2-app: 1.125rem;
+  --t-h1-app: 1.625rem;
+  /*
+    L'énoncé d'une question, et lui seul : un cran sous `h1-app`, pour qu'une
+    question de quinze mots tienne sur deux lignes et qu'un extrait de code ne
+    se coupe pas.
+  */
+  --t-enonce: 1.5rem;
+  --t-nombre: 3.5rem;
+  /*
+    Le compteur du jour, et lui seul. Plus grand que `nombre` (un chiffre dans
+    une composition) parce qu'il est le titre de l'écran.
+  */
+  --t-compteur: 4.5rem;
+  --t-h2-site: 3.5rem;
+  /*
+    Le titre de campagne, calé sur sa phrase : la contrainte est « deux lignes,
+    jamais trois ».
+
+    7,4 est la mesure de la ligne la plus longue : « Tu lis beaucoup. » occupe
+    7,35 fois sa taille de police dans le display, resserré de 0,03 em. Diviser
+    la largeur disponible par ce nombre donne la plus grande taille où la ligne
+    tient entière. Les 5 rem retranchés sont 3 de gouttière du panneau et 2 de
+    garde (barre de défilement, police de secours).
+
+    Double couplage : un titre plus long se remesure, une gouttière élargie se
+    retranche ici aussi. À partir de 48 rem, `grand-ecran.css` prend le relais.
+  */
+  --t-h1-site: clamp(2.25rem, calc((100vw - 5rem) / 7.4), 3.75rem);
+}

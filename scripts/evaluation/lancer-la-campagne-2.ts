@@ -57,20 +57,20 @@ function refuser(motif: string): never {
 }
 
 function melangerEtiquettes(
-  items: ModeleOpenRouter[],
+  modeles: ModeleOpenRouter[],
 ): { etiquette: Etiquette; finaliste: ModeleOpenRouter }[] {
   const etiquettes: Etiquette[] = ["A", "B"];
-  if (items.length !== etiquettes.length) {
+  if (modeles.length !== etiquettes.length) {
     throw new Error(
-      `Le mélange attend ${etiquettes.length} finalistes, il en a reçu ${items.length}.`,
+      `Le mélange attend ${etiquettes.length} finalistes, il en a reçu ${modeles.length}.`,
     );
   }
-  const ordre = [...items];
+  const ordre = [...modeles];
   for (let i = ordre.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    const tmp = ordre[i]!;
+    const echange = ordre[i]!;
     ordre[i] = ordre[j]!;
-    ordre[j] = tmp;
+    ordre[j] = echange;
   }
   return ordre.map((finaliste, rang) => ({ etiquette: etiquettes[rang]!, finaliste }));
 }

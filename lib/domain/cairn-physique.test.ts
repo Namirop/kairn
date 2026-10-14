@@ -10,7 +10,7 @@ import {
   type Cadre,
   type Corps,
 } from "./cairn-physique";
-import { empiler, LARGEUR_VUE, type Pierre } from "./cairn-stack";
+import { empiler, LARGEUR_VUE, type Pierre } from "./cairn-empilement";
 
 const EMPILEMENT = empiler(6);
 const PIERRES = EMPILEMENT.pierres;

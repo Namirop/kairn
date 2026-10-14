@@ -1,8 +1,8 @@
 import { appelerViaOpenRouter, type ConsommationOpenRouter } from "./client";
 import type { ModeleOpenRouter } from "./modeles";
 import type { Facture } from "./juges";
-import { EXTRACT_ATOMS, type ExtractAtomsOutput } from "@/lib/ai/schemas";
-import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
+import { CONTRAT_D_EXTRACTION, type SortieDExtraction } from "@/lib/ai/schemas";
+import { PROMPTS_SYSTEME_FR } from "@/lib/ai/prompts";
 
 /**
  * L'extraction via OpenRouter pour le banc, avec le prompt système de la
@@ -33,10 +33,10 @@ export async function extraireVia(
   texte: string,
   maxTokens: number,
   reasoning: { effort: "low" | "medium" | "high" } | false = false,
-): Promise<{ sortie: ExtractAtomsOutput; facture: Facture }> {
+): Promise<{ sortie: SortieDExtraction; facture: Facture }> {
   const { valeur, consommation } = await appelerViaOpenRouter({
-    contract: EXTRACT_ATOMS,
-    system: SYSTEM_PROMPTS.extract_atoms,
+    contract: CONTRAT_D_EXTRACTION,
+    system: PROMPTS_SYSTEME_FR.extract_atoms,
     messages: [{ role: "user", content: texte }],
     model: modele.id,
     maxTokens,

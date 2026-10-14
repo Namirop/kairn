@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
+import { jourEnDateUtc, jourLocal } from "@/lib/domain/jour-local";
 
 /**
  * Réservation de places d'appel modèle pour la journée en cours.
@@ -21,7 +21,7 @@ export type Reservation = {
 
 /** Le plafond est global au produit, la journée se compte donc en UTC. */
 function jourUtc(instant: Date): string {
-  return localDay(instant, "UTC");
+  return jourLocal(instant, "UTC");
 }
 
 /** Réserve une place d'appel au plafond global du jour. */
@@ -131,7 +131,7 @@ export async function reserverPlaceAnonyme(
  */
 export async function rendrePlaceAnonyme(maintenant: Date = new Date()): Promise<void> {
   await prisma.aiAnonymousQuota.updateMany({
-    where: { day: dayToUtcDate(jourUtc(maintenant)), reserved: { gte: 1 } },
+    where: { day: jourEnDateUtc(jourUtc(maintenant)), reserved: { gte: 1 } },
     data: { reserved: { decrement: 1 } },
   });
 }
@@ -154,7 +154,7 @@ export async function rendrePlacesDeCompte(
   maintenant: Date = new Date(),
 ): Promise<void> {
   await prisma.aiUserQuota.updateMany({
-    where: { userId, day: dayToUtcDate(jourUtc(maintenant)), reserved: { gte: places } },
+    where: { userId, day: jourEnDateUtc(jourUtc(maintenant)), reserved: { gte: places } },
     data: { reserved: { decrement: places } },
   });
 }

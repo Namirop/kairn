@@ -1,5 +1,5 @@
 import { lireLesSurcharges } from "@/lib/db/reglages";
-import { assemblerLaConfig, type AiConfig } from "./config";
+import { assemblerLaConfig, type ConfigIa } from "./config";
 
 /**
  * La configuration réellement en vigueur : l'environnement, surchargé par ce que
@@ -11,6 +11,6 @@ import { assemblerLaConfig, type AiConfig } from "./config";
  * Rien n'est mis en cache : couper les appels doit prendre effet à l'appel
  * suivant. La requête est une lecture par clé primaire.
  */
-export async function lireLaConfigEffective(): Promise<AiConfig> {
+export async function lireLaConfigEffective(): Promise<ConfigIa> {
   return assemblerLaConfig(await lireLesSurcharges());
 }

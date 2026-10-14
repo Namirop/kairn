@@ -5,7 +5,13 @@ import {
   type Cadre,
   type Contact,
 } from "./cairn-collision";
-import { appliquer, masseEffective, monde, vitesseAuPoint, type Mobile } from "./cairn-impulsions";
+import {
+  appliquer,
+  masseEffectiveInverse,
+  monde,
+  vitesseAuPoint,
+  type Mobile,
+} from "./cairn-impulsions";
 
 /**
  * Résolution des contacts par impulsions successives : à chaque image on liste
@@ -55,7 +61,7 @@ function corrigerVitesses(lien: Lien): void {
   // Positif : B s'éloigne déjà de A, il n'y a rien à corriger.
   if (vn > 0) return;
 
-  const kn = masseEffective(a, b, contact.point, normale);
+  const kn = masseEffectiveInverse(a, b, contact.point, normale);
 
   if (kn <= 0) return;
 
@@ -68,7 +74,7 @@ function corrigerVitesses(lien: Lien): void {
   const tangente = { x: -normale.y, y: normale.x };
   const glissement = relative();
   const vt = glissement.x * tangente.x + glissement.y * tangente.y;
-  const kt = masseEffective(a, b, contact.point, tangente);
+  const kt = masseEffectiveInverse(a, b, contact.point, tangente);
 
   if (kt <= 0) return;
 

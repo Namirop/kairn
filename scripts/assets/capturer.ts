@@ -2,7 +2,7 @@ import "dotenv/config";
 import type { Browser } from "@playwright/test";
 import { prisma } from "@/lib/db/client";
 import type { Langue } from "@/lib/db/types";
-import { SEED_USER_ID } from "@/prisma/seed/account";
+import { ID_DE_DEMONSTRATION } from "@/prisma/seed/compte-de-demonstration";
 import {
   capturerConnectees,
   capturerFinDeSession,
@@ -54,12 +54,12 @@ async function rassemblerLesDonnees(now: Date, selection: Selection): Promise<Do
   const depots = tous.filter((depot) => depot.langue === selection.langue);
   const fige = lireFigeDAssets();
   const stats = await prisma.userStats.findUnique({
-    where: { userId: SEED_USER_ID },
+    where: { userId: ID_DE_DEMONSTRATION },
     select: { currentStreak: true },
   });
   const due = await prisma.atom.count({
     where: {
-      userId: SEED_USER_ID,
+      userId: ID_DE_DEMONSTRATION,
       due: { lte: now },
       state: { not: "ARCHIVED" },
       variants: { some: { retiredAt: null } },
@@ -78,16 +78,16 @@ async function rassemblerLesDonnees(now: Date, selection: Selection): Promise<Do
 /** Pose la langue du compte de démo et rend celle qu'il avait. */
 async function poserLaLangue(langue: Langue): Promise<Langue> {
   const avant = await prisma.userSettings.findUniqueOrThrow({
-    where: { userId: SEED_USER_ID },
+    where: { userId: ID_DE_DEMONSTRATION },
     select: { langue: true },
   });
 
-  await prisma.userSettings.update({ where: { userId: SEED_USER_ID }, data: { langue } });
+  await prisma.userSettings.update({ where: { userId: ID_DE_DEMONSTRATION }, data: { langue } });
 
   return avant.langue;
 }
 
-async function capturerLesFinsDeSession(browser: Browser, selection: Selection): Promise<void> {
+async function capturerLesFinsDeSession(navigateur: Browser, selection: Selection): Promise<void> {
   const viewports = VIEWPORTS_ORDRE.filter((viewport) =>
     selection.garde(`${viewport}/fin-de-session/fin-de-session`),
   );
@@ -101,7 +101,7 @@ async function capturerLesFinsDeSession(browser: Browser, selection: Selection):
     console.info(`— fin de session (${viewport}) —`);
     resemerLeCompte();
     try {
-      await capturerFinDeSession(browser, viewport);
+      await capturerFinDeSession(navigateur, viewport);
     } catch (erreur) {
       console.warn(`Fin de session ${viewport} non capturée :`, erreur);
     }
@@ -112,7 +112,7 @@ async function capturerLesFinsDeSession(browser: Browser, selection: Selection):
 
 async function main(): Promise<void> {
   const selection = lireLaSelection();
-  const browser = await ouvrirLeNavigateur();
+  const navigateur = await ouvrirLeNavigateur();
   const langueDAvant = await poserLaLangue(selection.langue);
 
   try {
@@ -126,15 +126,15 @@ async function main(): Promise<void> {
 
     for (const viewport of VIEWPORTS_ORDRE) {
       console.info(`— ${viewport} —`);
-      if (selection.langue === "FR") await capturerPubliques(browser, viewport, selection);
-      await capturerConnectees(browser, viewport, donnees);
+      if (selection.langue === "FR") await capturerPubliques(navigateur, viewport, selection);
+      await capturerConnectees(navigateur, viewport, donnees);
     }
 
-    await capturerLesFinsDeSession(browser, selection);
+    await capturerLesFinsDeSession(navigateur, selection);
     console.info("Captures terminées.");
   } finally {
     await poserLaLangue(langueDAvant);
-    await browser.close();
+    await navigateur.close();
     await prisma.$disconnect();
   }
 }

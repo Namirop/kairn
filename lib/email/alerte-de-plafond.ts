@@ -1,10 +1,13 @@
-import { sendEmail } from "./client";
-import { renderAlerteDePlafond, type AlerteDePlafondPayload } from "./templates/alerte-de-plafond";
+import { envoyerLEmail } from "./client";
+import {
+  composerLAlerteDePlafond,
+  type AlerteDePlafondPayload,
+} from "./templates/alerte-de-plafond";
 
 /**
  * L'envoi d'une alerte de plafond, à qui tient le produit.
  *
- * Pas de `sendNotification` : il vérifie le refus d'emails d'un utilisateur et
+ * Pas de `envoyerLaNotification` : il vérifie le refus d'emails d'un utilisateur et
  * écrit dans `EmailDelivery`, alors qu'il n'y a pas d'utilisateur derrière
  * cette alerte (même raison que `connexion.ts`).
  *
@@ -19,9 +22,9 @@ export async function envoyerLAlerteDePlafond(payload: AlerteDePlafondPayload): 
     return;
   }
 
-  const email = renderAlerteDePlafond(payload);
+  const email = composerLAlerteDePlafond(payload);
 
-  await sendEmail({
+  await envoyerLEmail({
     to: destinataire,
     subject: email.subject,
     html: email.html,

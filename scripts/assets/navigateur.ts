@@ -3,13 +3,13 @@ import { chromium, type Browser, type BrowserContext, type Page } from "@playwri
 import type { Langue } from "@/lib/db/types";
 import {
   assurerLeDossier,
-  BASE_URL,
+  URL_DE_L_APPLICATION,
   cheminDeSortie,
   cheminRelatif,
   VIEWPORTS,
   type Viewport,
 } from "@/scripts/assets/config";
-import { ajouterAuManifeste } from "@/scripts/assets/manifest";
+import { ajouterAuManifeste } from "@/scripts/assets/manifeste";
 import { cookiesDeSession } from "@/scripts/assets/session";
 
 /** Le pilotage du navigateur pour les captures. */
@@ -26,18 +26,18 @@ export async function ouvrirLeNavigateur(): Promise<Browser> {
 
 /** Un contexte réglé pour un viewport, connecté au compte de démo ou non. */
 export async function contexte(
-  browser: Browser,
+  navigateur: Browser,
   viewport: Viewport,
   connecte: boolean,
 ): Promise<BrowserContext> {
   const reglage = VIEWPORTS[viewport];
-  const ctx = await browser.newContext({
+  const ctx = await navigateur.newContext({
     viewport: { width: reglage.width, height: reglage.height },
     deviceScaleFactor: reglage.deviceScaleFactor,
     colorScheme: "light",
     hasTouch: viewport === "mobile",
     isMobile: viewport === "mobile",
-    baseURL: BASE_URL,
+    baseURL: URL_DE_L_APPLICATION,
   });
 
   if (connecte) await ctx.addCookies(await cookiesDeSession());
@@ -67,33 +67,33 @@ export type OptionsDeTir = {
 };
 
 /** Tire une capture, l'écrit sur disque, et pose son entrée au manifeste. */
-export async function tirer(page: Page, opts: OptionsDeTir): Promise<string> {
+export async function tirer(page: Page, options: OptionsDeTir): Promise<string> {
   await attendrePolices(page);
 
   const fichier = cheminDeSortie({
-    viewport: opts.viewport,
-    ecran: opts.ecran,
-    sujet: opts.sujet,
-    langue: opts.langue,
+    viewport: options.viewport,
+    ecran: options.ecran,
+    sujet: options.sujet,
+    langue: options.langue,
     ext: "png",
   });
   assurerLeDossier(fichier);
 
-  if (opts.selecteur) {
-    await page.locator(opts.selecteur).first().screenshot({ path: fichier });
+  if (options.selecteur) {
+    await page.locator(options.selecteur).first().screenshot({ path: fichier });
   } else {
-    await page.screenshot({ path: fichier, fullPage: opts.pleinePage ?? false });
+    await page.screenshot({ path: fichier, fullPage: options.pleinePage ?? false });
   }
 
   ajouterAuManifeste({
     fichier: cheminRelatif(fichier),
     type: "capture",
-    ecran: opts.ecran,
-    sujet: opts.sujet ?? null,
-    viewport: opts.viewport,
-    format: opts.format ?? null,
-    depotSource: opts.depotSource ?? null,
-    langue: opts.langue ?? "FR",
+    ecran: options.ecran,
+    sujet: options.sujet ?? null,
+    viewport: options.viewport,
+    format: options.format ?? null,
+    depotSource: options.depotSource ?? null,
+    langue: options.langue ?? "FR",
     date: new Date().toISOString(),
   });
 

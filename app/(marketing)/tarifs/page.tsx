@@ -7,7 +7,7 @@ import { Strates } from "@/components/coquille/strates";
 import { Offres } from "@/components/site/offres";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { PLAFOND_GRATUIT } from "@/lib/domain/plafond-du-plan";
 import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 
@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * réglages, et la carte se saisit chez Stripe.
  */
 export default async function PageTarifs() {
-  const connecte = (await getCurrentUser()) !== null;
+  const connecte = (await lireLUtilisateur()) !== null;
   const t = await getTranslations("site.tarifs");
   // Premium n'est pas vendu en anglais : ni geste vers l'achat, ni précisions
   // sur un abonnement qu'on ne peut pas prendre.

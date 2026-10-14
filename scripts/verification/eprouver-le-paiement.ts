@@ -13,7 +13,7 @@ import { ouvrirLePortail } from "@/lib/paiement/portail";
 import { lireLeRapport } from "@/lib/paiement/rapport";
 import { arreterLAbonnement, reprendreLAbonnement } from "@/lib/paiement/resiliation";
 import { comparerAvecStripe } from "./cases/etat-du-paiement";
-import { conclure, record } from "./cases/journal";
+import { conclure, noter } from "./cases/journal";
 
 /**
  * Le parcours de paiement, exercé contre le vrai Stripe en mode test.
@@ -100,7 +100,7 @@ async function ouvrir(compte: Compte): Promise<void> {
   const annonce = cadence === "month" ? PRIX_MENSUEL : PRIX_ANNUEL;
   const prix = await prixDeLaCadence(cadence);
 
-  record(
+  noter(
     "Le catalogue résout la cadence par sa clé, au montant annoncé",
     true,
     `${CLE_DU_PRIX[cadence]} → ${prix}, ${annonce} €`,
@@ -110,7 +110,7 @@ async function ouvrir(compte: Compte): Promise<void> {
   const client = await stripe().customers.retrieve(clientId);
   const pied = "deleted" in client ? null : client.invoice_settings.footer;
 
-  record(
+  noter(
     "Le client Stripe porte la mention de franchise en base",
     pied === MENTION_FRANCHISE,
     `${clientId} → ${pied ?? "aucun pied de facture"}`,
@@ -118,7 +118,7 @@ async function ouvrir(compte: Compte): Promise<void> {
 
   const adresse = await ouvrirLePaiement(compte, cadence);
 
-  record("La session Checkout s'ouvre", adresse.startsWith("https://"), adresse);
+  noter("La session Checkout s'ouvre", adresse.startsWith("https://"), adresse);
 
   console.info(`\nPayer ici, avec la carte 4242 4242 4242 4242 :\n${adresse}\n`);
 }
@@ -131,7 +131,7 @@ async function ouvrir(compte: Compte): Promise<void> {
 async function portail(compte: Compte): Promise<void> {
   const adresse = await ouvrirLePortail(compte.id);
 
-  record("Le portail s'ouvre pour ce compte", adresse.startsWith("https://"), adresse);
+  noter("Le portail s'ouvre pour ce compte", adresse.startsWith("https://"), adresse);
 
   const configurations = await stripe().billingPortal.configurations.list({
     active: true,
@@ -140,20 +140,20 @@ async function portail(compte: Compte): Promise<void> {
   const notre = configurations.data.find((c) => c.metadata?.projet === "portail-kairn");
 
   if (!notre) {
-    record("Une configuration porte notre marque", false, "aucune trouvée");
+    noter("Une configuration porte notre marque", false, "aucune trouvée");
 
     return;
   }
 
   const f = notre.features;
 
-  record(
+  noter(
     "Le portail montre les factures et laisse changer de carte",
     f.invoice_history.enabled && f.payment_method_update.enabled,
     `factures ${f.invoice_history.enabled}, carte ${f.payment_method_update.enabled}`,
   );
 
-  record(
+  noter(
     "Le portail ne résilie ni ne change d'offre — ces gestes restent dans Kairn",
     !f.subscription_cancel.enabled && !f.subscription_update.enabled,
     `résiliation ${f.subscription_cancel.enabled}, changement d'offre ${f.subscription_update.enabled}`,
@@ -224,7 +224,7 @@ async function nettoyer(userId: string): Promise<void> {
 
     const apres = await stripe().subscriptions.retrieve(ligne.stripeSubscriptionId);
 
-    record(
+    noter(
       "La fermeture coupe l'abonnement chez Stripe, tout de suite",
       !abonnementVivant(lireLeRapport(apres).statut),
       `${ligne.stripeSubscriptionId} → ${apres.status}`,
@@ -242,7 +242,7 @@ async function nettoyer(userId: string): Promise<void> {
     },
   });
 
-  record("La ligne est revenue à son état d'origine", true, "plan GRATUIT, aucun terme");
+  noter("La ligne est revenue à son état d'origine", true, "plan GRATUIT, aucun terme");
 }
 
 main()

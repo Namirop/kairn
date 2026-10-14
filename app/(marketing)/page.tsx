@@ -3,12 +3,12 @@ import { getTranslations } from "next-intl/server";
 import { Panneau } from "@/components/coquille/panneau";
 import { Strates } from "@/components/coquille/strates";
 import { Essai } from "@/components/site/essai";
-import { Hero } from "@/components/site/hero";
+import { Ouverture } from "@/components/site/ouverture";
 import { LienDeLangue } from "@/components/site/lien-de-langue";
 import { PasCeci } from "@/components/site/pas-ceci";
 import { Sentier } from "@/components/site/sentier";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { lireLEssaiEnCours } from "@/lib/depots/essai-en-cours";
 import { inviteDeDepot } from "@/lib/domain/invites-de-depot";
 import { adressePublique } from "@/lib/i18n/adresses";
@@ -27,14 +27,14 @@ export default async function PageAccueil() {
   // Lu ici et non dans le composant : quelqu'un qui revient doit retrouver ses
   // concepts au premier rendu, pas après un aller-retour.
   const essaiPrecedent = await lireLEssaiEnCours();
-  const connecte = (await getCurrentUser()) !== null;
+  const connecte = (await lireLUtilisateur()) !== null;
   const t = await getTranslations("site.accueil.pied");
 
   return (
     <>
       {/* Le hero porte le même titre et le même cairn pour tout le monde ; son
           geste mène à l'essai ou à la journée selon l'état. */}
-      <Hero connecte={connecte} />
+      <Ouverture connecte={connecte} />
 
       {/* L'essai n'existe que pour un visiteur, et sa jointure avec lui. Sans
           essai, la coupe d'ombre vers ombre qui suit reste quand même : sans

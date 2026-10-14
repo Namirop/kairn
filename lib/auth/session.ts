@@ -9,24 +9,24 @@ import { auth } from "./config";
  * Mémoïsée sur le rendu : la mise en page et sa page la demandent toutes deux.
  */
 
-export type SessionUser = {
+export type UtilisateurDeSession = {
   id: string;
   name: string;
   email: string;
   image: string | null;
 };
 
-export class UnauthenticatedError extends Error {
+export class SessionAbsenteError extends Error {
   readonly code = "UNAUTHENTICATED";
 
   constructor() {
     // i18n-ignore — message d'Error interne, destiné au journal
     super("Aucune session valide.");
-    this.name = "UnauthenticatedError";
+    this.name = "SessionAbsenteError";
   }
 }
 
-export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
+export const lireLUtilisateur = cache(async (): Promise<UtilisateurDeSession | null> => {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) return null;
@@ -41,12 +41,12 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 
 /**
  * Pour les route handlers et les Server Actions. Une page préfère
- * `getCurrentUser()` suivi d'une redirection, plutôt qu'un écran d'erreur.
+ * `lireLUtilisateur()` suivi d'une redirection, plutôt qu'un écran d'erreur.
  */
-export async function requireUser(): Promise<SessionUser> {
-  const user = await getCurrentUser();
+export async function exigerLUtilisateur(): Promise<UtilisateurDeSession> {
+  const utilisateur = await lireLUtilisateur();
 
-  if (!user) throw new UnauthenticatedError();
+  if (!utilisateur) throw new SessionAbsenteError();
 
-  return user;
+  return utilisateur;
 }

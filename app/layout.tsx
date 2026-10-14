@@ -5,7 +5,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { RegistreServiceWorker } from "@/components/pwa/registre-service-worker";
 import { PAPIER } from "@/lib/design/couleurs-hors-css";
 import { ORIGINE_DU_SITE } from "@/lib/site/origine";
-import { classesPolices } from "./fonts";
+import { classesPolices } from "./polices";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -55,7 +55,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function LayoutRacine({ children }: { children: React.ReactNode }) {
   return (
     <html lang={await getLocale()}>
       <body className={classesPolices}>

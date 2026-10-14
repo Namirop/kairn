@@ -17,10 +17,10 @@ export type GenerationDeColonne = {
   arretApres: string | null;
 };
 
-function grouper<T>(items: T[]): T[][] {
+function grouper<T>(elements: T[]): T[][] {
   const groupes: T[][] = [];
-  for (let i = 0; i < items.length; i += CONCEPTS_PAR_APPEL) {
-    groupes.push(items.slice(i, i + CONCEPTS_PAR_APPEL));
+  for (let i = 0; i < elements.length; i += CONCEPTS_PAR_APPEL) {
+    groupes.push(elements.slice(i, i + CONCEPTS_PAR_APPEL));
   }
   return groupes;
 }

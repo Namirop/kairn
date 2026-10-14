@@ -16,7 +16,7 @@
   html {
     -webkit-text-size-adjust: 100%;
     /* L'ouverture propose de descendre à l'essai : un saut sec ferait croire à
-       un changement de page. `utilities/motion.css` le repasse en `auto` sous
+       un changement de page. `utilities/mouvement.css` le repasse en `auto` sous
        `prefers-reduced-motion`. */
     scroll-behavior: smooth;
     scrollbar-width: thin;

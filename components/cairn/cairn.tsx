@@ -6,7 +6,7 @@ import { PierrePosee } from "@/components/cairn/pierre-posee";
 import { SolDuCairn } from "@/components/cairn/sol-du-cairn";
 import { useAnimationPossible } from "@/components/cairn/use-animation-possible";
 import { tracerLeSentier } from "@/lib/domain/cairn-sentier";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * Le sentier : une pierre par Atom retenu — consolidé, ou archivé sur

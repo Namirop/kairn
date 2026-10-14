@@ -1,23 +1,23 @@
 import { ROUTES } from "@/lib/auth/routes";
-import { recordEmailDelivery } from "@/lib/db/reminder-audience";
+import { enregistrerLEnvoi } from "@/lib/db/destinataires-des-rappels";
 import type { Langue } from "@/lib/db/types";
-import { findUserEmail } from "@/lib/db/user";
-import { findUserSettings } from "@/lib/db/user-settings";
-import { localDay } from "@/lib/domain/local-day";
+import { trouverLAdresse } from "@/lib/db/adresse-du-compte";
+import { trouverLesReglages } from "@/lib/db/reglages-du-compte";
+import { jourLocal } from "@/lib/domain/jour-local";
 import { adresseDeLApp } from "@/lib/site/adresse-de-lapp";
-import { sendEmail } from "./client";
-import { renderAccueil, type AccueilPayload } from "./templates/accueil";
-import { renderAlerteDeStreak, type AlerteDeStreakPayload } from "./templates/alerte-de-streak";
+import { envoyerLEmail } from "./client";
+import { composerLAccueil, type AccueilPayload } from "./templates/accueil";
+import { composerLAlerteDeStreak, type AlerteDeStreakPayload } from "./templates/alerte-de-streak";
 import {
-  renderDailyReminder,
-  type DailyReminderPayload,
-  type RenderedEmail,
-} from "./templates/daily-reminder";
+  composerLeRappelQuotidien,
+  type RappelQuotidienPayload,
+} from "./templates/rappel-quotidien";
+import type { EmailRendu } from "./templates/gabarit";
 import {
-  renderRelanceDuCompteVide,
+  composerLaRelanceDuCompteVide,
   type RelanceDuCompteVidePayload,
 } from "./templates/relance-du-compte-vide";
-import { createUnsubscribeToken } from "./unsubscribe";
+import { creerLeJetonDeDesinscription } from "./desinscription";
 
 /**
  * Point d'entrée unique des notifications, par email. Le refus de
@@ -34,18 +34,18 @@ import { createUnsubscribeToken } from "./unsubscribe";
  */
 
 export type Notification =
-  | { type: "DAILY_REMINDER"; payload: DailyReminderPayload }
+  | { type: "DAILY_REMINDER"; payload: RappelQuotidienPayload }
   | { type: "STREAK_ALERT"; payload: AlerteDeStreakPayload }
   | { type: "ACCUEIL"; payload: AccueilPayload }
   | { type: "RELANCE_COMPTE_VIDE"; payload: RelanceDuCompteVidePayload };
 
-export type NotificationType = Notification["type"];
+export type TypeDeNotification = Notification["type"];
 
-export type NotificationOutcome =
+export type IssueDeNotification =
   | { status: "SENT"; providerId: string | null }
   | { status: "SKIPPED"; reason: "OPTED_OUT" | "DISABLED" | "NO_SETTINGS" | "NO_EMAIL" };
 
-type Liens = { sessionUrl: string; depotUrl: string; unsubscribeUrl: string };
+type Liens = { lienDeSession: string; lienDeDepot: string; lienDeDesinscription: string };
 
 /**
  * Le réglage qui gouverne ce type-là.
@@ -57,10 +57,10 @@ type Liens = { sessionUrl: string; depotUrl: string; unsubscribeUrl: string };
  * fois ; le refus global, vérifié avant, les arrête comme les autres.
  */
 function estActive(
-  type: NotificationType,
+  type: TypeDeNotification,
   reglages: { dailyReminderEnabled: boolean; streakAlertEnabled: boolean },
 ): boolean {
-  const gouverne: Record<NotificationType, boolean> = {
+  const gouverne: Record<TypeDeNotification, boolean> = {
     DAILY_REMINDER: reglages.dailyReminderEnabled,
     STREAK_ALERT: reglages.streakAlertEnabled,
     ACCUEIL: true,
@@ -71,64 +71,64 @@ function estActive(
 }
 
 /** L'email est écrit dans la langue du compte, celle de son interface. */
-function composer(notification: Notification, liens: Liens, langue: Langue): RenderedEmail {
+function composer(notification: Notification, liens: Liens, langue: Langue): EmailRendu {
   switch (notification.type) {
     case "DAILY_REMINDER":
-      return renderDailyReminder(notification.payload, liens, langue);
+      return composerLeRappelQuotidien(notification.payload, liens, langue);
     case "STREAK_ALERT":
-      return renderAlerteDeStreak(notification.payload, liens, langue);
+      return composerLAlerteDeStreak(notification.payload, liens, langue);
     case "ACCUEIL":
-      return renderAccueil(notification.payload, liens, langue);
+      return composerLAccueil(notification.payload, liens, langue);
     case "RELANCE_COMPTE_VIDE":
-      return renderRelanceDuCompteVide(notification.payload, liens, langue);
+      return composerLaRelanceDuCompteVide(notification.payload, liens, langue);
   }
 }
 
-export async function sendNotification(
+export async function envoyerLaNotification(
   userId: string,
   notification: Notification,
-): Promise<NotificationOutcome> {
-  const settings = await findUserSettings(userId);
+): Promise<IssueDeNotification> {
+  const reglages = await trouverLesReglages(userId);
 
-  if (!settings) return { status: "SKIPPED", reason: "NO_SETTINGS" };
-  if (settings.emailOptOutAt) return { status: "SKIPPED", reason: "OPTED_OUT" };
-  if (!estActive(notification.type, settings)) return { status: "SKIPPED", reason: "DISABLED" };
+  if (!reglages) return { status: "SKIPPED", reason: "NO_SETTINGS" };
+  if (reglages.emailOptOutAt) return { status: "SKIPPED", reason: "OPTED_OUT" };
+  if (!estActive(notification.type, reglages)) return { status: "SKIPPED", reason: "DISABLED" };
 
-  const recipient = await findUserEmail(userId);
+  const destinataire = await trouverLAdresse(userId);
 
-  if (!recipient) return { status: "SKIPPED", reason: "NO_EMAIL" };
+  if (!destinataire) return { status: "SKIPPED", reason: "NO_EMAIL" };
 
-  const unsubscribeUrl = `${adresseDeLApp()}/desinscription?jeton=${createUnsubscribeToken(userId)}`;
+  const lienDeDesinscription = `${adresseDeLApp()}/desinscription?jeton=${creerLeJetonDeDesinscription(userId)}`;
   const email = composer(
     notification,
     {
-      sessionUrl: `${adresseDeLApp()}${ROUTES.aujourdhui}`,
-      depotUrl: `${adresseDeLApp()}${ROUTES.depotNouveau}`,
-      unsubscribeUrl,
+      lienDeSession: `${adresseDeLApp()}${ROUTES.aujourdhui}`,
+      lienDeDepot: `${adresseDeLApp()}${ROUTES.depotNouveau}`,
+      lienDeDesinscription,
     },
-    settings.langue,
+    reglages.langue,
   );
 
-  const delivery = await sendEmail({
-    to: recipient,
+  const envoi = await envoyerLEmail({
+    to: destinataire,
     subject: email.subject,
     html: email.html,
     text: email.text,
     // Désabonnement en un clic (RFC 8058) : sans ces en-têtes, Gmail range
     // plus volontiers l'envoi en indésirable.
     headers: {
-      "List-Unsubscribe": `<${unsubscribeUrl}>`,
+      "List-Unsubscribe": `<${lienDeDesinscription}>`,
       // i18n-ignore — valeur d'en-tête fixée par la RFC 8058.
       "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
     },
   });
 
-  await recordEmailDelivery(
+  await enregistrerLEnvoi(
     userId,
     notification.type,
-    localDay(new Date(), settings.timezone),
-    delivery.providerId,
+    jourLocal(new Date(), reglages.timezone),
+    envoi.providerId,
   );
 
-  return { status: "SENT", providerId: delivery.providerId };
+  return { status: "SENT", providerId: envoi.providerId };
 }

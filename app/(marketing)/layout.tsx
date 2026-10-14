@@ -4,7 +4,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Marque } from "@/components/coquille/marque";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { langueDepuisCode } from "@/lib/domain/langue-devinee";
 import { EN_TETE_DU_CHEMIN, versionsDeLaPage } from "@/lib/i18n/adresses";
 import { EN_TETE_DE_LANGUE } from "@/lib/i18n/langues";
@@ -54,7 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CoquilleSite({ children }: { children: React.ReactNode }) {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
   const t = await getTranslations("site.accueil.entete");
 
   return (

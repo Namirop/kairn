@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { callAI } from "@/lib/ai/client";
-import type { AiContract } from "@/lib/ai/schemas";
+import type { ContratDeSortie } from "@/lib/ai/schemas";
 import type { Paire } from "../mesures/signaux";
 import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
 
@@ -67,7 +67,7 @@ export type VerdictDoublon = {
   questionSurB: string | null;
 };
 
-export const CONTRAT_DOUBLON: AiContract<z.infer<typeof doublonValidation>> = {
+export const CONTRAT_DOUBLON: ContratDeSortie<z.infer<typeof doublonValidation>> = {
   purpose: "juge_doublon",
   forme: doublonForme,
   validation: doublonValidation,

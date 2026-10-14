@@ -1,11 +1,11 @@
-import type { ExtractAtomsOutput, GenerateVariantsOutput } from "@/lib/ai/schemas";
+import type { SortieDExtraction, SortieDeGeneration } from "@/lib/ai/schemas";
 import type { LangueDuProduit } from "@/lib/domain/langue-du-produit";
 import type { Manquement } from "@/lib/domain/manquement";
 import type { NatureDuDepot } from "@/lib/domain/nature-du-depot";
 
 /** Ce qu'un passage du banc rend sur un dépôt, concept par concept. */
 
-export type Concept = ExtractAtomsOutput["atoms"][number];
+export type Concept = SortieDExtraction["atoms"][number];
 
 export type Echec = {
   motif: string;
@@ -14,7 +14,7 @@ export type Echec = {
   elements?: string;
 };
 
-export type VariantRendu = GenerateVariantsOutput["lots"][number]["variants"][number];
+export type VariantRendu = SortieDeGeneration["lots"][number]["variants"][number];
 
 /**
  * Une question telle qu'elle sera servie : le banc mesure ce que le produit

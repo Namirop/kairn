@@ -4,7 +4,7 @@ import { compterConceptsRetenus } from "@/lib/db/comptage-de-la-periode";
 import { PLAFOND_GRATUIT, plafondDeDepots } from "@/lib/domain/plafond-du-plan";
 import { deposer, type ResultatDepot } from "@/lib/depots/deposer";
 import { formulaire, repartirDeZero, vieillirLesDepots } from "./depot-simule";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /** Le compte de vérification est gratuit. */
 const DEPOTS_DUN_COMPTE_GRATUIT = plafondDeDepots(PLAFOND_GRATUIT);
@@ -31,13 +31,13 @@ export async function casDoubleEnvoi(userId: string): Promise<void> {
   const ecrits = await prisma.input.count({ where: { userId, submissionKey: "verif-double-01" } });
   const consommes = await prisma.monthlyUsage.findFirst({ where: { userId } });
 
-  record(
+  noter(
     "Double envoi — le même geste n'écrit qu'un dépôt",
     premier.ok && second.ok && premier.inputId === second.inputId && ecrits === 1,
     `${ecrits} dépôt(s) écrit(s)`,
   );
 
-  record(
+  noter(
     "Double envoi — la place prise à tort est rendue",
     (consommes?.deposits ?? 0) === 1,
     `${consommes?.deposits ?? 0} place(s) consommée(s)`,
@@ -54,7 +54,7 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
   }
 
   const quatrieme = await deposerTexte(userId, "verif-debit-04");
-  record(
+  noter(
     "Débit — quatre dépôts coup sur coup, le quatrième attend",
     !quatrieme.ok && quatrieme.quota !== true,
     quatrieme.ok ? "accepté" : quatrieme.motif,
@@ -67,7 +67,7 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
   await compterConceptsRetenus(userId, "Europe/Paris", PLAFOND_GRATUIT - 1);
 
   const dernier = await deposerTexte(userId, "verif-quota-limite");
-  record(
+  noter(
     "Quota — il reste une place tant qu'un concept manque au plafond",
     dernier.ok,
     dernier.ok ? "accepté" : dernier.motif,
@@ -77,14 +77,14 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
   await compterConceptsRetenus(userId, "Europe/Paris", 1);
 
   const surnumeraire = await deposerTexte(userId, "verif-quota-plein");
-  record(
+  noter(
     `Quota — le dépôt qui suit les ${PLAFOND_GRATUIT} concepts est refusé, et se sait refusé`,
     !surnumeraire.ok && surnumeraire.quota === true,
     surnumeraire.ok ? "accepté" : surnumeraire.motif,
   );
 
   const consommes = await prisma.monthlyUsage.findFirst({ where: { userId } });
-  record(
+  noter(
     "Quota — un refus n'entame ni les concepts ni les dépôts de la période",
     (consommes?.concepts ?? 0) === PLAFOND_GRATUIT && (consommes?.deposits ?? 0) === 4,
     `${consommes?.concepts ?? 0} concept(s) sur ${PLAFOND_GRATUIT}, ${consommes?.deposits ?? 0} dépôt(s)`,
@@ -105,7 +105,7 @@ export async function casPlafondDeDepots(userId: string): Promise<void> {
   const surnumeraire = await deposerTexte(userId, "verif-depots-trop");
   const consommes = await prisma.monthlyUsage.findFirst({ where: { userId } });
 
-  record(
+  noter(
     `Quota — le dépôt ${DEPOTS_DUN_COMPTE_GRATUIT + 1} est refusé même sans un seul concept retenu`,
     !surnumeraire.ok && surnumeraire.quota === true && (consommes?.concepts ?? 0) === 0,
     surnumeraire.ok ? "accepté" : surnumeraire.motif,
@@ -119,7 +119,7 @@ export async function casListeDattente(userId: string): Promise<void> {
   await inscrireEnListeDattente(userId, "quota");
   const inscriptions = await prisma.waitlistEntry.count({ where: { userId } });
 
-  record(
+  noter(
     "Liste d'attente — s'inscrire deux fois ne crée qu'une entrée",
     inscrit && inscriptions === 1,
     `${inscriptions} inscription(s)`,

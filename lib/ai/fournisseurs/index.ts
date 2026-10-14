@@ -1,6 +1,6 @@
 import { pontAnthropic } from "./anthropic";
 import { pontOpenRouter } from "./openrouter";
-import type { Fournisseur, PontFournisseur } from "./interface";
+import type { Fournisseur, PontFournisseur } from "./pont";
 
 /**
  * Le résolveur de pont, appelé par `client.ts` seul. La lignée vient de
@@ -21,4 +21,4 @@ export function choisirFournisseur(nom: Fournisseur, cles: ClesFournisseur): Pon
   }
 }
 
-export type { EmissionParams, EmissionResult, Fournisseur, PontFournisseur } from "./interface";
+export type { ParametresDEmission, ResultatDEmission, Fournisseur, PontFournisseur } from "./pont";

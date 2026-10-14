@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { destinationsPour, estActive } from "./destinations";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * Navigation de bureau : un rail vertical étroit, icône et libellé visibles.
@@ -20,7 +20,7 @@ export function Rail({ administrateur }: { administrateur: boolean }) {
       aria-label={t("principale")}
       /* `data-coquille` dit que ce plan appartient à la coquille et non à la
          page : c'est ce que lit la règle qui l'efface pendant un passage, et
-         c'est aussi par là qu'il reçoit son filet — voir `app/styles/shell.css`. */
+         c'est aussi par là qu'il reçoit son filet — voir `app/styles/coquille.css`. */
       data-coquille="rail"
       /* Les icônes commencent en haut, sans s'aligner sur l'en-tête : il vit
          dans la colonne de droite, pas en face du rail. */

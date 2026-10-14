@@ -13,7 +13,7 @@ import { enregistrerRevision } from "@/lib/db/revision";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
 import { redecouper } from "@/lib/depots/redecouper";
 import { fabriquerConcept, viderLeCompte } from "./abus-fabrique";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * La propriété des ressources : avec le compte A, toucher aux ressources du
@@ -156,7 +156,7 @@ export async function casRessourcesDunAutre(
     if (!(await tentative.echoue())) passees.push(tentative.libelle);
   }
 
-  record(
+  noter(
     `Propriété — les ${tentatives.length} tentatives du compte A sur le compte B échouent`,
     passees.length === 0,
     passees.length === 0 ? "toutes refusées" : `passées : ${passees.join(" ; ")}`,
@@ -167,7 +167,7 @@ export async function casRessourcesDunAutre(
   const siens = new Set([sien.atomId, archive.atomId, douteux.atomId]);
   const fuites = [...session.questions, ...tour].filter((question) => siens.has(question.atomId));
 
-  record(
+  noter(
     "Propriété — ni la session ni l'entraînement du compte A ne servent les concepts du compte B",
     fuites.length === 0,
     fuites.length === 0 ? "aucune fuite" : `${fuites.length} question(s) d'un autre compte`,
@@ -176,7 +176,7 @@ export async function casRessourcesDunAutre(
   const restant = await prisma.atom.count({ where: { userId: victime } });
   const passages = await prisma.review.count({ where: { atomId: { in: [...siens] } } });
 
-  record(
+  noter(
     "Propriété — le compte B ressort intact : rien de supprimé, rien d'écrit",
     restant === 3 && passages === 0,
     `${restant} concept(s) sur 3, ${passages} passage(s) écrit(s)`,

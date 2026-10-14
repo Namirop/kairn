@@ -9,12 +9,12 @@ import type { Langue } from "@/lib/db/types";
  * Racine des fichiers produits, hors du dépôt : ils se régénèrent et n'ont rien
  * à faire dans l'historique. Par défaut, le dossier de contenu voisin.
  */
-export const ASSETS_OUT_DIR = process.env.ASSETS_OUT_DIR
+export const DOSSIER_DE_SORTIE = process.env.ASSETS_OUT_DIR
   ? path.resolve(process.env.ASSETS_OUT_DIR)
   : path.resolve(process.cwd(), "..", "contenu", "commun", "assets");
 
 /** L'application visée par Playwright. */
-export const BASE_URL = process.env.ASSETS_BASE_URL ?? "http://localhost:3000";
+export const URL_DE_L_APPLICATION = process.env.ASSETS_BASE_URL ?? "http://localhost:3000";
 
 export type Viewport = "mobile" | "bureau";
 
@@ -32,22 +32,22 @@ export const VIEWPORTS = {
  * Sans sujet, l'écran nomme le fichier (écrans sans déclinaison par sujet). Une
  * capture anglaise prend `.en` avant l'extension, à côté de la française.
  */
-export function cheminDeSortie(opts: {
+export function cheminDeSortie(options: {
   viewport: Viewport;
   ecran: string;
   sujet?: string;
   langue?: Langue;
   ext: "png" | "mp4";
 }): string {
-  const suffixe = opts.langue === "EN" ? ".en" : "";
-  const nom = `${opts.sujet ?? opts.ecran}${suffixe}.${opts.ext}`;
+  const suffixe = options.langue === "EN" ? ".en" : "";
+  const nom = `${options.sujet ?? options.ecran}${suffixe}.${options.ext}`;
 
-  return path.join(ASSETS_OUT_DIR, opts.viewport, opts.ecran, nom);
+  return path.join(DOSSIER_DE_SORTIE, options.viewport, options.ecran, nom);
 }
 
 /** Le chemin d'un fichier relatif à la racine de sortie, en séparateurs POSIX. */
 export function cheminRelatif(fichierAbsolu: string): string {
-  return path.relative(ASSETS_OUT_DIR, fichierAbsolu).split(path.sep).join("/");
+  return path.relative(DOSSIER_DE_SORTIE, fichierAbsolu).split(path.sep).join("/");
 }
 
 /** Crée le dossier parent d'un fichier s'il manque. */

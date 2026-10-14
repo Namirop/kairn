@@ -1,7 +1,7 @@
 import { MODELE_DE_REPLI } from "@/lib/ai/client";
 import { prisma } from "@/lib/db/client";
 import type { AtomState, ReviewRating } from "@/lib/db/types";
-import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
+import { jourEnDateUtc, jourLocal } from "@/lib/domain/jour-local";
 
 /**
  * Le décor des vérifications d'abus : des comptes, des concepts posés à la
@@ -168,7 +168,7 @@ export async function enModeCompteur<T>(
   plafond: number,
   action: () => Promise<T>,
 ): Promise<Comptage<T>> {
-  const jour = dayToUtcDate(localDay(new Date(), "UTC"));
+  const jour = jourEnDateUtc(jourLocal(new Date(), "UTC"));
   const avant = await prisma.aiCallQuota.findUnique({ where: { day: jour } });
   const debut = new Date();
 

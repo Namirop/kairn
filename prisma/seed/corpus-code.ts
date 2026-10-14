@@ -1,4 +1,4 @@
-import type { SeedInput } from "./corpus-types";
+import type { InputDuCorpus } from "./types-du-corpus";
 
 /**
  * Un dépôt de code, écrit pour faire passer sous les yeux tout ce qui casse un
@@ -9,10 +9,10 @@ import type { SeedInput } from "./corpus-types";
  * Le premier concept n'a aucun passage : il est dû tout de suite, et sert à
  * ouvrir une session quand on n'a plus rien à réviser.
  */
-export const CORPUS_CODE: SeedInput[] = [
+export const CORPUS_CODE: InputDuCorpus[] = [
   {
     sourceType: "TEXT",
-    createdDaysAgo: 16,
+    deposeIlYAJours: 16,
     rawContent: `Notes de relecture — JavaScript et TypeScript
 
 · \`Array.prototype.at()\` accepte un index négatif : \`valeurs.at(-1)\` rend le dernier élément, là où \`valeurs[-1]\` rend \`undefined\` parce que \`-1\` est lu comme un nom de propriété.
@@ -25,7 +25,7 @@ export const CORPUS_CODE: SeedInput[] = [
           "`Array.prototype.at()` accepte un index négatif et compte depuis la fin : `valeurs.at(-1)` rend le dernier élément. La notation en crochets, elle, lit `-1` comme un nom de propriété et rend `undefined`.",
         tags: ["javascript", "tableaux"],
         state: "LEARNING",
-        history: [],
+        historique: [],
         variants: [
           {
             format: "CLOZE",
@@ -76,7 +76,7 @@ export const CORPUS_CODE: SeedInput[] = [
           "`\"use client\"` marque une frontière de bundle : le fichier qui la porte et tout ce qu'il importe partent chez le navigateur. Ce n'est pas une annotation locale, c'est le point d'entrée d'un sous-arbre.",
         tags: ["react", "bundle"],
         state: "REVIEWING",
-        history: [
+        historique: [
           [14, "GOOD"],
           [9, "AGAIN"],
           [6, "GOOD"],
@@ -131,7 +131,7 @@ export const CORPUS_CODE: SeedInput[] = [
           "`Record<string, unknown>` décrit un objet dont les clés ne sont pas connues à l'écriture. `unknown` oblige à contrôler la valeur avant de s'en servir, là où `any` laisse passer n'importe quel usage sans rien vérifier.",
         tags: ["typescript", "types"],
         state: "LEARNING",
-        history: [[3, "HARD"]],
+        historique: [[3, "HARD"]],
         variants: [
           {
             format: "EXPLAIN",

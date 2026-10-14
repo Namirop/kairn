@@ -1,11 +1,11 @@
 import { callAI } from "@/lib/ai/client";
-import type { AiMessage } from "@/lib/ai/message";
+import type { MessageIa } from "@/lib/ai/message";
 import { promptsSysteme } from "@/lib/ai/prompts";
 import { CONCEPTS_PAR_APPEL, contratDeGeneration } from "@/lib/ai/schemas";
 import { controlerConcept } from "@/lib/domain/controle-concept";
 import { controlerVariants } from "@/lib/domain/controle-variants";
 import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
-import { messageDuGroupe as construireLEnvoi } from "@/lib/domain/envoi-de-questions";
+import { messageDuGroupe } from "@/lib/domain/envoi-de-questions";
 import type { LangueDuProduit } from "@/lib/domain/langue-du-produit";
 import { conceptsAQuestionner, type NatureDuDepot } from "@/lib/domain/nature-du-depot";
 import { ordonnerLesOptions } from "@/lib/domain/ordre-des-options";
@@ -20,11 +20,11 @@ import { avecUneReprise } from "./reprise-d-appel";
  */
 
 /**
- * L'envoi du groupe, construit par le code du produit. La graine est le texte
- * du concept (voir `servir`).
+ * La conversation qui porte l'envoi du groupe, construit par le code du
+ * produit. La graine est le texte du concept (voir `servir`).
  */
-function messageDuGroupe(groupe: Concept[]): AiMessage[] {
-  const contenu = construireLEnvoi(
+function conversationDuGroupe(groupe: Concept[]): MessageIa[] {
+  const contenu = messageDuGroupe(
     groupe.map((entree) => ({ graine: entree.concept, concept: entree.concept })),
   );
 
@@ -80,7 +80,7 @@ async function genererPourGroupe(
         // sur le premier concept : la contrainte vaut pour tout l'envoi.
         contract: contratDeGeneration(emplacementDuTexteATrou(groupe[0]?.concept ?? "")),
         system: promptsSysteme(langue).generate_variants,
-        messages: messageDuGroupe(groupe),
+        messages: conversationDuGroupe(groupe),
       }),
     );
     const { lots, ecartes } = resultat;

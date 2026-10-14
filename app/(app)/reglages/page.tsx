@@ -13,9 +13,9 @@ import { TonOffre } from "@/components/reglages/ton-offre";
 import { UnRetour } from "@/components/reglages/un-retour";
 import { estAdministrateur } from "@/lib/auth/admin";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { lireLOffreDuCompte } from "@/lib/db/abonnement";
-import { lireReglages } from "@/lib/db/user-settings";
+import { lireReglages } from "@/lib/db/reglages-du-compte";
 import { termeLisible } from "@/lib/domain/terme-lisible";
 import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 import { ETIQUETTE_INTL } from "@/lib/i18n/langues";
@@ -58,7 +58,7 @@ function Ligne({ intitule, valeur, raison }: { intitule: string; valeur: string;
 type Parametres = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
 export default async function PageReglages({ searchParams }: Parametres) {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 

@@ -1,8 +1,8 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { anciennete, delaiAvantLeJour, joursAvant, type Duree } from "./echeance";
-import { localDay } from "./local-day";
-import { unFuseau, unInstant } from "./local-day.test";
+import { jourLocal } from "./jour-local";
+import { unFuseau, unInstant } from "./jour-local.test";
 
 const utc = (iso: string) => new Date(`${iso}Z`);
 
@@ -92,7 +92,7 @@ describe("propriété : le jour civil de l'utilisateur fait foi", () => {
 
           // On ne garde que les tirages qui tombent réellement dans le même
           // jour civil : c'est la prémisse de la propriété, pas son objet.
-          fc.pre(localDay(echeance, fuseau) === localDay(maintenant, fuseau));
+          fc.pre(jourLocal(echeance, fuseau) === jourLocal(maintenant, fuseau));
 
           expect(joursAvant(echeance, maintenant, fuseau)).toBe(0);
         },
@@ -110,7 +110,7 @@ describe("propriété : le jour civil de l'utilisateur fait foi", () => {
         (maintenant, decalageMinutes, fuseau) => {
           const echeance = new Date(maintenant.getTime() + decalageMinutes * 60_000);
 
-          fc.pre(localDay(echeance, fuseau) !== localDay(maintenant, fuseau));
+          fc.pre(jourLocal(echeance, fuseau) !== jourLocal(maintenant, fuseau));
 
           expect(joursAvant(echeance, maintenant, fuseau)).not.toBe(0);
         },

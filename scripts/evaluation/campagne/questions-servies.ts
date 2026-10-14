@@ -1,4 +1,4 @@
-import type { GenerateVariantsOutput } from "@/lib/ai/schemas";
+import type { SortieDeGeneration } from "@/lib/ai/schemas";
 import { ordonnerLesOptions } from "@/lib/domain/ordre-des-options";
 import { cibleDuVraiOuFaux } from "@/lib/domain/vrai-ou-faux";
 import type { VariantFige } from "../fige";
@@ -12,7 +12,7 @@ import type { VariantFige } from "../fige";
  * pour qu'un rejeu compare question par question.
  */
 
-type VariantBrut = GenerateVariantsOutput["lots"][number]["variants"][number];
+type VariantBrut = SortieDeGeneration["lots"][number]["variants"][number];
 
 export type VariantServi = VariantFige & {
   /** La cible du vrai/faux imposée par le serveur, `null` hors TRUE_FALSE. */

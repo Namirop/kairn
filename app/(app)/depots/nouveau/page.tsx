@@ -7,16 +7,16 @@ import { Strates } from "@/components/coquille/strates";
 import { FormulaireDepot } from "@/components/depots/formulaire-depot";
 import { PlafondAtteint } from "@/components/depots/plafond-atteint";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { lireLOffreDuCompte } from "@/lib/db/abonnement";
 import { estEnListeDattente } from "@/lib/db/liste-dattente";
 import { lireUsageDeLaPeriode } from "@/lib/db/periode-du-compte";
 import { compterLesDepots } from "@/lib/db/depots";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 import { inviteDeDepot } from "@/lib/domain/invites-de-depot";
 import { plafondDeDepots } from "@/lib/domain/plafond-du-plan";
 import { paiementOuvert } from "@/lib/paiement/config";
-import { localDay } from "@/lib/domain/local-day";
+import { jourLocal } from "@/lib/domain/jour-local";
 import { quandRepartLeCompteur } from "@/lib/domain/remise-a-zero";
 import { parametresDeRemise } from "@/lib/i18n/dire-le-temps";
 import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
@@ -34,7 +34,7 @@ export default async function PageNouveauDepot({
   /** `partage=absent` : un partage du système est arrivé et n'a pas pu être retenu. */
   searchParams: Promise<{ partage?: string }>;
 }) {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
@@ -61,7 +61,7 @@ export default async function PageNouveauDepot({
   const remiseAZero = tTemps(
     "remiseAZero",
     parametresDeRemise(
-      quandRepartLeCompteur(localDay(new Date(), fuseau), usage.periode.fin),
+      quandRepartLeCompteur(jourLocal(new Date(), fuseau), usage.periode.fin),
       ETIQUETTE_INTL[await langueDeLaRequete()],
     ),
   );

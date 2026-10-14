@@ -5,9 +5,9 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { prendreUnGeste } from "@/lib/db/limite-de-gestes";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 import { ouvrirLePaiement } from "@/lib/paiement/achat";
 import { ouvrirLePortail } from "@/lib/paiement/portail";
 import { AbonnementDejaOuvertError, PaiementError } from "@/lib/paiement/erreurs";
@@ -45,7 +45,7 @@ export async function payerAction(
   _precedent: EtatDuPaiement,
   donnees: FormData,
 ): Promise<EtatDuPaiement> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
   const t = await erreurs();
 
   if (!utilisateur) return { erreur: t("sessionExpiree") };
@@ -81,7 +81,7 @@ export async function payerAction(
  * qui se font dans Kairn. Redirection hors du `try`, comme pour l'achat.
  */
 export async function portailAction(): Promise<EtatDuPaiement> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
   const t = await erreurs();
 
   if (!utilisateur) return { erreur: t("sessionExpiree") };
@@ -131,7 +131,7 @@ async function basculer(
   geste: (userId: string) => Promise<void>,
   echec: string,
 ): Promise<EtatDuPaiement> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
   const t = await erreurs();
 
   if (!utilisateur) return { erreur: t("sessionExpiree") };

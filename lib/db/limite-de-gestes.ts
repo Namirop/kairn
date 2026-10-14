@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import { localDay } from "@/lib/domain/local-day";
+import { jourLocal } from "@/lib/domain/jour-local";
 
 /**
  * La limite de débit des gestes de révision (répondre, s'entraîner, demander un
@@ -30,7 +30,7 @@ export async function prendreUnGeste(
   fuseau: string,
   maintenant: Date = new Date(),
 ): Promise<boolean> {
-  const jour = localDay(maintenant, fuseau);
+  const jour = jourLocal(maintenant, fuseau);
   const lignes = await prisma.$queryRaw<{ actionWindowCount: number }[]>`
     INSERT INTO "DailyUsage" (
       "userId", "day", "generations", "concepts", "reviews",

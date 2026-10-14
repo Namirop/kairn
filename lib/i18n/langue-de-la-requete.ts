@@ -1,7 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { cache } from "react";
-import { getCurrentUser } from "@/lib/auth/session";
-import { findUserSettings } from "@/lib/db/user-settings";
+import { lireLUtilisateur } from "@/lib/auth/session";
+import { trouverLesReglages } from "@/lib/db/reglages-du-compte";
 import type { Langue } from "@/lib/db/types";
 import { langueDepuisCode, langueDevinee } from "@/lib/domain/langue-devinee";
 import { COOKIE_DE_LANGUE, EN_TETE_DE_LANGUE } from "./langues";
@@ -19,9 +19,9 @@ export const langueDeLaRequete = cache(async (): Promise<Langue> => {
 
   if (imposee) return imposee;
 
-  const user = await getCurrentUser();
+  const user = await lireLUtilisateur();
 
-  if (user) return (await findUserSettings(user.id))?.langue ?? "FR";
+  if (user) return (await trouverLesReglages(user.id))?.langue ?? "FR";
 
   return langueDevinee({
     choix: (await cookies()).get(COOKIE_DE_LANGUE)?.value,

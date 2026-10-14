@@ -1,21 +1,21 @@
-import { recordAiCall } from "@/lib/db/ai-call";
-import { type AiConfig } from "./config";
+import { enregistrerLAppel } from "@/lib/db/registre-des-appels";
+import { type ConfigIa } from "./config";
 import { choisirFournisseur, type Fournisseur, type PontFournisseur } from "./fournisseurs";
 import { lireLaConfigEffective } from "./reglages-effectifs";
 import { provenanceDeLAppel, reserverLaPlaceDuRepli, reserverLesDeuxPlaces } from "./reservation";
 import {
-  AICallFailedError,
-  AIDisabledError,
-  AIMissingOutputError,
-  AITruncatedOutputError,
-  AiError,
+  EmissionEchoueeError,
+  AppelsCoupesError,
+  SortieAbsenteError,
+  SortieTronqueeError,
+  AppelModeleError,
 } from "./errors";
-import { loadFixture } from "./fixtures";
+import { chargerLaFixture } from "./fixtures";
 import { lireSortieStructuree } from "./lecture";
-import { flattenText, type AiMessage } from "./message";
-import { toOutputSchema } from "./output-schema";
-import { computeCostUsd } from "./pricing";
-import type { AiContract } from "./schemas";
+import { texteMisBoutABout, type MessageIa } from "./message";
+import { deriverLeSchemaDeSortie } from "./schema-de-sortie";
+import { coutEnDollars } from "./cout-des-appels";
+import type { ContratDeSortie } from "./schemas";
 import { signalerUneBascule } from "./signalement-de-bascule";
 
 /**
@@ -36,7 +36,7 @@ import { signalerUneBascule } from "./signalement-de-bascule";
  * manuelle par variable d'environnement.
  */
 
-const MOCK_LATENCY_MS = 300;
+const LATENCE_DU_MOCK_MS = 300;
 
 /**
  * Le modèle du repli. Deux entrées pour un seul modèle : OpenRouter veut le nom
@@ -55,10 +55,10 @@ const CODES_DE_REPLI = new Set([
   "AI_TRUNCATED",
 ]);
 
-export type CallAIParams<T> = {
-  contract: AiContract<T>;
+export type ParametresDAppel<T> = {
+  contract: ContratDeSortie<T>;
   system: string;
-  messages: AiMessage[];
+  messages: MessageIa[];
   maxTokens?: number;
   /**
    * Le modèle, quand il ne doit pas être celui de la configuration : les juges
@@ -86,13 +86,13 @@ export type CallAIParams<T> = {
  */
 async function emettreEtJournaliser<T>(
   pont: PontFournisseur,
-  params: CallAIParams<T>,
-  config: AiConfig,
+  params: ParametresDAppel<T>,
+  config: ConfigIa,
   basculee: boolean,
 ): Promise<T> {
   const { contract } = params;
   const maxTokens = params.maxTokens ?? config.maxTokens;
-  const ledger = {
+  const registre = {
     purpose: contract.purpose,
     model: config.model,
     fournisseur: config.fournisseur,
@@ -102,9 +102,9 @@ async function emettreEtJournaliser<T>(
   };
   // Dérivé avant d'ouvrir le registre : une forme intraduisible est une erreur
   // de développement, pas un appel raté.
-  const format = toOutputSchema(contract.forme);
+  const format = deriverLeSchemaDeSortie(contract.forme);
 
-  const startedAt = Date.now();
+  const debut = Date.now();
   let sortie;
   try {
     sortie = await pont.emettre({
@@ -116,62 +116,62 @@ async function emettreEtJournaliser<T>(
       purpose: contract.purpose,
     });
   } catch (erreur) {
-    await recordAiCall({
-      ...ledger,
+    await enregistrerLAppel({
+      ...registre,
       inputTokens: 0,
       outputTokens: 0,
       costUsd: "0",
-      latencyMs: Date.now() - startedAt,
+      latencyMs: Date.now() - debut,
       success: false,
-      errorCode: erreur instanceof AiError ? erreur.code : "AI_CALL_FAILED",
+      errorCode: erreur instanceof AppelModeleError ? erreur.code : "AI_CALL_FAILED",
     });
-    if (erreur instanceof AICallFailedError) throw erreur;
-    throw new AICallFailedError(contract.purpose, erreur);
+    if (erreur instanceof EmissionEchoueeError) throw erreur;
+    throw new EmissionEchoueeError(contract.purpose, erreur);
   }
 
-  const costUsd = computeCostUsd(config.model, sortie.consommation);
+  const cout = coutEnDollars(config.model, sortie.consommation);
 
   try {
     // Une réponse coupée peut rester valide au schéma (cinq concepts sur
     // huit) : c'est un échec quand même.
     if (sortie.finishReason === "length") {
-      throw new AITruncatedOutputError(contract.purpose, maxTokens);
+      throw new SortieTronqueeError(contract.purpose, maxTokens);
     }
     if (sortie.responseText.length === 0) {
-      throw new AIMissingOutputError(contract.purpose);
+      throw new SortieAbsenteError(contract.purpose);
     }
 
-    const value = lireSortieStructuree(contract, sortie.responseText);
-    await recordAiCall({
-      ...ledger,
+    const valeur = lireSortieStructuree(contract, sortie.responseText);
+    await enregistrerLAppel({
+      ...registre,
       ...sortie.consommation,
-      costUsd,
+      costUsd: cout,
       latencyMs: sortie.latencyMs,
       success: true,
     });
-    return value;
-  } catch (error) {
-    await recordAiCall({
-      ...ledger,
+    return valeur;
+  } catch (echec) {
+    await enregistrerLAppel({
+      ...registre,
       ...sortie.consommation,
-      costUsd,
+      costUsd: cout,
       latencyMs: sortie.latencyMs,
       success: false,
-      errorCode: error instanceof AiError ? error.code : "AI_UNKNOWN",
+      errorCode: echec instanceof AppelModeleError ? echec.code : "AI_UNKNOWN",
     });
-    throw error;
+    throw echec;
   }
 }
 
 /** Décide si l'échec de l'appel doit basculer sur le modèle de repli. */
-function doitBasculer<T>(erreur: unknown, config: AiConfig, params: CallAIParams<T>): boolean {
+function doitBasculer<T>(erreur: unknown, config: ConfigIa, params: ParametresDAppel<T>): boolean {
   // Primaire déjà sur le modèle de repli : rejouer l'appel serait le retry que
   // ce fichier s'interdit.
   if (config.model === MODELE_DE_REPLI[config.fournisseur]) return false;
   // Un appelant qui cible un modèle précis (les juges du banc) ne doit pas être
   // remis en silence sur Sonnet : la mesure serait faussée.
   if (params.model !== undefined) return false;
-  if (!(erreur instanceof AiError)) return false;
+  if (!(erreur instanceof AppelModeleError)) return false;
   return CODES_DE_REPLI.has(erreur.code);
 }
 
@@ -181,7 +181,7 @@ function motifDeBascule(erreur: unknown): string {
   return `${erreur.message}${cause}`;
 }
 
-async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
+async function emettreAvecRepli<T>(params: ParametresDAppel<T>, config: ConfigIa): Promise<T> {
   const cles = { anthropicApiKey: config.apiKey, openrouterApiKey: config.openrouterApiKey };
   const pont = choisirFournisseur(config.fournisseur, cles);
 
@@ -194,7 +194,7 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
     // plafond. Plafond atteint, l'échec du primaire remonte.
     if (!(await reserverLaPlaceDuRepli(config))) throw erreur;
     // Si le repli échoue aussi, l'erreur remonte : pas de troisième tentative.
-    const configRepli: AiConfig = { ...config, model: MODELE_DE_REPLI[config.fournisseur] };
+    const configRepli: ConfigIa = { ...config, model: MODELE_DE_REPLI[config.fournisseur] };
     const resultat = await emettreEtJournaliser(pont, params, configRepli, true);
     signalerUneBascule(motifDeBascule(erreur));
     return resultat;
@@ -206,26 +206,26 @@ async function emit<T>(params: CallAIParams<T>, config: AiConfig): Promise<T> {
  * interrupteur, mode mock, part du compte, plafond journalier, émission avec
  * `max_tokens` explicite et sortie contrainte par grammaire, refus d'une
  * réponse tronquée, validation stricte, puis écriture au registre — succès
- * comme échec. Aucun retry ; un seul repli vers Sonnet (voir `emit`).
+ * comme échec. Aucun retry ; un seul repli vers Sonnet (voir `emettreAvecRepli`).
  */
-export async function callAI<T>(params: CallAIParams<T>): Promise<T> {
+export async function callAI<T>(params: ParametresDAppel<T>): Promise<T> {
   const effective = await lireLaConfigEffective();
   // La surcharge est appliquée ici, avant tout le reste : le registre, le calcul
   // de coût et la réservation doivent tous voir le modèle réellement appelé.
   const config = params.model ? { ...effective, model: params.model } : effective;
 
   if (!config.enabled) {
-    throw new AIDisabledError();
+    throw new AppelsCoupesError();
   }
 
   if (config.mock) {
-    await new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS));
-    return loadFixture(params.contract, flattenText(params.messages), params.system);
+    await new Promise((resolve) => setTimeout(resolve, LATENCE_DU_MOCK_MS));
+    return chargerLaFixture(params.contract, texteMisBoutABout(params.messages), params.system);
   }
 
   // Les places sont réservées avant d'émettre, chacune en une seule instruction :
   // deux appels simultanés ne peuvent pas obtenir la même.
   await reserverLesDeuxPlaces(config, provenanceDeLAppel(params));
 
-  return emit(params, config);
+  return emettreAvecRepli(params, config);
 }

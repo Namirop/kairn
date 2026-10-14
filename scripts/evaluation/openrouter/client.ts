@@ -1,23 +1,23 @@
 import { z } from "zod";
-import { AICallFailedError, AIMissingOutputError, AITruncatedOutputError } from "@/lib/ai/errors";
-import type { AiMessage } from "@/lib/ai/message";
-import { toOutputSchema } from "@/lib/ai/output-schema";
-import type { AiContract } from "@/lib/ai/schemas";
+import { EmissionEchoueeError, SortieAbsenteError, SortieTronqueeError } from "@/lib/ai/errors";
+import type { MessageIa } from "@/lib/ai/message";
+import { deriverLeSchemaDeSortie } from "@/lib/ai/schema-de-sortie";
+import type { ContratDeSortie } from "@/lib/ai/schemas";
 
 /**
  * Le point d'entrée du banc vers OpenRouter, distinct de `lib/ai/client.ts`.
  *
  * Il ne touche à rien de la production : ni `AiCall`, ni réservation de quota,
- * ni fixtures. Il ne partage avec elle que les types purs (`AiContract`,
- * `AiMessage`, `toOutputSchema`).
+ * ni fixtures. Il ne partage avec elle que les types purs (`ContratDeSortie`,
+ * `MessageIa`, `deriverLeSchemaDeSortie`).
  */
 
-const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+const ADRESSE_DES_COMPLETIONS = "https://openrouter.ai/api/v1/chat/completions";
 
-export type AppelOpenRouterParams<T> = {
-  contract: AiContract<T>;
+export type ParametresDAppelOpenRouter<T> = {
+  contract: ContratDeSortie<T>;
   system: string;
-  messages: AiMessage[];
+  messages: MessageIa[];
   /** Identifiant OpenRouter du modèle, `<fournisseur>/<slug>`. */
   model: string;
   maxTokens: number;
@@ -50,7 +50,7 @@ const choix = z.object({
   finish_reason: z.string().nullable(),
 });
 
-const usage = z.object({
+const consommationRendue = z.object({
   prompt_tokens: z.number(),
   completion_tokens: z.number(),
   total_tokens: z.number(),
@@ -58,15 +58,15 @@ const usage = z.object({
   cost: z.number().optional(),
 });
 
-const reponseSchema = z.object({
+const schemaDeReponse = z.object({
   id: z.string(),
   model: z.string(),
   choices: z.array(choix).min(1),
-  usage,
+  usage: consommationRendue,
 });
 
 /** Un message du banc au format OpenAI que suit OpenRouter. */
-function toOpenRouterMessage(message: AiMessage): {
+function versMessageOpenRouter(message: MessageIa): {
   role: "user" | "assistant";
   content:
     | string
@@ -92,27 +92,27 @@ function toOpenRouterMessage(message: AiMessage): {
  * La grammaire `json_schema` contraint la forme ; Zod ajoute ce qui ne descend
  * pas dans le schéma (bornes, contraintes croisées).
  */
-function lireSortie<T>(contract: AiContract<T>, texte: string): T {
+function lireSortie<T>(contrat: ContratDeSortie<T>, texte: string): T {
   let brut: unknown;
   try {
     brut = JSON.parse(texte);
   } catch {
-    throw new AIMissingOutputError(contract.purpose);
+    throw new SortieAbsenteError(contrat.purpose);
   }
-  const parse = contract.validation.safeParse(brut);
-  if (!parse.success) {
+  const lecture = contrat.validation.safeParse(brut);
+  if (!lecture.success) {
     if (process.env.OPENROUTER_DEBUG === "1") {
       console.error(
-        `[debug] Sortie brute rejetée pour « ${contract.purpose} » :\n${texte.slice(0, 2000)}`,
+        `[debug] Sortie brute rejetée pour « ${contrat.purpose} » :\n${texte.slice(0, 2000)}`,
       );
     }
-    throw new AICallFailedError(contract.purpose, parse.error);
+    throw new EmissionEchoueeError(contrat.purpose, lecture.error);
   }
-  return parse.data;
+  return lecture.data;
 }
 
 export async function appelerViaOpenRouter<T>(
-  params: AppelOpenRouterParams<T>,
+  parametres: ParametresDAppelOpenRouter<T>,
 ): Promise<{ valeur: T; consommation: ConsommationOpenRouter }> {
   const cle = process.env.OPENROUTERAI_KEY?.trim();
   if (!cle) {
@@ -121,7 +121,7 @@ export async function appelerViaOpenRouter<T>(
     );
   }
 
-  const format = toOutputSchema(params.contract.forme);
+  const format = deriverLeSchemaDeSortie(parametres.contract.forme);
   // Certains fournisseurs (Alibaba pour Qwen) honorent mal `json_schema strict`
   // et renomment les clés. Recopier le schéma dans le système, avec consigne de
   // garder les clés, y remédie ; c'est bénin pour les autres.
@@ -131,22 +131,22 @@ ${JSON.stringify(format.schema)}
 
 `;
 
-  const reasoning = params.reasoning ?? { effort: "low" as const };
+  const reasoning = parametres.reasoning ?? { effort: "low" as const };
   const corps: Record<string, unknown> = {
-    model: params.model,
-    max_tokens: params.maxTokens,
+    model: parametres.model,
+    max_tokens: parametres.maxTokens,
     messages: [
-      { role: "system" as const, content: `${preambule}${params.system}` },
-      ...params.messages.map(toOpenRouterMessage),
+      { role: "system" as const, content: `${preambule}${parametres.system}` },
+      ...parametres.messages.map(versMessageOpenRouter),
     ],
     response_format: {
       type: "json_schema" as const,
       json_schema: {
-        name: params.contract.purpose,
+        name: parametres.contract.purpose,
         // En strict, OpenAI exige que `required` liste tous les champs, même
-        // `.nullish()` ; adapter `toOutputSchema` casserait les autres lignées.
+        // `.nullish()` ; adapter `deriverLeSchemaDeSortie` casserait les autres lignées.
         // `strict` est donc coupé pour OpenAI seul, Zod rattrape derrière.
-        strict: !params.model.startsWith("openai/"),
+        strict: !parametres.model.startsWith("openai/"),
         schema: format.schema,
       },
     },
@@ -159,7 +159,7 @@ ${JSON.stringify(format.schema)}
   const debut = Date.now();
   let reponse: Response;
   try {
-    reponse = await fetch(ENDPOINT, {
+    reponse = await fetch(ADRESSE_DES_COMPLETIONS, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${cle}`,
@@ -168,35 +168,35 @@ ${JSON.stringify(format.schema)}
       body: JSON.stringify(corps),
     });
   } catch (erreur) {
-    throw new AICallFailedError(params.contract.purpose, erreur);
+    throw new EmissionEchoueeError(parametres.contract.purpose, erreur);
   }
 
   if (!reponse.ok) {
     const detail = await reponse.text().catch(() => reponse.statusText);
-    throw new AICallFailedError(
-      params.contract.purpose,
+    throw new EmissionEchoueeError(
+      parametres.contract.purpose,
       new Error(`OpenRouter ${reponse.status} — ${detail.slice(0, 500)}`),
     );
   }
 
-  const latencyMs = Date.now() - debut;
+  const latenceMs = Date.now() - debut;
   const brut: unknown = await reponse.json();
-  const parseReponse = reponseSchema.safeParse(brut);
-  if (!parseReponse.success) {
-    throw new AICallFailedError(params.contract.purpose, parseReponse.error);
+  const lectureDeLaReponse = schemaDeReponse.safeParse(brut);
+  if (!lectureDeLaReponse.success) {
+    throw new EmissionEchoueeError(parametres.contract.purpose, lectureDeLaReponse.error);
   }
 
-  const decodee = parseReponse.data;
+  const decodee = lectureDeLaReponse.data;
   const premier = decodee.choices[0];
-  if (!premier) throw new AIMissingOutputError(params.contract.purpose);
+  if (!premier) throw new SortieAbsenteError(parametres.contract.purpose);
   if (premier.finish_reason === "length") {
-    throw new AITruncatedOutputError(params.contract.purpose, params.maxTokens);
+    throw new SortieTronqueeError(parametres.contract.purpose, parametres.maxTokens);
   }
   if (premier.message.content === null || premier.message.content.length === 0) {
-    throw new AIMissingOutputError(params.contract.purpose);
+    throw new SortieAbsenteError(parametres.contract.purpose);
   }
 
-  const valeur = lireSortie(params.contract, premier.message.content);
+  const valeur = lireSortie(parametres.contract, premier.message.content);
 
   return {
     valeur,
@@ -204,7 +204,7 @@ ${JSON.stringify(format.schema)}
       inputTokens: decodee.usage.prompt_tokens,
       outputTokens: decodee.usage.completion_tokens,
       costUsd: decodee.usage.cost ?? null,
-      latencyMs,
+      latencyMs: latenceMs,
       modele: decodee.model,
     },
   };

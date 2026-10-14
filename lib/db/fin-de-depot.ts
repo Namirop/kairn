@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import { rendreDepot } from "@/lib/db/quota-depots";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 
 /**
  * Comment un dépôt s'arrête, et qui paie quand il s'arrête mal. Trois fins à ne

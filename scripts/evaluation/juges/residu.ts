@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { callAI } from "@/lib/ai/client";
-import type { AiContract } from "@/lib/ai/schemas";
+import type { ContratDeSortie } from "@/lib/ai/schemas";
 import type { Rapproche } from "../mesures/signaux";
 import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
 
@@ -71,7 +71,7 @@ export type VerdictManque = { retenir: boolean | null; motif: string };
 export type VerdictInvention = { soutenu: boolean | null; motif: string };
 export type SortieResidu = { manques: VerdictManque[]; inventions: VerdictInvention[] };
 
-export const CONTRAT_RESIDU: AiContract<z.infer<typeof residuValidation>> = {
+export const CONTRAT_RESIDU: ContratDeSortie<z.infer<typeof residuValidation>> = {
   purpose: "juge_residu",
   forme: residuForme,
   validation: residuValidation,

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
+import { jourEnDateUtc, jourLocal } from "@/lib/domain/jour-local";
 import type { CompteurDeQuota } from "@/lib/db/types";
 
 /**
@@ -29,7 +29,7 @@ export async function reserverLAlerte(
 ): Promise<boolean> {
   const { count } = await prisma.alerteQuota.createMany({
     data: {
-      day: dayToUtcDate(localDay(maintenant, "UTC")),
+      day: jourEnDateUtc(jourLocal(maintenant, "UTC")),
       compteur: cle.compteur,
       cible: cle.cible,
       seuil: cle.seuil,

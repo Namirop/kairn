@@ -1,4 +1,4 @@
-import { EXTRACT_ATOMS_PROMPT } from "@/lib/ai/prompts";
+import { PROMPT_D_EXTRACTION } from "@/lib/ai/prompts";
 import type { Depot } from "../corpus";
 import type { DepotFige } from "../fige";
 import { SYSTEM_ATTENDUS } from "../juges/attendus";
@@ -16,13 +16,13 @@ import type { ModeleOpenRouter } from "../openrouter/modeles";
  * la facture réelle se lit dépôt par dépôt à l'émission.
  */
 
-const CHARS_PAR_TOKEN = 4;
+const CARACTERES_PAR_TOKEN = 4;
 /** Approximation surface JSON par item (accolades, guillemets, noms de champs). */
 export const SURCHARGE_JSON_ITEM = 30;
 export { PAIRES_PAR_APPEL };
 
 export function tok(texte: string): number {
-  return Math.ceil(texte.length / CHARS_PAR_TOKEN);
+  return Math.ceil(texte.length / CARACTERES_PAR_TOKEN);
 }
 
 /**
@@ -65,14 +65,14 @@ export function couterPlan(plan: Plan, modele: ModeleOpenRouter): number {
  */
 export function planExtraction(corpus: Depot[], fige: { depots: DepotFige[] }): Plan {
   const parNom = new Map(fige.depots.map((d) => [d.nom, d]));
-  const promptTokens = tok(EXTRACT_ATOMS_PROMPT);
+  const tokensDuPrompt = tok(PROMPT_D_EXTRACTION);
   let tokensIn = 0;
   let tokensOut = 0;
 
   for (const depot of corpus) {
     const figeDepot = parNom.get(depot.nom);
     const texte = figeDepot?.texte ?? depot.texte;
-    tokensIn += promptTokens + tok(texte) + 50;
+    tokensIn += tokensDuPrompt + tok(texte) + 50;
 
     if (figeDepot) {
       for (const concept of figeDepot.concepts) {
@@ -88,7 +88,7 @@ export function planExtraction(corpus: Depot[], fige: { depots: DepotFige[] }): 
 
 /** Le juge du doublon — un appel par lot de {@link PAIRES_PAR_APPEL} paires. */
 export function planDoublon(fige: { depots: DepotFige[] }, verdicts: VerdictsFige): Plan {
-  const promptTokens = tok(SYSTEM_DOUBLON);
+  const tokensDuPrompt = tok(SYSTEM_DOUBLON);
   const parNom = new Map(fige.depots.map((d) => [d.nom, d]));
   const plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
 
@@ -102,7 +102,7 @@ export function planDoublon(fige: { depots: DepotFige[] }, verdicts: VerdictsFig
     const tokensParPaire = paires.reduce((s, p) => {
       const contenu = (p.questionSurA?.length ?? 0) + (p.questionSurB?.length ?? 0);
       // Plus le texte des deux concepts, ~120 signes chacun d'après le figé.
-      return s + Math.ceil(contenu / CHARS_PAR_TOKEN) + 60;
+      return s + Math.ceil(contenu / CARACTERES_PAR_TOKEN) + 60;
     }, 0);
 
     const nbLots = Math.ceil(paires.length / PAIRES_PAR_APPEL);
@@ -113,7 +113,7 @@ export function planDoublon(fige: { depots: DepotFige[] }, verdicts: VerdictsFig
         `Dépôt : ${nom}\n\n${parts.length} paire(s) à juger — verdicts #1 à #${parts.length}.\n\n`,
       );
       plan.appels += 1;
-      plan.tokensIn += promptTokens + enTete + tokensParPaire * (parts.length / paires.length);
+      plan.tokensIn += tokensDuPrompt + enTete + tokensParPaire * (parts.length / paires.length);
       plan.tokensOut += parts.length * (2 * 50 + SURCHARGE_JSON_ITEM) + 30;
     }
   }
@@ -123,7 +123,7 @@ export function planDoublon(fige: { depots: DepotFige[] }, verdicts: VerdictsFig
 
 /** Le juge du résidu — un appel par dépôt qui porte des manques ou inventions. */
 export function planResidu(fige: { depots: DepotFige[] }, verdicts: VerdictsFige): Plan {
-  const promptTokens = tok(SYSTEM_RESIDU);
+  const tokensDuPrompt = tok(SYSTEM_RESIDU);
   const parNom = new Map(fige.depots.map((d) => [d.nom, d]));
   const plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
 
@@ -134,10 +134,10 @@ export function planResidu(fige: { depots: DepotFige[] }, verdicts: VerdictsFige
     const depot = parNom.get(nom);
     if (!depot) continue;
 
-    const items = manques.length + inventions.length;
+    const elements = manques.length + inventions.length;
     plan.appels += 1;
-    plan.tokensIn += promptTokens + tok(depot.texte) + items * 60 + 80;
-    plan.tokensOut += items * (30 + SURCHARGE_JSON_ITEM) + 30;
+    plan.tokensIn += tokensDuPrompt + tok(depot.texte) + elements * 60 + 80;
+    plan.tokensOut += elements * (30 + SURCHARGE_JSON_ITEM) + 30;
   }
 
   return plan;
@@ -145,14 +145,14 @@ export function planResidu(fige: { depots: DepotFige[] }, verdicts: VerdictsFige
 
 /** Le juge des attendus — un appel par dépôt qui porte des attendus. */
 export function planAttendus(verdicts: VerdictsFige): Plan {
-  const promptTokens = tok(SYSTEM_ATTENDUS);
+  const tokensDuPrompt = tok(SYSTEM_ATTENDUS);
   const plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
 
   for (const entry of Object.values(verdicts.depots)) {
     const attendus = entry.attendus ?? [];
     if (attendus.length === 0) continue;
     plan.appels += 1;
-    plan.tokensIn += promptTokens + attendus.length * 150 + 60;
+    plan.tokensIn += tokensDuPrompt + attendus.length * 150 + 60;
     plan.tokensOut += attendus.length * (40 + SURCHARGE_JSON_ITEM) + 30;
   }
 

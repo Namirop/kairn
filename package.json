@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "docs:check": "tsx scripts/docs/check-docs.ts",
+    "docs:check": "tsx scripts/docs/verifier-les-docs.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "knip": "knip",

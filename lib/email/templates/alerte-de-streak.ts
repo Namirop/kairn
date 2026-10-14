@@ -1,7 +1,6 @@
 import type { Langue } from "@/lib/db/types";
 import { textesDEmail } from "../traduction";
-import { EMAIL_STYLE as S, renderShell } from "./shell";
-import type { RenderedEmail } from "./daily-reminder";
+import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
 
 /**
  * L'alerte de série, envoyée le soir et seulement quand il y a quelque chose à
@@ -13,33 +12,33 @@ export type AlerteDeStreakPayload = {
   /** Sessions d'affilée en cours. Toujours au moins une, sinon rien n'est en jeu. */
   currentStreak: number;
   /** Concepts dus aujourd'hui. Toujours au moins un, sinon rien n'est jouable. */
-  dueCount: number;
+  dus: number;
 };
 
-export function renderAlerteDeStreak(
-  { currentStreak, dueCount }: AlerteDeStreakPayload,
-  links: { sessionUrl: string; unsubscribeUrl: string },
+export function composerLAlerteDeStreak(
+  { currentStreak, dus }: AlerteDeStreakPayload,
+  liens: { lienDeSession: string; lienDeDesinscription: string },
   langue: Langue,
-): RenderedEmail {
+): EmailRendu {
   const t = textesDEmail(langue);
   const subject = t("serie.sujet");
   const unite = t("commun.uniteDeSerie", { nombre: currentStreak });
-  const constat = t("serie.constat", { nombre: dueCount });
+  const constat = t("serie.constat", { nombre: dus });
 
-  const body = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.ember};">${currentStreak}</p>
+  const corps = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${S.ember};">${currentStreak}</p>
 <p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.ember};">${unite}</p>
-<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">${constat}</p>
-<a href="${links.sessionUrl}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${t("commun.commencer")}</a>`;
+<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.secondaire};">${constat}</p>
+<a href="${liens.lienDeSession}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${t("commun.commencer")}</a>`;
 
-  const nePlusRecevoir = t("serie.nePlusRecevoir", { url: links.unsubscribeUrl });
-  const text = `${currentStreak} ${unite}.\n\n${constat}\n\n${links.sessionUrl}\n\n${nePlusRecevoir}`;
+  const nePlusRecevoir = t("serie.nePlusRecevoir", { url: liens.lienDeDesinscription });
+  const text = `${currentStreak} ${unite}.\n\n${constat}\n\n${liens.lienDeSession}\n\n${nePlusRecevoir}`;
 
   return {
     subject,
-    html: renderShell({
-      preheader: t("serie.preheader", { serie: `${currentStreak} ${unite}` }),
-      body,
-      unsubscribeUrl: links.unsubscribeUrl,
+    html: envelopper({
+      preentete: t("serie.preheader", { serie: `${currentStreak} ${unite}` }),
+      corps,
+      lienDeDesinscription: liens.lienDeDesinscription,
       raisonDeLEnvoi: t("serie.raison"),
       langue,
     }),

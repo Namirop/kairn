@@ -6,9 +6,9 @@ import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { RienAReviser } from "@/components/revision/rien-a-reviser";
 import { SessionDeRevision } from "@/components/revision/session-de-revision";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
-import { findUserStats, lireReglages } from "@/lib/db/user-settings";
+import { trouverLesCompteurs, lireReglages } from "@/lib/db/reglages-du-compte";
 import { prochainRappel } from "@/lib/domain/prochain-rappel";
 import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 import { ETIQUETTE_INTL } from "@/lib/i18n/langues";
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function PageReviser() {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
@@ -34,7 +34,7 @@ export default async function PageReviser() {
   const [session, reglages, compteurs] = await Promise.all([
     lireSessionDuJour(utilisateur.id, maintenant),
     lireReglages(utilisateur.id),
-    findUserStats(utilisateur.id),
+    trouverLesCompteurs(utilisateur.id),
   ]);
 
   // Sans rappel actif, annoncer une heure promettrait un email qui ne part pas.

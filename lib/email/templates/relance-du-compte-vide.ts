@@ -1,7 +1,6 @@
 import type { Langue } from "@/lib/db/types";
 import { textesDEmail } from "../traduction";
-import { EMAIL_STYLE as S, renderShell } from "./shell";
-import type { RenderedEmail } from "./daily-reminder";
+import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
 
 /**
  * La relance d'un compte resté vide, une fois, quelques jours après l'inscription.
@@ -15,33 +14,33 @@ import type { RenderedEmail } from "./daily-reminder";
 
 export type RelanceDuCompteVidePayload = Record<string, never>;
 
-export function renderRelanceDuCompteVide(
+export function composerLaRelanceDuCompteVide(
   _payload: RelanceDuCompteVidePayload,
-  links: { depotUrl: string; unsubscribeUrl: string },
+  liens: { lienDeDepot: string; lienDeDesinscription: string },
   langue: Langue,
-): RenderedEmail {
+): EmailRendu {
   const t = textesDEmail(langue);
   const subject = t("relance.sujet");
 
-  const body = `<p style="margin:0 0 16px;font-size:17px;line-height:25px;font-weight:600;letter-spacing:-0.01em;color:${S.ink};">${t("relance.titre")}</p>
-<p style="margin:0 0 12px;font-size:15px;line-height:23px;color:${S.muted};">${t("relance.exemples")}</p>
-<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">${t("relance.retour")}</p>
-<a href="${links.depotUrl}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${t("commun.deposer")}</a>`;
+  const corps = `<p style="margin:0 0 16px;font-size:17px;line-height:25px;font-weight:600;letter-spacing:-0.01em;color:${S.encre};">${t("relance.titre")}</p>
+<p style="margin:0 0 12px;font-size:15px;line-height:23px;color:${S.secondaire};">${t("relance.exemples")}</p>
+<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.secondaire};">${t("relance.retour")}</p>
+<a href="${liens.lienDeDepot}" style="display:inline-block;background:${S.accent};color:#FFFFFF;text-decoration:none;padding:12px 20px;font-size:15px;">${t("commun.deposer")}</a>`;
 
   const text = [
     t("relance.titre"),
     t("relance.exemples"),
     t("relance.retour"),
-    links.depotUrl,
-    t("commun.nePlusRecevoirEmails", { url: links.unsubscribeUrl }),
+    liens.lienDeDepot,
+    t("commun.nePlusRecevoirEmails", { url: liens.lienDeDesinscription }),
   ].join("\n\n");
 
   return {
     subject,
-    html: renderShell({
-      preheader: t("relance.preheader"),
-      body,
-      unsubscribeUrl: links.unsubscribeUrl,
+    html: envelopper({
+      preentete: t("relance.preheader"),
+      corps,
+      lienDeDesinscription: liens.lienDeDesinscription,
       raisonDeLEnvoi: t("relance.raison"),
       langue,
     }),

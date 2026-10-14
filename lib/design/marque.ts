@@ -1,4 +1,4 @@
-import { empiler, tailler, type Empilement } from "@/lib/domain/cairn-stack";
+import { empiler, tailler, type Empilement } from "@/lib/domain/cairn-empilement";
 import { tirageDe } from "@/lib/domain/tirage-deterministe";
 
 /**

@@ -1,10 +1,10 @@
 "use server";
 
 import { z } from "zod";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { enregistrerEntrainement, lireTourDentrainement } from "@/lib/db/entrainement";
 import { prendreUnGeste } from "@/lib/db/limite-de-gestes";
-import { lireFuseauUtilisateur, marquerPrincipeVu } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur, marquerPrincipeVu } from "@/lib/db/reglages-du-compte";
 import type { QuestionServie } from "@/lib/db/question-servie";
 
 /**
@@ -25,7 +25,7 @@ const passageSchema = z.object({
 export type PassageDonne = z.input<typeof passageSchema>;
 
 export async function sentrainerAction(donnees: PassageDonne): Promise<boolean> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) return false;
 
@@ -45,7 +45,7 @@ export async function sentrainerAction(donnees: PassageDonne): Promise<boolean> 
  * passe par la limite de débit, et sa lecture est bornée côté base.
  */
 export async function tourSuivantAction(): Promise<QuestionServie[]> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) return [];
 
@@ -58,7 +58,7 @@ export async function tourSuivantAction(): Promise<QuestionServie[]> {
 
 /** L'explication du principe a été vue : une fenêtre qui revient devient un péage. */
 export async function principeVuAction(): Promise<void> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) return;
 

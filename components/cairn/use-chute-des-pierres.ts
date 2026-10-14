@@ -13,7 +13,7 @@ import {
 } from "@/lib/domain/cairn-physique";
 import { remonter } from "@/lib/domain/cairn-remontee";
 import { pierreTraversee } from "@/lib/domain/cairn-contact";
-import type { Pierre } from "@/lib/domain/cairn-stack";
+import type { Pierre } from "@/lib/domain/cairn-empilement";
 import { useGestesSurLeCairn } from "@/components/cairn/use-gestes-sur-le-cairn";
 
 /**

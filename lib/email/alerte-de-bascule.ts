@@ -1,9 +1,12 @@
-import { sendEmail } from "./client";
-import { renderAlerteDeBascule, type AlerteDeBasculePayload } from "./templates/alerte-de-bascule";
+import { envoyerLEmail } from "./client";
+import {
+  composerLAlerteDeBascule,
+  type AlerteDeBasculePayload,
+} from "./templates/alerte-de-bascule";
 
 /**
  * L'envoi d'une alerte de bascule Luna → Sonnet. Comme les autres alertes
- * d'exploitation : hors de `sendNotification`, vers `EMAIL_ALERTES`, et un
+ * d'exploitation : hors de `envoyerLaNotification`, vers `EMAIL_ALERTES`, et un
  * simple avertissement si la variable manque.
  */
 export async function envoyerLAlerteDeBascule(payload: AlerteDeBasculePayload): Promise<void> {
@@ -14,9 +17,9 @@ export async function envoyerLAlerteDeBascule(payload: AlerteDeBasculePayload): 
     return;
   }
 
-  const email = renderAlerteDeBascule(payload);
+  const email = composerLAlerteDeBascule(payload);
 
-  await sendEmail({
+  await envoyerLEmail({
     to: destinataire,
     subject: email.subject,
     html: email.html,

@@ -1,4 +1,4 @@
-import { AiError } from "@/lib/ai/errors";
+import { AppelModeleError } from "@/lib/ai/errors";
 
 /**
  * Une seule reprise par appel, exception assumée au « pas de retry » du produit
@@ -22,7 +22,7 @@ export async function avecUneReprise<T>(
   try {
     return { resultat: await action(), reprises: 0 };
   } catch (erreur) {
-    if (erreur instanceof AiError && REPRISES_INAPPROPRIEES.has(erreur.code)) {
+    if (erreur instanceof AppelModeleError && REPRISES_INAPPROPRIEES.has(erreur.code)) {
       throw erreur;
     }
 

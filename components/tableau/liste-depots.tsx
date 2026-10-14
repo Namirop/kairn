@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/lib/auth/routes";
 import type { DepotListe } from "@/lib/db/depots";
 import { anciennete } from "@/lib/domain/echeance";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { conceptsLisibles, travailEnCours } from "@/lib/domain/etat-depot";
 

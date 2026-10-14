@@ -179,7 +179,7 @@ model AiCall {
   /// La lignée qui a servi l'appel : `anthropic` (SDK natif) ou `openrouter`
   /// (pont porté du banc). Nul et non pas absent : un coût ne veut rien dire
   /// si l'on ignore qui l'a facturé, et les multiplicateurs de cache diffèrent
-  /// (voir `lib/ai/pricing.ts`). Défaut `anthropic` pour les lignes écrites
+  /// (voir `lib/ai/cout-des-appels.ts`). Défaut `anthropic` pour les lignes écrites
   /// avant le portage — c'était la seule lignée.
   provider            String  @default("anthropic")
   model               String
@@ -332,7 +332,7 @@ model AnonymousSession {
 /// Les réglages d'exploitation, modifiables sans redéploiement.
 ///
 /// Une variable d'environnement se change au déploiement ; ces réglages-là
-/// doivent pouvoir se changer *pendant* un incident. `readAiConfig()` étant déjà
+/// doivent pouvoir se changer *pendant* un incident. `lireLaConfigDeLEnvironnement()` étant déjà
 /// relu à chaque appel, une valeur posée ici prend effet immédiatement.
 ///
 /// **Une colonne nulle veut dire « non surchargé »** : la valeur de

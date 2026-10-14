@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import { MAX_ATTEMPTS } from "@/lib/db/generation-job";
+import { TENTATIVES_MAX } from "@/lib/db/jobs-de-generation";
 import type { GenerationJob } from "@/lib/db/types";
 
 /**
@@ -75,7 +75,7 @@ export async function scinderLeJobDeQuestions(
     select: { attempts: true },
   });
 
-  if (!suite || suite.attempts >= MAX_ATTEMPTS) return false;
+  if (!suite || suite.attempts >= TENTATIVES_MAX) return false;
 
   await prisma.$transaction([
     prisma.generationJob.update({

@@ -1,6 +1,6 @@
 import type { Langue } from "@/lib/db/types";
 import { textesDEmail } from "../traduction";
-import { EMAIL_STYLE, renderShell } from "./shell";
+import { STYLE_DES_EMAILS, envelopper, type EmailRendu } from "./gabarit";
 
 /**
  * Le code qui ouvre une session. Un code, pas un lien : un lien s'ouvre dans le
@@ -21,37 +21,35 @@ export type CodeDeConnexionPayload = {
   minutes: number;
 };
 
-export type EmailRendu = { subject: string; html: string; text: string };
-
-export function renderCodeDeConnexion(
+export function composerLeCodeDeConnexion(
   { code, minutes }: CodeDeConnexionPayload,
   langue: Langue,
 ): EmailRendu {
   const t = textesDEmail(langue);
-  const { SANS, MONO, ink, muted, border, paper } = EMAIL_STYLE;
+  const { SANS, MONO, encre, secondaire, filet, ombre } = STYLE_DES_EMAILS;
 
   // i18n-ignore — balisage HTML ; ses textes viennent de t().
-  const body = `
-<p style="margin:0 0 20px;font-family:${SANS};font-size:15px;line-height:24px;color:${ink};">
+  const corps = `
+<p style="margin:0 0 20px;font-family:${SANS};font-size:15px;line-height:24px;color:${encre};">
 ${t("code.intro")}
 </p>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;background:${paper};border:1px solid ${border};">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;background:${ombre};border:1px solid ${filet};">
 <tr><td align="center" style="padding:20px 16px;">
-<div style="font-family:${MONO};font-size:32px;line-height:40px;font-weight:600;letter-spacing:0.22em;color:${ink};text-indent:0.22em;">${code}</div>
+<div style="font-family:${MONO};font-size:32px;line-height:40px;font-weight:600;letter-spacing:0.22em;color:${encre};text-indent:0.22em;">${code}</div>
 </td></tr>
 </table>
-<p style="margin:0 0 8px;font-family:${SANS};font-size:13px;line-height:20px;color:${muted};">
+<p style="margin:0 0 8px;font-family:${SANS};font-size:13px;line-height:20px;color:${secondaire};">
 ${t("code.retape", { minutes })}
 </p>
-<p style="margin:0;font-family:${SANS};font-size:13px;line-height:20px;color:${muted};">
+<p style="margin:0;font-family:${SANS};font-size:13px;line-height:20px;color:${secondaire};">
 ${t("code.ignore")}
 </p>`;
 
   return {
     subject: t("code.sujet", { code }),
-    html: renderShell({
-      preheader: t("code.preheader", { code }),
-      body,
+    html: envelopper({
+      preentete: t("code.preheader", { code }),
+      corps,
       // Ni désinscription ni raison d'envoi : cet email vient d'être demandé.
       langue,
     }),

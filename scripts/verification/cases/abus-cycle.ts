@@ -4,7 +4,7 @@ import { lireTourDentrainement } from "@/lib/db/entrainement";
 import { enregistrerRevision } from "@/lib/db/revision";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
 import { ajouterPassages, fabriquerConcept, viderLeCompte } from "./abus-fabrique";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Le cycle de vie d'un concept. L'archivage par intervalle est une étiquette,
@@ -40,13 +40,13 @@ export async function casArchivageAutomatique(userId: string, maintenant: Date):
   const session = await lireSessionDuJour(userId, maintenant);
   const servis = new Set(session.questions.map((question) => question.atomId));
 
-  record(
+  noter(
     "Archivage — un concept archivé par l'intervalle revient en session quand il est dû",
     servis.has(auto.atomId),
     servis.has(auto.atomId) ? "servi" : "jamais reproposé",
   );
 
-  record(
+  noter(
     "Archivage — un concept sorti du cycle par l'utilisateur revient aussi à son échéance",
     servis.has(declare.atomId),
     servis.has(declare.atomId) ? "servi" : "jamais reproposé",
@@ -55,13 +55,13 @@ export async function casArchivageAutomatique(userId: string, maintenant: Date):
   const tour = await lireTourDentrainement(userId);
   const entrainables = new Set(tour.map((question) => question.atomId));
 
-  record(
+  noter(
     "Entraînement — l'archivage par intervalle n'écarte pas le concept de l'entraînement",
     entrainables.has(auto.atomId),
     entrainables.has(auto.atomId) ? "proposé" : "écarté avec les archivages déclarés",
   );
 
-  record(
+  noter(
     "Entraînement — l'archivage déclaré, lui, écarte bien le concept",
     !entrainables.has(declare.atomId),
     entrainables.has(declare.atomId) ? "proposé malgré la déclaration" : "écarté",
@@ -114,7 +114,7 @@ export async function casDesarchivage(userId: string, maintenant: Date): Promise
   const apresCourt = relus.find((atome) => atome.id === court.atomId);
   const apresLong = relus.find((atome) => atome.id === long.atomId);
 
-  record(
+  noter(
     "Désarchivage — l'échéance revient à maintenant et la marque d'archivage tombe",
     relus.every(
       (atome) =>
@@ -125,7 +125,7 @@ export async function casDesarchivage(userId: string, maintenant: Date): Promise
     relus.map((atome) => `${atome.state} dû ${atome.due.toISOString().slice(0, 10)}`).join(", "),
   );
 
-  record(
+  noter(
     "Désarchivage — l'état se recalcule et ne reste pas collé à ARCHIVED",
     apresCourt?.state !== "ARCHIVED" && apresLong?.state !== "ARCHIVED",
     `intervalle 30 j → ${apresCourt?.state}, intervalle 120 j → ${apresLong?.state}`,
@@ -134,7 +134,7 @@ export async function casDesarchivage(userId: string, maintenant: Date): Promise
   const session = await lireSessionDuJour(userId, maintenant);
   const servis = new Set(session.questions.map((question) => question.atomId));
 
-  record(
+  noter(
     "Désarchivage — le concept remis en cycle est servi le jour même",
     servis.has(court.atomId) && servis.has(long.atomId),
     `${servis.size} concept(s) servi(s) sur 2`,
@@ -183,19 +183,19 @@ export async function casModification(userId: string, maintenant: Date): Promise
     where: { kind: "VARIANTS", atomIds: { has: concept.atomId } },
   });
 
-  record(
+  noter(
     "Modification — les anciennes questions ne sont plus servables, mais restent citables",
     apres._count.variants === 0 && gardees === 4,
     `${apres._count.variants} servable(s) sur ${gardees} conservée(s)`,
   );
 
-  record(
+  noter(
     "Modification — des questions neuves sont demandées",
     demandes === 1,
     `${demandes} demande(s) en file`,
   );
 
-  record(
+  noter(
     "Modification — la planification repart de zéro",
     apres.state === "LEARNING" &&
       apres.reps === 0 &&
@@ -205,7 +205,7 @@ export async function casModification(userId: string, maintenant: Date): Promise
     `${apres.state}, ${apres.reps} passage(s), intervalle ${apres.scheduledDays} j`,
   );
 
-  record(
+  noter(
     "Modification — les passages déjà donnés restent dans l'histoire",
     apres._count.reviews === 3,
     `${apres._count.reviews} passage(s) sur 3 conservé(s)`,
@@ -250,7 +250,7 @@ export async function casModificationPendantSession(
     maintenant,
   );
 
-  record(
+  noter(
     "Modification — une réponse en cours de session n'est pas perdue",
     ecrit !== null,
     ecrit === null ? "réponse refusée, la question n'existe plus" : "réponse écrite",

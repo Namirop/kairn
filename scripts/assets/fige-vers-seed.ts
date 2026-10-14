@@ -1,7 +1,12 @@
 import type { AtomState, ReviewRating } from "@/lib/db/types";
 import { compterReussitesConsecutives, etatApresRevision } from "@/lib/domain/etat-maitrise";
-import type { SeedAtom, SeedInput, SeedReview, SeedVariant } from "@/prisma/seed/corpus-types";
-import { replay } from "@/prisma/seed/replay";
+import type {
+  AtomDuCorpus,
+  InputDuCorpus,
+  ReviewDuCorpus,
+  VariantDuCorpus,
+} from "@/prisma/seed/types-du-corpus";
+import { rejouer } from "@/prisma/seed/rejeu";
 import type { DepotDAssets, VariantDAssets } from "@/scripts/assets/fige";
 import { langueDuDepot } from "@/scripts/evaluation/corpus";
 
@@ -37,12 +42,12 @@ const PROFILS: Record<string, ProfilSujet> = {
 
 const DEFAUT: ProfilSujet = { famille: "REVISION", anchor: 20, recents: [1, 2, 3, 4] };
 
-function jour(daysAgo: number, note: ReviewRating): SeedReview {
-  return [Math.max(0, Math.round(daysAgo)), note];
+function jour(joursEcoules: number, note: ReviewRating): ReviewDuCorpus {
+  return [Math.max(0, Math.round(joursEcoules)), note];
 }
 
 /** Un historique plausible pour la famille, ancré sur le dépôt et un jour récent. */
-function historique(famille: Famille, anchor: number, recent: number): SeedReview[] {
+function historique(famille: Famille, anchor: number, recent: number): ReviewDuCorpus[] {
   if (famille === "CONSOLIDE") {
     return [
       jour(anchor, "GOOD"),
@@ -62,7 +67,7 @@ function historique(famille: Famille, anchor: number, recent: number): SeedRevie
 }
 
 /** La charge utile attendue par `question-servie.ts`, selon le format. */
-function payloadDe(v: VariantDAssets): SeedVariant["payload"] {
+function payloadDe(v: VariantDAssets): VariantDuCorpus["payload"] {
   if (v.format === "MCQ" && v.options !== null && v.correctIndex !== null) {
     return { options: v.options, correctIndex: v.correctIndex };
   }
@@ -76,7 +81,7 @@ function payloadDe(v: VariantDAssets): SeedVariant["payload"] {
   return undefined;
 }
 
-function versSeedVariant(v: VariantDAssets): SeedVariant {
+function versSeedVariant(v: VariantDAssets): VariantDuCorpus {
   const base = { format: v.format, facet: v.facet, question: v.question, answerKey: v.answerKey };
   const payload = payloadDe(v);
 
@@ -84,35 +89,41 @@ function versSeedVariant(v: VariantDAssets): SeedVariant {
 }
 
 /** L'état dérivé de l'historique rejoué. */
-function etatDe(history: SeedReview[], archive: boolean, now: Date): AtomState {
+function etatDe(passages: ReviewDuCorpus[], archive: boolean, maintenant: Date): AtomState {
   if (archive) return "ARCHIVED";
 
-  const factice: SeedAtom = { concept: "", tags: [], state: "LEARNING", history, variants: [] };
-  const { card } = replay(factice, now);
-  const reussites = compterReussitesConsecutives(history.map(([, note]) => note));
+  const factice: AtomDuCorpus = {
+    concept: "",
+    tags: [],
+    state: "LEARNING",
+    historique: passages,
+    variants: [],
+  };
+  const { card } = rejouer(factice, maintenant);
+  const reussites = compterReussitesConsecutives(passages.map(([, note]) => note));
 
   return etatApresRevision(card.scheduledDays, reussites, false);
 }
 
-export function construireLeCorpus(depots: DepotDAssets[], now: Date): SeedInput[] {
+export function construireLeCorpus(depots: DepotDAssets[], maintenant: Date): InputDuCorpus[] {
   return depots.map((depot) => {
     const profil = PROFILS[depot.cle] ?? DEFAUT;
     const concepts = depot.concepts.filter((concept) => concept.variants.length > 0);
     let maxJour = 0;
 
-    const atoms: SeedAtom[] = concepts.map((concept, index) => {
+    const atoms: AtomDuCorpus[] = concepts.map((concept, index) => {
       const recent = profil.recents[index % profil.recents.length] ?? 0;
-      const history = historique(profil.famille, profil.anchor, recent);
+      const passages = historique(profil.famille, profil.anchor, recent);
       const archive = profil.archiver !== undefined && index < profil.archiver;
 
-      for (const [daysAgo] of history) maxJour = Math.max(maxJour, daysAgo);
+      for (const [joursEcoules] of passages) maxJour = Math.max(maxJour, joursEcoules);
 
       return {
         concept: concept.concept,
         tags: concept.tags,
-        state: etatDe(history, archive, now),
-        history,
-        ...(archive ? { archivedDaysAgo: recent } : {}),
+        state: etatDe(passages, archive, maintenant),
+        historique: passages,
+        ...(archive ? { archiveIlYAJours: recent } : {}),
         variants: concept.variants.map(versSeedVariant),
       };
     });
@@ -122,7 +133,7 @@ export function construireLeCorpus(depots: DepotDAssets[], now: Date): SeedInput
       sourceType: depot.estImage ? "IMAGE" : "TEXT",
       ...(depot.estImage ? { extractedText: depot.texte } : {}),
       langue: langueDuDepot(depot.nom),
-      createdDaysAgo: maxJour + 2,
+      deposeIlYAJours: maxJour + 2,
       atoms,
     };
   });

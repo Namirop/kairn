@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db/client";
 import { planifier } from "@/lib/db/planification";
 import { compterLePassage, type ProgressionEcrite } from "@/lib/db/progression";
 import { regenererSiUsees } from "@/lib/db/regeneration";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 import type { ReviewRating } from "@/lib/db/types";
 import {
   compterReussitesConsecutives,

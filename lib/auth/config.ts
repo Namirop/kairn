@@ -2,15 +2,15 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { emailOTP } from "better-auth/plugins";
-import { TIMEZONE_HEADER } from "@/lib/auth/en-tetes";
+import { ENTETE_DU_FUSEAU } from "@/lib/auth/en-tetes";
 import { envoyerLAccueil } from "@/lib/auth/email-d-accueil";
 import { reprendreLaVisite } from "@/lib/auth/reprise-de-visite";
-import { provisionAccount } from "@/lib/db/account-provisioning";
+import { ouvrirLeCompte } from "@/lib/db/ouverture-du-compte";
 import { langueDesEnTetes } from "@/lib/i18n/langue-des-en-tetes";
 import { prisma } from "@/lib/db/client";
 import { envoyerLeCodeDeConnexion, MINUTES_DE_VALIDITE } from "@/lib/email/connexion";
 import { LONGUEUR_DU_CODE } from "@/lib/domain/code-de-connexion";
-import { isSupportedTimeZone } from "@/lib/domain/local-day";
+import { fuseauReconnu } from "@/lib/domain/jour-local";
 
 /**
  * L'instance better-auth. Elle possède les modèles User, Session, Account et
@@ -18,7 +18,7 @@ import { isSupportedTimeZone } from "@/lib/domain/local-day";
  */
 
 /** Google n'est proposé que si ses identifiants sont présents. */
-function socialProviders() {
+function fournisseursSociaux() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
@@ -27,7 +27,7 @@ function socialProviders() {
   return { google: { clientId, clientSecret } };
 }
 
-export const isGoogleEnabled = Object.keys(socialProviders()).length > 0;
+export const googleEstPropose = Object.keys(fournisseursSociaux()).length > 0;
 
 /**
  * Les origines admises en plus de `baseURL`. Celle du déploiement courant, sans
@@ -37,7 +37,7 @@ export const isGoogleEnabled = Object.keys(socialProviders()).length > 0;
  * session appartient à son hôte, et deux hôtes servant le même environnement
  * donneraient deux sessions distinctes. Une preview est un environnement séparé.
  */
-function trustedOrigins(): string[] {
+function originesDeConfiance(): string[] {
   const deploiement = process.env.VERCEL_URL;
 
   return [...(deploiement ? [`https://${deploiement}`] : []), ...originesDuReseauLocal()];
@@ -64,7 +64,7 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
-  trustedOrigins: trustedOrigins(),
+  trustedOrigins: originesDeConfiance(),
   // Pas de mot de passe : Kairn écrit tous les jours, l'adresse doit être
   // vérifiée dès le premier, et un code reçu par email le garantit par
   // construction.
@@ -76,7 +76,7 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 30,
     updateAge: 60 * 60 * 24,
   },
-  socialProviders: socialProviders(),
+  socialProviders: fournisseursSociaux(),
   rateLimit: { enabled: true },
   databaseHooks: {
     user: {
@@ -85,12 +85,12 @@ export const auth = betterAuth({
           // Le fuseau est détecté côté client. Le formulaire d'inscription le
           // pose en en-tête ; par Google il n'y en a pas, et la coquille de
           // l'application le réconcilie au premier affichage.
-          const submitted = context?.headers?.get(TIMEZONE_HEADER);
-          const timezone = submitted && isSupportedTimeZone(submitted) ? submitted : "UTC";
+          const envoye = context?.headers?.get(ENTETE_DU_FUSEAU);
+          const fuseau = envoye && fuseauReconnu(envoye) ? envoye : "UTC";
 
           // La langue de l'inscription : le choix fait sur le site, à défaut le
           // navigateur. Par Google comme par code, la requête porte les deux.
-          await provisionAccount(user.id, timezone, langueDesEnTetes(context?.headers));
+          await ouvrirLeCompte(user.id, fuseau, langueDesEnTetes(context?.headers));
 
           // Seul instant où l'on tient à la fois le compte neuf et le cookie de
           // la visite : le dépôt du visiteur lui revient ici.

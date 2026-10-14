@@ -1,4 +1,4 @@
-import { localDay, localHour } from "./local-day";
+import { jourLocal, heureLocale } from "./jour-local";
 
 /**
  * Quand une série est en sursis, et quand le dire. Contrairement au rappel
@@ -23,7 +23,7 @@ export function estLHeureDeLAlerte(
 ): boolean {
   if (cible.dailyReminderHour >= HEURE_DE_LALERTE) return false;
 
-  return localHour(maintenant, cible.timezone) === HEURE_DE_LALERTE;
+  return heureLocale(maintenant, cible.timezone) === HEURE_DE_LALERTE;
 }
 
 /**
@@ -37,5 +37,5 @@ export function serieEnSursis(
 ): boolean {
   if (compte.currentStreak <= 0) return false;
 
-  return compte.dernierJourRevise !== localDay(maintenant, compte.timezone);
+  return compte.dernierJourRevise !== jourLocal(maintenant, compte.timezone);
 }

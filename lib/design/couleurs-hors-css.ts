@@ -2,9 +2,9 @@
  * Les rares couleurs qui ne peuvent pas venir d'une variable CSS : le manifeste
  * PWA, la balise `theme-color` (lue avant toute feuille de style) et les
  * fichiers cuits par script. Seul endroit du code applicatif où une couleur est
- * en dur, avec `lib/email/templates/shell.ts`.
+ * en dur, avec `lib/email/templates/gabarit.ts`.
  *
- * Chacune doit rester égale à son jeton dans `app/styles/tokens/colors.css`.
+ * Chacune doit rester égale à son jeton dans `app/styles/tokens/couleurs.css`.
  */
 
 /** `--surface-papier`. */

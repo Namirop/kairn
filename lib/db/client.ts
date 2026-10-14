@@ -8,7 +8,7 @@ import { PrismaClient } from "@/lib/db/generated/client";
  * Prisma 7 compile les requêtes côté client et exige un driver adapter : c'est
  * `pg` qui tient la connexion, pas un moteur natif.
  */
-function createPrismaClient(): PrismaClient {
+function creerLeClientPrisma(): PrismaClient {
   const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
@@ -27,7 +27,7 @@ declare global {
   var cairnPrisma: PrismaClient | undefined;
 }
 
-export const prisma: PrismaClient = globalThis.cairnPrisma ?? createPrismaClient();
+export const prisma: PrismaClient = globalThis.cairnPrisma ?? creerLeClientPrisma();
 
 if (process.env.NODE_ENV !== "production") {
   globalThis.cairnPrisma = prisma;

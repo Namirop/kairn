@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "motion/react";
 import type { EtapeDeLAttente } from "@/lib/domain/catalogue-dattente";
 import { phraseDattente, RELEVE_MS } from "@/lib/domain/phrases-dattente";
 import { useLangue } from "@/lib/i18n/use-langue";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * La voix de l'attente : une phrase qui change à chaque relève (`RELEVE_MS`), et

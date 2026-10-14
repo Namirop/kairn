@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { conclure, expectFailure, record } from "./cases/journal";
+import { conclure, noterUnEchecAttendu, noter } from "./cases/journal";
 import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
 
 /**
@@ -12,103 +12,108 @@ import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
  *   npm run verifier:ai
  */
 
-const networkAttempts: string[] = [];
-const realFetch = globalThis.fetch;
+const tentativesReseau: string[] = [];
+const vraiFetch = globalThis.fetch;
 
-function trippedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+function fetchPiege(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const url = typeof input === "string" ? input : input.toString();
-  if (!versUnFournisseurDeModele(url)) return realFetch(input, init);
+  if (!versUnFournisseurDeModele(url)) return vraiFetch(input, init);
 
-  networkAttempts.push(url);
+  tentativesReseau.push(url);
   return Promise.reject(new Error(`Requête sortante interdite pendant la vérification : ${url}`));
 }
 
-globalThis.fetch = trippedFetch;
+globalThis.fetch = fetchPiege;
 
 async function main(): Promise<void> {
   const { callAI } = await import("@/lib/ai/client");
-  const { EXTRACT_ATOMS, GENERATE_VARIANTS, OCR_EXTRACT } = await import("@/lib/ai/schemas");
+  const { CONTRAT_D_EXTRACTION, CONTRAT_DE_GENERATION, CONTRAT_DE_LECTURE } =
+    await import("@/lib/ai/schemas");
 
   process.env.AI_ENABLED = "true";
   process.env.MOCK_AI = "true";
 
-  const short = await callAI({
-    contract: EXTRACT_ATOMS,
+  const court = await callAI({
+    contract: CONTRAT_D_EXTRACTION,
     system: "",
     messages: [{ role: "user", content: "Une seule phrase, courte." }],
   });
-  record(
+  noter(
     "Mock — une phrase isolée produit un seul Atom",
-    short.atoms.length === 1,
-    `${short.atoms.length} Atom(s)`,
+    court.atoms.length === 1,
+    `${court.atoms.length} Atom(s)`,
   );
 
   const long = await callAI({
-    contract: EXTRACT_ATOMS,
+    contract: CONTRAT_D_EXTRACTION,
     system: "",
     messages: [{ role: "user", content: "x".repeat(2_000) }],
   });
-  record(
+  noter(
     "Mock — un article produit huit Atoms",
     long.atoms.length === 8,
     `${long.atoms.length} Atom(s)`,
   );
 
   const courses = await callAI({
-    contract: EXTRACT_ATOMS,
+    contract: CONTRAT_D_EXTRACTION,
     system: "",
     messages: [{ role: "user", content: "Ma liste de courses : lentilles corail, pain, café." }],
   });
-  record(
+  noter(
     "Mock — une liste de courses ne donne aucun Atom mais un motif",
     courses.atoms.length === 0 && courses.rejected !== null,
     courses.rejected ?? "aucun motif",
   );
 
   const { lots } = await callAI({
-    contract: GENERATE_VARIANTS,
+    contract: CONTRAT_DE_GENERATION,
     system: "",
     messages: [{ role: "user", content: "y".repeat(400) }],
   });
   const premier = lots[0]?.variants ?? [];
   const facets = new Set(premier.map((variant) => variant.facet));
-  record(
+  noter(
     "Mock — un lot par concept, quatre facettes distinctes chacun",
     lots.length === 3 && premier.length === 4 && facets.size === 4,
     `${lots.length} lots, ${premier.length} Variants, ${facets.size} facettes`,
   );
 
   const ocr = await callAI({
-    contract: OCR_EXTRACT,
+    contract: CONTRAT_DE_LECTURE,
     system: "",
     messages: [{ role: "user", content: "Lis cette capture." }],
   });
-  record(
+  noter(
     "Mock — l'OCR rend du texte exploitable et sa langue",
     ocr.usable && ocr.extractedText.length > 0,
     ocr.language ?? "sans langue",
   );
 
   const floue = await callAI({
-    contract: OCR_EXTRACT,
+    contract: CONTRAT_DE_LECTURE,
     system: "",
     messages: [{ role: "user", content: "capture floue, prise de loin" }],
   });
-  record(
+  noter(
     "Mock — une capture illisible ne rend ni texte ni langue",
     !floue.usable && floue.extractedText === "" && floue.language === null,
     `usable=${floue.usable}, language=${floue.language}`,
   );
 
-  await expectFailure("Une fixture hors schéma est refusée", "AI_INVALID_OUTPUT", async () => {
-    const { loadFixture } = await import("@/lib/ai/fixtures");
-    return loadFixture({ ...OCR_EXTRACT, purpose: "extract_atoms" }, "", "");
-  });
+  await noterUnEchecAttendu(
+    "Une fixture hors schéma est refusée",
+    "AI_INVALID_OUTPUT",
+    async () => {
+      const { chargerLaFixture } = await import("@/lib/ai/fixtures");
+      return chargerLaFixture({ ...CONTRAT_DE_LECTURE, purpose: "extract_atoms" }, "", "");
+    },
+  );
 
   process.env.AI_ENABLED = "false";
-  await expectFailure("AI_ENABLED=false coupe tout appel", "AI_DISABLED", () =>
+  await noterUnEchecAttendu("AI_ENABLED=false coupe tout appel", "AI_DISABLED", () =>
     callAI({
-      contract: EXTRACT_ATOMS,
+      contract: CONTRAT_D_EXTRACTION,
       system: "",
       messages: [{ role: "user", content: "test" }],
     }),
@@ -118,10 +123,10 @@ async function main(): Promise<void> {
   await verifierPlafond();
   await verifierPartAnonyme();
 
-  record(
+  noter(
     "Aucune requête n'est sortie vers l'API",
-    networkAttempts.length === 0,
-    networkAttempts.length === 0 ? "zéro tentative" : networkAttempts.join(", "),
+    tentativesReseau.length === 0,
+    tentativesReseau.length === 0 ? "zéro tentative" : tentativesReseau.join(", "),
   );
 }
 

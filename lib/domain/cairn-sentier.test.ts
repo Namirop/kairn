@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { empiler, LARGEUR_VUE } from "./cairn-stack";
+import { empiler, LARGEUR_VUE } from "./cairn-empilement";
 import { PIERRES_PAR_CAIRN, repartirEnCairns, tracerLeSentier } from "./cairn-sentier";
 
 describe("repartirEnCairns", () => {

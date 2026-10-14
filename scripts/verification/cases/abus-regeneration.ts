@@ -7,10 +7,10 @@ import { etatDuDepot } from "@/lib/domain/etat-depot";
 import { etatDepot } from "@/lib/i18n/messages/fr/etat-depot";
 import { deposer } from "@/lib/depots/deposer";
 import { redecouper } from "@/lib/depots/redecouper";
-import { runJob } from "@/lib/jobs/runner";
+import { executerLeJob } from "@/lib/jobs/runner";
 import { FACETTES, enModeCompteur, fabriquerConcept, viderLeCompte } from "./abus-fabrique";
 import { executerToutLePipeline, formulaire } from "./depot-simule";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Les vecteurs de régénération, comptés en appels. Le plafond d'une
@@ -68,16 +68,16 @@ export async function casModificationsEnBoucle(userId: string): Promise<void> {
       select: { id: true },
     });
 
-    for (const job of jobs) await runJob(job.id);
+    for (const job of jobs) await executerLeJob(job.id);
   });
 
-  record(
+  noter(
     `Régénération — ${TENTATIVES} modifications d'affilée ne demandent pas ${TENTATIVES} fois des questions`,
     demandes <= 1,
     `${demandes} demande(s) en file`,
   );
 
-  record(
+  noter(
     `Régénération — le plafond hebdomadaire borne les appels partis, quel que soit le chemin`,
     appels <= 1,
     `${appels} appel(s) émis, ${places} place(s) prises au plafond global`,
@@ -113,18 +113,18 @@ export async function casCorrectionApresDepot(userId: string): Promise<void> {
     "Le concept, corrigé dans la minute qui suit son dépôt.",
   );
 
-  record(
+  noter(
     "Correction — corriger juste après un dépôt n'attend pas la semaine",
     Array.isArray(jobs) && jobs.length === 1,
     jobs === null ? "concept introuvable" : `${jobs.length} job(s) à lancer tout de suite`,
   );
 
   // Le chemin réel de la Server Action : appel direct, comme pour un dépôt.
-  for (const jobId of jobs ?? []) await runJob(jobId);
+  for (const jobId of jobs ?? []) await executerLeJob(jobId);
 
   const apres = await prisma.variant.count({ where: { atomId: concept.id, retiredAt: null } });
 
-  record(
+  noter(
     "Correction — les questions neuves sont là, pas dans sept jours",
     apres > 0,
     `${avant} question(s) avant, ${apres} après la correction`,
@@ -145,7 +145,7 @@ export async function casCorrectionApresDepot(userId: string): Promise<void> {
     where: { kind: "VARIANTS", atomIds: { has: concept.id }, notBefore: { not: null } },
   });
 
-  record(
+  noter(
     "Correction — la seconde correction, elle, prend rendez-vous",
     Array.isArray(seconde) && seconde.length === 0 && differees === 1,
     `${seconde?.length ?? "aucun"} job immédiat, ${differees} demande(s) datée(s)`,
@@ -185,7 +185,7 @@ export async function casModificationReportee(userId: string, maintenant: Date):
     where: { atomId: concept.atomId, retiredAt: null },
   });
 
-  record(
+  noter(
     "Modification — la demande refusée n'est pas jetée, elle prend rendez-vous",
     differe !== undefined,
     differe
@@ -193,7 +193,7 @@ export async function casModificationReportee(userId: string, maintenant: Date):
       : `${jobs.length} demande(s), aucune datée`,
   );
 
-  record(
+  noter(
     "Modification — les questions qui ne décrivent plus le concept ne sont plus servies",
     actives === 0,
     `${actives} question(s) encore servable(s)`,
@@ -207,10 +207,10 @@ export async function casModificationReportee(userId: string, maintenant: Date):
       select: { id: true },
     });
 
-    for (const job of enAttente) await runJob(job.id);
+    for (const job of enAttente) await executerLeJob(job.id);
   });
 
-  record(
+  noter(
     "Modification — une demande datée ne part pas avant sa date, même déclenchée à la main",
     appels === 0,
     `${appels} appel(s) émis`,
@@ -225,7 +225,7 @@ export async function casModificationReportee(userId: string, maintenant: Date):
       })
     : null;
 
-  record(
+  noter(
     "Modification — l'écran dit que les questions attendent, pas qu'elles s'écrivent",
     etat === "questions-differees",
     etat ? etatDepot[etat] : "dépôt introuvable",
@@ -258,7 +258,7 @@ export async function casUsureApresModification(userId: string, maintenant: Date
   await regenererSiUsees({ id: concept.atomId, inputId: concept.inputId }, usees, maintenant);
   const apres = await demandesPour(concept.atomId);
 
-  record(
+  noter(
     "Régénération — une modification gèle le seuil d'usure pour la semaine",
     apres === avant,
     apres === avant ? "aucune demande de plus" : `${apres - avant} demande(s) ajoutée(s)`,
@@ -300,7 +300,7 @@ export async function casRedecoupageEnRafale(userId: string): Promise<void> {
 
   const secondes = Math.round((Date.now() - debut) / 1000);
 
-  record(
+  noter(
     "Redécoupage — la limite de débit borne aussi les relances rapprochées",
     debitAtteint,
     `${acceptes} extraction(s) achetées en ${secondes} s, sans un seul refus de débit — arrêté par « ${arret} »`,

@@ -1,4 +1,4 @@
-import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
+import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
 
 /**
  * Un cairn du paysage.

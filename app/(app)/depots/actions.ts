@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import {
   confirmerConcept,
   desarchiverConcept,
@@ -58,7 +58,7 @@ function revaliderLeDepot(donnees: FormData): void {
 }
 
 async function utilisateurOuRefus(): Promise<string> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 

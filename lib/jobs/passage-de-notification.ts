@@ -1,5 +1,5 @@
-import { findAlreadyNotified } from "@/lib/db/reminder-audience";
-import type { NotificationType } from "@/lib/email/notifications";
+import { trouverLesDejaNotifies } from "@/lib/db/destinataires-des-rappels";
+import type { TypeDeNotification } from "@/lib/email/notifications";
 
 /**
  * Ce que tout passage d'envoi partage : son compte rendu, et l'écart de ceux
@@ -24,12 +24,12 @@ export function passage(candidats: number, retenus: number, dejaEnvoyes: number)
  * la même seconde peuvent ne pas être le même jour.
  */
 export async function aNotifier<T extends { userId: string }>(
-  type: NotificationType,
+  type: TypeDeNotification,
   retenus: { cible: T; jour: string }[],
 ): Promise<{ restants: { cible: T; jour: string }[]; deja: number }> {
-  const deja = await findAlreadyNotified(
+  const deja = await trouverLesDejaNotifies(
     type,
-    retenus.map((entree) => ({ userId: entree.cible.userId, day: entree.jour })),
+    retenus.map((entree) => ({ userId: entree.cible.userId, jour: entree.jour })),
   );
 
   return { restants: retenus.filter((entree) => !deja.has(entree.cible.userId)), deja: deja.size };

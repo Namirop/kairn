@@ -9,7 +9,7 @@
  * sans barrière comme de la prose. Les accents graves simples sont ceux que
  * relève `segmentsDeCode` pour les termes en ligne.
  */
-export const OCR_EXTRACT_PROMPT = `Tu lis une image déposée par quelqu'un qui veut retenir ce qu'elle contient.
+export const PROMPT_DE_LECTURE = `Tu lis une image déposée par quelqu'un qui veut retenir ce qu'elle contient.
 
 Rends le contenu substantiel, mis à plat en texte lisible, dans sa langue d'origine.
 

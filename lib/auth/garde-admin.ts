@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { estAdministrateur } from "./admin";
 import { ROUTES } from "./routes";
-import { getCurrentUser } from "./session";
+import { lireLUtilisateur } from "./session";
 
 /**
  * La garde de tous les écrans internes, en un appel en tête de page : une page
@@ -14,7 +14,7 @@ import { getCurrentUser } from "./session";
  * sans passer par l'écran qui les propose.
  */
 export async function exigerUnAdministrateur(): Promise<void> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
   if (!estAdministrateur(utilisateur.email)) notFound();

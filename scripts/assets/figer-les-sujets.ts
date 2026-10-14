@@ -38,7 +38,7 @@ async function main(): Promise<void> {
   const { evaluerDepot } = await import("@/scripts/evaluation/execution");
   const { lireFigeDAssets, ecrireFigeDAssets, depuisDepotEvalue, couvertureDesFormats } =
     await import("@/scripts/assets/fige");
-  const { sumAiCalls } = await import("@/lib/db/ai-call");
+  const { sommerLesAppels } = await import("@/lib/db/registre-des-appels");
   const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
 
   const refaire = process.argv.includes("--refaire");
@@ -84,7 +84,7 @@ async function main(): Promise<void> {
 
   const depots = [...parCle.values()].sort((a, b) => ordreDuSujet(a.cle) - ordreDuSujet(b.cle));
   const chemin = ecrireFigeDAssets(depots, process.env.AI_MODEL ?? "inconnu");
-  const total = await sumAiCalls(debut);
+  const total = await sommerLesAppels(debut);
 
   console.info(`\n${total.calls} appels, ${Number(total.costUsd).toFixed(4)} $.`);
   console.info(`Figé écrit dans ${chemin}`);

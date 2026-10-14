@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { callAI } from "@/lib/ai/client";
-import type { AiContract } from "@/lib/ai/schemas";
+import type { ContratDeSortie } from "@/lib/ai/schemas";
 import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
 import { MOTIF_ABSTENTION_JUGE } from "./residu";
 
@@ -48,7 +48,7 @@ const attendusValidation = sortieLue;
 /** `couvert: null` = abstention (item non rendu par le juge). Voir `residu.ts`. */
 export type VerdictAttendu = { couvert: boolean | null; motif: string };
 
-export const CONTRAT_ATTENDUS: AiContract<z.infer<typeof attendusValidation>> = {
+export const CONTRAT_ATTENDUS: ContratDeSortie<z.infer<typeof attendusValidation>> = {
   purpose: "juge_attendus",
   forme: attendusForme,
   validation: attendusValidation,

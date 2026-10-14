@@ -30,4 +30,4 @@ export const ROUTES = {
 } as const;
 
 /** Paramètre qui mémorise où l'utilisateur voulait aller avant la connexion. */
-export const RETURN_TO_PARAM = "suite";
+export const PARAMETRE_DE_SUITE = "suite";

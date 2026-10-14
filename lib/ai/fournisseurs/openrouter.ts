@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { AICallFailedError, AIMissingOutputError } from "../errors";
-import type { AiMessage } from "../message";
-import type { EmissionParams, EmissionResult, PontFournisseur } from "./interface";
+import { EmissionEchoueeError, SortieAbsenteError } from "../errors";
+import type { MessageIa } from "../message";
+import type { ParametresDEmission, ResultatDEmission, PontFournisseur } from "./pont";
 
 /**
  * Le pont OpenRouter, avec les réglages du banc
@@ -9,7 +9,7 @@ import type { EmissionParams, EmissionResult, PontFournisseur } from "./interfac
  *
  * - `strict: false` pour les modèles OpenAI : leur validateur exige que
  *   `required` liste tous les champs, `.nullish()` compris, alors que
- *   `toOutputSchema` rend les optionnels comme optionnels — ce que les autres
+ *   `deriverLeSchemaDeSortie` rend les optionnels comme optionnels — ce que les autres
  *   fournisseurs attendent. Zod rattrape côté nous une sortie non conforme.
  * - Un préambule schéma-en-clair pour les modèles non stricts, qui sinon
  *   renomment les clés.
@@ -44,14 +44,14 @@ const usage = z.object({
   prompt_tokens_details: z.object({ cached_tokens: z.number().optional() }).optional(),
 });
 
-const reponseSchema = z.object({
+const schemaDeReponse = z.object({
   id: z.string(),
   model: z.string(),
   choices: z.array(choix).min(1),
   usage,
 });
 
-function toOpenRouterMessage(message: AiMessage): {
+function toOpenRouterMessage(message: MessageIa): {
   role: "user" | "assistant";
   content:
     | string
@@ -76,7 +76,7 @@ function toOpenRouterMessage(message: AiMessage): {
 export function pontOpenRouter(apiKey: string | undefined): PontFournisseur {
   return {
     nom: "openrouter",
-    async emettre(params: EmissionParams): Promise<EmissionResult> {
+    async emettre(params: ParametresDEmission): Promise<ResultatDEmission> {
       const cle = apiKey?.trim();
       if (!cle) {
         throw new Error("OPENROUTER_API_KEY absente — la lignée OpenRouter ne peut pas partir.");
@@ -132,12 +132,12 @@ ${JSON.stringify(params.formatSchema.schema)}
           body: JSON.stringify(corps),
         });
       } catch (erreur) {
-        throw new AICallFailedError(params.purpose, erreur);
+        throw new EmissionEchoueeError(params.purpose, erreur);
       }
 
       if (!reponse.ok) {
         const detail = await reponse.text().catch(() => reponse.statusText);
-        throw new AICallFailedError(
+        throw new EmissionEchoueeError(
           params.purpose,
           new Error(`OpenRouter ${reponse.status} — ${detail.slice(0, 500)}`),
         );
@@ -148,16 +148,16 @@ ${JSON.stringify(params.formatSchema.schema)}
       // avant, on chronométrerait la poignée de main.
       const brut: unknown = await reponse.json();
       const latencyMs = Date.now() - debut;
-      const parseReponse = reponseSchema.safeParse(brut);
+      const parseReponse = schemaDeReponse.safeParse(brut);
       if (!parseReponse.success) {
-        throw new AICallFailedError(params.purpose, parseReponse.error);
+        throw new EmissionEchoueeError(params.purpose, parseReponse.error);
       }
 
       const decodee = parseReponse.data;
       const premier = decodee.choices[0];
-      if (!premier) throw new AIMissingOutputError(params.purpose);
+      if (!premier) throw new SortieAbsenteError(params.purpose);
 
-      const finishReason: EmissionResult["finishReason"] =
+      const finishReason: ResultatDEmission["finishReason"] =
         premier.finish_reason === "length"
           ? "length"
           : premier.finish_reason === "stop"
@@ -174,7 +174,7 @@ ${JSON.stringify(params.formatSchema.schema)}
             finishReason,
           };
         }
-        throw new AIMissingOutputError(params.purpose);
+        throw new SortieAbsenteError(params.purpose);
       }
 
       return {
@@ -188,7 +188,7 @@ ${JSON.stringify(params.formatSchema.schema)}
   };
 }
 
-function consommationDepuisUsage(u: z.infer<typeof usage>): EmissionResult["consommation"] {
+function consommationDepuisUsage(u: z.infer<typeof usage>): ResultatDEmission["consommation"] {
   const cacheRead = u.prompt_tokens_details?.cached_tokens ?? 0;
   // OpenAI ne facture pas l'écriture du cache, d'où `cacheCreationTokens` à 0.
   // `prompt_tokens` est un total : `inputTokens` n'en garde que la part non

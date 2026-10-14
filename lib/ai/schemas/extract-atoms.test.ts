@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PLAFOND_CONCEPTS_PAR_DEPOT } from "@/lib/domain/plafond-de-concepts";
-import { EXTRACT_ATOMS } from "./extract-atoms";
+import { CONTRAT_D_EXTRACTION } from "./extract-atoms";
 
 /**
  * La validation de l'extraction, sans appel modèle.
@@ -27,7 +27,7 @@ const sortie = (combien: number, reste: Record<string, unknown> = {}) => ({
 
 describe("validation de extract_atoms", () => {
   it("coupe au plafond une sortie qui le dépasse, sans lever", () => {
-    const lu = EXTRACT_ATOMS.validation.parse(sortie(DE_TROP));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(sortie(DE_TROP));
 
     expect(lu.atoms).toHaveLength(PLAFOND_CONCEPTS_PAR_DEPOT);
     expect(lu.rendus).toBe(DE_TROP);
@@ -37,14 +37,14 @@ describe("validation de extract_atoms", () => {
   // La tête, c'est le début du texte : le prompt fait rendre les concepts dans
   // l'ordre de lecture depuis le 04/09/2026, et plus par importance.
   it("garde la tête de la liste, celle que le prompt fait rendre en premier", () => {
-    const lu = EXTRACT_ATOMS.validation.parse(sortie(DE_TROP));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(sortie(DE_TROP));
 
     expect(lu.atoms[0]?.concept).toContain("numéro 0");
     expect(lu.atoms.at(-1)?.concept).toContain(`numéro ${PLAFOND_CONCEPTS_PAR_DEPOT - 1}`);
   });
 
   it("ne tronque pas une sortie ordinaire", () => {
-    const lu = EXTRACT_ATOMS.validation.parse(sortie(5));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(sortie(5));
 
     expect(lu.atoms).toHaveLength(5);
     expect(lu.rendus).toBe(5);
@@ -53,14 +53,14 @@ describe("validation de extract_atoms", () => {
 
   it("accepte un concept plus long que ce que la forme annonçait", () => {
     const long = { ...concept(1), concept: "a".repeat(2000) };
-    const lu = EXTRACT_ATOMS.validation.parse(sortie(0, { atoms: [long], rejected: null }));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(sortie(0, { atoms: [long], rejected: null }));
 
     expect(lu.atoms).toHaveLength(1);
   });
 
   it("ramène les étiquettes à trois plutôt que de refuser la sortie", () => {
     const trop = { ...concept(1), tags: ["une", "deux", "trois", "quatre", "cinq"] };
-    const lu = EXTRACT_ATOMS.validation.parse(sortie(0, { atoms: [trop], rejected: null }));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(sortie(0, { atoms: [trop], rejected: null }));
 
     expect(lu.atoms[0]?.tags).toEqual(["une", "deux", "trois"]);
   });
@@ -68,21 +68,21 @@ describe("validation de extract_atoms", () => {
   it("ignore un motif de rejet posé à côté de concepts extraits", () => {
     // Ce désaccord jetait l'extraction entière. Le compte tranche : s'il reste
     // des concepts, il n'y a pas de rejet, quoi que le modèle ait écrit.
-    const lu = EXTRACT_ATOMS.validation.parse(sortie(3, { rejected: "Rien à retenir." }));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(sortie(3, { rejected: "Rien à retenir." }));
 
     expect(lu.atoms).toHaveLength(3);
     expect(lu.rejected).toBeNull();
   });
 
   it("accepte une liste vide sans motif, que l'appelant sait remplacer", () => {
-    const lu = EXTRACT_ATOMS.validation.parse(sortie(0, { rejected: null }));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(sortie(0, { rejected: null }));
 
     expect(lu.atoms).toHaveLength(0);
     expect(lu.rejected).toBeNull();
   });
 
   it("refuse une nature que la base ne saurait pas écrire", () => {
-    expect(() => EXTRACT_ATOMS.validation.parse(sortie(1, { nature: "ROMANCE" }))).toThrow();
+    expect(() => CONTRAT_D_EXTRACTION.validation.parse(sortie(1, { nature: "ROMANCE" }))).toThrow();
   });
 });
 
@@ -101,7 +101,7 @@ describe("les concepts qui se déclarent dérivés d'un voisin", () => {
     });
 
   it("les compte sans en écarter un seul", () => {
-    const lu = EXTRACT_ATOMS.validation.parse(avecRenvois([null, 1, null, 3]));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(avecRenvois([null, 1, null, 3]));
 
     expect(lu.atoms).toHaveLength(4);
     expect(lu.derives).toBe(2);
@@ -109,7 +109,7 @@ describe("les concepts qui se déclarent dérivés d'un voisin", () => {
   });
 
   it("ne laisse pas `deriveDe` arriver jusqu'à la base", () => {
-    const lu = EXTRACT_ATOMS.validation.parse(avecRenvois([null, 1]));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(avecRenvois([null, 1]));
 
     expect(lu.atoms[0]).toEqual({
       concept: expect.stringContaining("numéro 0"),
@@ -119,14 +119,14 @@ describe("les concepts qui se déclarent dérivés d'un voisin", () => {
   });
 
   it("accepte une sortie qui ne renseigne pas le champ du tout", () => {
-    const lu = EXTRACT_ATOMS.validation.parse(sortie(3));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(sortie(3));
 
     expect(lu.atoms).toHaveLength(3);
     expect(lu.derives).toBe(0);
   });
 
   it("garde tout un dépôt dont chaque concept se déclare dérivé", () => {
-    const lu = EXTRACT_ATOMS.validation.parse(avecRenvois([2, 1]));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(avecRenvois([2, 1]));
 
     expect(lu.atoms).toHaveLength(2);
     expect(lu.derives).toBe(2);
@@ -137,7 +137,7 @@ describe("les concepts qui se déclarent dérivés d'un voisin", () => {
     // sont bien les premiers qui restent, dans l'ordre rendu. Le compte des
     // dérivés est une mesure, il n'écarte rien.
     const renvois = Array.from({ length: DE_TROP }, (_, rang) => (rang < 5 ? DE_TROP : null));
-    const lu = EXTRACT_ATOMS.validation.parse(avecRenvois(renvois));
+    const lu = CONTRAT_D_EXTRACTION.validation.parse(avecRenvois(renvois));
 
     expect(lu.derives).toBe(5);
     expect(lu.atoms).toHaveLength(PLAFOND_CONCEPTS_PAR_DEPOT);

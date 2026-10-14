@@ -39,13 +39,13 @@ function alias(corps: string, resolus: Record<string, string>): Record<string, s
 }
 
 /**
- * Les fichiers qui posent la palette de base. `responsive.css` n'en fait pas
+ * Les fichiers qui posent la palette de base. `grand-ecran.css` n'en fait pas
  * partie : il ne surcharge que des tailles, et sous condition de largeur.
  */
 const FEUILLES_DE_JETONS = [
-  "app/styles/tokens/colors.css",
-  "app/styles/tokens/scale.css",
-  "app/styles/tokens/landscape.css",
+  "app/styles/tokens/couleurs.css",
+  "app/styles/tokens/echelle.css",
+  "app/styles/tokens/paysage.css",
 ];
 
 export function jetonsDeLaFeuille(chemins = FEUILLES_DE_JETONS): Record<string, string> {

@@ -142,10 +142,10 @@ async function main(): Promise<void> {
 
   if (total > 0) exigerLesGardeFous();
 
-  const { sumAiCalls } = await import("@/lib/db/ai-call");
+  const { sommerLesAppels } = await import("@/lib/db/registre-des-appels");
   const debutJuges = new Date();
   const verdicts = await jugerLesSignalements(signalements, depots, couvertures, chemin);
-  const consommation = await sumAiCalls(debutJuges);
+  const consommation = await sommerLesAppels(debutJuges);
   console.info(
     `Juges : ${consommation.calls} appels, ${Number(consommation.costUsd).toFixed(4)} $.`,
   );

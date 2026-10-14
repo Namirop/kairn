@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { BoutonGoogle } from "@/components/compte/bouton-google";
 import { FormulaireConnexion } from "@/components/compte/formulaire-connexion";
-import { isGoogleEnabled } from "@/lib/auth/config";
-import { RETURN_TO_PARAM, ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { googleEstPropose } from "@/lib/auth/config";
+import { PARAMETRE_DE_SUITE, ROUTES } from "@/lib/auth/routes";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { adressePublique } from "@/lib/i18n/adresses";
 import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 
@@ -26,12 +26,12 @@ export default async function PageConnexion({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const params = await searchParams;
-  const brut = params[RETURN_TO_PARAM];
+  const parametres = await searchParams;
+  const brut = parametres[PARAMETRE_DE_SUITE];
   const suite = destination(Array.isArray(brut) ? brut[0] : brut);
 
   // Déjà connecté : on le mène là où il allait, sans lui redemander un code.
-  if (await getCurrentUser()) redirect(suite);
+  if (await lireLUtilisateur()) redirect(suite);
 
   const t = await getTranslations("compte.connexion");
   // La politique de confidentialité a sa version anglaise : on mène à celle qu'on lit.
@@ -45,7 +45,7 @@ export default async function PageConnexion({
 
       <FormulaireConnexion suite={suite} />
 
-      {isGoogleEnabled ? (
+      {googleEstPropose ? (
         <div className="gap-pas-4 flex flex-col">
           <span className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
             {t("ou")}

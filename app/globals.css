@@ -8,14 +8,14 @@
   L'ordre des imports est celui de la cascade : à spécificité égale, un
   fichier plus bas l'emporte.
 */
-@import "./styles/tokens/colors.css";
-@import "./styles/tokens/scale.css";
-@import "./styles/tokens/landscape.css";
-@import "./styles/tokens/responsive.css";
+@import "./styles/tokens/couleurs.css";
+@import "./styles/tokens/echelle.css";
+@import "./styles/tokens/paysage.css";
+@import "./styles/tokens/grand-ecran.css";
 @import "./styles/theme.css";
-@import "./styles/sky.css";
-@import "./styles/shell.css";
+@import "./styles/ciel.css";
+@import "./styles/coquille.css";
 @import "./styles/base.css";
-@import "./styles/utilities/scrollbars.css";
-@import "./styles/utilities/motion.css";
-@import "./styles/utilities/hollow-title.css";
+@import "./styles/utilities/barres-de-defilement.css";
+@import "./styles/utilities/mouvement.css";
+@import "./styles/utilities/titre-creux.css";

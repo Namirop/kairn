@@ -1,7 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { joursEntre, localDay, localHour } from "./local-day";
-import { unFuseau, unInstant } from "./local-day.test";
+import { joursEntre, jourLocal, heureLocale } from "./jour-local";
+import { unFuseau, unInstant } from "./jour-local.test";
 import {
   estLHeureDeLaRelance,
   JOURS_APRES_LESQUELS_ON_RENONCE,
@@ -134,10 +134,10 @@ describe("estLHeureDeLaRelance", () => {
         inscritLe: utc("2026-08-14T00:00:00"),
       };
 
-      expect(localHour(utc("2026-08-17T03:20:00"), "Asia/Kathmandu")).toBe(9);
+      expect(heureLocale(utc("2026-08-17T03:20:00"), "Asia/Kathmandu")).toBe(9);
       expect(estLHeureDeLaRelance(utc("2026-08-17T03:20:00"), katmandou)).toBe(true);
 
-      expect(localHour(utc("2026-08-16T20:20:00"), "Pacific/Chatham")).toBe(9);
+      expect(heureLocale(utc("2026-08-16T20:20:00"), "Pacific/Chatham")).toBe(9);
       expect(estLHeureDeLaRelance(utc("2026-08-16T20:20:00"), chatham)).toBe(true);
     });
 
@@ -151,8 +151,8 @@ describe("estLHeureDeLaRelance", () => {
       const auckland = { timezone: "Pacific/Auckland", dailyReminderHour: 9, inscritLe };
       const losAngeles = { timezone: "America/Los_Angeles", dailyReminderHour: 9, inscritLe };
 
-      expect(localDay(inscritLe, "Pacific/Auckland")).toBe("2026-08-15");
-      expect(localDay(inscritLe, "America/Los_Angeles")).toBe("2026-08-14");
+      expect(jourLocal(inscritLe, "Pacific/Auckland")).toBe("2026-08-15");
+      expect(jourLocal(inscritLe, "America/Los_Angeles")).toBe("2026-08-14");
 
       // 9 h du 18 à Auckland, 9 h du 17 à Los Angeles : trois jours chacun.
       expect(estLHeureDeLaRelance(utc("2026-08-17T21:10:00"), auckland)).toBe(true);
@@ -173,7 +173,7 @@ describe("estLHeureDeLaRelance", () => {
           unInstant,
           fc.integer({ min: 0, max: 23 }),
           (maintenant, timezone, inscritLe, dailyReminderHour) => {
-            if (localHour(maintenant, timezone) === dailyReminderHour) return true;
+            if (heureLocale(maintenant, timezone) === dailyReminderHour) return true;
 
             return !estLHeureDeLaRelance(maintenant, { timezone, dailyReminderHour, inscritLe });
           },
@@ -184,8 +184,8 @@ describe("estLHeureDeLaRelance", () => {
     it("ne relance jamais hors de la fenêtre, quel que soit le fuseau", () => {
       fc.assert(
         fc.property(unInstant, unFuseau, unInstant, (maintenant, timezone, inscritLe) => {
-          const dailyReminderHour = localHour(maintenant, timezone);
-          const age = joursEntre(localDay(inscritLe, timezone), localDay(maintenant, timezone));
+          const dailyReminderHour = heureLocale(maintenant, timezone);
+          const age = joursEntre(jourLocal(inscritLe, timezone), jourLocal(maintenant, timezone));
           const dansLaFenetre =
             age >= JOURS_AVANT_RELANCE && age <= JOURS_APRES_LESQUELS_ON_RENONCE;
 
@@ -205,7 +205,7 @@ describe("estLHeureDeLaRelance", () => {
           fc.integer({ min: 1, max: 400 }),
           (maintenant, timezone, jours) => {
             const inscritLe = new Date(maintenant.getTime() + jours * 24 * 60 * 60 * 1000);
-            const dailyReminderHour = localHour(maintenant, timezone);
+            const dailyReminderHour = heureLocale(maintenant, timezone);
 
             return !estLHeureDeLaRelance(maintenant, { timezone, dailyReminderHour, inscritLe });
           },

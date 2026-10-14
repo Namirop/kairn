@@ -1,10 +1,10 @@
 import { createHash } from "node:crypto";
 import type { Langue } from "@/lib/db/types";
-import type { AiPurposeProduit } from "../schemas";
+import type { IntentionDuProduit } from "../schemas";
 import { LANGUES_DES_QUESTIONS, LANGUES_D_EXTRACTION } from "./consignes-de-langue";
 import { promptDExtraction } from "./extract-atoms";
 import { promptDeQuestions } from "./generate-variants";
-import { OCR_EXTRACT_PROMPT } from "./ocr-extract";
+import { PROMPT_DE_LECTURE } from "./ocr-extract";
 
 /**
  * Prompts système, un par intention du produit. Ceux du banc voyagent avec
@@ -18,16 +18,16 @@ import { OCR_EXTRACT_PROMPT } from "./ocr-extract";
  * l'appel : une question régénérée parle la langue de ses sœurs. La lecture
  * d'image n'en prend pas, elle transcrit.
  */
-export function promptsSysteme(langue: Langue): Record<AiPurposeProduit, string> {
+export function promptsSysteme(langue: Langue): Record<IntentionDuProduit, string> {
   return {
     extract_atoms: promptDExtraction(LANGUES_D_EXTRACTION[langue]),
     generate_variants: promptDeQuestions(LANGUES_DES_QUESTIONS[langue]),
-    ocr_extract: OCR_EXTRACT_PROMPT,
+    ocr_extract: PROMPT_DE_LECTURE,
   };
 }
 
 /** Les consignes françaises, pour le banc, qui ne mesure encore qu'elles. */
-export const SYSTEM_PROMPTS = promptsSysteme("FR");
+export const PROMPTS_SYSTEME_FR = promptsSysteme("FR");
 
 /**
  * L'empreinte d'un prompt, pour savoir sous quel réglage une question a été
@@ -38,7 +38,7 @@ function empreinte(prompt: string): string {
   return createHash("sha256").update(prompt).digest("hex").slice(0, 12);
 }
 
-export function versionsDesPrompts(langue: Langue): Record<AiPurposeProduit, string> {
+export function versionsDesPrompts(langue: Langue): Record<IntentionDuProduit, string> {
   const prompts = promptsSysteme(langue);
 
   return {
@@ -48,8 +48,8 @@ export function versionsDesPrompts(langue: Langue): Record<AiPurposeProduit, str
   };
 }
 
-export const PROMPT_VERSIONS = versionsDesPrompts("FR");
+export const VERSIONS_DES_PROMPTS_FR = versionsDesPrompts("FR");
 
-export const EXTRACT_ATOMS_PROMPT = SYSTEM_PROMPTS.extract_atoms;
-export const GENERATE_VARIANTS_PROMPT = SYSTEM_PROMPTS.generate_variants;
-export { OCR_EXTRACT_PROMPT };
+export const PROMPT_D_EXTRACTION = PROMPTS_SYSTEME_FR.extract_atoms;
+export const PROMPT_DE_QUESTIONS = PROMPTS_SYSTEME_FR.generate_variants;
+export { PROMPT_DE_LECTURE };

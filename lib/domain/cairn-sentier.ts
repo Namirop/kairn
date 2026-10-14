@@ -1,4 +1,4 @@
-import { empiler, LARGEUR_VUE, type Pierre } from "./cairn-stack";
+import { empiler, LARGEUR_VUE, type Pierre } from "./cairn-empilement";
 
 /**
  * Le sentier : plusieurs cairns côte à côte plutôt qu'un empilement sans fin.

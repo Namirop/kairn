@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db/client";
 import { questionServie, type QuestionServie } from "@/lib/db/question-servie";
-import { lireCadreDeSession, lireFuseauUtilisateur } from "@/lib/db/user-settings";
-import { jourSuivant, localDay } from "@/lib/domain/local-day";
+import { lireCadreDeSession, lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
+import { jourSuivant, jourLocal } from "@/lib/domain/jour-local";
 import { composerLaJournee } from "@/lib/domain/journee-de-session";
 import {
   chargeDuJour,
@@ -133,13 +133,13 @@ export async function compterFaitsAujourdhui(
   maintenant: Date,
   fuseau: string,
 ): Promise<number> {
-  const jour = localDay(maintenant, fuseau);
+  const jour = jourLocal(maintenant, fuseau);
   const passes = await prisma.atom.findMany({
     where: { userId, lastReview: { gte: new Date(maintenant.getTime() - MARGE_MS) } },
     select: { lastReview: true },
   });
 
-  return passes.filter((atome) => atome.lastReview && localDay(atome.lastReview, fuseau) === jour)
+  return passes.filter((atome) => atome.lastReview && jourLocal(atome.lastReview, fuseau) === jour)
     .length;
 }
 
@@ -214,7 +214,7 @@ export async function compterDusDemain(
   maintenant: Date = new Date(),
 ): Promise<number> {
   const { fuseau, plafond } = await lireCadreDeSession(userId);
-  const demain = jourSuivant(localDay(maintenant, fuseau));
+  const demain = jourSuivant(jourLocal(maintenant, fuseau));
 
   const candidats = await prisma.atom.findMany({
     where: {

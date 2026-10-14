@@ -115,7 +115,7 @@ export async function volet2Fidelite(
     );
     factures.push(facture);
 
-    const koQwen = verdicts.filter((v) => v.juste === false).length;
+    const koDuCandidat = verdicts.filter((v) => v.juste === false).length;
     // Référence question par question : les verdicts Haiku du figé `11h58`.
     const verdictsHaiku = lireVerdictsHaiku(lot);
     // Une question sans verdict compte comme un désaccord : le taux porte sur
@@ -131,12 +131,12 @@ export async function volet2Fidelite(
       }
     }
 
-    if (lot.categorie === "propre" && koQwen > 0) fauxPositifsPropres += koQwen;
+    if (lot.categorie === "propre" && koDuCandidat > 0) fauxPositifsPropres += koDuCandidat;
 
     afficherLeLot({
       lot,
       nbQuestions: variants.length,
-      koQwen,
+      koDuCandidat,
       accordsLot,
       verdicts,
       verdictsHaiku,
@@ -158,7 +158,7 @@ export async function volet2Fidelite(
 function afficherLeLot({
   lot,
   nbQuestions,
-  koQwen,
+  koDuCandidat,
   accordsLot,
   verdicts,
   verdictsHaiku,
@@ -166,7 +166,7 @@ function afficherLeLot({
 }: {
   lot: LotFidelite;
   nbQuestions: number;
-  koQwen: number;
+  koDuCandidat: number;
   accordsLot: number;
   verdicts: VerdictFidelite[];
   verdictsHaiku: (boolean | null)[];
@@ -176,7 +176,7 @@ function afficherLeLot({
     lot.categorie === "propre" ? "propre" : lot.categorie === "infidele" ? "infidèle" : "moyen";
   console.info(`${lot.depot.replace(/\.[^.]+$/, "")} concept ${lot.concept} (${etiquette})`);
   console.info(
-    `  Haiku : ${lot.koHaiku}/${nbQuestions} KO    Qwen : ${koQwen}/${nbQuestions} KO    accord : ${accordsLot}/${nbQuestions}`,
+    `  Haiku : ${lot.koHaiku}/${nbQuestions} KO    Candidat : ${koDuCandidat}/${nbQuestions} KO    accord : ${accordsLot}/${nbQuestions}`,
   );
   for (let i = 0; i < verdicts.length; i++) {
     const v = verdicts[i];
@@ -185,7 +185,7 @@ function afficherLeLot({
     const marque = v.juste === attenduH ? " " : "≠";
     const rendu = v.juste === null ? "?" : v.juste ? "ok" : "KO";
     const attendu = attenduH === null || attenduH === undefined ? "?" : attenduH ? "ok" : "KO";
-    console.info(`    ${marque} Q${i + 1} : Qwen ${rendu}, Haiku ${attendu} — ${v.motif}`);
+    console.info(`    ${marque} Q${i + 1} : candidat ${rendu}, Haiku ${attendu} — ${v.motif}`);
   }
   console.info(
     `    ${facture.inputTokens} in / ${facture.outputTokens} out, ${(facture.coutUsd * 100).toFixed(2)} ¢, ${facture.latencyMs} ms`,

@@ -3,7 +3,7 @@
  * « le produit a coupé les appels » de « le modèle a mal répondu », et les
  * journaux doivent porter un code stable plutôt qu'un message libre.
  */
-export abstract class AiError extends Error {
+export abstract class AppelModeleError extends Error {
   abstract readonly code: string;
 
   constructor(message: string, options?: { cause?: unknown }) {
@@ -13,7 +13,7 @@ export abstract class AiError extends Error {
 }
 
 /** `AI_ENABLED=false`. Aucun appel n'est émis, aucune ligne n'est écrite. */
-export class AIDisabledError extends AiError {
+export class AppelsCoupesError extends AppelModeleError {
   readonly code = "AI_DISABLED";
 
   constructor() {
@@ -25,9 +25,9 @@ export class AIDisabledError extends AiError {
  * Plafond journalier **global** atteint. Vérifié avant l'émission, jamais après.
  *
  * C'est un report, pas un échec : rien ne s'est cassé, et le même travail
- * réussira demain à l'identique. `runJob` la traite à part pour cette raison.
+ * réussira demain à l'identique. `executerLeJob` la traite à part pour cette raison.
  */
-export class AIQuotaError extends AiError {
+export class PlafondGlobalAtteintError extends AppelModeleError {
   readonly code = "AI_QUOTA";
 
   constructor(
@@ -41,10 +41,10 @@ export class AIQuotaError extends AiError {
 /**
  * Ce compte a pris toute sa part de la journée.
  *
- * Distincte d'`AIQuotaError` : l'une dit « le produit est plein » et se
+ * Distincte d'`PlafondGlobalAtteintError` : l'une dit « le produit est plein » et se
  * reporte au lendemain, l'autre « tu es plein » et regarde son auteur.
  */
-export class AIUserQuotaError extends AiError {
+export class PartDuCompteEpuiseeError extends AppelModeleError {
   readonly code = "AI_USER_QUOTA";
 
   constructor(
@@ -58,12 +58,12 @@ export class AIUserQuotaError extends AiError {
 /**
  * Part du jour épuisée pour le trafic **sans compte**.
  *
- * Volontairement pas une sous-classe d'`AIQuotaError` : l'exécuteur traite
+ * Volontairement pas une sous-classe d'`PlafondGlobalAtteintError` : l'exécuteur traite
  * celle-ci comme un report, ce qui laisserait un visiteur devant une attente
  * sans fin. Elle suit le chemin ordinaire de l'échec : le dépôt part en
  * `FAILED`, une panne qui ne consomme pas d'essai.
  */
-export class AIAnonymousQuotaError extends AiError {
+export class PartSansCompteEpuiseeError extends AppelModeleError {
   readonly code = "AI_ANONYMOUS_QUOTA";
 
   constructor(
@@ -78,7 +78,7 @@ export class AIAnonymousQuotaError extends AiError {
  * La sortie du modèle ne respecte pas le schéma. Elle n'est pas réparée, mais
  * conservée dans `raw` pour le diagnostic.
  */
-export class AIInvalidOutputError extends AiError {
+export class SortieInvalideError extends AppelModeleError {
   readonly code = "AI_INVALID_OUTPUT";
 
   constructor(
@@ -105,7 +105,7 @@ export class AIInvalidOutputError extends AiError {
  * deux, en appels ordinaires. Le plafond ne se relève que pour un concept seul
  * qui déborde, le seul cas que `scinderLeGroupe` ne sait pas traiter.
  */
-export class AITruncatedOutputError extends AiError {
+export class SortieTronqueeError extends AppelModeleError {
   readonly code = "AI_TRUNCATED";
 
   constructor(
@@ -117,7 +117,7 @@ export class AITruncatedOutputError extends AiError {
 }
 
 /** Le modèle n'a rien rendu là où la sortie structurée devait arriver. */
-export class AIMissingOutputError extends AiError {
+export class SortieAbsenteError extends AppelModeleError {
   readonly code = "AI_NO_OUTPUT";
 
   constructor(readonly purpose: string) {
@@ -126,7 +126,7 @@ export class AIMissingOutputError extends AiError {
 }
 
 /** Le mode mock est actif mais la fixture est absente ou illisible. */
-export class AIFixtureMissingError extends AiError {
+export class FixtureAbsenteError extends AppelModeleError {
   readonly code = "AI_FIXTURE_MISSING";
 
   constructor(readonly purpose: string) {
@@ -135,7 +135,7 @@ export class AIFixtureMissingError extends AiError {
 }
 
 /** L'appel réseau a échoué. Aucun retry : l'échec est enregistré tel quel. */
-export class AICallFailedError extends AiError {
+export class EmissionEchoueeError extends AppelModeleError {
   readonly code = "AI_CALL_FAILED";
 
   constructor(
@@ -147,7 +147,7 @@ export class AICallFailedError extends AiError {
 }
 
 /** Une variable d'environnement des garde-fous est absente ou invalide. */
-export class AIConfigError extends AiError {
+export class ConfigIaInvalideError extends AppelModeleError {
   readonly code = "AI_CONFIG";
 }
 
@@ -157,7 +157,7 @@ export class AIConfigError extends AiError {
  * Levée avant d'émettre : perdre en silence un mot-clé qui contraint la sortie
  * (une énumération, par exemple) la laisserait sans contrainte.
  */
-export class AISchemaError extends AiError {
+export class SchemaIntraduisibleError extends AppelModeleError {
   readonly code = "AI_SCHEMA";
 
   constructor(

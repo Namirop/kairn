@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAuthorizedCron } from "@/lib/cron/authorization";
+import { estUnCronAutorise } from "@/lib/cron/autorisation";
 import { signalerLeBattement } from "@/lib/cron/battement";
 import { envoyerLesAlertesDeStreak, envoyerLesRappels } from "@/lib/jobs/rappels";
 import { relancerLesComptesVides } from "@/lib/jobs/relance-des-comptes-vides";
@@ -21,12 +21,12 @@ export const dynamic = "force-dynamic";
 
 /**
  * Un appel réseau par envoi, compte par compte. À relever quand la base
- * grossira, en même temps que la borne de `findReminderCandidates`.
+ * grossira, en même temps que la borne de `trouverLesDestinataires`.
  */
 export const maxDuration = 60;
 
 export async function GET(request: Request) {
-  if (!isAuthorizedCron(request)) {
+  if (!estUnCronAutorise(request)) {
     // i18n-ignore — lu par le planificateur de crons, jamais par une personne.
     return NextResponse.json({ erreur: "Non autorisé." }, { status: 401 });
   }

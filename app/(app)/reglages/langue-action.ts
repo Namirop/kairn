@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { getCurrentUser } from "@/lib/auth/session";
-import { changerDeLangue } from "@/lib/db/user-settings";
+import { lireLUtilisateur } from "@/lib/auth/session";
+import { changerDeLangue } from "@/lib/db/reglages-du-compte";
 import { COOKIE_DE_LANGUE, LOCALE } from "@/lib/i18n/langues";
 
 const LANGUE = z.enum(["FR", "EN"]);
@@ -15,7 +15,7 @@ const LANGUE = z.enum(["FR", "EN"]);
  * déjà planifiés. Aussi retenue en cookie, pour la landing et la connexion.
  */
 export async function changerDeLangueAction(langue: unknown): Promise<{ ok: boolean }> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
   const valide = LANGUE.safeParse(langue);
 
   if (!utilisateur || !valide.success) return { ok: false };

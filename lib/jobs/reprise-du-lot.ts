@@ -1,4 +1,4 @@
-import { AITruncatedOutputError } from "@/lib/ai/errors";
+import { SortieTronqueeError } from "@/lib/ai/errors";
 import { scinderLeJobDeQuestions } from "@/lib/db/lots";
 import type { GenerationJob } from "@/lib/db/types";
 import { scinderLeGroupe } from "@/lib/domain/scission-de-groupe";
@@ -33,7 +33,7 @@ export class LotIncomplet extends Error {
  */
 export async function scinderApresTroncature(
   job: GenerationJob,
-  erreur: AITruncatedOutputError,
+  erreur: SortieTronqueeError,
 ): Promise<never> {
   const moities = scinderLeGroupe(job.atomIds);
 

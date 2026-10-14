@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db/client";
 import { demanderDesQuestions } from "@/lib/db/demande-de-questions";
 import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
-import { conclure, record } from "../verification/cases/journal";
+import { conclure, noter } from "../verification/cases/journal";
 
 /**
  * Retire les vrais ou faux muets et redemande le lot de leur concept.
@@ -116,7 +116,7 @@ async function main(): Promise<string> {
       data: { retiredAt: new Date() },
     });
 
-    record(
+    noter(
       "Affirmations retirées du tirage",
       retirees.count === aRetirer.length,
       `${retirees.count}`,
@@ -134,7 +134,7 @@ async function main(): Promise<string> {
   }
 
   for (const [etat, nombre] of [...issues].sort((a, b) => b[1] - a[1])) {
-    record(`Demandes en état « ${etat} »`, etat !== "trop-tot", `${nombre} concept(s)`);
+    noter(`Demandes en état « ${etat} »`, etat !== "trop-tot", `${nombre} concept(s)`);
   }
 
   return "Plus aucune affirmation muette n'est servie. Les réécritures sont en file.";

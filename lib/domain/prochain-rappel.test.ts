@@ -1,7 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { localHour } from "./local-day";
-import { unFuseau, unInstant } from "./local-day.test";
+import { heureLocale } from "./jour-local";
+import { unFuseau, unInstant } from "./jour-local.test";
 import { prochainRappel } from "./prochain-rappel";
 
 const utc = (iso: string) => new Date(`${iso}Z`);
@@ -53,7 +53,7 @@ describe("prochainRappel", () => {
         (instant, fuseau, heure) => {
           const { jour } = prochainRappel(instant, heure, fuseau);
 
-          return jour === (localHour(instant, fuseau) < heure ? "aujourdhui" : "demain");
+          return jour === (heureLocale(instant, fuseau) < heure ? "aujourdhui" : "demain");
         },
       ),
       { numRuns: 400 },

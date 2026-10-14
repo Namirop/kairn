@@ -18,7 +18,7 @@ import {
 } from "@/lib/depots/bornes-du-depot";
 import { essaiSansLimite, VARIABLE_SANS_LIMITE } from "@/lib/depots/essai-sans-limite";
 import { textesDesRefus } from "@/lib/depots/textes-des-refus";
-import { enqueueJob } from "@/lib/jobs/queue";
+import { mettreEnFile } from "@/lib/jobs/queue";
 
 /**
  * Le dépôt d'un visiteur, avant tout compte : la landing montre un vrai
@@ -129,7 +129,7 @@ export async function deposerSansCompte(
   });
 
   await marquerEnCours(depot.id);
-  await enqueueJob(depot.id, "ATOMS");
+  await mettreEnFile(depot.id, "ATOMS");
 
   return { ok: true, sessionId: session.sessionId, inputId: depot.id };
 }

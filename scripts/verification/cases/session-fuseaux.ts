@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * La même échéance, le même instant, deux fuseaux : un concept dû à Los Angeles
@@ -52,19 +52,19 @@ export async function casDeuxFuseaux(userId: string): Promise<void> {
   const dueAAuckland = aAuckland.questions.some((question) => question.atomId === atome.id);
   const dueALosAngeles = aLosAngeles.questions.some((question) => question.atomId === atome.id);
 
-  record(
+  noter(
     "Fuseaux — à l'est de l'UTC, l'échéance du soir est déjà demain, donc pas due",
     !dueAAuckland,
     dueAAuckland ? "comptée comme due" : "reportée au lendemain",
   );
 
-  record(
+  noter(
     "Fuseaux — à l'ouest, la même échéance tombe aujourd'hui, donc due",
     dueALosAngeles,
     dueALosAngeles ? "comptée comme due" : "pas due, à tort",
   );
 
-  record(
+  noter(
     "Fuseaux — le même instant ne donne donc pas la même session",
     dueAAuckland !== dueALosAngeles,
     `Auckland : ${dueAAuckland ? "due" : "pas due"}, Los Angeles : ${dueALosAngeles ? "due" : "pas due"}`,

@@ -2,7 +2,7 @@
 
 import { Crosshair } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * L'interrupteur qui donne le cairn au doigt.
@@ -32,7 +32,7 @@ export function PriseDuCairn({ tenu, surBascule }: { tenu: boolean; surBascule: 
         /* Au repos, le gris de second plan et pas plus pâle : en dessous du
            contraste AA, la commande disparaît. Ce gris est réglé pour le
            papier ; sur le ciel de l'ouverture, `.ciel .prise-du-cairn`
-           (sky.css) lui donne une encre lisible. */
+           (ciel.css) lui donne une encre lisible. */
         tenu ? "bg-lichen/20 text-lichen-deep" : "text-stone-500",
       )}
     >

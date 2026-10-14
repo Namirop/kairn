@@ -1,4 +1,4 @@
-import { dayToUtcDate, localDay } from "./local-day";
+import { jourEnDateUtc, jourLocal } from "./jour-local";
 
 /**
  * Le mois d'un compte, qui n'est pas celui du calendrier.
@@ -44,8 +44,8 @@ export function periodeDeQuota(
   maintenant: Date,
   fuseau: string,
 ): PeriodeDeQuota {
-  const jourInscription = localDay(inscription, fuseau);
-  const aujourdhui = localDay(maintenant, fuseau);
+  const jourInscription = jourLocal(inscription, fuseau);
+  const aujourdhui = jourLocal(maintenant, fuseau);
 
   // Une horloge qui recule, ou un compte lu avant son inscription : la première
   // période ne commence jamais avant l'inscription.
@@ -85,5 +85,5 @@ function moisSuivant(debut: string, jourInscription: string): string {
 
 /** La borne de la période, sous la forme que stockent les colonnes `Date`. */
 export function debutEnDate(periode: PeriodeDeQuota): Date {
-  return dayToUtcDate(periode.debut);
+  return jourEnDateUtc(periode.debut);
 }

@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 import { debutDuCommentaire } from "@/lib/domain/commentaire-de-code";
 
 /**

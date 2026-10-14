@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import type { Input, InputNature } from "@/lib/db/types";
-import { lireLangueUtilisateur } from "@/lib/db/user-settings";
+import { lireLangueUtilisateur } from "@/lib/db/reglages-du-compte";
 
 /**
  * Les écritures qui font avancer un dépôt. Ce qui l'arrête — rejet, panne,

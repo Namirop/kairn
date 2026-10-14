@@ -2,7 +2,7 @@
  * Rendre exploitables les options d'un QCM que le modèle vient de rendre.
  *
  * Le nombre d'options et la borne de l'index ne sont que des indications pour
- * le modèle (voir `lib/ai/output-schema.ts`) : refuser une option de trop
+ * le modèle (voir `lib/ai/schema-de-sortie.ts`) : refuser une option de trop
  * ferait perdre tout le lot, appel payé.
  *
  * On garde la bonne réponse et les premières mauvaises jusqu'au compte voulu.

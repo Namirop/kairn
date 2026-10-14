@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { FACETTES_DU_LOT, type FacetteDuLot } from "@/lib/domain/emplacement-du-trou";
-import { toOutputSchema } from "../output-schema";
+import { deriverLeSchemaDeSortie } from "../schema-de-sortie";
 import {
   CONCEPTS_PAR_APPEL,
   contratDeGeneration,
-  GENERATE_VARIANTS,
-  generateVariantsForme,
+  CONTRAT_DE_GENERATION,
+  formeDeGeneration,
 } from "./generate-variants";
 
 /**
@@ -50,7 +50,7 @@ function lot(rang: number, formats = ["TRUE_FALSE", "EXPLAIN", "TRUE_FALSE", "MC
 }
 
 describe("forme de sortie de generate_variants", () => {
-  const outil = toOutputSchema(generateVariantsForme).schema;
+  const outil = deriverLeSchemaDeSortie(formeDeGeneration).schema;
   const entree = chemin(outil, "properties", "lots", "items");
 
   it("groupe les concepts dans un tableau, un lot par rang", () => {
@@ -92,7 +92,7 @@ describe("forme de sortie de generate_variants", () => {
       for (const format of ["SHORT_ANSWER", "EXPLAIN"]) {
         const pose = { ...lot(1), [cle]: question(format) };
 
-        expect(GENERATE_VARIANTS.validation.safeParse({ lots: [pose] }).success).toBe(false);
+        expect(CONTRAT_DE_GENERATION.validation.safeParse({ lots: [pose] }).success).toBe(false);
       }
     }
   });
@@ -123,21 +123,21 @@ describe("forme de sortie de generate_variants", () => {
     const partagee = z.object({ format: z.enum(["MCQ", "TRUE_FALSE"]) });
     const reutilisee = z.object({ premier: partagee, second: partagee });
 
-    expect(() => toOutputSchema(reutilisee)).not.toThrow();
-    expect(() => toOutputSchema(z.object({ un: z.intersection(partagee, partagee) }))).toThrow(
-      /allOf|\$ref/,
-    );
+    expect(() => deriverLeSchemaDeSortie(reutilisee)).not.toThrow();
+    expect(() =>
+      deriverLeSchemaDeSortie(z.object({ un: z.intersection(partagee, partagee) })),
+    ).toThrow(/allOf|\$ref/);
   });
 
   it("dérive la forme, jamais la validation", () => {
     // La validation porte des contraintes croisées et une mise à plat : rien de
     // tout cela ne s'exprime en JSON Schema.
-    expect(toOutputSchema(GENERATE_VARIANTS.forme).schema).toEqual(outil);
-    expect(GENERATE_VARIANTS.validation).not.toBe(GENERATE_VARIANTS.forme);
+    expect(deriverLeSchemaDeSortie(CONTRAT_DE_GENERATION.forme).schema).toEqual(outil);
+    expect(CONTRAT_DE_GENERATION.validation).not.toBe(CONTRAT_DE_GENERATION.forme);
   });
 
   it("rend un lot par rang, facettes remplies depuis les clés", () => {
-    const sortie = GENERATE_VARIANTS.validation.parse({
+    const sortie = CONTRAT_DE_GENERATION.validation.parse({
       lots: [lot(1), lot(2), lot(CONCEPTS_PAR_APPEL)],
     });
 
@@ -156,7 +156,7 @@ describe("forme de sortie de generate_variants", () => {
     // C'était un refus. Refuser emportait les lots corrects du même envoi pour
     // une incohérence qui se tranche toute seule, et l'appel était déjà payé.
     // Les rangs restés sans réponse sont signalés par l'appelant.
-    const sortie = GENERATE_VARIANTS.validation.parse({ lots: [lot(1), lot(1), lot(2)] });
+    const sortie = CONTRAT_DE_GENERATION.validation.parse({ lots: [lot(1), lot(1), lot(2)] });
 
     expect(sortie.lots.map((entree) => entree.rang)).toEqual([1, 2]);
   });
@@ -169,7 +169,7 @@ describe("forme de sortie de generate_variants", () => {
         mcq: { options: ["a", "b", "c", "d", "bonne"], correctIndex: 4 },
       },
     };
-    const servi = GENERATE_VARIANTS.validation.parse({ lots: [cinq] }).lots[0]?.variants[3];
+    const servi = CONTRAT_DE_GENERATION.validation.parse({ lots: [cinq] }).lots[0]?.variants[3];
 
     expect(servi?.options).toHaveLength(4);
     expect(servi?.options?.[servi.correctIndex ?? -1]).toBe("bonne");
@@ -188,7 +188,7 @@ describe("forme de sortie de generate_variants", () => {
   it("écarte la charge posée sur un format qui n'en porte pas, et la signale", () => {
     const cloze = { sentence: "Le lichen est une ___ entre deux espèces.", accepted: ["symbiose"] };
     const enTrop = { ...lot(1), mechanism: { ...question("EXPLAIN"), cloze } };
-    const sortie = GENERATE_VARIANTS.validation.parse(envoiDeTrois(enTrop));
+    const sortie = CONTRAT_DE_GENERATION.validation.parse(envoiDeTrois(enTrop));
 
     expect(sortie.lots).toHaveLength(3);
     expect(sortie.lots[0]?.variants[1]?.cloze).toBeNull();
@@ -201,7 +201,7 @@ describe("forme de sortie de generate_variants", () => {
       ...lot(1),
       application: { ...question("MCQ"), mcq: { options: ["a", "b", "c", "d"], correctIndex: 9 } },
     };
-    const sortie = GENERATE_VARIANTS.validation.parse(envoiDeTrois(perdue));
+    const sortie = CONTRAT_DE_GENERATION.validation.parse(envoiDeTrois(perdue));
 
     // Les deux autres concepts du même appel sont écrits. Le rang manquant est
     // rapporté par l'appelant, qui sait à quel concept il correspond.
@@ -212,8 +212,8 @@ describe("forme de sortie de generate_variants", () => {
     const sansOptions = { ...lot(1), application: question("MCQ") };
     const sansTrou = { ...lot(1), boundary: question("CLOZE") };
 
-    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansOptions)).lots).toHaveLength(2);
-    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansTrou)).lots).toHaveLength(2);
+    expect(CONTRAT_DE_GENERATION.validation.parse(envoiDeTrois(sansOptions)).lots).toHaveLength(2);
+    expect(CONTRAT_DE_GENERATION.validation.parse(envoiDeTrois(sansTrou)).lots).toHaveLength(2);
   });
 
   /**
@@ -225,8 +225,8 @@ describe("forme de sortie de generate_variants", () => {
     const sansTexte = { ...lot(1), mechanism: { ...question("EXPLAIN"), question: "" } };
     const sansReponse = { ...lot(1), mechanism: { ...question("EXPLAIN"), answerKey: "  " } };
 
-    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansTexte)).lots).toHaveLength(2);
-    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansReponse)).lots).toHaveLength(2);
+    expect(CONTRAT_DE_GENERATION.validation.parse(envoiDeTrois(sansTexte)).lots).toHaveLength(2);
+    expect(CONTRAT_DE_GENERATION.validation.parse(envoiDeTrois(sansReponse)).lots).toHaveLength(2);
   });
 
   /**
@@ -240,7 +240,7 @@ describe("forme de sortie de generate_variants", () => {
       mechanism: { format: "EXPLAIN", question: "...", answerKey: "..." },
     };
 
-    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(abrege)).lots).toHaveLength(2);
+    expect(CONTRAT_DE_GENERATION.validation.parse(envoiDeTrois(abrege)).lots).toHaveLength(2);
   });
 
   it("fait disparaître le lot d'un QCM dont les options ne se distinguent pas", () => {
@@ -252,7 +252,7 @@ describe("forme de sortie de generate_variants", () => {
       },
     };
 
-    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(memes)).lots).toHaveLength(2);
+    expect(CONTRAT_DE_GENERATION.validation.parse(envoiDeTrois(memes)).lots).toHaveLength(2);
   });
 
   it("fait disparaître le lot d'un texte à trou dont la phrase n'a pas de trou", () => {
@@ -264,7 +264,7 @@ describe("forme de sortie de generate_variants", () => {
       },
     };
 
-    expect(GENERATE_VARIANTS.validation.parse(envoiDeTrois(sansTrou)).lots).toHaveLength(2);
+    expect(CONTRAT_DE_GENERATION.validation.parse(envoiDeTrois(sansTrou)).lots).toHaveLength(2);
   });
 
   /** Les questions écrites avant que l'aide existe n'ont pas de leurres. */
@@ -272,7 +272,7 @@ describe("forme de sortie de generate_variants", () => {
     const cloze = { sentence: "Le lichen est une ___ entre deux espèces.", accepted: ["symbiose"] };
     const juste = { ...lot(1), boundary: { ...question("CLOZE"), cloze } };
 
-    expect(GENERATE_VARIANTS.validation.parse({ lots: [juste] }).lots).toHaveLength(1);
+    expect(CONTRAT_DE_GENERATION.validation.parse({ lots: [juste] }).lots).toHaveLength(1);
   });
 
   it("rend la phrase trouée, ses formes acceptées et ses leurres à plat", () => {
@@ -281,7 +281,7 @@ describe("forme de sortie de generate_variants", () => {
       accepted: ["symbiose"],
       leurres: ["parasitisme", "commensalisme", "mutualisme"],
     };
-    const sortie = GENERATE_VARIANTS.validation.parse({
+    const sortie = CONTRAT_DE_GENERATION.validation.parse({
       lots: [{ ...lot(1), boundary: { ...question("CLOZE"), cloze } }],
     });
 
@@ -290,7 +290,7 @@ describe("forme de sortie de generate_variants", () => {
   });
 
   it("rend la valeur déclarée d'un vrai ou faux, et null partout ailleurs", () => {
-    const sortie = GENERATE_VARIANTS.validation.parse({
+    const sortie = CONTRAT_DE_GENERATION.validation.parse({
       lots: [{ ...lot(1), boundary: { ...question("TRUE_FALSE"), estVraie: true } }],
     });
 
@@ -301,7 +301,7 @@ describe("forme de sortie de generate_variants", () => {
   it("laisse passer un vrai ou faux qui ne déclare pas sa valeur", () => {
     // Le contrôle le signalera, mais un appel qui porte trois concepts ne se
     // jette pas pour un champ manquant sur une question.
-    const sortie = GENERATE_VARIANTS.validation.parse({
+    const sortie = CONTRAT_DE_GENERATION.validation.parse({
       lots: [{ ...lot(1), boundary: question("TRUE_FALSE") }],
     });
 
@@ -321,7 +321,7 @@ describe("forme de sortie de generate_variants", () => {
 describe("l'emplacement du texte à trou", () => {
   const facetteDe = (trou: FacetteDuLot, cle: string) =>
     chemin(
-      toOutputSchema(contratDeGeneration(trou).forme).schema,
+      deriverLeSchemaDeSortie(contratDeGeneration(trou).forme).schema,
       "properties",
       "lots",
       "items",
@@ -349,7 +349,7 @@ describe("l'emplacement du texte à trou", () => {
 
   it("n'impose rien quand aucun emplacement n'est demandé", () => {
     const formats = chemin(
-      toOutputSchema(GENERATE_VARIANTS.forme).schema,
+      deriverLeSchemaDeSortie(CONTRAT_DE_GENERATION.forme).schema,
       "properties",
       "lots",
       "items",

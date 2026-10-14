@@ -1,10 +1,10 @@
-import type { SeedInput } from "./corpus-types";
+import type { InputDuCorpus } from "./types-du-corpus";
 
 /** Ce qui vient d'un copier-coller de réponse d'assistant sur les index Postgres. */
-export const CORPUS_POSTGRES: SeedInput[] = [
+export const CORPUS_POSTGRES: InputDuCorpus[] = [
   {
     sourceType: "TEXT",
-    createdDaysAgo: 63,
+    deposeIlYAJours: 63,
     rawContent: `Quand choisir quel index dans Postgres ?
 
 Un B-tree sert les égalités, les intervalles et le tri. C'est le défaut, et il couvre la grande majorité des cas.
@@ -17,7 +17,7 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
           "Un index B-tree sert les égalités, les intervalles et le tri. Il n'aide pas à chercher à l'intérieur d'un tableau ou d'un JSONB : il indexe la valeur entière.",
         tags: ["postgres", "index"],
         state: "CONSOLIDATED",
-        history: [
+        historique: [
           [61, "GOOD"],
           [52, "GOOD"],
           [34, "EASY"],
@@ -60,7 +60,7 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
           "Un index GIN indexe le contenu d'une valeur composite — éléments d'un tableau, clés d'un JSONB, lexèmes d'un tsvector — au lieu de la valeur entière.",
         tags: ["postgres", "index"],
         state: "REVIEWING",
-        history: [
+        historique: [
           [58, "AGAIN"],
           [51, "HARD"],
           [40, "GOOD"],
@@ -96,7 +96,7 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
           "Dans un index composite, seul un préfixe de gauche des colonnes est utilisable. Un index sur `(userId, due)` sert `userId` seul et le couple, jamais `due` seul.",
         tags: ["postgres", "index"],
         state: "LEARNING",
-        history: [[0, "AGAIN"]],
+        historique: [[0, "AGAIN"]],
         variants: [
           {
             format: "MCQ",
@@ -133,7 +133,7 @@ Un index partiel porte une clause WHERE. Il ne contient que les lignes qui la sa
           "Un index partiel porte une clause `WHERE` et n'indexe que les lignes qui la satisfont. Il reste minuscule quand la condition est rare.",
         tags: ["postgres", "index"],
         state: "LEARNING",
-        history: [
+        historique: [
           [6, "HARD"],
           [1, "AGAIN"],
         ],

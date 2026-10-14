@@ -10,7 +10,7 @@ import { Marque } from "./marque";
  * défilant se lisait au travers ; sans grain, il formait une troisième valeur.
  * `z-30`, le rang de la coquille : une page ne monte jamais au-dessus de
  * `z-20`, et à égalité le dernier dans le balisage gagne. Pendant une session,
- * c'est `app/styles/shell.css` qui le retire, ce qui le garde composant serveur.
+ * c'est `app/styles/coquille.css` qui le retire, ce qui le garde composant serveur.
  */
 const TAILLE_DE_LA_MARQUE = 32;
 

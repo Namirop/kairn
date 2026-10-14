@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { prisma } from "@/lib/db/client";
 import { CORPUS_CODE } from "@/prisma/seed/corpus-code";
-import { writeCorpus } from "@/prisma/seed/corpus-writer";
+import { ecrireLeCorpus } from "@/prisma/seed/ecriture-du-corpus";
 
 /**
  * Ajoute le dépôt de code à un compte existant, pour regarder le rendu des
@@ -43,7 +43,7 @@ async function main(): Promise<void> {
     console.info(`${deja.length} dépôt de code déjà présent, remplacé.`);
   }
 
-  const { reviewedAt } = await writeCorpus(compte.id, CORPUS_CODE, new Date());
+  const { reviewedAt } = await ecrireLeCorpus(compte.id, CORPUS_CODE, new Date());
 
   const [concepts, questions, dus] = await Promise.all([
     prisma.atom.count({

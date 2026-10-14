@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { EXEMPLES_DE_DEPOT } from "@/lib/domain/invites-de-depot";
 import { useLangue } from "@/lib/i18n/use-langue";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * L'onboarding tient là : pas de visite guidée, le premier dépôt fait le
