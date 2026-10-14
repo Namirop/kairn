@@ -14,10 +14,6 @@ model GenerationJob {
   /// Les Atoms qu'un job de variantes couvre, trois au plus. Vide ailleurs.
   atomIds String[]
 
-  /// Le lot qui porte ce job, quand il est parti en soumission groupée.
-  batchId String?
-  batch   AiBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
-
   /// Ce job réécrit les questions d'un concept qui en avait déjà.
   ///
   /// C'est lui, et lui seul, que compte le plafond hebdomadaire. Le premier
@@ -45,32 +41,6 @@ model GenerationJob {
   /// Requête du cron de reprise : les jobs à relancer, les plus vieux d'abord.
   @@index([status, createdAt])
   @@index([inputId])
-  @@index([batchId])
-}
-
-/// Une soumission groupée au modèle : plusieurs requêtes, un seul envoi, moitié
-/// tarif contre une latence de quelques minutes à quelques heures.
-///
-/// Les questions ne servent qu'à la première révision, au plus tôt le lendemain.
-/// Elles peuvent attendre ; les concepts, eux, sont le retour visible du dépôt
-/// et restent en appel normal.
-model AiBatch {
-  id String @id @default(cuid())
-
-  /// Identifiant rendu par la plateforme, celui qu'on interroge.
-  providerId String      @unique
-  status     BatchStatus @default(SUBMITTED)
-  /// Nombre de requêtes du lot. Chacune a pris une place au plafond du jour.
-  requests   Int
-
-  createdAt DateTime  @default(now())
-  polledAt  DateTime?
-  endedAt   DateTime?
-
-  jobs GenerationJob[]
-
-  /// Requête du cron de relève : les lots encore ouverts, les plus vieux d'abord.
-  @@index([status, createdAt])
 }
 
 /// Une question qui n'allait pas, et tout ce qu'il faut pour comprendre pourquoi.

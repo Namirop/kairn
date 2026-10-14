@@ -80,7 +80,7 @@ export async function scinderLeJobDeQuestions(
   await prisma.$transaction([
     prisma.generationJob.update({
       where: { id: job.id },
-      data: { atomIds: garde, status: "QUEUED", startedAt: null, batchId: null, lastError: motif },
+      data: { atomIds: garde, status: "QUEUED", startedAt: null, lastError: motif },
     }),
     prisma.generationJob.create({
       data: {

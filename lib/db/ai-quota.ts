@@ -24,45 +24,34 @@ function jourUtc(instant: Date): string {
   return localDay(instant, "UTC");
 }
 
-/** Réserve `places` d'un coup, ou aucune. */
-export async function reserverAppelsModele(
+/** Réserve une place d'appel au plafond global du jour. */
+export async function reserverAppelModele(
   plafond: number,
-  places: number,
   maintenant: Date = new Date(),
 ): Promise<Reservation> {
-  const jour = jourUtc(maintenant);
-
   // La clause `WHERE` ne garde que le `DO UPDATE` : la première réservation de
-  // la journée s'insère sans être confrontée au plafond. Sans cette garde, une
-  // demande plus grosse que le plafond passerait entière juste après minuit UTC.
-  if (places > plafond) {
+  // la journée s'insère sans être confrontée au plafond. Un plafond à zéro doit
+  // pourtant tout refuser.
+  if (plafond < 1) {
     return { obtenue: false, utilisees: await lireReservationsDuJour(maintenant) };
   }
 
+  const jour = jourUtc(maintenant);
   const lignes = await prisma.$queryRaw<{ reserved: number }[]>`
     INSERT INTO "AiCallQuota" ("day", "reserved", "createdAt", "updatedAt")
-    VALUES (${jour}::date, ${places}, now(), now())
+    VALUES (${jour}::date, 1, now(), now())
     ON CONFLICT ("day") DO UPDATE
-      SET "reserved" = "AiCallQuota"."reserved" + ${places},
+      SET "reserved" = "AiCallQuota"."reserved" + 1,
           "updatedAt" = now()
-      WHERE "AiCallQuota"."reserved" + ${places} <= ${plafond}
+      WHERE "AiCallQuota"."reserved" + 1 <= ${plafond}
     RETURNING "reserved"
   `;
 
   const obtenue = lignes[0];
 
-  if (obtenue) {
-    return { obtenue: true, utilisees: obtenue.reserved };
-  }
+  if (obtenue) return { obtenue: true, utilisees: obtenue.reserved };
 
   return { obtenue: false, utilisees: await lireReservationsDuJour(maintenant) };
-}
-
-export async function reserverAppelModele(
-  plafond: number,
-  maintenant: Date = new Date(),
-): Promise<Reservation> {
-  return reserverAppelsModele(plafond, 1, maintenant);
 }
 
 /**
@@ -73,26 +62,25 @@ export async function reserverAppelModele(
  * la place globale, avec la même instruction atomique, et se compte en UTC
  * comme elle pour que les deux fenêtres ferment au même instant.
  */
-export async function reserverPlacesDeCompte(
+export async function reserverPlaceDeCompte(
   userId: string,
   plafond: number,
-  places: number,
   maintenant: Date = new Date(),
 ): Promise<Reservation> {
   // Même garde que pour le plafond global : la première réservation du jour
   // échappe à la clause `WHERE`.
-  if (places > plafond) {
+  if (plafond < 1) {
     return { obtenue: false, utilisees: await lirePlacesDeCompte(userId, maintenant) };
   }
 
   const jour = jourUtc(maintenant);
   const lignes = await prisma.$queryRaw<{ reserved: number }[]>`
     INSERT INTO "AiUserQuota" ("userId", "day", "reserved", "createdAt", "updatedAt")
-    VALUES (${userId}, ${jour}::date, ${places}, now(), now())
+    VALUES (${userId}, ${jour}::date, 1, now(), now())
     ON CONFLICT ("userId", "day") DO UPDATE
-      SET "reserved" = "AiUserQuota"."reserved" + ${places},
+      SET "reserved" = "AiUserQuota"."reserved" + 1,
           "updatedAt" = now()
-      WHERE "AiUserQuota"."reserved" + ${places} <= ${plafond}
+      WHERE "AiUserQuota"."reserved" + 1 <= ${plafond}
     RETURNING "reserved"
   `;
 
@@ -101,14 +89,6 @@ export async function reserverPlacesDeCompte(
   if (obtenue) return { obtenue: true, utilisees: obtenue.reserved };
 
   return { obtenue: false, utilisees: await lirePlacesDeCompte(userId, maintenant) };
-}
-
-export async function reserverPlaceDeCompte(
-  userId: string,
-  plafond: number,
-  maintenant: Date = new Date(),
-): Promise<Reservation> {
-  return reserverPlacesDeCompte(userId, plafond, 1, maintenant);
 }
 
 /**

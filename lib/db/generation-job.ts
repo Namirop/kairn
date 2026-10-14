@@ -84,7 +84,7 @@ export async function reprendreCeQuiManque(
 
   await prisma.generationJob.update({
     where: { id: jobId },
-    data: { atomIds, status: "QUEUED", startedAt: null, batchId: null, lastError: motif },
+    data: { atomIds, status: "QUEUED", startedAt: null, lastError: motif },
   });
 
   return true;
@@ -133,16 +133,12 @@ export async function findResumableJobs(
 /**
  * Ferme les jobs bloqués qui ont épuisé leurs tentatives. Sans ça ils
  * resteraient RUNNING pour toujours, jamais repris.
- *
- * Le filtre `batchId: null` écarte les jobs rattachés à un envoi groupé, que
- * plus aucun code ne crée.
  */
 export async function failExhaustedJobs(now: Date = new Date()): Promise<number> {
   const stallCutoff = new Date(now.getTime() - STALL_AFTER_MS);
 
   const bloques = await prisma.generationJob.findMany({
     where: {
-      batchId: null,
       status: "RUNNING",
       startedAt: { lt: stallCutoff },
       attempts: { gte: MAX_ATTEMPTS },
