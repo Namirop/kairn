@@ -26,11 +26,8 @@ export type VariantAControler = {
   chargeIgnoree?: boolean;
 };
 
-export {
-  ECART_MAX_OPTIONS,
-  ECART_MINIMUM_SIGNIFICATIF,
-  MOTS_MAX_DU_TROU,
-} from "./controle-du-format";
+export { ECART_MAX_OPTIONS, ECART_MINIMUM_SIGNIFICATIF } from "./controle-du-format";
+export { MOTS_MAX_DU_TROU } from "./controle-du-trou";
 
 /** Tout ce qu'on peut reprocher à une question sans regarder les autres. */
 export function controlerQuestion(variant: VariantAControler): Manquement[] {

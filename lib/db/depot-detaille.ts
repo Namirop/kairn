@@ -48,6 +48,17 @@ export type DepotDetaille = {
   travauxEnCours: { kind: GenerationKind; differe: boolean }[];
 };
 
+/** Chaque travail, marqué `differe` tant que son `notBefore` n'est pas échu. */
+function travauxDifferes(
+  jobs: { kind: GenerationKind; notBefore: Date | null }[],
+  maintenant: Date,
+): { kind: GenerationKind; differe: boolean }[] {
+  return jobs.map(({ kind, notBefore }) => ({
+    kind,
+    differe: notBefore !== null && notBefore > maintenant,
+  }));
+}
+
 export async function lireDepotDetaille(
   inputId: string,
   userId: string,
@@ -87,15 +98,11 @@ export async function lireDepotDetaille(
   if (!depot) return null;
 
   const { atoms, jobs, ...reste } = depot;
-  const maintenant = new Date();
 
   return {
     ...reste,
     concepts: atoms.map(({ _count, ...atome }) => ({ ...atome, questions: _count.variants })),
-    travauxEnCours: jobs.map(({ kind, notBefore }) => ({
-      kind,
-      differe: notBefore !== null && notBefore > maintenant,
-    })),
+    travauxEnCours: travauxDifferes(jobs, new Date()),
   };
 }
 
@@ -122,14 +129,9 @@ export async function lireAvancementDuDepot(
 
   if (!depot) return null;
 
-  const maintenant = new Date();
-
   return {
     status: depot.status,
     concepts: depot._count.atoms,
-    travaux: depot.jobs.map(({ kind, notBefore }) => ({
-      kind,
-      differe: notBefore !== null && notBefore > maintenant,
-    })),
+    travaux: travauxDifferes(depot.jobs, new Date()),
   };
 }

@@ -1,4 +1,4 @@
-import { initialiser, type Corps } from "./cairn-physique";
+import { poser, type Corps } from "./cairn-physique";
 import type { Pierre } from "./cairn-empilement";
 
 /**
@@ -33,9 +33,7 @@ export function remonter(corps: Corps[], pierres: Pierre[], dt: number): Corps[]
       Math.abs(y - pierre.y) < ARRIVEE &&
       Math.abs(rotation - pierre.rotation) < ARRIVEE_ANGLE;
 
-    if (arrive) {
-      return { ...initialiser([pierre])[0]! };
-    }
+    if (arrive) return poser(pierre);
 
     return { ...solide, x, y, rotation, vx: 0, vy: 0, vr: 0, repos: false };
   });

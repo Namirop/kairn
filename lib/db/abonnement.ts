@@ -15,14 +15,24 @@ import {
  * Stripe n'a pas confirmé serait un abonnement offert.
  */
 export async function lireAbonnement(userId: string): Promise<Abonnement> {
+  return (await lireLaLigne(userId)).abonnement;
+}
+
+/** La ligne d'abonnement du compte, et la résiliation qu'elle annonce. */
+async function lireLaLigne(
+  userId: string,
+): Promise<{ abonnement: Abonnement; resilieALaFin: boolean }> {
   const ligne = await prisma.subscription.findUnique({
     where: { userId },
-    select: { plan: true, currentPeriodEnd: true },
+    select: { plan: true, currentPeriodEnd: true, cancelAtPeriodEnd: true },
   });
 
-  if (!ligne) return SANS_ABONNEMENT;
+  if (!ligne) return { abonnement: SANS_ABONNEMENT, resilieALaFin: false };
 
-  return { plan: ligne.plan, finDePeriode: ligne.currentPeriodEnd };
+  return {
+    abonnement: { plan: ligne.plan, finDePeriode: ligne.currentPeriodEnd },
+    resilieALaFin: ligne.cancelAtPeriodEnd,
+  };
 }
 
 /** Le plafond de concepts d'un compte, à cet instant. */
@@ -51,19 +61,12 @@ export async function lireLOffreDuCompte(
   userId: string,
   maintenant: Date = new Date(),
 ): Promise<OffreDuCompte> {
-  const ligne = await prisma.subscription.findUnique({
-    where: { userId },
-    select: { plan: true, currentPeriodEnd: true, cancelAtPeriodEnd: true },
-  });
-
-  const abonnement: Abonnement = ligne
-    ? { plan: ligne.plan, finDePeriode: ligne.currentPeriodEnd }
-    : SANS_ABONNEMENT;
+  const { abonnement, resilieALaFin } = await lireLaLigne(userId);
 
   return {
     plan: planEffectif(abonnement, maintenant),
     plafond: plafondDeConcepts(abonnement, maintenant),
     finDePeriode: abonnement.finDePeriode,
-    resilieALaFin: ligne?.cancelAtPeriodEnd ?? false,
+    resilieALaFin,
   };
 }

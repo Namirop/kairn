@@ -1,3 +1,5 @@
+import { aplati } from "./texte-aplati";
+
 /**
  * La racine grossière d'un mot, pour comparer deux textes sans buter sur les
  * accords : on coupe une terminaison connue et on s'arrête là (« exécution »,
@@ -46,12 +48,8 @@ const TERMINAISONS = [
  */
 const RACINE_MINIMUM = 1;
 
-/** Minuscules, sans accents : le reste de la coupe se fait sur de l'ASCII. */
-function aplati(mot: string): string {
-  return mot.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-}
-
 export function racineDeMot(mot: string): string {
+  // Minuscules, sans accents : le reste de la coupe se fait sur de l'ASCII.
   const plat = aplati(mot);
 
   for (const terminaison of TERMINAISONS) {

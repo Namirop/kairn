@@ -9,6 +9,8 @@
  * En cas d'échec, l'écran montre le terme attendu et laisse dire « je l'avais ».
  */
 
+import { motsAplatis } from "./mots-normalises";
+
 /** Le trou dans la phrase. Trois soulignés : ça se lit, et ça se retape. */
 export const TROU = "___";
 
@@ -32,12 +34,7 @@ const LONGUEUR_DEUX_ECARTS = 10;
  * apostrophe deviennent des espaces : « porte greffe » vaut « porte-greffe ».
  */
 export function normaliserReponse(texte: string): string {
-  return texte
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
+  return motsAplatis(texte);
 }
 
 /**

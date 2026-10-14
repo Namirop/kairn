@@ -1,3 +1,5 @@
+import { fusionnerLaProse, type MorceauMarque } from "./segments-fusionnes";
+
 /**
  * Découpe d'un texte en parties ordinaires et parties mises en avant.
  *
@@ -20,20 +22,6 @@ export type SegmentEnGras = {
   gras: boolean;
   texte: string;
 };
-
-/** Empile en fusionnant les parties ordinaires voisines et en ignorant les vides. */
-function empiler(segments: SegmentEnGras[], texte: string, gras: boolean): void {
-  if (texte.length === 0) return;
-
-  const dernier = segments[segments.length - 1];
-
-  if (!gras && dernier && !dernier.gras) {
-    dernier.texte += texte;
-    return;
-  }
-
-  segments.push({ gras, texte });
-}
 
 /**
  * Les bornes des termes cités : un accent grave ouvre, le suivant ferme, et ce
@@ -77,7 +65,7 @@ function marqueSuivante(
  */
 export function segmentsEnGras(texte: string): SegmentEnGras[] {
   const cites = termesCites(texte);
-  const segments: SegmentEnGras[] = [];
+  const morceaux: MorceauMarque[] = [];
   let curseur = 0;
 
   while (curseur < texte.length) {
@@ -89,15 +77,18 @@ export function segmentsEnGras(texte: string): SegmentEnGras[] {
 
     const dedans = texte.slice(ouverture + MARQUEUR.length, fermeture);
 
-    empiler(segments, texte.slice(curseur, ouverture), false);
+    morceaux.push({ marque: false, texte: texte.slice(curseur, ouverture) });
 
-    if (dedans.trim().length === 0) empiler(segments, `${MARQUEUR}${dedans}${MARQUEUR}`, false);
-    else empiler(segments, dedans, true);
+    morceaux.push(
+      dedans.trim().length === 0
+        ? { marque: false, texte: `${MARQUEUR}${dedans}${MARQUEUR}` }
+        : { marque: true, texte: dedans },
+    );
 
     curseur = fermeture + MARQUEUR.length;
   }
 
-  empiler(segments, texte.slice(curseur), false);
+  morceaux.push({ marque: false, texte: texte.slice(curseur) });
 
-  return segments;
+  return fusionnerLaProse(morceaux).map(({ marque, texte }) => ({ gras: marque, texte }));
 }
