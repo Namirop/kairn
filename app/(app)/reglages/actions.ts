@@ -5,9 +5,13 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { supprimerLeCompte } from "@/lib/db/compte";
-import { enregistrerLesReglages, optOutOfEmails, reprendreLesEmails } from "@/lib/db/user-settings";
+import {
+  enregistrerLesReglages,
+  couperLesEmails,
+  reprendreLesEmails,
+} from "@/lib/db/reglages-du-compte";
 import { confirmationValide, MOT_DE_CONFIRMATION } from "@/lib/domain/confirmation-de-suppression";
 import { lireHeureDeRappel } from "@/lib/domain/heure-de-rappel";
 import { lirePlafondDeSession, PLAFOND_MAX, PLAFOND_MIN } from "@/lib/domain/selection-session";
@@ -27,7 +31,7 @@ export async function supprimerMonCompteAction(
   _precedent: EtatSuppression,
   donnees: FormData,
 ): Promise<EtatSuppression> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
@@ -89,7 +93,7 @@ export async function enregistrerLesReglagesAction(
   _precedent: EtatDesReglages,
   donnees: FormData,
 ): Promise<EtatDesReglages> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
@@ -119,7 +123,7 @@ export async function enregistrerLesReglagesAction(
     };
   }
 
-  if (!emailsActifs) await optOutOfEmails(utilisateur.id);
+  if (!emailsActifs) await couperLesEmails(utilisateur.id);
   else await reprendreLesEmails(utilisateur.id);
 
   const ecrit = await enregistrerLesReglages(utilisateur.id, {

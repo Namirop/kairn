@@ -17,11 +17,11 @@ const DOSSIER = path.join(import.meta.dirname, "fige");
 const CHEMIN = path.join(DOSSIER, "demo.json");
 
 const FORMATS = ["MCQ", "CLOZE", "TRUE_FALSE", "SHORT_ANSWER", "CODE", "EXPLAIN"] as const;
-const FACETS = ["RECOGNITION", "MECHANISM", "BOUNDARY", "APPLICATION"] as const;
+const FACETTES = ["RECOGNITION", "MECHANISM", "BOUNDARY", "APPLICATION"] as const;
 
 const variant = z.object({
   format: z.enum(FORMATS),
-  facet: z.enum(FACETS),
+  facet: z.enum(FACETTES),
   question: z.string(),
   answerKey: z.string(),
   /** Le VRAI/FAUX : ce que la question affirme est-il vrai. Null hors de ce format. */

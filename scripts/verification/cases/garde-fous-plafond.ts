@@ -1,11 +1,11 @@
-import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
+import { CONTRAT_D_EXTRACTION } from "@/lib/ai/schemas";
 import { callAI } from "@/lib/ai/client";
 import { prisma } from "@/lib/db/client";
-import { readAiConfig } from "@/lib/ai/config";
+import { lireLaConfigDeLEnvironnement } from "@/lib/ai/config";
 import { reserverLesDeuxPlaces } from "@/lib/ai/reservation";
 import { lireReservationsDuJour, reserverAppelModele } from "@/lib/db/ai-quota";
-import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
-import { expectFailure, record } from "./journal";
+import { jourEnDateUtc, jourLocal } from "@/lib/domain/jour-local";
+import { noterUnEchecAttendu, noter } from "./journal";
 
 /**
  * Le plafond journalier, éprouvé sur l'appel au modèle. Le compteur du jour est
@@ -25,13 +25,13 @@ const SATURE = 3;
  * passe demanderait de l'émettre.
  */
 export async function verifierPartAnonyme(): Promise<void> {
-  const jour = dayToUtcDate(localDay(new Date(), "UTC"));
+  const jour = jourEnDateUtc(jourLocal(new Date(), "UTC"));
   const avantGlobal = await prisma.aiCallQuota.findUnique({ where: { day: jour } });
   const avantAnonyme = await prisma.aiAnonymousQuota.findUnique({ where: { day: jour } });
   const compte = await prisma.user.findFirst({ select: { id: true } });
 
   const config = {
-    ...readAiConfig(),
+    ...lireLaConfigDeLEnvironnement(),
     dailyCallCap: 1000,
     userDailyCallCap: 2,
     anonymousDailyCallCap: 2,
@@ -55,7 +55,7 @@ export async function verifierPartAnonyme(): Promise<void> {
       update: { reserved: config.anonymousDailyCallCap },
     });
 
-    await expectFailure(
+    await noterUnEchecAttendu(
       "La part du trafic sans compte refuse quand elle est pleine",
       "AI_ANONYMOUS_QUOTA",
       () => reserverLesDeuxPlaces(config, { anonyme: true }),
@@ -71,7 +71,7 @@ export async function verifierPartAnonyme(): Promise<void> {
       : null;
     const interneServi = await passe(() => reserverLesDeuxPlaces(config, { interne: true }));
 
-    record(
+    noter(
       "La landing pleine ne ferme la journée à personne d'autre",
       interneServi && compteServi !== false,
       `appel interne ${interneServi ? "servi" : "refusé"}, compte ${
@@ -89,14 +89,14 @@ export async function verifierPartAnonyme(): Promise<void> {
         update: { reserved: config.userDailyCallCap },
       });
 
-      await expectFailure("La part d'un compte plein refuse ce compte", "AI_USER_QUOTA", () =>
+      await noterUnEchecAttendu("La part d'un compte plein refuse ce compte", "AI_USER_QUOTA", () =>
         reserverLesDeuxPlaces(config, { userId: compte.id }),
       );
     }
 
     const essaiServi = await passe(() => reserverLesDeuxPlaces(config, { anonyme: true }));
 
-    record(
+    noter(
       "Un compte qui sature sa part ne ferme pas la landing",
       essaiServi,
       `essai sans compte ${essaiServi ? "servi" : "refusé"} alors que la part d'un compte est pleine`,
@@ -157,7 +157,7 @@ async function reposerAnonyme(jour: Date, reserved: number | undefined): Promise
 }
 
 export async function verifierPlafond(): Promise<void> {
-  const jour = dayToUtcDate(localDay(new Date(), "UTC"));
+  const jour = jourEnDateUtc(jourLocal(new Date(), "UTC"));
   const avant = await prisma.aiCallQuota.findUnique({ where: { day: jour } });
 
   await prisma.aiCallQuota.upsert({
@@ -178,15 +178,15 @@ export async function verifierPlafond(): Promise<void> {
     // Hors mock, sinon `callAI` rend la fixture avant la réservation. Rien ne
     // sort : le piège sur `fetch` de `verifier-garde-fous.ts` le garantit.
     process.env.MOCK_AI = "false";
-    await expectFailure("Le plafond journalier refuse avant d'émettre", "AI_QUOTA", () =>
+    await noterUnEchecAttendu("Le plafond journalier refuse avant d'émettre", "AI_QUOTA", () =>
       callAI({
-        contract: EXTRACT_ATOMS,
+        contract: CONTRAT_D_EXTRACTION,
         system: "",
         messages: [{ role: "user", content: "test" }],
       }),
     );
 
-    record(
+    noter(
       "Un refus n'entame pas le compteur",
       (await lireReservationsDuJour()) === SATURE,
       `compteur à ${await lireReservationsDuJour()}`,
@@ -198,7 +198,7 @@ export async function verifierPlafond(): Promise<void> {
     await prisma.aiCallQuota.deleteMany({ where: { day: jour } });
 
     const surPlafondNul = await reserverAppelModele(0);
-    record(
+    noter(
       "Un plafond à zéro refuse tout, même sur une journée vierge",
       !surPlafondNul.obtenue && (await lireReservationsDuJour()) === 0,
       `compteur à ${await lireReservationsDuJour()} après une demande sur un plafond nul`,

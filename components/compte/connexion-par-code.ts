@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { emailOtp, signIn } from "@/lib/auth/client";
-import { TIMEZONE_HEADER } from "@/lib/auth/en-tetes";
+import { ENTETE_DU_FUSEAU } from "@/lib/auth/en-tetes";
 import { codeComplet, lireLeCode } from "@/lib/domain/code-de-connexion";
 
 /**
@@ -44,7 +44,7 @@ export function useConnexionParCode(adresse: string, suite: string): ConnexionPa
       // Le compte se crée dans cette requête s'il n'existe pas : c'est la seule
       // occasion de transmettre le fuseau du navigateur.
       const fuseau = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const entetes = fuseau ? { [TIMEZONE_HEADER]: fuseau } : {};
+      const entetes = fuseau ? { [ENTETE_DU_FUSEAU]: fuseau } : {};
 
       const { error } = await signIn.emailOtp(
         { email: adresse, otp: valeur },

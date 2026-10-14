@@ -1,11 +1,11 @@
 import { lireDepotAReprendre, repartirEnDecoupage } from "@/lib/db/reprise-depot";
 import { rendreDepot, reserverDepot } from "@/lib/db/quota-depots";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 import { redecoupable } from "@/lib/domain/etat-depot";
 import type { TraduireLesRefus } from "@/lib/depots/bornes-du-depot";
 import { refusDeQuota } from "@/lib/depots/refus-de-quota";
 import { textesDesRefus } from "@/lib/depots/textes-des-refus";
-import { enqueueJob } from "@/lib/jobs/queue";
+import { mettreEnFile } from "@/lib/jobs/queue";
 
 /**
  * Relance l'extraction sur un texte déjà déposé, quand le découpage n'a rien
@@ -45,7 +45,7 @@ export async function redecouper(
     return { ok: false, motif: t("introuvable") };
   }
 
-  await enqueueJob(inputId, "ATOMS");
+  await mettreEnFile(inputId, "ATOMS");
 
   return { ok: true };
 }

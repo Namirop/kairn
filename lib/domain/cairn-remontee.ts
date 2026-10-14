@@ -1,5 +1,5 @@
 import { initialiser, type Corps } from "./cairn-physique";
-import type { Pierre } from "./cairn-stack";
+import type { Pierre } from "./cairn-empilement";
 
 /**
  * Le retour du cairn à sa forme : une interpolation, pas une simulation. La

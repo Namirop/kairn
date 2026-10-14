@@ -1,16 +1,16 @@
 import { callAI } from "@/lib/ai/client";
-import { AITruncatedOutputError } from "@/lib/ai/errors";
+import { SortieTronqueeError } from "@/lib/ai/errors";
 import { promptsSysteme } from "@/lib/ai/prompts";
 import { lireLaConfigEffective } from "@/lib/ai/reglages-effectifs";
 import { contratDeGeneration } from "@/lib/ai/schemas";
 import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
 import { prisma } from "@/lib/db/client";
-import { reprendreCeQuiManque } from "@/lib/db/generation-job";
+import { reprendreCeQuiManque } from "@/lib/db/jobs-de-generation";
 import type { GenerationJob } from "@/lib/db/types";
 import { ecrireQuestions } from "@/lib/db/variants";
 import { sansAffirmationMuette } from "@/lib/domain/affirmation-muette";
 import { sansRenvoiAuConcept } from "@/lib/domain/renvoi-au-concept";
-import { messageDuGroupe as construireLEnvoi } from "@/lib/domain/envoi-de-questions";
+import { messageDuGroupe } from "@/lib/domain/envoi-de-questions";
 import { LotIncomplet, scinderApresTroncature } from "./reprise-du-lot";
 
 /**
@@ -29,12 +29,12 @@ export async function conceptsDuJob(atomIds: string[]) {
 }
 
 /**
- * L'envoi d'un groupe. La graine est l'id de l'Atom : la cible du vrai ou faux
+ * L'envoi d'un groupe, semé sur l'id de chaque Atom : la cible du vrai ou faux
  * en dérive, et doit rester stable d'une régénération à l'autre. Le banc, qui
  * n'écrit rien en base, sème sur le texte du concept.
  */
-export function messageDuGroupe(concepts: { id: string; concept: string }[]): string {
-  return construireLEnvoi(concepts.map(({ id, concept }) => ({ graine: id, concept })));
+export function messageSemeParAtome(concepts: { id: string; concept: string }[]): string {
+  return messageDuGroupe(concepts.map(({ id, concept }) => ({ graine: id, concept })));
 }
 
 /**
@@ -121,9 +121,9 @@ export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
     // L'essai d'un visiteur passe aussi par ici : sans ce drapeau, sa question
     // se compterait sur le plafond des comptes au lieu de la part publique.
     anonyme: depot?.anonymousSessionId != null,
-    messages: [{ role: "user", content: messageDuGroupe(concepts) }],
+    messages: [{ role: "user", content: messageSemeParAtome(concepts) }],
   }).catch(async (erreur: unknown) => {
-    if (erreur instanceof AITruncatedOutputError) await scinderApresTroncature(job, erreur);
+    if (erreur instanceof SortieTronqueeError) await scinderApresTroncature(job, erreur);
 
     throw erreur;
   });

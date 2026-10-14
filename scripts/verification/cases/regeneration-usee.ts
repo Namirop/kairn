@@ -4,7 +4,7 @@ import {
   JOURS_ENTRE_REGENERATIONS,
   PASSAGES_AVANT_REGENERATION,
 } from "@/lib/domain/rotation-variantes";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Le renouvellement des questions, éprouvé par l'usage. Deux garanties qui
@@ -86,13 +86,13 @@ export async function casRegenerationParUsure(userId: string, maintenant: Date):
     select: { sessionCount: true, trainingCount: true },
   });
 
-  record(
+  noter(
     "Usure — l'entraînement seul suffit à atteindre le seuil de renouvellement",
     compteurs.every((v) => v.sessionCount === 0 && v.trainingCount >= PASSAGES_AVANT_REGENERATION),
     `${compteurs.length} variantes à ${compteurs[0]?.trainingCount ?? 0} passages d'entraînement, 0 en session`,
   );
 
-  record(
+  noter(
     "Usure — des questions neuves sont demandées, sans bouton ni décision",
     (await jobsDeQuestions(atomId)) === 1,
     `${await jobsDeQuestions(atomId)} demande(s) en file`,
@@ -101,7 +101,7 @@ export async function casRegenerationParUsure(userId: string, maintenant: Date):
   // On continue à tourner : le seuil reste franchi, et rien ne doit repartir.
   await tournerJusquauSeuil(userId, atomId, apresLesTours);
 
-  record(
+  noter(
     "Usure — le plafond de sept jours tient, quoi qu'on fasse dans la journée",
     (await jobsDeQuestions(atomId)) === 1,
     `${await jobsDeQuestions(atomId)} demande(s) après deux fois plus de passages`,
@@ -117,7 +117,7 @@ export async function casRegenerationParUsure(userId: string, maintenant: Date):
   });
   await tournerJusquauSeuil(userId, atomId, plusTard);
 
-  record(
+  noter(
     "Usure — passé le délai, un concept encore tourné redemande des questions",
     (await jobsDeQuestions(atomId)) === 2,
     `${await jobsDeQuestions(atomId)} demande(s) au total`,

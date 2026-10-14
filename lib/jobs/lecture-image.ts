@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { callAI } from "@/lib/ai/client";
-import { OCR_EXTRACT_PROMPT } from "@/lib/ai/prompts";
-import { OCR_EXTRACT } from "@/lib/ai/schemas";
+import { PROMPT_DE_LECTURE } from "@/lib/ai/prompts";
+import { CONTRAT_DE_LECTURE } from "@/lib/ai/schemas";
 import { enregistrerTexteLu, lireDepot, oublierImage } from "@/lib/db/ingestion";
 import { marquerEchec, marquerRejet } from "@/lib/db/fin-de-depot";
 import type { GenerationJob } from "@/lib/db/types";
-import { enqueueJob } from "./queue";
+import { mettreEnFile } from "./queue";
 import { textesDesRefus } from "@/lib/depots/textes-des-refus";
 
 /**
@@ -31,8 +31,8 @@ export async function lireImage(job: GenerationJob): Promise<void> {
   // Le texte déposé à côté de l'image lui sert de contexte, quand il y en a un.
   const contexte = depot.rawContent.trim();
   const lu = await callAI({
-    contract: OCR_EXTRACT,
-    system: OCR_EXTRACT_PROMPT,
+    contract: CONTRAT_DE_LECTURE,
+    system: PROMPT_DE_LECTURE,
     jobId: job.id,
     userId: depot.userId ?? undefined,
     messages: [
@@ -60,5 +60,5 @@ export async function lireImage(job: GenerationJob): Promise<void> {
   }
 
   await enregistrerTexteLu(depot.id, lu.extractedText, lu.tronque);
-  await enqueueJob(depot.id, "ATOMS");
+  await mettreEnFile(depot.id, "ATOMS");
 }

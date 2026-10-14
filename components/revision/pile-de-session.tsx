@@ -1,5 +1,5 @@
 import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
-import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
+import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
 import { remplissageDePile } from "@/lib/domain/remplissage-de-pile";
 
 /**

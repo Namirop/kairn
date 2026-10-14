@@ -1,6 +1,6 @@
 import { callAI } from "@/lib/ai/client";
-import { promptsSysteme, SYSTEM_PROMPTS } from "@/lib/ai/prompts";
-import { EXTRACT_ATOMS, OCR_EXTRACT } from "@/lib/ai/schemas";
+import { promptsSysteme, PROMPTS_SYSTEME_FR } from "@/lib/ai/prompts";
+import { CONTRAT_D_EXTRACTION, CONTRAT_DE_LECTURE } from "@/lib/ai/schemas";
 import { langueDuDepot, type Depot } from "./corpus";
 import type { DepotEvalue } from "./depot-evalue";
 import { decrire } from "./echec-d-appel";
@@ -23,8 +23,8 @@ async function lireImage(
 
   const { resultat: lu, reprises } = await avecUneReprise(() =>
     callAI({
-      contract: OCR_EXTRACT,
-      system: SYSTEM_PROMPTS.ocr_extract,
+      contract: CONTRAT_DE_LECTURE,
+      system: PROMPTS_SYSTEME_FR.ocr_extract,
       messages: [
         {
           role: "user",
@@ -64,7 +64,7 @@ export async function evaluerDepot(depot: Depot): Promise<DepotEvalue> {
     reprisesAvantEchec += reprisesLecture;
     const { resultat: extraction, reprises: reprisesExtraction } = await avecUneReprise(() =>
       callAI({
-        contract: EXTRACT_ATOMS,
+        contract: CONTRAT_D_EXTRACTION,
         system: promptsSysteme(langue).extract_atoms,
         messages: [{ role: "user", content: texte }],
       }),

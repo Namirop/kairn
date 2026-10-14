@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import { runJob } from "@/lib/jobs/runner";
+import { executerLeJob } from "@/lib/jobs/runner";
 
 /**
  * De quoi rejouer un dépôt hors requête HTTP. `after()` n'y part pas : les
@@ -48,7 +48,7 @@ export async function executerJobsEnAttente(inputId: string): Promise<number> {
     orderBy: { createdAt: "asc" },
   });
 
-  for (const job of jobs) await runJob(job.id);
+  for (const job of jobs) await executerLeJob(job.id);
 
   return jobs.length;
 }
@@ -66,7 +66,7 @@ export async function executerToutLePipeline(inputId: string): Promise<number> {
 
     if (jobs.length === 0) break;
 
-    for (const job of jobs) await runJob(job.id);
+    for (const job of jobs) await executerLeJob(job.id);
 
     executes += jobs.length;
   }

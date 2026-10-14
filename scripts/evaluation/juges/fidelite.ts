@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { callAI } from "@/lib/ai/client";
-import type { AiContract } from "@/lib/ai/schemas";
+import type { ContratDeSortie } from "@/lib/ai/schemas";
 import type { VariantFige } from "../fige";
 import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
 
@@ -50,7 +50,7 @@ const fideliteValidation = sortieLue;
 /** `juste: null` = abstention (question non rendue par le juge). Voir `residu.ts`. */
 export type VerdictFidelite = { juste: boolean | null; motif: string };
 
-export const CONTRAT_FIDELITE: AiContract<z.infer<typeof fideliteValidation>> = {
+export const CONTRAT_FIDELITE: ContratDeSortie<z.infer<typeof fideliteValidation>> = {
   purpose: "juge_fidelite",
   forme: fideliteForme,
   validation: fideliteValidation,

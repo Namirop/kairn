@@ -4,7 +4,7 @@ import { reclamerSignalDeMaitrise } from "@/lib/db/carte-de-maitrise";
 import { enregistrerRevision } from "@/lib/db/revision";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
 import { JOURS_AVANT_ARCHIVAGE } from "@/lib/domain/etat-maitrise";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Ce que la session déduit des passages : l'archivage déclaré, et la carte
@@ -94,13 +94,13 @@ export async function casSignalDeMaitrise(userId: string, maintenant: Date): Pro
     maintenant,
   );
 
-  record(
+  noter(
     "Maîtrise — une série qui accélère déclenche le signal",
     vuSurAcceleration,
     vuSurAcceleration ? "signal levé" : "aucun signal",
   );
 
-  record(
+  noter(
     "Maîtrise — une série qui ralentit ne le déclenche pas",
     !vuSurRalentissement,
     vuSurRalentissement ? "signal levé à tort" : "aucun signal",
@@ -110,7 +110,7 @@ export async function casSignalDeMaitrise(userId: string, maintenant: Date): Pro
   const premiere = await reclamerSignalDeMaitrise(userId, [accelere.atomId, ralentit.atomId]);
   const seconde = await reclamerSignalDeMaitrise(userId, [accelere.atomId]);
 
-  record(
+  noter(
     "Maîtrise — la carte est réclamée une fois, et une seule",
     premiere?.atomId === accelere.atomId && seconde === null,
     premiere ? `première accordée, seconde ${seconde ? "accordée aussi" : "refusée"}` : "aucune",
@@ -133,13 +133,13 @@ export async function casArchivageDeclare(userId: string, maintenant: Date): Pro
 
   const joursAvantRetour = Math.round((atome.due.getTime() - maintenant.getTime()) / JOUR_MS);
 
-  record(
+  noter(
     "Archivage — le concept est archivé, et par l'utilisateur",
     atome.state === "ARCHIVED" && atome.archivedByUser && atome.archivedAt !== null,
     `${atome.state}, déclaré par l'utilisateur : ${atome.archivedByUser}`,
   );
 
-  record(
+  noter(
     "Archivage — l'échéance repart à trois mois au lieu de disparaître",
     joursAvantRetour === JOURS_AVANT_ARCHIVAGE,
     `revient dans ${joursAvantRetour} jours`,
@@ -147,7 +147,7 @@ export async function casArchivageDeclare(userId: string, maintenant: Date): Pro
 
   const session = await lireSessionDuJour(userId, maintenant);
 
-  record(
+  noter(
     "Archivage — le concept ne revient pas dans la session du jour",
     !session.questions.some((question) => question.atomId === cible.atomId),
     `${session.questions.length} question(s) dans la session`,
@@ -156,7 +156,7 @@ export async function casArchivageDeclare(userId: string, maintenant: Date): Pro
   const plusTard = new Date(maintenant.getTime() + (JOURS_AVANT_ARCHIVAGE + 1) * JOUR_MS);
   const retour = await lireSessionDuJour(userId, plusTard);
 
-  record(
+  noter(
     "Archivage — il revient bien trois mois plus tard",
     retour.questions.some((question) => question.atomId === cible.atomId),
     `${retour.questions.length} question(s) trois mois plus tard`,
@@ -171,7 +171,7 @@ export async function casArchivageDeclare(userId: string, maintenant: Date): Pro
     select: { state: true, archivedByUser: true, archivedAt: true },
   });
 
-  record(
+  noter(
     "Archivage — il se défait, et le concept cesse d'être archivé",
     defait && remis.state !== "ARCHIVED" && !remis.archivedByUser && remis.archivedAt === null,
     `${remis.state}, déclaré : ${remis.archivedByUser}`,
@@ -179,7 +179,7 @@ export async function casArchivageDeclare(userId: string, maintenant: Date): Pro
 
   const aussitot = await lireSessionDuJour(userId, demain);
 
-  record(
+  noter(
     "Archivage — défait, le concept redevient dû tout de suite",
     aussitot.questions.some((question) => question.atomId === cible.atomId),
     aussitot.questions.some((question) => question.atomId === cible.atomId)
@@ -187,7 +187,7 @@ export async function casArchivageDeclare(userId: string, maintenant: Date): Pro
       : "absent de la session",
   );
 
-  record(
+  noter(
     "Archivage — défaire deux fois ne fait rien la seconde",
     !(await desarchiverConcept(cible.atomId, userId, demain)),
     "second appel refusé",

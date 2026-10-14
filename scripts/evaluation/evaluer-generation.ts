@@ -55,7 +55,7 @@ async function main(): Promise<void> {
   const { evaluerDepot, rejouerDepot } = await import("./execution");
   const { dernierFige, ecrireFige, lireFige } = await import("./fige");
   const { accorder, rendreRapport, resumeConsole } = await import("./rapport");
-  const { sumAiCalls } = await import("@/lib/db/ai-call");
+  const { sommerLesAppels } = await import("@/lib/db/registre-des-appels");
   const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
 
   const fragments = (argument("--depot") ?? "").split(",").filter(Boolean);
@@ -136,11 +136,11 @@ async function main(): Promise<void> {
     const ouverture = new Date();
     const evaluation =
       "concepts" in entree ? await rejouerDepot(entree) : await evaluerDepot(entree);
-    passages.push({ evaluation, consommation: await sumAiCalls(ouverture) });
+    passages.push({ evaluation, consommation: await sommerLesAppels(ouverture) });
   }
 
   const modele = process.env.AI_MODEL ?? "inconnu";
-  const total = await sumAiCalls(debut);
+  const total = await sommerLesAppels(debut);
   const rapport = rendreRapport(passages, { modele, emisA: debut, total, source });
 
   mkdirSync(RAPPORTS, { recursive: true });

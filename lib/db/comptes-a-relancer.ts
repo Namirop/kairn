@@ -23,7 +23,7 @@ export type CandidatALaRelance = {
  * jour de marge couvre tous les fuseaux, le jugement exact revient à la
  * fonction pure.
  */
-export async function findComptesARelancer(
+export async function trouverLesComptesARelancer(
   maintenant: Date,
   limit = 500,
 ): Promise<CandidatALaRelance[]> {
@@ -31,7 +31,7 @@ export async function findComptesARelancer(
     maintenant.getTime() - (JOURS_APRES_LESQUELS_ON_RENONCE + 1) * 24 * 60 * 60 * 1000,
   );
 
-  const rows = await prisma.userSettings.findMany({
+  const lignes = await prisma.userSettings.findMany({
     where: {
       emailOptOutAt: null,
       user: {
@@ -49,10 +49,10 @@ export async function findComptesARelancer(
     take: limit,
   });
 
-  return rows.map((row) => ({
-    userId: row.userId,
-    timezone: row.timezone,
-    dailyReminderHour: row.dailyReminderHour,
-    inscritLe: row.user.createdAt,
+  return lignes.map((ligne) => ({
+    userId: ligne.userId,
+    timezone: ligne.timezone,
+    dailyReminderHour: ligne.dailyReminderHour,
+    inscritLe: ligne.user.createdAt,
   }));
 }

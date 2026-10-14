@@ -1,16 +1,16 @@
 import { compterDusAujourdhui } from "@/lib/db/session-du-jour";
-import { findReminderCandidates } from "@/lib/db/reminder-audience";
-import { findUserStats } from "@/lib/db/user-settings";
-import { sendNotification } from "@/lib/email/notifications";
+import { trouverLesDestinataires } from "@/lib/db/destinataires-des-rappels";
+import { trouverLesCompteurs } from "@/lib/db/reglages-du-compte";
+import { envoyerLaNotification } from "@/lib/email/notifications";
 import { aNotifier, journaliser, passage, type Passage } from "./passage-de-notification";
 import { estLHeureDeLAlerte, serieEnSursis } from "@/lib/domain/alerte-de-streak";
-import { localDay } from "@/lib/domain/local-day";
-import { selectDueForReminder } from "@/lib/domain/reminder-selection";
+import { jourLocal } from "@/lib/domain/jour-local";
+import { choisirLesRappelsDus } from "@/lib/domain/selection-des-rappels";
 
 /**
  * Les envois du passage horaire : rappel quotidien et alerte de série.
  *
- * Les fonctions pures tranchent qui est à l'heure ; `sendNotification` vérifie
+ * Les fonctions pures tranchent qui est à l'heure ; `envoyerLaNotification` vérifie
  * en dernier le refus d'emails et le réglage du type, et aucun chemin ne le
  * contourne. `EmailDelivery` (clé compte, type, jour local) empêche un second
  * envoi le même jour, même si le passage est rejoué.
@@ -22,11 +22,8 @@ import { selectDueForReminder } from "@/lib/domain/reminder-selection";
  * plus ouvrir les suivants.
  */
 export async function envoyerLesRappels(maintenant: Date = new Date()): Promise<Passage> {
-  const candidats = await findReminderCandidates();
-  const alHeure = selectDueForReminder(candidats, maintenant).map((entree) => ({
-    cible: entree.target,
-    jour: entree.day,
-  }));
+  const candidats = await trouverLesDestinataires();
+  const alHeure = choisirLesRappelsDus(candidats, maintenant);
 
   const { restants, deja } = await aNotifier("DAILY_REMINDER", alHeure);
   const resultat = passage(candidats.length, alHeure.length, deja);
@@ -39,10 +36,10 @@ export async function envoyerLesRappels(maintenant: Date = new Date()): Promise<
       continue;
     }
 
-    const stats = await findUserStats(cible.userId);
-    const envoi = await sendNotification(cible.userId, {
+    const stats = await trouverLesCompteurs(cible.userId);
+    const envoi = await envoyerLaNotification(cible.userId, {
       type: "DAILY_REMINDER",
-      payload: { dueCount: dus, currentStreak: stats?.currentStreak ?? 0 },
+      payload: { dus, currentStreak: stats?.currentStreak ?? 0 },
     });
 
     if (envoi.status === "SENT") resultat.envoyes += 1;
@@ -61,16 +58,16 @@ export async function envoyerLesRappels(maintenant: Date = new Date()): Promise<
  * l'inévitable.
  */
 export async function envoyerLesAlertesDeStreak(maintenant: Date = new Date()): Promise<Passage> {
-  const candidats = await findReminderCandidates("STREAK_ALERT");
+  const candidats = await trouverLesDestinataires("STREAK_ALERT");
   const alHeure = candidats
     .filter((cible) => estLHeureDeLAlerte(maintenant, cible))
-    .map((cible) => ({ cible, jour: localDay(maintenant, cible.timezone) }));
+    .map((cible) => ({ cible, jour: jourLocal(maintenant, cible.timezone) }));
 
   const { restants, deja } = await aNotifier("STREAK_ALERT", alHeure);
   const resultat = passage(candidats.length, alHeure.length, deja);
 
   for (const { cible } of restants) {
-    const stats = await findUserStats(cible.userId);
+    const stats = await trouverLesCompteurs(cible.userId);
     const enSursis = serieEnSursis(maintenant, {
       timezone: cible.timezone,
       currentStreak: stats?.currentStreak ?? 0,
@@ -91,9 +88,9 @@ export async function envoyerLesAlertesDeStreak(maintenant: Date = new Date()): 
       continue;
     }
 
-    const envoi = await sendNotification(cible.userId, {
+    const envoi = await envoyerLaNotification(cible.userId, {
       type: "STREAK_ALERT",
-      payload: { currentStreak: stats?.currentStreak ?? 0, dueCount: dus },
+      payload: { currentStreak: stats?.currentStreak ?? 0, dus },
     });
 
     if (envoi.status === "SENT") resultat.envoyes += 1;

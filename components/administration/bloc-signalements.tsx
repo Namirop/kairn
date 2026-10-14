@@ -4,7 +4,7 @@ import { Section } from "@/components/administration/section";
 import { LigneDeSignalement } from "@/components/signalements/ligne-de-signalement";
 import { ROUTES } from "@/lib/auth/routes";
 import type { PageDeSignalements } from "@/lib/db/signalement";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * Les signalements de questions, les plus récents d'abord. L'empreinte de

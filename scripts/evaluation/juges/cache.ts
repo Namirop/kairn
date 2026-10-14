@@ -97,10 +97,10 @@ Il a probablement été écrit par une version antérieure du banc. Supprime-le 
 /** Écriture atomique (temp puis rename) : un `Ctrl-C` ne laisse pas de cache tronqué. */
 export function sauverCache(cache: CacheDeMesure, cheminFige: string): void {
   const chemin = cheminDuCache(cheminFige);
-  const temp = `${chemin}.tmp`;
+  const provisoire = `${chemin}.tmp`;
   mkdirSync(dirname(chemin), { recursive: true });
-  writeFileSync(temp, `${JSON.stringify(cache, null, 2)}\n`, "utf8");
-  renameSync(temp, chemin);
+  writeFileSync(provisoire, `${JSON.stringify(cache, null, 2)}\n`, "utf8");
+  renameSync(provisoire, chemin);
 }
 
 /** Cache d'un dépôt, créé au vol si absent. Le retour est mutable — les écritures suivantes le voient. */

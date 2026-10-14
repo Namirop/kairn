@@ -1,8 +1,8 @@
-import { readAiConfig } from "@/lib/ai/config";
+import { lireLaConfigDeLEnvironnement } from "@/lib/ai/config";
 import { lireLaConfigEffective } from "@/lib/ai/reglages-effectifs";
 import { prisma } from "@/lib/db/client";
 import { lireLeJournal, lireLesReglagesPosés, poserLesReglages } from "@/lib/db/reglages";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Les réglages posés en base. Chaque cas repose l'état d'origine en sortant :
@@ -24,19 +24,19 @@ const OPERATEUR = "verification@cairn.test";
 
 /** La surcharge l'emporte sur l'environnement, et son retrait rend la main. */
 export async function casSurchargeEtRetour(): Promise<void> {
-  const environnement = readAiConfig();
+  const environnement = lireLaConfigDeLEnvironnement();
   const augmente = environnement.maxTokens + 1234;
 
   await poserLesReglages({ ...AUCUN, maxTokens: augmente }, OPERATEUR);
   const avecSurcharge = await lireLaConfigEffective();
 
-  record(
+  noter(
     "Réglages — une valeur posée l'emporte sur l'environnement",
     avecSurcharge.maxTokens === augmente,
     `${environnement.maxTokens} → ${avecSurcharge.maxTokens}`,
   );
 
-  record(
+  noter(
     "Réglages — ce qui n'est pas posé continue de suivre l'environnement",
     avecSurcharge.model === environnement.model &&
       avecSurcharge.dailyCallCap === environnement.dailyCallCap,
@@ -46,7 +46,7 @@ export async function casSurchargeEtRetour(): Promise<void> {
   await poserLesReglages(AUCUN, OPERATEUR);
   const rendu = await lireLaConfigEffective();
 
-  record(
+  noter(
     "Réglages — retirer la surcharge rend la main au défaut",
     rendu.maxTokens === environnement.maxTokens,
     `${rendu.maxTokens}`,
@@ -68,7 +68,7 @@ export async function casValeurAbsurdeRefusee(): Promise<void> {
     leve = true;
   }
 
-  record(
+  noter(
     "Réglages — un plafond à zéro lève au lieu de couper l'ingestion en silence",
     leve,
     leve ? "refusé" : "accepté, ce qui est un trou",
@@ -91,12 +91,12 @@ export async function casSurchargeRattrapeLEnvironnement(): Promise<void> {
     let leve = false;
 
     try {
-      readAiConfig();
+      lireLaConfigDeLEnvironnement();
     } catch {
       leve = true;
     }
 
-    record(
+    noter(
       "Réglages — une variable absente reste une erreur tant que rien ne la remplace",
       leve,
       leve ? "refusé" : "accepté, ce qui est un trou",
@@ -105,7 +105,7 @@ export async function casSurchargeRattrapeLEnvironnement(): Promise<void> {
     await poserLesReglages({ ...AUCUN, anonymousDailyCallCap: 7 }, OPERATEUR);
     const effective = await lireLaConfigEffective();
 
-    record(
+    noter(
       "Réglages — une valeur posée rattrape une variable d'environnement absente",
       effective.anonymousDailyCallCap === 7,
       `plafond anonyme ${effective.anonymousDailyCallCap}`,
@@ -129,7 +129,7 @@ export async function casJournalTrace(): Promise<void> {
     (ligne) => ligne.reglage === "enabled" && !avant.some((vieille) => vieille.id === ligne.id),
   );
 
-  record(
+  noter(
     "Réglages — un changement écrit son avant, son après et son auteur",
     nouvelle?.apres === "false" && nouvelle.parEmail === OPERATEUR,
     nouvelle
@@ -139,7 +139,7 @@ export async function casJournalTrace(): Promise<void> {
 
   const { changements } = await poserLesReglages({ ...AUCUN, enabled: false }, OPERATEUR);
 
-  record(
+  noter(
     "Réglages — réenregistrer sans rien changer n'encombre pas le journal",
     changements === 0,
     `${changements} changement(s)`,
@@ -157,7 +157,7 @@ export async function casAucunResteEnBase(): Promise<void> {
   const restants = await lireLesReglagesPosés();
   const poses = Object.values(restants).filter((valeur) => valeur !== null);
 
-  record(
+  noter(
     "Réglages — la vérification ne laisse aucune surcharge derrière elle",
     poses.length === 0,
     poses.length === 0 ? "table rendue vide" : `${poses.length} surcharge(s) restante(s)`,

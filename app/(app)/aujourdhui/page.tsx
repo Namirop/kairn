@@ -12,7 +12,7 @@ import { ProgressionDuCairn } from "@/components/tableau/progression-du-cairn";
 import { TitreDuCairn } from "@/components/tableau/titre-du-cairn";
 import { SignalDeDette } from "@/components/tableau/signal-de-dette";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { lireTableauDeBord } from "@/lib/db/tableau-de-bord";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * se prolonge jusqu'en bas de la fenêtre.
  */
 export default async function PageAujourdhui() {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 

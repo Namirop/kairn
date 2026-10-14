@@ -48,7 +48,7 @@ async function main(): Promise<void> {
   const { evaluerDepot, rejouerDepot } = await import("./execution");
   const { dernierFige, lireFige, retenirVariant } = await import("./fige");
   const { join: joinChemin } = await import("node:path");
-  const { sumAiCalls } = await import("@/lib/db/ai-call");
+  const { sommerLesAppels } = await import("@/lib/db/registre-des-appels");
   const { lireReservationsDuJour } = await import("@/lib/db/ai-quota");
   const { CONCEPTS_PAR_APPEL } = await import("@/lib/ai/schemas");
 
@@ -187,7 +187,7 @@ async function main(): Promise<void> {
     }
   }
 
-  const total = await sumAiCalls(debut);
+  const total = await sommerLesAppels(debut);
   console.info(`\n${total.calls} appels, ${Number(total.costUsd).toFixed(4)} $.`);
 
   // Sérialisé à la main : `ecrireFige` attend des `DepotEvalue` frais, on a des

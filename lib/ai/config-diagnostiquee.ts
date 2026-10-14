@@ -1,6 +1,6 @@
-import { AIConfigError } from "./errors";
+import { ConfigIaInvalideError } from "./errors";
 import { lireLaConfigEffective } from "./reglages-effectifs";
-import type { AiConfig } from "./config";
+import type { ConfigIa } from "./config";
 
 /**
  * La configuration effective, ou la raison pour laquelle elle ne se lit pas.
@@ -11,7 +11,7 @@ import type { AiConfig } from "./config";
  * modèle, une configuration illisible doit rester une erreur levée.
  */
 export type ConfigDiagnostiquee =
-  { lisible: true; config: AiConfig } | { lisible: false; motif: string };
+  { lisible: true; config: ConfigIa } | { lisible: false; motif: string };
 
 export async function diagnostiquerLaConfig(): Promise<ConfigDiagnostiquee> {
   try {
@@ -19,7 +19,7 @@ export async function diagnostiquerLaConfig(): Promise<ConfigDiagnostiquee> {
   } catch (erreur) {
     // Seule une configuration refusée se montre : une base injoignable remonte,
     // pour ne pas passer pour un réglage à corriger.
-    if (!(erreur instanceof AIConfigError)) throw erreur;
+    if (!(erreur instanceof ConfigIaInvalideError)) throw erreur;
 
     console.error("Configuration du modèle illisible", {
       code: erreur.code,

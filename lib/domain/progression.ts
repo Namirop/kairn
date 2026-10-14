@@ -1,4 +1,4 @@
-import { jourSuivant } from "./local-day";
+import { jourSuivant } from "./jour-local";
 
 /**
  * XP, niveaux et série.

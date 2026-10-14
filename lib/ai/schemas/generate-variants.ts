@@ -3,7 +3,7 @@ import type { FacetteDuLot } from "@/lib/domain/emplacement-du-trou";
 import { normaliserLesOptions, optionsDistinguables } from "@/lib/domain/options-de-qcm";
 import { questionServable } from "@/lib/domain/question-servable";
 import { TROU } from "@/lib/domain/reponse-cloze";
-import type { AiContract } from "./contract";
+import type { ContratDeSortie } from "./contrat-de-sortie";
 import {
   FORMATS_DU_MECANISME,
   FORMATS_VERIFIABLES,
@@ -87,7 +87,7 @@ function formeDeLEnvoi(trou: FacetteDuLot | undefined) {
   });
 }
 
-export const generateVariantsForme = formeDeLEnvoi(undefined);
+export const formeDeGeneration = formeDeLEnvoi(undefined);
 
 /** Le même lot, relu : plus aucune borne de comptage, les énumérations restent. */
 const lotLu = z.object({
@@ -162,7 +162,7 @@ function optionsDe(posee: QuestionLue) {
   };
 }
 
-const generateVariantsValidation = sortieLue.transform((sortie) => {
+const validationDeGeneration = sortieLue.transform((sortie) => {
   // Deux lots au même rang : le premier gagne. Refuser emporterait les lots
   // corrects du même envoi.
   const vus = new Set<number>();
@@ -217,20 +217,20 @@ const generateVariantsValidation = sortieLue.transform((sortie) => {
   };
 });
 
-export type GenerateVariantsOutput = z.infer<typeof generateVariantsValidation>;
+export type SortieDeGeneration = z.infer<typeof validationDeGeneration>;
 
 /**
  * Le contrat d'un envoi, avec l'emplacement du trou qui lui a été assigné.
  * `purpose` reste le même quel que soit le trou : même dépense, même registre,
  * même fixture en mode mock.
  */
-export function contratDeGeneration(trou?: FacetteDuLot): AiContract<GenerateVariantsOutput> {
+export function contratDeGeneration(trou?: FacetteDuLot): ContratDeSortie<SortieDeGeneration> {
   return {
     purpose: "generate_variants",
     forme: formeDeLEnvoi(trou),
-    validation: generateVariantsValidation,
+    validation: validationDeGeneration,
   };
 }
 
 /** Le contrat sans emplacement imposé : les tests et les fixtures s'en servent. */
-export const GENERATE_VARIANTS = contratDeGeneration();
+export const CONTRAT_DE_GENERATION = contratDeGeneration();

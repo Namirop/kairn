@@ -1,4 +1,5 @@
-import { startOfUtcDay, sumAiCalls } from "@/lib/db/ai-call";
+import { sommerLesAppels } from "@/lib/db/registre-des-appels";
+import { debutDuJourUtc } from "@/lib/domain/fenetre-utc";
 import { reserverLAlerte } from "@/lib/db/alerte-quota";
 import { envoyerLAlerteDePlafond } from "@/lib/email/alerte-de-plafond";
 import { surveillerLePlafond, type EtatDuCompteur, type OutilsDAlerte } from "./alerte-de-plafond";
@@ -14,7 +15,8 @@ import { differer } from "@/lib/hors-chemin-critique";
 const OUTILS: OutilsDAlerte = {
   reserver: reserverLAlerte,
   // La dépense se lit au registre plutôt qu'elle ne s'estime.
-  depenseDuJourUsd: async (maintenant) => (await sumAiCalls(startOfUtcDay(maintenant))).costUsd,
+  depenseDuJourUsd: async (maintenant) =>
+    (await sommerLesAppels(debutDuJourUtc(maintenant))).costUsd,
   envoyer: envoyerLAlerteDePlafond,
 };
 

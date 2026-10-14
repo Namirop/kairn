@@ -2,7 +2,7 @@ import { plafondDuCompte } from "@/lib/db/abonnement";
 import { plafondDeDepots } from "@/lib/domain/plafond-du-plan";
 import { prisma } from "@/lib/db/client";
 import { lireUsageDeLaPeriode, periodeDuCompte } from "@/lib/db/periode-du-compte";
-import { localDay } from "@/lib/domain/local-day";
+import { jourLocal } from "@/lib/domain/jour-local";
 import { debutEnDate } from "@/lib/domain/periode-de-quota";
 
 /**
@@ -108,7 +108,7 @@ async function fenetreDeDebitOuverte(
   fuseau: string,
   maintenant: Date,
 ): Promise<boolean> {
-  const jour = localDay(maintenant, fuseau);
+  const jour = jourLocal(maintenant, fuseau);
   const lignes = await prisma.$queryRaw<{ depositWindowCount: number }[]>`
     INSERT INTO "DailyUsage" (
       "userId", "day", "generations", "concepts", "reviews",

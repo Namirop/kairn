@@ -65,7 +65,7 @@ export async function jugerLesDoublonsVia(
    * appel. */
   maxTokens: number = TOKENS_DES_JUGES,
   /** `false` pour un fournisseur qui ne supporte pas `reasoning` (Kimi via
-   * Novita) ; sinon « low » par défaut, voir `AppelOpenRouterParams`. */
+   * Novita) ; sinon « low » par défaut, voir `ParametresDAppelOpenRouter`. */
   reasoning?: { effort: "low" | "medium" | "high" } | false,
 ): Promise<{ verdicts: VerdictDoublon[]; facture: Facture }> {
   const contenu = [

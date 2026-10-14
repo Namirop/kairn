@@ -1,29 +1,29 @@
 /**
  * Les trois contrats de sortie du modèle. Chacun expose une forme, montrée au
- * modèle, et une validation, appliquée à sa réponse. Voir `contract.ts` pour la
+ * modèle, et une validation, appliquée à sa réponse. Voir `contrat-de-sortie.ts` pour la
  * raison de cette séparation.
  */
 
 export {
-  AI_PURPOSES,
-  AI_PURPOSES_BANC,
+  INTENTIONS_DU_PRODUIT,
+  INTENTIONS_DU_BANC,
   estUneIntentionDeBanc,
-  type AiContract,
-  type AiPurpose,
-  type AiPurposeBanc,
-  type AiPurposeProduit,
-} from "./contract";
+  type ContratDeSortie,
+  type IntentionDAppel,
+  type IntentionDuBanc,
+  type IntentionDuProduit,
+} from "./contrat-de-sortie";
 export {
   contratDExtraction,
-  EXTRACT_ATOMS,
-  extractAtomsForme,
-  type ExtractAtomsOutput,
+  CONTRAT_D_EXTRACTION,
+  formeDExtraction,
+  type SortieDExtraction,
 } from "./extract-atoms";
 export {
   CONCEPTS_PAR_APPEL,
   contratDeGeneration,
-  GENERATE_VARIANTS,
-  generateVariantsForme,
-  type GenerateVariantsOutput,
+  CONTRAT_DE_GENERATION,
+  formeDeGeneration,
+  type SortieDeGeneration,
 } from "./generate-variants";
-export { OCR_EXTRACT, ocrExtractForme, type OcrExtractOutput } from "./ocr-extract";
+export { CONTRAT_DE_LECTURE, formeDeLecture, type SortieDeLecture } from "./ocr-extract";

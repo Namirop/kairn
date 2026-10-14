@@ -5,9 +5,9 @@ import { enregistrerEntrainement } from "@/lib/db/entrainement";
 import { enregistrerRevision } from "@/lib/db/revision";
 import { listerLesSignalements, signalerUneQuestion } from "@/lib/db/signalement";
 import { estAdministrateur } from "@/lib/auth/admin";
-import { PROMPT_VERSIONS } from "@/lib/ai/prompts";
+import { VERSIONS_DES_PROMPTS_FR } from "@/lib/ai/prompts";
 import { fabriquerConcept } from "./abus-fabrique";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * La progression comptée et la trace d'un signalement, deux garanties qui se
@@ -51,7 +51,7 @@ export async function casProgressionComptee(userId: string, maintenant: Date): P
   await reviser(userId, premier, "GOOD", maintenant);
 
   const apresUn = await statsDe(userId);
-  record(
+  noter(
     "Progression — un passage de session vaut un point, quelle que soit la note",
     apresUn?.xp === 1 && apresUn?.currentStreak === 1 && apresUn?.level === 1,
     `${apresUn?.xp} XP, série ${apresUn?.currentStreak}, niveau ${apresUn?.level}`,
@@ -65,7 +65,7 @@ export async function casProgressionComptee(userId: string, maintenant: Date): P
   await reviser(userId, second, "GOOD", new Date(maintenant.getTime() + JOUR_MS), 1);
   const apresRattrapage = await statsDe(userId);
 
-  record(
+  noter(
     "Progression — un concept raté puis retrouvé rapporte le double",
     (apresRattrapage?.xp ?? 0) - (avantRattrapage?.xp ?? 0) === 2,
     `+${(apresRattrapage?.xp ?? 0) - (avantRattrapage?.xp ?? 0)} point(s)`,
@@ -84,7 +84,7 @@ export async function casProgressionComptee(userId: string, maintenant: Date): P
   );
   const apresEntrainement = await statsDe(userId);
 
-  record(
+  noter(
     "Progression — l'entraînement ne donne ni point, ni série",
     apresEntrainement?.xp === avantEntrainement?.xp &&
       apresEntrainement?.currentStreak === avantEntrainement?.currentStreak &&
@@ -94,7 +94,7 @@ export async function casProgressionComptee(userId: string, maintenant: Date): P
 
   // La garantie la plus solide : l'entraînement n'importe pas la progression.
   const entrainement = readFileSync("lib/db/entrainement.ts", "utf8");
-  record(
+  noter(
     "Progression — le chemin de l'entraînement ne connaît pas le compteur",
     !entrainement.includes("progression"),
     entrainement.includes("progression") ? "il l'importe" : "aucun import",
@@ -117,7 +117,7 @@ export async function casSerieAutourDeMinuit(userId: string): Promise<void> {
   await reviser(userId, concept, "GOOD", new Date("2026-03-10T23:10:00Z"), 1);
   const lendemain = await statsDe(userId);
 
-  record(
+  noter(
     "Série — vingt minutes à cheval sur minuit local comptent deux jours",
     veille?.currentStreak === 1 && lendemain?.currentStreak === 2,
     `${veille?.currentStreak} puis ${lendemain?.currentStreak}`,
@@ -126,7 +126,7 @@ export async function casSerieAutourDeMinuit(userId: string): Promise<void> {
   await reviser(userId, concept, "GOOD", new Date("2026-03-11T09:00:00Z"), 2);
   const memeJour = await statsDe(userId);
 
-  record(
+  noter(
     "Série — deux passages le même jour ne comptent qu'une fois",
     memeJour?.currentStreak === 2,
     `série ${memeJour?.currentStreak}`,
@@ -146,7 +146,7 @@ export async function casSignalementTrace(userId: string): Promise<void> {
   // pipeline aurait posé, pour éprouver la capture et non la fabrique.
   await prisma.variant.update({
     where: { id: variantId },
-    data: { promptVersion: PROMPT_VERSIONS.generate_variants, model: "claude-sonnet-5" },
+    data: { promptVersion: VERSIONS_DES_PROMPTS_FR.generate_variants, model: "claude-sonnet-5" },
   });
 
   const ecrit = await signalerUneQuestion(
@@ -155,7 +155,7 @@ export async function casSignalementTrace(userId: string): Promise<void> {
   );
   const retiree = await prisma.variant.findUniqueOrThrow({ where: { id: variantId } });
 
-  record(
+  noter(
     "Signalement — la question signalée sort du tirage, sans rien régénérer",
     ecrit && retiree.retiredAt !== null,
     ecrit ? "retirée, aucune demande de questions" : "refusé",
@@ -163,9 +163,9 @@ export async function casSignalementTrace(userId: string): Promise<void> {
 
   const avant = (await listerLesSignalements()).find((ligne) => ligne.atomId === concept.atomId);
 
-  record(
+  noter(
     "Signalement — la version des prompts est capturée",
-    avant?.promptVersion === PROMPT_VERSIONS.generate_variants &&
+    avant?.promptVersion === VERSIONS_DES_PROMPTS_FR.generate_variants &&
       avant?.model === "claude-sonnet-5",
     `prompt ${avant?.promptVersion ?? "absent"}, modèle ${avant?.model ?? "absent"}`,
   );
@@ -174,7 +174,7 @@ export async function casSignalementTrace(userId: string): Promise<void> {
   await prisma.atom.delete({ where: { id: concept.atomId } });
   const apres = (await listerLesSignalements()).find((ligne) => ligne.id === avant?.id);
 
-  record(
+  noter(
     "Signalement — il survit à la suppression du concept, et le dit",
     apres !== undefined &&
       apres.conceptExisteEncore === false &&
@@ -209,7 +209,7 @@ export function casAdministrationFermee(): void {
 
   const rates = verdicts.filter(([, ok]) => !ok).map(([libelle]) => libelle);
 
-  record(
+  noter(
     "Administration — seule une adresse autorisée ouvre les signalements",
     rates.length === 0 && fermeParDefaut,
     rates.length === 0
@@ -229,7 +229,7 @@ export function casAdministrationFermee(): void {
   const ancienne = readFileSync("app/(app)/signalements/page.tsx", "utf8");
   const ancienneNue = !(ancienne.includes("estAdministrateur") && ancienne.includes("notFound"));
 
-  record(
+  noter(
     "Administration — chacune de ses pages se garde, et n'admet pas son existence",
     internes.length === 0 && !ancienneNue,
     internes.length === 0 && !ancienneNue

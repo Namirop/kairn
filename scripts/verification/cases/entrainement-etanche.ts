@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db/client";
 import { enregistrerEntrainement, lireTourDentrainement } from "@/lib/db/entrainement";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * L'étanchéité de l'entraînement libre, vérifiée sur la base : une garantie
@@ -101,13 +101,13 @@ export async function casEntrainementEtanche(userId: string, maintenant: Date): 
 
   const tour = await lireTourDentrainement(userId);
 
-  record(
+  noter(
     "Entraînement — deux concepts non dus donnent huit questions",
     tour.length === 8 && new Set(tour.map((question) => question.variantId)).size === 8,
     `${tour.length} question(s), alors que la session en sert ${sessionAvant.questions.length}`,
   );
 
-  record(
+  noter(
     "Entraînement — il alterne les concepts",
     tour.every((question, rang) => rang === 0 || question.atomId !== tour[rang - 1]?.atomId),
     tour.map((question) => (question.atomId === premier ? "1" : "2")).join(""),
@@ -142,7 +142,7 @@ export async function casEntrainementEtanche(userId: string, maintenant: Date): 
     champsModifies(photo, apres.get(atomId) ?? {}),
   );
 
-  record(
+  noter(
     "Entraînement — huit passages ne déplacent ni échéance, ni stabilité, ni difficulté, ni état",
     bouges.length === 0,
     bouges.length === 0 ? "la mémoire est intacte" : `champs modifiés : ${bouges.join(", ")}`,
@@ -152,7 +152,7 @@ export async function casEntrainementEtanche(userId: string, maintenant: Date): 
     where: { id: { in: [premier, second] }, masterySignaledAt: { not: null } },
   });
 
-  record(
+  noter(
     "Entraînement — une série qui accélère ne lève jamais la carte de maîtrise",
     signales === 0,
     `${signales} concept(s) marqué(s)`,
@@ -163,7 +163,7 @@ export async function casEntrainementEtanche(userId: string, maintenant: Date): 
     select: { sessionCount: true, trainingCount: true, lastSessionAt: true },
   });
 
-  record(
+  noter(
     "Entraînement — il n'entre pas dans le compteur qui pilote la rotation",
     compteurs.every((v) => v.sessionCount === 0 && v.lastSessionAt === null),
     `${compteurs.filter((v) => v.trainingCount > 0).length} variante(s) comptée(s) en entraînement, ${compteurs.filter((v) => v.sessionCount > 0).length} en session`,
@@ -174,13 +174,13 @@ export async function casEntrainementEtanche(userId: string, maintenant: Date): 
     select: { mode: true, stabilityBefore: true, stabilityAfter: true },
   });
 
-  record(
+  noter(
     "Entraînement — les passages sont enregistrés, et portent leur mode",
     passages.length === 8 && passages.every((passage) => passage.mode === "TRAINING"),
     `${passages.length} passage(s), tous en ${new Set(passages.map((p) => p.mode)).size === 1 ? passages[0]?.mode : "modes mélangés"}`,
   );
 
-  record(
+  noter(
     "Entraînement — la stabilité enregistrée est celle d'avant, inchangée",
     passages.every((passage) => passage.stabilityBefore === passage.stabilityAfter),
     "aucun passage ne prétend avoir fait progresser la mémoire",
@@ -188,7 +188,7 @@ export async function casEntrainementEtanche(userId: string, maintenant: Date): 
 
   const sessionApres = await lireSessionDuJour(userId, maintenant);
 
-  record(
+  noter(
     "Entraînement — la session du jour est la même avant et après",
     sessionApres.questions.length === sessionAvant.questions.length &&
       sessionApres.prochainJourServi === sessionAvant.prochainJourServi,

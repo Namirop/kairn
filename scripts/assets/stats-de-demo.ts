@@ -1,6 +1,6 @@
-import { dayToUtcDate, localDay } from "@/lib/domain/local-day";
+import { jourEnDateUtc, jourLocal } from "@/lib/domain/jour-local";
 import { progressionPourXp, xpDuPassage } from "@/lib/domain/progression";
-import type { SeedInput } from "@/prisma/seed/corpus-types";
+import type { InputDuCorpus } from "@/prisma/seed/types-du-corpus";
 
 /**
  * Les compteurs du compte de démonstration, par les vraies formules du domaine
@@ -20,21 +20,21 @@ export type StatsDeDemo = {
   lastReviewedOn: Date | null;
 };
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+const JOUR_MS = 24 * 60 * 60 * 1000;
 
 /** Suites de jours consécutifs : la plus longue, et celle qui court encore. */
-function series(jours: string[], aujourdhui: string): { current: number; longest: number } {
+function series(jours: string[], aujourdhui: string): { enCours: number; plusLongue: number } {
   const tries = [...new Set(jours)].sort();
-  let longest = 0;
-  let run = 0;
+  let plusLongue = 0;
+  let suite = 0;
   let precedent: string | undefined;
 
   for (const jour of tries) {
     const enchaine =
       precedent !== undefined &&
-      dayToUtcDate(jour).getTime() - dayToUtcDate(precedent).getTime() === DAY_MS;
-    run = enchaine ? run + 1 : 1;
-    longest = Math.max(longest, run);
+      jourEnDateUtc(jour).getTime() - jourEnDateUtc(precedent).getTime() === JOUR_MS;
+    suite = enchaine ? suite + 1 : 1;
+    plusLongue = Math.max(plusLongue, suite);
     precedent = jour;
   }
 
@@ -42,34 +42,38 @@ function series(jours: string[], aujourdhui: string): { current: number; longest
   const ecartAAujourdhui =
     dernier === undefined
       ? Infinity
-      : (dayToUtcDate(aujourdhui).getTime() - dayToUtcDate(dernier).getTime()) / DAY_MS;
+      : (jourEnDateUtc(aujourdhui).getTime() - jourEnDateUtc(dernier).getTime()) / JOUR_MS;
 
-  return { current: ecartAAujourdhui <= 1 ? run : 0, longest };
+  return { enCours: ecartAAujourdhui <= 1 ? suite : 0, plusLongue };
 }
 
-export function statsDeDemo(corpus: SeedInput[], now: Date, timezone: string): StatsDeDemo {
+export function statsDeDemo(
+  corpus: InputDuCorpus[],
+  maintenant: Date,
+  fuseau: string,
+): StatsDeDemo {
   const jours: string[] = [];
   let xp = 0;
 
   for (const input of corpus) {
     for (const atom of input.atoms) {
-      atom.history.forEach(([daysAgo, note], rang) => {
-        const notePrecedente = rang > 0 ? atom.history[rang - 1]?.[1] : undefined;
+      atom.historique.forEach(([joursEcoules, note], rang) => {
+        const notePrecedente = rang > 0 ? atom.historique[rang - 1]?.[1] : undefined;
         xp += xpDuPassage(notePrecedente === "AGAIN", note !== "AGAIN");
-        jours.push(localDay(new Date(now.getTime() - daysAgo * DAY_MS), timezone));
+        jours.push(jourLocal(new Date(maintenant.getTime() - joursEcoules * JOUR_MS), fuseau));
       });
     }
   }
 
-  const aujourdhui = localDay(now, timezone);
-  const { current, longest } = series(jours, aujourdhui);
+  const aujourdhui = jourLocal(maintenant, fuseau);
+  const { enCours, plusLongue } = series(jours, aujourdhui);
   const dernierJour = [...jours].sort().at(-1);
 
   return {
     xp,
     level: progressionPourXp(xp).niveau,
-    currentStreak: current,
-    longestStreak: longest,
-    lastReviewedOn: dernierJour ? dayToUtcDate(dernierJour) : null,
+    currentStreak: enCours,
+    longestStreak: plusLongue,
+    lastReviewedOn: dernierJour ? jourEnDateUtc(dernierJour) : null,
   };
 }

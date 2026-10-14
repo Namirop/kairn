@@ -6,21 +6,21 @@ import { z } from "zod";
  * `verifier-openrouter.ts` en tire la liste des challengers éligibles.
  */
 
-const ENDPOINT = "https://openrouter.ai/api/v1/models";
+const ADRESSE_DU_CATALOGUE = "https://openrouter.ai/api/v1/models";
 
-const pricingSchema = z.object({
+const schemaDesPrix = z.object({
   prompt: z.string(),
   completion: z.string(),
 });
 
-const modeleListingSchema = z.object({
+const schemaDUnModele = z.object({
   id: z.string(),
-  pricing: pricingSchema,
+  pricing: schemaDesPrix,
   supported_parameters: z.array(z.string()).optional(),
 });
 
-const listingSchema = z.object({
-  data: z.array(modeleListingSchema),
+const schemaDuListing = z.object({
+  data: z.array(schemaDUnModele),
 });
 
 const PARAMETRES_DE_SORTIE_STRUCTUREE = new Set(["structured_outputs", "response_format"]);
@@ -34,7 +34,7 @@ export type EntreeDuCatalogue = {
 };
 
 export async function lireLeCatalogue(): Promise<EntreeDuCatalogue[]> {
-  const reponse = await fetch(ENDPOINT, {
+  const reponse = await fetch(ADRESSE_DU_CATALOGUE, {
     headers: { "Content-Type": "application/json" },
   });
   if (!reponse.ok) {
@@ -43,12 +43,12 @@ export async function lireLeCatalogue(): Promise<EntreeDuCatalogue[]> {
     );
   }
   const brut: unknown = await reponse.json();
-  const parse = listingSchema.safeParse(brut);
-  if (!parse.success) {
-    throw new Error(`Le catalogue OpenRouter n'a pas la forme attendue : ${parse.error.message}`);
+  const lecture = schemaDuListing.safeParse(brut);
+  if (!lecture.success) {
+    throw new Error(`Le catalogue OpenRouter n'a pas la forme attendue : ${lecture.error.message}`);
   }
 
-  return parse.data.data.map((entree) => {
+  return lecture.data.data.map((entree) => {
     const parametres = new Set(entree.supported_parameters ?? []);
     const supporteSortiesStructurees = [...parametres].some((p) =>
       PARAMETRES_DE_SORTIE_STRUCTUREE.has(p),

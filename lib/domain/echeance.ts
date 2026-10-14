@@ -1,4 +1,4 @@
-import { dayToUtcDate, localDay } from "./local-day";
+import { jourEnDateUtc, jourLocal } from "./jour-local";
 
 const MS_PAR_JOUR = 24 * 60 * 60 * 1000;
 
@@ -10,8 +10,8 @@ const MS_PAR_JOUR = 24 * 60 * 60 * 1000;
 
 /** Nombre de jours civils entre deux instants, vus depuis un fuseau donné. */
 function ecartEnJoursCivils(depuis: Date, jusqua: Date, fuseau: string): number {
-  const a = dayToUtcDate(localDay(depuis, fuseau)).getTime();
-  const b = dayToUtcDate(localDay(jusqua, fuseau)).getTime();
+  const a = jourEnDateUtc(jourLocal(depuis, fuseau)).getTime();
+  const b = jourEnDateUtc(jourLocal(jusqua, fuseau)).getTime();
 
   // Deux minuits UTC : la division est exacte, l'arrondi absorbe les flottants.
   return Math.round((b - a) / MS_PAR_JOUR);
@@ -45,8 +45,8 @@ function enDuree(jours: number): Duree {
  * `jourOuIlRevient`).
  */
 export function delaiAvantLeJour(jour: string, maintenant: Date, fuseau: string): Duree {
-  const vise = dayToUtcDate(jour).getTime();
-  const aujourdhui = dayToUtcDate(localDay(maintenant, fuseau)).getTime();
+  const vise = jourEnDateUtc(jour).getTime();
+  const aujourdhui = jourEnDateUtc(jourLocal(maintenant, fuseau)).getTime();
 
   return enDuree(Math.round((vise - aujourdhui) / MS_PAR_JOUR));
 }

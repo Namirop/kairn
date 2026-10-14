@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/db/client";
 import { deposer } from "@/lib/depots/deposer";
-import { runJob } from "@/lib/jobs/runner";
+import { executerLeJob } from "@/lib/jobs/runner";
 import { executerJobsEnAttente, formulaire, libererLaJournee } from "./depot-simule";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Quand une étape n'aboutit pas. Deux règles : les concepts d'un découpage
@@ -47,14 +47,14 @@ export async function casDecoupageImpossible(userId: string): Promise<void> {
     include: { jobs: true },
   });
 
-  record(
+  noter(
     "Découpage impossible — le dépôt s'arrête avec un motif, pas en cours",
     depot.status === "FAILED" && (depot.failureReason ?? "").length > 0,
     `${depot.status} — ${depot.failureReason ?? "aucun motif"}`,
   );
 
   const technique = depot.jobs[0]?.lastError ?? "";
-  record(
+  noter(
     "Découpage impossible — l'erreur technique reste sur le job, pas à l'écran",
     depot.jobs.every((job) => job.status === "FAILED") &&
       technique.length > 0 &&
@@ -87,7 +87,7 @@ export async function casLectureImpossible(userId: string, image: File): Promise
 
   const depot = await prisma.input.findUniqueOrThrow({ where: { id: resultat.inputId } });
 
-  record(
+  noter(
     "Lecture impossible — les octets de l'image ne survivent pas à l'échec",
     (avant.imageData?.length ?? 0) > 0 && depot.imageData === null && depot.status === "FAILED",
     depot.imageData === null
@@ -116,7 +116,7 @@ export async function casEchecPartiel(userId: string): Promise<void> {
     data: { atomIds: ["concept-disparu"] },
   });
 
-  await runJob(job.id);
+  await executerLeJob(job.id);
 
   const depot = await prisma.input.findUniqueOrThrow({
     where: { id: inputId },
@@ -125,13 +125,13 @@ export async function casEchecPartiel(userId: string): Promise<void> {
   const questions = depot.atoms.flatMap((atome) => atome.variants);
   const enEchec = depot.jobs.filter((emploi) => emploi.status === "FAILED");
 
-  record(
+  noter(
     "Échec des questions — le dépôt garde ses concepts et ne reste pas en cours",
     depot.status === "READY" && depot.atoms.length === 3 && questions.length === 0,
     `${depot.status}, ${depot.atoms.length} concepts, ${questions.length} questions`,
   );
 
-  record(
+  noter(
     "Échec des questions — le job est refermé en échec, motif enregistré",
     enEchec.length === 1 && (enEchec[0]?.lastError ?? "").length > 0,
     `${enEchec.length} job(s) en échec — ${enEchec[0]?.lastError ?? "sans motif"}`,

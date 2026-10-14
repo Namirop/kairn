@@ -7,7 +7,7 @@ import { TROU } from "@/lib/domain/reponse-cloze";
  * décodage contraint est compilée depuis ces objets.
  *
  * Les bornes chiffrées n'y sont pas imposées : elles partent en description
- * (`lib/ai/output-schema.ts`) et le modèle les lit comme des indications. Elles
+ * (`lib/ai/schema-de-sortie.ts`) et le modèle les lit comme des indications. Elles
  * vivent donc dans la forme et pas dans la relecture, où elles ne feraient que
  * jeter un appel payé qui porte trois concepts. La relecture ne garde que ce que
  * la grammaire tient : les énumérations, et `minItems` à 0 ou 1.

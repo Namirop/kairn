@@ -1,14 +1,14 @@
-import type { SeedInput } from "./corpus-types";
+import type { InputDuCorpus } from "./types-du-corpus";
 
 /**
  * Un podcast et un livre de cuisine : du savoir ordinaire, mal écrit pour l'un,
  * propre pour l'autre. Les notes décousues portent aussi l'état `ARCHIVED`,
  * pour qu'il se voie dans la démonstration.
  */
-export const CORPUS_CUISINE: SeedInput[] = [
+export const CORPUS_CUISINE: InputDuCorpus[] = [
   {
     sourceType: "TEXT",
-    createdDaysAgo: 61,
+    deposeIlYAJours: 61,
     rawContent:
       "notes du podcast sur le commerce de la glace : ils sciaient des blocs sur les lacs gelés et les gardaient dans des glacières. ce qui compte c'est pas le froid c'est l'isolation, et le volume du tas.",
     atoms: [
@@ -17,8 +17,8 @@ export const CORPUS_CUISINE: SeedInput[] = [
           "Avant les réfrigérateurs, la glace découpée l'hiver sur les lacs gelés se gardait des mois dans des bâtiments isolés. Ce qui la conserve n'est pas le froid ambiant mais la lenteur avec laquelle la chaleur extérieure pénètre.",
         tags: ["histoire", "physique"],
         state: "ARCHIVED",
-        archivedDaysAgo: 16,
-        history: [
+        archiveIlYAJours: 16,
+        historique: [
           [59, "GOOD"],
           [48, "GOOD"],
           [30, "EASY"],
@@ -65,7 +65,7 @@ export const CORPUS_CUISINE: SeedInput[] = [
           "Un bloc de glace transporté par bateau jusqu'aux Antilles arrivait à plus de la moitié de son poids de départ, après plusieurs semaines de traversée. C'est le rapport entre la surface et la masse d'un chargement entier qui rend la chose possible.",
         tags: ["histoire"],
         state: "LEARNING",
-        history: [
+        historique: [
           [7, "AGAIN"],
           [2, "HARD"],
         ],
@@ -103,7 +103,7 @@ export const CORPUS_CUISINE: SeedInput[] = [
   },
   {
     sourceType: "TEXT",
-    createdDaysAgo: 21,
+    deposeIlYAJours: 21,
     rawContent:
       "La réaction de Maillard n'est pas une caramélisation : elle fait réagir les acides aminés avec les sucres, et démarre vers 140 °C. C'est pour ça qu'une viande ne dore pas dans une poêle où elle rend de l'eau.",
     atoms: [
@@ -112,7 +112,7 @@ export const CORPUS_CUISINE: SeedInput[] = [
           "La réaction de Maillard fait réagir les acides aminés d'un aliment avec ses sucres, à partir d'environ 140 °C. Elle produit la croûte dorée et l'essentiel des arômes de grillé. Elle est distincte de la caramélisation, qui ne concerne que les sucres.",
         tags: ["cuisine", "chimie"],
         state: "REVIEWING",
-        history: [
+        historique: [
           [19, "GOOD"],
           [11, "HARD"],
           [3, "GOOD"],

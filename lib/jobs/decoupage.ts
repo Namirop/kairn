@@ -8,7 +8,7 @@ import { texteRetenu } from "@/lib/domain/texte-retenu";
 import { marquerPretSiPlusRienEnAttente, marquerRejet } from "@/lib/db/fin-de-depot";
 import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { compterConceptsRetenus } from "@/lib/db/comptage-de-la-periode";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 import type { GenerationJob } from "@/lib/db/types";
 import { declencher } from "./queue";
 

@@ -2,7 +2,7 @@
 
 import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
 import { PoseDePierre } from "@/components/cairn/pose-de-pierre";
-import type { Pierre } from "@/lib/domain/cairn-stack";
+import type { Pierre } from "@/lib/domain/cairn-empilement";
 
 /**
  * Une pierre de l'empilement, à sa place. La position finale passe par

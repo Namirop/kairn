@@ -1,4 +1,4 @@
-import { jourSuivant } from "./local-day";
+import { jourSuivant } from "./jour-local";
 
 /**
  * Quand quelqu'un dépose plus vite qu'il ne révise : un constat, pas un

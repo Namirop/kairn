@@ -15,10 +15,10 @@ import { VideDuDepot } from "@/components/depots/vide-du-depot";
 import { Badge } from "@/components/ui/badge";
 import { TexteRiche } from "@/components/typographie/texte-riche";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { lireDepotDetaille } from "@/lib/db/depot-detaille";
 import { lireChargeDuJour } from "@/lib/db/session-du-jour";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 import { anciennete } from "@/lib/domain/echeance";
 import { etatDuDepot, redecoupable, travailEnCours } from "@/lib/domain/etat-depot";
 import { PLAFOND_CONCEPTS_PAR_DEPOT } from "@/lib/domain/plafond-de-concepts";
@@ -41,7 +41,7 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
   const tEtat = await getTranslations("etatDepot");
   const tTemps = await getTranslations("temps");
   const t = await getTranslations("depots.depot");
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 

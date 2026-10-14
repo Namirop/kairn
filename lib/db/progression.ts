@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import { ETATS_QUI_POSENT_UNE_PIERRE } from "@/lib/domain/etat-maitrise";
-import { localDay } from "@/lib/domain/local-day";
+import { jourLocal } from "@/lib/domain/jour-local";
 import {
   progressionPourXp,
   serieApresPassage,
@@ -53,7 +53,7 @@ export async function compterLePassage(
   passage: PassageCompte,
   maintenant: Date = new Date(),
 ): Promise<ProgressionEcrite> {
-  const jour = localDay(maintenant, passage.fuseau);
+  const jour = jourLocal(maintenant, passage.fuseau);
   const gain = xpDuPassage(passage.ratePrecedemment, passage.reussiMaintenant);
 
   const [consolides, echeances] = await Promise.all([
@@ -135,6 +135,6 @@ async function echeancesPassees(passage: PassageCompte, maintenant: Date): Promi
   });
 
   return [passage.echeanceAvant, ...enAttente.map((atome) => atome.due)].map((echeance) =>
-    localDay(echeance, passage.fuseau),
+    jourLocal(echeance, passage.fuseau),
   );
 }

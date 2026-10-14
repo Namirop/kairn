@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { optOutOfEmails } from "@/lib/db/user-settings";
-import { readUnsubscribeToken } from "@/lib/email/unsubscribe";
+import { couperLesEmails } from "@/lib/db/reglages-du-compte";
+import { lireLeJetonDeDesinscription } from "@/lib/email/desinscription";
 
 /**
  * Désinscription en un clic, sans session : le jeton signé du lien fait foi.
@@ -14,14 +14,14 @@ export async function POST(request: Request) {
     new URL(request.url).searchParams.get("jeton") ??
     (await request.formData().catch(() => null))?.get("jeton")?.toString();
 
-  const userId = jeton ? readUnsubscribeToken(jeton) : null;
+  const userId = jeton ? lireLeJetonDeDesinscription(jeton) : null;
 
   if (!userId) {
     // i18n-ignore — lu par le client mail (RFC 8058) ou le formulaire, qui n'affiche que le statut.
     return NextResponse.json({ erreur: "Lien de désinscription invalide." }, { status: 400 });
   }
 
-  await optOutOfEmails(userId);
+  await couperLesEmails(userId);
 
   return new NextResponse(null, { status: 204 });
 }

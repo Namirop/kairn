@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { SolDuCairn } from "@/components/cairn/sol-du-cairn";
-import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
-import { cn } from "@/lib/utils";
+import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * L'emplacement de la première pierre : un contour, sur le sol.

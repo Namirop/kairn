@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { conclure, record } from "./cases/journal";
+import { conclure, noter } from "./cases/journal";
 import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
 
 /**
@@ -85,20 +85,20 @@ async function main(): Promise<void> {
     const octetsRestants = await prisma.input.count({
       where: { userId, imageData: { not: null } },
     });
-    record(
+    noter(
       "Aucun octet d'image ne reste en base après le pipeline",
       octetsRestants === 0,
       octetsRestants === 0 ? "aucune image conservée" : `${octetsRestants} dépôt(s) avec image`,
     );
 
     const appelsEnregistres = await prisma.aiCall.count({ where: { userId } });
-    record(
+    noter(
       "Le mode mock n'écrit rien au registre des appels",
       appelsEnregistres === 0,
       `${appelsEnregistres} ligne(s)`,
     );
 
-    record(
+    noter(
       "Aucune requête n'est sortie vers l'API",
       tentativesReseau.length === 0,
       tentativesReseau.length === 0 ? "zéro tentative" : tentativesReseau.join(", "),

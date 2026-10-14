@@ -170,10 +170,10 @@ export function rendreLeTableauAveugleQuestions(
   for (const nom of nomsDepots) {
     const s = reference.depots.find((d) => d.nom === nom);
     const cs = colonnes.map((c) => c.score.depots.find((d) => d.nom === nom));
-    const cellRef = formaterCellule(s);
-    const cellsChallengers = cs.map(formaterCellule);
+    const celluleRef = formaterCellule(s);
+    const cellulesChallengers = cs.map(formaterCellule);
     lignes.push(
-      `| ${nom.padEnd(30)} | ${cellRef.padEnd(20)} | ${cellsChallengers.map((c) => c.padEnd(20)).join(" | ")} |`,
+      `| ${nom.padEnd(30)} | ${celluleRef.padEnd(20)} | ${cellulesChallengers.map((c) => c.padEnd(20)).join(" | ")} |`,
     );
   }
   lignes.push("");

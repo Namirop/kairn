@@ -20,9 +20,9 @@ const TENTATIVES = 25;
 async function main(): Promise<void> {
   const { prisma } = await import("@/lib/db/client");
   const { reserverAppelModele, lireReservationsDuJour } = await import("@/lib/db/ai-quota");
-  const { dayToUtcDate, localDay } = await import("@/lib/domain/local-day");
+  const { jourEnDateUtc, jourLocal } = await import("@/lib/domain/jour-local");
 
-  const cleJour = dayToUtcDate(localDay(JOUR_SENTINELLE, "UTC"));
+  const cleJour = jourEnDateUtc(jourLocal(JOUR_SENTINELLE, "UTC"));
   const nettoyer = () => prisma.aiCallQuota.deleteMany({ where: { day: cleJour } });
 
   await nettoyer();

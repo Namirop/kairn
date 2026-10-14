@@ -12,7 +12,7 @@ import { enregistrerEntrainement } from "@/lib/db/entrainement";
 import { debutEnDate } from "@/lib/domain/periode-de-quota";
 import { executerToutLePipeline, formulaire } from "./depot-simule";
 import { fabriquerConcept, viderLeCompte } from "./abus-fabrique";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /** Ce que la vérification vise : ses comptes sont gratuits. */
 const DEPOTS_DUN_COMPTE_GRATUIT = plafondDeDepots(PLAFOND_GRATUIT);
@@ -61,7 +61,7 @@ export async function casDebitConcurrent(userId: string): Promise<void> {
   const resultats = await Promise.all(enParallele(userId, "verif-debit-simultane"));
   const acceptes = resultats.filter((resultat) => resultat.ok).length;
 
-  record(
+  noter(
     `Débit — ${SIMULTANES} dépôts simultanés ne dépassent pas les ${DEPOTS_PAR_FENETRE} de la fenêtre`,
     acceptes <= DEPOTS_PAR_FENETRE,
     `${acceptes} dépôt(s) acceptés d'un coup`,
@@ -77,7 +77,7 @@ export async function casPlafondConcurrent(userId: string): Promise<void> {
   const acceptes = resultats.filter((resultat) => resultat.ok).length;
   const usage = await lireUsageDeLaPeriode(userId, FUSEAU);
 
-  record(
+  noter(
     `Quota — ${SIMULTANES} dépôts simultanés sur deux places libres n'en prennent que deux`,
     acceptes === 2 && usage.depots === DEPOTS_DUN_COMPTE_GRATUIT,
     `${acceptes} accepté(s), compteur à ${usage.depots}/${DEPOTS_DUN_COMPTE_GRATUIT}`,
@@ -109,7 +109,7 @@ export async function casDecompteApresExtraction(userId: string): Promise<void> 
     formulaire({ texte: PARAGRAPHE, cleEnvoi: "verif-apres-debordement" }),
   );
 
-  record(
+  noter(
     "Quota — passé le plafond de concepts, plus aucun dépôt ne part",
     !suivant.ok && suivant.quota === true,
     suivant.ok
@@ -117,7 +117,7 @@ export async function casDecompteApresExtraction(userId: string): Promise<void> 
       : `${ecrits} concept(s) sur la dernière place, compteur à ${usage.concepts}/${PLAFOND_GRATUIT} — puis « ${suivant.motif} »`,
   );
 
-  record(
+  noter(
     "Quota — le plafond s'annonce pour ce qu'il est, approximatif",
     refusDeQuota("concepts", PLAFOND_GRATUIT).motif.includes("autour de"),
     refusDeQuota("concepts", PLAFOND_GRATUIT).motif,
@@ -127,7 +127,7 @@ export async function casDecompteApresExtraction(userId: string): Promise<void> 
   await prisma.input.delete({ where: { id: depot.inputId } });
   const apres = await lireUsageDeLaPeriode(userId, FUSEAU);
 
-  record(
+  noter(
     "Quota — supprimer un dépôt ne rend jamais ce qu'il a consommé",
     apres.concepts === avant && apres.depots > 0,
     `${apres.concepts} concept(s) et ${apres.depots} dépôt(s) toujours comptés`,
@@ -161,13 +161,13 @@ export async function casRejetEtPanne(userId: string): Promise<void> {
     select: { status: true },
   });
 
-  record(
+  noter(
     "Rejet — le dépôt est bien reconnu comme un rejet, pas comme une panne",
     etatRejet.status === "REJECTED",
     etatRejet.status,
   );
 
-  record(
+  noter(
     "Rejet — l'unité « dépôt » est consommée, aucun concept ne l'est",
     apresRejet.depots === 1 && apresRejet.concepts === 0,
     `${apresRejet.depots} dépôt(s), ${apresRejet.concepts} concept(s)`,
@@ -187,19 +187,19 @@ export async function casRejetEtPanne(userId: string): Promise<void> {
     select: { status: true },
   });
 
-  record(
+  noter(
     "Panne — le dépôt est bien reconnu comme un échec technique",
     etatPanne.status === "FAILED",
     etatPanne.status,
   );
 
-  record(
+  noter(
     "Panne — l'unité « dépôt » est rendue : on ne facture pas sa propre panne",
     apresPanne.depots === apresRejet.depots,
     `${apresPanne.depots} dépôt(s) comptés après la panne, contre ${apresRejet.depots} avant`,
   );
 
-  record(
+  noter(
     "Décompte — le compteur distingue un rejet d'un échec technique",
     apresPanne.depots === apresRejet.depots,
     apresPanne.depots === apresRejet.depots
@@ -240,13 +240,13 @@ export async function casGestesEnRafale(userId: string): Promise<void> {
     acceptes += 1;
   }
 
-  record(
+  noter(
     `Débit — une boucle de gestes s'arrête à la fenêtre, ${GESTES_PAR_FENETRE} par minute`,
     acceptes === GESTES_PAR_FENETRE,
     `${acceptes} geste(s) acceptés d'affilée`,
   );
 
-  record(
+  noter(
     "Débit — la fenêtre pleine, un geste de plus est refusé quoi qu'il demande",
     !(await prendreUnGeste(userId, FUSEAU)),
     "refusé",
@@ -270,7 +270,7 @@ export async function casGestesEnRafale(userId: string): Promise<void> {
     })
     .map(([libelle]) => libelle);
 
-  record(
+  noter(
     "Débit — les trois gestes coûteux passent par la limite",
     sansLimite.length === 0,
     sansLimite.length === 0 ? "les trois la traversent" : `sans limite : ${sansLimite.join(", ")}`,
@@ -286,7 +286,7 @@ export async function casBornesDentree(userId: string): Promise<void> {
     formulaire({ texte: "a".repeat(CARACTERES_MAXIMUM + 1), cleEnvoi: "verif-borne-texte" }),
   );
 
-  record(
+  noter(
     `Bornes — un texte de plus de ${CARACTERES_MAXIMUM} caractères est refusé côté serveur`,
     !trop.ok,
     trop.ok ? "accepté" : trop.motif,
@@ -294,7 +294,7 @@ export async function casBornesDentree(userId: string): Promise<void> {
 
   const vide = await deposer(userId, formulaire({ texte: "   ", cleEnvoi: "verif-borne-vide" }));
 
-  record(
+  noter(
     "Bornes — un dépôt sans texte ni capture est refusé",
     !vide.ok,
     vide.ok ? "accepté" : vide.motif,
@@ -308,7 +308,7 @@ export async function casBornesDentree(userId: string): Promise<void> {
     formulaire({ texte: "", cleEnvoi: "verif-borne-type" }, menteur),
   );
 
-  record(
+  noter(
     "Bornes — le type d'un fichier est décidé par son contenu, pas par son nom",
     !faux.ok,
     faux.ok ? "accepté" : faux.motif,
@@ -320,7 +320,7 @@ export async function casBornesDentree(userId: string): Promise<void> {
     formulaire({ texte: "", cleEnvoi: "verif-borne-taille" }, enorme),
   );
 
-  record(
+  noter(
     "Bornes — une capture de plus de 4 Mo est refusée côté serveur",
     !lourd.ok,
     lourd.ok ? "accepté" : lourd.motif,
@@ -328,7 +328,7 @@ export async function casBornesDentree(userId: string): Promise<void> {
 
   const usage = await lireUsageDeLaPeriode(userId, FUSEAU);
 
-  record(
+  noter(
     "Bornes — un dépôt refusé à l'entrée ne consomme aucune place du jour",
     usage.depots === 0 && usage.concepts === 0,
     `${usage.depots} dépôt(s), ${usage.concepts} concept(s)`,

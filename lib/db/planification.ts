@@ -1,5 +1,5 @@
 import { fsrs, generatorParameters, Rating, type Card } from "ts-fsrs";
-import { fromCard, toCard, type AtomCardFields } from "@/lib/db/fsrs-card";
+import { depuisLaCarte, versLaCarte, type ChampsDeCarte } from "@/lib/db/carte-fsrs";
 import type { ReviewRating } from "@/lib/db/types";
 
 /**
@@ -9,7 +9,7 @@ import type { ReviewRating } from "@/lib/db/types";
  * Le brouillage (`enable_fuzz`) décale chaque intervalle d'un peu de hasard :
  * des concepts révisés le même jour avec la même note ne reviennent pas tous
  * le même jour, et la charge des sessions se lisse. ts-fsrs le désactive par
- * défaut, d'où le réglage explicite. Le seed (`prisma/seed/replay.ts`) le
+ * défaut, d'où le réglage explicite. Le seed (`prisma/seed/rejeu.ts`) le
  * coupe, pour rester reproductible.
  */
 
@@ -23,7 +23,7 @@ const NOTES: Record<ReviewRating, Rating.Again | Rating.Hard | Rating.Good | Rat
 };
 
 export type Planification = {
-  carte: AtomCardFields;
+  carte: ChampsDeCarte;
   /** Jours jusqu'au prochain passage, tels que l'algorithme les a posés. */
   intervalleJours: number;
   stabiliteAvant: number;
@@ -31,15 +31,15 @@ export type Planification = {
 };
 
 export function planifier(
-  atom: AtomCardFields,
+  atom: ChampsDeCarte,
   note: ReviewRating,
   maintenant: Date,
 ): Planification {
-  const avant: Card = toCard(atom);
+  const avant: Card = versLaCarte(atom);
   const { card } = ordonnanceur.next(avant, maintenant, NOTES[note]);
 
   return {
-    carte: fromCard(card),
+    carte: depuisLaCarte(card),
     intervalleJours: card.scheduled_days,
     stabiliteAvant: avant.stability,
     stabiliteApres: card.stability,

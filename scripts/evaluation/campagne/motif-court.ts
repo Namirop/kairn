@@ -1,5 +1,5 @@
 /**
- * Le motif d'un échec d'appel, cause d'origine comprise : `AICallFailedError`
+ * Le motif d'un échec d'appel, cause d'origine comprise : `EmissionEchoueeError`
  * masque la réponse du fournisseur, le schéma refusé ou le timeout.
  */
 export function motifCourt(erreur: unknown): string {

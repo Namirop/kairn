@@ -1,6 +1,5 @@
 // i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
-import { EMAIL_STYLE as S, renderShell } from "./shell";
-import type { RenderedEmail } from "./daily-reminder";
+import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
 
 /**
  * L'alerte d'exploitation quand un webhook de paiement n'aboutit pas : Stripe a
@@ -29,7 +28,7 @@ function heureUtc(instant: Date): string {
   return `${instant.toISOString().slice(11, 16)} UTC`;
 }
 
-export function renderAlerteDePaiement(payload: AlerteDePaiementPayload): RenderedEmail {
+export function composerLAlerteDePaiement(payload: AlerteDePaiementPayload): EmailRendu {
   const { type, code, motif, instant } = payload;
 
   const constat =
@@ -46,18 +45,18 @@ export function renderAlerteDePaiement(payload: AlerteDePaiementPayload): Render
   const tableau = lignes
     .map(
       ([valeur, legende]) =>
-        `<tr><td style="padding:0 12px 8px 0;font-family:${S.MONO};font-size:15px;color:${S.ink};white-space:nowrap;">${valeur}</td><td style="padding:0 0 8px;font-size:14px;color:${S.muted};">${legende}</td></tr>`,
+        `<tr><td style="padding:0 12px 8px 0;font-family:${S.MONO};font-size:15px;color:${S.encre};white-space:nowrap;">${valeur}</td><td style="padding:0 0 8px;font-size:14px;color:${S.secondaire};">${legende}</td></tr>`,
     )
     .join("");
 
   const motifCourt = motif.length > MOTIF_MAXIMUM ? `${motif.slice(0, MOTIF_MAXIMUM)}…` : motif;
 
-  const body = `<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.alerte};">Webhook de paiement en échec</p>
-<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">${constat}</p>
+  const corps = `<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${S.alerte};">Webhook de paiement en échec</p>
+<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.secondaire};">${constat}</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">${tableau}</table>
-<p style="margin:0 0 4px;font-size:14px;color:${S.muted};">Ce que l'erreur dit :</p>
-<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;line-height:19px;color:${S.ink};word-break:break-all;">${motifCourt}</p>
-<p style="margin:0;font-size:15px;line-height:23px;color:${S.muted};">${reparation}</p>`;
+<p style="margin:0 0 4px;font-size:14px;color:${S.secondaire};">Ce que l'erreur dit :</p>
+<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;line-height:19px;color:${S.encre};word-break:break-all;">${motifCourt}</p>
+<p style="margin:0;font-size:15px;line-height:23px;color:${S.secondaire};">${reparation}</p>`;
 
   const text = [
     "Webhook de paiement en échec.",
@@ -75,9 +74,9 @@ export function renderAlerteDePaiement(payload: AlerteDePaiementPayload): Render
 
   return {
     subject: `Kairn — webhook de paiement en échec (${type})`,
-    html: renderShell({
-      preheader: `${type} n'a pas pu être traité, ${heureUtc(instant)}.`,
-      body,
+    html: envelopper({
+      preentete: `${type} n'a pas pu être traité, ${heureUtc(instant)}.`,
+      corps,
       raisonDeLEnvoi:
         "Alerte d'exploitation. Elle part une fois par jour au plus, à l'adresse posée dans EMAIL_ALERTES.",
     }),

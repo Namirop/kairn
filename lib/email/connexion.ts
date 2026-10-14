@@ -1,14 +1,14 @@
 import type { Langue } from "@/lib/db/types";
-import { findUserSettings } from "@/lib/db/user-settings";
+import { trouverLesReglages } from "@/lib/db/reglages-du-compte";
 import { LONGUEUR_DU_CODE } from "@/lib/domain/code-de-connexion";
 import { langueDesEnTetes } from "@/lib/i18n/langue-des-en-tetes";
-import { sendEmail } from "./client";
-import { renderCodeDeConnexion } from "./templates/code-de-connexion";
+import { envoyerLEmail } from "./client";
+import { composerLeCodeDeConnexion } from "./templates/code-de-connexion";
 
 /**
  * L'envoi d'un code de connexion.
  *
- * Il ne passe pas par `sendNotification`, qui respecte le refus d'emails :
+ * Il ne passe pas par `envoyerLaNotification`, qui respecte le refus d'emails :
  * quelqu'un qui a coupé ses rappels doit pouvoir entrer dans son compte.
  *
  * Il n'écrit rien dans `EmailDelivery`, qui rend un cron idempotent par type et
@@ -36,7 +36,7 @@ export type Provenance = {
  * langue, à défaut le navigateur, à défaut le français.
  */
 async function langueDuCode({ userId, entetes }: Provenance): Promise<Langue> {
-  const duCompte = userId ? (await findUserSettings(userId))?.langue : undefined;
+  const duCompte = userId ? (await trouverLesReglages(userId))?.langue : undefined;
 
   if (duCompte) return duCompte;
 
@@ -54,16 +54,16 @@ export async function envoyerLeCodeDeConnexion(
     throw new Error(`Code de connexion de longueur inattendue : ${code.length}.`);
   }
 
-  const email = renderCodeDeConnexion(
+  const email = composerLeCodeDeConnexion(
     { code, minutes: MINUTES_DE_VALIDITE },
     await langueDuCode(provenance),
   );
 
-  await sendEmail({
+  await envoyerLEmail({
     to: destinataire,
     subject: email.subject,
     html: email.html,
     text: email.text,
-    // Aucun en-tête de désabonnement : voir `ShellContent.unsubscribeUrl`.
+    // Aucun en-tête de désabonnement : voir `ContenuDuGabarit.lienDeDesinscription`.
   });
 }

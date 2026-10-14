@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { TourDentrainement } from "@/components/entrainement/tour-dentrainement";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { lireTourDentrainement } from "@/lib/db/entrainement";
-import { lireReglages } from "@/lib/db/user-settings";
+import { lireReglages } from "@/lib/db/reglages-du-compte";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("revision.pages");
@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function PageEntrainement() {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 

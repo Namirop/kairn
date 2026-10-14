@@ -9,7 +9,7 @@ import {
   formulaire,
   libererLaJournee,
 } from "./depot-simule";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Le pipeline, du geste jusqu'aux questions écrites, en mode mock.
@@ -38,7 +38,7 @@ const DOUTEUX = `En JavaScript, les promesses lancées concurrently s'exécutent
 ce qui rend Promise.all réellement parallèle. Un tableau de promesses passé à Promise.all se règle
 quand la dernière se règle.`;
 
-async function fixerFacture(inputId: string): Promise<void> {
+async function deroulerLePipeline(inputId: string): Promise<void> {
   // Hors requête HTTP, `after()` ne part pas : on déroule ce qui serait parti.
   await executerToutLePipeline(inputId);
 }
@@ -53,7 +53,7 @@ async function deposerEtDerouler(
 
   if (!resultat.ok) throw new Error(`Dépôt refusé : ${resultat.motif}`);
 
-  await fixerFacture(resultat.inputId);
+  await deroulerLePipeline(resultat.inputId);
 
   return resultat.inputId;
 }
@@ -66,7 +66,7 @@ export async function casDepotTexte(userId: string): Promise<void> {
   });
   const questions = await compterQuestions(inputId);
 
-  record(
+  noter(
     "Texte — le dépôt produit ses concepts puis ses questions",
     depot.status === "READY" && depot.atoms.length === 3 && questions === 12,
     `${depot.status}, ${depot.atoms.length} concepts, ${questions} questions`,
@@ -78,14 +78,14 @@ export async function casDepotTexte(userId: string): Promise<void> {
     where: { inputId, kind: "VARIANTS", status: { in: ["QUEUED", "RUNNING"] } },
   });
 
-  record(
+  noter(
     "Texte — les questions arrivent avec le dépôt, rien ne reste en file",
     questions === 12 && enAttente === 0,
     `${enAttente} job(s) de questions encore en file`,
   );
 
   const planifie = await prisma.variant.count({ where: { atom: { inputId }, retiredAt: null } });
-  record(
+  noter(
     "Texte — les questions sont réparties sur les trois concepts",
     new Set(depot.atoms.map((atome) => atome.id)).size === 3 && planifie === 12,
     `${planifie} questions actives`,
@@ -103,7 +103,7 @@ export async function casDepotTexte(userId: string): Promise<void> {
     return lu.success && lu.data.sentence.includes(TROU);
   });
 
-  record(
+  noter(
     "Texte — un texte à trou garde sa phrase trouée et ses formes acceptées",
     trous.length > 0 && complets.length === trous.length,
     `${complets.length} sur ${trous.length} texte(s) à trou`,
@@ -117,7 +117,7 @@ export async function casDepotImage(userId: string, image: File): Promise<void> 
     include: { atoms: true },
   });
 
-  record(
+  noter(
     "Capture — la lecture alimente le découpage",
     depot.sourceType === "IMAGE" &&
       (depot.extractedText ?? "").length > 0 &&
@@ -125,7 +125,7 @@ export async function casDepotImage(userId: string, image: File): Promise<void> 
     `${depot.status}, ${depot.atoms.length} concepts`,
   );
 
-  record(
+  noter(
     "Capture — les octets de l'image ne survivent pas à sa lecture",
     depot.imageData === null && depot.imageMediaType === null,
     depot.imageData === null ? "effacés" : `${depot.imageData.length} octets restants`,
@@ -140,7 +140,7 @@ export async function casCaptureIllisible(userId: string, image: File): Promise<
   );
   const depot = await prisma.input.findUniqueOrThrow({ where: { id: inputId } });
 
-  record(
+  noter(
     "Capture illisible — le dépôt est rejeté avec un motif, sans garder l'image",
     depot.status === "REJECTED" && (depot.failureReason ?? "").length > 0 && !depot.imageData,
     depot.failureReason ?? "aucun motif",
@@ -154,7 +154,7 @@ export async function casRejet(userId: string): Promise<void> {
   });
   const depot = await prisma.input.findUniqueOrThrow({ where: { id: inputId } });
 
-  record(
+  noter(
     "Rien à retenir — le dépôt porte le motif du refus",
     depot.status === "REJECTED" && (depot.failureReason ?? "").length > 0,
     depot.failureReason ?? "aucun motif",
@@ -167,17 +167,17 @@ export async function casConceptDouteux(userId: string): Promise<void> {
   const questionsDouteuses = await prisma.variant.count({ where: { atomId: douteux.id } });
   const total = await compterQuestions(inputId);
 
-  record(
+  noter(
     "Concept douteux — aucune question n'est écrite dessus",
     questionsDouteuses === 0 && total === 4,
     `${questionsDouteuses} sur le douteux, ${total} en tout`,
   );
 
   await confirmerConcept(douteux.id, userId);
-  await fixerFacture(inputId);
+  await deroulerLePipeline(inputId);
 
   const apresConfirmation = await prisma.variant.count({ where: { atomId: douteux.id } });
-  record(
+  noter(
     "Concept douteux — le confirmer lui écrit ses questions",
     apresConfirmation === 4,
     `${apresConfirmation} questions`,
@@ -199,7 +199,7 @@ export async function casDepotDeFiction(userId: string): Promise<void> {
   const douteux = depot.atoms.filter((atome) => atome.uncertain).length;
   const questions = await compterQuestions(inputId);
 
-  record(
+  noter(
     "Fiction — un dépôt qui n'a pas à être vrai obtient quand même ses questions",
     depot.nature === "FICTION" && douteux === 2 && questions === 8,
     `nature ${depot.nature ?? "absente"}, ${douteux} douteux, ${questions} questions`,
@@ -238,19 +238,19 @@ export async function casCorrectionDeConcept(userId: string): Promise<void> {
     where: { id: { in: avant }, retiredAt: null },
   });
   const gardees = await prisma.variant.count({ where: { id: { in: avant } } });
-  record(
+  noter(
     "Correction — les anciennes questions sortent du tirage sans sortir de la base",
     servables === 0 && gardees === avant.length,
     `${servables} servable(s), ${gardees} conservée(s) sur ${avant.length}`,
   );
 
-  await fixerFacture(atome.inputId);
+  await deroulerLePipeline(atome.inputId);
 
   const apres = await prisma.atom.findUniqueOrThrow({
     where: { id: atome.id },
     include: { variants: { where: { retiredAt: null } } },
   });
-  record(
+  noter(
     "Correction — la planification repart de zéro et les questions sont réécrites",
     apres.state === "LEARNING" && apres.reps === 0 && apres.variants.length === 4,
     `${apres.state}, ${apres.reps} passage(s), ${apres.variants.length} questions`,

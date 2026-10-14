@@ -15,14 +15,14 @@
 const MARQUEUR = "**";
 const ACCENT = "`";
 
-export type SegmentDeTexte = {
+export type SegmentEnGras = {
   /** Vrai pour une partie mise en avant, faux pour le reste. */
   gras: boolean;
   texte: string;
 };
 
 /** Empile en fusionnant les parties ordinaires voisines et en ignorant les vides. */
-function empiler(segments: SegmentDeTexte[], texte: string, gras: boolean): void {
+function empiler(segments: SegmentEnGras[], texte: string, gras: boolean): void {
   if (texte.length === 0) return;
 
   const dernier = segments[segments.length - 1];
@@ -75,9 +75,9 @@ function marqueSuivante(
  * littérale : c'est le plus souvent une puissance ou une note, et l'avaler
  * ferait disparaître des signes du dépôt.
  */
-export function segmentsEnGras(texte: string): SegmentDeTexte[] {
+export function segmentsEnGras(texte: string): SegmentEnGras[] {
   const cites = termesCites(texte);
-  const segments: SegmentDeTexte[] = [];
+  const segments: SegmentEnGras[] = [];
   let curseur = 0;
 
   while (curseur < texte.length) {

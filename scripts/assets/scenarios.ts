@@ -5,7 +5,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import type { Page } from "@playwright/test";
 import type { Langue } from "@/lib/db/types";
-import { renderDailyReminder } from "@/lib/email/templates/daily-reminder";
+import { composerLeRappelQuotidien } from "@/lib/email/templates/rappel-quotidien";
 import { aller } from "@/scripts/assets/navigateur";
 
 /**
@@ -28,14 +28,17 @@ export async function joindreUneCapture(page: Page, cheminImage: string): Promis
 
 /** Rend l'email de rappel avec les vrais chiffres du compte, et rend son URL locale. */
 export function ecrireEmailDeRappel(
-  dueCount: number,
+  dus: number,
   currentStreak: number,
   dossier: string,
   langue: Langue,
 ): string {
-  const rendu = renderDailyReminder(
-    { dueCount, currentStreak },
-    { sessionUrl: "https://kairn.app/reviser", unsubscribeUrl: "https://kairn.app/desinscription" },
+  const rendu = composerLeRappelQuotidien(
+    { dus, currentStreak },
+    {
+      lienDeSession: "https://kairn.app/reviser",
+      lienDeDesinscription: "https://kairn.app/desinscription",
+    },
     langue,
   );
   const fichier = path.join(dossier, "email-de-rappel.html");

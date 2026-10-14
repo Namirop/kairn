@@ -2,7 +2,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { avancer, cairnRenverse, initialiser, renverser, toutEstPose } from "./cairn-physique";
 import { remonter } from "./cairn-remontee";
-import { empiler } from "./cairn-stack";
+import { empiler } from "./cairn-empilement";
 
 const PIERRES = empiler(6).pierres;
 

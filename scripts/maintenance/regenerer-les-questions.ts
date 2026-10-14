@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { prisma } from "@/lib/db/client";
 import { demanderDesQuestions } from "@/lib/db/demande-de-questions";
-import { conclure, record } from "../verification/cases/journal";
+import { conclure, noter } from "../verification/cases/journal";
 
 /**
  * Réécrire les questions déjà en base après un changement de prompt, sans
@@ -82,7 +82,7 @@ async function main(): Promise<string> {
   }
 
   for (const [etat, nombre] of [...issues].sort((a, b) => b[1] - a[1])) {
-    record(`Demandes en état « ${etat} »`, etat !== "trop-tot", `${nombre} concept(s)`);
+    noter(`Demandes en état « ${etat} »`, etat !== "trop-tot", `${nombre} concept(s)`);
   }
 
   return "Les demandes sont en file. Les passages planifiés les relèveront.";

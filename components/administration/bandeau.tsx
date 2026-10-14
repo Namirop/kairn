@@ -2,7 +2,7 @@
 import { dollars, nombre } from "@/components/administration/formats";
 import type { BlocComptes, BlocSignalements } from "@/lib/db/administration";
 import type { BlocDepense } from "@/lib/db/administration-depense";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * Les quatre chiffres pour lesquels on ouvre cet écran. Aucun n'est repris tel

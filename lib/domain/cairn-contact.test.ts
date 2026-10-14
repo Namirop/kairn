@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { pierreTraversee } from "./cairn-contact";
 import { initialiser, renverser } from "./cairn-physique";
-import { empiler } from "./cairn-stack";
+import { empiler } from "./cairn-empilement";
 
 const PIERRES = empiler(6).pierres;
 

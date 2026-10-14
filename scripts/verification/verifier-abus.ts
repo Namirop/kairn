@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { conclure, record } from "./cases/journal";
+import { conclure, noter } from "./cases/journal";
 import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
 
 /**
@@ -79,13 +79,13 @@ async function main(): Promise<void> {
     await global.casPartDuCompte(a, b);
 
     const registre = await prisma.aiCall.count({ where: { userId: { in: [a, b] } } });
-    record(
+    noter(
       "Aucune ligne d'appel ne subsiste au registre après la passe",
       registre === 0,
       `${registre} ligne(s)`,
     );
 
-    record(
+    noter(
       "Aucune requête n'est sortie vers l'API",
       tentativesReseau.length === 0,
       tentativesReseau.length === 0 ? "zéro tentative" : tentativesReseau.join(", "),

@@ -1,4 +1,4 @@
-import type { SeedInput } from "./corpus-types";
+import type { InputDuCorpus } from "./types-du-corpus";
 import { CORPUS_CUISINE } from "./corpus-cuisine";
 import { CORPUS_MONTAGNE } from "./corpus-montagne";
 import { CORPUS_POSTGRES } from "./corpus-postgres";
@@ -12,7 +12,7 @@ import { CORPUS_REACT } from "./corpus-react";
  * `CORPUS_CODE` n'en fait pas partie : il s'ajoute à un compte par
  * `scripts/maintenance/ajouter-depot-de-code.ts`.
  */
-export const CORPUS: SeedInput[] = [
+export const CORPUS: InputDuCorpus[] = [
   ...CORPUS_MONTAGNE,
   ...CORPUS_CUISINE,
   ...CORPUS_POSTGRES,

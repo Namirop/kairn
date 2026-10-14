@@ -1,4 +1,4 @@
-import type { ExtractAtomsOutput } from "@/lib/ai/schemas";
+import type { SortieDExtraction } from "@/lib/ai/schemas";
 import type { Depot } from "../corpus";
 import type { ConceptFige, DepotFige } from "../fige";
 import { BUDGET_SORTIE_CAMPAGNE } from "../openrouter/campagne";
@@ -16,7 +16,7 @@ export type ExtractionDeColonne = {
   arretApres: string | null;
 };
 
-function faireDepotFige(nom: string, texte: string, extraction: ExtractAtomsOutput): DepotFige {
+function faireDepotFige(nom: string, texte: string, extraction: SortieDExtraction): DepotFige {
   const concepts: ConceptFige[] = extraction.atoms.map((atome) => ({
     concept: atome.concept,
     tags: atome.tags,

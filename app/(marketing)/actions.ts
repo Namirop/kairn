@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { adresseDuVisiteur, lireLaVisite, poserLaVisite } from "@/lib/auth/visite";
 import { deposerSansCompte } from "@/lib/depots/deposer-sans-compte";
 import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
@@ -26,7 +26,7 @@ import { lireLEssaiEnCours, type AvancementDeLEssai } from "@/lib/depots/essai-e
 export type EtatEssai = { erreur?: string; sessionId?: string; inputId?: string };
 
 export async function essayerAction(_precedent: EtatEssai, donnees: FormData): Promise<EtatEssai> {
-  if (await getCurrentUser()) redirect(`${ROUTES.depots}/nouveau`);
+  if (await lireLUtilisateur()) redirect(`${ROUTES.depots}/nouveau`);
 
   const texte = (donnees.get("texte") ?? "").toString();
   // Les refus se disent dans la langue de la requête, celle de l'écran qui les montre.

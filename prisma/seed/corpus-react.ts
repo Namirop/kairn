@@ -1,10 +1,10 @@
-import type { SeedInput } from "./corpus-types";
+import type { InputDuCorpus } from "./types-du-corpus";
 
 /** Ce qui vient d'une capture d'écran : une diapositive sur React. */
-export const CORPUS_REACT: SeedInput[] = [
+export const CORPUS_REACT: InputDuCorpus[] = [
   {
     sourceType: "IMAGE",
-    createdDaysAgo: 47,
+    deposeIlYAJours: 47,
     rawContent: "Capture d'une diapositive : « Server Components — ce qui part et ce qui reste ».",
     extractedText: `Server Components — ce qui part et ce qui reste
 · Le code d'un Server Component ne quitte jamais le serveur. Le client reçoit le résultat du rendu, pas le composant.
@@ -16,7 +16,7 @@ export const CORPUS_REACT: SeedInput[] = [
           "Le code d'un Server Component ne part jamais dans le bundle client. Le navigateur reçoit le résultat de son rendu, pas le composant ni ses dépendances.",
         tags: ["react", "rsc"],
         state: "CONSOLIDATED",
-        history: [
+        historique: [
           [45, "GOOD"],
           [38, "GOOD"],
           [21, "EASY"],
@@ -52,7 +52,7 @@ export const CORPUS_REACT: SeedInput[] = [
           '`"use client"` déclare une frontière : le fichier et tout ce qu\'il importe rejoignent le bundle client. Un Client Component ne peut recevoir un Server Component que par `children`.',
         tags: ["react", "rsc"],
         state: "REVIEWING",
-        history: [
+        historique: [
           [44, "HARD"],
           [33, "AGAIN"],
           [26, "GOOD"],

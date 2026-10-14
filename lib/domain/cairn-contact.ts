@@ -1,5 +1,5 @@
 import type { Corps } from "./cairn-physique";
-import type { Pierre } from "./cairn-stack";
+import type { Pierre } from "./cairn-empilement";
 
 /**
  * Détection du geste sur l'empilement : ce que le pointeur a touché. La chute

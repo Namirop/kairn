@@ -4,12 +4,12 @@
  * messages au moment d'émettre.
  */
 
-export type AiTextPart = {
+export type PartieTexte = {
   type: "text";
   text: string;
 };
 
-export type AiImagePart = {
+export type PartieImage = {
   type: "image";
   /** Type MIME vérifié côté serveur avant d'arriver ici. */
   mediaType: "image/jpeg" | "image/png" | "image/gif" | "image/webp";
@@ -17,18 +17,18 @@ export type AiImagePart = {
   base64: string;
 };
 
-export type AiContentPart = AiTextPart | AiImagePart;
+export type PartieDeMessage = PartieTexte | PartieImage;
 
-export type AiMessage = {
+export type MessageIa = {
   role: "user" | "assistant";
-  content: string | AiContentPart[];
+  content: string | PartieDeMessage[];
 };
 
 /**
  * Forme attendue par le SDK, décrite sans l'importer ; la compilation du pont
  * Anthropic vérifie que les deux coïncident.
  */
-export type SdkMessage = {
+export type MessageDuSdk = {
   role: "user" | "assistant";
   content:
     | string
@@ -36,38 +36,38 @@ export type SdkMessage = {
         | { type: "text"; text: string }
         | {
             type: "image";
-            source: { type: "base64"; media_type: AiImagePart["mediaType"]; data: string };
+            source: { type: "base64"; media_type: PartieImage["mediaType"]; data: string };
           }
       )[];
 };
 
-export function toSdkMessage(message: AiMessage): SdkMessage {
+export function versMessageDuSdk(message: MessageIa): MessageDuSdk {
   if (typeof message.content === "string") {
     return { role: message.role, content: message.content };
   }
 
   return {
     role: message.role,
-    content: message.content.map((part) =>
-      part.type === "text"
-        ? { type: "text", text: part.text }
+    content: message.content.map((partie) =>
+      partie.type === "text"
+        ? { type: "text", text: partie.text }
         : {
             type: "image",
-            source: { type: "base64", media_type: part.mediaType, data: part.base64 },
+            source: { type: "base64", media_type: partie.mediaType, data: partie.base64 },
           },
     ),
   };
 }
 
 /** Le texte soumis, mis bout à bout. Le mode mock y choisit sa fixture. */
-export function flattenText(messages: AiMessage[]): string {
+export function texteMisBoutABout(messages: MessageIa[]): string {
   return messages
     .map((message) =>
       typeof message.content === "string"
         ? message.content
         : message.content
-            .filter((part): part is AiTextPart => part.type === "text")
-            .map((part) => part.text)
+            .filter((partie): partie is PartieTexte => partie.type === "text")
+            .map((partie) => partie.text)
             .join("\n"),
     )
     .join("\n");

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireUser, UnauthenticatedError } from "@/lib/auth/session";
-import { setTimezone } from "@/lib/db/user-settings";
-import { isSupportedTimeZone } from "@/lib/domain/local-day";
+import { exigerLUtilisateur, SessionAbsenteError } from "@/lib/auth/session";
+import { poserLeFuseau } from "@/lib/db/reglages-du-compte";
+import { fuseauReconnu } from "@/lib/domain/jour-local";
 
 /**
  * Enregistre le fuseau détecté par le navigateur.
@@ -12,8 +12,8 @@ import { isSupportedTimeZone } from "@/lib/domain/local-day";
  * L'identité vient de la session, jamais du corps de la requête.
  */
 
-const bodySchema = z.object({
-  timezone: z.string().min(1).max(64).refine(isSupportedTimeZone, {
+const schemaDuCorps = z.object({
+  timezone: z.string().min(1).max(64).refine(fuseauReconnu, {
     // i18n-ignore — réponse technique d'API, lue par du code et jamais rendue par un écran
     message: "Fuseau horaire inconnu.",
   }),
@@ -23,23 +23,23 @@ export async function POST(request: Request) {
   let userId: string;
 
   try {
-    userId = (await requireUser()).id;
+    userId = (await exigerLUtilisateur()).id;
   } catch (error) {
-    if (error instanceof UnauthenticatedError) {
+    if (error instanceof SessionAbsenteError) {
       // i18n-ignore — réponse technique d'API, lue par du code et jamais rendue par un écran
       return NextResponse.json({ erreur: "Session absente." }, { status: 401 });
     }
     throw error;
   }
 
-  const parsed = bodySchema.safeParse(await request.json().catch(() => null));
+  const lecture = schemaDuCorps.safeParse(await request.json().catch(() => null));
 
-  if (!parsed.success) {
+  if (!lecture.success) {
     // i18n-ignore — réponse technique d'API, lue par du code et jamais rendue par un écran
     return NextResponse.json({ erreur: "Fuseau horaire invalide." }, { status: 400 });
   }
 
-  await setTimezone(userId, parsed.data.timezone);
+  await poserLeFuseau(userId, lecture.data.timezone);
 
   return new NextResponse(null, { status: 204 });
 }

@@ -178,7 +178,7 @@ supprimés : le portage est livré, et rien ne les rappellera. L'historique git 
 Une doc fausse coûte plus cher qu'une doc absente : on la croit. Le risque est le plus fort pendant
 une série de modifications, quand le code bouge et que personne ne rouvre le document qui le décrit.
 
-`scripts/docs/doc-map.ts` dit quelle doc décrit quelle partie du code. `npm run docs:check` compare
+`scripts/docs/carte-des-docs.ts` dit quelle doc décrit quelle partie du code. `npm run docs:check` compare
 cette carte à ce qui a changé sur la branche (commits depuis `main`, fichiers modifiés et fichiers
 nouveaux) et nomme chaque doc dont le code a bougé sans qu'elle bouge. La commande signale aussi
 les chemins de la carte qui n'existent plus, pour que la carte ne pourrisse pas à son tour.

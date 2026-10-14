@@ -1,6 +1,6 @@
-import { findComptesARelancer } from "@/lib/db/comptes-a-relancer";
+import { trouverLesComptesARelancer } from "@/lib/db/comptes-a-relancer";
 import { estLHeureDeLaRelance } from "@/lib/domain/relance-du-compte-vide";
-import { sendNotification } from "@/lib/email/notifications";
+import { envoyerLaNotification } from "@/lib/email/notifications";
 import { journaliser, passage, type Passage } from "./passage-de-notification";
 
 /**
@@ -14,12 +14,12 @@ import { journaliser, passage, type Passage } from "./passage-de-notification";
  * Les journaux ne portent que des comptes, jamais une adresse ni un contenu.
  */
 export async function relancerLesComptesVides(maintenant: Date = new Date()): Promise<Passage> {
-  const candidats = await findComptesARelancer(maintenant);
+  const candidats = await trouverLesComptesARelancer(maintenant);
   const alHeure = candidats.filter((candidat) => estLHeureDeLaRelance(maintenant, candidat));
   const resultat = passage(candidats.length, alHeure.length, 0);
 
   for (const candidat of alHeure) {
-    const envoi = await sendNotification(candidat.userId, {
+    const envoi = await envoyerLaNotification(candidat.userId, {
       type: "RELANCE_COMPTE_VIDE",
       payload: {},
     });

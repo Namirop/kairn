@@ -1,4 +1,4 @@
-import { AIInvalidOutputError } from "@/lib/ai/errors";
+import { SortieInvalideError } from "@/lib/ai/errors";
 import type { Echec } from "./depot-evalue";
 
 /**
@@ -25,7 +25,7 @@ function compterLesElements(brut: string | undefined): string | undefined {
 }
 
 export function decrire(erreur: unknown): Echec {
-  if (erreur instanceof AIInvalidOutputError) {
+  if (erreur instanceof SortieInvalideError) {
     return {
       motif: erreur.message,
       brut: erreur.raw,

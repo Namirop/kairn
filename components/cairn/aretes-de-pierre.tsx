@@ -1,4 +1,4 @@
-import type { Pierre } from "@/lib/domain/cairn-stack";
+import type { Pierre } from "@/lib/domain/cairn-empilement";
 
 /**
  * Le tracé d'une pierre : sa forme, et l'arête de lichen quand c'est la

@@ -1,6 +1,6 @@
 import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
-import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
-import { cn } from "@/lib/utils";
+import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * Une pierre posée au sol, seule, pour les états vides : l'empilement à un,

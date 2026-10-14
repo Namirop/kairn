@@ -1,10 +1,10 @@
 import { callAI } from "@/lib/ai/client";
-import { AiError } from "@/lib/ai/errors";
-import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
-import { EXTRACT_ATOMS } from "@/lib/ai/schemas";
+import { AppelModeleError } from "@/lib/ai/errors";
+import { PROMPTS_SYSTEME_FR } from "@/lib/ai/prompts";
+import { CONTRAT_D_EXTRACTION } from "@/lib/ai/schemas";
 import { lireReservationsDuJour } from "@/lib/db/ai-quota";
 import { enModeCompteur } from "./abus-fabrique";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Une bascule est une seconde émission réelle : elle doit prendre sa propre
@@ -25,13 +25,13 @@ async function appelInterne(): Promise<string> {
 
   try {
     await callAI({
-      contract: EXTRACT_ATOMS,
-      system: SYSTEM_PROMPTS.extract_atoms,
+      contract: CONTRAT_D_EXTRACTION,
+      system: PROMPTS_SYSTEME_FR.extract_atoms,
       messages: [{ role: "user", content: PARAGRAPHE }],
     });
     return "servi";
   } catch (erreur) {
-    return erreur instanceof AiError ? erreur.code : "inconnu";
+    return erreur instanceof AppelModeleError ? erreur.code : "inconnu";
   } finally {
     process.env.AI_MODEL = modele;
   }
@@ -40,7 +40,7 @@ async function appelInterne(): Promise<string> {
 export async function casRepli(): Promise<void> {
   const ouvert = await enModeCompteur(50 + (await lireReservationsDuJour()), appelInterne);
 
-  record(
+  noter(
     "Repli — une bascule prend sa propre place au plafond global",
     ouvert.appels === 2 && ouvert.places === 2,
     `${ouvert.appels} émission(s), ${ouvert.places} place(s), issue ${ouvert.resultat}`,
@@ -48,7 +48,7 @@ export async function casRepli(): Promise<void> {
 
   const plein = await enModeCompteur(1 + (await lireReservationsDuJour()), appelInterne);
 
-  record(
+  noter(
     "Repli — plafond atteint, pas de repli : une seule émission",
     plein.appels === 1 && plein.places === 1 && plein.resultat === "AI_CALL_FAILED",
     `${plein.appels} émission(s), ${plein.places} place(s), issue ${plein.resultat}`,

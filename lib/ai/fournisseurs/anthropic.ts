@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { AICallFailedError, AIMissingOutputError } from "../errors";
-import { toSdkMessage } from "../message";
-import type { EmissionParams, EmissionResult, PontFournisseur } from "./interface";
+import { EmissionEchoueeError, SortieAbsenteError } from "../errors";
+import { versMessageDuSdk } from "../message";
+import type { ParametresDEmission, ResultatDEmission, PontFournisseur } from "./pont";
 
 /**
  * Le pont Anthropic, seul endroit du projet qui importe le SDK. Le point
@@ -30,7 +30,7 @@ function sdkFor(apiKey: string | undefined): Anthropic {
 export function pontAnthropic(apiKey: string | undefined): PontFournisseur {
   return {
     nom: "anthropic",
-    async emettre(params: EmissionParams): Promise<EmissionResult> {
+    async emettre(params: ParametresDEmission): Promise<ResultatDEmission> {
       const sdk = sdkFor(apiKey);
       const debut = Date.now();
 
@@ -41,11 +41,11 @@ export function pontAnthropic(apiKey: string | undefined): PontFournisseur {
           max_tokens: params.maxTokens,
           system: [{ type: "text", text: params.system, cache_control: { type: "ephemeral" } }],
           thinking: { type: "disabled" },
-          messages: params.messages.map(toSdkMessage),
+          messages: params.messages.map(versMessageDuSdk),
           output_config: { format: params.formatSchema },
         });
       } catch (erreur) {
-        throw new AICallFailedError(params.purpose, erreur);
+        throw new EmissionEchoueeError(params.purpose, erreur);
       }
 
       const latencyMs = Date.now() - debut;
@@ -53,7 +53,7 @@ export function pontAnthropic(apiKey: string | undefined): PontFournisseur {
         (candidat): candidat is Anthropic.TextBlock => candidat.type === "text",
       );
 
-      if (!block) throw new AIMissingOutputError(params.purpose);
+      if (!block) throw new SortieAbsenteError(params.purpose);
 
       return {
         responseText: block.text,

@@ -64,9 +64,9 @@ function melangerEtiquettes(
   const ordre = [...challengers];
   for (let i = ordre.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    const tmp = ordre[i]!;
+    const echange = ordre[i]!;
     ordre[i] = ordre[j]!;
-    ordre[j] = tmp;
+    ordre[j] = echange;
   }
   return ordre.map((challenger, rang) => ({ etiquette: etiquettes[rang]!, challenger }));
 }

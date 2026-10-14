@@ -76,9 +76,9 @@ function ligneDetailDepot(
   depotSonnet: ScoreDepot | undefined,
   cellules: (ScoreDepot | undefined)[],
 ): string {
-  const cellSonnet = formaterCellule(depotSonnet);
-  const cellsChallengers = cellules.map(formaterCellule);
-  return `| ${nom.padEnd(30)} | ${cellSonnet.padEnd(24)} | ${cellsChallengers.map((c) => c.padEnd(24)).join(" | ")} |`;
+  const celluleSonnet = formaterCellule(depotSonnet);
+  const cellulesChallengers = cellules.map(formaterCellule);
+  return `| ${nom.padEnd(30)} | ${celluleSonnet.padEnd(24)} | ${cellulesChallengers.map((c) => c.padEnd(24)).join(" | ")} |`;
 }
 
 function formaterCellule(depot: ScoreDepot | undefined): string {

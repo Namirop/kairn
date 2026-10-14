@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { jetonsDeLaFeuille } from "./cases/jetons-de-la-feuille";
-import { conclure, record } from "./cases/journal";
+import { conclure, noter } from "./cases/journal";
 
 /**
  * Les contrastes, mesurés plutôt que regardés : ratios WCAG, lus dans
@@ -61,8 +61,8 @@ const COMBINAISONS: Combinaison[] = [
     role: "texte second sur le sol de session",
     seuil: AA_TEXTE,
   },
-  { texte: "stone-900", fond: "surface-lichen", role: "encre sur lichen", seuil: AA_TEXTE },
-  { texte: "stone-500", fond: "surface-lichen", role: "texte second sur lichen", seuil: AA_TEXTE },
+  { texte: "stone-900", fond: "surface-givre", role: "encre sur givre", seuil: AA_TEXTE },
+  { texte: "stone-500", fond: "surface-givre", role: "texte second sur givre", seuil: AA_TEXTE },
   { texte: "stone-50", fond: "surface-roche", role: "encre sur roche", seuil: AA_TEXTE },
   { texte: "stone-300", fond: "surface-roche", role: "texte second sur roche", seuil: AA_TEXTE },
   { texte: "stone-400", fond: "surface-roche", role: "niveau et XP sur roche", seuil: AA_TEXTE },
@@ -114,13 +114,13 @@ function main(): void {
     const fond = jetons[combinaison.fond];
 
     if (!texte || !fond) {
-      record(`Contraste — ${combinaison.role}`, false, "jeton introuvable dans app/styles/tokens/");
+      noter(`Contraste — ${combinaison.role}`, false, "jeton introuvable dans app/styles/tokens/");
       continue;
     }
 
     const ratio = contraste(texte, fond);
 
-    record(
+    noter(
       `Contraste — ${combinaison.role}`,
       ratio >= combinaison.seuil,
       `${ratio.toFixed(2)} pour 1 (seuil ${combinaison.seuil})`,

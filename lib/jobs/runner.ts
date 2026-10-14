@@ -1,8 +1,8 @@
-import { AIQuotaError } from "@/lib/ai/errors";
-import { claimJob, finishJob, reporterJob } from "@/lib/db/generation-job";
+import { PlafondGlobalAtteintError } from "@/lib/ai/errors";
+import { prendreLeJob, terminerLeJob, reporterJob } from "@/lib/db/jobs-de-generation";
 import { marquerPretSiPlusRienEnAttente } from "@/lib/db/fin-de-depot";
 import type { GenerationKind } from "@/lib/db/types";
-import { JOB_HANDLERS } from "./handlers";
+import { TRAITEMENTS_PAR_NATURE } from "./traitements";
 import { LotIncomplet } from "./reprise-du-lot";
 
 /**
@@ -16,10 +16,10 @@ import { LotIncomplet } from "./reprise-du-lot";
  * manque et rendu à la file (`DONE` laisserait des concepts sans questions,
  * `FAILED` jetterait ce qui est écrit).
  */
-export type JobOutcome = "DONE" | "FAILED" | "SKIPPED" | "REPORTE" | "REPRIS";
+export type IssueDuJob = "DONE" | "FAILED" | "SKIPPED" | "REPORTE" | "REPRIS";
 
-function describe(error: unknown): string {
-  if (error instanceof Error) return `${error.name} : ${error.message}`;
+function decrire(erreur: unknown): string {
+  if (erreur instanceof Error) return `${erreur.name} : ${erreur.message}`;
   return "Erreur inconnue.";
 }
 
@@ -33,8 +33,8 @@ const MOTIF_PAR_ETAPE: Record<GenerationKind, string> = {
   VARIANTS: "L'écriture des questions n'a pas abouti.",
 };
 
-export async function runJob(jobId: string): Promise<JobOutcome> {
-  const job = await claimJob(jobId);
+export async function executerLeJob(jobId: string): Promise<IssueDuJob> {
+  const job = await prendreLeJob(jobId);
 
   if (!job) return "SKIPPED";
 
@@ -46,32 +46,32 @@ export async function runJob(jobId: string): Promise<JobOutcome> {
   const debut = Date.now();
 
   try {
-    await JOB_HANDLERS[job.kind](job);
-    await finishJob(job.id, "DONE");
+    await TRAITEMENTS_PAR_NATURE[job.kind](job);
+    await terminerLeJob(job.id, "DONE");
     console.info(`[job] ${job.kind} ${job.id} abouti en ${Date.now() - debut} ms`);
     // Le dernier job du dépôt le referme. Après un découpage, les questions
     // sont déjà en file et le dépôt reste en cours.
     await marquerPretSiPlusRienEnAttente(job.inputId);
     return "DONE";
-  } catch (error) {
-    const reason = describe(error);
+  } catch (erreur) {
+    const motif = decrire(erreur);
 
-    if (error instanceof LotIncomplet) {
-      console.warn(`Job ${job.id} (${job.kind}) repris — ${reason}`);
+    if (erreur instanceof LotIncomplet) {
+      console.warn(`Job ${job.id} (${job.kind}) repris — ${motif}`);
       // Pas de clôture du dépôt : la reprise est en file.
       return "REPRIS";
     }
 
-    if (error instanceof AIQuotaError) {
-      console.warn(`Job ${job.id} (${job.kind}) reporté — ${reason}`);
-      await reporterJob(job.id, reason);
+    if (erreur instanceof PlafondGlobalAtteintError) {
+      console.warn(`Job ${job.id} (${job.kind}) reporté — ${motif}`);
+      await reporterJob(job.id, motif);
       // Pas de clôture du dépôt : le dire en échec ferait payer une journée
       // pleine à qui n'y est pour rien.
       return "REPORTE";
     }
 
-    console.error(`Job ${job.id} (${job.kind}) en échec — ${reason}`);
-    await finishJob(job.id, "FAILED", reason);
+    console.error(`Job ${job.id} (${job.kind}) en échec — ${motif}`);
+    await terminerLeJob(job.id, "FAILED", motif);
     // Sans ça, le dépôt annoncerait un travail en cours pour toujours.
     await marquerPretSiPlusRienEnAttente(job.inputId, MOTIF_PAR_ETAPE[job.kind]);
     return "FAILED";

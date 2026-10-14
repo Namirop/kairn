@@ -1,0 +1,89 @@
+/* Le paysage de l'ouverture : son titre, son ciel, sa terre, ses pierres. */
+
+:root {
+  /*
+    Le ciel de l'ouverture, un lavis d'une seule teinte : c'est un ciel, pas un
+    dégradé décoratif entre deux couleurs, qui reste interdit. De gauche à
+    droite, le versant d'ombre pose le plus sombre à gauche.
+
+    L'ombre est un jeton parce que l'en-tête porte la même fonction de x : deux
+    dégradés à 90° sur deux éléments pleine largeur se rejoignent exactement à
+    chaque colonne, et la couture reste invisible.
+  */
+  --ombre-du-versant: linear-gradient(
+    90deg,
+    rgb(6 21 60 / 0.6) 0%,
+    rgb(6 21 60 / 0.26) 46%,
+    rgb(6 21 60 / 0) 84%
+  );
+  --ciel:
+    var(--ombre-du-versant),
+    linear-gradient(177deg, #163f96 0%, #1a4aa6 26%, #1e5cc4 66%, #3a86c9 100%);
+  /*
+    Le ciel en couleur plate : `color-mix` n'accepte pas de dégradé, et les
+    lointains du paysage virent vers cette teinte (la brume). Calculée pour
+    qu'un lointain mêlé à 18 % tombe sur la bande de glace de la maquette.
+  */
+  --ciel-teinte: #a5d8e7;
+  /* La terre du premier plan : un sol appartient à son ciel, sinon l'image se
+     coupe en deux aplats sans rapport. */
+  --terre: #47a2cb;
+
+  /*
+    Les pierres du paysage, distinctes de celles du grand cairn. Au lointain,
+    presque blanches : la brume les mange. Au plan proche, la pierre du grand
+    cairn, sommet lichen.
+  */
+  --pierre-loin-1: #b3d4e1;
+  --pierre-loin-2: #c2dde8;
+  --pierre-loin-3: #cfe6ee;
+  --pierre-proche-1: #1b3d58;
+  --pierre-proche-2: #24506f;
+  --pierre-proche-3: #2e6285;
+  --pierre-proche-sommet: #9fc22e;
+
+  /*
+    Les arêtes se taisent : sur un aplat coloré, un trait de relief coupe la
+    couleur au lieu de la dessiner ; c'est le changement de valeur entre deux
+    terrasses qui fait la crête.
+
+    L'en-tête est le haut du ciel — sa couleur de départ sous le même versant
+    d'ombre —, donc il n'a rien à savoir de la hauteur du hero. Son filet se
+    tait pour la même raison : un trait entre deux surfaces continues serait
+    une couture.
+  */
+  --arete-loin: transparent;
+  --arete-proche: transparent;
+  --entete: var(--ombre-du-versant), linear-gradient(90deg, #163f96 0%, #163f96 100%);
+  --entete-filet: transparent;
+  /* Le geste de l'ouverture : l'encre de la nuit sur le ciel. */
+  --geste-ciel: #14202e;
+  --geste-ciel-encre: #f4f9fb;
+  /* Le creux du titre se remplit du sol et se trace en blanc. */
+  --creux-fond: #47a2cb;
+  --creux-trait: #ffffff;
+  /* Le trait qui dit que le rail est devant la page — voir sa règle dans
+     `coquille.css`. */
+  --filet-du-rail: #7fb3c8;
+
+  /*
+    Sous le cairn, le trait de sol se tait (même raison que les arêtes) : seule
+    l'ombre dit que la pierre touche terre, d'où sa densité.
+  */
+  --sol-du-cairn: transparent;
+  --ombre-du-cairn: #0b1c2c;
+  --ombre-du-cairn-part: 0.3;
+
+  /*
+    Le titre de l'ouverture. Sous `md`, une colonne : le diviseur de
+    `--t-h1-site`, mais quatre rems de marge au lieu de cinq — la formule
+    partagée ignore son panneau, l'ouverture connaît le sien (`px-pas-6`).
+
+    Au-delà de `md` (`grand-ecran.css`), c'est la colonne qui borne le titre et
+    non la fenêtre : mesure du panneau bornée par la fenêtre, moins la
+    gouttière, fois `0.084` — la part de gauche (1,7 sur 2,7) divisée par 7,5,
+    largeur de « Tu lis beaucoup. » en multiples de son corps, plus une garde
+    pour la police de secours. Un titre plus long se remesure.
+  */
+  --t-ouverture: clamp(2.25rem, calc((100vw - 4rem) / 7.4), 3.75rem);
+}

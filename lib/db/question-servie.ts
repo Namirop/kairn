@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { VariantFacet, VariantFormat } from "@/lib/db/types";
 import { trouSansRedite } from "@/lib/domain/bord-du-trou";
 import { choixDUnVraiOuFaux } from "@/lib/domain/choix-proposes";
-import { joursEntre, localDay } from "@/lib/domain/local-day";
+import { joursEntre, jourLocal } from "@/lib/domain/jour-local";
 import { optionsDistinguables } from "@/lib/domain/options-de-qcm";
 import { TROU } from "@/lib/domain/reponse-cloze";
 import { tagsSansReponse } from "@/lib/domain/tags-sans-reponse";
@@ -73,8 +73,8 @@ function ecartDepuis(
   if (!lastReview || !repere) return null;
 
   const jours = joursEntre(
-    localDay(lastReview, repere.fuseau),
-    localDay(repere.maintenant, repere.fuseau),
+    jourLocal(lastReview, repere.fuseau),
+    jourLocal(repere.maintenant, repere.fuseau),
   );
 
   return jours >= 0 ? jours : null;

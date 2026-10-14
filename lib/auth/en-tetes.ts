@@ -11,4 +11,4 @@
  * compte se crée. Par Google il manque : la coquille de l'application le
  * réconcilie au premier affichage.
  */
-export const TIMEZONE_HEADER = "x-cairn-timezone";
+export const ENTETE_DU_FUSEAU = "x-cairn-timezone";

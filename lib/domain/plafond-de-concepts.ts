@@ -4,7 +4,7 @@
  * Une contrainte que la grammaire ne fait pas respecter ne doit jamais faire
  * échouer un appel déjà payé : on tronque, on ne rejette pas. Un `.max()` sur la
  * sortie du modèle n'est pour lui qu'une indication (voir
- * `lib/ai/output-schema.ts`), et le faire tenir par Zod jetait tout le dépôt.
+ * `lib/ai/schema-de-sortie.ts`), et le faire tenir par Zod jetait tout le dépôt.
  *
  * La coupe est positionnelle : le modèle rend les concepts dans l'ordre du
  * texte, pas par importance, donc c'est la fin du texte qui part. Une consigne

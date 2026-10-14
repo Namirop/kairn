@@ -1,6 +1,6 @@
 import { citeDuCode } from "@/lib/domain/controle-concept";
 import { FACETTES_ATTENDUES, FORMATS_LIBRES, LIBRES_MAXIMUM } from "@/lib/domain/controle-variants";
-import type { ConsommationFenetre } from "@/lib/db/ai-call";
+import type { ConsommationFenetre } from "@/lib/db/registre-des-appels";
 import type { DepotEvalue } from "./execution";
 
 /**

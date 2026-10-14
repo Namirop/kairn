@@ -1,9 +1,18 @@
 import { prisma } from "@/lib/db/client";
-import { createSeedAccount, resetSeedAccount, SEED_EMAIL, SEED_TIMEZONE } from "./seed/account";
+import {
+  creerLeCompteDeDemonstration,
+  effacerLeCompteDeDemonstration,
+  ADRESSE_DE_DEMONSTRATION,
+  FUSEAU_DE_DEMONSTRATION,
+} from "./seed/compte-de-demonstration";
 import { CORPUS } from "./seed/corpus";
-import { writeCorpus } from "./seed/corpus-writer";
-import { writeAiCalls, writeDailyUsage, writeFailedInput } from "./seed/ledger";
-import { writeStats } from "./seed/stats";
+import { ecrireLeCorpus } from "./seed/ecriture-du-corpus";
+import {
+  ecrireLesAppels,
+  ecrireLUsageQuotidien,
+  ecrireLesDepotsSansConcept,
+} from "./seed/registre";
+import { ecrireLesCompteurs } from "./seed/compteurs";
 
 /**
  * Remplit la base avec un compte de démonstration et deux mois d'usage
@@ -12,34 +21,40 @@ import { writeStats } from "./seed/stats";
  * l'interface sans appeler le modèle.
  */
 async function main(): Promise<void> {
-  const now = new Date();
+  const maintenant = new Date();
 
-  await resetSeedAccount();
-  const userId = await createSeedAccount();
+  await effacerLeCompteDeDemonstration();
+  const userId = await creerLeCompteDeDemonstration();
 
-  const { reviewedAt, atomsConsolidated } = await writeCorpus(userId, CORPUS, now);
-  await writeFailedInput(userId, now);
-  await writeAiCalls(userId, now);
-  await writeDailyUsage(userId, SEED_TIMEZONE, reviewedAt);
-  await writeStats(userId, SEED_TIMEZONE, reviewedAt, atomsConsolidated, now);
+  const { reviewedAt, atomsConsolidated } = await ecrireLeCorpus(userId, CORPUS, maintenant);
+  await ecrireLesDepotsSansConcept(userId, maintenant);
+  await ecrireLesAppels(userId, maintenant);
+  await ecrireLUsageQuotidien(userId, FUSEAU_DE_DEMONSTRATION, reviewedAt);
+  await ecrireLesCompteurs(
+    userId,
+    FUSEAU_DE_DEMONSTRATION,
+    reviewedAt,
+    atomsConsolidated,
+    maintenant,
+  );
 
-  const [atoms, variants, due] = await Promise.all([
+  const [atomes, variantes, dus] = await Promise.all([
     prisma.atom.count({ where: { userId } }),
     prisma.variant.count({ where: { atom: { userId } } }),
     prisma.atom.count({
-      where: { userId, due: { lte: now }, state: { not: "ARCHIVED" } },
+      where: { userId, due: { lte: maintenant }, state: { not: "ARCHIVED" } },
     }),
   ]);
 
   console.info(
-    `Seed écrit pour ${SEED_EMAIL} — ${atoms} Atoms, ${variants} Variants, ` +
-      `${reviewedAt.length} Reviews, ${atomsConsolidated} consolidés, ${due} dus aujourd'hui.`,
+    `Seed écrit pour ${ADRESSE_DE_DEMONSTRATION} — ${atomes} Atoms, ${variantes} Variants, ` +
+      `${reviewedAt.length} Reviews, ${atomsConsolidated} consolidés, ${dus} dus aujourd'hui.`,
   );
 }
 
 main()
-  .catch((error: unknown) => {
-    console.error("Le seed a échoué.", error);
+  .catch((erreur: unknown) => {
+    console.error("Le seed a échoué.", erreur);
     process.exitCode = 1;
   })
   .finally(() => prisma.$disconnect());

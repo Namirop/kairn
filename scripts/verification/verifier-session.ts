@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { conclure, record } from "./cases/journal";
+import { conclure, noter } from "./cases/journal";
 import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
 
 /**
@@ -58,7 +58,7 @@ function verifierQueLaVarianteNePlanifiePas(): void {
   ];
   const trouves = interdits.filter((champ) => new RegExp(`^\\s+${champ}\\s`, "m").test(corps));
 
-  record(
+  noter(
     "Architecture — aucune variante ne porte d'intervalle, de difficulté ni d'échéance",
     trouves.length === 0,
     trouves.length === 0
@@ -97,7 +97,7 @@ function verifierQueLesActionsNExportentQueDesFonctions(): void {
     if (exports.length > 0) fautifs.push(`${fichier} (${exports.length})`);
   }
 
-  record(
+  noter(
     "Architecture — les fichiers d'actions n'exportent que des fonctions async",
     fautifs.length === 0,
     fautifs.length === 0 ? "aucun export de valeur" : fautifs.join(", "),
@@ -180,13 +180,13 @@ async function main(): Promise<void> {
     await compte.casSuppressionComplete(aEffacer.id, "Europe/Paris");
 
     const appels = await prisma.aiCall.count({ where: { userId: { in: comptes } } });
-    record(
+    noter(
       "Le moteur de révision n'appelle jamais le modèle",
       appels === 0,
       `${appels} appel(s) au registre`,
     );
 
-    record(
+    noter(
       "Aucune requête n'est sortie vers l'API",
       tentativesReseau.length === 0,
       tentativesReseau.length === 0 ? "zéro tentative" : tentativesReseau.join(", "),

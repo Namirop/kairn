@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { isAuthorizedCron } from "@/lib/cron/authorization";
+import { estUnCronAutorise } from "@/lib/cron/autorisation";
 import { signalerLeBattement } from "@/lib/cron/battement";
-import { failExhaustedJobs, findResumableJobs } from "@/lib/db/generation-job";
+import { fermerLesJobsEpuises, trouverLesJobsAReprendre } from "@/lib/db/jobs-de-generation";
 import { oublierLesVisitesAbandonnees } from "@/lib/db/depot-de-visite";
-import { runJob, type JobOutcome } from "@/lib/jobs/runner";
+import { executerLeJob, type IssueDuJob } from "@/lib/jobs/runner";
 
 /**
- * Reprise des jobs : ferme ceux qui ont épuisé leurs tentatives (`MAX_ATTEMPTS`),
+ * Reprise des jobs : ferme ceux qui ont épuisé leurs tentatives (`TENTATIVES_MAX`),
  * puis rattrape ceux restés en attente et ceux bloqués « en cours » depuis
- * `STALL_AFTER_MS`. Appelée par un déclencheur externe, authentifiée par
+ * `BLOCAGE_APRES_MS`. Appelée par un déclencheur externe, authentifiée par
  * CRON_SECRET.
  */
 
@@ -38,17 +38,17 @@ const JOBS_PAR_PASSAGE = 3;
 const BUDGET_DE_DEPART_MS = 20_000;
 
 export async function GET(request: Request) {
-  if (!isAuthorizedCron(request)) {
+  if (!estUnCronAutorise(request)) {
     // i18n-ignore — lu par le planificateur de crons, jamais par une personne.
     return NextResponse.json({ erreur: "Non autorisé." }, { status: 401 });
   }
 
-  const abandonnes = await failExhaustedJobs();
+  const abandonnes = await fermerLesJobsEpuises();
   // Les essais que personne n'a réclamés : personne n'a accepté que leur texte
   // reste. Les cascades emportent les concepts.
   const visitesOubliees = await oublierLesVisitesAbandonnees();
-  const jobs = await findResumableJobs(JOBS_PAR_PASSAGE);
-  const comptes: Record<JobOutcome, number> = {
+  const jobs = await trouverLesJobsAReprendre(JOBS_PAR_PASSAGE);
+  const comptes: Record<IssueDuJob, number> = {
     DONE: 0,
     FAILED: 0,
     SKIPPED: 0,
@@ -62,7 +62,7 @@ export async function GET(request: Request) {
   for (const job of jobs) {
     if (lances > 0 && Date.now() - debut > BUDGET_DE_DEPART_MS) break;
 
-    comptes[await runJob(job.id)] += 1;
+    comptes[await executerLeJob(job.id)] += 1;
     lances += 1;
   }
 

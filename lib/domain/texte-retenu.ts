@@ -30,12 +30,12 @@ export function texteRetenu(source: string, rendu: string | null | undefined): s
   if (garde.length === 0) return null;
 
   const plat = normaliser(source);
-  const rendupla = normaliser(garde);
+  const renduPlat = normaliser(garde);
 
-  if (rendupla === plat) return null;
+  if (renduPlat === plat) return null;
 
   // Plus long que le dépôt : c'est une réécriture, pas un extrait.
-  if (rendupla.length >= plat.length) return null;
+  if (renduPlat.length >= plat.length) return null;
 
   const lignes = garde
     .split("\n")

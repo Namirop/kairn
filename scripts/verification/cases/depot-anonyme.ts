@@ -18,7 +18,7 @@ import {
 import { VISITES_PAR_ADRESSE } from "@/lib/db/session-anonyme";
 import { deposerSansCompte } from "@/lib/depots/deposer-sans-compte";
 import { executerToutLePipeline } from "./depot-simule";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Le dépôt avant compte, seul endroit du produit qui dépense sans compte
@@ -51,7 +51,7 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
 
   const vu = await lireLeDepotAnonyme(essai.sessionId);
 
-  record(
+  noter(
     "Essai — le visiteur voit vraiment ses concepts, sans compte",
     (vu?.concepts.length ?? 0) > 0,
     `${vu?.concepts.length ?? 0} concept(s) affichés`,
@@ -67,7 +67,7 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
     where: { anonymousSessionId: essai.sessionId, variants: { some: {} } },
   });
 
-  record(
+  noter(
     "Essai — un seul concept reçoit ses quatre questions, les autres attendent le compte",
     questionnes === 1 && questions === 4,
     `${questions} question(s) sur ${questionnes} concept(s) questionné(s)`,
@@ -78,7 +78,7 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
     ? await deposerSansCompte(TEXTE, adresse, essai.sessionId)
     : { ok: false as const, motif: "le second avait déjà été refusé" };
 
-  record(
+  noter(
     "Essai — un découpage réussi laisse un second essai, mais pas un troisième",
     second.ok && !troisieme.ok,
     second.ok
@@ -99,7 +99,7 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
     where: { anonymousSessionId: essai.sessionId },
   });
 
-  record(
+  noter(
     "Reprise — dépôt et concepts passent au compte, sans reste",
     conceptsRepris > 0 && aMoi === conceptsRepris && orphelins === 0,
     `${aMoi} concept(s) au compte, ${orphelins} resté(s) sur la visite`,
@@ -111,7 +111,7 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
     where: { userId, NOT: { inputId: { in: repris.map((depot) => depot.inputId) } } },
   });
 
-  record(
+  noter(
     "Reprise — les concepts restent groupés sous leur dépôt d'origine",
     malRanges === 0 && repris.every((depot) => depot.inputId.length > 0),
     `${repris.length} dépôt(s) repris, ${malRanges} concept(s) hors de leur dépôt`,
@@ -123,13 +123,13 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
   await compterLaVisiteReprise(userId, "UTC", conceptsRepris);
   const apres = await lireUsageDeLaPeriode(userId, "UTC");
 
-  record(
+  noter(
     "Reprise — les concepts de l'essai entrent au plafond du mois",
     apres.concepts === avant.concepts + conceptsRepris && apres.concepts > 0,
     `${avant.concepts} → ${apres.concepts} concept(s) comptés pour ${conceptsRepris} repris`,
   );
 
-  record(
+  noter(
     "Reprise — l'extraction de l'essai compte aussi comme un dépôt",
     apres.depots === avant.depots + 1,
     `${avant.depots} → ${apres.depots} dépôt(s)`,
@@ -137,7 +137,7 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
 
   const reprise = await rattacherAuCompte(essai.sessionId, userId);
 
-  record(
+  noter(
     "Reprise — la même visite ne se réclame pas deux fois",
     reprise.length === 0,
     `${reprise.length} dépôt(s) repris au second appel`,
@@ -169,7 +169,7 @@ export async function casSecondeChance(): Promise<void> {
   const concepts = await prisma.atom.count({ where: { anonymousSessionId: rate.sessionId } });
   const retente = await deposerSansCompte(TEXTE, adresse, rate.sessionId);
 
-  record(
+  noter(
     "Essai — un essai qui n'a rien donné laisse retenter",
     concepts === 0 && retente.ok,
     concepts === 0
@@ -183,7 +183,7 @@ export async function casSecondeChance(): Promise<void> {
 
   const troisieme = await deposerSansCompte(TEXTE, adresse, rate.sessionId);
 
-  record(
+  noter(
     "Essai — la seconde chance ne se répète pas",
     !troisieme.ok,
     troisieme.ok ? "un troisième essai est passé" : troisieme.motif,
@@ -211,7 +211,7 @@ export async function casPanneNeConsommePasDEssai(): Promise<void> {
   const apresPanne = await compterLesDepots(essai.sessionId);
   const ouverte = await sessionDisponible(essai.sessionId);
 
-  record(
+  noter(
     "Panne — un dépôt en panne ne consomme aucun essai",
     ouverte && apresPanne.imputables === 0 && apresPanne.pannes === 1,
     `${apresPanne.imputables} imputable(s), ${apresPanne.pannes} panne(s), visite ${
@@ -231,7 +231,7 @@ export async function casPanneNeConsommePasDEssai(): Promise<void> {
     accordes += 1;
   }
 
-  record(
+  noter(
     `Panne — après une panne, les ${ESSAIS_PAR_VISITE} essais dus restent dus`,
     accordes === ESSAIS_PAR_VISITE,
     `${accordes} essai(s) accordé(s) après la panne`,
@@ -265,7 +265,7 @@ export async function casPlafondDesPannes(): Promise<void> {
   const refuse = await deposerSansCompte(TEXTE, adresse, premier.sessionId);
   const compte = await compterLesDepots(premier.sessionId);
 
-  record(
+  noter(
     `Panne — ${PANNES_TOLEREES} pannes ferment la visite`,
     !refuse.ok && compte.pannes === PANNES_TOLEREES,
     refuse.ok
@@ -275,7 +275,7 @@ export async function casPlafondDesPannes(): Promise<void> {
 
   // Ni « tes concepts » — il n'en a aucun —, ni « tes essais sont faits » — ils
   // sont intacts, c'est toute la règle. Le refus doit désigner la panne.
-  record(
+  noter(
     "Panne — le refus désigne la panne, pas des concepts ni des essais consommés",
     !refuse.ok && !refuse.motif.includes("tes concepts") && !refuse.motif.includes("Tes essais"),
     refuse.ok ? "accepté" : refuse.motif,
@@ -311,7 +311,7 @@ export async function casRepriseApresRejet(): Promise<void> {
 
   const vu = await lireLeDepotAnonyme(rate.sessionId);
 
-  record(
+  noter(
     "Reprise — c'est le second essai qui s'affiche, pas le premier",
     vu?.inputId === retente.inputId && (vu?.concepts.length ?? 0) > 0,
     `dépôt lu : ${vu?.inputId === retente.inputId ? "le second" : "le premier"}, ${
@@ -339,7 +339,7 @@ export async function casDeuxOngletsSimultanes(): Promise<void> {
   const compte = await compterLesDepots(premier.sessionId);
   const troisieme = await deposerSansCompte(TEXTE, adresse, premier.sessionId);
 
-  record(
+  noter(
     "Visite — deux onglets consomment les deux essais d'un coup, et pas plus",
     second.ok && compte.imputables === ESSAIS_PAR_VISITE && !troisieme.ok,
     `${compte.imputables} imputable(s) après deux envois simultanés, troisième ${
@@ -374,7 +374,7 @@ export async function casReouvertureLeLendemain(userId: string): Promise<void> {
 
   const ferme = await deposerSansCompte(TEXTE, adresse, premier.sessionId);
 
-  record(
+  noter(
     "Visite — deux essais faits, la porte est fermée",
     !ferme.ok,
     ferme.ok ? "un troisième essai est passé" : ferme.motif,
@@ -391,7 +391,7 @@ export async function casReouvertureLeLendemain(userId: string): Promise<void> {
 
   const lendemain = await deposerSansCompte(TEXTE, adresse, premier.sessionId);
 
-  record(
+  noter(
     `Visite — après ${FENETRE_ESSAIS_HEURES} h, la même visite redonne ses essais`,
     lendemain.ok && lendemain.sessionId === premier.sessionId,
     lendemain.ok
@@ -406,7 +406,7 @@ export async function casReouvertureLeLendemain(userId: string): Promise<void> {
   const depots = await prisma.input.count({ where: { anonymousSessionId: premier.sessionId } });
   const repris = await rattacherAuCompte(premier.sessionId, userId);
 
-  record(
+  noter(
     "Reprise — tout ce que la visite a déposé part au compte, d'hier comme d'aujourd'hui",
     repris.length === depots && depots >= 3,
     `${repris.length} dépôt(s) repris sur ${depots} déposé(s)`,
@@ -437,7 +437,7 @@ export async function casLimiteParAdresse(): Promise<void> {
     break;
   }
 
-  record(
+  noter(
     `Essai — la même adresse n'ouvre que ${VISITES_PAR_ADRESSE} visites`,
     acceptes === VISITES_PAR_ADRESSE,
     `${acceptes} visite(s) ouvertes, puis « ${refus} »`,
@@ -447,7 +447,7 @@ export async function casLimiteParAdresse(): Promise<void> {
   // le produit.
   const ailleurs = await deposerSansCompte(TEXTE, "198.51.100.3", null);
 
-  record(
+  noter(
     "Essai — une autre adresse reste servie",
     ailleurs.ok,
     ailleurs.ok ? "servie" : ailleurs.motif,
@@ -486,7 +486,7 @@ export async function casOubliDesVisites(): Promise<void> {
     where: { anonymousSessionId: abandonnee.sessionId },
   });
 
-  record(
+  noter(
     "Oubli — une visite non réclamée disparaît avec son dépôt, une réclamée reste",
     restantes.length === 1 && restantes[0]?.id === gardee.sessionId && depotsRestants === 0,
     `${restantes.length} visite(s) restante(s), ${depotsRestants} dépôt(s) orphelin(s)`,

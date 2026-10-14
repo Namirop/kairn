@@ -1,5 +1,5 @@
-import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
-import { contratDeGeneration, type GenerateVariantsOutput } from "@/lib/ai/schemas";
+import { PROMPTS_SYSTEME_FR } from "@/lib/ai/prompts";
+import { contratDeGeneration, type SortieDeGeneration } from "@/lib/ai/schemas";
 import { emplacementDuTexteATrou } from "@/lib/domain/emplacement-du-trou";
 import { messageDuGroupe } from "@/lib/domain/envoi-de-questions";
 import { appelerViaOpenRouter, type ConsommationOpenRouter } from "./client";
@@ -41,14 +41,14 @@ export async function genererVia(
   groupe: GroupeAGenerer[],
   maxTokens: number,
   reasoning: { effort: "low" | "medium" | "high" } | false = false,
-): Promise<{ sortie: GenerateVariantsOutput; facture: Facture }> {
+): Promise<{ sortie: SortieDeGeneration; facture: Facture }> {
   const trou = emplacementDuTexteATrou(groupe[0]?.concept ?? "");
-  const contract = contratDeGeneration(trou);
+  const contrat = contratDeGeneration(trou);
   const contenu = messageDuGroupe(groupe);
 
   const { valeur, consommation } = await appelerViaOpenRouter({
-    contract,
-    system: SYSTEM_PROMPTS.generate_variants,
+    contract: contrat,
+    system: PROMPTS_SYSTEME_FR.generate_variants,
     messages: [{ role: "user", content: contenu }],
     model: modele.id,
     maxTokens,

@@ -1,4 +1,4 @@
-import { GENERATE_VARIANTS_PROMPT } from "@/lib/ai/prompts";
+import { PROMPT_DE_QUESTIONS } from "@/lib/ai/prompts";
 import { CONCEPTS_PAR_APPEL } from "@/lib/ai/schemas";
 import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
 import type { DepotFige } from "../fige";
@@ -26,7 +26,7 @@ export function conceptsQuestionnables(depot: DepotFige): number {
  * questionnables.
  */
 export function planGeneration(fige: { depots: DepotFige[] }): Plan {
-  const promptTokens = tok(GENERATE_VARIANTS_PROMPT);
+  const tokensDuPrompt = tok(PROMPT_DE_QUESTIONS);
   let appels = 0;
   let tokensIn = 0;
   let tokensOut = 0;
@@ -61,7 +61,7 @@ export function planGeneration(fige: { depots: DepotFige[] }): Plan {
     const tailleConceptMoyenne =
       questionnables.reduce((s, c) => s + tok(c.concept), 0) / questionnables.length;
     tokensIn += Math.round(
-      nbAppels * (promptTokens + CONCEPTS_PAR_APPEL * (tailleConceptMoyenne + 30) + 80),
+      nbAppels * (tokensDuPrompt + CONCEPTS_PAR_APPEL * (tailleConceptMoyenne + 30) + 80),
     );
   }
 
@@ -70,7 +70,7 @@ export function planGeneration(fige: { depots: DepotFige[] }): Plan {
 
 /** Le juge de fidélité : un appel par concept questionné, un verdict par question. */
 export function planFidelite(fige: { depots: DepotFige[] }): Plan {
-  const promptTokens = tok(SYSTEM_FIDELITE);
+  const tokensDuPrompt = tok(SYSTEM_FIDELITE);
   const plan: Plan = { appels: 0, tokensIn: 0, tokensOut: 0 };
 
   for (const depot of fige.depots) {
@@ -87,7 +87,7 @@ export function planFidelite(fige: { depots: DepotFige[] }): Plan {
           for (const option of variant.options) inConcept += tok(option);
         }
       }
-      plan.tokensIn += promptTokens + inConcept + 80;
+      plan.tokensIn += tokensDuPrompt + inConcept + 80;
       plan.tokensOut += variants.length * (30 + SURCHARGE_JSON_ITEM) + 30;
     }
   }

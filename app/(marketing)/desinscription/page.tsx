@@ -6,7 +6,7 @@ import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
-import { readUnsubscribeToken } from "@/lib/email/unsubscribe";
+import { lireLeJetonDeDesinscription } from "@/lib/email/desinscription";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("site.desinscription");
@@ -30,7 +30,7 @@ export default async function PageDesinscription({
   searchParams: Promise<{ jeton?: string }>;
 }) {
   const { jeton } = await searchParams;
-  const valide = jeton !== undefined && readUnsubscribeToken(jeton) !== null;
+  const valide = jeton !== undefined && lireLeJetonDeDesinscription(jeton) !== null;
   const t = await getTranslations("site.desinscription");
 
   return (

@@ -1,4 +1,4 @@
-import { joursEntre, localDay, localHour } from "./local-day";
+import { joursEntre, jourLocal, heureLocale } from "./jour-local";
 
 /**
  * Quand relancer un compte qui n'a jamais rien déposé. Le rappel quotidien et
@@ -38,11 +38,11 @@ export type CompteARelancer = {
  * une journée locale fait 23 ou 25 h aux changements d'heure.
  */
 export function estLHeureDeLaRelance(maintenant: Date, compte: CompteARelancer): boolean {
-  if (localHour(maintenant, compte.timezone) !== compte.dailyReminderHour) return false;
+  if (heureLocale(maintenant, compte.timezone) !== compte.dailyReminderHour) return false;
 
   const age = joursEntre(
-    localDay(compte.inscritLe, compte.timezone),
-    localDay(maintenant, compte.timezone),
+    jourLocal(compte.inscritLe, compte.timezone),
+    jourLocal(maintenant, compte.timezone),
   );
 
   return age >= JOURS_AVANT_RELANCE && age <= JOURS_APRES_LESQUELS_ON_RENONCE;

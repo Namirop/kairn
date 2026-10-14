@@ -187,7 +187,7 @@ désaturé qui signale et un accent ember réservé à l'affichage du streak.
   surface de lecture par défaut.
 - **Ombre** (`--surface-ombre` #e4e4df, alias `--stone-100`) : panneau
   alterné, jamais deux d'affilée.
-- **Lichen Surface** (`--surface-lichen` #e8eadf) : un seul panneau dans
+- **Givre** (`--surface-givre` #e4eff2) : un seul panneau dans
   toute l'application — celui où le produit tient sa promesse. Interdit tout
   autre usage du lichen sur cet écran, sauf le sommet du cairn.
 - **Roche Sombre** (`--surface-roche` #2a2e2c) : deux panneaux maximum. Le

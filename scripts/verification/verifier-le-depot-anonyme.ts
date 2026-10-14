@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs";
 import { prisma } from "@/lib/db/client";
 import { deposerSansCompte } from "@/lib/depots/deposer-sans-compte";
 import { CARACTERES_MAXIMUM_ANONYME } from "@/lib/depots/bornes-du-depot";
-import { readAiConfig } from "@/lib/ai/config";
-import { computeCostUsd } from "@/lib/ai/pricing";
+import { lireLaConfigDeLEnvironnement } from "@/lib/ai/config";
+import { coutEnDollars } from "@/lib/ai/cout-des-appels";
 import { executerToutLePipeline } from "./cases/depot-simule";
 
 /**
@@ -237,7 +237,7 @@ async function plafondAtteint(inputId: string): Promise<boolean> {
     select: { lastError: true },
   });
 
-  return jobs.some((job) => job.lastError?.includes("AIAnonymousQuotaError") === true);
+  return jobs.some((job) => job.lastError?.includes("PartSansCompteEpuiseeError") === true);
 }
 
 type Depot = {
@@ -331,7 +331,7 @@ async function eprouverLePlafond(texte: string): Promise<string[]> {
  * Le dépôt anonyme appelle l'extraction, puis un lot de questions pour
  * l'échantillon de la landing : les deux comptent dans l'estimation.
  */
-const PURPOSES = ["extract_atoms", "generate_variants"] as const;
+const APPELANTS = ["extract_atoms", "generate_variants"] as const;
 
 /**
  * Le coût estimé n'est pas la moyenne globale de `AiCall`, dominée par le banc
@@ -341,7 +341,7 @@ const PURPOSES = ["extract_atoms", "generate_variants"] as const;
 async function planASec(cas: Cas[]): Promise<void> {
   const avecModele = cas.filter((c) => !c.controles.includes("aucun-appel"));
   const caracteres = avecModele.reduce((total, c) => total + c.texte.length, 0);
-  const config = readAiConfig();
+  const config = lireLaConfigDeLEnvironnement();
 
   console.log(`
 Plan à sec — ${cas.length} cas, dont ${avecModele.length} appellent le modèle.
@@ -357,7 +357,7 @@ Plan à sec — ${cas.length} cas, dont ${avecModele.length} appellent le modèl
   let parDepot = 0;
   const detail: string[] = [];
 
-  for (const purpose of PURPOSES) {
+  for (const appelant of APPELANTS) {
     const moyenne = await prisma.aiCall.aggregate({
       _avg: {
         inputTokens: true,
@@ -366,16 +366,16 @@ Plan à sec — ${cas.length} cas, dont ${avecModele.length} appellent le modèl
         cacheReadTokens: true,
       },
       _count: true,
-      where: { purpose, success: true },
+      where: { purpose: appelant, success: true },
     });
 
     if (moyenne._count === 0) {
-      detail.push(`   ${purpose.padEnd(22)}aucun historique`);
+      detail.push(`   ${appelant.padEnd(22)}aucun historique`);
       continue;
     }
 
     const cout = Number(
-      computeCostUsd(config.model, {
+      coutEnDollars(config.model, {
         inputTokens: Math.round(moyenne._avg.inputTokens ?? 0),
         outputTokens: Math.round(moyenne._avg.outputTokens ?? 0),
         cacheCreationTokens: Math.round(moyenne._avg.cacheCreationTokens ?? 0),
@@ -385,7 +385,7 @@ Plan à sec — ${cas.length} cas, dont ${avecModele.length} appellent le modèl
 
     parDepot += cout;
     detail.push(
-      `   ${purpose.padEnd(22)}${(cout * 100).toFixed(3)} ¢/appel  (sur ${moyenne._count} appels)`,
+      `   ${appelant.padEnd(22)}${(cout * 100).toFixed(3)} ¢/appel  (sur ${moyenne._count} appels)`,
     );
   }
 

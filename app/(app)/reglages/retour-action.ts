@@ -3,7 +3,7 @@
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { ecrireUnRetour } from "@/lib/db/retour";
 import { signalerUnRetour } from "@/lib/email/signalement-de-retour";
 import { LIBELLE_DE_SUJET } from "@/lib/retours/libelle-du-sujet";
@@ -49,7 +49,7 @@ export async function envoyerUnRetourAction(
   _precedent: EtatDuRetour,
   donnees: FormData,
 ): Promise<EtatDuRetour> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 

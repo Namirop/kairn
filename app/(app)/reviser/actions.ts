@@ -4,13 +4,13 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { reclamerSignalDeMaitrise } from "@/lib/db/carte-de-maitrise";
 import { prendreUnGeste } from "@/lib/db/limite-de-gestes";
 import { enregistrerRevision } from "@/lib/db/revision";
 import { compterDusDemain } from "@/lib/db/session-du-jour";
 import { signalerUneQuestion } from "@/lib/db/signalement";
-import { lireFuseauUtilisateur, marquerEspacementVu } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur, marquerEspacementVu } from "@/lib/db/reglages-du-compte";
 import type { SignalDeMaitrise } from "@/lib/domain/signal-maitrise";
 import type { Messages } from "@/lib/i18n/messages";
 
@@ -42,7 +42,7 @@ export type ResultatReponse =
   { ok: true; signal: SignalDeMaitrise | null } | { ok: false; motif: string };
 
 export async function repondreAction(donnees: ReponseDonnee): Promise<ResultatReponse> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
   const t = await getTranslations("revision.session.serveur");
 
   if (!utilisateur) return { ok: false, motif: t("expiree") };
@@ -92,7 +92,7 @@ export type SignalementDonne = z.input<typeof signalementSchema>;
  * débit comme pour les autres gestes : c'est une écriture répétable à volonté.
  */
 export async function signalerAction(donnees: SignalementDonne): Promise<boolean> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) return false;
 
@@ -123,7 +123,7 @@ const reclamationSchema = z.array(z.string().min(1)).max(50);
 export async function reclamerMaitriseAction(
   atomIds: string[],
 ): Promise<{ atomId: string; concept: string } | null> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) return null;
 
@@ -138,7 +138,7 @@ export async function reclamerMaitriseAction(
 
 /** Ce qui revient demain, une fois la session finie. */
 export async function compterDemainAction(): Promise<number> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) return 0;
 
@@ -150,7 +150,7 @@ export async function compterDemainAction(): Promise<number> {
  * explication qui revient jusqu'à ce qu'on l'accuse est une modale déguisée.
  */
 export async function espacementVuAction(): Promise<void> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) return;
 
@@ -172,7 +172,7 @@ export async function espacementVuAction(): Promise<void> {
  * `SessionDeRevision` au lieu de le laisser en décider.
  */
 export async function relireLeTableauAction(): Promise<void> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) return;
 

@@ -2,13 +2,13 @@ import "dotenv/config";
 import { prisma } from "@/lib/db/client";
 import { ETATS_QUI_POSENT_UNE_PIERRE } from "@/lib/domain/etat-maitrise";
 import {
-  createSeedAccount,
-  resetSeedAccount,
-  SEED_EMAIL,
-  SEED_TIMEZONE,
-} from "@/prisma/seed/account";
-import { writeCorpus } from "@/prisma/seed/corpus-writer";
-import { writeDailyUsage } from "@/prisma/seed/ledger";
+  creerLeCompteDeDemonstration,
+  effacerLeCompteDeDemonstration,
+  ADRESSE_DE_DEMONSTRATION,
+  FUSEAU_DE_DEMONSTRATION,
+} from "@/prisma/seed/compte-de-demonstration";
+import { ecrireLeCorpus } from "@/prisma/seed/ecriture-du-corpus";
+import { ecrireLUsageQuotidien } from "@/prisma/seed/registre";
 import { construireLeCorpus } from "@/scripts/assets/fige-vers-seed";
 import { lireFigeDAssets } from "@/scripts/assets/fige";
 import { statsDeDemo } from "@/scripts/assets/stats-de-demo";
@@ -19,12 +19,12 @@ import { statsDeDemo } from "@/scripts/assets/stats-de-demo";
  * fait grandir le cairn et remplit la session du jour.
  *
  * Aucune dépense, aucun appel modèle — que de l'écriture en base, sur le seul
- * compte `SEED_USER_ID`. Rejouable : on efface, on recrée, on réécrit.
+ * compte `ID_DE_DEMONSTRATION`. Rejouable : on efface, on recrée, on réécrit.
  *
  *   npm run assets:seed
  */
 async function main(): Promise<void> {
-  const now = new Date();
+  const maintenant = new Date();
   const depots = lireFigeDAssets();
 
   if (depots.length === 0) {
@@ -32,19 +32,19 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  await resetSeedAccount();
-  const userId = await createSeedAccount();
+  await effacerLeCompteDeDemonstration();
+  const userId = await creerLeCompteDeDemonstration();
 
-  const corpus = construireLeCorpus(depots, now);
-  const { reviewedAt } = await writeCorpus(userId, corpus, now);
-  await writeDailyUsage(userId, SEED_TIMEZONE, reviewedAt);
+  const corpus = construireLeCorpus(depots, maintenant);
+  const { reviewedAt } = await ecrireLeCorpus(userId, corpus, maintenant);
+  await ecrireLUsageQuotidien(userId, FUSEAU_DE_DEMONSTRATION, reviewedAt);
 
   // Le cairn compte CONSOLIDATED et ARCHIVED : on recompte en base plutôt que de
   // se fier au décompte partiel du writer, qui ignore les archivés.
   const atomsConsolidated = await prisma.atom.count({
     where: { userId, state: { in: ETATS_QUI_POSENT_UNE_PIERRE } },
   });
-  const stats = statsDeDemo(corpus, now, SEED_TIMEZONE);
+  const stats = statsDeDemo(corpus, maintenant, FUSEAU_DE_DEMONSTRATION);
 
   await prisma.userStats.update({
     where: { userId },
@@ -63,7 +63,7 @@ async function main(): Promise<void> {
     prisma.atom.count({
       where: {
         userId,
-        due: { lte: now },
+        due: { lte: maintenant },
         state: { not: "ARCHIVED" },
         variants: { some: { retiredAt: null } },
       },
@@ -74,7 +74,7 @@ async function main(): Promise<void> {
   const etats = Object.fromEntries(parEtat.map((ligne) => [ligne.state, ligne._count]));
 
   console.info(
-    `Seed d'assets écrit pour ${SEED_EMAIL} — ${reviewedAt.length} Reviews, ${variants} Variants.`,
+    `Seed d'assets écrit pour ${ADRESSE_DE_DEMONSTRATION} — ${reviewedAt.length} Reviews, ${variants} Variants.`,
   );
   console.info(`États : ${JSON.stringify(etats)}`);
   console.info(

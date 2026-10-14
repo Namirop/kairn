@@ -1,7 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { debutDuJourUtc, ilYA } from "./fenetre-utc";
-import { localDay } from "./local-day";
+import { jourLocal } from "./jour-local";
 
 describe("ilYA", () => {
   it("recule du nombre de jours demandé", () => {
@@ -89,7 +89,7 @@ describe("debutDuJourUtc", () => {
           const debut = debutDuJourUtc(quand);
 
           expect(debut.getTime()).toBeLessThanOrEqual(quand.getTime());
-          expect(localDay(debut, "UTC")).toBe(localDay(quand, "UTC"));
+          expect(jourLocal(debut, "UTC")).toBe(jourLocal(quand, "UTC"));
           expect(quand.getTime() - debut.getTime()).toBeLessThan(24 * 60 * 60 * 1000);
         },
       ),

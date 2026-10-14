@@ -2,7 +2,7 @@ import "dotenv/config";
 // Import de type seulement : effacé à la compilation, il ne charge rien avant
 // que l'environnement soit posé (les autres modules s'importent en dynamique).
 import type { StatutStripe } from "@/lib/domain/rapport-de-stripe";
-import { conclure, record } from "./cases/journal";
+import { conclure, noter } from "./cases/journal";
 
 /**
  * Preuve que l'abonnement ne se laisse pas remonter le temps.
@@ -17,7 +17,7 @@ import { conclure, record } from "./cases/journal";
  */
 
 const COMPTE = "verification-abonnement";
-const CLIENT = "cus_verification_kairn";
+const CLIENT_STRIPE = "cus_verification_kairn";
 const ABONNEMENT = "sub_verification_kairn";
 
 /** Loin devant, pour qu'aucun terme ne soit dépassé pendant la passe. */
@@ -57,13 +57,13 @@ async function main(): Promise<void> {
     });
 
   try {
-    await attacherLeClientStripe(COMPTE, CLIENT);
+    await attacherLeClientStripe(COMPTE, CLIENT_STRIPE);
 
     // ---- Le chemin nominal -------------------------------------------------
     const premier = await ecrire("active", decale(0));
     const apresAchat = await lireLOffreDuCompte(COMPTE);
 
-    record(
+    noter(
       "Un abonnement actif ouvre le plan payant",
       premier === "ecrit" && apresAchat.plan === "MENSUEL" && apresAchat.plafond === PLAFOND_PAYANT,
       `${premier}, plan ${apresAchat.plan}, plafond ${apresAchat.plafond}`,
@@ -73,7 +73,7 @@ async function main(): Promise<void> {
     const rejeu = await ecrire("canceled", decale(0));
     const apresRejeu = await lireLOffreDuCompte(COMPTE);
 
-    record(
+    noter(
       "Un événement rejoué à l'identique n'écrit rien",
       rejeu === "ignore" && apresRejeu.plan === "MENSUEL",
       `${rejeu}, plan ${apresRejeu.plan}`,
@@ -83,7 +83,7 @@ async function main(): Promise<void> {
     const enRetard = await ecrire("canceled", decale(-30));
     const apresRetard = await lireLOffreDuCompte(COMPTE);
 
-    record(
+    noter(
       "Une résiliation arrivée après le renouvellement qu'elle précédait est ignorée",
       enRetard === "ignore" && apresRetard.plan === "MENSUEL",
       `${enRetard}, plan ${apresRetard.plan}`,
@@ -93,7 +93,7 @@ async function main(): Promise<void> {
     const suivant = await ecrire("canceled", decale(30));
     const apresSuivant = await lireLOffreDuCompte(COMPTE);
 
-    record(
+    noter(
       "Un événement plus récent est appliqué",
       suivant === "ecrit" && apresSuivant.plan === "GRATUIT",
       `${suivant}, plan ${apresSuivant.plan}`,
@@ -103,7 +103,7 @@ async function main(): Promise<void> {
     await ecrire("active", decale(60), TERME_PASSE);
     const apresTerme = await lireLOffreDuCompte(COMPTE);
 
-    record(
+    noter(
       "Un plan payant dont le terme est passé ne vaut plus rien",
       apresTerme.plan === "GRATUIT" && apresTerme.plafond === PLAFOND_GRATUIT,
       `plan ${apresTerme.plan}, plafond ${apresTerme.plafond}`,
@@ -114,9 +114,9 @@ async function main(): Promise<void> {
     // abonnements d'un autre projet du même compte arriveraient ici. Le filtre
     // est une jointure sur notre table, pas une métadonnée.
     const etranger = await compteDuClientStripe("cus_dun_autre_produit");
-    const notre = await compteDuClientStripe(CLIENT);
+    const notre = await compteDuClientStripe(CLIENT_STRIPE);
 
-    record(
+    noter(
       "Le client d'un autre produit du même compte Stripe ne désigne aucun compte Kairn",
       etranger === null && notre === COMPTE,
       `étranger : ${etranger ?? "aucun"}, nôtre : ${notre ?? "aucun"}`,
@@ -141,7 +141,7 @@ async function main(): Promise<void> {
       if (apres.plan !== "MENSUEL") coursesPerdues += 1;
     }
 
-    record(
+    noter(
       "Deux événements traités ensemble laissent toujours le plus récent",
       coursesPerdues === 0,
       coursesPerdues === 0 ? "20 passes, aucune inversion" : `${coursesPerdues}/20 inversées`,
@@ -151,11 +151,7 @@ async function main(): Promise<void> {
 
     const reste = await prisma.subscription.count({ where: { userId: COMPTE } });
 
-    record(
-      "Aucune ligne d'abonnement ne subsiste après la passe",
-      reste === 0,
-      `${reste} ligne(s)`,
-    );
+    noter("Aucune ligne d'abonnement ne subsiste après la passe", reste === 0, `${reste} ligne(s)`);
   }
 }
 

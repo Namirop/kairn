@@ -12,7 +12,7 @@ import { Resend } from "resend";
  * pas s'y retrouver dans un journal.
  */
 
-export type OutgoingEmail = {
+export type EmailSortant = {
   to: string;
   subject: string;
   html: string;
@@ -21,23 +21,23 @@ export type OutgoingEmail = {
 };
 
 /** Identifiant rendu par le fournisseur, `null` quand rien n'est parti. */
-export type DeliveryResult = { sent: boolean; providerId: string | null };
+export type ResultatDEnvoi = { sent: boolean; providerId: string | null };
 
-let cached: Resend | null = null;
+let enCache: Resend | null = null;
 
-function resend(apiKey: string): Resend {
-  cached ??= new Resend(apiKey);
-  return cached;
+function resend(cle: string): Resend {
+  enCache ??= new Resend(cle);
+  return enCache;
 }
 
-export async function sendEmail(email: OutgoingEmail): Promise<DeliveryResult> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM;
+export async function envoyerLEmail(email: EmailSortant): Promise<ResultatDEnvoi> {
+  const cle = process.env.RESEND_API_KEY;
+  const expediteur = process.env.EMAIL_FROM;
 
-  if (!apiKey || !from) {
+  if (!cle || !expediteur) {
     const manquantes = [
-      ...(apiKey ? [] : ["RESEND_API_KEY"]),
-      ...(from ? [] : ["EMAIL_FROM"]),
+      ...(cle ? [] : ["RESEND_API_KEY"]),
+      ...(expediteur ? [] : ["EMAIL_FROM"]),
     ].join(" et ");
 
     if (process.env.NODE_ENV === "production") {
@@ -48,8 +48,8 @@ export async function sendEmail(email: OutgoingEmail): Promise<DeliveryResult> {
     return { sent: false, providerId: null };
   }
 
-  const { data, error } = await resend(apiKey).emails.send({
-    from,
+  const { data, error } = await resend(cle).emails.send({
+    from: expediteur,
     to: email.to,
     subject: email.subject,
     html: email.html,

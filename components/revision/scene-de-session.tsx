@@ -42,7 +42,7 @@ export function SceneDeSession({
   return (
     <PileDePanneaux sol="session">
       {/* La déclaration que lit la coquille pour se retirer — voir
-          `app/styles/shell.css`. */}
+          `app/styles/coquille.css`. */}
       <div data-passage className="flex flex-1 flex-col lg:flex-row">
         {rail ? (
           // En bande, elle colle au défilement pour rester visible sur une

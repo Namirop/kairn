@@ -69,7 +69,7 @@ sous ce même drapeau, pour qu'il ne se glisse pas dans les captures.
 | Fichier                                                                                   | Rôle                                                         |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | `config.ts`                                                                               | Racine de sortie, viewports, chemins.                        |
-| `manifest.ts`                                                                             | Schéma et écriture du manifeste.                             |
+| `manifeste.ts`                                                                            | Schéma et écriture du manifeste.                             |
 | `session.ts`                                                                              | Cookie de session (better-auth `testUtils`) pour Playwright. |
 | `sujets.ts` / `sujets/`                                                                   | Les textes déposés, un par sujet.                            |
 | `fige.ts` / `figer-les-sujets.ts`                                                         | Figé d'assets sans perte, et son extraction réelle.          |

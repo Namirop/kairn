@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import type { AiImagePart } from "@/lib/ai/message";
+import type { PartieImage } from "@/lib/ai/message";
 import type { Depot } from "@/scripts/evaluation/corpus";
 
 /**
@@ -38,7 +38,7 @@ function image(
   cle: string,
   titre: string,
   fichier: string,
-  mediaType: AiImagePart["mediaType"],
+  mediaType: PartieImage["mediaType"],
 ): Sujet {
   return {
     cle,

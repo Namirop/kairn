@@ -4,7 +4,7 @@
   `text-muted-foreground`. Rien ici ne définit de valeur : tout pointe vers un
   token de `styles/tokens/`.
 
-  `--accent` est ensuite redéfini par `styles/tokens/colors.css`, importé
+  `--accent` est ensuite redéfini par `styles/tokens/couleurs.css`, importé
   après : c'est l'accent du produit qui l'emporte.
 */
 

@@ -1,7 +1,7 @@
 import { lireLAdministration } from "@/lib/db/administration";
 import { prisma } from "@/lib/db/client";
-import { localDay } from "@/lib/domain/local-day";
-import { record } from "./journal";
+import { jourLocal } from "@/lib/domain/jour-local";
+import { noter } from "./journal";
 
 /**
  * Les chiffres de l'écran d'administration, éprouvés contre la base : ses
@@ -22,37 +22,37 @@ export async function casChiffresLisibles(maintenant: Date): Promise<void> {
     depense.echecs,
   ];
 
-  record(
+  noter(
     "Administration — les compteurs sont des nombres finis",
     entiers.every((valeur) => typeof valeur === "number" && Number.isFinite(valeur)),
     entiers.join(", "),
   );
 
-  record(
+  noter(
     "Administration — le total des comptes couvre les inscriptions récentes",
     comptes.total >= comptes.nouveaux30j && comptes.nouveaux30j >= comptes.nouveaux7j,
     `${comptes.total} au total, ${comptes.nouveaux30j} sur 30 j, ${comptes.nouveaux7j} sur 7 j`,
   );
 
-  record(
+  noter(
     "Administration — les actifs ne dépassent jamais les comptes existants",
     comptes.actifs30j <= comptes.total && comptes.actifs7j <= comptes.actifs30j,
     `${comptes.actifs7j} sur 7 j, ${comptes.actifs30j} sur 30 j, ${comptes.total} comptes`,
   );
 
-  record(
+  noter(
     "Administration — la fenêtre de signalements tient dans le total",
     signalements.sur7j <= signalements.total,
     `${signalements.sur7j} sur 7 j, ${signalements.total} au total`,
   );
 
-  record(
+  noter(
     "Administration — la dépense est datée du jour UTC",
-    depense.jour === localDay(maintenant, "UTC"),
+    depense.jour === jourLocal(maintenant, "UTC"),
     depense.jour,
   );
 
-  record(
+  noter(
     "Administration — le coût réel ne dépasse pas le coût catalogue",
     depense.coutReel === null || depense.coutReel <= depense.coutCatalogue + 1e-9,
     `catalogue ${depense.coutCatalogue.toFixed(4)} $, réel ${depense.coutReel?.toFixed(4) ?? "—"} $`,
@@ -66,13 +66,13 @@ export async function casChiffresLisibles(maintenant: Date): Promise<void> {
 export async function casJoursVidesMontres(maintenant: Date): Promise<void> {
   const { volumes } = await lireLAdministration(maintenant);
 
-  record(
+  noter(
     "Administration — quatorze jours sont rendus, jours vides compris",
     volumes.length === 14,
     `${volumes.length} jour(s)`,
   );
 
-  record(
+  noter(
     "Administration — les jours vont du plus récent au plus ancien",
     volumes.every((ligne, rang) => rang === 0 || ligne.jour < volumes[rang - 1]!.jour),
     volumes.length > 0 ? `${volumes[0]?.jour} → ${volumes.at(-1)?.jour}` : "aucun",
@@ -80,7 +80,7 @@ export async function casJoursVidesMontres(maintenant: Date): Promise<void> {
 
   const sansDepot = volumes.filter((ligne) => ligne.depots === 0);
 
-  record(
+  noter(
     "Administration — un jour sans dépôt n'a pas de moyenne, et pas zéro",
     sansDepot.every((ligne) => ligne.moyenne === null),
     `${sansDepot.length} jour(s) sans dépôt`,
@@ -112,15 +112,15 @@ export async function casMoyenneCalculee(userId: string, maintenant: Date): Prom
 
   try {
     const { volumes } = await lireLAdministration(maintenant);
-    const aujourdhui = volumes.find((ligne) => ligne.jour === localDay(maintenant, "UTC"));
+    const aujourdhui = volumes.find((ligne) => ligne.jour === jourLocal(maintenant, "UTC"));
 
-    record(
+    noter(
       "Administration — le jour courant compte le dépôt et ses trois concepts",
       aujourdhui !== undefined && aujourdhui.depots >= 1 && aujourdhui.concepts >= 3,
       `${aujourdhui?.depots ?? 0} dépôt(s), ${aujourdhui?.concepts ?? 0} concept(s)`,
     );
 
-    record(
+    noter(
       "Administration — la moyenne existe dès qu'il y a un dépôt",
       aujourdhui?.moyenne !== null && aujourdhui?.moyenne !== undefined,
       aujourdhui?.moyenne?.toFixed(1) ?? "—",

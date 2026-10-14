@@ -1,4 +1,4 @@
-import { compterBasculesDuJour } from "@/lib/db/ai-call";
+import { compterBasculesDuJour } from "@/lib/db/registre-des-appels";
 import { reserverLAlerte } from "@/lib/db/alerte-quota";
 import { envoyerLAlerteDeBascule } from "@/lib/email/alerte-de-bascule";
 import {

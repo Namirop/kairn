@@ -4,7 +4,7 @@ import { demanderDesQuestions } from "@/lib/db/demande-de-questions";
 import { optionsDUnQCM, texteATrouServi, type VarianteEnBase } from "@/lib/db/question-servie";
 import { optionsDistinguables } from "@/lib/domain/options-de-qcm";
 import { questionServable } from "@/lib/domain/question-servable";
-import { conclure, record } from "../verification/cases/journal";
+import { conclure, noter } from "../verification/cases/journal";
 
 /**
  * Retire les questions que l'écran ne sait pas poser (un lot abrégé en « ... »
@@ -114,7 +114,7 @@ async function main(): Promise<string> {
       data: { retiredAt: new Date() },
     });
 
-    record("Questions retirées du tirage", retirees.count === aRetirer.length, `${retirees.count}`);
+    noter("Questions retirées du tirage", retirees.count === aRetirer.length, `${retirees.count}`);
   }
 
   const issues = new Map<string, number>();
@@ -128,7 +128,7 @@ async function main(): Promise<string> {
   }
 
   for (const [etat, nombre] of [...issues].sort((a, b) => b[1] - a[1])) {
-    record(`Demandes en état « ${etat} »`, etat !== "trop-tot", `${nombre} concept(s)`);
+    noter(`Demandes en état « ${etat} »`, etat !== "trop-tot", `${nombre} concept(s)`);
   }
 
   return "Plus aucune question creuse n'est servie. Les réécritures sont en file.";

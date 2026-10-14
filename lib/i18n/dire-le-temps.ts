@@ -1,4 +1,4 @@
-import { dayToUtcDate } from "@/lib/domain/local-day";
+import { jourEnDateUtc } from "@/lib/domain/jour-local";
 import type { RemiseAZero } from "@/lib/domain/remise-a-zero";
 
 /**
@@ -22,7 +22,7 @@ export function parametresDeRemise(
             day: "numeric",
             month: "long",
             timeZone: "UTC",
-          }).format(dayToUtcDate(remise.jour))
+          }).format(jourEnDateUtc(remise.jour))
         : "",
   };
 }

@@ -94,12 +94,12 @@ npm run db:seed             # remplit la base avec un compte de démonstration
 npm run dev
 ```
 
-L'adresse du compte de démonstration est définie dans `prisma/seed/account.ts` et surchargeable
+L'adresse du compte de démonstration est définie dans `prisma/seed/compte-de-demonstration.ts` et surchargeable
 par `SEED_USER_EMAIL`. Il n'a pas de mot de passe : on y entre en demandant un code depuis l'écran
 de connexion, comme sur n'importe quel compte.
 
 **Sans `RESEND_API_KEY` ou sans `EMAIL_FROM`, le code se lit dans les journaux du serveur.**
-`sendEmail()` journalise l'objet du message et jamais son contenu, et l'objet du code de connexion
+`envoyerLEmail()` journalise l'objet du message et jamais son contenu, et l'objet du code de connexion
 porte le code — c'est ce qui permet d'entrer en local sans compte fournisseur. Ce chemin lève en
 production : une variable oubliée s'y voit comme une panne au lieu de fermer la porte en silence.
 
@@ -254,7 +254,7 @@ compte ni de trafic anonyme, qui comptent des demandes. Plafond atteint, pas de 
 primaire remonte.
 
 La forme envoyée n'est pas produite par l'assistant du SDK, qui rétrograde `enum` et `const` en
-simple description : `lib/ai/output-schema.ts` dérive le schéma JSON à la main pour les conserver,
+simple description : `lib/ai/schema-de-sortie.ts` dérive le schéma JSON à la main pour les conserver,
 et lève plutôt que d'émettre si la forme porte un mot-clé structurel (`$ref`, `oneOf`, `if`…) que
 la grammaire ne compile pas. Une forme intraduisible est une erreur de développement, pas un appel
 raté : elle est détectée avant que le registre s'ouvre.
@@ -279,7 +279,7 @@ Le plafond global protège le budget ; il ne protégeait personne de son voisin,
 pouvait fermer la journée de tous les autres. La part anonyme joue le même rôle entre le trafic
 public et le trafic identifié, dans les deux sens.
 
-Le refus global n'est pas un échec de job. `runJob` remet le travail en file sans lui compter de
+Le refus global n'est pas un échec de job. `executerLeJob` remet le travail en file sans lui compter de
 tentative : la journée est pleine, le même appel réussira demain, et le dépôt continue d'annoncer
 un travail en cours au lieu d'annoncer une panne.
 
@@ -463,7 +463,7 @@ Les tests couvrent `lib/domain/` — logique pure, donc testable sans base ni r�
 conditions, les schémas et l'alerte de plafond de `lib/ai/`, l'alerte de paiement et la géométrie
 du banc (`vitest.config.mts`). Les règles vraies pour toutes les entrées y sont écrites en propriétés
 fast-check : sur des instants et des fuseaux tirés au hasard parmi ceux que la plateforme connaît,
-le jour civil fait foi, `localDay` conserve l'ordre du temps, `joursAvant` est antisymétrique ; les
+le jour civil fait foi, `jourLocal` conserve l'ordre du temps, `joursAvant` est antisymétrique ; les
 contrôles de génération ne réagissent ni aux accents ni à la ponctuation.
 
 Le banc d'évaluation ne fait pas partie de cette commande : il dépense.

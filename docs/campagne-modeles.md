@@ -34,7 +34,7 @@ n'achète pas un bloc de crédits GPT et un autre bloc Claude, le coût applicab
 solde après chaque requête.</cite> Un seul compte, une seule clé, un seul adaptateur au lieu de
 quatre.
 
-Il expose les sorties structurées par `response_format: json_schema`, ce que `output-schema.ts`
+Il expose les sorties structurées par `response_format: json_schema`, ce que `schema-de-sortie.ts`
 sait déjà produire.
 
 **Trois pièges à traiter dans l'implémentation :**

@@ -6,14 +6,14 @@
 
 const MARQUEUR = "`";
 
-export type SegmentDeTexte = {
+export type SegmentDeCode = {
   /** Vrai pour un terme à relever, faux pour de la prose. */
   code: boolean;
   texte: string;
 };
 
 /** Empile en fusionnant la prose voisine et en ignorant les morceaux vides. */
-function empiler(segments: SegmentDeTexte[], texte: string, code: boolean): void {
+function empiler(segments: SegmentDeCode[], texte: string, code: boolean): void {
   if (texte.length === 0) return;
 
   const dernier = segments[segments.length - 1];
@@ -30,8 +30,8 @@ function empiler(segments: SegmentDeTexte[], texte: string, code: boolean): void
  * Un accent grave ouvre, le suivant ferme. Un accent non refermé ou une paire
  * vide reste littéral : l'avaler ferait disparaître un signe du dépôt.
  */
-export function segmentsDeCode(texte: string): SegmentDeTexte[] {
-  const segments: SegmentDeTexte[] = [];
+export function segmentsDeCode(texte: string): SegmentDeCode[] {
+  const segments: SegmentDeCode[] = [];
   let reste = texte;
 
   while (reste.length > 0) {

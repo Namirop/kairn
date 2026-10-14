@@ -1,4 +1,4 @@
-import { localDay } from "./local-day";
+import { jourLocal } from "./jour-local";
 
 /**
  * Les bornes de temps des écrans qui comptent, en UTC et non dans le fuseau de
@@ -16,5 +16,5 @@ export function ilYA(instant: Date, jours: number): Date {
  * un `setHours(0)` rendrait le minuit local de la machine.
  */
 export function debutDuJourUtc(instant: Date): Date {
-  return new Date(`${localDay(instant, "UTC")}T00:00:00.000Z`);
+  return new Date(`${jourLocal(instant, "UTC")}T00:00:00.000Z`);
 }

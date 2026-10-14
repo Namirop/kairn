@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/client";
-import { sendNotification } from "@/lib/email/notifications";
+import { envoyerLaNotification } from "@/lib/email/notifications";
 
 /**
  * L'accueil, envoyé une fois, depuis le hook d'inscription. Il ne peut pas
@@ -11,9 +11,9 @@ import { sendNotification } from "@/lib/email/notifications";
  */
 export async function envoyerLAccueil(userId: string): Promise<void> {
   try {
-    const conceptCount = await prisma.atom.count({ where: { userId } });
+    const nombreDeConcepts = await prisma.atom.count({ where: { userId } });
 
-    await sendNotification(userId, { type: "ACCUEIL", payload: { conceptCount } });
+    await envoyerLaNotification(userId, { type: "ACCUEIL", payload: { nombreDeConcepts } });
   } catch (erreur) {
     console.error(`L'email d'accueil n'a pas pu partir pour le compte ${userId}.`, erreur);
   }

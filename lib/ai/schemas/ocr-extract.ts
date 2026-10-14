@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { CARACTERES_MAXIMUM } from "@/lib/depots/bornes-du-depot";
-import type { AiContract } from "./contract";
+import type { ContratDeSortie } from "./contrat-de-sortie";
 
 /**
  * Le texte tiré d'une capture d'écran.
@@ -15,7 +15,7 @@ function porteDuTexte(texte: string): boolean {
   return texte.trim().length > 0;
 }
 
-export const ocrExtractForme = z.object({
+export const formeDeLecture = z.object({
   extractedText: z
     .string()
     .max(CARACTERES_MAXIMUM)
@@ -33,9 +33,9 @@ export const ocrExtractForme = z.object({
 });
 
 /** La même forme, relue : la longueur n'y refuse plus rien. */
-const sortieLue = ocrExtractForme.extend({ extractedText: z.string() });
+const sortieLue = formeDeLecture.extend({ extractedText: z.string() });
 
-const ocrExtractValidation = sortieLue.transform((sortie) => ({
+const validationDeLecture = sortieLue.transform((sortie) => ({
   extractedText: sortie.extractedText.slice(0, CARACTERES_MAXIMUM),
   language: sortie.language ?? null,
   // `usable` se déduit du texte plutôt que d'être cru : un désaccord avec le
@@ -45,10 +45,10 @@ const ocrExtractValidation = sortieLue.transform((sortie) => ({
   tronque: sortie.extractedText.length > CARACTERES_MAXIMUM,
 }));
 
-export type OcrExtractOutput = z.infer<typeof ocrExtractValidation>;
+export type SortieDeLecture = z.infer<typeof validationDeLecture>;
 
-export const OCR_EXTRACT: AiContract<OcrExtractOutput> = {
+export const CONTRAT_DE_LECTURE: ContratDeSortie<SortieDeLecture> = {
   purpose: "ocr_extract",
-  forme: ocrExtractForme,
-  validation: ocrExtractValidation,
+  forme: formeDeLecture,
+  validation: validationDeLecture,
 };

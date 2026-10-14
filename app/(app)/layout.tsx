@@ -6,8 +6,8 @@ import { Rail } from "@/components/coquille/rail";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { estAdministrateur } from "@/lib/auth/admin";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireLUtilisateur } from "@/lib/auth/session";
+import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 
 /**
  * La coquille de l'application authentifiée. Le middleware n'a regardé que le
@@ -15,7 +15,7 @@ import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
  * renvoie vers la connexion.
  */
 export default async function CoquilleApplication({ children }: { children: React.ReactNode }) {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) redirect(ROUTES.connexion);
 
@@ -33,7 +33,7 @@ export default async function CoquilleApplication({ children }: { children: Reac
       <div className="bg-surface-papier flex min-h-dvh flex-col">
         <Rail administrateur={administrateur} />
         {/* Le décalage du rail vit ici, et la règle de passage le reprend à
-            zéro quand le rail s'efface — voir `app/styles/shell.css`. */}
+            zéro quand le rail s'efface — voir `app/styles/coquille.css`. */}
         <div data-colonne className="flex flex-1 flex-col md:pl-28">
           <EnTete />
           {/* Ni mesure ni rembourrage : chaque écran est une pile de panneaux

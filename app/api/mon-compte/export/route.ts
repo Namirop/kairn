@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getTranslations } from "next-intl/server";
-import { requireUser, UnauthenticatedError } from "@/lib/auth/session";
+import { exigerLUtilisateur, SessionAbsenteError } from "@/lib/auth/session";
 import { exporterLeCompte } from "@/lib/db/compte";
 
 /**
@@ -22,9 +22,9 @@ export async function GET() {
   let userId: string;
 
   try {
-    userId = (await requireUser()).id;
+    userId = (await exigerLUtilisateur()).id;
   } catch (error) {
-    if (error instanceof UnauthenticatedError) {
+    if (error instanceof SessionAbsenteError) {
       // i18n-ignore — réponse technique d'API, lue par du code et jamais rendue par un écran
       return NextResponse.json({ erreur: "Session absente." }, { status: 401 });
     }

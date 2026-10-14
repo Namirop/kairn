@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 import { Info } from "lucide-react";
 import { Popover as PopoverPrimitive, Tooltip as TooltipPrimitive } from "radix-ui";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * Une explication qui s'ouvre au survol, ou au doigt : une info-bulle seule ne

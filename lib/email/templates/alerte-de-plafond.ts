@@ -1,7 +1,6 @@
 // i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
 import type { CompteurDeQuota } from "@/lib/db/types";
-import { EMAIL_STYLE as S, renderShell } from "./shell";
-import type { RenderedEmail } from "./daily-reminder";
+import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
 
 /**
  * L'alerte d'exploitation quand un compteur d'appels se remplit.
@@ -81,12 +80,12 @@ function sujet({ compteur, cible, seuil }: AlerteDePlafondPayload): string {
   return `Kairn — ${nom.toLowerCase()} est à ${seuil} %${qui}`;
 }
 
-export function renderAlerteDePlafond(payload: AlerteDePlafondPayload): RenderedEmail {
+export function composerLAlerteDePlafond(payload: AlerteDePlafondPayload): EmailRendu {
   const { compteur, cible, seuil, utilisees, plafond, variable, depenseDuJourUsd, instant } =
     payload;
 
   const atteint = seuil >= 100;
-  const teinte = atteint ? S.alerte : S.ink;
+  const teinte = atteint ? S.alerte : S.encre;
   const constat = atteint
     ? "Des dépôts échouent en ce moment. Ils reprendront demain sans rien perdre, mais la journée est fermée."
     : "Il reste de quoi décider : relever le plafond, ou regarder ce qui consomme.";
@@ -101,19 +100,19 @@ export function renderAlerteDePlafond(payload: AlerteDePlafondPayload): Rendered
   const tableau = lignes
     .map(
       ([valeur, legende]) =>
-        `<tr><td style="padding:0 12px 8px 0;font-family:${S.MONO};font-size:15px;color:${S.ink};white-space:nowrap;">${valeur}</td><td style="padding:0 0 8px;font-size:14px;color:${S.muted};">${legende}</td></tr>`,
+        `<tr><td style="padding:0 12px 8px 0;font-family:${S.MONO};font-size:15px;color:${S.encre};white-space:nowrap;">${valeur}</td><td style="padding:0 0 8px;font-size:14px;color:${S.secondaire};">${legende}</td></tr>`,
     )
     .join("");
 
   const compteConcerne =
     compteur === "COMPTE" && cible
-      ? `<p style="margin:0 0 8px;font-family:${S.MONO};font-size:13px;color:${S.muted};">compte ${cible}</p>`
+      ? `<p style="margin:0 0 8px;font-family:${S.MONO};font-size:13px;color:${S.secondaire};">compte ${cible}</p>`
       : "";
 
-  const body = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${teinte};">${seuil} %</p>
+  const corps = `<p style="margin:0 0 4px;font-family:${S.MONO};font-size:44px;line-height:1;color:${teinte};">${seuil} %</p>
 <p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;color:${teinte};">${COMPTEURS[compteur].nom.toLowerCase()}</p>
 ${compteConcerne}
-<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.muted};">${constat} ${COMPTEURS[compteur].protege}</p>
+<p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.secondaire};">${constat} ${COMPTEURS[compteur].protege}</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0;">${tableau}</table>`;
 
   // Les lignes vides séparent les blocs de la version texte : seul `null`
@@ -134,9 +133,9 @@ ${compteConcerne}
 
   return {
     subject: sujet(payload),
-    html: renderShell({
-      preheader: `${utilisees} appels sur ${plafond}, ${heureUtc(instant)}.`,
-      body,
+    html: envelopper({
+      preentete: `${utilisees} appels sur ${plafond}, ${heureUtc(instant)}.`,
+      corps,
       raisonDeLEnvoi:
         "Alerte d'exploitation. Elle part une fois par seuil et par jour, à l'adresse posée dans EMAIL_ALERTES.",
     }),

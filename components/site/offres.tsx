@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { PLAFOND_GRATUIT, PLAFOND_PAYANT } from "@/lib/domain/plafond-du-plan";
 import { PRIX_ANNUEL, PRIX_MENSUEL } from "@/lib/domain/prix";
 import { useLangue } from "@/lib/i18n/use-langue";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * Les deux offres, côte à côte, de forme identique pour que la seule

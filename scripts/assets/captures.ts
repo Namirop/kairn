@@ -41,21 +41,21 @@ export type DonneesDeCapture = {
   selection: Selection;
 };
 
-function garde(selection: Selection, opts: Pick<OptionsDeTir, "viewport" | "ecran" | "sujet">) {
-  return selection.garde(`${opts.viewport}/${opts.ecran}/${opts.sujet ?? opts.ecran}`);
+function garde(selection: Selection, options: Pick<OptionsDeTir, "viewport" | "ecran" | "sujet">) {
+  return selection.garde(`${options.viewport}/${options.ecran}/${options.sujet ?? options.ecran}`);
 }
 
 /** Va à une page et la tire, si la sélection la garde. */
 async function allerEtTirer(
   page: Page,
   chemin: string,
-  opts: OptionsDeTir,
+  options: OptionsDeTir,
   selection: Selection,
 ): Promise<void> {
-  if (!garde(selection, opts)) return;
+  if (!garde(selection, options)) return;
 
   await aller(page, chemin);
-  await tirer(page, { ...opts, langue: selection.langue });
+  await tirer(page, { ...options, langue: selection.langue });
 }
 
 /** Un format fermé se montre juste et faux ; un format ouvert, révélé. */
@@ -66,11 +66,11 @@ function etatsPourFormat(format: string): string[] {
 }
 
 export async function capturerPubliques(
-  browser: Browser,
+  navigateur: Browser,
   viewport: Viewport,
   selection: Selection,
 ): Promise<void> {
-  const ctx = await contexte(browser, viewport, false);
+  const ctx = await contexte(navigateur, viewport, false);
   const page = await ctx.newPage();
 
   await allerEtTirer(page, "/", { viewport, ecran: "landing" }, selection);
@@ -89,24 +89,24 @@ async function capturerLesDepots(
 
   for (const depot of donnees.depots) {
     const ecran = depot.estImage ? "depot-capture" : "depot-colle";
-    const opts = { viewport, ecran, sujet: depot.cle, depotSource: depot.cle };
+    const options = { viewport, ecran, sujet: depot.cle, depotSource: depot.cle };
 
-    if (!garde(selection, opts)) continue;
+    if (!garde(selection, options)) continue;
 
     if (depot.estImage) await joindreUneCapture(page, IMAGE_CAPTURE);
     else await remplirLeDepot(page, donnees.texteDuSujet(depot.cle));
 
-    await tirer(page, { ...opts, langue: selection.langue });
+    await tirer(page, { ...options, langue: selection.langue });
   }
 }
 
 export async function capturerConnectees(
-  browser: Browser,
+  navigateur: Browser,
   viewport: Viewport,
   donnees: DonneesDeCapture,
 ): Promise<void> {
   const { selection } = donnees;
-  const ctx = await contexte(browser, viewport, true);
+  const ctx = await contexte(navigateur, viewport, true);
   const page = await ctx.newPage();
 
   await allerEtTirer(page, "/aujourdhui", { viewport, ecran: "tableau-aujourdhui" }, selection);
@@ -114,8 +114,8 @@ export async function capturerConnectees(
   await allerEtTirer(page, "/depots", { viewport, ecran: "ce-que-tu-as-depose" }, selection);
 
   for (const depot of donnees.depots) {
-    const opts = { viewport, ecran: "concepts", sujet: depot.cle, depotSource: depot.cle };
-    await allerEtTirer(page, `/depots/${depot.id}`, opts, selection);
+    const options = { viewport, ecran: "concepts", sujet: depot.cle, depotSource: depot.cle };
+    await allerEtTirer(page, `/depots/${depot.id}`, options, selection);
   }
 
   await allerEtTirer(page, "/depots/nouveau", { viewport, ecran: "depot-vide" }, selection);
@@ -128,14 +128,19 @@ export async function capturerConnectees(
   for (const cible of donnees.formats) {
     for (const etat of etatsPourFormat(cible.format)) {
       const sujet = `${cible.format.toLowerCase()}-${etat}`;
-      const opts = { viewport, ecran: "question", sujet, format: cible.format, selecteur };
-      await allerEtTirer(page, `/apercu/question/${cible.variantId}?etat=${etat}`, opts, selection);
+      const options = { viewport, ecran: "question", sujet, format: cible.format, selecteur };
+      await allerEtTirer(
+        page,
+        `/apercu/question/${cible.variantId}?etat=${etat}`,
+        options,
+        selection,
+      );
     }
   }
 
   for (const hauteur of HAUTEURS) {
-    const opts = { viewport, ecran: "cairn", sujet: `${hauteur}-pierres`, selecteur: CAIRN };
-    await allerEtTirer(page, `/apercu/cairn/${hauteur}`, opts, selection);
+    const options = { viewport, ecran: "cairn", sujet: `${hauteur}-pierres`, selecteur: CAIRN };
+    await allerEtTirer(page, `/apercu/cairn/${hauteur}`, options, selection);
   }
 
   if (garde(selection, { viewport, ecran: "email-rappel" })) {
@@ -147,8 +152,8 @@ export async function capturerConnectees(
   await ctx.close();
 }
 
-export async function capturerFinDeSession(browser: Browser, viewport: Viewport): Promise<void> {
-  const ctx = await contexte(browser, viewport, true);
+export async function capturerFinDeSession(navigateur: Browser, viewport: Viewport): Promise<void> {
+  const ctx = await contexte(navigateur, viewport, true);
   const page = await ctx.newPage();
 
   await deroulerLaSession(page);

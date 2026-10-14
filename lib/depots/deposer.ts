@@ -10,9 +10,9 @@ import {
 } from "@/lib/depots/bornes-du-depot";
 import { refusDeQuota } from "@/lib/depots/refus-de-quota";
 import { textesDesRefus } from "@/lib/depots/textes-des-refus";
-import { lireFuseauUtilisateur } from "@/lib/db/user-settings";
+import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 import { preparerCapture } from "@/lib/images/capture";
-import { enqueueJob } from "@/lib/jobs/queue";
+import { mettreEnFile } from "@/lib/jobs/queue";
 
 /**
  * Le geste de dépôt, côté serveur : validation, place du jour, image réduite,
@@ -124,7 +124,7 @@ export async function deposer(
   }
 
   await marquerEnCours(input.id);
-  await enqueueJob(input.id, capture ? "OCR" : "ATOMS");
+  await mettreEnFile(input.id, capture ? "OCR" : "ATOMS");
 
   return { ok: true, inputId: input.id, nouveau: true };
 }

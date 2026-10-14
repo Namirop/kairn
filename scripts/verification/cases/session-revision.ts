@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db/client";
 import { enregistrerRevision } from "@/lib/db/revision";
 import { lireSessionDuJour } from "@/lib/db/session-du-jour";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Une session de révision jouée en entier sur des concepts fabriqués. Les
@@ -79,14 +79,14 @@ export async function casSessionComplete(userId: string, maintenant: Date): Prom
 
   const session = await lireSessionDuJour(userId, maintenant);
 
-  record(
+  noter(
     "Session — seuls les concepts échus entrent, jamais de remplissage",
     session.questions.length === 2,
     `${session.questions.length} question(s) pour 3 concepts, dont un à échéance dans dix jours`,
   );
 
   const sujets = session.questions.map((q) => q.tags[0] ?? "-");
-  record(
+  noter(
     "Session — les sujets alternent",
     new Set(sujets).size === sujets.length,
     sujets.join(" puis "),
@@ -112,14 +112,14 @@ export async function casSessionComplete(userId: string, maintenant: Date): Prom
 
   const passages = await prisma.review.count({ where: { userId } });
 
-  record(
+  noter(
     "Session — chaque passage est écrit au moment où il est donné",
     ecrites === session.questions.length && passages === session.questions.length,
     `${passages} passage(s) en base`,
   );
 
   const apres = await lireSessionDuJour(userId, maintenant);
-  record(
+  noter(
     "Session — ce qui vient d'être revu ne revient pas dans la foulée",
     apres.questions.length === 0,
     `${apres.questions.length} question(s) restante(s)`,
@@ -153,14 +153,14 @@ export async function casSessionInterrompue(userId: string, maintenant: Date): P
 
   const apres = await prisma.review.count({ where: { userId } });
 
-  record(
+  noter(
     "Interruption — les passages déjà donnés sont gardés",
     apres - avant === 2,
     `${apres - avant} passage(s) écrit(s) sur 4 questions posées`,
   );
 
   const restants = await lireSessionDuJour(userId, maintenant);
-  record(
+  noter(
     "Interruption — ce qui n'a pas été vu reste dû",
     restants.questions.length === 2,
     `${restants.questions.length} question(s) encore dues`,
@@ -209,13 +209,13 @@ export async function casRotationDesFacettes(userId: string, maintenant: Date): 
 
   const colles = servies.filter((facette, rang) => rang > 0 && facette === servies[rang - 1]);
 
-  record(
+  noter(
     "Rotation — jamais deux fois la même facette d'affilée",
     servies.length >= 4 && colles.length === 0,
     servies.join(" → "),
   );
 
-  record(
+  noter(
     "Rotation — les quatre facettes tournent",
     new Set(servies.slice(0, 4)).size === 4,
     `${new Set(servies).size} facette(s) distincte(s) sur ${servies.length} passages`,

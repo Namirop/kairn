@@ -3,16 +3,16 @@ import type { InputNature } from "@/lib/db/types";
 import { compterLesDerives } from "@/lib/domain/concepts-derives";
 import { NATURES_DE_DEPOT } from "@/lib/domain/nature-du-depot";
 import { appliquerLePlafond } from "@/lib/domain/plafond-de-concepts";
-import type { AiContract } from "./contract";
+import type { ContratDeSortie } from "./contrat-de-sortie";
 
 /**
  * Un Input découpé en concepts unitaires, ou rien du tout avec son motif.
  *
  * Les deux moitiés du contrat restent séparées :
- * - `extractAtomsForme` part au modèle. Ses bornes chiffrées sont des
- *   indications — `lib/ai/output-schema.ts` les verse en description, la
+ * - `formeDExtraction` part au modèle. Ses bornes chiffrées sont des
+ *   indications — `lib/ai/schema-de-sortie.ts` les verse en description, la
  *   grammaire ne les fait pas respecter.
- * - `extractAtomsValidation` relit la réponse et ne rejette sur aucun compte :
+ * - `validationDExtraction` relit la réponse et ne rejette sur aucun compte :
  *   un appel payé ne se perd pas parce que le modèle a rendu trop de concepts,
  *   on tronque (`lib/domain/plafond-de-concepts.ts`).
  */
@@ -79,7 +79,7 @@ const sortieLue = z.object({
  * Dérivée de la version lue : deux objets jumeaux finiraient par diverger, et
  * la validation s'en apercevrait après la dépense.
  */
-export const extractAtomsForme = sortieLue.omit({ retenu: true }).extend({
+export const formeDExtraction = sortieLue.omit({ retenu: true }).extend({
   atoms: z
     .array(
       atomeLu.extend({
@@ -102,7 +102,7 @@ const TAGS_MAXIMUM = 3;
 
 // Le modèle omet une clé là où le schéma acceptait `null`. La base, elle, ne
 // verra jamais d'`undefined`.
-const extractAtomsValidation = sortieLue.transform((sortie) => {
+const validationDExtraction = sortieLue.transform((sortie) => {
   const { gardes, tronque } = appliquerLePlafond(sortie.atoms);
 
   return {
@@ -130,7 +130,7 @@ const extractAtomsValidation = sortieLue.transform((sortie) => {
   };
 });
 
-export type ExtractAtomsOutput = z.infer<typeof extractAtomsValidation>;
+export type SortieDExtraction = z.infer<typeof validationDExtraction>;
 
 /**
  * La forme demandée quand le dépôt porte une consigne, et seulement alors.
@@ -140,7 +140,7 @@ export type ExtractAtomsOutput = z.infer<typeof extractAtomsValidation>;
  * le remplirait sans rien avoir à écarter. La consigne décide déjà de la forme
  * du message (`depotADecouper`).
  */
-const formeAvecConsigne = extractAtomsForme.extend({
+const formeAvecConsigne = formeDExtraction.extend({
   retenu: z
     .string()
     .nullish()
@@ -156,12 +156,12 @@ const formeAvecConsigne = extractAtomsForme.extend({
  * registre : seule la forme montrée au modèle change (comme
  * `contratDeGeneration`).
  */
-export function contratDExtraction(avecConsigne: boolean): AiContract<ExtractAtomsOutput> {
+export function contratDExtraction(avecConsigne: boolean): ContratDeSortie<SortieDExtraction> {
   return {
     purpose: "extract_atoms",
-    forme: avecConsigne ? formeAvecConsigne : extractAtomsForme,
-    validation: extractAtomsValidation,
+    forme: avecConsigne ? formeAvecConsigne : formeDExtraction,
+    validation: validationDExtraction,
   };
 }
 
-export const EXTRACT_ATOMS: AiContract<ExtractAtomsOutput> = contratDExtraction(false);
+export const CONTRAT_D_EXTRACTION: ContratDeSortie<SortieDExtraction> = contratDExtraction(false);

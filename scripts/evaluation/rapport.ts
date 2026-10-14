@@ -1,5 +1,5 @@
-import { SYSTEM_PROMPTS } from "@/lib/ai/prompts";
-import type { ConsommationFenetre } from "@/lib/db/ai-call";
+import { PROMPTS_SYSTEME_FR } from "@/lib/ai/prompts";
+import type { ConsommationFenetre } from "@/lib/db/registre-des-appels";
 import { compter, rendreRepartition, type Passage } from "./rapport-chiffres";
 import { rendreConcept, rendreEchec } from "./rapport-concept";
 import { rendreDistributions } from "./rapport-distributions";
@@ -138,7 +138,7 @@ function appelsParDepot(passages: Passage[]): string {
 }
 
 function longueursDesPrompts(): string {
-  return `Prompts : extraction ${SYSTEM_PROMPTS.extract_atoms.length} caractères, questions ${SYSTEM_PROMPTS.generate_variants.length}, lecture ${SYSTEM_PROMPTS.ocr_extract.length}`;
+  return `Prompts : extraction ${PROMPTS_SYSTEME_FR.extract_atoms.length} caractères, questions ${PROMPTS_SYSTEME_FR.generate_variants.length}, lecture ${PROMPTS_SYSTEME_FR.ocr_extract.length}`;
 }
 
 export function rendreRapport(

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AIConfigError } from "./errors";
+import { ConfigIaInvalideError } from "./errors";
 import type { Fournisseur } from "./fournisseurs";
 
 /**
@@ -17,7 +17,7 @@ const booleen = z.preprocess(
   z.enum(["true", "false"]).transform((value) => value === "true"),
 );
 
-const configSchema = z.object({
+const schemaDeConfig = z.object({
   enabled: booleen,
   mock: booleen,
   dailyCallCap: z.coerce.number().int().positive(),
@@ -39,10 +39,10 @@ const configSchema = z.object({
   openrouterApiKey: z.string().min(1).optional(),
 });
 
-export type AiConfig = z.infer<typeof configSchema>;
+export type ConfigIa = z.infer<typeof schemaDeConfig>;
 
 /** Ce qu'une surcharge peut porter. Une clé absente laisse l'environnement. */
-export type SurchargesDeConfig = Partial<Omit<AiConfig, "apiKey">>;
+export type SurchargesDeConfig = Partial<Omit<ConfigIa, "apiKey">>;
 
 /**
  * Les variables de plafond, à part parce qu'une alerte de plafond nomme celle à
@@ -145,7 +145,7 @@ function environnementBrut(): Record<string, string | undefined> {
  * Seul l'empilement est validé, jamais l'environnement seul : une variable
  * manquante doit pouvoir être remplacée depuis l'écran pendant un incident.
  */
-export function assemblerLaConfig(surcharges: SurchargesDeConfig = {}): AiConfig {
+export function assemblerLaConfig(surcharges: SurchargesDeConfig = {}): ConfigIa {
   const brut: Record<string, unknown> = environnementBrut();
   const posés = new Set<string>();
 
@@ -156,14 +156,16 @@ export function assemblerLaConfig(surcharges: SurchargesDeConfig = {}): AiConfig
     posés.add(champ);
   }
 
-  const parsed = configSchema.safeParse({
+  const parsed = schemaDeConfig.safeParse({
     ...brut,
     apiKey: propre(process.env.ANTHROPIC_API_KEY),
     openrouterApiKey: propre(process.env.OPENROUTER_API_KEY),
   });
 
   if (!parsed.success) {
-    throw new AIConfigError(`Configuration IA invalide — ${diagnostic(parsed.error, brut, posés)}`);
+    throw new ConfigIaInvalideError(
+      `Configuration IA invalide — ${diagnostic(parsed.error, brut, posés)}`,
+    );
   }
 
   return parsed.data;
@@ -174,6 +176,6 @@ export function assemblerLaConfig(surcharges: SurchargesDeConfig = {}): AiConfig
  * vérification. Jamais pour décider d'un appel : c'est la configuration
  * effective, surcharges comprises, qui décide.
  */
-export function readAiConfig(): AiConfig {
+export function lireLaConfigDeLEnvironnement(): ConfigIa {
   return assemblerLaConfig();
 }

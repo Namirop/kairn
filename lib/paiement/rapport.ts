@@ -12,7 +12,7 @@ import { RapportIllisibleError } from "./erreurs";
  * payant », qui couperait l'accès de quelqu'un qui a payé.
  */
 
-const statutSchema = z.enum([
+const schemaDuStatut = z.enum([
   "active",
   "trialing",
   "past_due",
@@ -23,7 +23,7 @@ const statutSchema = z.enum([
   "paused",
 ]);
 
-const cadenceSchema = z.enum(["month", "year"]);
+const schemaDeCadence = z.enum(["month", "year"]);
 
 /**
  * Le rapport, ou une erreur qui dit ce qui ne se lit pas. Un abonnement Kairn
@@ -40,8 +40,8 @@ export function lireLeRapport(abonnement: Stripe.Subscription): RapportDeStripe 
     );
   }
 
-  const statut = statutSchema.safeParse(abonnement.status);
-  const cadence = cadenceSchema.safeParse(ligne.price.recurring?.interval);
+  const statut = schemaDuStatut.safeParse(abonnement.status);
+  const cadence = schemaDeCadence.safeParse(ligne.price.recurring?.interval);
 
   if (!statut.success) {
     throw new RapportIllisibleError(`statut « ${abonnement.status} » inconnu.`);

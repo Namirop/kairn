@@ -15,5 +15,5 @@ ces documents en sont la suite, un sujet chacun.
 À la racine, [DESIGN.md](../DESIGN.md) décrit le système visuel et [PRODUCT.md](../PRODUCT.md)
 le produit et son public.
 
-Une doc décrit ce qui **est**. `scripts/docs/doc-map.ts` dit quelle doc couvre quel code, et
+Une doc décrit ce qui **est**. `scripts/docs/carte-des-docs.ts` dit quelle doc couvre quel code, et
 `npm run docs:check` nomme celles à relire quand ce code change.

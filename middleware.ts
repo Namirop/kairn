@@ -1,6 +1,6 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
-import { RETURN_TO_PARAM, ROUTES } from "@/lib/auth/routes";
+import { PARAMETRE_DE_SUITE, ROUTES } from "@/lib/auth/routes";
 import { langueDepuisCode, langueDevinee } from "@/lib/domain/langue-devinee";
 import { adressePublique, EN_TETE_DU_CHEMIN, estPagePublique } from "@/lib/i18n/adresses";
 import { COOKIE_DE_LANGUE, EN_TETE_DE_LANGUE, LOCALE } from "@/lib/i18n/langues";
@@ -35,7 +35,7 @@ export function middleware(request: NextRequest) {
   if (getSessionCookie(request)) return NextResponse.next();
 
   const destination = new URL(ROUTES.connexion, request.url);
-  destination.searchParams.set(RETURN_TO_PARAM, pathname);
+  destination.searchParams.set(PARAMETRE_DE_SUITE, pathname);
 
   return NextResponse.redirect(destination);
 }

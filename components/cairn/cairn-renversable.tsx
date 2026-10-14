@@ -12,8 +12,8 @@ import { useAnimationPossible } from "@/components/cairn/use-animation-possible"
 import { useChuteDesPierres } from "@/components/cairn/use-chute-des-pierres";
 import { usePriseDuCairn } from "@/components/cairn/use-prise-du-cairn";
 import { SANS_BORDS } from "@/lib/domain/cairn-physique";
-import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-stack";
-import { cn } from "@/lib/utils";
+import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
+import { cn } from "@/lib/fusion-des-classes";
 
 /**
  * Le cairn de la page publique, que l'on peut faire tomber d'un geste.

@@ -1,15 +1,15 @@
 import { after } from "next/server";
-import { createGenerationJob } from "@/lib/db/generation-job";
+import { creerJobDeGeneration } from "@/lib/db/jobs-de-generation";
 import type { GenerationJob, GenerationKind } from "@/lib/db/types";
-import { runJob } from "./runner";
+import { executerLeJob } from "./runner";
 
 /**
  * Mise en file d'un travail : on écrit le job, on rend la main, et `after()`
  * lance le traitement une fois la réponse envoyée. Si le traitement ne part pas
  * (hors requête, processus recyclé), le cron de reprise récupère le job.
  */
-export async function enqueueJob(inputId: string, kind: GenerationKind): Promise<GenerationJob> {
-  const job = await createGenerationJob(inputId, kind);
+export async function mettreEnFile(inputId: string, kind: GenerationKind): Promise<GenerationJob> {
+  const job = await creerJobDeGeneration(inputId, kind);
 
   declencher(job.id);
 
@@ -23,9 +23,9 @@ export async function enqueueJob(inputId: string, kind: GenerationKind): Promise
 export function declencher(jobId: string): void {
   try {
     after(async () => {
-      await runJob(jobId);
+      await executerLeJob(jobId);
     });
-  } catch (error) {
-    console.error(`Job ${jobId} créé mais non déclenché ; le cron le reprendra.`, error);
+  } catch (erreur) {
+    console.error(`Job ${jobId} créé mais non déclenché ; le cron le reprendra.`, erreur);
   }
 }

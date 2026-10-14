@@ -4,7 +4,7 @@ import { PLAFOND_GRATUIT, PLAFOND_PAYANT } from "@/lib/domain/plafond-du-plan";
 import { etatDepuisStripe } from "@/lib/domain/rapport-de-stripe";
 import { stripe } from "@/lib/paiement/client";
 import { lireLeRapport } from "@/lib/paiement/rapport";
-import { record } from "./journal";
+import { noter } from "./journal";
 
 /**
  * Notre ligne et celle de Stripe, côte à côte, contre un vrai abonnement.
@@ -19,7 +19,7 @@ export async function comparerAvecStripe(userId: string): Promise<void> {
   const dossier = await lireDossierStripe(userId);
 
   if (!dossier.abonnementId) {
-    record(
+    noter(
       "Le compte porte un abonnement Stripe",
       false,
       `plan ${offre.plan}, client ${dossier.clientId ?? "aucun"}, aucun abonnement attaché`,
@@ -31,7 +31,7 @@ export async function comparerAvecStripe(userId: string): Promise<void> {
   const abonnement = await stripe().subscriptions.retrieve(dossier.abonnementId);
   const attendu = etatDepuisStripe(lireLeRapport(abonnement));
 
-  record(
+  noter(
     "Le plan de notre ligne est celui que Stripe décrit",
     offre.plan === attendu.plan,
     `nous : ${offre.plan}, Stripe : ${abonnement.status} → ${attendu.plan}`,
@@ -42,13 +42,13 @@ export async function comparerAvecStripe(userId: string): Promise<void> {
     ? Math.abs(offre.finDePeriode.getTime() - (attendu.finDePeriode?.getTime() ?? 0))
     : Number.POSITIVE_INFINITY;
 
-  record(
+  noter(
     "Le terme de notre ligne est celui de Stripe",
     ecart < 1000,
     `nous : ${offre.finDePeriode?.toISOString() ?? "aucun"}, Stripe : ${attendu.finDePeriode?.toISOString() ?? "aucun"}`,
   );
 
-  record(
+  noter(
     "Le drapeau de résiliation suit Stripe",
     offre.resilieALaFin === attendu.resilieALaFin,
     `nous : ${offre.resilieALaFin}, Stripe : ${attendu.resilieALaFin}`,
@@ -56,7 +56,7 @@ export async function comparerAvecStripe(userId: string): Promise<void> {
 
   const plafondAttendu = attendu.plan === "GRATUIT" ? PLAFOND_GRATUIT : PLAFOND_PAYANT;
 
-  record(
+  noter(
     "Le plafond de concepts suit le plan",
     offre.plafond === plafondAttendu,
     `${offre.plafond} concepts pour un plan ${offre.plan}`,

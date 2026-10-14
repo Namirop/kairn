@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { estAdministrateur } from "@/lib/auth/admin";
 import { ROUTES } from "@/lib/auth/routes";
-import { getCurrentUser } from "@/lib/auth/session";
+import { lireLUtilisateur } from "@/lib/auth/session";
 import { basculerLeTraitement } from "@/lib/db/retour";
 
 /**
@@ -24,7 +24,7 @@ export async function basculerLeTraitementAction(
   _precedent: EtatDuTraitement,
   donnees: FormData,
 ): Promise<EtatDuTraitement> {
-  const utilisateur = await getCurrentUser();
+  const utilisateur = await lireLUtilisateur();
 
   if (!utilisateur) return { erreur: "Session absente." };
   if (!estAdministrateur(utilisateur.email)) return { erreur: "Accès refusé." };
