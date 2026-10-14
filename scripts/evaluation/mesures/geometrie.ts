@@ -112,12 +112,18 @@ export function mediane(valeurs: number[]): number | null {
   const tries = [...valeurs].sort((a, b) => a - b);
   const milieu = Math.floor(tries.length / 2);
 
-  if (tries.length % 2 === 1) return tries[milieu] ?? null;
+  // Le tri tient `-0` et `0` pour égaux et garde leur ordre d'arrivée : sans
+  // normaliser, le signe d'une médiane nulle dépendrait de l'ordre d'entrée.
+  if (tries.length % 2 === 1) return sansZeroNegatif(tries[milieu] ?? 0);
 
   const avant = tries[milieu - 1] ?? 0;
   const apres = tries[milieu] ?? 0;
 
-  return (avant + apres) / 2;
+  return sansZeroNegatif((avant + apres) / 2);
+}
+
+function sansZeroNegatif(valeur: number): number {
+  return valeur === 0 ? 0 : valeur;
 }
 
 /**
