@@ -1,14 +1,11 @@
 /*
-  Pont entre les noms sémantiques de shadcn et la palette de pierre.
+  Pont entre les noms sémantiques de shadcn et la palette de pierre, pour les
+  primitives ajoutées par la CLI, câblées sur `bg-primary` ou
+  `text-muted-foreground`. Rien ici ne définit de valeur : tout pointe vers un
+  token de `styles/tokens/`.
 
-  Nos composants n'utilisent pas ces noms : ils écrivent directement
-  `bg-stone-900`, `text-lichen-deep`. Ce fichier existe pour la primitive
-  suivante — celle qu'on ajoutera par la CLI et qui arrivera câblée sur
-  `bg-primary` et `text-muted-foreground`. Sans ce remappage, elle sortirait
-  sans couleurs du tout.
-
-  Une seule règle : rien ici ne définit de valeur, tout pointe vers un token de
-  globals.css.
+  `--accent` est ensuite redéfini par `styles/tokens/colors.css`, importé
+  après : c'est l'accent du produit qui l'emporte.
 */
 
 :root {

@@ -15,31 +15,17 @@ import type { SignalDeMaitrise } from "@/lib/domain/signal-maitrise";
 import type { Messages } from "@/lib/i18n/messages";
 
 /**
- * Les gestes d'une session.
- *
- * Chaque passage est écrit dès qu'il est donné : la session ne garde rien en
- * mémoire pour l'envoyer à la fin. L'identifiant de l'utilisateur vient de la
- * session, jamais du client, et la propriété du concept est revérifiée à
- * l'écriture.
+ * Les gestes d'une session. Chaque passage est écrit dès qu'il est donné ; la
+ * propriété du concept est revérifiée à l'écriture.
  */
 
 /**
- * Borne haute du temps de réponse.
- *
- * Le chronomètre part à l'affichage et s'arrête à la validation, mais rien
- * n'empêche un onglet de rester ouvert une nuit. Au-delà d'un quart d'heure la
- * mesure ne dit plus rien sur le rappel : on la plafonne plutôt que d'enregistrer
- * un nombre qui fausserait le signal de maîtrise.
+ * Un onglet peut rester ouvert une nuit : au-delà d'un quart d'heure, le temps
+ * ne dit plus rien du rappel et fausserait le signal de maîtrise. On plafonne.
  */
 const TEMPS_MAXIMUM_MS = 15 * 60 * 1000;
 
-/**
- * Ce qu'on dit quand la limite de débit refuse un geste.
- *
- * Personne ne verra cette phrase en révisant : la limite est très au-dessus de
- * ce qu'un humain produit. Elle existe pour ce qui n'est pas humain, et elle
- * doit quand même savoir se dire.
- */
+/** La limite de débit est très au-dessus d'un humain : ce refus vise les automates. */
 const TROP_VITE = "tropVite" satisfies keyof Messages["revision"]["session"]["serveur"];
 
 const reponseSchema = z.object({
@@ -78,17 +64,10 @@ export async function repondreAction(donnees: ReponseDonnee): Promise<ResultatRe
   }
 
   /*
-    Le tableau et la liste des dépôts sont périmés dès cette réponse-là.
-
-    Ils l'étaient déjà, et on ne le disait qu'à l'écran de fin de session : qui
-    s'arrête en cours de route et prend la barre du bas retombait sur un
-    décompte d'avant, avec les concepts déjà passés encore à faire. Le cas est
-    ordinaire — on répond à trois questions et on va voir où l'on en est.
-
-    Marqué ici plutôt qu'à la sortie, parce qu'il n'y a pas de sortie : on quitte
-    par un lien, par un retour arrière, par la barre du bas, ou en fermant
-    l'onglet. Le seul moment qu'on tient à coup sûr est celui où la donnée
-    change, et il ne coûte rien — l'aller-retour a déjà lieu pour enregistrer.
+    Le tableau et la liste des dépôts sont périmés dès cette réponse. Marqué ici
+    et non à la sortie, parce qu'une session se quitte par n'importe quelle porte
+    (lien, retour arrière, barre du bas, onglet fermé) : seul le moment où la
+    donnée change est sûr.
   */
   revalidatePath(ROUTES.aujourdhui);
   revalidatePath(ROUTES.depots);
@@ -108,13 +87,9 @@ export type SignalementDonne = z.input<typeof signalementSchema>;
 /**
  * Signale une question qui ne va pas.
  *
- * Le client n'envoie que l'identifiant de la question et un motif. Tout le
- * contexte — la question, sa réponse, le concept, le format, la facette, le
- * modèle, l'empreinte du prompt — est relu en base : ce qui sert à diagnostiquer
- * ne doit pas pouvoir être arrangé par ce qui signale.
- *
- * La limite de débit s'applique comme aux autres gestes : c'est une écriture, et
- * elle est répétable autant qu'on veut sans coûter d'appel modèle.
+ * Le client n'envoie que l'identifiant et un motif : le contexte de diagnostic
+ * est relu en base, pour que ce qui signale ne puisse pas l'arranger. Limite de
+ * débit comme pour les autres gestes : c'est une écriture répétable à volonté.
  */
 export async function signalerAction(donnees: SignalementDonne): Promise<boolean> {
   const utilisateur = await getCurrentUser();
@@ -142,9 +117,8 @@ const reclamationSchema = z.array(z.string().min(1)).max(50);
 /**
  * Réclame la carte de maîtrise à la fin de la session.
  *
- * Le client envoie les concepts qui l'ont méritée, dans l'ordre où ils sont
- * passés ; la base n'en marque qu'un. C'est elle qui tranche, pas le client :
- * deux onglets ouverts sur la même session n'obtiennent pas deux cartes.
+ * Le client envoie les candidats dans l'ordre de passage ; la base n'en marque
+ * qu'un, pour que deux onglets sur la même session n'obtiennent pas deux cartes.
  */
 export async function reclamerMaitriseAction(
   atomIds: string[],
@@ -157,8 +131,7 @@ export async function reclamerMaitriseAction(
 
   if (!valide.success) return null;
 
-  // Pas de revalidation ici : ce n'est pas son sujet. La fin de session en
-  // demande une, une seule fois, et pour tout ce qu'elle a déplacé — voir
+  // Pas de revalidation ici : la fin de session en demande une seule, via
   // `relireLeTableauAction`.
   return reclamerSignalDeMaitrise(utilisateur.id, valide.data);
 }
@@ -173,11 +146,8 @@ export async function compterDemainAction(): Promise<number> {
 }
 
 /**
- * L'espacement a été expliqué. Il ne le sera plus.
- *
- * Appelée à l'affichage de l'explication et non à sa lecture : rien ne dit
- * qu'elle a été lue, et une explication qui revient jusqu'à ce qu'on l'accuse
- * est une fenêtre modale déguisée.
+ * L'espacement a été expliqué. Appelée à l'affichage et non à la lecture : une
+ * explication qui revient jusqu'à ce qu'on l'accuse est une modale déguisée.
  */
 export async function espacementVuAction(): Promise<void> {
   const utilisateur = await getCurrentUser();
@@ -190,30 +160,16 @@ export async function espacementVuAction(): Promise<void> {
 /**
  * Le tableau de bord est périmé : qu'il soit relu.
  *
- * Elle n'écrit rien — tout a déjà été écrit, réponse par réponse. Elle marque
- * seulement la page d'accueil comme à relire, sans quoi le client ressert celle
- * qu'il avait chargée avant la session : le compte de concepts dus d'avant, et
- * le travail qu'on vient de faire invisible jusqu'au rechargement.
+ * N'écrit rien ; sans elle, le client ressert l'accueil chargé avant la
+ * session. Nommée d'après son effet, pas d'après une porte, parce que
+ * l'invariant est : tout ce qui sort d'une session l'appelle avant de partir.
+ * Deux sorties, dans `components/revision/` : `ArreterLa` (abandon) et
+ * `FinDeSession` (achèvement), qui l'appelle à son affichage plutôt qu'à
+ * chacun de ses liens.
  *
- * **Elle s'appelait `quitterLaSessionAction`, et c'est ce nom qui a fait revenir
- * le défaut deux fois.** Nommée d'après une porte, elle n'était appelée que par
- * cette porte-là : le jour où l'écran de fin en a ouvert trois autres — déposer,
- * s'entraîner, revenir à aujourd'hui —, aucune n'avait de raison de la connaître,
- * et le compteur est redevenu faux. Elle est maintenant nommée d'après son
- * effet, et l'invariant tient en une phrase :
- *
- * > **Tout ce qui sort d'une session appelle cette action avant de partir.**
- *
- * Il n'y a que deux sorties, et elles sont toutes les deux dans
- * `components/revision/` : `ArreterLa` pour l'abandon, `FinDeSession` pour
- * l'achèvement. La seconde l'appelle à son affichage plutôt qu'à chacun de ses
- * liens — quelle que soit la porte qu'on prenne ensuite, y compris la barre de
- * navigation, le tableau est déjà marqué.
- *
- * Ça suppose que l'écran de fin survive au rafraîchissement que la revalidation
- * déclenche sur la route courante. C'est le cas depuis que `/reviser` lui passe
- * l'écran vide en accessoire au lieu d'en décider lui-même — voir
- * `SessionDeRevision`.
+ * Suppose que l'écran de fin survive au rafraîchissement de la route courante :
+ * c'est pourquoi `/reviser` passe l'écran vide en accessoire à
+ * `SessionDeRevision` au lieu de le laisser en décider.
  */
 export async function relireLeTableauAction(): Promise<void> {
   const utilisateur = await getCurrentUser();

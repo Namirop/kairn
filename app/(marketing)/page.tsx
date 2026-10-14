@@ -15,11 +15,9 @@ import { adressePublique } from "@/lib/i18n/adresses";
 import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 
 /**
- * La page publique : une pile de panneaux, chacun avec sa surface, séparés par
- * des coupes de roche. On descend une paroi, on ne suit pas un article.
- *
- * Chaque jointure porte sa propre graine — les trois coupes ne se ressemblent
- * pas, et c'est ce qui les empêche de redevenir un séparateur de gabarit.
+ * La page publique : une pile de panneaux séparés par des coupes de roche.
+ * Chaque coupe a sa propre graine, pour qu'aucune ne ressemble à un séparateur
+ * de gabarit.
  */
 /** Rendue à la demande : l'invite du champ change à chaque chargement. */
 export const dynamic = "force-dynamic";
@@ -38,27 +36,9 @@ export default async function PageAccueil() {
           geste mène à l'essai ou à la journée selon l'état. */}
       <Hero connecte={connecte} />
 
-      {/* L'essai n'existe que pour un visiteur, et sa jointure avec lui.
-
-          Quelqu'un de connecté voyait ici un panneau « Reprends » : un titre,
-          une ligne, un bouton, dans la mesure d'une colonne et au milieu d'un
-          panneau aéré. C'était la place de l'essai — le moteur de la page —
-          occupée par trois éléments qui n'avaient pas de quoi la remplir, pour
-          proposer une journée que l'en-tête proposait déjà et que le hero
-          propose maintenant. Le panneau est parti ; le geste est remonté là où
-          on regarde en premier.
-
-          Le hero se termine sur son sol d'ombre, et l'essai est du papier :
-          c'est exactement ce qu'une coupe de roche sait faire.
-
-          Sans essai, les deux surfaces qui se touchent sont de l'ombre — et la
-          coupe reste, d'ombre vers ombre. On avait cru pouvoir s'en passer :
-          pas de changement de teinte, donc pas de jointure à peindre. Mais
-          l'ombre et le papier ne se séparent que de quelques centièmes de
-          luminance, et deux panneaux d'ombre bout à bout ne se séparaient de
-          rien du tout — le sentier avait l'air de continuer l'ouverture. Ce qui
-          fait la jointure ici n'est pas le contraste, c'est la matière : une
-          strate se voit même quand la roche est la même des deux côtés. */}
+      {/* L'essai n'existe que pour un visiteur, et sa jointure avec lui. Sans
+          essai, la coupe d'ombre vers ombre qui suit reste quand même : sans
+          elle, le sentier aurait l'air de continuer l'ouverture. */}
       {connecte ? null : (
         <>
           <Strates de="ombre" vers="papier" graine="accueil-essai" />
@@ -76,10 +56,8 @@ export default async function PageAccueil() {
         <div className="gap-pas-4 flex flex-wrap items-baseline justify-between">
           <p className="text-mono text-stone-500">{t("devise")}</p>
 
-          {/* Atteignables sans compte, et depuis la seule page publique : une
-              politique de confidentialité derrière une connexion ne sert à
-              personne. Les tarifs sont du même ordre — ce qu'on veut pouvoir
-              lire avant de s'engager, sans avoir à s'engager pour le lire. */}
+          {/* Atteignables sans compte : la confidentialité et les tarifs se
+              lisent avant de s'engager. */}
           <nav className="gap-pas-4 text-mono flex flex-wrap">
             <Link
               href={adressePublique(ROUTES.tarifs, langue)}

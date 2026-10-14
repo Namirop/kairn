@@ -1,30 +1,20 @@
 /*
-  La peinture d'un aplat coloré : un lavis lent, puis du grain.
-
-  Le grain de `.grain` est réglé pour du presque-blanc, où il doit se sentir
-  sans se voir. Sur une couleur saturée il disparaît : un aplat plein s'y lit
-  comme une valeur CSS, pas comme un pigment. Celui-ci monte, et il passe en
-  `overlay` — il éclaircit *et* assombrit, comme une encre qui a séché en
-  grains, là où `multiply` ne fait que salir.
-
-  Le lavis est la variation lente par-dessus. Une seule teinte : c'est ce qui
-  le sépare du dégradé entre deux couleurs, qui reste interdit.
+  La peinture d'un aplat coloré (ciel, en-tête) : le lavis de `--ciel`, puis un
+  grain plus fort que celui de `.grain`, qui disparaîtrait sur une couleur
+  saturée. En `overlay` : il éclaircit et assombrit, là où `multiply` ne fait
+  que salir.
 */
 .entete-du-site {
   background: var(--entete);
-  /* Le filet qui sépare l'en-tête du ciel. Il se tait : les deux sont la même
-     couleur à la même colonne, et un trait y serait une couture qu'on dessine
-     exprès. Le jeton reste pour qu'une surface puisse le rallumer. */
+  /* Éteint par défaut (`--entete-filet`) : l'en-tête et le ciel sont la même
+     couleur à la même colonne. */
   border-bottom: 1px solid var(--entete-filet, transparent);
 }
 
 /*
-  L'ouverture et l'en-tête sont en encre claire : leur fond est le ciel.
-
-  La marque suit. Ses pierres et son mot sont peints par des utilitaires
-  Tailwind, qu'on repeint ici plutôt que de passer un ton depuis un composant
-  serveur — la marque ne sait pas sur quoi elle est posée, et c'est très bien :
-  c'est la surface qui décide de l'encre, partout ailleurs dans ce fichier.
+  Encre claire sur le ciel. La marque est peinte par des utilitaires Tailwind,
+  repeints ici : c'est la surface qui décide de l'encre, la marque ne sait pas
+  sur quoi elle est posée.
 */
 .ciel,
 .entete-du-site {
@@ -36,8 +26,8 @@
   isolation: isolate;
 }
 
-/* La même matière que le ciel : sans elle, l'en-tête est le seul aplat lisse de
-   la page et la couture se voit à ça, pas à la teinte. */
+/* Le grain du ciel : sans lui, l'en-tête serait le seul aplat lisse et la
+   couture se verrait. */
 .entete-du-site::after {
   content: "";
   position: absolute;
@@ -55,16 +45,9 @@
 }
 
 /*
-  Le survol du lien de l'en-tête, et c'est une correction d'illisibilité.
-
-  Il prend `surface-ombre`, réglée pour poser un panneau clair sur un autre
-  panneau clair. Sur le ciel, cette même surface devient une pastille presque
-  blanche en travers de la bande — l'objet le plus lumineux de la page pour un
-  survol —, et le mot qu'elle porte reste en encre claire puisque le fond est
-  sombre : on allume une lampe et on efface le texte au même instant.
-
-  Sur un aplat sombre, un survol se dit en voile, pas en pastille : la même
-  couleur un peu plus présente, assez pour qu'on sache que c'est cliquable.
+  Sur le ciel, le survol est un voile clair et non `surface-ombre` : celle-ci
+  y ferait une pastille presque blanche sous un mot en encre claire, donc
+  illisible.
 */
 .entete-du-site a:hover {
   background-color: rgb(255 255 255 / 0.12);
@@ -87,17 +70,8 @@
   color: var(--stone-50);
 }
 
-/*
-  La prise du cairn, sur le ciel.
-
-  Elle est au gris de second plan, réglé pour du papier. Le cairn de
-  l'ouverture n'est pas sur du papier : il est planté dans un paysage, et ce
-  paysage est un ciel — la commande y tombait à 1,5 pour 1, c'est-à-dire
-  qu'elle n'existait plus, au moment précis où elle invite à jouer.
-
-  Sur un fond sombre, le second plan s'éclaircit : c'est la même règle que
-  l'anneau de focus et que les pierres claires du cairn, et elle rend 3,6 ici.
-*/
+/* La prise du cairn sur le ciel : le gris du papier y tombe à 1,5 pour 1,
+   celui-ci rend 3,6. */
 .ciel .prise-du-cairn {
   color: var(--stone-300);
 }
@@ -130,22 +104,14 @@
 }
 
 /*
-  Le lavis, et le fondu du bas.
+  Le fondu du bas (`::before`) et le grain (`::after`), au-dessus du paysage :
+  les plans du relief sont positionnés, et à z-index nul ils se peindraient
+  par-dessus. Le fondu tourne la couleur vers le papier sur le bas de
+  l'ouverture, pour que la strate ne porte pas seule l'écart entre un sol
+  saturé et une surface de lecture.
 
-  **Au-dessus du paysage, et c'est l'ordre de peinture qui l'impose.** Les plans
-  du relief sont positionnés : à z-index nul, ils se peignent par-dessus cette
-  couche, qui ne servait alors à rien. Un cran plus haut, le lavis unifie toute
-  l'ouverture — ciel, crêtes et butte — au lieu de ne teinter que le ciel.
-
-  Le fondu du bas répond au reproche de la coupe nette : la strate ne peut pas
-  absorber seule l'écart entre un sol saturé et une surface de lecture. La
-  couleur tourne donc avant elle, sur la moitié basse de l'ouverture, et la
-  strate redevient une ligne de crête.
-
-  **Aucun lavis radial par-dessus**, et c'est une chose essayée puis retirée :
-  le ciel porte déjà sa lumière dans son propre dégradé, et une tache claire
-  posée dessus éclaircissait justement le coin haut-gauche — celui qui doit se
-  fondre dans l'en-tête.
+  Pas de lavis radial par-dessus : il éclaircirait le coin haut-gauche, qui
+  doit se fondre dans l'en-tête.
 */
 .ciel::before {
   z-index: 1;

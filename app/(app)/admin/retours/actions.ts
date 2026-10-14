@@ -9,13 +9,11 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { basculerLeTraitement } from "@/lib/db/retour";
 
 /**
- * Marquer un retour lu, ou le remettre à lire.
+ * Marquer un retour lu, ou le remettre à lire : un retour classé par erreur ne
+ * doit pas disparaître pour de bon.
  *
  * L'autorisation est revérifiée ici et pas seulement à l'affichage : une Server
  * Action est une route, atteignable sans passer par l'écran qui la propose.
- *
- * C'est un aller-retour et pas un aller : on se trompe de bouton, et un retour
- * classé par erreur ne doit pas disparaître de la pile pour de bon.
  */
 
 const CHAMPS = z.object({ id: z.string().min(1) });

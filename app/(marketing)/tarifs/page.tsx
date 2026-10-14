@@ -18,21 +18,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Le prix, sur une page à soi.
- *
- * Une page et non une fenêtre : un prix se partage par lien, se relit sans être
- * connecté, se référence depuis des conditions de vente. Une popup ne fait aucun
- * des trois, et disparaît au moment où l'on veut la montrer à quelqu'un.
- *
- * **Elle informe, elle n'encaisse pas.** Le geste d'achat vit dans les réglages,
- * avec le reste de ce qui touche au compte : ici on décide, là-bas on paie. La
- * carte ne se saisit ni sur l'une ni sur l'autre — elle se saisit chez Stripe,
- * et c'est ce qui fait qu'aucun numéro ne traverse jamais ce serveur.
- *
- * Le registre est celui de la landing : surfaces pleine largeur, strates aux
- * jointures, display sur les nombres. C'est une page publique, elle a le droit
- * d'être expressive — mais l'accent reste unique et fonctionnel, sur la seule
- * colonne qu'on vend.
+ * Le prix, sur une page publique : elle se partage par lien et se relit sans
+ * être connecté. Elle informe, elle n'encaisse pas : l'achat vit dans les
+ * réglages, et la carte se saisit chez Stripe.
  */
 export default async function PageTarifs() {
   const connecte = (await getCurrentUser()) !== null;
@@ -65,9 +53,8 @@ export default async function PageTarifs() {
           {t("precisions.titre")}
         </h2>
 
-        {/* Ce qui suit doit rester vrai du code. Aucune de ces phrases n'est un
-            argument : chacune répond à une question qu'on se pose devant un
-            paiement, et chacune se vérifie dans le produit. */}
+        {/* Ce qui suit doit rester vrai du code : chaque phrase se vérifie dans
+            le produit. */}
         <div className="mt-pas-8 gap-pas-6 grid">
           <Precision titre={t("precisions.identique.titre")}>
             {t("precisions.identique.texte")}
@@ -89,11 +76,8 @@ export default async function PageTarifs() {
         </div>
 
         <div className="mt-pas-12 gap-pas-4 flex flex-wrap items-center">
-          {/* Deux visiteurs, deux gestes suivants. Qui n'a pas de compte n'a
-              rien à acheter — il a d'abord à essayer, et le dire enlève la
-              carte de l'équation. Qui est connecté a fini de comparer : on
-              l'envoie là où l'on paie, et « mon offre » reste vrai qu'il paie
-              déjà ou non. */}
+          {/* Sans compte, on commence par essayer ; connecté, on va là où l'on
+              paie. */}
           <Button asChild size="lg">
             <Link href={destination(connecte, vendable)}>
               {connecte

@@ -5,12 +5,9 @@ import { Cairn } from "@/components/cairn/cairn";
 export const dynamic = "force-dynamic";
 
 /**
- * Le cairn seul, à une hauteur donnée, pour les captures « le cairn à plusieurs
- * hauteurs » et le recadrage serré.
- *
- * C'est le vrai composant et sa vraie géométrie : au-delà d'une dizaine de
- * pierres, `tracerLeSentier` ouvre un cairn de plus à droite. Rien n'est inventé
- * — une hauteur de 20 est un état qu'un compte atteint réellement.
+ * Le cairn seul, à une hauteur donnée, pour les captures. Vrai composant et
+ * vraie géométrie : au-delà d'une dizaine de pierres, `tracerLeSentier` ouvre
+ * un cairn de plus à droite.
  */
 export default async function PageApercuCairn({ params }: { params: Promise<{ n: string }> }) {
   if (process.env.NODE_ENV === "production" || process.env.ASSETS_PREVIEW !== "1") notFound();

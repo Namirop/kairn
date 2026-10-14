@@ -10,14 +10,8 @@ import { lireLaListeDesComptes } from "@/lib/db/liste-des-comptes";
 export const metadata: Metadata = { title: "Comptes · Administration" };
 
 /**
- * Qui a un compte, et qui s'en sert.
- *
- * L'écart entre les deux est le signal le plus précoce du produit : il se creuse
- * des semaines avant que le nombre d'inscriptions cesse de monter.
- *
- * Les chiffres d'abord, les comptes nommés ensuite. L'ordre importe : on vient
- * ici pour la tendance, et on descend vers les noms quand on cherche quelqu'un
- * en particulier. L'inverse ferait chercher la tendance sous la liste.
+ * Qui a un compte, et qui s'en sert. Les chiffres d'abord, les comptes nommés
+ * ensuite : on vient ici pour la tendance.
  */
 export const dynamic = "force-dynamic";
 

@@ -6,48 +6,34 @@ import { oublierLesVisitesAbandonnees } from "@/lib/db/depot-de-visite";
 import { runJob, type JobOutcome } from "@/lib/jobs/runner";
 
 /**
- * Reprise des jobs. Rattrape ceux restés en attente et ceux dont le processus
- * est mort en cours de route depuis plus de dix minutes, puis ferme ceux qui
- * ont épuisé leurs trois tentatives.
- *
- * Appelée par un déclencheur externe, authentifiée par CRON_SECRET.
+ * Reprise des jobs : ferme ceux qui ont épuisé leurs tentatives (`MAX_ATTEMPTS`),
+ * puis rattrape ceux restés en attente et ceux bloqués « en cours » depuis
+ * `STALL_AFTER_MS`. Appelée par un déclencheur externe, authentifiée par
+ * CRON_SECRET.
  */
 
 export const dynamic = "force-dynamic";
 
 /**
- * Le passage a le droit de durer : il enchaîne des appels modèle.
- *
- * Soixante secondes, parce que c'est le plafond du palier d'hébergement gratuit.
- * Sans cette déclaration, la fonction est coupée bien plus tôt encore, au milieu
- * d'un job. Rien n'est perdu — le travail redevient reprenable au passage
- * suivant — mais la file n'avancerait que d'un job ou deux par passage sans
- * qu'aucune erreur ne le dise. C'est le pire genre de panne : celle qui
- * ressemble à de la lenteur. À monter le jour où l'hébergement le permet.
+ * Soixante secondes, le plafond du palier d'hébergement gratuit : le passage
+ * enchaîne des appels modèle. Sans cette déclaration, la fonction est coupée
+ * bien plus tôt, au milieu d'un job, et la file ralentit sans aucune erreur.
  */
 export const maxDuration = 60;
 
 /**
- * Borne le travail d'un passage : le reste attendra le passage suivant.
- *
- * C'est la valeur à relever d'abord si la file prend du retard, en même temps
- * que `maxDuration` : les deux vont ensemble et l'une sans l'autre ne sert rien.
+ * Borne le travail d'un passage. À relever si la file prend du retard, en même
+ * temps que `maxDuration` : l'une sans l'autre ne sert à rien.
  */
 const JOBS_PAR_PASSAGE = 3;
 
 /**
- * Au-delà, on ne commence plus de job : celui-ci ne finirait pas.
+ * Au-delà, on ne commence plus de job : il ne finirait pas dans la minute.
  *
- * Trois jobs tenaient dans la minute tant que ce passage ne reprenait que du
- * découpage — deux secondes et demie à quinze en production. Depuis que
- * l'écriture des questions y est revenue, un seul job peut prendre huit à
- * quarante-trois secondes, médiane vingt : trois d'affilée débordent la minute,
- * et un passage coupé laisse un job « en cours » qui a peut-être déjà payé son
- * appel sans avoir écrit ce qu'il rendait.
- *
- * Le compte fixe ne suffit donc pas, il faut le temps. Vingt secondes laissent
- * les quarante restantes au job qu'on démarre, ce qui couvre le neuvième
- * décile ; le premier part toujours, sans quoi un passage ne ferait rien.
+ * Un job prend de 8 à 43 secondes (médiane 20) : trois d'affilée débordent, et
+ * un passage coupé laisse un job « en cours » qui a peut-être payé son appel
+ * sans rien écrire. Vingt secondes laissent les quarante restantes au job
+ * qu'on démarre, ce qui couvre le neuvième décile. Le premier part toujours.
  */
 const BUDGET_DE_DEPART_MS = 20_000;
 
@@ -58,8 +44,8 @@ export async function GET(request: Request) {
   }
 
   const abandonnes = await failExhaustedJobs();
-  // Les essais que personne n'a réclamés : leur texte n'a pas à rester, et
-  // personne n'a accepté qu'il reste. Les cascades emportent concepts compris.
+  // Les essais que personne n'a réclamés : personne n'a accepté que leur texte
+  // reste. Les cascades emportent les concepts.
   const visitesOubliees = await oublierLesVisitesAbandonnees();
   const jobs = await findResumableJobs(JOBS_PAR_PASSAGE);
   const comptes: Record<JobOutcome, number> = {
@@ -83,15 +69,13 @@ export async function GET(request: Request) {
   await signalerLeBattement("jobs");
 
   return NextResponse.json({
-    // Ce qui a réellement tourné, pas ce qui a été trouvé : le reste est resté
-    // en file faute de temps, et le passage suivant le reprendra.
+    // Ce qui a réellement tourné ; le reste attend le passage suivant.
     repris: lances,
     trouves: jobs.length,
     termines: comptes.DONE,
     echoues: comptes.FAILED,
     ignores: comptes.SKIPPED,
-    // Le plafond du jour était plein : ces jobs sont revenus à la file intacts,
-    // ils repartiront au prochain passage. Ce n'est pas une ligne d'échec.
+    // Plafond du jour plein : revenus intacts à la file, ce n'est pas un échec.
     reportes: comptes.REPORTE,
     abandonnes,
     visitesOubliees,

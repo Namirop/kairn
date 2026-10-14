@@ -7,13 +7,9 @@ import { ZoneDeReponse } from "@/components/revision/zone-de-reponse";
 import type { QuestionServie } from "@/lib/db/question-servie";
 
 /**
- * Une question réelle montée dans un état de réponse figé.
- *
- * Elle reprend la composition du vrai déroulé (`DerouleQuestions`) — même carte,
- * même dispatcher `ZoneDeReponse` — mais l'état « répondu » est posé en accessoire
- * au lieu de sortir de la machine à états. Le contenu reste la question générée ;
- * seul l'état est choisi, et c'est exactement le rendu que le produit affiche
- * après le geste correspondant.
+ * Une question réelle montée dans un état de réponse figé. Même composition
+ * que `DerouleQuestions` ; seul l'état « répondu » est posé en accessoire au
+ * lieu de sortir de la machine à états.
  */
 
 export type EtatDApercu = "juste" | "faux" | "revele";
@@ -70,12 +66,9 @@ function mauvaisIndex(question: QuestionServie): number {
 }
 
 /**
- * L'état d'un texte à trou, figé.
- *
- * Sur les formats qui ne sont pas un CLOZE, il n'est pas lu — `ZoneDeReponse`
- * branche ailleurs — mais il faut le fournir. Sur un CLOZE, le verdict pose l'état
- * « juste » ou « à côté », et `comble` fait apparaître le terme attendu dans la
- * phrase, comme après une vérification.
+ * L'état d'un texte à trou, figé. Requis même hors CLOZE, où `ZoneDeReponse`
+ * ne le lit pas. Sur un CLOZE, `comble` fait apparaître le terme attendu comme
+ * après une vérification.
  */
 function trouFige(question: QuestionServie, etat: EtatDApercu): TexteATrou {
   const attendu = question.cloze?.accepted[0] ?? "";

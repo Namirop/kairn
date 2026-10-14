@@ -6,12 +6,9 @@ function daysBefore(reference: Date, days: number): Date {
 }
 
 /**
- * Les trois fins sans concept, pour qu'on puisse les regarder côte à côte sans
- * provoquer de vrai incident.
- *
- * Un rejet — la chaîne a lu et n'a rien trouvé, avec le motif qu'elle a écrit.
- * Une panne — quelque chose s'est cassé, on peut relancer. Un dépôt vidé — il a
- * donné des concepts, l'utilisateur les a tous supprimés, le texte reste.
+ * Les trois fins sans concept, à regarder côte à côte sans provoquer
+ * d'incident : un rejet (rien à retenir), une panne (relançable), un dépôt
+ * vidé par son auteur.
  */
 export async function writeFailedInput(userId: string, now: Date): Promise<void> {
   const rejet = daysBefore(now, 2);
@@ -90,9 +87,8 @@ export async function writeFailedInput(userId: string, now: Date): Promise<void>
 }
 
 /**
- * Quelques lignes du registre d'appels modèle, toutes datées d'hier ou avant :
- * le compteur du jour reste à zéro, donc le plafond journalier n'est pas entamé
- * par le seed.
+ * Quelques lignes du registre d'appels modèle, datées d'hier ou avant pour que
+ * le seed n'entame pas le plafond journalier.
  */
 export async function writeAiCalls(userId: string, now: Date): Promise<void> {
   const calls = [

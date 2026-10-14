@@ -1,4 +1,4 @@
-// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision.
 import type { Metadata } from "next";
 import { BlocJournal } from "@/components/administration/bloc-journal";
 import { BlocPaiement } from "@/components/administration/bloc-paiement";
@@ -11,20 +11,12 @@ import { lireLEtatDuPaiement } from "@/lib/paiement/etat-pour-ladministration";
 export const metadata: Metadata = { title: "Pilotage · Administration" };
 
 /**
- * Le seul écran interne qui écrit quelque chose.
+ * Le seul écran interne qui écrit : couper les appels, baisser un plafond,
+ * changer de modèle. Ce sont les réglages du modèle ; ceux du compte vivent
+ * dans le produit, sous « Mon compte » dans le rail.
  *
- * Les cinq autres se lisent ; celui-ci se manœuvre — c'est ici qu'on coupe les
- * appels pendant un incident, qu'on baisse un plafond, qu'on change de modèle.
- * Il est en fin de navigation pour cette raison : ce qu'on touche une fois par
- * mois ne se met pas devant ce qu'on regarde tous les jours.
- *
- * Ce sont les réglages **du modèle**. Ceux du compte — fuseau, heure de rappel,
- * export, suppression — vivent dans le produit, et le rail interne y renvoie
- * sous « Mon compte » : deux entrées appelées « Réglages » dans la même
- * navigation ne se distingueraient pas.
- *
- * `ADMIN_EMAILS` n'y est pas et n'y sera pas : la liste qui décide qui ouvre cet
- * écran ne se modifie pas depuis cet écran.
+ * `ADMIN_EMAILS` n'y figure pas : la liste qui décide qui ouvre cet écran ne se
+ * modifie pas depuis cet écran.
  */
 export const dynamic = "force-dynamic";
 
@@ -34,14 +26,12 @@ export default async function PagePilotage() {
   const [reglages, journal, paiement] = await Promise.all([
     lireLesReglagesPosés(),
     lireLeJournal(),
-    // Le seul bloc de cet écran qui ne se manœuvre pas : `PAIEMENT_LIVE` reste
-    // un geste chez l'hébergeur, et ce qui est ici sert à savoir où l'on est.
+    // En lecture seule : `PAIEMENT_LIVE` se change chez l'hébergeur.
     lireLEtatDuPaiement(),
   ]);
 
-  // Les valeurs d'environnement voyagent jusqu'au formulaire pour qu'un champ
-  // vide veuille dire quelque chose. Aucune n'est un secret : ce sont les six
-  // réglages d'exploitation, et rien d'autre ne quitte le serveur.
+  // Les valeurs d'environnement vont au formulaire pour qu'un champ vide dise
+  // ce qui s'appliquera. Cet objet part au client : aucun secret n'y entre.
   const environnement = {
     AI_ENABLED: process.env.AI_ENABLED,
     MOCK_AI: process.env.MOCK_AI,

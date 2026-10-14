@@ -39,12 +39,8 @@ export const dynamic = "force-dynamic";
 const GROUPE = "text-mono font-mono tracking-[0.14em] text-stone-500 uppercase";
 
 /**
- * Une donnée du compte qu'on ne change pas ici, et pourquoi.
- *
- * Chaque ligne est posée sur sa propre surface plutôt que séparée de la suivante
- * par un filet — c'est la même correction que partout ailleurs, à l'échelle d'une
- * liste de définitions. La raison est écrite à côté : une valeur qu'on ne peut
- * pas toucher sans qu'on dise pourquoi ressemble à une fonctionnalité oubliée.
+ * Une donnée du compte qu'on ne change pas ici, et pourquoi : une valeur
+ * intouchable sans raison écrite ressemble à une fonctionnalité oubliée.
  */
 function Ligne({ intitule, valeur, raison }: { intitule: string; valeur: string; raison: string }) {
   return (
@@ -76,15 +72,9 @@ export default async function PageReglages({ searchParams }: Parametres) {
   ]);
 
   /**
-   * L'exploitant n'a pas les mêmes besoins que la personne qui apprend.
-   *
-   * « Comment ça marche » explique le produit à qui le découvre ; l'export et la
-   * suppression de compte sont des droits qu'on exerce contre celui qui détient
-   * les données — or ici c'est la même personne, avec un accès direct à la base.
-   * Les lui montrer ne lui offre rien qu'il n'ait déjà, et met un bouton qui
-   * efface tout à un clic d'un écran qu'il ouvre pour vérifier son fuseau.
-   *
-   * Rien n'est retiré à personne d'autre : un compte ordinaire garde les trois.
+   * L'exploitant ne voit ni « Comment ça marche », ni l'export, ni la
+   * suppression : il détient déjà les données, et ce bouton qui efface tout
+   * n'a rien à faire sur l'écran qu'il ouvre pour vérifier son fuseau.
    */
   const administrateur = estAdministrateur(utilisateur.email);
   const t = await getTranslations("compte.reglages");
@@ -124,10 +114,8 @@ export default async function PageReglages({ searchParams }: Parametres) {
           />
         </dl>
 
-        {/* L'offre est une donnée du compte, donc elle suit celles qu'on ne
-            change pas — et elle vient avant tout le reste parce que c'est la
-            seule de cette page qui engage de l'argent. Le geste d'achat est
-            ici et pas sur la page de tarifs : là-bas on décide, ici on paie. */}
+        {/* Le geste d'achat est ici et pas sur la page de tarifs : là-bas on
+            décide, ici on paie. */}
         <TonOffre
           plan={offre.plan}
           plafond={offre.plafond}
@@ -146,22 +134,9 @@ export default async function PageReglages({ searchParams }: Parametres) {
           dossier={dossier.clientId !== null}
         />
 
-        {/* Le seul endroit du produit où l'on peut dire qu'autre chose qu'une
-            question ne va pas.
-
-            Il est ici et pas ailleurs pour deux raisons. C'est la page qu'on
-            ouvre quand on cherche « où est-ce que je règle ça », donc celle où
-            l'on arrive déjà avec quelque chose à redire. Et le mettre dans la
-            navigation en ferait une fonctionnalité du produit, ce qu'il n'est
-            pas : c'est une porte de service, elle doit être trouvable sans
+        {/* Le seul endroit où signaler autre chose qu'une question. Ici et pas
+            dans la navigation : c'est une porte de service, trouvable sans
             occuper le devant. */}
-        {/* Elle prend la surface des réglages, et c'est ce qui en fait une
-            section plutôt qu'un formulaire tombé en bas de page. Posée à nu sur
-            l'ombre, sous un intitulé en petites capitales, elle n'avait ni
-            contour ni matière là où tout le reste de la page en a : quatre
-            champs flottaient sur le fond, et rien ne disait qu'ils forment un
-            ensemble. Ce n'est pas le contenu qui manquait de poids, c'est la
-            surface qui manquait dessous. */}
         <section className="mt-pas-12">
           <h2 className={GROUPE}>{t("probleme.titre")}</h2>
 
@@ -174,9 +149,8 @@ export default async function PageReglages({ searchParams }: Parametres) {
           </div>
         </section>
 
-        {/* L'accès à l'administration a quitté cette page : il est dans le rail,
-            à la place qu'occupaient les réglages. Un raccourci qui existe à deux
-            endroits finit par en avoir un des deux qui ment. */}
+        {/* Pas de lien vers l'administration : il est dans le rail, et un
+            raccourci en double finit par mentir. */}
         {administrateur ? null : (
           <div className="gap-pas-4 mt-pas-8 flex flex-col items-start">
             <Link

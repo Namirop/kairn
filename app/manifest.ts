@@ -3,15 +3,12 @@ import { PAPIER } from "@/lib/design/couleurs-hors-css";
 import { ORIGINE_DU_SITE } from "@/lib/site/origine";
 
 /**
- * Manifeste PWA. L'application s'installe depuis le navigateur et s'ouvre en
- * plein écran ; une application mobile native suivra.
+ * Manifeste PWA.
  *
- * **Il reste en français, et c'est voulu.** Il est servi à une adresse fixe,
- * mis en cache par le navigateur et demandé sans cookie : il ne peut pas suivre
- * la langue de la personne, seulement en deviner une. Ce qui compte à
- * l'installation — le nom, l'icône — ne dépend d'aucune langue ; la description
- * ne se lit que dans la fenêtre d'installation de Chrome. Le jour où l'anglais
- * pèse plus que le français dans les installations, c'est elle qui change.
+ * Il reste en français : servi à une adresse fixe, mis en cache et demandé sans
+ * cookie, il ne peut pas suivre la langue de la personne. Le nom et l'icône
+ * n'en dépendent pas ; seule la description, lue dans la fenêtre
+ * d'installation de Chrome, est concernée.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -27,38 +24,21 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait",
 
     /**
-     * Quand la plateforme capture un lien vers Kairn, elle réutilise la fenêtre
-     * de l'application au lieu d'en ouvrir une seconde.
-     *
-     * Ça ne force personne à capturer quoi que ce soit — c'est le navigateur et
-     * l'utilisateur qui en décident, et sur iOS une application posée sur
-     * l'écran d'accueil ne le peut pas du tout. D'où le code à six chiffres
-     * plutôt qu'un lien pour entrer : la session se crée dans la fenêtre qui l'a
-     * demandée, et cette ligne-ci n'est qu'un confort là où elle s'applique.
+     * Un lien capturé réutilise la fenêtre de l'application. Ce n'est qu'un
+     * confort : le navigateur décide, et iOS ne le fait pas du tout — d'où le
+     * code à six chiffres plutôt qu'un lien pour se connecter.
      */
     launch_handler: { client_mode: "navigate-existing" },
     /**
-     * Kairn dans la feuille de partage du système.
+     * Kairn dans la feuille de partage du système (absent sur iOS). Les noms de
+     * champs sont ceux du formulaire de dépôt, qui les reçoit à l'arrivée.
      *
-     * C'est le raccourci du geste qui existe déjà : sélectionner un passage
-     * dans une conversation, un article, une réponse d'assistant, et le déposer
-     * sans passer par le presse-papier. Les noms de champs sont ceux du
-     * formulaire de dépôt — `texte`, `image` — parce que c'est le même
-     * formulaire qui les reçoit à l'arrivée.
+     * L'envoi est intercepté par le service worker et rangé sur l'appareil : un
+     * partage abandonné n'envoie rien. La route `/depots/partage` ne sert que si
+     * le worker ne répond pas.
      *
-     * **L'envoi est intercepté par le service worker**, jamais par une route :
-     * ce qui a été partagé est rangé sur l'appareil et repris par le champ, si
-     * bien qu'un partage abandonné n'a rien envoyé à personne. La route de même
-     * adresse n'existe que pour le cas où le worker ne répond pas.
-     *
-     * Les quatre types d'image sont ceux que la lecture sait décoder. Déclarer
-     * `image/*` ferait apparaître Kairn dans la feuille pour des formats qu'elle
-     * refuserait ensuite — un raccourci qui mène à un refus n'est pas un
-     * raccourci.
-     *
-     * Rien de tout ça n'existe sur iOS : une application posée sur l'écran
-     * d'accueil ne peut pas s'inscrire dans la feuille de partage. Le
-     * copier-coller reste le chemin de tout le monde.
+     * Les quatre types d'image sont ceux que la lecture sait décoder : `image/*`
+     * proposerait Kairn pour des formats refusés ensuite.
      */
     share_target: {
       action: "/depots/partage",
@@ -76,18 +56,10 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["education", "productivity"],
 
     /**
-     * L'application se déclare elle-même comme application liée.
-     *
-     * C'est le seul moyen, depuis un onglet ordinaire, de savoir que Kairn est
-     * déjà posée sur l'écran d'accueil de cet appareil :
-     * `getInstalledRelatedApps()` ne répond que sur ce qui est déclaré ici, et
-     * `display-mode: standalone` ne renseigne que sur la fenêtre courante — pas
-     * sur celles d'à côté. Sans cette entrée, quelqu'un qui a installé
-     * l'application et rouvre le site dans son navigateur se voit proposer de
-     * l'installer une seconde fois.
-     *
-     * `prefer_related_applications` reste faux : la liste sert à reconnaître,
-     * pas à détourner l'installation vers autre chose.
+     * L'application se déclare elle-même comme application liée : c'est le seul
+     * moyen, depuis un onglet ordinaire, que `getInstalledRelatedApps()` dise
+     * que Kairn est déjà installée, et ne pas reproposer l'installation.
+     * `prefer_related_applications` reste faux : la liste sert à reconnaître.
      */
     related_applications: [{ platform: "webapp", url: `${ORIGINE_DU_SITE}/manifest.webmanifest` }],
     prefer_related_applications: false,

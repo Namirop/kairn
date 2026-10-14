@@ -20,11 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * La session du jour.
- *
- * La page est recalculée à chaque visite : ce qui est dû dépend de l'heure qu'il
- * est chez l'utilisateur, et une session servie depuis un cache serait celle
- * d'un autre moment.
+ * La session du jour. Recalculée à chaque visite : ce qui est dû dépend de
+ * l'heure chez l'utilisateur, et une session en cache serait d'un autre moment.
  */
 export const dynamic = "force-dynamic";
 
@@ -40,29 +37,17 @@ export default async function PageReviser() {
     findUserStats(utilisateur.id),
   ]);
 
-  // Un rappel coupé n'a pas d'heure à annoncer, et l'annoncer quand même serait
-  // promettre un email qui ne partira pas.
+  // Sans rappel actif, annoncer une heure promettrait un email qui ne part pas.
   const rappelActif = reglages.dailyReminderEnabled && reglages.emailOptOutAt === null;
 
   return (
     <SessionDeRevision
       questions={session.questions}
       /*
-        L'écran vide est passé en accessoire, il n'est plus décidé ici.
-
-        La page en décidait, et c'est ce qui rendait la fin de session fragile :
-        une revalidation la faisait relire, le serveur voyait une session
-        désormais vide, et remplaçait l'écran de fin par « tu es à jour » à
-        l'instant où l'on venait de le mériter.
-
-        La fin de session n'était que la moitié du problème : la **liste des
-        questions** se relisait aussi, plus courte de ce qu'on venait de
-        répondre, et le rang tenu par le client désignait alors la question
-        d'après. `SessionDeRevision` la gèle maintenant à l'ouverture, et
-        l'écran ne craint plus aucune relecture de la route.
-
-        Rendu ici mais servi là-bas, l'écran vide ne coûte rien quand il ne sert
-        pas, et l'état « la session est finie » vit dans le client, où un
+        L'écran vide est passé en accessoire, et c'est `SessionDeRevision` qui
+        décide de l'afficher. Si la page en décidait, la revalidation de fin de
+        session relirait une session vide et remplacerait l'écran de fin par
+        « tu es à jour ». L'état « session finie » vit dans le client, où un
         rafraîchissement du serveur ne peut pas le contredire.
       */
       vide={
@@ -90,10 +75,8 @@ export default async function PageReviser() {
 }
 
 /**
- * Le jour de la session, chez l'utilisateur.
- *
- * Le fuseau est passé explicitement : sans lui, le serveur écrirait sa propre
- * date, et quelqu'un qui révise à 00 h 30 à Sydney verrait la veille.
+ * Le jour de la session, chez l'utilisateur : sans fuseau explicite, le serveur
+ * écrirait sa propre date, et 00 h 30 à Sydney afficherait la veille.
  */
 function jourDeLaSession(maintenant: Date, fuseau: string, etiquette: string): string {
   return new Intl.DateTimeFormat(etiquette, {

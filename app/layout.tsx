@@ -26,11 +26,9 @@ const METADONNEES = {
   applicationName: "Kairn",
   manifest: "/manifest.webmanifest",
 
-  // Les deux icônes sont déclarées ici, et il faut les deux : dès qu'`icons`
-  // existe, il **remplace** la détection de fichier au lieu de s'y ajouter. Ne
-  // déclarer que la pastille iOS suffisait donc à retirer la favicon du HTML —
-  // `app/icon.png` restait servi, mais plus personne ne pointait dessus, et
-  // l'onglet retombait sur `/favicon.ico`, qui n'existe pas.
+  // Il faut déclarer les deux : dès qu'`icons` existe, il remplace la détection
+  // de fichier (`app/icon.png`) au lieu de s'y ajouter, et l'onglet retomberait
+  // sur `/favicon.ico`, qui n'existe pas.
   icons: {
     icon: { url: "/icon.png", type: "image/png" },
     apple: "/icones/apple-touch-icon.png",
@@ -38,9 +36,7 @@ const METADONNEES = {
   appleWebApp: { capable: true, title: "Kairn", statusBarStyle: "default" },
   formatDetection: { telephone: false },
 
-  // L'image elle-même vient d'`app/opengraph-image.tsx` : Next l'ajoute et pose
-  // son URL absolue et ses dimensions. On ne décrit ici que ce qu'il ne devine
-  // pas.
+  // L'image vient d'`app/opengraph-image.tsx`, que Next ajoute lui-même.
   openGraph: {
     type: "website",
     siteName: "Kairn",
@@ -65,15 +61,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={classesPolices}>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
         <RegistreServiceWorker />
-        {/* La mesure d'audience de Vercel : combien de visites, sur quelles
-            pages, d'où. Sans cookie et sans identifiant qui suive quelqu'un d'un
-            site à l'autre — c'est la raison de ce choix-là plutôt qu'un autre,
-            et c'est ce qui permet de ne pas poser de bandeau. La page
-            « Confidentialité » le dit, et elle doit continuer de le dire.
-
-            Posée à la racine pour couvrir la landing comme l'application : ce
-            qu'on veut savoir, c'est où les gens s'arrêtent, et l'essentiel de
-            cette réponse est dans le passage de l'une à l'autre. */}
+        {/* Sans cookie ni identifiant entre sites : c'est ce qui dispense de
+            bandeau, et la page « Confidentialité » le dit. Une mesure qui
+            perdrait ces propriétés changerait d'abord cette page. À la racine,
+            pour suivre le passage de la landing à l'application. */}
         <Analytics />
       </body>
     </html>

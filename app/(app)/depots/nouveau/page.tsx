@@ -44,18 +44,16 @@ export default async function PageNouveauDepot({
     lireUsageDeLaPeriode(utilisateur.id, fuseau),
     estEnListeDattente(utilisateur.id),
     compterLesDepots(utilisateur.id),
-    // L'offre entière et non le seul plafond : cet écran doit dire *pourquoi*
-    // la période est pleine, et ce qui y répond selon le plan.
+    // L'offre entière : l'écran dit pourquoi la période est pleine, selon le plan.
     lireLOffreDuCompte(utilisateur.id),
   ]);
-  // Le premier dépôt d'un compte : c'est le seul moment où les exemples
-  // servent, et le seul où l'écran doit dire ce qu'on attend de lui.
+  // Au premier dépôt seulement, l'écran montre des exemples.
   const aucunDepot = depotsFaits === 0;
-  // Ce qui reste, c'est ce qu'on peut encore retenir sur la période. Le plafond
-  // de dépôts n'est qu'un second rideau : il ne s'annonce pas, il se rencontre.
+  // On annonce les concepts restants ; le plafond de dépôts est un second
+  // rideau qui ne s'annonce pas, il se rencontre.
   const restants = Math.max(0, offre.plafond - usage.concepts);
-  // Le rideau des dépôts suit le plan, comme celui des concepts : sans quoi
-  // une offre payée s'arrêterait au soixantième dépôt.
+  // Le rideau des dépôts suit le plan, sinon une offre payée s'arrêterait bien
+  // avant son plafond de concepts.
   const depotsMax = plafondDeDepots(offre.plafond);
   const depotsPleins = usage.depots >= depotsMax;
   const t = await getTranslations("depots.formulaire");
@@ -68,8 +66,8 @@ export default async function PageNouveauDepot({
     ),
   );
   const plein = restants === 0 || depotsPleins;
-  // Les concepts d'abord : quand les deux ferment le même jour, c'est celle qui
-  // se paie qu'il faut nommer.
+  // Quand les deux ferment ensemble, on nomme les concepts : c'est la limite
+  // qui se paie.
   const motif = restants === 0 ? "concepts" : "depots";
 
   return (
@@ -88,17 +86,15 @@ export default async function PageNouveauDepot({
             inscrit={inscrit}
             motif={motif}
             limite={motif === "concepts" ? offre.plafond : depotsMax}
-            // L'offre ne se propose qu'à qui elle ouvrirait quelque chose : pas à
-            // un compte qui paie déjà, pas contre le rideau des dépôts qu'elle ne
-            // lève pas, et pas quand les clés manquent — le bouton mènerait alors
-            // à un écran qui dit que le paiement n'est pas ouvert.
+            // L'offre ne se propose que si elle ouvre quelque chose : pas à qui
+            // paie déjà, pas contre le rideau des dépôts qu'elle ne lève pas, pas
+            // sans clés de paiement.
             offreAProposer={offre.plan === "GRATUIT" && motif === "concepts" && paiementOuvert()}
           />
         ) : (
-          // La clé d'un geste de dépôt, tirée à chaque affichage : elle rend le
-          // double envoi inoffensif sans jamais confondre deux dépôts distincts.
-          // L'invite est tirée ici pour la même raison qu'elle ne l'est pas dans
-          // le composant : un tirage côté client diverge de celui du serveur.
+          // La clé d'envoi, tirée à chaque affichage, rend le double envoi
+          // inoffensif sans confondre deux dépôts. L'invite est tirée ici et non
+          // dans le composant : un tirage côté client divergerait du serveur.
           <FormulaireDepot
             restants={restants}
             cleEnvoi={crypto.randomUUID()}

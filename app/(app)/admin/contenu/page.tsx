@@ -1,4 +1,4 @@
-// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision.
 import type { Metadata } from "next";
 import { BlocVolumes } from "@/components/administration/bloc-volumes";
 import { Carte, GraphiqueBarres } from "@/components/administration/graphique-barres";
@@ -10,13 +10,9 @@ import { JOURS_MONTRES, lireLesVolumes } from "@/lib/db/administration";
 export const metadata: Metadata = { title: "Contenu · Administration" };
 
 /**
- * Ce qui est entré dans le produit, et ce que le découpage en a tiré.
- *
- * La moyenne de concepts par dépôt est la mesure la plus utile des trois :
- * c'est elle qui dit si le découpage rend ce qu'il devrait. Elle s'effondre
- * quand les dépôts partent en rejet, et elle grimpe quand les gens collent des
- * articles entiers — deux usages très différents que les compteurs bruts
- * confondent.
+ * Ce qui est entré dans le produit, et ce que le découpage en a tiré. La
+ * moyenne de concepts par dépôt est la mesure clé : elle chute avec les rejets
+ * et grimpe avec les articles entiers, ce que les compteurs bruts confondent.
  */
 export const dynamic = "force-dynamic";
 

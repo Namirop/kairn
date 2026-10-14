@@ -33,13 +33,8 @@ export default async function PageDepots() {
   return (
     <PileDePanneaux sol="ombre">
       <Panneau surface="papier" mesure="colonne">
-        {/* Même largeur que la liste : sans ça, le bouton part se poser tout
-            seul au bord de l'écran, loin de ce sur quoi il agit.
-
-            Sur une colonne, le titre se centre et le bouton prend la largeur,
-            comme celui d'« Aujourd'hui » — ce sont les deux mêmes gestes
-            d'ouverture d'écran, et rien ne justifiait qu'ils ne se ressemblent
-            pas. La rangée ne se reforme qu'avec la place de la porter. */}
+        {/* Même largeur que la liste, pour que le bouton reste près de ce sur
+            quoi il agit. Sur mobile, titre centré comme sur « Aujourd'hui ». */}
         <div className="gap-pas-6 md:gap-pas-4 flex flex-col items-center text-center md:flex-row md:flex-wrap md:items-end md:justify-between md:text-left">
           <div>
             <h1 className="text-h1-app leading-tight font-bold">{t("titre")}</h1>

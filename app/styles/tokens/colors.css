@@ -6,101 +6,63 @@
 
 :root {
   /*
-    Les cinq surfaces. Une page est une pile de panneaux, et chaque panneau
-    porte l'une d'elles — c'est le changement de fond qui sépare deux sujets,
-    plus jamais un filet d'un pixel.
+    Les cinq surfaces. C'est le changement de fond qui sépare deux panneaux,
+    jamais un filet d'un pixel.
 
     papier   la surface de lecture, par défaut
     ombre    le panneau alterné, jamais deux d'affilée
     lichen   un seul panneau dans toute l'application : celui où le produit
              tient sa promesse
-    session  le sol d'un seul écran, celui de la session, et d'aucun autre —
-             voir plus bas
-    roche    deux panneaux, pas trois. Le texte et les pierres s'y inversent en
-             clairs ; le sommet lichen reste lichen
+    session  le sol de l'écran de session, et d'aucun autre
+    roche    deux panneaux par page, pas trois. Le texte et les pierres s'y
+             inversent en clairs ; le sommet lichen reste lichen
 
-    **Elles portent une température, et c'est la glace.** Relevées à la pipette
-    sur la maquette validée, pas réinventées : le produit raconte un sentier de
-    montagne, et un sentier de montagne n'est pas gris. L'écart entre le papier
-    et l'ombre est de 1,22 pour 1 — c'est peu, c'est volontaire, et c'est
-    exactement celui que la roche se donne avec la dalle qu'elle porte. En
-    dessous, une carte posée sur un panneau ne se détache plus ; au-dessus, la
-    bande alternée devient un aplat de couleur à part entière, ce qui est une
-    autre décision que celle-ci.
+    Papier contre ombre : 1,22 pour 1, volontairement faible. En dessous, une
+    carte posée sur un panneau ne se détache plus ; au-dessus, la bande
+    alternée devient un aplat de couleur à part entière.
   */
   --surface-papier: #eef5f7;
   --surface-ombre: #cfe3ec;
   --surface-lichen: #e4eff2;
   --surface-roche: #1e2b3c;
   /*
-    Le sol de la session, et d'elle seule.
-
-    La session ne pose pas un panneau de lecture avec un encart : elle pose un
-    objet dans un terrain. C'est la seule métaphore que ce produit raconte
-    depuis le début — une pierre posée sur le sentier —, et l'alternance
-    papier/ombre ne sait pas la dire. Le sol prend donc la bande de glace du
-    paysage, et la carte de la question redevient le papier clair posé dessus :
-    1,47 pour 1 entre les deux.
-
-    Sa chroma est tombée, pas sa valeur. Le niveau 2 de la maquette se lit
-    « glace » sur cent pixels de haut entre un ciel profond et des pierres
-    sombres ; le même ton étendu à un écran entier se lit « piscine ». Une
-    saturation qui tient à petite taille devient du plastique en aplat.
-
-    Aucun autre écran ne la prend. C'est la règle qui l'empêche de devenir une
-    surface de plus à dépenser.
+    Le sol de la session, et d'aucun autre écran. La carte de la question, en
+    papier, s'y pose à 1,47 pour 1. Chroma volontairement basse : étendu à tout
+    un écran, le ton de glace du paysage se lirait « piscine ».
   */
   --surface-session: #b3cfda;
 
-  /*
-    Pierre — la rampe entière, retempérée vers le bleu de nuit.
-
-    Ce n'est pas une nuance : c'est elle qui peint les cairns, les arêtes du
-    relief, l'encre et le pied de page. Surcharger les surfaces sans y toucher
-    laissait un cairn gris-vert sur un ciel bleu.
-  */
+  /* Pierre : peint aussi les cairns, les arêtes du relief, l'encre et le pied
+     de page, d'où sa teinte bleu de nuit. */
   --stone-50: #f4f9fb;
   --stone-100: #dcebf0;
-  /* Les filets. Ils doivent se voir sur le papier **et** sur le sol de la
-     session, qui est plus dense : réglés pour le seul papier, le trait qui
-     sépare la réponse des gestes avait exactement la valeur du sol et
-     n'existait plus. */
+  /* Les filets. Réglés pour se voir aussi sur le sol de la session, plus dense
+     que le papier. */
   --stone-300: #7fb3c8;
-  /* Texte secondaire sur surface sombre. Un gris pensé pour du papier ne tient
-     pas sur de la roche, et « Niveau 3 · 564 XP » y était quasi illisible. */
+  /* Texte secondaire sur surface sombre : un gris réglé pour le papier ne tient
+     pas sur la roche. */
   --stone-400: #8fb2c4;
-  /* Le texte second, et il descend avec les surfaces : à la valeur d'avant il
-     tombait à 4,14 sur l'ombre et 3,88 sur le sol de la session, sous le
-     seuil, pour ce qui est justement le plus répandu de l'interface. */
+  /* Le texte second, le plus répandu de l'interface : réglé pour tenir AA sur
+     l'ombre et sur le sol de la session, pas seulement sur le papier. */
   --stone-500: #345770;
   --stone-700: #1f4360;
   --stone-800: #143049;
   --stone-900: #0d2236;
 
   /*
-    Le lichen, et il ne garde qu'un métier.
-
-    Il en tenait deux : il disait ce qu'on maîtrise — le sommet du cairn, la
-    pierre tenue, la bonne réponse — et il peignait en même temps tout ce que
-    le produit demande, un champ qui prend le focus, un choix retenu, un
-    interrupteur. Les deux cohabitaient sans qu'on le remarque, parce qu'ils
-    avaient la même couleur. Sous un ciel bleu, ça saute aux yeux.
-
-    Il ne lui reste donc que **la maîtrise**, et il est saturé pour ça : c'est
-    la couleur du lichen sur le granit, et elle se pose sur des pierres
-    sombres. Sur une surface claire, c'est `deep` qui porte — 4,8 contre 1,9.
+    Le lichen ne dit que la maîtrise : sommet du cairn, pierre tenue, bonne
+    réponse. Ce que le produit demande est à `--accent`. Saturé pour se poser
+    sur des pierres sombres ; sur une surface claire, c'est `deep` qui porte —
+    4,8 contre 1,9.
   */
   --lichen: #9fc22e;
   --lichen-deep: #5c7418;
 
   /*
-    L'accent du produit, et il descend du ciel.
-
-    Tout ce que le produit demande : un champ qui prend le focus, un choix
-    retenu, un interrupteur, l'anneau de focus, le trait du compteur du jour.
-    `clair` est la variante des surfaces sombres, où un accent réglé pour du
-    papier passe sous le seuil de l'anneau de focus — même règle que
-    `ember-clair` et que les pierres claires du cairn.
+    L'accent : tout ce que le produit demande — focus, choix retenu,
+    interrupteur, trait du compteur du jour. `clair` est la variante des
+    surfaces sombres, où l'accent du papier passe sous le seuil de l'anneau de
+    focus.
   */
   --accent: #1b4fc4;
   --accent-profond: #143b8d;
@@ -109,10 +71,9 @@
   /* Réservé au streak, nulle part ailleurs. */
   --ember: #b4552f;
   --ember-deep: #9e4526;
-  /* Le même accent, éclairci pour les surfaces sombres. Un accent chaud réglé
-     sur du clair ne tient pas sur du sombre : l'ember d'origine y donnait 3,60,
-     assez pour un grand titre et pas pour la ligne de série, qui est petite et
-     en capitales. Celui-ci donne 5,30 sur la roche. */
+  /* L'ember des surfaces sombres : celui du papier n'y donne que 3,60, trop peu
+     pour la ligne de série, petite et en capitales. Celui-ci donne 5,30 sur la
+     roche. */
   --ember-clair: #d98a63;
 
   /* Sémantique : un échec n'est pas la couleur du produit. */
@@ -121,37 +82,24 @@
 
   /*
     Les marques des graphiques de l'écran interne, et de nulle part ailleurs.
-
-    Une seule teinte par graphique : tous ceux de cet écran mesurent une
-    grandeur — combien on a dépensé, combien de concepts sont entrés — et une
-    grandeur n'a pas d'identité à distinguer. Une palette catégorielle y
-    peindrait des couleurs qui ne veulent rien dire, ce qui est le contresens le
-    plus courant du genre.
-
-    C'est l'accent approfondi : une barre de trois pixels de large a besoin de
-    plus de contraste qu'un aplat. La barre à zéro garde une amorce grise : un
-    jour sans dépense doit se voir comme un zéro et non comme un trou dans la
-    série.
+    Une seule teinte : chaque graphique mesure une grandeur, et une palette
+    catégorielle y peindrait des couleurs qui ne veulent rien dire. Accent
+    approfondi parce qu'une barre fine demande plus de contraste qu'un aplat.
+    La barre à zéro garde une amorce, pour se lire comme un zéro et non comme
+    un trou dans la série.
   */
   --data-mark: #143b8d;
   --data-mark-zero: #c3d7e1;
 
   /*
-    Le jeton d'un terme de code cité dans une phrase.
-
-    De l'encre très diluée plutôt qu'une des surfaces nommées : le jeton se pose
-    aussi bien sur le papier que sur l'ombre, alors qu'une surface fixe
-    disparaîtrait sur l'une des deux. C'est le seul endroit du produit où une
-    couleur est définie en transparence, et c'est pour cette raison-là.
+    Le jeton d'un terme de code cité dans une phrase. En transparence pour se
+    poser aussi bien sur le papier que sur l'ombre, là où une surface fixe
+    disparaîtrait sur l'une des deux.
   */
   --jeton: color-mix(in oklab, var(--stone-900) 7%, transparent);
   --jeton-bord: color-mix(in oklab, var(--stone-900) 14%, transparent);
-  /*
-    Le même jeton sur la roche. De l'encre diluée y est plus sombre que le fond :
-    les termes de code du bloc de réponse s'y effaçaient, alors que ce sont eux
-    qu'on vient lire. C'est donc du clair très dilué, et un peu plus dense — sur
-    un fond sombre, il faut plus de matière pour la même présence.
-  */
+  /* Le même jeton sur la roche : de l'encre diluée y serait plus sombre que le
+     fond. Du clair, un peu plus dense pour la même présence. */
   --jeton-clair: color-mix(in oklab, var(--stone-50) 12%, transparent);
   --jeton-bord-clair: color-mix(in oklab, var(--stone-50) 22%, transparent);
 }

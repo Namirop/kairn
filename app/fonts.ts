@@ -2,11 +2,10 @@ import { Bricolage_Grotesque, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 
 /**
- * Trois rôles typographiques, jamais plus.
- *
- * Display pour les titres du site public et les grands nombres, texte pour tout
- * ce qui se lit, données pour ce qui se compte. Satoshi n'est pas sur Google
- * Fonts : ses fichiers sont embarqués, voir app/fonts/README.md.
+ * Trois rôles typographiques, jamais plus : display pour les titres et les
+ * grands nombres, texte pour ce qui se lit, données pour ce qui se compte.
+ * Satoshi n'est pas sur Google Fonts : ses fichiers sont embarqués, voir
+ * app/fonts/README.md.
  */
 
 export const policeDisplay = Bricolage_Grotesque({

@@ -33,8 +33,8 @@ function measureStreaks(days: string[], today: string): { current: number; longe
 /**
  * Compteurs du compte de démonstration, reconstitués depuis les passages écrits.
  *
- * La formule d'XP définitive appartient à une phase ultérieure : celle-ci sert
- * seulement à donner au tableau de bord des nombres cohérents entre eux.
+ * L'XP et le niveau ne suivent pas `lib/domain/progression.ts` : ils donnent
+ * seulement au tableau de bord des nombres cohérents entre eux.
  */
 export async function writeStats(
   userId: string,
