@@ -7,29 +7,21 @@ import type { ConceptFige, DepotFige } from "./fige";
 appliquerCapDuBanc();
 
 /**
- * Combler les trous d'un figé sans réémettre ce qui a déjà réussi.
+ * Combler les trous d'un figé sans réémettre ce qui a déjà réussi : un passage
+ * complet coûte quelques dollars, et une panne isolée laisse un trou silencieux.
+ * Ne rejoue que ce qui manque :
  *
- * Un passage complet dépense quelques dollars, et une panne réseau isolée ou
- * un lot de questions raté par Haiku laisse un trou silencieux dans le figé —
- * un dépôt sans concepts (le cas de `27` sur le figé du 18/08), ou des
- * concepts sans variants dispersés sur plusieurs dépôts. Ce script les
- * retrouve et **ne rejoue que ce qui manque** :
+ * - dépôts sans concepts (échec d'extraction, avec ou sans motif) →
+ *   `evaluerDepot` depuis le texte du corpus, générations comprises ;
+ * - concepts non douteux sans variants → `rejouerDepot` sur un dépôt réduit à
+ *   ces concepts, puis fusion dans le figé.
  *
- * - dépôts sans concepts (échec d'extraction, avec ou sans motif écrit) →
- *   `evaluerDepot` en repart du texte du corpus, extraction et générations
- *   comprises.
- * - concepts non-douteux sans variants → `rejouerDepot` sur un dépôt réduit
- *   aux seuls concepts à combler, et fusion des variants neufs dans le figé.
- *
- * Le script écrit un nouveau figé daté du moment, quitte à ce que `completer`
- * de `fige.ts` reprenne les dépôts inchangés du précédent. Un rejeu ordinaire
- * (`eval:rejeu`) suit ensuite si on veut regénérer proprement l'ensemble.
+ * Écrit un nouveau figé daté du moment, avec tous les dépôts, complétés ou non.
  *
  *   MOCK_AI=false npm run evaluer:completer                 # le plan
  *   MOCK_AI=false npm run evaluer:completer -- --emettre    # complétion réelle
  *
- * Comme `eval:generation`, il exige `MOCK_AI=false` explicitement et ne
- * dépense qu'à l'ajout de `--emettre`.
+ * Exige `MOCK_AI=false` explicitement et ne dépense qu'avec `--emettre`.
  */
 
 const RAPPORTS = join(import.meta.dirname, "rapports");
@@ -71,9 +63,8 @@ async function main(): Promise<void> {
   const aCompleter: DepotFige[] = [];
 
   for (const depot of fige.depots) {
-    // Un dépôt sans concepts sans motif de rejet est un échec silencieux :
-    // le figé d'avant la persistance d'`echec` n'écrivait rien pour eux. On
-    // le rattrape ici en même temps que les échecs explicites.
+    // Sans concepts ni motif de rejet, c'est un échec silencieux : les anciens
+    // figés n'écrivaient pas `echec`.
     const enEchec =
       depot.echec !== undefined || (depot.rejet === null && depot.concepts.length === 0);
     if (enEchec) {
@@ -94,9 +85,8 @@ async function main(): Promise<void> {
     0,
   );
   const totalExtractions = aRextraire.length;
-  // Plancher : une extraction par dépôt à rextraire, plus une génération pour
-  // chacun de ses concepts. Plafond : on n'estime pas mieux tant qu'on n'a pas
-  // extrait, mais l'ordre de grandeur est bon.
+  // Un plancher : les générations des dépôts à réextraire ne se comptent
+  // qu'après extraction.
   const appels = totalExtractions + totalRegenerations;
 
   console.info(`Complément du figé : ${basename(chemin)}`);
@@ -135,8 +125,7 @@ async function main(): Promise<void> {
     }
     console.info(`… extraction de ${enEchec.nom}`);
     const evalue = await evaluerDepot(source);
-    // La conversion en DepotFige : on reprend la même forme que `ecrireFige`
-    // pour ces dépôts-là, en portant l'échec et les reprises s'il y en a.
+    // La même forme que celle écrite par `ecrireFige`.
     const reconstitue: DepotFige = {
       nom: evalue.nom,
       texte: evalue.texte,
@@ -201,10 +190,8 @@ async function main(): Promise<void> {
   const total = await sumAiCalls(debut);
   console.info(`\n${total.calls} appels, ${Number(total.costUsd).toFixed(4)} $.`);
 
-  // On réécrit un figé daté du moment, avec l'ensemble des dépôts (complétés
-  // et inchangés) sérialisés directement. `ecrireFige` ne s'applique pas ici :
-  // il attend des `DepotEvalue` frais, et on repart de `DepotFige` déjà
-  // convertis. Le format JSON est le même, contrôlé par `figeSchema`.
+  // Sérialisé à la main : `ecrireFige` attend des `DepotEvalue` frais, on a des
+  // `DepotFige`. Le format reste celui que `figeSchema` contrôle.
   const depotsFinaux = [...parNomDuFige.values()].sort((a, b) => a.nom.localeCompare(b.nom));
   const DOSSIER = joinChemin(import.meta.dirname, "concepts");
   const cheminNouveau = joinChemin(

@@ -13,23 +13,18 @@ import { executerToutLePipeline, formulaire } from "./depot-simule";
 import { record } from "./journal";
 
 /**
- * Les vecteurs de régénération, comptés en appels.
- *
- * Chaque écriture de questions est un appel payant. Le plafond d'une
- * régénération par concept et par semaine n'existe que si **tous** les chemins
- * le traversent — un seul qui l'évite, et la boucle est ouverte.
- *
- * Les appels ne sont pas devinés : ils sont comptés au registre, en mode
- * compteur, sans qu'aucune requête ne sorte. Voir `enModeCompteur`.
+ * Les vecteurs de régénération, comptés en appels. Le plafond d'une
+ * régénération par concept et par semaine ne tient que si tous les chemins le
+ * traversent. Les appels sont comptés au registre sans qu'aucune requête ne
+ * sorte : voir `enModeCompteur`.
  */
 
 const TENTATIVES = 20;
 
 /**
- * Assez de places pour que le plafond global n'intervienne pas — posées
- * au-dessus de ce que la journée a déjà pris. Le banc d'évaluation dépense
- * réellement sur la même journée UTC, et un plafond posé en absolu rétrécissait
- * donc à mesure qu'on s'en servait.
+ * Assez de places pour que le plafond global n'intervienne pas, posées
+ * au-dessus de ce que la journée a déjà pris : le banc d'évaluation dépense
+ * réellement sur la même journée UTC.
  */
 async function plafondLarge(): Promise<number> {
   return 200 + (await lireReservationsDuJour());
@@ -46,11 +41,8 @@ async function demandesPour(atomId: string): Promise<number> {
 }
 
 /**
- * Vingt modifications du même concept, en boucle, sans attendre.
- *
- * C'est le geste le plus banal du produit — corriger un concept mal découpé —
- * et rien ne le borne aujourd'hui. Les jobs mis en file sont ensuite exécutés
- * pour la seule chose qui compte : combien d'appels seraient partis.
+ * Vingt modifications du même concept, sans attendre. Les jobs mis en file
+ * sont ensuite exécutés pour compter les appels qui seraient partis.
  */
 export async function casModificationsEnBoucle(userId: string): Promise<void> {
   await viderLeCompte(userId);
@@ -93,14 +85,9 @@ export async function casModificationsEnBoucle(userId: string): Promise<void> {
 }
 
 /**
- * Le geste le plus normal du produit : déposer, voir un concept mal découpé, le
- * corriger dans la minute.
- *
- * Il tombait sous le plafond hebdomadaire, parce que la fenêtre partait de
- * n'importe quelle demande de questions — y compris celle du dépôt lui-même. La
- * correction retirait les questions et la réécriture attendait sept jours. La
- * fenêtre ne compte plus que les réécritures : le premier jeu de questions d'un
- * concept n'en est pas une, et la première correction est toujours servie.
+ * Déposer, voir un concept mal découpé, le corriger dans la minute. La fenêtre
+ * hebdomadaire ne compte que les réécritures : le premier jeu de questions n'en
+ * est pas une, donc la première correction est servie tout de suite.
  */
 export async function casCorrectionApresDepot(userId: string): Promise<void> {
   await viderLeCompte(userId);
@@ -166,14 +153,10 @@ export async function casCorrectionApresDepot(userId: string): Promise<void> {
 }
 
 /**
- * Ce qu'on fait d'une modification que le plafond refuse.
- *
- * Trois issues étaient possibles et une seule est honnête. Garder les anciennes
- * questions servirait des questions qui contredisent le texte. Refuser la
- * modification retiendrait une correction que la personne a demandée. Reste :
- * on accepte le texte, on retire les questions, et la demande attend sa date au
- * lieu d'être jetée — ce qui suppose qu'elle soit vraiment écrite, qu'elle ne
- * parte vraiment pas avant, et que l'écran le dise.
+ * Une modification que le plafond refuse : le texte est accepté, les anciennes
+ * questions (qui le contrediraient) sont retirées, et la demande attend sa
+ * date. On vérifie qu'elle est écrite, qu'elle ne part pas avant, et que
+ * l'écran le dit.
  */
 export async function casModificationReportee(userId: string, maintenant: Date): Promise<void> {
   await viderLeCompte(userId);
@@ -250,11 +233,8 @@ export async function casModificationReportee(userId: string, maintenant: Date):
 }
 
 /**
- * Le plafond hebdomadaire lui-même, sur le chemin qu'il couvre.
- *
- * `derniereDemande` lit n'importe quel job de questions, d'où qu'il vienne :
- * une modification compte donc comme une demande et gèle le seuil d'usure pour
- * la semaine. C'est le sens qu'on veut — reste à vérifier qu'il tient.
+ * Une modification compte comme une réécriture (`derniereReecriture`) et gèle
+ * donc le seuil d'usure pour la semaine.
  */
 export async function casUsureApresModification(userId: string, maintenant: Date): Promise<void> {
   await viderLeCompte(userId);
@@ -286,12 +266,8 @@ export async function casUsureApresModification(userId: string, maintenant: Date
 }
 
 /**
- * Le redécoupage en rafale.
- *
- * La limite de débit se lit sur les dépôts écrits dans la dernière minute. Un
- * redécoupage n'écrit pas de dépôt : il prend une place du jour, mais il ne se
- * voit pas dans la fenêtre courte. Reste à savoir combien d'extractions ça
- * permet d'acheter d'affilée, sans attendre une seconde.
+ * Le redécoupage en rafale. Il n'écrit pas de dépôt mais passe par
+ * `reserverDepot`, dont la fenêtre de débit doit l'arrêter comme un dépôt.
  */
 export async function casRedecoupageEnRafale(userId: string): Promise<void> {
   await viderLeCompte(userId);

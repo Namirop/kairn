@@ -4,14 +4,12 @@ import { cibleDuVraiOuFaux } from "@/lib/domain/vrai-ou-faux";
 import type { VariantFige } from "../fige";
 
 /**
- * Met en forme les variants bruts d'un lot avant qu'ils soient mesurés — même
- * traitement que le produit fait en base (options remises en ordre, cloze
- * dérivé) mais sans écrire nulle part. On produit ce que le juge de fidélité et
- * la mesure de radotage vont regarder, exactement dans la forme du figé.
+ * Met en forme les variants bruts d'un lot comme le produit le fait en base,
+ * sans rien écrire, dans la forme du figé que lisent le juge de fidélité et le
+ * radotage.
  *
- * La graine des tirages (position des options, cible du vrai/faux) est le texte
- * du concept — même choix que `execution.ts` du banc, pour qu'un rejeu compare
- * question par question.
+ * La graine des tirages est le texte du concept, comme dans `execution.ts`,
+ * pour qu'un rejeu compare question par question.
  */
 
 type VariantBrut = GenerateVariantsOutput["lots"][number]["variants"][number];

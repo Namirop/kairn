@@ -6,16 +6,11 @@ import type { Paire, Rapproche } from "./signaux";
 import type { SignalementsDuDepot } from "./signalements";
 
 /**
- * Le détail par dépôt de la section « Mesures ».
- *
- * Sorti de `rapport-de-mesures.ts` pour la même raison qu'ailleurs : ce qu'on
- * lit ici (« pour ce dépôt, telles phrases, tels concepts, tels verdicts »)
- * répond à une autre question que ce qu'on lit là (« pour tout le corpus, où
- * en est-on »). Le corps du rapport agrège, ce module isole.
+ * Le détail par dépôt de la section « Mesures » ; `rapport-de-mesures.ts`
+ * agrège le corpus.
  *
  * Chaque signalement porte ses deux textes en entier, jamais une référence à
- * une ligne, et le verdict du juge tombe juste en dessous. C'est la contrainte
- * qui gouverne la mise en forme.
+ * une ligne, avec le verdict du juge juste en dessous.
  */
 
 const EXTRAIT = 300;
@@ -134,11 +129,9 @@ function rendreLaQuestion(variant: VariantFige, verdict: VerdictFidelite | undef
 }
 
 /**
- * Le bloc « Fidélité » d'un dépôt. Les concepts qui portent au moins une
- * question **non soutenue** ou une **abstention** sont détaillés ; ceux dont
- * toutes les questions sont soutenues restent sous la ligne d'en-tête, sans
- * lister leurs quatre questions. Sur un corpus qui rend beaucoup de fidèles,
- * afficher chaque bonne question noierait les deux ou trois cas à regarder.
+ * Le bloc « Fidélité » d'un dépôt. Seuls les concepts qui portent une question
+ * non soutenue ou une abstention sont détaillés : lister les bonnes noierait
+ * les quelques cas à regarder.
  */
 function rendreLaFidelite(
   fidelite: VerdictsDuDepot["fidelite"],

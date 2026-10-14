@@ -4,15 +4,10 @@ import { lireSessionDuJour } from "@/lib/db/session-du-jour";
 import { record } from "./journal";
 
 /**
- * L'étanchéité de l'entraînement libre, vérifiée sur la base elle-même.
- *
- * C'est la garantie centrale des deux modes, et c'est une garantie négative :
- * on prouve qu'il **ne se passe rien**. Une relecture ne suffit pas — il
- * suffirait d'un champ ajouté un jour à l'écriture pour que l'entraînement
- * commence à déplacer des échéances sans que personne s'en aperçoive.
- *
- * On photographie donc l'Atom avant, on joue une série d'entraînement, et on
- * compare champ par champ.
+ * L'étanchéité de l'entraînement libre, vérifiée sur la base : une garantie
+ * négative, qu'un champ ajouté à l'écriture casserait en silence. On
+ * photographie l'Atom, on joue une série d'entraînement, et on compare champ
+ * par champ.
  */
 
 const JOUR_MS = 24 * 60 * 60 * 1000;
@@ -39,11 +34,9 @@ async function photographier(atomId: string) {
 }
 
 /**
- * Les champs qui ont bougé entre deux photos.
- *
- * La comparaison se fait sur les clés réellement présentes plutôt que sur une
- * liste écrite à côté : le jour où un champ de mémoire s'ajoute au modèle, il
- * entre dans `MEMOIRE` et se retrouve surveillé sans qu'on ait rien à penser.
+ * Les champs qui ont bougé entre deux photos. On compare les clés présentes
+ * dans la photo : un champ ajouté à `MEMOIRE` est surveillé sans autre
+ * changement.
  */
 function champsModifies(avant: object, apres: object): string[] {
   const suivant = new Map(Object.entries(apres));
@@ -92,8 +85,8 @@ async function conceptAvecQuatreQuestions(userId: string, libelle: string, due: 
 }
 
 /**
- * Un compte neuf : deux concepts, pas encore dus. La session n'a rien à servir,
- * et c'est exactement la situation qui fait exister l'entraînement.
+ * Deux concepts pas encore dus : la session n'a rien à servir, la situation où
+ * l'entraînement se propose.
  */
 export async function casEntrainementEtanche(userId: string, maintenant: Date): Promise<void> {
   const dansDixJours = new Date(maintenant.getTime() + 10 * JOUR_MS);
@@ -120,8 +113,7 @@ export async function casEntrainementEtanche(userId: string, maintenant: Date): 
     tour.map((question) => (question.atomId === premier ? "1" : "2")).join(""),
   );
 
-  // Une série qui accélère : en session, c'est exactement ce qui lève la carte
-  // « tu maîtrises ça ». Ici, elle ne doit rien lever du tout.
+  // Une série qui accélère : en session, elle lèverait la carte de maîtrise.
   let instant = maintenant;
 
   for (const [rang, question] of tour.entries()) {

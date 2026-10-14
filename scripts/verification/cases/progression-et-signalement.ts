@@ -10,14 +10,10 @@ import { fabriquerConcept } from "./abus-fabrique";
 import { record } from "./journal";
 
 /**
- * Ce que la phase 4 ajoute au moteur : la progression comptée, et la trace
- * qu'un signalement laisse.
- *
- * Deux garanties qui se cassent en silence. Une progression qui compterait
- * l'entraînement rouvrirait par la porte de service ce qu'on a fermé en 3.5 ; un
- * signalement qui disparaîtrait avec le concept effacerait exactement celui
- * qu'on voulait lire — supprimer le concept est le geste qui suit une question
- * fausse.
+ * La progression comptée et la trace d'un signalement, deux garanties qui se
+ * cassent en silence. L'entraînement ne doit rien compter ; un signalement
+ * doit survivre au concept, puisque supprimer le concept est le geste qui suit
+ * une question fausse.
  */
 
 const JOUR_MS = 24 * 60 * 60 * 1000;
@@ -61,8 +57,8 @@ export async function casProgressionComptee(userId: string, maintenant: Date): P
     `${apresUn?.xp} XP, série ${apresUn?.currentStreak}, niveau ${apresUn?.level}`,
   );
 
-  // Raté au passage précédent, retrouvé maintenant : c'est le seul endroit où le
-  // résultat compte, et il ne compte que pour récompenser d'être revenu.
+  // Raté puis retrouvé : le seul cas où le résultat compte, pour récompenser
+  // d'être revenu.
   const second = await fabriquerConcept(userId, { libelle: "Un concept qu'on rate puis retrouve" });
   await reviser(userId, second, "AGAIN", maintenant, 0);
   const avantRattrapage = await statsDe(userId);
@@ -96,8 +92,7 @@ export async function casProgressionComptee(userId: string, maintenant: Date): P
     `${apresEntrainement?.xp} XP et série ${apresEntrainement?.currentStreak}, inchangées`,
   );
 
-  // Le module de progression ne doit pas être atteignable depuis l'entraînement :
-  // la garantie la plus solide qu'on puisse lui donner est qu'il ne l'importe pas.
+  // La garantie la plus solide : l'entraînement n'importe pas la progression.
   const entrainement = readFileSync("lib/db/entrainement.ts", "utf8");
   record(
     "Progression — le chemin de l'entraînement ne connaît pas le compteur",
@@ -107,10 +102,8 @@ export async function casProgressionComptee(userId: string, maintenant: Date): P
 }
 
 /**
- * La série se compte en jours civils de l'utilisateur.
- *
- * Deux passages séparés de vingt minutes autour de minuit à Paris : ce sont deux
- * jours pour lui, un seul en UTC. C'est son calendrier qui décide.
+ * La série se compte en jours civils de l'utilisateur : vingt minutes autour
+ * de minuit à Paris font deux jours pour lui, un seul en UTC.
  */
 export async function casSerieAutourDeMinuit(userId: string): Promise<void> {
   await prisma.userStats.deleteMany({ where: { userId } });
@@ -130,8 +123,6 @@ export async function casSerieAutourDeMinuit(userId: string): Promise<void> {
     `${veille?.currentStreak} puis ${lendemain?.currentStreak}`,
   );
 
-  // Un troisième passage le même jour local ne rallonge rien : revenir suffit,
-  // mais revenir deux fois dans la journée ne compte pas double.
   await reviser(userId, concept, "GOOD", new Date("2026-03-11T09:00:00Z"), 2);
   const memeJour = await statsDe(userId);
 
@@ -179,7 +170,7 @@ export async function casSignalementTrace(userId: string): Promise<void> {
     `prompt ${avant?.promptVersion ?? "absent"}, modèle ${avant?.model ?? "absent"}`,
   );
 
-  // Le geste qui suit une question fausse, et celui qui emportait le signalement.
+  // Le geste qui suit une question fausse.
   await prisma.atom.delete({ where: { id: concept.atomId } });
   const apres = (await listerLesSignalements()).find((ligne) => ligne.id === avant?.id);
 
@@ -226,19 +217,15 @@ export function casAdministrationFermee(): void {
       : `échecs : ${rates.join(", ")}`,
   );
 
-  // La garde doit être sur la page elle-même, pas seulement dans le lien qui y
-  // mène : une URL se tape à la main.
-  // Chaque page du dossier, et pas seulement celle de tête : l'écran est
-  // devenu six pages, donc six occasions d'oublier la garde. Une page qui
-  // l'oublie ne casse rien, ne fait échouer aucun rendu, et s'ouvre à tout le
-  // monde.
+  // La garde doit être sur chaque page du dossier, pas dans le lien qui y mène
+  // (une URL se tape à la main). Une page qui l'oublie ne casse aucun rendu et
+  // s'ouvre à tout le monde.
   const internes = pagesDuDossier("app/(app)/admin").filter(
     (chemin) => !readFileSync(chemin, "utf8").includes("exigerUnAdministrateur"),
   );
 
-  // L'ancienne adresse ne passe pas par l'aide commune — elle renvoie au lieu
-  // d'afficher — mais elle doit se garder tout autant : un renvoi non gardé
-  // apprendrait à n'importe qui que l'écran existe, et à quelle adresse.
+  // L'ancienne adresse renvoie au lieu d'afficher, hors de l'aide commune, mais
+  // se garde aussi : un renvoi non gardé révélerait l'adresse de l'écran.
   const ancienne = readFileSync("app/(app)/signalements/page.tsx", "utf8");
   const ancienneNue = !(ancienne.includes("estAdministrateur") && ancienne.includes("notFound"));
 

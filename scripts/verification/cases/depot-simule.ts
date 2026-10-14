@@ -2,11 +2,10 @@ import { prisma } from "@/lib/db/client";
 import { runJob } from "@/lib/jobs/runner";
 
 /**
- * De quoi rejouer un dépôt hors requête HTTP.
- *
- * `after()` ne part pas en dehors d'une requête : les jobs restent en attente,
- * exactement comme quand un processus est recyclé. On les exécute donc à la
- * main, ce qui vérifie au passage que le cron de reprise a de quoi travailler.
+ * De quoi rejouer un dépôt hors requête HTTP. `after()` n'y part pas : les
+ * jobs restent en attente, comme après un processus recyclé, et s'exécutent à
+ * la main — ce qui vérifie au passage que le cron de reprise a de quoi
+ * travailler.
  */
 
 export const UTILISATEUR_DE_TEST = "verification-ingestion@cairn.test";
@@ -27,8 +26,7 @@ export async function utilisateurDeTest(): Promise<string> {
 
   const cree = await prisma.user.create({
     data: {
-      // C'est better-auth qui pose l'identifiant en temps normal ; ici, une
-      // valeur fixe suffit et rend le nettoyage évident.
+      // Fixe, à la place de celui de better-auth, pour un nettoyage évident.
       id: "verification-ingestion",
       email: UTILISATEUR_DE_TEST,
       name: "Vérification",
@@ -41,10 +39,8 @@ export async function utilisateurDeTest(): Promise<string> {
 }
 
 /**
- * Exécute les jobs en attente de ce dépôt, sauf les questions.
- *
- * Sert les cas qui éprouvent ce qui arrive aux questions : ils veulent le job
- * laissé en file, pour le lancer eux-mêmes dans les conditions qu'ils posent.
+ * Exécute les jobs en attente de ce dépôt, sauf les questions : les cas qui
+ * éprouvent les questions lancent ce job eux-mêmes, dans leurs conditions.
  */
 export async function executerJobsEnAttente(inputId: string): Promise<number> {
   const jobs = await prisma.generationJob.findMany({
@@ -57,10 +53,7 @@ export async function executerJobsEnAttente(inputId: string): Promise<number> {
   return jobs.length;
 }
 
-/**
- * Exécute tout ce qui attend, questions comprises — ce que fait `declencher()`
- * derrière une vraie requête. Hors requête, `after()` ne part pas.
- */
+/** Exécute tout ce qui attend, questions comprises, comme `declencher()` derrière une requête. */
 export async function executerToutLePipeline(inputId: string): Promise<number> {
   let executes = 0;
 
@@ -83,12 +76,8 @@ export async function executerToutLePipeline(inputId: string): Promise<number> {
 
 /**
  * Recule la fenêtre de débit, pour éprouver le quota de la période sans attendre
- * une minute entre deux dépôts.
- *
- * La fenêtre ne se lit plus sur les dépôts écrits : elle vit sur la ligne de
- * `DailyUsage`, parce qu'un compteur lu à part laissait passer tout ce qui
- * partait ensemble. C'est donc cette ligne qu'on vieillit. Les horodatages des
- * dépôts suivent, pour que le décor reste cohérent avec ce qu'on raconte.
+ * entre deux dépôts. La fenêtre vit sur la ligne `DailyUsage`, pas sur les
+ * dépôts : c'est elle qu'on vieillit, les dépôts suivent par cohérence.
  */
 export async function vieillirLesDepots(userId: string): Promise<void> {
   const passe = new Date(Date.now() - 10 * 60 * 1000);

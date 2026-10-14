@@ -6,18 +6,14 @@ import type { DepotDAssets, VariantDAssets } from "@/scripts/assets/fige";
 import { langueDuDepot } from "@/scripts/evaluation/corpus";
 
 /**
- * Transforme le figé d'assets en corpus de seed, avec un historique de révisions
- * simulé — sur le seul compte de démonstration, comme la consigne l'autorise.
+ * Transforme le figé d'assets en corpus de seed pour le compte de
+ * démonstration, avec un historique de révisions simulé.
  *
- * Rien n'est inventé au doigt : chaque historique est rejoué par ts-fsrs, et
- * l'état de l'Atom est **dérivé** de l'intervalle rendu et des réussites
- * d'affilée, par la vraie fonction du domaine `etatApresRevision`. Un concept
- * n'est donc consolidé que s'il l'aurait vraiment été.
- *
- * L'âge du dépôt corrèle avec l'état : les vieux dépôts portent des concepts
- * consolidés, les récents des concepts en apprentissage encore dus. Les jours de
- * révision récents sont couverts jour après jour, ce qui donne une série
- * honnête plutôt qu'un trou.
+ * L'état de l'Atom n'est jamais posé à la main : l'historique est rejoué par
+ * ts-fsrs et l'état dérivé par `etatApresRevision`, donc un concept n'est
+ * consolidé que s'il l'aurait vraiment été. Les vieux dépôts portent les
+ * concepts mûrs, et les jours récents sont couverts un à un pour que la série
+ * soit continue.
  */
 
 type Famille = "CONSOLIDE" | "REVISION" | "APPRENTISSAGE";
@@ -57,8 +53,8 @@ function historique(famille: Famille, anchor: number, recent: number): SeedRevie
   }
 
   if (famille === "REVISION") {
-    // Deux réussites seulement : sous le seuil de consolidation, donc l'atome
-    // reste en REVIEWING même quand l'intervalle dépasse trois semaines.
+    // Deux réussites, sous `REUSSITES_POUR_CONSOLIDER` : l'Atom reste en
+    // REVIEWING même quand l'intervalle dépasse trois semaines.
     return [jour(anchor, "GOOD"), jour(recent, "GOOD")];
   }
 
@@ -87,7 +83,7 @@ function versSeedVariant(v: VariantDAssets): SeedVariant {
   return payload ? { ...base, payload } : base;
 }
 
-/** L'état dérivé de l'historique rejoué — jamais posé à la main. */
+/** L'état dérivé de l'historique rejoué. */
 function etatDe(history: SeedReview[], archive: boolean, now: Date): AtomState {
   if (archive) return "ARCHIVED";
 

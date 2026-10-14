@@ -11,13 +11,10 @@ import { executerToutLePipeline, formulaire } from "./depot-simule";
 import { record } from "./journal";
 
 /**
- * `AI_DAILY_CALL_CAP` est global au produit : il protège le budget, et il fait
- * de chaque utilisateur le voisin de tous les autres.
- *
- * Ce cas décrit ce qui arrive au second quand le premier a tout pris — quel
- * état, quel message, et si son dépôt est remis en file ou perdu. Le plafond
- * est ramené à une seule place, et l'émission ne va nulle part : voir
- * `enModeCompteur`.
+ * `AI_DAILY_CALL_CAP` est global : il protège le budget, et fait de chaque
+ * compte le voisin de tous les autres. Ces cas disent ce qui arrive au second
+ * quand le premier a tout pris. Le plafond est ramené à une place et
+ * l'émission ne va nulle part (voir `enModeCompteur`).
  */
 
 const FUSEAU = "Europe/Paris";
@@ -83,8 +80,8 @@ export async function casVoisinBloquant(premier: string, second: string): Promis
       jobs.map((job) => `${job.attempts} tentative(s)`).join(", "),
     );
 
-    // Sa place reste prise, et c'est juste : son travail n'est pas perdu, il est
-    // à faire. Le remboursement est pour ce qui ne se fera jamais.
+    // Sa place reste prise : son travail est à faire, pas perdu. Le
+    // remboursement est pour ce qui ne se fera jamais.
     record(
       "Plafond global — le voisin garde sa place puisqu'il garde son travail",
       usage.depots === 1,
@@ -100,12 +97,9 @@ export async function casVoisinBloquant(premier: string, second: string): Promis
 }
 
 /**
- * La réserve par compte, éprouvée seule.
- *
- * C'est le verrou qui manquait : le plafond global protège le budget, il ne
- * protège personne de son voisin. Un compte qui prend sa part et s'arrête laisse
- * la journée ouverte pour les autres — c'est toute la différence entre un
- * plafond de dépense et un déni de service.
+ * La part par compte, éprouvée seule : le plafond global protège le budget, pas
+ * un compte de son voisin. Un compte arrêté à sa part laisse la journée ouverte
+ * aux autres.
  */
 export async function casPartDuCompte(gourmand: string, voisin: string): Promise<void> {
   await viderLeCompte(gourmand);
@@ -115,19 +109,15 @@ export async function casPartDuCompte(gourmand: string, voisin: string): Promise
 
   process.env.AI_DAILY_CALL_CAP_PAR_COMPTE = String(partDeCompte);
 
-  // Le compteur du jour n'est pas à zéro : le banc d'évaluation dépense pour de
-  // vrai sur la même journée UTC, et ce qu'il a pris compte dans le plafond
-  // global. Un plafond « large » posé en absolu devenait donc étroit — puis
-  // dépassé — au fil de la journée, et ce cas échouait pour une raison qui
-  // n'avait rien à voir avec ce qu'il éprouve. Il se pose au-dessus de ce qui
-  // est déjà pris. Celui de `casPlafondGlobal` reste absolu, lui : il veut
-  // précisément que la journée soit pleine.
+  // Posé au-dessus de ce qui est déjà pris : le banc d'évaluation dépense sur
+  // la même journée UTC, et un plafond absolu finirait dépassé pour une raison
+  // étrangère au cas. Celui de `casVoisinBloquant` reste absolu : il veut la
+  // journée pleine.
   const large = 50 + (await lireReservationsDuJour());
 
   try {
     await enModeCompteur(large, async () => {
-      // La même raison : ce qui se vérifie ici est ce que ce bloc ajoute au
-      // compteur, pas la valeur qu'il affiche.
+      // Pour la même raison, on mesure ce que ce bloc ajoute au compteur.
       const avant = await lireReservationsDuJour();
       const refus: string[] = [];
 
@@ -170,8 +160,8 @@ export async function casPartDuCompte(gourmand: string, voisin: string): Promise
           messages: [{ role: "user", content: PARAGRAPHE }],
         });
       } catch (erreur) {
-        // L'émission échoue faute de clé, c'est le mode compteur. Ce qui compte
-        // est qu'elle ait été autorisée à partir.
+        // En mode compteur l'émission échoue faute de clé ; seul compte qu'elle
+        // ait été autorisée à partir.
         voisinServi = !(erreur instanceof AIUserQuotaError) && !(erreur instanceof AIQuotaError);
       }
 

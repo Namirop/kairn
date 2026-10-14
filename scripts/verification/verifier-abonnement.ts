@@ -1,22 +1,17 @@
 import "dotenv/config";
-// Import de type seulement : effacé à la compilation, donc il ne charge rien
-// avant que l'environnement soit posé, contrairement aux imports dynamiques
-// qui suivent.
+// Import de type seulement : effacé à la compilation, il ne charge rien avant
+// que l'environnement soit posé (les autres modules s'importent en dynamique).
 import type { StatutStripe } from "@/lib/domain/rapport-de-stripe";
 import { conclure, record } from "./cases/journal";
 
 /**
  * Preuve que l'abonnement ne se laisse pas remonter le temps.
  *
- * Stripe ne garantit pas l'ordre d'arrivée de ses webhooks et les rejoue :
- * `lib/domain/rapport-de-stripe.ts` énonce la règle, et Vitest prouve qu'elle
- * est juste. Ce qu'aucun test unitaire ne peut prouver, c'est qu'elle tient
- * quand deux événements sont traités **en même temps** — la garantie n'est plus
- * dans le TypeScript à ce moment-là, elle est dans le `where` d'une instruction
- * Postgres. Comme le plafond concurrent, ça demande une vraie base.
- *
- * L'enjeu est un mois payé qui disparaît sans un bruit : ni erreur, ni
- * réclamation, juste un compte retombé au plafond gratuit.
+ * Stripe ne garantit pas l'ordre de ses webhooks et les rejoue. La règle vit
+ * dans `lib/domain/rapport-de-stripe.ts` et Vitest la prouve ; quand deux
+ * événements sont traités en même temps, la garantie est dans le `where` d'une
+ * instruction Postgres, et ça demande une vraie base. L'enjeu : un mois payé qui
+ * retombe en silence au plafond gratuit.
  *
  *   npm run verifier:abonnement
  */
@@ -40,13 +35,8 @@ async function main(): Promise<void> {
   const { lireLOffreDuCompte } = await import("@/lib/db/abonnement");
   const { compteDuClientStripe } = await import("@/lib/db/ecriture-de-labonnement");
   const { etatDepuisStripe } = await import("@/lib/domain/rapport-de-stripe");
-  // Les deux plafonds viennent de la règle, ils ne se recopient pas.
-  //
-  // Ils étaient écrits en clair plus bas — trente et trois cents —, et ils ont
-  // été portés à cinquante et cinq cents le 04/09/2026 sans que ce fichier
-  // bouge. Deux vérifications sur huit échouaient donc depuis, en annonçant un
-  // défaut qui n'existait pas : un script de contrôle qui crie faux est un
-  // script qu'on cesse de lancer, et c'est plus grave que de ne pas l'avoir.
+  // Les plafonds viennent de la règle et ne se recopient pas : recopiés, ils
+  // finiraient par faire échouer la vérification sur un défaut inexistant.
   const { PLAFOND_GRATUIT, PLAFOND_PAYANT } = await import("@/lib/domain/plafond-du-plan");
 
   await effacerComptes([COMPTE]);
@@ -120,11 +110,9 @@ async function main(): Promise<void> {
     );
 
     // ---- Le voisin de palier ----------------------------------------------
-    // Un endpoint webhook écoute un **compte** Stripe, pas un produit. Si un
-    // autre projet partage un jour ce compte, ses abonnements arriveront ici.
-    // Le filtre n'est pas une métadonnée qu'on choisit de croire : c'est une
-    // jointure sur notre propre table, qui ne contient que des clients que
-    // Kairn a créés lui-même.
+    // Un endpoint webhook écoute un compte Stripe, pas un produit : les
+    // abonnements d'un autre projet du même compte arriveraient ici. Le filtre
+    // est une jointure sur notre table, pas une métadonnée.
     const etranger = await compteDuClientStripe("cus_dun_autre_produit");
     const notre = await compteDuClientStripe(CLIENT);
 
@@ -135,9 +123,8 @@ async function main(): Promise<void> {
     );
 
     // ---- La course ---------------------------------------------------------
-    // Le vrai enjeu : deux webhooks traités ensemble. Les deux lisent la même
-    // ancienne valeur avant d'écrire, et sans le verrou dans le `where`, le plus
-    // vieux gagne une fois sur deux.
+    // Deux webhooks traités ensemble lisent la même ancienne valeur : sans le
+    // verrou dans le `where`, le plus vieux gagne une fois sur deux.
     let coursesPerdues = 0;
 
     for (let passe = 0; passe < 20; passe += 1) {

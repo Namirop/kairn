@@ -21,14 +21,10 @@ import { executerToutLePipeline } from "./depot-simule";
 import { record } from "./journal";
 
 /**
- * Le dépôt avant compte, éprouvé là où il coûte de l'argent.
- *
- * C'est le seul endroit du produit qui dépense sans compte identifié, donc le
- * seul où une faille se paie directement. Trois choses doivent tenir : deux
- * essais par visite et par tranche de vingt-quatre heures, une poignée de
- * visites par adresse, et **un seul concept questionné** — si tous les concepts
- * recevaient leurs questions, un visiteur coûterait cinq fois plus et
- * l'ouverture ne serait plus finançable.
+ * Le dépôt avant compte, seul endroit du produit qui dépense sans compte
+ * identifié. Trois choses doivent tenir : deux essais par visite et par tranche
+ * de vingt-quatre heures, une poignée de visites par adresse, et un seul
+ * concept questionné — sinon un visiteur coûterait cinq fois plus.
  */
 
 const TEXTE = `Une requête HTTP conditionnelle envoie \`If-None-Match\` avec l'étiquette reçue à la
@@ -61,16 +57,9 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
     `${vu?.concepts.length ?? 0} concept(s) affichés`,
   );
 
-  /*
-    Le point qui rend l'ouverture finançable, et il a bougé.
-
-    L'essai s'arrêtait aux concepts, et ce cas vérifiait qu'aucune question
-    n'était écrite. Depuis que la landing montre un échantillon, **un** concept
-    reçoit son lot de quatre — c'est un appel de plus par visiteur, et pas cinq.
-    L'assertion avait gardé son ancienne forme : elle était fausse depuis, et
-    c'est précisément le genre de chose qu'un script de vérification est là pour
-    dire au lieu de la laisser passer.
-  */
+  // Le point qui rend l'ouverture finançable : la landing montre un échantillon,
+  // donc un seul concept reçoit ses quatre questions — un appel de plus par
+  // visiteur, pas cinq.
   const questions = await prisma.variant.count({
     where: { atom: { anonymousSessionId: essai.sessionId } },
   });
@@ -128,9 +117,8 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
     `${repris.length} dépôt(s) repris, ${malRanges} concept(s) hors de leur dépôt`,
   );
 
-  // Ce que l'essai a rendu doit entrer au compteur du mois. Sans ça, la limite
-  // annoncée cesse d'être la limite réelle : un compte neuf démarrait avec ses
-  // concepts d'essai en plus de ses trente.
+  // Ce que l'essai a rendu entre au compteur du mois, sinon un compte neuf
+  // aurait ses concepts d'essai en plus de son plafond.
   const avant = await lireUsageDeLaPeriode(userId, "UTC");
   await compterLaVisiteReprise(userId, "UTC", conceptsRepris);
   const apres = await lireUsageDeLaPeriode(userId, "UTC");
@@ -160,11 +148,8 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
 }
 
 /**
- * L'essai qui ne donne rien laisse une seconde chance, et une seule.
- *
- * Sans elle, quelqu'un qui colle le mauvais texte du premier coup se retrouve
- * devant une page morte : sa visite est consommée, il n'a rien vu du produit, et
- * la seule page qui convertit devient une impasse.
+ * L'essai qui ne donne rien laisse une seconde chance, et une seule : sinon
+ * qui colle le mauvais texte du premier coup tombe sur une page morte.
  */
 export async function casSecondeChance(): Promise<void> {
   const adresse = "203.0.113.55";
@@ -208,12 +193,8 @@ export async function casSecondeChance(): Promise<void> {
 }
 
 /**
- * Une panne ne se facture pas au visiteur.
- *
- * C'est la règle centrale du chemin anonyme, et celle qui coûte le plus cher à
- * se tromper : le produit se casse, puis ferme la porte derrière lui, sur la
- * seule page qui convertit. Elle passait la relecture — deux compteurs, une
- * soustraction, ça a l'air juste — donc elle s'éprouve ici.
+ * Une panne ne se facture pas au visiteur : sinon le produit se casse puis
+ * ferme la porte derrière lui, sur la page qui convertit.
  */
 export async function casPanneNeConsommePasDEssai(): Promise<void> {
   const adresse = "203.0.113.71";
@@ -238,8 +219,8 @@ export async function casPanneNeConsommePasDEssai(): Promise<void> {
     }`,
   );
 
-  // Les deux essais dus doivent rester entièrement dus : c'est ce qu'un plafond
-  // *total* ne tenait pas, puisque la panne y mordait sur la même réserve.
+  // Les essais dus restent entièrement dus : un plafond total ne le tiendrait
+  // pas, la panne mordant sur la même réserve.
   let accordes = 0;
 
   for (let tour = 0; tour < ESSAIS_PAR_VISITE + 1; tour += 1) {
@@ -260,13 +241,8 @@ export async function casPanneNeConsommePasDEssai(): Promise<void> {
 }
 
 /**
- * Les pannes tolérées ont elles aussi une fin.
- *
- * Sans ce plafond, une panne systématique rendrait la visite infinie : chaque
- * reprise repart pour une extraction, et seule la part journalière du public
- * finirait par arrêter la page. On vérifie aussi **ce qui est dit** au moment de
- * fermer : le message des concepts à garder, servi à quelqu'un qui n'en a aucun,
- * était le vrai défaut de ce chemin.
+ * Les pannes tolérées ont une fin, sinon une panne systématique rendrait la
+ * visite infinie. On vérifie aussi ce que dit le refus : il désigne la panne.
  */
 export async function casPlafondDesPannes(): Promise<void> {
   const adresse = "203.0.113.72";
@@ -309,13 +285,9 @@ export async function casPlafondDesPannes(): Promise<void> {
 }
 
 /**
- * Le second essai s'affiche, et c'est le second qu'on voit.
- *
- * L'écran clé son interrogation sur l'identifiant du dépôt. Tant qu'il la clait
- * sur la session — la même d'un essai à l'autre —, le second essai tournait,
- * coûtait, et n'apparaissait jamais. Ce qui suit vérifie le contrat côté serveur :
- * après un rejet puis un succès sur la même visite, c'est le dépôt **récent**
- * qu'on lit.
+ * Après un rejet puis un succès sur la même visite, c'est le dépôt récent
+ * qu'on lit : la session est la même d'un essai à l'autre, seul l'identifiant
+ * du dépôt distingue le second.
  */
 export async function casRepriseApresRejet(): Promise<void> {
   const adresse = "203.0.113.73";
@@ -351,12 +323,8 @@ export async function casRepriseApresRejet(): Promise<void> {
 }
 
 /**
- * Deux onglets partent ensemble, et les deux passent.
- *
- * Le second onglet porte le même cookie, et `sessionDisponible` dit oui tant
- * qu'il reste des essais à la visite : deux partent, deux imputables sont
- * consommés d'un coup. C'est acceptable — la visite reste dans son budget — mais
- * ça doit être **constaté** plutôt que découvert le jour où quelqu'un s'en sert.
+ * Deux onglets partent ensemble avec le même cookie, et les deux passent :
+ * acceptable, la visite reste dans son budget, mais constaté ici.
  */
 export async function casDeuxOngletsSimultanes(): Promise<void> {
   const adresse = "203.0.113.74";
@@ -383,18 +351,9 @@ export async function casDeuxOngletsSimultanes(): Promise<void> {
 }
 
 /**
- * La visite se rouvre le lendemain, sans jamais changer de cookie.
- *
- * C'est la règle qui permet de redéposer, et elle a deux moitiés qui doivent
- * tenir ensemble. La première : deux essais épuisés ferment vraiment la porte,
- * sinon la landing devient un compte gratuit. La seconde, moins évidente : ce
- * qui se rouvre est **la même visite**, pas une neuve.
- *
- * Le second point est celui qui coûterait cher à rater. La reprise au compte se
- * fait par l'identifiant du cookie ; ouvrir une visite neuve au retour laisserait
- * la précédente derrière elle, avec ses concepts, que le cron effacerait sept
- * jours plus tard sans que personne les ait jamais réclamés. On vérifie donc que
- * les dépôts d'hier et d'aujourd'hui partent au compte **ensemble**.
+ * Deux essais épuisés ferment la porte, et le lendemain c'est la même visite
+ * qui se rouvre. La reprise au compte passe par l'identifiant du cookie : une
+ * visite neuve laisserait la précédente au cron d'oubli, avec ses concepts.
  */
 export async function casReouvertureLeLendemain(userId: string): Promise<void> {
   const adresse = "203.0.113.88";

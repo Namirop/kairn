@@ -7,12 +7,10 @@ import { ajouterPassages, fabriquerConcept, viderLeCompte } from "./abus-fabriqu
 import { record } from "./journal";
 
 /**
- * Le cycle de vie d'un concept, éprouvé là où il coûte de se tromper.
- *
- * L'archivage par intervalle est une étiquette, pas une décision : un concept
- * bien su qui sortirait du cycle pour de bon contredirait la thèse du produit —
- * on croit savoir, et on oublie. Ce qui suit vérifie que l'étiquette n'exclut
- * rien de plus que ce que l'utilisateur a déclaré.
+ * Le cycle de vie d'un concept. L'archivage par intervalle est une étiquette,
+ * pas une sortie : un concept bien su qui quitterait le cycle contredirait le
+ * produit — on croit savoir, et on oublie. Ces cas vérifient que l'étiquette
+ * n'exclut rien de plus que ce que l'utilisateur a déclaré.
  */
 
 const JOUR_MS = 24 * 60 * 60 * 1000;

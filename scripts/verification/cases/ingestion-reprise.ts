@@ -5,12 +5,9 @@ import { executerJobsEnAttente, formulaire, libererLaJournee } from "./depot-sim
 import { record } from "./journal";
 
 /**
- * Ce qui se passe quand une étape n'aboutit pas.
- *
- * Deux règles à tenir. Le découpage a coûté un appel : ses concepts restent,
- * quoi qu'il arrive ensuite — un dépôt sans ses questions est incomplet, pas
- * perdu. Et un dépôt cesse toujours d'annoncer un travail en cours : aucune
- * étape ne doit pouvoir le laisser tourner indéfiniment.
+ * Quand une étape n'aboutit pas. Deux règles : les concepts d'un découpage
+ * payé restent, quoi qu'il arrive ensuite ; et aucun dépôt ne reste à annoncer
+ * un travail en cours.
  */
 
 const TEXTE = `Une requête HTTP conditionnelle envoie \`If-None-Match\` avec l'étiquette reçue à la
@@ -69,9 +66,8 @@ export async function casDecoupageImpossible(userId: string): Promise<void> {
 }
 
 /**
- * La lecture d'une capture n'aboutit pas — l'appel lève au lieu de rendre un
- * verdict. Le chemin d'erreur doit effacer les octets comme le fait le chemin
- * qui réussit : c'est précisément là qu'une capture pourrait rester en base.
+ * La lecture d'une capture lève. Le chemin d'erreur doit effacer les octets
+ * comme le chemin qui réussit : c'est là qu'une capture resterait en base.
  */
 export async function casLectureImpossible(userId: string, image: File): Promise<void> {
   await libererLaJournee(userId);
@@ -106,9 +102,8 @@ export async function casLectureImpossible(userId: string, image: File): Promise
  * Le job de questions échoue pour de bon. Les questions manquent, les concepts
  * restent, et le dépôt cesse d'annoncer un travail en cours.
  *
- * L'échec est provoqué en vidant le groupe du job de ses concepts : c'est la
- * seule panne dont on sache qu'elle se reproduira à l'identique, donc la seule
- * qui éprouve la fin de course plutôt qu'une reprise.
+ * L'échec est provoqué en pointant le job vers un concept absent : une panne
+ * qui se reproduit à l'identique éprouve la fin de course, pas une reprise.
  */
 export async function casEchecPartiel(userId: string): Promise<void> {
   const inputId = await depotAvecConcepts(userId, "verif-echec-partiel");

@@ -6,14 +6,13 @@ appliquerCapDuBanc();
 /**
  * Fige les vraies sorties du pipeline pour les sujets de démonstration.
  *
- * Il réutilise `evaluerDepot` du banc — même extraction, même génération, par le
- * seul point d'entrée `callAI` — et n'écrit rien dans les tables de
- * l'application. Le résultat va dans un figé d'assets versionné : une fois posé,
- * le seed et les captures ne repayent jamais.
+ * Réutilise `evaluerDepot` du banc (même chaîne, via `callAI`) et n'écrit rien
+ * dans les tables de l'application. Le résultat va dans un figé d'assets
+ * versionné : le seed et les captures ne repayent jamais.
  *
- * C'est le seul script d'assets qui dépense. Il exige `MOCK_AI=false` et
- * `AI_ENABLED=true`, plafonne les appels par `BANC_DAILY_CALL_CAP`, annonce ce
- * qu'il va faire, et ne part qu'à `--emettre` :
+ * Seul script d'assets qui dépense. Il exige `MOCK_AI=false` et
+ * `AI_ENABLED=true`, plafonne les appels par `BANC_DAILY_CALL_CAP`, annonce son
+ * plan, et ne part qu'à `--emettre` :
  *
  *   BANC_DAILY_CALL_CAP=60 MOCK_AI=false npm run assets:figer               # le plan
  *   BANC_DAILY_CALL_CAP=60 MOCK_AI=false npm run assets:figer -- --emettre  # la dépense

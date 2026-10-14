@@ -3,12 +3,11 @@ import { REFERENCE } from "../openrouter/modeles";
 import type { ScoreDeColonneQuestions, ScoreDepotQuestions } from "./execution-questions";
 
 /**
- * Rendu aveuglé A/B du rapport de campagne 2 — mêmes lignes que la campagne 1
- * (une par dépôt) mais mesures différentes : fidélité (juge Haiku), radotage
- * intra/inter (mesure géo), diversité des formats, cible vrai/faux respectée.
+ * Le rapport aveuglé A/B de la campagne 2, une ligne par dépôt : fidélité,
+ * radotage, diversité des formats, cible vrai ou faux.
  *
- * L'appelant décide de l'étiquetage A/B et garde la correspondance en local.
- * Cette fois, elle **ne quitte pas le dépôt** : Fable ne la reçoit pas.
+ * L'appelant choisit l'étiquetage ; la correspondance reste locale et n'est
+ * jamais transmise avec le rapport, sinon l'aveugle tombe.
  */
 
 export type Etiquette = "A" | "B";

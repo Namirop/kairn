@@ -4,16 +4,12 @@ import type { AiImagePart } from "@/lib/ai/message";
 import type { Depot } from "@/scripts/evaluation/corpus";
 
 /**
- * Les sujets de démonstration, calqués sur les contenus de Romain.
+ * Les sujets de démonstration. Seul le dépôt est rédigé : les concepts et les
+ * questions sortent du vrai pipeline, figés par `figer-les-sujets.ts`.
  *
- * Chaque sujet est un Input — du texte qu'on colle, ou une capture qu'on joint.
- * Le contenu est rédigé (c'est ce qu'un utilisateur dépose) ; les concepts et
- * les questions, eux, ne le sont jamais : ils sortent du vrai pipeline, figés
- * une fois par `figer-les-sujets.ts`.
- *
- * Les textes sont factuels à dessein : un concept marqué douteux ne part pas en
- * génération. Les répliques de séries sont donc cadrées comme de l'apprentissage
- * de langue — ce que l'expression signifie —, pas comme de la fiction.
+ * Les textes sont factuels à dessein, un concept douteux ne partant pas en
+ * génération : les répliques de séries sont cadrées comme de l'apprentissage de
+ * langue, pas comme de la fiction.
  */
 
 export type Sujet = {
@@ -62,11 +58,9 @@ export const SUJETS: Sujet[] = [
   texte("cours-histoire", "Cours d'histoire", "cours-histoire.txt"),
   texte("reponse-assistant", "Réponse d'assistant collée", "reponse-assistant.txt"),
   texte("article-presse", "Article de presse", "article-presse.txt"),
-  // Une capture d'assistant reconstituée : elle exerce l'OCR et sert le dépôt
-  // « avec une capture d'écran jointe ». Réutilisée du corpus du banc.
+  // Une capture reconstituée, reprise du corpus du banc, pour exercer l'OCR.
   image("capture-assistant", "Capture d'écran jointe", "07-capture-assistant.png", "image/png"),
-  // Le seul sujet anglais : un cours collé par quelqu'un qui révise en anglais,
-  // pour les captures de l'interface anglaise.
+  // Le seul sujet anglais, pour les captures de l'interface anglaise.
   texte("cours-biologie", "Biology class", "cours-biologie.en.txt"),
 ];
 

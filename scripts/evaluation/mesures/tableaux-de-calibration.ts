@@ -3,12 +3,8 @@ import type { MesuresDuDepot } from "./signaux";
 
 /**
  * Les deux tableaux du rapport de calibration : la distribution de chaque
- * signal, puis ce que chaque dépôt donne.
- *
- * Séparés du reste du rapport parce qu'ils répondent à une autre question. Les
- * listes triées servent à juger un cas ; ces tableaux-là servent à placer un
- * plancher et à voir, d'un passage au suivant, si une modification de prompt
- * améliore ou dégrade.
+ * signal, puis ce que chaque dépôt donne. Ils servent à placer un plancher et
+ * à comparer deux passages, là où les listes triées jugent un cas.
  */
 
 function proximite(valeur: number): string {
@@ -24,14 +20,9 @@ function ouTiret(valeur: number | null): string {
 }
 
 /**
- * Les déciles de chaque signal, tous dépôts confondus.
- *
- * C'est la ligne qu'on lit pour poser un plancher. La médiane dit où se tient
- * le gros de la distribution ; un seuil, lui, se place dans la queue, et il
- * faut voir où elle commence pour ne pas la couper au hasard.
- *
- * Agréger des distances entre dépôts n'aurait aucun sens s'il s'agissait de les
- * comparer — c'est une distribution qu'on regarde ici, pas un classement.
+ * Les déciles de chaque signal, tous dépôts confondus : un plancher se place
+ * dans la queue, et il faut voir où elle commence. On agrège pour lire une
+ * distribution, pas pour comparer des dépôts entre eux.
  */
 export function rendreLesDeciles(mesures: MesuresDuDepot[]): string[] {
   const series: [string, number[]][] = [

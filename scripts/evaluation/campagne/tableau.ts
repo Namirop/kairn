@@ -3,13 +3,10 @@ import { REFERENCE } from "../openrouter/modeles";
 import type { ScoreDeColonne, ScoreDepot } from "./execution";
 
 /**
- * Le rendu aveuglé du tableau de campagne — colonnes A, B, C, D pour les
- * challengers, plus Sonnet en référence (déjà payée, non rejouée). Aucun nom
- * de challenger n'apparaît : l'appelant décide de l'ordre d'étiquetage et
- * garde la correspondance dans un fichier séparé, hors du rapport.
- *
- * Le rapport et la correspondance sortent volontairement de la même fonction
- * — c'est la seule garantie que l'ordre A/B/C/D est le même dans les deux.
+ * Le rendu aveuglé du tableau de campagne : colonnes A à D pour les
+ * challengers, Sonnet en référence (déjà payée, non rejouée). Aucun nom de
+ * challenger dans le rapport ; la correspondance sort de ce même module, depuis
+ * la même liste étiquetée, pour que l'ordre A/B/C/D soit le même des deux côtés.
  */
 
 export type Etiquette = "A" | "B" | "C" | "D";
@@ -19,10 +16,7 @@ export type EtiqueteesAvecScore = {
   score: ScoreDeColonne;
 }[];
 
-/**
- * La ligne référence Sonnet — comptée depuis le figé et ses verdicts existants.
- * Pas de facture (colonne déjà payée), mais tous les autres compteurs.
- */
+/** La référence Sonnet, comptée depuis le figé et ses verdicts : pas de facture. */
 export type ReferenceSonnet = {
   depots: ScoreDepot[];
 };

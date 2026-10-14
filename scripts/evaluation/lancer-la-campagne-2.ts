@@ -28,27 +28,16 @@ import { verifierLeListing } from "./openrouter/verification";
 import type { Vecteur } from "./mesures/espace";
 
 /**
- * **Ce script n'a plus de commande dans `package.json`.** Son chantier est clos ;
- * il se relance à la main, et le fichier reste pour ça. Voir `docs/outillage.md`,
- * « Les commandes retirées ».
- */
-
-/**
- * L'émission de la campagne 2 — les deux finalistes désignés à l'arrêt 2
- * (Gemini 3.7 Flash + GPT-5.6 Luna) génèrent leurs questions sur les concepts
- * figés du 11h58, Haiku via OpenRouter juge la fidélité, et le rapport aveuglé
- * A/B part à Fable pour l'arrêt 3.
+ * L'émission de la campagne 2 (close, sans commande : voir `docs/outillage.md`,
+ * « Les commandes retirées »). Les deux finalistes génèrent leurs questions sur
+ * les concepts du dernier figé, `JUGE_PRINCIPAL` juge la fidélité, et le rapport
+ * aveuglé A/B part à l'arbitre. La correspondance des étiquettes reste locale.
  *
- * **La correspondance ne quitte pas le dépôt** cette fois (consigne Fable,
- * 2026-08-24). Elle reste écrite localement pour la reproductibilité.
- *
- * Trois garde-fous :
- * 1. `--emettre` obligatoire, sans quoi le script se contente du plan à sec
- *    (préférer `npx tsx scripts/evaluation/planifier-la-campagne-2.ts` pour la vue chiffrée seule).
- * 2. Garde-fou de dérive **2×** appliqué séparément à génération et fidélité
- *    (voir `passerParColonneQuestions` + mémoire `garde-fou-derive-2x`).
- * 3. Cache d'embeddings Voyage réutilisé pour les questions Sonnet déjà
- *    plongées au corpus.
+ * Garde-fous de dépense :
+ * 1. sans `--emettre`, plan à sec seulement ;
+ * 2. dérive 2× appliquée séparément à génération et fidélité
+ *    (`passerParColonneQuestions`) ;
+ * 3. cache d'embeddings réutilisé pour les questions de référence déjà plongées.
  */
 
 const RAPPORTS = join(import.meta.dirname, "rapports", "campagne");
@@ -128,7 +117,8 @@ async function main(): Promise<void> {
     return;
   }
 
-  // 4. Étiqueter A/B et écrire la correspondance immédiatement (locale).
+  // 4. Étiqueter A/B. La correspondance s'écrit dès le tirage, aléatoire : une
+  //    interruption ne permettrait pas de le retrouver.
   const emisA = new Date();
   const etiquetees = melangerEtiquettes(finalistes());
   const horodatage = emisA.toISOString().slice(0, 16).replace("T", "-").replace(":", "h");
@@ -171,8 +161,7 @@ async function main(): Promise<void> {
     );
   }
 
-  // 6. Référence Sonnet : mesures géo recalculées + fidélité lue du cache.
-  //    Une passe de plongée sur toutes les questions Sonnet (cache Voyage utilisé).
+  // 6. Référence Sonnet : mesures géométriques recalculées, fidélité lue du cache.
   const textesRef: string[] = [];
   for (const depot of fige.depots) {
     for (const concept of conceptsAQuestionner(depot.concepts, depot.nature)) {

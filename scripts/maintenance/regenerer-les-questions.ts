@@ -4,22 +4,15 @@ import { demanderDesQuestions } from "@/lib/db/demande-de-questions";
 import { conclure, record } from "../verification/cases/journal";
 
 /**
- * Réécrire les questions déjà en base sous un prompt qui a changé.
+ * Réécrire les questions déjà en base après un changement de prompt, sans
+ * attendre que l'usure les renouvelle une à une.
  *
- * Une question porte la version du prompt qui l'a écrite, et une correction de
- * prompt ne touche que ce qui sera généré ensuite. Le stock, lui, garde ses
- * formulations — parfois pendant des mois, puisqu'une question ne se réécrit
- * qu'à l'usure. Ce script sert le jour où l'on ne veut pas attendre.
+ * Passe par `demanderDesQuestions`, le chemin de production, et ses garde-fous :
+ * une place hebdomadaire par concept, pas de seconde demande en file, anciennes
+ * questions retirées seulement à l'arrivée des nouvelles, jamais supprimées (les
+ * passages passés les citent).
  *
- * **Il ne fabrique aucun chemin parallèle.** Il appelle `demanderDesQuestions`,
- * celui de la production, qui porte les garde-fous : une place hebdomadaire par
- * concept, pas de seconde demande pour un concept déjà en file, et un job qui
- * retire les anciennes questions **au moment** où les nouvelles arrivent, jamais
- * avant. Rien n'est supprimé : les passages passés citent les anciennes
- * formulations, et la planification vit sur le concept, pas sur la question.
- *
- * Il met en file, il n'appelle pas le modèle : ce sont les passages planifiés
- * qui relèveront les jobs, à leur rythme.
+ * Met en file sans appeler le modèle : les passages planifiés relèvent les jobs.
  *
  *   npm run regenerer:questions                      # simulation, n'écrit rien
  *   npm run regenerer:questions -- --pour-de-vrai    # met les demandes en file
@@ -36,11 +29,8 @@ function lireLOption(nom: string): string | undefined {
 }
 
 /**
- * Les concepts qui ont quelque chose à réécrire.
- *
- * Un concept sans question vivante n'en a jamais eu, ou les a toutes vu
- * retirer : dans les deux cas il n'y a pas de formulation à corriger, et le
- * découpage lui en donnera par son propre chemin.
+ * Les concepts qui ont au moins une question vivante : sans elle, il n'y a pas
+ * de formulation à corriger, et le découpage en donnera par son propre chemin.
  */
 async function ciblesARegenerer(): Promise<Cible[]> {
   const email = lireLOption("compte");
@@ -54,9 +44,8 @@ async function ciblesARegenerer(): Promise<Cible[]> {
     where: {
       variants: { some: { retiredAt: null } },
       ...(compte ? { userId: compte.id } : {}),
-      // Les essais sans compte s'éteignent d'eux-mêmes et personne ne les
-      // réclame : les réécrire dépense pour des concepts qui n'ont pas de
-      // lecteur. On les prend s'il le faut, jamais par défaut.
+      // Les essais sans compte n'ont pas de lecteur : les réécrire dépenserait
+      // pour rien. Seulement sur demande.
       ...(compte || avecLesEssais ? {} : { userId: { not: null } }),
     },
     select: { id: true, inputId: true, userId: true },
@@ -75,8 +64,8 @@ async function main(): Promise<string> {
 
   console.info(`${cibles.length} concept(s) à réécrire, répartis ainsi :\n`);
   for (const [cle, nombre] of [...parCompte].sort((a, b) => b[1] - a[1])) {
-    // Le plafond d'appels se compte par compte et par jour : c'est cette
-    // colonne, et pas le total, qui dit si tout passera en une fois.
+    // Le plafond se compte par compte et par jour : c'est cette colonne, pas
+    // le total, qui dit si tout passera en une fois.
     console.info(`  ${nombre.toString().padStart(4)}  ${cle}`);
   }
   console.info();

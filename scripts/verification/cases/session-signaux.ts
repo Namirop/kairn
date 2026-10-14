@@ -162,8 +162,8 @@ export async function casArchivageDeclare(userId: string, maintenant: Date): Pro
     `${retour.questions.length} question(s) trois mois plus tard`,
   );
 
-  // « L'archivage se défait » : sans ce chemin, un clic sortait un concept pour
-  // trois mois sans aucun retour possible.
+  // L'archivage se défait : sans ce chemin, un clic sortirait un concept pour
+  // trois mois sans retour possible.
   const demain = new Date(maintenant.getTime() + JOUR_MS);
   const defait = await desarchiverConcept(cible.atomId, userId, demain);
   const remis = await prisma.atom.findUniqueOrThrow({

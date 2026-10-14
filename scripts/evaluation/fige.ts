@@ -5,16 +5,9 @@ import { NATURES_DE_DEPOT } from "@/lib/domain/nature-du-depot";
 import type { DepotEvalue } from "./execution";
 
 /**
- * Les concepts figés.
- *
- * Un passage complet écrit ici ce que l'extraction a rendu ; un passage
- * ultérieur repart de ce fichier au lieu de rappeler l'extraction. C'est le
- * seul moyen de mesurer la génération de questions seule : sans lui, les
- * concepts changent d'un passage à l'autre et deux rapports ne se comparent
- * pas.
- *
- * Le fichier est relu par un schéma comme n'importe quelle entrée : un figé
- * abîmé à la main doit échouer bruyamment.
+ * Les concepts figés : ce qu'un passage complet a extrait, pour qu'un passage
+ * ultérieur mesure la génération de questions seule, sur les mêmes concepts.
+ * Relu par un schéma : un figé abîmé à la main doit échouer bruyamment.
  */
 
 const DOSSIER = join(import.meta.dirname, "concepts");
@@ -27,15 +20,12 @@ const figeSchema = z.object({
       nom: z.string(),
       texte: z.string(),
       lecture: z.object({ langue: z.string().nullable(), exploitable: z.boolean() }).optional(),
-      // Facultative : les figés écrits avant ce champ n'en portent pas, et les
-      // rendre invalides ferait taire toute la référence d'un coup — `lirePrecedent`
-      // se contenterait de prévenir, et le rejeu repartirait de rien.
+      // Facultative : des figés de référence n'en portent pas, et les rendre
+      // invalides ferait taire toute la référence d'un coup.
       nature: z.enum(NATURES_DE_DEPOT).optional(),
       rejet: z.string().nullable(),
-      // Persisté depuis la reprise automatique du banc. Un dépôt sans `echec`
-      // et sans concepts est un rejet du produit (motif dans `rejet`) ; un
-      // dépôt avec `echec` est une panne technique — les deux se lisent
-      // désormais différemment dans le rapport de mesures.
+      // Sans `echec` et sans concepts : rejet du produit (motif dans `rejet`).
+      // Avec `echec` : panne technique. Le rapport les lit différemment.
       echec: z.object({ motif: z.string() }).optional(),
       /** Nombre d'essais supplémentaires consommés sur ce dépôt. Zéro le plus souvent. */
       reprises: z.number().int().nonnegative().optional(),
@@ -46,28 +36,18 @@ const figeSchema = z.object({
           uncertain: z.boolean(),
           /**
            * L'échec du lot qui portait ce concept, quand la génération n'a rien
-           * rendu de servable — silence du modèle sur ce rang, ou lot écarté à
-           * la relecture. Absent le plus souvent. Sans lui, un concept sans
-           * variants se lisait comme un rejet volontaire, et un motif capturé
-           * par le banc partait dans le vide.
+           * rendu de servable. Sans lui, un concept sans variants se lirait
+           * comme un rejet volontaire.
            */
           echec: z.object({ motif: z.string() }).optional(),
           /**
-           * Les questions telles qu'elles ont été servies.
+           * Les questions telles qu'elles ont été servies. Facultatives pour la
+           * même raison que `nature`.
            *
-           * Facultatives, comme `nature` avant elles : les figés écrits avant ce
-           * champ n'en portent pas, et les rendre invalides ferait taire toute
-           * la référence d'un coup.
-           *
-           * Elles ne servent pas au rejeu — qui les regénère, c'est son objet —
-           * mais aux mesures : le radotage compare les questions d'un même dépôt
-           * entre elles, et le juge de fidélité lit un concept avec les siennes.
-           * Sans ce champ, ces deux-là exigeaient un passage de génération à
-           * chaque fois qu'on voulait recalculer un seuil.
-           *
-           * Un sous-ensemble des champs d'un Variant, et pas la sortie entière :
-           * ce qu'il faut pour juger une question, sans lier le format du figé à
-           * chaque évolution du contrat de génération.
+           * Le rejeu les regénère ; elles servent aux mesures (radotage, juge de
+           * fidélité), qui se recalculent ainsi sans passage de génération. Un
+           * sous-ensemble d'un Variant, pour ne pas lier le format du figé au
+           * contrat de génération.
            */
           variants: z
             .array(
@@ -79,16 +59,10 @@ const figeSchema = z.object({
                 options: z.array(z.string()).nullable(),
                 correctIndex: z.number().int().nullable(),
                 /**
-                 * La charge d'un texte à trou : la phrase avec le trou, les
-                 * formes acceptées, et les leurres du coup de pouce. Persistée
-                 * depuis que la mesure du radotage s'appuie dessus — le champ
-                 * `question` d'un CLOZE porte au mieux une consigne, jamais la
-                 * vraie phrase à comparer.
-                 *
-                 * Les leurres y figurent parce qu'un contrôle les relit : un
-                 * leurre qui est une forme acceptée retourne l'aide contre celui
-                 * qui la demande, et un rejeu qui ne les garderait pas
-                 * signalerait toujours zéro.
+                 * La charge d'un texte à trou. Le radotage compare `sentence` :
+                 * le champ `question` d'un CLOZE porte au plus une consigne. Les
+                 * leurres sont gardés parce qu'un contrôle vérifie qu'aucun n'est
+                 * une forme acceptée ; sans eux, il signalerait toujours zéro.
                  */
                 cloze: z
                   .object({
@@ -128,10 +102,8 @@ export function retenirVariant(
 }
 
 /**
- * Le figé précédent, quand il est lisible et qu'il ne vient pas du mode mock.
- *
- * Il sert à compléter un passage restreint. Un figé abîmé n'interrompt pas le
- * banc : on le signale et on écrit sans lui.
+ * Le figé précédent, s'il est lisible et ne vient pas du mode mock. Abîmé, il
+ * n'interrompt pas le banc : on le signale et on écrit sans lui.
  */
 function lirePrecedent(chemin: string): CorpusFige | null {
   try {
@@ -147,16 +119,12 @@ function lirePrecedent(chemin: string): CorpusFige | null {
 
 /**
  * Ce que le passage a produit, complété par les dépôts du figé précédent qu'il
- * n'a pas traités mais qui sont toujours au corpus.
+ * n'a pas traités et qui sont toujours au corpus. Sans ça, un passage restreint
+ * écrirait une référence amputée ; le filtre par le corpus fait sortir un dépôt
+ * retiré du dossier.
  *
- * Sans cette reprise, un passage restreint — trois dépôts qu'on vient d'ajouter
- * au corpus — écrirait une référence de trois dépôts, et le rejeu suivant
- * mesurerait un corpus amputé sans le dire. Le filtre par le corpus tient
- * l'autre bout : un dépôt retiré du dossier sort de la référence au passage
- * suivant, il n'y survit pas indéfiniment.
- *
- * L'en-tête décrit le passage qui a écrit le fichier ; les dépôts repris, eux,
- * viennent d'un passage antérieur.
+ * L'en-tête décrit le passage qui écrit ; les dépôts repris viennent d'un
+ * passage antérieur.
  */
 function completer(depots: DepotFige[], corpus: string[]): DepotFige[] {
   const precedent = dernierFige();
@@ -193,8 +161,7 @@ export function ecrireFige(
         concepts: evaluation.concepts.map((evalue) => ({
           ...evalue.concept,
           echec: evalue.echec ? { motif: evalue.echec.motif } : undefined,
-          // Un concept mis de côté n'a pas de questions : le champ reste absent
-          // plutôt que de porter un tableau vide, qui se lirait « zéro question
+          // Absent plutôt que vide : un tableau vide se lirait « zéro question
           // rendue » au lieu de « aucune demandée ».
           variants: evalue.variants.length === 0 ? undefined : evalue.variants.map(retenirVariant),
         })),

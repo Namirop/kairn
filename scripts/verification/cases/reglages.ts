@@ -5,17 +5,9 @@ import { lireLeJournal, lireLesReglagesPosés, poserLesReglages } from "@/lib/db
 import { record } from "./journal";
 
 /**
- * Les réglages posés en base, éprouvés là où ils comptent.
- *
- * Ce que ces cas gardent : qu'une valeur posée l'emporte vraiment sur
- * l'environnement, qu'on puisse revenir au défaut, qu'une valeur absurde soit
- * refusée avant d'atteindre le moteur, et que rien ne change sans laisser de
- * trace.
- *
- * Ils reposent l'état d'origine en sortant. Un réglage oublié en base après une
- * vérification ne serait pas un test qui salit : ce serait un `mock` à `false`
- * sur un poste de développement, donc de l'argent dépensé sans qu'on l'ait
- * demandé.
+ * Les réglages posés en base. Chaque cas repose l'état d'origine en sortant :
+ * un réglage oublié pourrait être un `mock` à `false` sur un poste de
+ * développement, donc des appels payés sans demande.
  */
 
 const AUCUN = {
@@ -62,11 +54,8 @@ export async function casSurchargeEtRetour(): Promise<void> {
 }
 
 /**
- * Une valeur absurde est refusée avant d'atteindre le moteur.
- *
- * Le plafond à zéro est le cas qui compte : il passerait le typage, se poserait
- * sans bruit, et couperait toute l'ingestion en rendant « quota atteint » sur le
- * premier appel de la journée.
+ * Une valeur absurde est refusée avant d'atteindre le moteur. Le plafond à zéro
+ * passerait le typage et couperait toute l'ingestion en « quota atteint ».
  */
 export async function casValeurAbsurdeRefusee(): Promise<void> {
   await poserLesReglages({ ...AUCUN, dailyCallCap: 0 }, OPERATEUR);
@@ -89,17 +78,10 @@ export async function casValeurAbsurdeRefusee(): Promise<void> {
 }
 
 /**
- * Une valeur posée rattrape une variable d'environnement absente.
- *
- * C'est l'incident pour lequel cet écran existe, et il ne fonctionnait pas :
- * l'environnement était validé avant que la surcharge ait la parole, donc une
- * variable oubliée en ligne levait quoi qu'on pose. Le seul recours était
- * l'hébergeur puis un redéploiement — c'est-à-dire tout ce que « s'applique sans
- * redéploiement » promettait d'éviter.
- *
- * Le cas garde les deux moitiés de la règle : sans surcharge, l'absence reste
- * une erreur ; avec, elle est rattrapée. La seconde sans la première laisserait
- * passer une configuration qui accepte n'importe quoi.
+ * Une valeur posée rattrape une variable d'environnement absente : c'est la
+ * raison d'être de l'écran, corriger sans redéploiement. Les deux moitiés sont
+ * vérifiées : sans surcharge, l'absence reste une erreur, sinon la
+ * configuration accepterait n'importe quoi.
  */
 export async function casSurchargeRattrapeLEnvironnement(): Promise<void> {
   const origine = process.env.AI_DAILY_CALL_CAP_ANONYME;
@@ -167,11 +149,8 @@ export async function casJournalTrace(): Promise<void> {
 }
 
 /**
- * L'état de sortie : aucune surcharge ne survit à la vérification.
- *
- * Le filet reste le piège sur `fetch` — une surcharge qui couperait le mode mock
- * ferait sortir une requête et le cas correspondant tomberait. Celui-ci le dit
- * plus tôt, et plus clairement.
+ * Aucune surcharge ne survit à la vérification. Le piège sur `fetch` attraperait
+ * un mode mock coupé ; ce cas le dit plus tôt et plus clairement.
  */
 export async function casAucunResteEnBase(): Promise<void> {
   await prisma.reglageJournal.deleteMany({ where: { parEmail: OPERATEUR } });

@@ -4,38 +4,24 @@ import { PIERRES_DENSE, PIERRES_REDUITE } from "@/lib/design/marque";
 import { symboleSeul, symboleSurPastille } from "@/lib/design/symbole-svg";
 
 /**
- * Produit les fichiers de marque qui ne suivent aucun jeton.
- *
- * `npm run exporter:assets`. À relancer quand la géométrie des pierres change, ou quand la
- * graine du logo change — c'est-à-dire jamais, mais la commande existe pour que
- * personne n'ait à rouvrir un outil de dessin.
- *
- * **Rien n'est dessiné à la main.** Tout sort d'`empiler()`, en passant par
- * `symbole-svg`. C'est la seule construction qui garantisse que la favicon, la
- * pastille d'application et le cairn du tableau de bord ne divergent pas.
- *
- * Les chemins écrits existent déjà et sont référencés par `app/manifest.ts` : on
- * remplace leur contenu, pas leurs chemins.
+ * Produit les fichiers de marque qui ne suivent aucun jeton, à relancer
+ * (`npm run exporter:assets`) quand la géométrie des pierres ou la graine du
+ * logo change. Tout sort de `symbole-svg`, donc du même empilement que le cairn
+ * du tableau de bord : rien n'est dessiné à la main. Les chemins sont référencés
+ * par `app/manifest.ts` et ne changent pas.
  */
 
 /**
- * La part de la hauteur qu'occupe le symbole sur une pastille ordinaire.
- *
- * En hauteur et non en largeur : l'empilement est plus haut que large, c'est donc
- * sa hauteur qui décide. Une icône qui touche ses bords se fait rogner par le
- * masque de la plateforme et paraît trop grosse dans une grille d'applications ;
- * une icône trop petite ressemble à un espace réservé.
+ * La part de la hauteur (l'empilement est plus haut que large) qu'occupe le
+ * symbole sur une pastille ordinaire : assez de marge pour échapper au masque de
+ * la plateforme, pas au point de ressembler à un espace réservé.
  */
 const PART_ORDINAIRE = 0.72;
 
 /**
- * La part d'une icône masquable.
- *
- * La spécification ne garantit que le **disque central**, de quatre-vingts pour
- * cent du côté : le reste peut être rogné en losange, en goutte ou en cercle selon
- * le lanceur. Un empilement de rapport 0,78 tient dans ce disque jusqu'à
- * soixante-trois pour cent de la hauteur — sa diagonale est ce qui limite, pas sa
- * hauteur seule. On s'arrête un peu en dessous.
+ * La part d'une icône masquable. Seul le disque central de 80 % du côté est
+ * garanti ; un empilement de rapport 0,78 y tient jusqu'à 63 % de la hauteur
+ * (c'est sa diagonale qui limite). On s'arrête un peu en dessous.
  */
 const PART_MASQUABLE = 0.58;
 
@@ -47,15 +33,14 @@ type Fichier = { chemin: string; svg: string; cote: number };
 
 const FICHIERS: Fichier[] = [
   {
-    // La favicon. Fond transparent : elle se pose sur la barre d'onglets, dont la
-    // teinte appartient au navigateur et pas à nous.
+    // La favicon, sur fond transparent : la barre d'onglets a la teinte du navigateur.
     chemin: "app/icon.png",
     cote: 32,
     svg: symboleSeul({ pierres: PIERRES_REDUITE, hauteurPx: 32 }),
   },
   {
-    // iOS applique son propre masque : la pastille est donc à fond perdu et sans
-    // rayon, sinon on arrondit deux fois et il reste quatre coins vides.
+    // Sans rayon : iOS applique son propre masque, et arrondir deux fois laisse
+    // quatre coins vides.
     chemin: "public/icones/apple-touch-icon.png",
     cote: 180,
     svg: symboleSurPastille({

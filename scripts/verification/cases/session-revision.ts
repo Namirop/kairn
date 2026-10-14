@@ -4,13 +4,10 @@ import { lireSessionDuJour } from "@/lib/db/session-du-jour";
 import { record } from "./journal";
 
 /**
- * Une session de révision jouée en entier, sur des concepts fabriqués pour
- * l'occasion.
- *
- * Les passages sont écrits par le même chemin que l'interface — la lecture de
- * session puis `enregistrerRevision` — et non par des écritures Prisma montées
- * à la main : une vérification qui contourne le chemin réel ne prouve rien du
- * chemin réel.
+ * Une session de révision jouée en entier sur des concepts fabriqués. Les
+ * passages suivent le chemin de l'interface (`lireSessionDuJour` puis
+ * `enregistrerRevision`), pas des écritures Prisma à la main : contourner le
+ * chemin réel ne prouverait rien de lui.
  */
 
 const FACETTES = ["RECOGNITION", "MECHANISM", "BOUNDARY", "APPLICATION"] as const;
@@ -129,12 +126,7 @@ export async function casSessionComplete(userId: string, maintenant: Date): Prom
   );
 }
 
-/**
- * Une session laissée en plan.
- *
- * On répond à deux questions sur quatre puis on s'arrête net, comme un onglet
- * qu'on ferme. Les deux passages donnés doivent être en base.
- */
+/** Une session laissée en plan après deux questions sur quatre, comme un onglet fermé. */
 export async function casSessionInterrompue(userId: string, maintenant: Date): Promise<void> {
   const inputId = await depotDeTravail(userId);
 

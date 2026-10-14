@@ -4,12 +4,11 @@ import type { ConsommationFenetre } from "@/lib/db/ai-call";
 import type { DepotEvalue } from "./execution";
 
 /**
- * Ce que la ligne de tête doit compter séparément, et la répartition des
- * formats.
+ * Les comptes de la ligne de tête, et la répartition des formats.
  *
- * Un banc qui annonce « un manquement » quand les quatre cinquièmes de la
- * sortie manquent rassure à tort : aboutis, mis de côté et échecs sont trois
- * catégories, et un échec d'extraction n'est pas un échec de génération.
+ * Aboutis, mis de côté et échecs se comptent à part, et un échec d'extraction
+ * n'est pas un échec de génération : « un manquement » quand les quatre
+ * cinquièmes de la sortie manquent rassurerait à tort.
  */
 
 export type Passage = { evaluation: DepotEvalue; consommation: ConsommationFenetre };
@@ -44,8 +43,8 @@ export function compter(passages: Passage[]) {
 }
 
 /**
- * Le tableau qu'on regarde pour savoir si le verrou a sauté : jusqu'ici, une
- * facette appelait toujours le même format, et `CODE` ne sortait jamais.
+ * Les formats par facette : on y voit si une facette se fige sur un seul
+ * format, et si `CODE` sort.
  */
 export function rendreRepartition(passages: Passage[]): string[] {
   const compte = new Map<string, number>();
@@ -82,11 +81,8 @@ export function rendreRepartition(passages: Passage[]): string[] {
 }
 
 /**
- * Le quota de texte libre, lot par lot.
- *
- * Le manquement s'affiche déjà sous le lot fautif, mais un rapport de huit
- * cents lignes ne se compte pas à la main : ce nombre-là est la réponse à
- * « est-ce que la contrainte a pris », et il se lit en tête.
+ * Le quota de texte libre, résumé en tête : le manquement sous chaque lot fautif
+ * ne se compte pas à la main dans un long rapport.
  */
 function mesureDuTexteLibre(passages: Passage[]): string {
   const lots = lotsAboutis(passages);
@@ -101,12 +97,9 @@ function mesureDuTexteLibre(passages: Passage[]): string {
 }
 
 /**
- * L'équilibre entre reconnaître et produire.
- *
- * Un QCM et un vrai ou faux montrent la réponse ; le texte à trou, le code et
- * le texte libre demandent de la produire. C'est le second geste qui consolide,
- * et c'est celui qui disparaît en premier quand le modèle se réfugie dans le
- * QCM. Ces deux nombres disent si un lot est devenu un questionnaire à cocher.
+ * L'équilibre entre reconnaître et produire. QCM et vrai ou faux montrent la
+ * réponse ; trou, code et texte libre la font produire, et c'est ce geste qui
+ * consolide — le premier à disparaître quand le modèle se réfugie dans le QCM.
  */
 function mesureDuRappel(passages: Passage[]): string {
   const lots = lotsAboutis(passages);
@@ -123,15 +116,9 @@ function mesureDuRappel(passages: Passage[]): string {
 }
 
 /**
- * Trois nombres, pas un contrôle.
- *
- * La règle CODE se déclenche sur une citation dans le concept, ce qui est
- * observable — mais un déclencheur trop large remplacerait un verrou par un
- * autre. Le troisième nombre est celui qu'on surveille depuis que le corpus
- * n'est plus un corpus de développeur : une question de code posée sur un
- * concept qui n'en cite pas, c'est le réflexe technique qui revient tout seul.
- * Savoir si une question CODE éprouve quelque chose ou respecte une règle, ça
- * se juge à l'œil.
+ * Trois nombres, pas un contrôle : la pertinence d'une question `CODE` se juge
+ * à l'œil. Le troisième est celui à surveiller — une question de code sur un
+ * concept qui n'en cite pas, c'est le réflexe technique qui revient.
  */
 function mesureDuCode(passages: Passage[]): string {
   const lots = lotsAboutis(passages);

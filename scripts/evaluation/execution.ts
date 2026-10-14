@@ -23,15 +23,9 @@ import { langueDuDepot, type Depot } from "./corpus";
 import type { DepotFige } from "./fige";
 
 /**
- * Un passage du banc sur un dépôt : lecture d'image si c'en est une, découpage
- * en concepts, puis quatre questions par concept — trois concepts par appel.
- *
- * Un échec n'interrompt pas le passage : il est rangé avec le dépôt qui l'a
- * produit, accompagné de la sortie brute du modèle, et le groupe qui l'entoure
- * n'est pas perdu pour autant.
- *
- * Un concept marqué douteux ne part pas en génération. Il attend une décision
- * de l'utilisateur : lui écrire quatre questions, ce serait river une erreur.
+ * Un passage du banc sur un dépôt : lecture d'image, découpage, puis questions
+ * par groupes de `CONCEPTS_PAR_APPEL`. Un échec est rangé avec son dépôt et sa
+ * sortie brute, sans interrompre le passage.
  */
 
 type Concept = ExtractAtomsOutput["atoms"][number];
@@ -44,15 +38,9 @@ export type Echec = {
 };
 
 /**
- * Combien d'éléments le modèle avait rendus dans chaque tableau de sa sortie.
- *
- * Quand une validation refuse pour dépassement, c'est exactement le nombre qu'on
- * cherche — c'est lui qui dit à quelle hauteur poser une borne. Il a fallu
- * l'estimer à la main sur `23-pave-maximal`, parce que le rapport tronquait la
- * sortie brute et ne le disait nulle part.
- *
- * Ne lit que le premier niveau : au-delà, on additionnerait des choux et des
- * carottes. Une sortie illisible le dit plutôt que de se taire.
+ * Combien d'éléments le modèle avait rendus dans chaque tableau de sa sortie :
+ * quand la validation refuse pour dépassement, c'est le nombre qui dit où poser
+ * la borne, et le rapport tronque la sortie brute. Premier niveau seulement.
  */
 function compterLesElements(brut: string | undefined): string | undefined {
   if (brut === undefined) return undefined;
@@ -75,16 +63,10 @@ function compterLesElements(brut: string | undefined): string | undefined {
 type VariantRendu = GenerateVariantsOutput["lots"][number]["variants"][number];
 
 /**
- * Une question telle qu'elle sera servie, et le souvenir de l'ordre reçu.
- *
- * Le banc mesure ce que le produit montre : il fait donc passer les options par
- * la même remise en ordre que l'écriture d'un Variant. Sans ça il mesurerait la
- * sortie brute du modèle, et le contrôle de position ne verrait jamais la
- * correction qu'il est censé surveiller.
- *
- * `rangBrut` garde la position que le modèle avait donnée, pour que le rapport
- * puisse montrer les deux répartitions côte à côte — c'est l'écart entre elles
- * qui dit combien de travail fait le serveur.
+ * Une question telle qu'elle sera servie : le banc mesure ce que le produit
+ * montre, donc après la même remise en ordre des options qu'un Variant écrit.
+ * `rangBrut` garde la position donnée par le modèle ; l'écart entre les deux
+ * répartitions dit combien le serveur corrige.
  */
 export type VariantEvalue = VariantRendu & {
   rangBrut: number | null;
@@ -114,17 +96,12 @@ export type DepotEvalue = {
   concepts: ConceptEvalue[];
   echec?: Echec;
   /**
-   * Ce que les deux coupes du serveur ont retiré à l'extraction. Absentes sur
-   * un rejeu, qui repart d'un figé et ne rappelle pas l'extraction.
+   * Concepts déclarés dérivés d'un voisin (mesurés, jamais coupés) et coupe du
+   * plafond. Absents sur un rejeu, qui ne rappelle pas l'extraction.
    */
   derives?: number;
   tronque?: boolean;
-  /**
-   * Le nombre d'appels qui ont demandé une reprise sur ce dépôt — extraction
-   * et générations confondues. Zéro le plus souvent. Une panne réseau ou une
-   * sortie invalide de Haiku vaut une seconde chance ; deux essais ratés
-   * laissent l'échec dans le figé.
-   */
+  /** Appels repris sur ce dépôt, lecture, extraction et générations confondues. */
   reprises: number;
 };
 
@@ -141,18 +118,10 @@ function decrire(erreur: unknown): Echec {
 }
 
 /**
- * Un appel technique — extraction ou génération — a droit à une seconde chance.
- *
- * Le contrat général du produit reste « pas de retry » (voir `callAI`) : ce qui
- * y ressort d'un échec passe en `FAILED` sans repayer. Le banc, lui, dépense
- * son propre argent pour figer un état de référence, et une panne réseau isolée
- * qui laisse un dépôt vide dans le figé coûte plus cher qu'un second essai
- * immédiat. Une seule reprise, jamais deux, et jamais sur un plafond atteint —
- * ceux-là échoueront à l'identique.
- *
- * Le nombre de reprises consommées est remonté au rapport, colonne par
- * colonne. Un banc qui a dû reprendre plusieurs fois signale un problème
- * qu'il ne faut pas laisser sous silence.
+ * Une seule reprise par appel, exception assumée au « pas de retry » du produit
+ * (voir `callAI`) : une panne isolée qui laisse un dépôt vide dans le figé coûte
+ * plus cher qu'un second essai. Jamais sur ces codes-ci, qui échoueraient à
+ * l'identique. Les reprises remontent au rapport pour ne pas passer inaperçues.
  */
 const REPRISES_INAPPROPRIEES = new Set([
   "AI_QUOTA",
@@ -206,11 +175,8 @@ async function lireImage(
 }
 
 /**
- * L'envoi du groupe, construit par le même code que celui du produit.
- *
- * La graine est le texte du concept et non un identifiant, pour la raison dite
- * plus bas à propos des options : le banc n'écrit rien en base, et un concept
- * figé porte le même texte d'un passage à l'autre.
+ * L'envoi du groupe, construit par le code du produit. La graine est le texte
+ * du concept (voir `servir`).
  */
 function messageDuGroupe(groupe: Concept[]): AiMessage[] {
   const contenu = construireLEnvoi(
@@ -231,11 +197,10 @@ function grouper(concepts: Concept[]): Concept[][] {
 }
 
 /**
- * Les options remises dans l'ordre où elles seront montrées.
- *
- * La graine est le texte du concept, et non un identifiant : le banc n'écrit
- * rien en base, et un concept figé porte le même texte d'un passage à l'autre.
- * Deux rejeux se comparent donc question par question.
+ * Les options remises dans l'ordre où elles seront montrées. La graine est le
+ * texte du concept, pas un identifiant : le banc n'écrit rien en base, et un
+ * concept figé garde son texte, donc deux rejeux se comparent question par
+ * question.
  */
 function servir(variants: VariantRendu[], concept: string): VariantEvalue[] {
   return variants.map((variant) => {
@@ -266,9 +231,8 @@ async function genererPourGroupe(
   try {
     const { resultat, reprises } = await avecUneReprise(() =>
       callAI({
-        // L'emplacement du trou est décidé par le serveur et imposé par la
-        // grammaire de cet appel-là. La graine est celle du premier concept du
-        // groupe : la contrainte vaut pour tout l'envoi.
+        // L'emplacement du trou est imposé par la grammaire de l'appel, semé
+        // sur le premier concept : la contrainte vaut pour tout l'envoi.
         contract: contratDeGeneration(emplacementDuTexteATrou(groupe[0]?.concept ?? "")),
         system: promptsSysteme(langue).generate_variants,
         messages: messageDuGroupe(groupe),
@@ -280,9 +244,8 @@ async function genererPourGroupe(
       const lot = lots.find((candidat) => candidat.rang === index + 1);
 
       if (!lot) {
-        // Deux silences très différents : un lot que le modèle n'a pas rendu,
-        // et un lot qu'on a retiré nous-mêmes parce qu'on n'aurait pas su le
-        // servir. Les confondre reviendrait à ne plus voir sa propre relecture.
+        // Un lot écarté à la relecture n'est pas un lot non rendu : les
+        // confondre masquerait ce que la relecture retire.
         const motif = ecartes.includes(index + 1)
           ? `lot écarté à la relecture : le concept ${index + 1} portait une question inexploitable`
           : `aucun lot rendu pour le concept ${index + 1} de l'envoi`;
@@ -305,8 +268,7 @@ async function genererPourGroupe(
       echec,
     }));
 
-    // On est ici après deux essais ratés : la reprise a été consommée sans
-    // résultat, elle apparaît quand même au compte pour dire qu'on l'a payée.
+    // Compté 1 qu'il y ait eu reprise ou que le code l'excluait.
     return { evalues, reprises: 1 };
   }
 }
@@ -316,8 +278,8 @@ async function evaluerConcepts(
   nature: NatureDuDepot | undefined,
   langue: LangueDuProduit,
 ): Promise<{ evalues: ConceptEvalue[]; reprises: number }> {
-  // La même règle que l'ingestion, et pas une copie : sur un dépôt de fiction,
-  // le doute n'écarte plus rien, et le banc doit le voir comme le produit.
+  // La règle de l'ingestion, pas une copie : un concept douteux ne part pas en
+  // génération, sauf sur un dépôt de fiction.
   const retenus = conceptsAQuestionner(concepts, nature);
   const douteux = concepts
     .filter((concept) => !retenus.includes(concept))

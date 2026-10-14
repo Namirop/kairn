@@ -3,19 +3,14 @@ import { readFileSync } from "node:fs";
 /**
  * Les jetons de couleur de la feuille, lus dans `app/styles/tokens/`.
  *
- * **Bornés au premier bloc `:root` de chaque fichier.** C'est la palette du produit, celle qui
- * s'applique quand rien d'autre n'est posé, c'est-à-dire toujours. Une lecture
- * du fichier entier garderait la dernière valeur rencontrée et mesurerait un
- * jeton surchargé plus bas dans une règle — un échec sur un produit intact,
- * ce qui est la pire sortie possible pour un filet.
+ * Bornés au premier bloc `:root` de chaque fichier, la palette de base : lire
+ * le fichier entier garderait la dernière valeur rencontrée, celle d'une
+ * surcharge plus bas, et ferait échouer le filet sur un produit intact.
  */
 
 /**
- * Les couleurs écrites en clair.
- *
- * Seules les valeurs hexadécimales sont retenues : un jeton qui vaut un
- * dégradé ou un `color-mix` n'a pas de luminance à calculer, et le laisser
- * passer donnerait un ratio inventé.
+ * Les couleurs écrites en hexadécimal, seules : un dégradé ou un `color-mix`
+ * n'a pas de luminance calculable, et donnerait un ratio inventé.
  */
 function hexDuBloc(corps: string): Record<string, string> {
   const trouves: Record<string, string> = {};
@@ -28,13 +23,8 @@ function hexDuBloc(corps: string): Record<string, string> {
 }
 
 /**
- * Les alias, résolus.
- *
- * Un jeton peut valoir un autre jeton. Sans cette passe, le script dirait
- * « jeton introuvable » là où la feuille, elle, sait très bien quelle couleur
- * elle sert. Une seule passe suffit tant qu'un alias ne pointe pas vers un
- * autre alias ; si ça arrivait, la valeur resterait absente et le script le
- * dirait, ce qui est le bon comportement pour un filet.
+ * Les alias (`--a: var(--b)`), résolus en une passe. Un alias d'alias reste
+ * absent et le script le signale : c'est le bon comportement pour un filet.
  */
 function alias(corps: string, resolus: Record<string, string>): Record<string, string> {
   const trouves: Record<string, string> = {};

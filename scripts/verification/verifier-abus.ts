@@ -5,14 +5,12 @@ import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
 /**
  * La passe d'audit : abus, quotas, et cycle de vie des concepts.
  *
- * Chaque constat est écrit comme la règle qu'on veut voir tenir. Une ligne en
- * ÉCHEC n'est donc pas une panne de la vérification : c'est un trou, prouvé à
- * l'exécution. Ce script est fait pour échouer tant qu'ils ne sont pas bouchés.
+ * Chaque constat est écrit comme la règle qu'on veut voir tenir : une ligne en
+ * ÉCHEC est un trou prouvé à l'exécution, pas une panne de la vérification.
  *
- * Rien ne sort vers l'API. Le pipeline tourne en mode mock ; les seuls passages
- * qui coupent le mock — ceux qui comptent des appels — retirent la clé et
- * pointent la base sur un port fermé, et le piège sur `fetch`, armé avant le
- * premier import, reste le dernier rempart.
+ * Rien ne sort vers l'API : mode mock ; les passages qui le coupent pour compter
+ * les appels retirent les clés et pointent sur un port fermé ; le piège sur
+ * `fetch`, armé avant le premier import, reste le dernier rempart.
  *
  *   npm run verifier:abus
  */

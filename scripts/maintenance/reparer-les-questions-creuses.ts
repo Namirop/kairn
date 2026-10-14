@@ -7,35 +7,16 @@ import { questionServable } from "@/lib/domain/question-servable";
 import { conclure, record } from "../verification/cases/journal";
 
 /**
- * Retirer les questions que l'écran ne sait pas poser, et redemander leur lot.
- *
- * **Ce qui s'est passé.** Le 23 septembre 2026, un lot est arrivé abrégé : le
- * modèle a écrit la première question du concept, puis posé « ... » partout
- * ailleurs — énoncé, étalon, phrase trouée, quatre options de QCM. L'appel
- * n'avait pas été tronqué et la grammaire était satisfaite ; trois points ne
- * sont pas une chaîne vide, et c'est tout ce que les filets refusaient. Une
- * carte portant « ... » a été servie en session le 26.
- *
- * Les filets ont été resserrés — voir `porteDuTexte` et `optionsDistinguables`.
- * Ils valent pour ce qui s'écrit ; ce script s'occupe de ce qui est déjà écrit.
- *
- * **Ce qu'il fait.** Il retire les questions qu'on ne sait pas poser telles que
- * leur format les annonce, et il redemande le lot des concepts qui n'ont plus
- * rien de servable. Les deux, parce qu'aucun des deux ne suffit : le plafond
- * hebdomadaire retarde souvent la réécriture, et pendant ce temps-là il ne faut
- * plus rien servir.
+ * Retire les questions que l'écran ne sait pas poser (un lot abrégé en « ... »
+ * passé avant `porteDuTexte` et `optionsDistinguables`), et redemande le lot
+ * des concepts qui n'ont plus rien de servable. Les deux : le plafond
+ * hebdomadaire retarde souvent la réécriture, et d'ici là rien ne doit être
+ * servi.
  *
  * Rien n'est supprimé : `retiredAt` sort la formulation du tirage, les passages
- * passés continuent de la citer, et la planification vit sur le concept.
- *
- * **Le retrait vaut pour tout le monde, la réécriture pour les comptes.** Servir
- * une carte vide ne coûte rien à corriger ; réécrire coûte un appel, et les
- * essais sans compte s'éteignent d'eux-mêmes.
- *
- * **Il se rejoue.** Le retrait se lit sur les questions vivantes, la réécriture
- * sur les concepts qui n'ont plus de question servable — retirée à l'instant ou
- * lors d'un passage précédent. Un second passage ne retire donc plus rien et
- * redemande ce qui manquait encore.
+ * passés continuent de la citer. Le retrait vaut pour tout le monde, la
+ * réécriture (un appel) pour les comptes seuls. Le script se rejoue : un second
+ * passage ne retire plus rien et redemande ce qui manquait encore.
  *
  *   npm run reparer:creuses                   # simulation, n'écrit rien
  *   npm run reparer:creuses -- --pour-de-vrai
@@ -47,18 +28,13 @@ type Concept = { id: string; inputId: string; userId: string | null };
 type Formulation = { variantId: string; concept: Concept; vivante: boolean; creuse: boolean };
 
 /**
- * L'écran sait-il poser cette question telle que son format l'annonce ?
+ * L'écran sait-il poser cette question telle que son format l'annonce ? Le
+ * test réutilise `questionServable` et les fonctions de `questionServie`, pas
+ * une règle recopiée.
  *
- * Le test est celui de la lecture, et pas une règle recopiée : `questionServable`
- * décide déjà de ce qui entre dans une session, et les deux autres passent par
- * les fonctions que `questionServie` appelle pour reconstruire la charge. Ce
- * qu'on relève ici est donc exactement ce qui ne se pose pas à l'écran.
- *
- * Un QCM dont les options ne se distinguent pas et un texte à trou sans trou
- * sont comptés creux, alors que la lecture les ferait simplement retomber en
- * question ouverte. Ce repli existe pour une charge abîmée sous un énoncé sain ;
- * ici l'énoncé vient du même lot abrégé, et le concept est réécrit de toute
- * façon.
+ * Un QCM indistinct ou un texte à trou sans trou comptent creux, alors que la
+ * lecture les replierait en question ouverte : ce repli vaut pour une charge
+ * abîmée sous un énoncé sain, et ici l'énoncé vient du même lot abrégé.
  */
 function creuse(variante: VarianteEnBase): boolean {
   if (!questionServable(variante)) return true;
@@ -99,10 +75,8 @@ async function formulations(): Promise<Formulation[]> {
 }
 
 /**
- * Les concepts de compte qui n'ont plus une seule question servable.
- *
- * La condition est un état, pas un événement : un passage précédent a pu
- * retirer sans réussir à redemander, et ce concept-là doit rester rattrapable.
+ * Les concepts de compte qui n'ont plus une seule question servable. Un état,
+ * pas un événement : un passage précédent a pu retirer sans redemander.
  */
 function conceptsSansQuestion(toutes: readonly Formulation[]): Concept[] {
   const servables = new Set(
@@ -146,9 +120,8 @@ async function main(): Promise<string> {
   const issues = new Map<string, number>();
 
   for (const concept of aReecrire) {
-    // `reporter` parce qu'on vient de retirer : refuser sans rien écrire
-    // laisserait le concept sans aucune question pour toujours, alors que le
-    // plafond hebdomadaire n'est qu'un délai.
+    // `reporter` : refuser sans rien écrire laisserait le concept sans question
+    // pour toujours, alors que le plafond hebdomadaire n'est qu'un délai.
     const demande = await demanderDesQuestions(concept, new Date(), { reporter: true });
 
     issues.set(demande.etat, (issues.get(demande.etat) ?? 0) + 1);

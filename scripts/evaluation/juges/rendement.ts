@@ -3,9 +3,9 @@ import type { SignalementsDuDepot } from "../mesures/signalements";
 import type { VerdictsDuDepot } from "./verdicts";
 
 /**
- * Le rendement du juge du doublon par bande : le compte des non-indépendants
- * dans la bande basse contre la bande haute, pour dire si le plancher à 0,63
- * ramasse ce qu'il fallait ou si on descendait pour rien.
+ * Le rendement du juge du doublon par bande : les non-indépendants confirmés
+ * sous `BANDE_DU_DOUBLON` contre au-dessus, pour dire si le plancher
+ * (`PLANCHER_DOUBLON`) descend assez bas ou pour rien.
  */
 export type RendementParBande = {
   basse: { candidats: number; confirmes: number };

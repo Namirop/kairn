@@ -5,23 +5,15 @@ import { MODELE_DES_JUGES, MOTIF_MAXIMUM, TOKENS_DES_JUGES } from "./modele";
 import { MOTIF_ABSTENTION_JUGE } from "./residu";
 
 /**
- * Le juge d'attendus — la géométrie sélectionne, le juge tranche.
+ * Le juge d'attendus : la géométrie sélectionne, le juge tranche. La proximité
+ * seule ne suffit pas comme verdict, le cosinus mesure le même sujet, pas la
+ * même affirmation.
  *
- * Le premier essai avait fait de la proximité un verdict : au-dessus du
- * plancher, l'attendu passait couvert sans autre lecture. Le passage 23h09 a
- * montré le trou — `22` sortait 6/6 couverts par proximité alors que le juge
- * de résidu confirmait 4 manques de phrases au même moment sur les mêmes
- * sujets. C'est la troisième occurrence de la même leçon : **le cosinus mesure
- * le même sujet, pas la même affirmation.**
+ * Elle désigne un ou deux concepts candidats par attendu ; le juge dit si l'un
+ * d'eux couvre l'idée, chiffres, seuils et conditions compris.
  *
- * Ici, la proximité ne sert qu'à désigner une ou deux concepts candidats pour
- * chaque attendu. Le juge répond à une question locale et binaire : ce concept
- * couvre-t-il cette idée, y compris ses chiffres, ses seuils et ses conditions ?
- * Un concept qui parle du bon sujet sans porter le facteur ou la condition de
- * l'attendu ne le couvre pas.
- *
- * Un appel par dépôt, tous ses attendus groupés — deux appels par passage sur
- * le corpus actuel (22 et 27), quelques centimes.
+ * Un appel par dépôt, ses attendus groupés : deux appels par passage sur le
+ * corpus actuel (22 et 27).
  */
 
 const verdictAttendu = z.object({
@@ -111,10 +103,8 @@ export function decrireAttendu(soumis: AttenduSoumis, rang: number): string {
 }
 
 /**
- * Rend un verdict par attendu soumis, dans l'ordre.
- *
- * L'appariement se fait par `numero` pour survivre à un modèle qui reformule
- * ou décale — même robustesse que le juge de résidu.
+ * Un verdict par attendu soumis, dans l'ordre. Apparié par `numero` pour
+ * survivre à un modèle qui décale, comme le juge de résidu.
  */
 export async function jugerLesAttendus(
   nom: string,

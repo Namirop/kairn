@@ -4,14 +4,9 @@ import { localDay } from "@/lib/domain/local-day";
 import { record } from "./journal";
 
 /**
- * Les chiffres de l'écran d'administration, éprouvés contre la base.
- *
- * Ce que ces cas attrapent, aucun test unitaire ne le peut : les trois lectures
- * sont du SQL écrit à la main, avec des `generate_series`, des `FILTER` et des
- * conversions de type. Une colonne renommée, un cast qui rend une chaîne au lieu
- * d'un nombre, un `count` qui revient en `BigInt` — tout cela compile, passe le
- * typage, et ne casse qu'à l'exécution, sur un écran qu'on ouvre une fois par
- * semaine.
+ * Les chiffres de l'écran d'administration, éprouvés contre la base : ses
+ * lectures sont du SQL écrit à la main, et une colonne renommée ou un `count`
+ * rendu en `BigInt` passe le typage pour ne casser qu'à l'exécution.
  */
 
 /** Les lectures tournent et rendent des nombres, pas des chaînes ni des BigInt. */
@@ -65,11 +60,8 @@ export async function casChiffresLisibles(maintenant: Date): Promise<void> {
 }
 
 /**
- * Le tableau des volumes montre les jours vides.
- *
- * C'est la raison d'être du `generate_series` : une série qui saute les jours
- * sans dépôt se lit comme une activité continue, et c'est précisément le
- * contresens qu'un tableau de bord ne doit pas induire.
+ * Le tableau des volumes montre les jours vides (`generate_series`) : une série
+ * qui les saute se lirait comme une activité continue.
  */
 export async function casJoursVidesMontres(maintenant: Date): Promise<void> {
   const { volumes } = await lireLAdministration(maintenant);
@@ -96,11 +88,8 @@ export async function casJoursVidesMontres(maintenant: Date): Promise<void> {
 }
 
 /**
- * La moyenne de concepts par dépôt dit bien ce qu'elle prétend.
- *
- * Le cas fabrique un dépôt et ses concepts sur le jour courant, puis relit le
- * tableau : c'est le seul moyen de vérifier que la division porte sur les bonnes
- * lignes, et pas sur deux jours voisins.
+ * La moyenne de concepts par dépôt : un dépôt fabriqué sur le jour courant, puis
+ * relu, vérifie que la division porte sur les lignes du bon jour.
  */
 export async function casMoyenneCalculee(userId: string, maintenant: Date): Promise<void> {
   const depot = await prisma.input.create({

@@ -5,13 +5,9 @@ import { PLANCHER_COUVERTURE } from "./seuils";
 /**
  * Le rapport de l'épreuve par ablation.
  *
- * Il est écrit pour qu'on puisse **conclure** : le compte des retraits sans
- * effet en tête, parce que c'est là que se joue la question. Un retrait qui ne
- * découvre rien veut dire l'une de deux choses, et il faut lire le concept pour
- * savoir laquelle — soit un voisin le couvre entièrement, soit il ne portait
- * rien. La première réponse valide la mesure, la seconde accuse le produit.
- * Aucune des deux n'accuse l'instrument, mais elles ne se distinguent qu'à
- * l'œil, d'où les textes en entier.
+ * Un retrait qui ne découvre rien veut dire qu'un voisin le couvre (la mesure
+ * est juste) ou qu'il ne portait rien (le produit est en cause). Les deux ne
+ * se distinguent qu'à l'œil, d'où les textes en entier.
  */
 
 const EXTRAIT = 220;
@@ -47,10 +43,8 @@ function rendreUnRetrait(retrait: Retrait): string[] {
 }
 
 /**
- * Un retrait sans effet, avec sa chute maximale.
- *
- * Sans cette ligne, on ne sait pas si la mesure n'a pas bougé ou si elle a bougé
- * sans franchir le plancher — et c'est toute la question de l'épreuve.
+ * Un retrait sans effet, avec sa chute maximale : elle dit si la mesure n'a
+ * pas bougé ou a bougé sans franchir le plancher.
  */
 function rendreUnRetraitSansEffet(retrait: Retrait): string[] {
   const chute =
@@ -75,15 +69,10 @@ function chutes(ablation: Ablation): number[] {
 }
 
 /**
- * En tête, la chute — pas le compte des franchissements de plancher.
- *
- * C'est la chute qui prouve la sensibilité, et c'est elle qu'il faut lire en
- * premier. Le premier relevé menait sur « 5 retraits sur 20 découvrent une
- * phrase » et laissait croire à un instrument sourd, alors que dix-neuf retraits
- * sur vingt déplaçaient la couverture de deux dixièmes : les chutes atterrissent
- * simplement entre 0,63 et 0,80, très au-dessus d'un plancher posé pour une
- * autre question. Un franchissement de plancher dépend du plancher ; une chute,
- * non.
+ * En tête, la chute, pas le compte des franchissements : c'est elle qui prouve
+ * la sensibilité. Les chutes atterrissent souvent au-dessus d'un plancher posé
+ * pour une autre question, et compter les franchissements ferait croire à un
+ * instrument sourd.
  */
 function rendreUneAblation(ablation: Ablation): string[] {
   const sansEffet = ablation.retraits.filter((retrait) => retrait.decouvertes.length === 0);

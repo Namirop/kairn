@@ -3,13 +3,12 @@ import { conclure, record } from "./cases/journal";
 import { versUnFournisseurDeModele } from "./cases/hotes-des-fournisseurs";
 
 /**
- * Preuve, à l'exécution, que l'ingestion tient de bout en bout : un dépôt entre,
- * ses concepts puis ses questions sortent, et rien ne part vers l'API.
+ * Preuve que l'ingestion tient de bout en bout : un dépôt entre, ses concepts
+ * puis ses questions sortent, et rien ne part vers un fournisseur de modèle.
  *
- * Tout se joue en mode mock, sur un utilisateur de vérification créé pour
- * l'occasion et effacé à la fin. Le piège sur `fetch` est armé avant le premier
- * import : une sortie réseau vers l'API ferait échouer la vérification au lieu
- * de coûter quelque chose.
+ * En mode mock, sur un utilisateur de vérification effacé à la fin. Le piège
+ * sur `fetch` est armé avant le premier import : une sortie vers l'API fait
+ * échouer la vérification au lieu de coûter.
  *
  *   npm run verifier:ingestion
  */

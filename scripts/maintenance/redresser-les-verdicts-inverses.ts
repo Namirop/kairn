@@ -4,60 +4,30 @@ import { prisma } from "@/lib/db/client";
 import { conclure, record } from "../verification/cases/journal";
 
 /**
- * Remettre à l'endroit les affirmations dont le verdict contredit le texte.
+ * Remet à l'endroit les vrai ou faux dont `payload.expected` contredit
+ * l'affirmation écrite : c'est ce booléen seul qui dit quelle proposition
+ * l'écran surligne.
  *
- * **Ce qui s'est passé.** Un vrai ou faux porte son verdict dans `payload.expected` :
- * c'est lui, et lui seul, qui dit laquelle des deux propositions l'écran
- * surligne. Jusqu'au 24 septembre 2026, le prompt demandait d'y recopier la
- * **cible** reçue dans l'envoi — « écris une affirmation vraie » — et non de
- * décrire l'affirmation effectivement écrite. Un modèle qui n'arrivait pas à
- * tenir la cible avait alors intérêt à mentir sur le verdict plutôt qu'à la
- * manquer : il écrivait une affirmation fausse, la déclarait vraie, et
- * expliquait deux lignes plus bas pourquoi elle était fausse.
+ * La liste est écrite à la main : savoir si une affirmation est vraie de son
+ * concept demande de lire les deux, et aucune règle ne le calcule. On redresse
+ * plutôt que de retirer : l'affirmation et son étalon sont justes, seul le
+ * booléen est faux, et un retrait coûterait la facette `BOUNDARY` et une
+ * réécriture.
  *
- * Le prompt a été corrigé (commit `32500fc`) : `estVraie` décrit désormais ce
- * qui vient d'être écrit, et rater la cible est un défaut mineur qui se mesure.
- * L'audit qui l'accompagnait annonçait « un cas sur soixante-huit corrigé en
- * base ». Il en a trouvé un sur douze : les onze autres ont continué d'être
- * servis, et l'un d'eux a corrigé quelqu'un qui avait raison le 30 septembre —
- * « son `applicationId` peut être modifié tant que son nom affiché reste
- * identique », déclarée vraie.
- *
- * **Pourquoi une liste écrite à la main.** Savoir si une affirmation est vraie
- * de son concept demande de lire les deux. Aucune règle ne le calcule, et un
- * appel modèle pour trancher douze lignes coûterait plus cher que de les lire.
- * Les cent huit affirmations vivantes de la production ont donc été relues une
- * à une, contre leur concept et non contre le monde ; celles qui suivent sont
- * les douze qui se contredisent.
- *
- * **On redresse plutôt que de retirer.** L'affirmation est bonne, son étalon
- * explique déjà la vérité : seul le booléen est faux. Le retrait coûterait à
- * ces concepts leur facette `BOUNDARY` et un appel de réécriture, pour réparer
- * ce qu'un booléen répare.
- *
- * **Il se rejoue.** Chaque ligne porte le verdict tel qu'il a été constaté ; une
- * ligne qui ne le porte plus est laissée intacte et signalée. Un second passage
- * ne redresse donc rien, et ne remet pas à l'envers ce qu'il vient de remettre
- * à l'endroit.
+ * Rejouable : une ligne qui ne porte plus le verdict constaté est laissée
+ * intacte et signalée, donc un second passage ne remet rien à l'envers.
  *
  *   npm run redresser:verdicts                   # simulation, n'écrit rien
  *   npm run redresser:verdicts -- --pour-de-vrai
  */
 
 /**
- * Ce qu'un vrai ou faux pose à côté de sa question.
- *
- * Lu ouvert plutôt que fermé : un vrai ou faux n'y pose aujourd'hui que son
- * verdict, mais ce qui s'y trouverait en plus doit survivre au redressement.
+ * Lu ouvert : ce que le payload porterait en plus du verdict doit survivre au
+ * redressement.
  */
 const VERDICT = z.looseObject({ expected: z.boolean() });
 
-/**
- * Les affirmations relues, et le verdict qu'on leur a trouvé.
- *
- * `servi` est ce qui est en base, donc ce qui est faux. La correction est son
- * contraire — il n'y a pas de troisième valeur pour un vrai ou faux.
- */
+/** `servi` est le verdict faux constaté en base ; la correction est son contraire. */
 const INVERSEES: readonly { id: string; servi: boolean; texte: string }[] = [
   {
     id: "cmtmvf6bm001w04k00sdqoso7",

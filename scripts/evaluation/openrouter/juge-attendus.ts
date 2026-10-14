@@ -12,9 +12,8 @@ import { TOKENS_DES_JUGES } from "../juges/modele";
 import type { Facture } from "./juges";
 
 /**
- * Le juge d'attendus servi via OpenRouter — pendant de `jugerLesAttendus` pour
- * la campagne 1. Un appel par dépôt qui porte des attendus (deux dépôts au
- * corpus), le reste ne consomme rien.
+ * Le juge d'attendus via OpenRouter, pendant de `jugerLesAttendus` pour la
+ * campagne. Un appel par dépôt qui porte des attendus, aucun pour les autres.
  */
 
 function facturer(modele: ModeleOpenRouter, consommation: ConsommationOpenRouter): Facture {

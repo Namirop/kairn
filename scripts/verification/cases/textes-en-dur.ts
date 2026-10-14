@@ -2,19 +2,18 @@
  * Les textes d'interface restés en dur, hors des fichiers de messages.
  *
  * Lit l'arbre syntaxique plutôt que le texte : les commentaires du projet sont
- * en français et le resteront, et une recherche d'accents les ramènerait tous.
- * Relève le texte JSX et les chaînes qui contiennent une lettre accentuée ou au
- * moins deux mots, en écartant ce qui n'est jamais montré — classes, imports,
- * clés de traduction, journaux.
+ * en français, et une recherche d'accents les ramènerait tous. Relève le texte
+ * JSX et les chaînes qui contiennent une lettre accentuée ou au moins deux
+ * mots, hors ce qui n'est jamais montré (classes, imports, clés, journaux).
  *
  * Usage : `npx tsx scripts/verification/cases/textes-en-dur.ts components/revision app/(app)/reviser`
  * Sans argument : `app`, `components`, `lib/email`. Rend un code non nul s'il
  * reste quelque chose, pour servir de critère de fin à une zone traduite.
  *
- * Un faux positif se tait en posant `// i18n-ignore` sur la ligne au-dessus —
- * avec la raison, comme partout ailleurs. Un fichier entier qui ne parle qu'à
- * l'administrateur — l'outil interne, les alertes d'exploitation — se tait par
- * `// i18n-ignore-fichier — <raison>` en tête : il reste français par décision.
+ * Un faux positif se tait par `// i18n-ignore` sur la ligne au-dessus, avec la
+ * raison. Un fichier qui ne parle qu'à l'administrateur (outil interne, alertes
+ * d'exploitation) se tait par `// i18n-ignore-fichier — <raison>` en tête : il
+ * reste français par décision.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";

@@ -6,12 +6,11 @@ import type { DepotEvalue } from "@/scripts/evaluation/execution";
 
 /**
  * Le figé d'assets : les vraies sorties du pipeline pour les sujets de démo,
- * mises en cache pour que le seed et les captures ne repayent jamais.
+ * pour que le seed et les captures ne repayent jamais.
  *
- * C'est un figé *sans perte pour le seed* — contrairement à celui du banc, il
- * garde `estVraie` (le VRAI/FAUX ne retombe pas en question ouverte) et l'ordre
- * servi des options. C'est le seul fichier du dossier `fige/` qu'on versionne :
- * il rend le compte de démo reproductible hors ligne.
+ * Contrairement au figé du banc, il est sans perte pour le seed : il garde
+ * `estVraie` (sinon le VRAI/FAUX retombe en question ouverte) et l'ordre des
+ * options. Versionné : il rend le compte de démo reproductible hors ligne.
  */
 
 const DOSSIER = path.join(import.meta.dirname, "fige");

@@ -16,12 +16,9 @@ import { fabriquerConcept, viderLeCompte } from "./abus-fabrique";
 import { record } from "./journal";
 
 /**
- * La propriété des ressources, éprouvée par le seul test qui compte : avec le
- * compte A, toucher aux ressources du compte B.
- *
- * Les identifiants passés ici sont exactement ceux qu'un corps de requête
- * porterait — un dépôt, un concept, une variante. Le `userId`, lui, vient de la
- * session : c'est la seule chose qu'un attaquant ne choisit pas.
+ * La propriété des ressources : avec le compte A, toucher aux ressources du
+ * compte B. Les identifiants passés sont ceux qu'un corps de requête porterait ;
+ * le `userId` vient de la session, seule chose qu'un attaquant ne choisit pas.
  */
 
 const JOUR_MS = 24 * 60 * 60 * 1000;
@@ -56,8 +53,8 @@ export async function casRessourcesDunAutre(
   });
   await prisma.atom.update({ where: { id: douteux.atomId }, data: { uncertain: true } });
 
-  // Deux concepts du même compte : l'identifiant de variante d'un concept
-  // envoyé sous l'identifiant de l'autre est le cas où la vérification se perd.
+  // Deux concepts du même compte : la variante de l'un envoyée sous l'autre est
+  // le cas qu'une vérification de propriété seule laisse passer.
   const premier = await fabriquerConcept(usurpateur, {
     libelle: "Le premier concept de l'usurpateur",
     due: new Date(maintenant.getTime() - JOUR_MS),

@@ -23,11 +23,9 @@ import { rendreLesDeciles } from "./tableaux-de-calibration";
  * du juge du doublon par bande. Le détail par signalement est dans
  * `rendu-des-signalements.ts`.
  *
- * Les déciles restent en tête alors que les planchers sont posés, et c'est
- * volontaire : ce sont eux qui diront, d'un passage au suivant, si la
- * distribution a bougé sous les seuils. Un signalement qui double sans que la
- * distribution change dit autre chose qu'un signalement qui double parce que
- * tout le corpus a glissé.
+ * Les déciles restent en tête malgré les planchers : ils disent si un
+ * signalement qui double vient d'un vrai défaut ou d'une distribution qui a
+ * glissé sous les seuils.
  */
 
 function nombre(valeur: number): string {

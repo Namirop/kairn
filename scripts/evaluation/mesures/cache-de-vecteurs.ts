@@ -3,27 +3,17 @@ import { join } from "node:path";
 import { MODELE_EMBEDDING, type Vecteur } from "./espace";
 
 /**
- * Le cache de vecteurs, sur disque, à côté des concepts figés.
+ * Le cache de vecteurs sur disque. Les vecteurs sont déterministes : les garder
+ * rend la calibration (seuils, ablation, comparaison de figés) gratuite.
  *
- * Les vecteurs sont déterministes : le même texte plongé par le même modèle
- * rend toujours le même point. Les garder permet de recalculer des seuils, de
- * rejouer une ablation ou de comparer deux figés sans rappeler l'API — c'est ce
- * qui rend l'étape de calibration gratuite, et donc réellement itérative.
+ * Un fichier JSONL par modèle, en ajout seul : une passe interrompue garde ce
+ * qu'elle a calculé. Les doublons sont sans conséquence, ils portent le même
+ * vecteur.
  *
- * **Un fichier par modèle, en JSONL, en ajout seul.** L'ajout seul est le point
- * important : une passe interrompue au milieu laisse derrière elle tout ce
- * qu'elle avait déjà calculé, là où une réécriture complète du fichier aurait
- * tout perdu. Les entrées en double sont sans conséquence — la dernière lue
- * gagne, et elles portent le même vecteur.
+ * Float32 en base64 plutôt qu'un tableau JSON : environ deux fois plus léger.
  *
- * Le vecteur est stocké en Float32 encodé en base64, pas en tableau de nombres :
- * mille vingt-quatre flottants en JSON pèsent une dizaine de kilo-octets contre
- * cinq et demi ici, et le corpus entier en compte près d'un millier.
- *
- * **Le dossier n'est pas suivi par git.** Rebâtir tout le cache coûte une
- * fraction de centime ; y ajouter quelques mégaoctets d'opaque à chaque passage
- * coûterait plus cher à relire qu'à recalculer. Les figés, eux, restent suivis :
- * ce sont eux la référence, les vecteurs n'en sont qu'une vue.
+ * Le dossier n'est pas suivi par git : le rebâtir coûte une fraction de centime.
+ * Les figés, eux, sont la référence et restent suivis.
  */
 
 const DOSSIER = join(import.meta.dirname, "..", "vecteurs");
@@ -69,9 +59,8 @@ export function lireLeCache(): Map<string, Vecteur> {
         connus.set(lu.h, decoder(lu.v));
       }
     } catch (erreur) {
-      // Une ligne tronquée par une interruption ne condamne pas le reste du
-      // fichier : on la signale et on continue. Le texte qu'elle portait sera
-      // simplement recalculé.
+      // Une ligne tronquée par une interruption ne condamne pas le fichier :
+      // son texte sera recalculé.
       console.warn("Ligne de cache illisible, ignorée :", erreur);
     }
   }

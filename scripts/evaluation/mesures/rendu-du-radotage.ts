@@ -1,17 +1,12 @@
 import type { MesuresDuDepot, PaireDeQuestions } from "./signaux";
 
 /**
- * Les cinquante paires les plus proches, en deux axes séparés.
+ * Les cinquante paires les plus proches, en deux axes séparés : intra-concept
+ * (les questions d'un même Atom) et inter-concepts n'ont pas la même queue
+ * supérieure (d9 à 0,805 contre 0,633 au figé de référence), donc pas le même
+ * plancher.
  *
- * Deux planchers différents sont probables : la distribution intra-concept
- * (les questions d'un même Atom, qui tournent exprès) et la distribution
- * inter-concepts (les questions qui se rapprochent d'un concept à l'autre)
- * n'ont pas la même queue supérieure — sur le figé du 18/08, le d9 sortait
- * respectivement à 0,805 et 0,633. Les lire côte à côte permet de poser
- * les deux seuils sans avoir à supposer qu'ils sont les mêmes.
- *
- * Coût zéro : les vecteurs sont déjà au cache, on ne fait que trier ce qui
- * est déjà calculé.
+ * Coût zéro : les vecteurs sont déjà au cache.
  */
 
 const A_LISTER = 50;

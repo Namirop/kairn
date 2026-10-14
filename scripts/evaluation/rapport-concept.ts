@@ -1,13 +1,9 @@
 import type { Manquement } from "@/lib/domain/manquement";
 import type { ConceptEvalue, Echec } from "./execution";
 
-/** Le rendu d'un concept et de ses quatre questions, manquements compris. */
+/** Le rendu d'un concept et de ses questions, manquements compris. */
 
-/**
- * Le mot « manquement » est écrit en toutes lettres, le même que celui de
- * l'en-tête : deux ont été déclarés introuvables dans un rapport où ils étaient
- * pourtant à la bonne place, faute de porter leur nom.
- */
+/** « Manquement » en toutes lettres, le mot de l'en-tête, pour qu'on le retrouve. */
 function rendreManquements(manquements: Manquement[]): string[] {
   if (manquements.length === 0) return [];
 
@@ -18,8 +14,7 @@ function rendreManquements(manquements: Manquement[]): string[] {
 export function rendreEchec(titre: string, echec: Echec): string[] {
   const lignes = [`**${titre}** ${echec.motif}`, ""];
 
-  // Avant la sortie brute, qui est tronquée : le compte, lui, tient sur une
-  // ligne et c'est le seul chiffre qui serve à décider d'une borne.
+  // Avant la sortie brute, tronquée : c'est le chiffre qui décide d'une borne.
   if (echec.elements) lignes.push(`Éléments rendus par le modèle — ${echec.elements}`, "");
 
   if (!echec.brut) return lignes;
@@ -50,8 +45,7 @@ function rendreVariant(
     );
   }
 
-  // Le manquement s'affiche sous la question qu'il vise. Un compteur en tête
-  // sans emplacement dans le corps oblige à le chercher.
+  // Le manquement s'affiche sous la question qu'il vise.
   return [...lignes, "", ...rendreManquements(manquements.filter((m) => m.rang === rang))];
 }
 
@@ -83,8 +77,7 @@ export function rendreConcept(evalue: ConceptEvalue, rang: number): string[] {
     ...evalue.variants.flatMap((variant, index) =>
       rendreVariant(variant, index, evalue.manquementsVariants),
     ),
-    // Ce qui vise le lot entier, et non une question : nombre, facettes, ordre,
-    // diversité des formats.
+    // Ce qui vise le lot entier : nombre, facettes, ordre, diversité des formats.
     ...rendreManquements(evalue.manquementsVariants.filter((m) => m.rang === undefined)),
   ];
 }

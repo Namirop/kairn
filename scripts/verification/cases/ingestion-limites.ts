@@ -6,16 +6,15 @@ import { deposer, type ResultatDepot } from "@/lib/depots/deposer";
 import { formulaire, repartirDeZero, vieillirLesDepots } from "./depot-simule";
 import { record } from "./journal";
 
-/** Ce que la vérification vise : ses comptes sont gratuits. */
+/** Le compte de vérification est gratuit. */
 const DEPOTS_DUN_COMPTE_GRATUIT = plafondDeDepots(PLAFOND_GRATUIT);
 
 /**
- * Ce qui borne le dépôt : l'envoi répété, le débit, le quota du jour.
+ * Ce qui borne le dépôt : l'envoi répété, le débit, le quota de la période.
  *
- * La limite de débit se lit sur les dépôts des dernières secondes. Pour
- * atteindre le quota du jour sans attendre une minute entre deux dépôts, on
- * vieillit les dépôts déjà écrits — c'est le seul artifice de ce script, et il
- * ne touche qu'à l'horodatage.
+ * Pour atteindre le quota sans attendre entre deux dépôts, `vieillirLesDepots`
+ * recule la fenêtre de débit : c'est le seul artifice, il ne touche qu'aux
+ * horodatages.
  */
 
 const TEXTE = "Une note courte, déposée pour éprouver les limites du compteur.";
@@ -64,7 +63,7 @@ export async function casDebitEtQuota(userId: string): Promise<void> {
   await vieillirLesDepots(userId);
 
   // Le quota porte sur les concepts, et l'extraction n'a pas lieu ici : on
-  // remplit le compteur comme le ferait le découpage, jusqu'à une place près.
+  // remplit le compteur comme le découpage, à une place près.
   await compterConceptsRetenus(userId, "Europe/Paris", PLAFOND_GRATUIT - 1);
 
   const dernier = await deposerTexte(userId, "verif-quota-limite");

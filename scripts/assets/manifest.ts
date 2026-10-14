@@ -5,12 +5,9 @@ import { z } from "zod";
 import { ASSETS_OUT_DIR, assurerLeDossier } from "@/scripts/assets/config";
 
 /**
- * Le manifeste : la seule chose versionnée du dossier de sortie.
- *
- * Il décrit chaque fichier produit — écran, sujet, format de question, viewport,
- * date, dépôt d'origine — pour que le studio de contenu l'interroge sans avoir à
- * deviner d'après les noms de fichiers. Les PNG et MP4, eux, se régénèrent et ne
- * sont pas suivis.
+ * Le manifeste, seul fichier versionné du dossier de sortie (PNG et MP4 se
+ * régénèrent) : il décrit chaque fichier produit pour qu'on l'interroge sans
+ * deviner d'après les noms.
  */
 
 const entree = z.object({
@@ -25,7 +22,7 @@ const entree = z.object({
   format: z.string().nullable(),
   /** Le nom du dépôt source dans le figé d'assets, quand il y en a un. */
   depotSource: z.string().nullable(),
-  /** La langue de l'interface capturée. Les entrées d'avant l'anglais sont françaises. */
+  /** La langue de l'interface capturée ; absente des entrées anciennes, toutes françaises. */
   langue: z.enum(["FR", "EN"]).default("FR"),
   /** Instant de génération, en ISO 8601. */
   date: z.string().min(1),
