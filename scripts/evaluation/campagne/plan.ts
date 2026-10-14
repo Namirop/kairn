@@ -60,7 +60,10 @@ export function couterPlan(plan: Plan, modele: ModeleOpenRouter): number {
   return (plan.tokensIn * modele.prixInParM + plan.tokensOut * modele.prixOutParM) / 1_000_000;
 }
 
-/** L'extraction, un appel par dépôt. Voir `planifier-la-campagne.ts` pour les détails. */
+/**
+ * L'extraction, un appel par dépôt. Une image compte pour son texte OCR au
+ * figé : l'appel OCR en plus est marginal en coût.
+ */
 export function planExtraction(corpus: Depot[], fige: { depots: DepotFige[] }): Plan {
   const parNom = new Map(fige.depots.map((d) => [d.nom, d]));
   const promptTokens = tok(EXTRACT_ATOMS_PROMPT);
@@ -95,8 +98,11 @@ export function planDoublon(fige: { depots: DepotFige[] }, verdicts: VerdictsFig
     if (paires.length === 0) continue;
     if (!parNom.get(nom)) continue;
 
+    // Les paires soumises ne sont pas au figé : la longueur des questions
+    // rendues, qui paraphrasent A et B, sert d'indicateur.
     const tokensParPaire = paires.reduce((s, p) => {
       const contenu = (p.questionSurA?.length ?? 0) + (p.questionSurB?.length ?? 0);
+      // Plus le texte des deux concepts, ~120 signes chacun d'après le figé.
       return s + Math.ceil(contenu / CHARS_PAR_TOKEN) + 60;
     }, 0);
 
