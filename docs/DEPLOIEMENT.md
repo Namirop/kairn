@@ -88,7 +88,8 @@ déconnecté sur l'autre, sans que rien ne l'explique à l'écran.
 
 L'origine du **déploiement courant** (`VERCEL_URL`) est admise, elle, et c'est
 un cas différent : elle sert à pouvoir se connecter sur une preview pour
-éprouver une branche avant de la fusionner. Une preview est un environnement
+éprouver une branche avant de la fusionner (les previews sont désactivées
+aujourd'hui, la règle reste prête). Une preview est un environnement
 séparé — sa session n'a aucune raison d'être celle de la production, donc rien
 ne se scinde.
 
@@ -335,6 +336,45 @@ construit avec le volume et les ouvertures.
 `vercel.json` fixe l'exécution à `fra1`, pour être dans le même centre de données
 que la base. Sans ça, chaque requête traverse l'Atlantique deux fois par appel de
 base — et les écrans de ce produit en font plusieurs.
+
+## Du code à la production
+
+**`main` est la branche de production.** Vercel la surveille : tout ce qui y arrive part en ligne,
+sans confirmation. Elle est protégée sur GitHub : on n'y pousse jamais directement.
+
+### Le cycle
+
+```bash
+# 1. Une branche courte par intention
+git switch -c fix/sujet
+
+# 2. Des commits, vérifiés au passage par les hooks (format, message, typecheck et tests)
+git commit -m "fix: ce qui change"
+
+# 3. La branche part sur GitHub, puis la demande de fusion
+git push -u origin fix/sujet
+gh pr create
+```
+
+La CI refait les vérifications sur une machine vierge (lint, types, format, tests, build). GitHub
+refuse la fusion tant qu'elle n'est pas verte. **Fusionner la PR est le geste de mise en ligne** :
+c'est le seul moment où ce qui marchait sur une branche devient ce que voient les autres.
+
+Les déploiements de prévisualisation (une URL par branche) sont désactivés dans Vercel : la CI
+vérifie, et l'écran se regarde en local.
+
+### Les migrations partent avec le code
+
+La commande de build applique les migrations en attente avant de compiler : fusionner une PR qui
+en porte une migre la production. Le pourquoi, et la règle qui en découle pour les
+prévisualisations, sont plus haut, dans « L'ordre des opérations ».
+
+### Revenir en arrière
+
+Le retour arrière ne se joue pas dans git. Vercel garde les déploiements précédents et sait en
+repromouvoir un en production en quelques secondes : c'est plus rapide et plus sûr qu'une
+correction poussée dans l'urgence. Git sert à réparer ensuite, une fois le site revenu à un état
+qui marche.
 
 ## Une fois en ligne
 

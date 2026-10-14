@@ -495,7 +495,7 @@ réserve ni n'enregistre rien, donc ne peut rien compter — et émettent sans c
 ce qui se compte est ce que le produit aurait facturé, sans qu'une requête sorte.
 
 Les pièges reconnaissent les hôtes des deux ponts, listés dans
-`scripts/verification/hotes-des-fournisseurs.ts` : un pont ajouté doit y être déclaré. Le mode
+`scripts/verification/cases/hotes-des-fournisseurs.ts` : un pont ajouté doit y être déclaré. Le mode
 compteur impose le pont Anthropic, le seul dont la base se redirige, retire les deux clés, et pose le
 modèle primaire sur le modèle de repli : chaque émission y échoue, et un repli ouvert doublerait les
 comptages. Le repli a son propre cas, qui le rouvre.
