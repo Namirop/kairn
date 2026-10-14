@@ -248,7 +248,7 @@ silence. Un appel sans jeton doit renvoyer 401 : c'est le test le plus rapide qu
 la configuration est bonne, avant même de regarder les journaux.
 
 `CRON_SECRET` doit exister dans l'environnement **avant** le premier
-déploiement : sans elle, `isAuthorizedCron` refuse tout, jeton correct ou non.
+déploiement : sans elle, `estUnCronAutorise` refuse tout, jeton correct ou non.
 
 ### La cadence des rappels
 
