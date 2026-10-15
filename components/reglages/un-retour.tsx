@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { envoyerUnRetourAction, type EtatDuRetour } from "@/app/(app)/reglages/retour-action";
 import { ChoixDuSujet } from "@/components/reglages/choix-du-sujet";
@@ -20,6 +20,11 @@ import { MESSAGE_MAX } from "@/lib/domain/retour-sur-le-produit";
  * pour reproduire un défaut d'affichage ; rien d'autre (ni adresse, ni contenu
  * déposé).
  */
+/** Rien à écouter : les valeurs se relisent au rendu. */
+function sansAbonnement(): () => void {
+  return () => {};
+}
+
 export function UnRetour() {
   const [etat, envoyer, enCours] = useActionState<EtatDuRetour, FormData>(
     envoyerUnRetourAction,
@@ -28,19 +33,34 @@ export function UnRetour() {
 
   const [sujet, setSujet] = useState<SujetDeRetour>("COMPORTEMENT");
   const [capture, setCapture] = useState<string | null>(null);
-  const [fenetre, setFenetre] = useState({ largeur: 0, hauteur: 0, agent: "" });
   const fichier = useRef<HTMLInputElement>(null);
   const t = useTranslations("compte.retour");
 
-  // Lu après le montage : ces trois valeurs n'existent pas au rendu serveur, et
-  // les y chercher ferait diverger le balisage des deux côtés.
-  useEffect(() => {
-    setFenetre({
-      largeur: window.innerWidth,
-      hauteur: window.innerHeight,
-      agent: navigator.userAgent,
-    });
-  }, []);
+  // Ces trois valeurs n'existent pas au rendu serveur : il rend des zéros, et le
+  // client ne pose les vraies qu'après l'hydratation. Lues à chaque rendu, sans
+  // écouter le redimensionnement : c'est l'état au moment de l'envoi qui compte.
+  const largeur = useSyncExternalStore(
+    sansAbonnement,
+    () => window.innerWidth,
+    () => 0,
+  );
+  const hauteur = useSyncExternalStore(
+    sansAbonnement,
+    () => window.innerHeight,
+    () => 0,
+  );
+  const agent = useSyncExternalStore(
+    sansAbonnement,
+    () => navigator.userAgent,
+    () => "",
+  );
+
+  // Le champ natif appartient à ce composant : c'est ici qu'on le vide, pour
+  // pouvoir rejoindre un même fichier après l'avoir retiré.
+  function retirerLaCapture() {
+    setCapture(null);
+    if (fichier.current) fichier.current.value = "";
+  }
 
   if (etat.envoye) {
     return (
@@ -91,13 +111,14 @@ export function UnRetour() {
       <CaptureDuRetour
         capture={capture}
         onCapture={setCapture}
+        onRetirer={retirerLaCapture}
         fichier={fichier}
         enCours={enCours}
       />
 
-      <input type="hidden" name="largeur" value={fenetre.largeur} />
-      <input type="hidden" name="hauteur" value={fenetre.hauteur} />
-      <input type="hidden" name="agent" value={fenetre.agent} />
+      <input type="hidden" name="largeur" value={largeur} />
+      <input type="hidden" name="hauteur" value={hauteur} />
+      <input type="hidden" name="agent" value={agent} />
 
       <div className="gap-pas-4 flex flex-wrap items-center">
         <Button type="submit" disabled={enCours}>
@@ -116,11 +137,13 @@ export function UnRetour() {
 function CaptureDuRetour({
   capture,
   onCapture,
+  onRetirer,
   fichier,
   enCours,
 }: {
   capture: string | null;
   onCapture: (nom: string | null) => void;
+  onRetirer: () => void;
   fichier: React.RefObject<HTMLInputElement | null>;
   enCours: boolean;
 }) {
@@ -135,10 +158,7 @@ function CaptureDuRetour({
       libelle={capture ? t("changerCapture") : t("joindreCapture")}
       libelleRetirer={t("retirerCapture")}
       onChoisir={(choisi) => onCapture(choisi?.name ?? null)}
-      onRetirer={() => {
-        onCapture(null);
-        if (fichier.current) fichier.current.value = "";
-      }}
+      onRetirer={onRetirer}
       desactive={enCours}
       className="flex-wrap"
     />

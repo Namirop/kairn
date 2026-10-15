@@ -69,6 +69,11 @@ export default async function PageNouveauDepot({
   // Quand les deux ferment ensemble, on nomme les concepts : c'est la limite
   // qui se paie.
   const motif = restants === 0 ? "concepts" : "depots";
+  // L'invite change à chaque visite, et c'est voulu. Un Server Component se rend
+  // une fois par requête : la règle de pureté, qui ne le distingue pas d'un
+  // composant client, ne s'applique pas ici.
+  // eslint-disable-next-line react-hooks/purity
+  const invite = inviteDeDepot(Math.random(), await langueDeLaRequete());
 
   return (
     <PileDePanneaux sol="ombre">
@@ -98,7 +103,7 @@ export default async function PageNouveauDepot({
           <FormulaireDepot
             restants={restants}
             cleEnvoi={crypto.randomUUID()}
-            invite={inviteDeDepot(Math.random(), await langueDeLaRequete())}
+            invite={invite}
             premierDepot={aucunDepot}
             partageManque={partage === "absent"}
           />

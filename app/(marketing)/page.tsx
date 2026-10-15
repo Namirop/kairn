@@ -29,6 +29,11 @@ export default async function PageAccueil() {
   const essaiPrecedent = await lireLEssaiEnCours();
   const connecte = (await lireLUtilisateur()) !== null;
   const t = await getTranslations("site.accueil.pied");
+  // L'invite change à chaque visite, et c'est voulu. Un Server Component se rend
+  // une fois par requête : la règle de pureté, qui ne le distingue pas d'un
+  // composant client, ne s'applique pas ici.
+  // eslint-disable-next-line react-hooks/purity
+  const invite = inviteDeDepot(Math.random(), langue);
 
   return (
     <>
@@ -42,7 +47,7 @@ export default async function PageAccueil() {
       {connecte ? null : (
         <>
           <Strates de="ombre" vers="papier" graine="accueil-essai" />
-          <Essai invite={inviteDeDepot(Math.random(), langue)} essaiPrecedent={essaiPrecedent} />
+          <Essai invite={invite} essaiPrecedent={essaiPrecedent} />
         </>
       )}
 

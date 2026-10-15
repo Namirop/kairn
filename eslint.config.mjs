@@ -48,13 +48,6 @@ const eslintConfig = [
       "@typescript-eslint/no-unused-vars": ["error", { ignoreRestSiblings: true }],
       "@typescript-eslint/consistent-type-assertions": ["error", { assertionStyle: "never" }],
       "no-console": ["error", { allow: ["warn", "error", "info"] }],
-      // Les règles du React Compiler, arrivées avec Next 16 : en avertissement le
-      // temps de corriger les cas existants, relevés dans le carnet. Elles
-      // repassent en erreur une fois le compte à zéro.
-      "react-hooks/purity": "warn",
-      "react-hooks/refs": "warn",
-      "react-hooks/set-state-in-effect": "warn",
-      "react-hooks/immutability": "warn",
     },
   },
   {

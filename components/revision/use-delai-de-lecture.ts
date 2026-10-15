@@ -19,19 +19,23 @@ export const DELAI_DE_LECTURE_MS = 3000;
  * n'y a rien à lire.
  */
 export function useDelaiDeLecture(aLire: boolean): boolean {
-  const [lu, setLu] = useState(!aLire);
+  const [ecoule, setEcoule] = useState(false);
+  const [aLirePrecedent, setALirePrecedent] = useState(aLire);
+
+  // Une nouvelle réponse à lire relance le délai : l'état se recale pendant le
+  // rendu, sans attendre un effet qui afficherait d'abord l'ancien.
+  if (aLire !== aLirePrecedent) {
+    setALirePrecedent(aLire);
+    setEcoule(false);
+  }
 
   useEffect(() => {
-    if (!aLire) {
-      setLu(true);
-      return;
-    }
+    if (!aLire) return;
 
-    setLu(false);
-    const minuteur = setTimeout(() => setLu(true), DELAI_DE_LECTURE_MS);
+    const minuteur = setTimeout(() => setEcoule(true), DELAI_DE_LECTURE_MS);
 
     return () => clearTimeout(minuteur);
   }, [aLire]);
 
-  return lu;
+  return !aLire || ecoule;
 }

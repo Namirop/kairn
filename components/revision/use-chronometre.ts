@@ -19,7 +19,9 @@ export function useChronometre(question: string | number): {
   arreter: () => void;
   mesure: () => number;
 } {
-  const debut = useRef(Date.now());
+  // Posé par l'effet, qui tourne à l'affichage de chaque question : lire
+  // l'horloge pendant le rendu le rendrait impur.
+  const debut = useRef(0);
   const fige = useRef<number | null>(null);
 
   useEffect(() => {
