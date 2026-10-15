@@ -17,7 +17,7 @@
     roche    deux panneaux par page, pas trois. Le texte et les pierres s'y
              inversent en clairs ; le sommet lichen reste lichen
 
-    Papier contre ombre : 1,22 pour 1, volontairement faible. En dessous, une
+    Papier contre ombre : 1,20 pour 1, volontairement faible. En dessous, une
     carte posée sur un panneau ne se détache plus ; au-dessus, la bande
     alternée devient un aplat de couleur à part entière.
   */
@@ -71,7 +71,7 @@
   /* Réservé au streak, nulle part ailleurs. */
   --ember: #b4552f;
   --ember-deep: #9e4526;
-  /* L'ember des surfaces sombres : celui du papier n'y donne que 3,60, trop peu
+  /* L'ember des surfaces sombres : celui du papier n'y donne que 2,92, trop peu
      pour la ligne de série, petite et en capitales. Celui-ci donne 5,30 sur la
      roche. */
   --ember-clair: #d98a63;

@@ -14,7 +14,7 @@ import { cn } from "@/lib/fusion-des-classes";
  * `lg` (44 px) est calé sur la cible tactile de l'action principale.
  */
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-galet border border-transparent font-medium whitespace-nowrap transition-colors select-none active:translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-pas-2 rounded-galet border border-transparent font-medium whitespace-nowrap transition-colors select-none active:translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -33,11 +33,12 @@ const buttonVariants = cva(
         linkClair:
           "text-stone-300 underline decoration-stone-700 underline-offset-4 hover:text-stone-50 hover:decoration-stone-300",
       },
+      // Au doigt, toute cible fait 44 px : la densité ne se paie qu'à la souris.
       size: {
-        default: "h-10 px-pas-6 text-petit",
-        sm: "h-9 px-pas-4 text-petit",
+        default: "h-10 px-pas-6 text-petit pointer-coarse:h-11",
+        sm: "h-9 px-pas-4 text-petit pointer-coarse:h-11",
         lg: "h-11 px-pas-8 text-corps",
-        icon: "size-10",
+        icon: "size-10 pointer-coarse:size-11",
       },
     },
     defaultVariants: { variant: "default", size: "default" },
