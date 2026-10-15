@@ -13,6 +13,16 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # Les types de Node suivent la version qui fait tourner le site (`.nvmrc`,
+      # Node 24 sur Vercel). Au-delà, le compilateur accepterait des API absentes
+      # en prod. Ce plafond monte avec `.nvmrc`.
+      - dependency-name: "@types/node"
+        versions: [">=25"]
+      # knip et typescript-eslint n'acceptent pas encore TypeScript 7. À retirer
+      # quand ils le font.
+      - dependency-name: "typescript"
+        versions: [">=7"]
 
   - package-ecosystem: github-actions
     directory: /
