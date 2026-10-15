@@ -1,4 +1,5 @@
 // i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
+import { echapper } from "./echapper";
 import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
 import { heureUtc, lignesDeValeurs } from "./blocs-d-alerte";
 
@@ -47,7 +48,7 @@ export function composerLAlerteDePaiement(payload: AlerteDePaiementPayload): Ema
 <p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.secondaire};">${constat}</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">${tableau}</table>
 <p style="margin:0 0 4px;font-size:14px;color:${S.secondaire};">Ce que l'erreur dit :</p>
-<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;line-height:19px;color:${S.encre};word-break:break-all;">${motifCourt}</p>
+<p style="margin:0 0 24px;font-family:${S.MONO};font-size:13px;line-height:19px;color:${S.encre};word-break:break-all;">${echapper(motifCourt)}</p>
 <p style="margin:0;font-size:15px;line-height:23px;color:${S.secondaire};">${reparation}</p>`;
 
   const text = [
