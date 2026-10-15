@@ -184,7 +184,7 @@ Les migrations suivantes sont **appliquées par la commande de build**, avant qu
 Next ne compile quoi que ce soit :
 
 ```json
-"build": "prisma migrate deploy && next build --turbopack"
+"build": "prisma migrate deploy && next build"
 ```
 
 Ce n'était pas le cas au départ, et le motif d'alors était bon : un build de

@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/Namirop/kairn/actions/workflows/ci.yml"><img src="https://github.com/Namirop/kairn/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/Next.js-15-black?logo=nextdotjs&logoColor=white" alt="Next.js">
+  <img src="https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs&logoColor=white" alt="Next.js">
   <img src="https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/PostgreSQL-Prisma-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL et Prisma">
 </p>
@@ -42,7 +42,7 @@ la question : les formulations tournent pour qu'on retienne l'idée, pas une phr
 
 | Domaine            | Choix                                                                        |
 | ------------------ | ---------------------------------------------------------------------------- |
-| Application        | Next.js 15 (App Router), React 19, TypeScript strict                         |
+| Application        | Next.js 16 (App Router), React 19, TypeScript strict                         |
 | Données            | PostgreSQL (Neon), Prisma 7                                                  |
 | Modèle de langage  | OpenRouter, repli automatique sur Claude Sonnet, sorties validées par Zod    |
 | Répétition espacée | ts-fsrs                                                                      |
