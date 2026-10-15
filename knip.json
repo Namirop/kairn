@@ -3,5 +3,5 @@
   "entry": ["lib/i18n/requete.ts", "public/sw.js", "scripts/**/*.{ts,tsx}"],
   "project": ["app/**", "components/**", "lib/**", "scripts/**", "prisma/**", "*.{ts,mts,mjs}"],
   "ignoreExportsUsedInFile": true,
-  "ignoreDependencies": ["eslint-config-next", "postcss"]
+  "ignoreDependencies": ["postcss"]
 }
