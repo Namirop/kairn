@@ -7,6 +7,7 @@ import { FormulaireConnexion } from "@/components/compte/formulaire-connexion";
 import { googleEstPropose } from "@/lib/auth/config";
 import { PARAMETRE_DE_SUITE, ROUTES } from "@/lib/auth/routes";
 import { lireLUtilisateur } from "@/lib/auth/session";
+import { cheminDeSuite } from "@/lib/domain/chemin-de-suite";
 import { adressePublique } from "@/lib/i18n/adresses";
 import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 
@@ -16,11 +17,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("metaTitre") };
 }
 
-/** Ne suit que les chemins internes : un `suite` venant de l'URL est du client. */
-function destination(valeur: string | undefined): string {
-  return valeur?.startsWith("/") && !valeur.startsWith("//") ? valeur : ROUTES.aujourdhui;
-}
-
 export default async function PageConnexion({
   searchParams,
 }: {
@@ -28,7 +24,7 @@ export default async function PageConnexion({
 }) {
   const parametres = await searchParams;
   const brut = parametres[PARAMETRE_DE_SUITE];
-  const suite = destination(Array.isArray(brut) ? brut[0] : brut);
+  const suite = cheminDeSuite(Array.isArray(brut) ? brut[0] : brut) ?? ROUTES.aujourdhui;
 
   // Déjà connecté : on le mène là où il allait, sans lui redemander un code.
   if (await lireLUtilisateur()) redirect(suite);
