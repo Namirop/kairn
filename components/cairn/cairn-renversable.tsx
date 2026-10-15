@@ -46,28 +46,31 @@ export function CairnRenversable({
   const pose = useAnimationPossible(immobile);
   const { pierres, hauteur, ySol } = useMemo(() => empiler(nombre, graines), [nombre, graines]);
   const { tenu, basculer, refZone } = usePriseDuCairn();
-  const chute = useChuteDesPierres(pierres, !immobile, { cadre: SANS_BORDS, tenu });
+  // Déstructuré : refs et gestionnaires vont chacun où ils servent, au lieu
+  // d'un objet que le React Compiler lirait en entier comme une ref.
+  const { refZoneDeJeu, refSvg, refsGroupes, surDeplacement, surAppui, surSortie } =
+    useChuteDesPierres(pierres, !immobile, { cadre: SANS_BORDS, tenu });
 
   if (immobile) return <Cairn nombre={nombre} graines={graines} className={className} />;
 
   return (
     <div ref={refZone} className={cn("relative h-full w-full", className)}>
       <div
-        ref={chute.refZoneDeJeu}
+        ref={refZoneDeJeu}
         /* En tactile, ce bloc ne prend le geste (`touch-none`) que prise armée :
            voir `useChuteDesPierres` et `PriseDuCairn`. Les gestionnaires
            ci-dessous ne servent qu'à la souris et au tapotement. */
         className={cn("relative h-full w-full cursor-crosshair", tenu && "touch-none")}
-        onPointerMove={chute.surDeplacement}
-        onPointerDown={chute.surAppui}
-        onPointerLeave={chute.surSortie}
+        onPointerMove={surDeplacement}
+        onPointerDown={surAppui}
+        onPointerLeave={surSortie}
         /* La fin d'un geste tactile efface le dernier point : sinon le geste
            suivant se mesurerait depuis là, avec une vitesse absurde. */
-        onPointerUp={chute.surSortie}
-        onPointerCancel={chute.surSortie}
+        onPointerUp={surSortie}
+        onPointerCancel={surSortie}
       >
         <svg
-          ref={chute.refSvg}
+          ref={refSvg}
           viewBox={`0 ${-hauteur + ySol} ${LARGEUR_VUE} ${hauteur}`}
           className="h-full w-full overflow-visible"
           role="img"
@@ -78,7 +81,7 @@ export function CairnRenversable({
             <g
               key={pierre.cle}
               ref={(element) => {
-                chute.refsGroupes.current[rang] = element;
+                refsGroupes.current[rang] = element;
               }}
               transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}
             >

@@ -66,31 +66,40 @@ export function useChuteDesPierres(
     });
   }, []);
 
+  // Une image de la boucle, qui demande la suivante : `function` et non une
+  // constante, pour qu'elle puisse se nommer elle-même sans être lue avant
+  // d'exister.
   const tourner = useCallback(
-    (precedent: number) => (instant: number) => {
-      const dt = (instant - precedent) / 1000;
+    (depart: number) => {
+      function image(precedent: number) {
+        return (instant: number) => {
+          const dt = (instant - precedent) / 1000;
 
-      if (phase.current === "chute") {
-        corps.current = avancer(corps.current, pierres, dt, cadre);
-        if (toutEstPose(corps.current) || instant - debutChute.current > CHUTE_MAXIMALE) {
-          phase.current = "attente";
-          posee.current = instant;
-        }
-      } else if (phase.current === "attente" && instant - posee.current > AVANT_REMONTEE) {
-        phase.current = "remontee";
-      } else if (phase.current === "remontee") {
-        corps.current = remonter(corps.current, pierres, dt);
-        if (!cairnRenverse(corps.current)) phase.current = "pose";
+          if (phase.current === "chute") {
+            corps.current = avancer(corps.current, pierres, dt, cadre);
+            if (toutEstPose(corps.current) || instant - debutChute.current > CHUTE_MAXIMALE) {
+              phase.current = "attente";
+              posee.current = instant;
+            }
+          } else if (phase.current === "attente" && instant - posee.current > AVANT_REMONTEE) {
+            phase.current = "remontee";
+          } else if (phase.current === "remontee") {
+            corps.current = remonter(corps.current, pierres, dt);
+            if (!cairnRenverse(corps.current)) phase.current = "pose";
+          }
+
+          peindre();
+
+          if (phase.current === "pose") {
+            boucle.current = null;
+            return;
+          }
+
+          boucle.current = requestAnimationFrame(image(instant));
+        };
       }
 
-      peindre();
-
-      if (phase.current === "pose") {
-        boucle.current = null;
-        return;
-      }
-
-      boucle.current = requestAnimationFrame(tourner(instant));
+      return image(depart);
     },
     [cadre, peindre, pierres],
   );

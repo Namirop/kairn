@@ -18,6 +18,10 @@ export function useAnimationPossible(immobile: boolean): boolean {
 
   useEffect(() => {
     if (immobile || document.hidden) return;
+    // Le rendu de plus est le but : la pose rejoue sa chute juste après
+    // l'hydratation, une fois. Un `useSyncExternalStore` relirait la visibilité
+    // à chaque rendu et rejouerait la chute au retour d'un onglet caché.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPossible(true);
   }, [immobile]);
 
