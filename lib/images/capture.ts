@@ -13,6 +13,14 @@ import { BORD_LONG_CAPTURE, TAILLE_MAXIMALE_OCTETS } from "@/lib/depots/bornes-d
 
 const FORMATS_LISIBLES = new Set(["jpeg", "png", "webp", "gif"]);
 
+/**
+ * Le plafond de pixels d'une image décodée. Quatre mégaoctets de PNG peuvent
+ * annoncer 16 384 × 16 384 pixels, soit un gigaoctet une fois décodés. Une
+ * capture de téléphone en fait moins de 4 millions, et le navigateur réduit
+ * avant l'envoi : 50 millions laisse passer toute photo qui tient sous 4 Mo.
+ */
+const PIXELS_MAXIMUM = 50_000_000;
+
 export type CaptureLue = { donnees: Uint8Array<ArrayBuffer>; mediaType: "image/webp" };
 
 /**
@@ -31,17 +39,22 @@ export async function preparerCapture(fichier: File): Promise<LectureCapture> {
   }
 
   const octets = Buffer.from(await fichier.arrayBuffer());
-  const image = sharp(octets, { animated: false });
-  const format = await image
+  // Les métadonnées se lisent dans l'en-tête, sans décoder l'image. Sans la
+  // limite de pixels ici : sharp la ferait échouer, et une image trop grande
+  // serait dite illisible.
+  const entete = await sharp(octets)
     .metadata()
-    .then((donnees) => donnees.format)
     .catch(() => undefined);
 
-  if (!format || !FORMATS_LISIBLES.has(format)) {
+  if (!entete?.format || !FORMATS_LISIBLES.has(entete.format)) {
     return { ok: false, refus: "illisible" };
   }
 
-  const reduite = await image
+  if ((entete.width ?? 0) * (entete.height ?? 0) > PIXELS_MAXIMUM) {
+    return { ok: false, refus: "lourde" };
+  }
+
+  const reduite = await sharp(octets, { animated: false, limitInputPixels: PIXELS_MAXIMUM })
     .rotate()
     .resize({
       width: BORD_LONG_CAPTURE,
