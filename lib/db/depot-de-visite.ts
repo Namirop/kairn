@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/client";
 import { optionsDUnQCM, texteATrouServi } from "@/lib/db/question-servie";
-import type { VariantFormat } from "@/lib/db/types";
+import type { InputNature, VariantFormat } from "@/lib/db/types";
 
 /**
  * Ce qu'une visite sans compte a produit : le lire pour l'afficher, le rattacher
@@ -104,7 +104,18 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
  * C'est à l'appelant de demander les questions : la dépense reprend là, et doit
  * se voir dans le code qui décide.
  */
-export type DepotRepris = { inputId: string; atomIds: string[] };
+export type DepotRepris = {
+  inputId: string;
+  nature: InputNature | null;
+  concepts: ConceptRepris[];
+};
+
+/**
+ * `dejaQuestionne` : l'essai a déjà questionné ce concept, ou le fait encore.
+ * Le redemander paierait un appel pour retirer les questions que la personne
+ * vient de voir.
+ */
+export type ConceptRepris = { id: string; uncertain: boolean; dejaQuestionne: boolean };
 
 export async function rattacherAuCompte(
   sessionId: string,
@@ -122,7 +133,19 @@ export async function rattacherAuCompte(
   const tous = await prisma.input.findMany({
     where: { anonymousSessionId: sessionId },
     orderBy: { createdAt: "asc" },
-    select: { id: true, status: true, atoms: { select: { id: true } } },
+    select: {
+      id: true,
+      status: true,
+      nature: true,
+      atoms: {
+        select: {
+          id: true,
+          uncertain: true,
+          _count: { select: { variants: { where: { retiredAt: null } } } },
+        },
+      },
+      jobs: { where: { kind: "VARIANTS" }, select: { atomIds: true } },
+    },
   });
 
   // Un essai terminal et vide ne suit pas au compte : son verdict a déjà été
@@ -169,7 +192,13 @@ export async function rattacherAuCompte(
 
   return depots.map((depot) => ({
     inputId: depot.id,
-    atomIds: depot.atoms.map((atome) => atome.id),
+    nature: depot.nature,
+    concepts: depot.atoms.map((atome) => ({
+      id: atome.id,
+      uncertain: atome.uncertain,
+      dejaQuestionne:
+        atome._count.variants > 0 || depot.jobs.some((job) => job.atomIds.includes(atome.id)),
+    })),
   }));
 }
 
