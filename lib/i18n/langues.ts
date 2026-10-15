@@ -26,5 +26,5 @@ export function langueDeLocale(locale: string): Langue {
  */
 export const COOKIE_DE_LANGUE = "kairn-langue";
 
-/** Posé par le middleware sur une page publique dont l'adresse dit la langue. */
+/** Posé par le proxy sur une page publique dont l'adresse dit la langue. */
 export const EN_TETE_DE_LANGUE = "x-kairn-langue";

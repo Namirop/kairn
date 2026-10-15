@@ -6,10 +6,10 @@ import { useLangue } from "@/lib/i18n/use-langue";
 /**
  * Le passage à l'autre langue, sur les pages publiques. L'autre langue est
  * nommée dans cette langue : qui ne lit pas la page doit reconnaître la sienne.
- * Il mène à `/fr…` ou `/en…`, que le middleware retient en cookie.
+ * Il mène à `/fr…` ou `/en…`, que le proxy retient en cookie.
  *
  * `<a>` et non `Link` : le changement de langue doit repasser par le
- * middleware et recharger les textes, ce qu'une navigation client ne ferait pas.
+ * proxy et recharger les textes, ce qu'une navigation client ne ferait pas.
  */
 export function LienDeLangue() {
   const langue = useLangue();

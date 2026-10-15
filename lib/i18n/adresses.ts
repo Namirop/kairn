@@ -6,7 +6,7 @@ import type { Langue } from "@/lib/db/types";
  * qu'on partage et qu'un moteur indexe. L'application suit le réglage du
  * compte.
  *
- * `/en` est servi par le middleware à la même page — il n'y a pas de dossier
+ * `/en` est servi par le proxy à la même page — il n'y a pas de dossier
  * `en/` dans `app/`. Le français n'a pas de préfixe ; `/fr` ne fait que poser le
  * choix avant d'y renvoyer.
  */
@@ -31,7 +31,7 @@ export function adressePublique(chemin: string, langue: Langue): string {
   return chemin === ROUTES.accueil ? PREFIXE_ANGLAIS : `${PREFIXE_ANGLAIS}${chemin}`;
 }
 
-/** Posé par le middleware : la page publique servie, sans son préfixe de langue. */
+/** Posé par le proxy : la page publique servie, sans son préfixe de langue. */
 export const EN_TETE_DU_CHEMIN = "x-kairn-chemin";
 
 /**

@@ -10,7 +10,7 @@ import { lireLUtilisateur } from "@/lib/auth/session";
 import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 
 /**
- * La coquille de l'application authentifiée. Le middleware n'a regardé que le
+ * La coquille de l'application authentifiée. Le proxy (`proxy.ts`) n'a regardé que le
  * cookie ; ici on vérifie la session pour de bon, et une session expirée
  * renvoie vers la connexion.
  */
