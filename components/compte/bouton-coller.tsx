@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { ClipboardPaste } from "lucide-react";
 
 /**
@@ -10,9 +10,22 @@ import { ClipboardPaste } from "lucide-react";
  * peut refuser la permission) : le bouton ne s'affiche que là où l'API existe.
  * C'est un raccourci ; le clavier mobile propose le code, la frappe reste.
  *
- * Détection après le montage : le serveur ne connaît pas le presse-papier, et
- * l'interroger au rendu ferait diverger l'hydratation.
+ * Le serveur ne connaît pas le presse-papier : il rend sans bouton, et le client
+ * ne l'ajoute qu'après l'hydratation, ce que `useSyncExternalStore` garantit.
  */
+/** L'API ne change pas pendant la vie de la page : rien à écouter. */
+function sansAbonnement(): () => void {
+  return () => {};
+}
+
+function lectureDisponible(): boolean {
+  return typeof navigator.clipboard?.readText === "function";
+}
+
+function jamaisAuServeur(): boolean {
+  return false;
+}
+
 export function BoutonColler({
   onTexte,
   intitule,
@@ -23,13 +36,7 @@ export function BoutonColler({
   intitule: string;
   className?: string;
 }) {
-  const [disponible, setDisponible] = useState(false);
-
-  useEffect(() => {
-    setDisponible(
-      typeof navigator !== "undefined" && typeof navigator.clipboard?.readText === "function",
-    );
-  }, []);
+  const disponible = useSyncExternalStore(sansAbonnement, lectureDisponible, jamaisAuServeur);
 
   if (!disponible) return null;
 

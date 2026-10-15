@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { enregistrerLesReglagesAction, type EtatDesReglages } from "@/app/(app)/reglages/actions";
 import { BarreDEnregistrement } from "@/components/reglages/barre-denregistrement";
@@ -53,9 +53,12 @@ export function FormulaireDeReglages({
     doit rester pour dire quoi corriger, sinon elle annoncerait écrite une
     saisie rejetée.
   */
-  useEffect(() => {
+  const [etatVu, setEtatVu] = useState(etat);
+
+  if (etat !== etatVu) {
+    setEtatVu(etat);
     if (etat.message) setModifie(false);
-  }, [etat]);
+  }
 
   // `input` remonte des champs de texte ; les interrupteurs n'émettent rien qui
   // remonte jusqu'ici, d'où leur `setModifie` explicite.
