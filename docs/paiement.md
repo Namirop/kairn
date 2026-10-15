@@ -233,6 +233,23 @@ verrous, dans le même esprit que `MOCK_AI` pour le modèle :
 S'y ajoutent deux règles de code : un seul module instancie le SDK, et un seul module accorde un
 plan.
 
+### La version d'API, épinglée
+
+`lib/paiement/client.ts` épingle la version d'API Stripe (`2026-09-30.endive`). Sans elle, une mise à
+jour du paquet changerait en silence la forme des réponses, et le droit d'un compte payant dépend
+de `current_period_end` lu sur la ligne de l'abonnement.
+
+Les webhooks, eux, ne suivent pas le code : les endpoints n'ont pas de version propre et reçoivent
+leurs événements dans la **version par défaut du compte**, réglée dans le tableau de bord. Monter la
+version se fait donc en deux temps, dans cet ordre :
+
+1. Changer `apiVersion` dans le code, puis éprouver le parcours (ci-dessous) deux fois : avec
+   `stripe listen`, qui émet dans la version par défaut du compte, puis avec `stripe listen --latest`,
+   qui émet dans la plus récente. Le code doit accepter les deux, car la prod enverra l'ancienne
+   version jusqu'au second temps.
+2. Après le déploiement, passer la version par défaut du compte dans le tableau de bord, en live
+   puis dans la sandbox.
+
 ---
 
 ## Développer et éprouver en local
