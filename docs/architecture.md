@@ -218,10 +218,19 @@ lendemain, sur le même cookie, car la reprise au compte passe par lui.
 
 Deux visites par adresse et non une, parce qu'une adresse ne désigne pas une personne : un bureau
 ou un opérateur mobile sous CGNAT sortent par une seule IPv4. Ce verrou freine le passant qui
-recommence ; c'est la part anonyme et le plafond global qui bornent la dépense. Aucune IP n'est
-conservée : `AnonymousSession.ipHash` porte un SHA-256 tronqué, salé par `BETTER_AUTH_SECRET`.
+recommence ; c'est la part anonyme et le plafond global qui bornent la dépense. Une IPv6 se compte
+par son /64 ([prefixe-de-l-adresse.ts](../lib/domain/prefixe-de-l-adresse.ts)) : un abonné en
+détient tout le bloc et changerait d'adresse à chaque requête. Aucune IP n'est conservée :
+`AnonymousSession.ipHash` porte un SHA-256 tronqué, salé par `BETTER_AUTH_SECRET`.
 
 ## Compte et données
+
+La connexion passe par un code à six chiffres reçu par email : trois essais, dix minutes, stocké
+haché. Son envoi est limité deux fois : par adresse IP, avec le compteur de better-auth gardé en
+base (`RateLimit`, une instance Vercel n'a pas la mémoire des autres), et par destinataire, cinq
+codes par heure (`EnvoisDeCode`, [envois-de-code.ts](../lib/db/envois-de-code.ts)), refusés avant
+que le code en cours ne soit remplacé. Après la connexion, on ne suit qu'un chemin interne
+([chemin-de-suite.ts](../lib/domain/chemin-de-suite.ts)).
 
 Un compte exporte ses dépôts et sa progression en JSON (`GET /api/mon-compte/export`) et se
 supprime lui-même, tout partant par les cascades du schéma. Les emails portent un lien de
@@ -234,10 +243,10 @@ retente rien : seul un job resté en attente, ou mort en route depuis plus de di
 par le cron, au plus trois fois. Quelle que soit l'étape qui échoue, une seule fonction referme le
 dépôt (`marquerPretSiPlusRienEnAttente`) et elle garde les concepts déjà écrits.
 
-| Route                                                   | Rôle                                                                                            |
-| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| [`/api/cron/jobs`](../app/api/cron/jobs/route.ts)       | Ferme les jobs épuisés, efface les visites non réclamées, reprend trois jobs au plus            |
-| [`/api/cron/rappels`](../app/api/cron/rappels/route.ts) | Rappel à l'heure locale si un concept est dû, alerte de série à 21 h, relance des comptes vides |
+| Route                                                   | Rôle                                                                                                                 |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [`/api/cron/jobs`](../app/api/cron/jobs/route.ts)       | Ferme les jobs épuisés, efface les visites non réclamées et les fenêtres de codes closes, reprend trois jobs au plus |
+| [`/api/cron/rappels`](../app/api/cron/rappels/route.ts) | Rappel à l'heure locale si un concept est dû, alerte de série à 21 h, relance des comptes vides                      |
 
 Les deux exigent `Authorization: Bearer $CRON_SECRET` ([autorisation.ts](../lib/cron/autorisation.ts))
 et signalent un battement à chaque passage abouti : c'est le silence qui alerte. Un email part une
