@@ -31,6 +31,35 @@ const nextConfig: NextConfig = {
    * Next est éteint : sa pastille se retrouverait dans chaque capture.
    */
   ...(process.env.ASSETS_PREVIEW === "1" ? { devIndicators: false as const } : {}),
+
+  poweredByHeader: false,
+
+  /**
+   * Les protections que le navigateur applique sans rien casser. Le cadre reste
+   * permis à la même origine : la vérification en largeur mobile charge la page
+   * dans une iframe d'elle-même. Pas de CSP de scripts : Next injecte des
+   * scripts en ligne, et la tenir demanderait un nonce par requête.
+   */
+  async headers() {
+    return [
+      {
+        source: "/:chemin*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self'; object-src 'none'; base-uri 'self'",
+          },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), payment=()",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default avecLesLangues(nextConfig);
