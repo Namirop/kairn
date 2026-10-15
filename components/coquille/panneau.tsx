@@ -75,8 +75,8 @@ export function Panneau({
       id={id}
       /*
         La surface est déclarée, pas seulement peinte : l'anneau de focus en
-        dépend. `lichen-deep` tombe à 2,48:1 sur la roche, sous le seuil d'un
-        indicateur de focus, et la feuille de style le relève sur cette surface.
+        dépend. `accent-profond` tombe à 1,39:1 sur la roche, sous le seuil d'un
+        indicateur de focus, et la feuille de style y passe à `accent-clair`.
       */
       data-surface={surface}
       className={cn(

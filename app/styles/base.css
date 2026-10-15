@@ -112,7 +112,7 @@
   }
 
   /*
-    L'anneau de focus sur la roche : `accent-profond` y tombe à 2,48, sous le
+    L'anneau de focus sur la roche : `accent-profond` y tombe à 1,39, sous le
     seuil de 3 exigé d'un indicateur de focus ; `accent-clair` donne 6,85.
     Crochet sur `data-surface`, que posent `Panneau` et la fenêtre de l'essai,
     plutôt que sur la classe qui peint le fond.

@@ -131,7 +131,7 @@ elle a du grain.**
 
 Le système est **calme, minéral et délibéré**. Cinq surfaces mates
 (papier / ombre / givre / session / roche) suffisent à séparer les sujets — aucun trait
-fin, aucune bordure grise. Une seule audace visuelle est autorisée : le cairn
+fin entre deux sujets, aucune carte à bordure grise. Une seule audace visuelle est autorisée : le cairn
 lui-même, dessiné à la main, aux pierres légèrement irrégulières dérivées d'un
 seed déterministe. Toute autre exubérance est proscrite.
 
@@ -161,7 +161,7 @@ seed déterministe. Toute autre exubérance est proscrite.
 - Grain overlay léger sur toutes les surfaces — se sent, ne se voit pas.
 - Élément signature : le cairn irrégulier dessiné main, aux pierres
   déterministes.
-- Trois radius, trois sens (panneau plein, carte arrondie, galet pilule).
+- Cinq rayons, chacun un sens (panneau plein, pierre, champ, carte, galet).
 
 ## Colors
 
@@ -202,9 +202,12 @@ composant ne les écrit en dur.
 - **Papier** (`--surface-papier` #eef5f7) : surface de lecture par défaut.
 - **Ombre** (`--surface-ombre` #cfe3ec) : panneau alterné, jamais deux
   d'affilée. Papier contre ombre : 1,20 pour 1, volontairement faible.
-- **Givre** (`--surface-givre` #e4eff2) : un seul panneau dans
-  toute l'application — celui où le produit tient sa promesse. Interdit tout
-  autre usage du lichen sur cet écran, sauf le sommet du cairn.
+- **Givre** (`--surface-givre` #e4eff2) : un seul bloc dans toute
+  l'application, celui de l'offre complète dans les réglages
+  (`components/reglages/offre-complete.tsx`) — là où le produit dit ce qu'il
+  promet en échange du paiement. Aucun autre emploi : c'est sa rareté qui le
+  détache. Interdit tout usage du lichen sur cet écran, sauf le sommet du
+  cairn.
 - **Session** (`--surface-session` #b3cfda) : le sol de l'écran de session, et
   d'aucun autre. La carte de la question, en papier, s'y pose à 1,48 pour 1.
 - **Roche** (`--surface-roche` #1e2b3c) : deux panneaux maximum. Le
@@ -272,9 +275,11 @@ Le ciel de l'ouverture est un lavis d'une seule teinte (`--ciel`, de
 
 ### Named Rules
 
-**The One Lichen Rule.** Le lichen apparaît uniquement sur le sommet du cairn,
-l'outline de focus, et le data-mark des graphiques internes. Nulle part
-ailleurs. Sa rareté est ce qui le rend signal — l'exception qui donne du sens.
+**The One Lichen Rule.** Le lichen ne dit qu'une chose, la maîtrise : le
+sommet du cairn, la pierre tenue, la bonne réponse. Nulle part ailleurs. Le
+focus et les graphiques sont des demandes du produit ou des mesures, pas de la
+maîtrise : ils passent par l'accent (`--accent-profond`, `--data-mark`). Sa
+rareté est ce qui le rend signal — l'exception qui donne du sens.
 
 **The One Ember Rule.** L'ember n'apparaît que sur l'affichage du streak.
 Jamais ailleurs, même comme deuxième accent, même « juste pour cette fois ».
@@ -341,9 +346,12 @@ titre de l'ouverture. Les polices sont chargées dans `app/polices.ts`.
 pour titrer, texte pour lire, mono pour signaler du technique. Aucun quatrième
 rôle, aucun mélange.
 
-**The Serrage Rule.** Les titres display sont serrés : leading 0.95, tracking
-négatif jusqu'à -0.045em. Le titre n'est pas une phrase qui respire, c'est un
-bloc qui frappe.
+**The Serrage Rule.** Les titres display sont serrés : leading 1 au plus,
+tracking négatif. Le titre n'est pas une phrase qui respire, c'est un bloc qui
+frappe. Le titre d'ouverture descend sous 1 (0.95 mobile, 0.84 desktop, tracking
+jusqu'à -0.045em) parce qu'il est seul et court ; un H2 qui passe sur deux
+lignes reste à 1, sans quoi les accents des capitales (É, À) touchent les
+jambages de la ligne du dessus.
 
 **The Ratio-Pas-Immobilité Rule.** Sur grand écran, tout le bas de l'échelle
 monte, mais moins vite que le corps — la hiérarchie tient dans le _rapport_,
@@ -406,9 +414,15 @@ faire sauter le contenu). Vérification systématique en largeur mobile (390 px)
 ni un `<hr>`. C'est le changement de surface qui sépare, via un composant
 `<Strates>` qui tire une graine différente à chaque coupe.
 
-**The Pas-Pas-Pixels Rule.** Toute mesure d'espacement passe par un token
-`pas-*`. Pas de `gap-4`, pas de `p-[13px]`. Le vocabulaire commun tient parce
-que personne n'écrit à côté.
+**The Pas-Pas-Pixels Rule.** Toute mesure de rythme — l'écart entre deux
+éléments, le rembourrage d'un bloc — passe par un token `pas-*`. Pas de
+`gap-4`, pas de `p-[13px]`. Le vocabulaire commun tient parce que personne
+n'écrit à côté. Hors de la règle : une mesure qui recopie la dimension d'un
+autre élément (la réserve d'un bouton dans un champ, la marge de défilement
+sous l'en-tête), qui se lit depuis cet élément, et le demi-pas vertical des
+badges. Une dimension partagée par plusieurs composants devient un jeton nommé,
+comme `--rail` (la largeur du rail, réservée par la colonne et les barres
+fixées).
 
 ## Elevation & Depth
 
@@ -441,7 +455,7 @@ sente sans jamais toucher la lisibilité du texte.
 
 ## Shapes
 
-**Trois radius, trois sens.** L'angle vif ne survit que sur les pleines
+**Un rayon, un sens.** L'angle vif ne survit que sur les pleines
 largeurs : ailleurs, une interface faite d'angles droits et de traits fins se
 lit comme un document, pas comme une application.
 
@@ -462,9 +476,11 @@ lit comme un document, pas comme une application.
 
 ### Named Rules
 
-**The Trois-Formes-Trois-Sens Rule.** Trois radius, trois sens. Panneau = sol
-(angle vif). Carte = objet posé (r-carte). Pilule = geste (r-galet). Aucun
-autre radius n'est légitime.
+**The Un-Rayon-Un-Sens Rule.** Cinq rayons, chacun avec son sens. Panneau =
+sol (angle vif). Pierre = cible dans une liste (r-pierre). Champ = objet
+interne (r-champ). Carte = objet posé (r-carte). Pilule = geste (r-galet).
+Aucun autre rayon n'est légitime, et un nouveau n'entre qu'avec un sens que les
+cinq ne disent pas.
 
 ## Components
 
@@ -501,8 +517,10 @@ autre radius n'est légitime.
 - **Shape** : pilule (`--r-galet`, 999px).
 - **Primary** : fond `--stone-900`, texte `--stone-50`. Taille `default` :
   hauteur 40 px (`h-10`), padding horizontal `--pas-6`, texte `petit`. Taille
-  `lg` : hauteur 44 px (`h-11`), padding `--pas-8`, texte `corps` — calée sur
-  la cible tactile de l'action principale.
+  `sm` : 36 px (`h-9`), padding `--pas-4`. Taille `lg` : hauteur 44 px
+  (`h-11`), padding `--pas-8`, texte `corps` — l'action principale.
+- **Cible tactile** : au doigt (`pointer: coarse`), toutes les tailles montent
+  à 44 px. La densité de 36 et 40 px ne se paie qu'à la souris.
 - **Hover** : variation de teinte (`--stone-800`) ; à l'appui, un décalage
   vertical d'un pixel. Pas d'ombre.
 - **Sur la roche** : variantes `clair` (fond `--stone-50`, texte
@@ -518,8 +536,12 @@ autre radius n'est légitime.
 
 ### Inputs
 
-- **Style** : **aucune bordure, aucun contour.** Un trait de 2 px sous le
-  champ, visible au repos. Le champ s'écrit à même la surface.
+- **Style** : dans l'application, le champ est une boîte discrète —
+  `--r-champ`, fond `--surface-papier`, filet `--stone-300` appuyé en
+  `--stone-500` au bas, hauteur 44 px (`components/ui/input.tsx`). Sans ce
+  filet, rien ne dirait où cliquer : un champ doit se distinguer de sa surface
+  à 3:1 (WCAG 1.4.11). Seul le creux de l'essai s'en passe, parce que la
+  surface creusée fait ce travail.
 - **Focus** : sur le creux de l'essai, le trait passe de `--stone-300` à
   `--accent-profond`. Pas de changement d'épaisseur (le bouton ne doit pas se
   décaler d'un pixel à chaque entrée). Le changement mesure 4,50:1 contre
@@ -532,11 +554,13 @@ autre radius n'est légitime.
   s'interromprait au début de la courbe ; `components/site/champ-de-depot.tsx`). C'est un **creux, pas un contour** : un contour fait une boîte posée
   sur la page, un creux est du terrain, et on dépose dans un creux. La règle du
   sol survit intacte. Dans l'application, l'utilisateur sait déjà où il est :
-  le champ y reste nu — registre marketing contre registre interne.
+  le champ y reste une boîte discrète — registre marketing contre registre
+  interne.
 - **Texte d'invite** : `--stone-500` au minimum. `--stone-400` ne donne que
   1,70:1 sur le creux, et c'est la seule phrase qui dise quoi mettre dans le
   champ.
-- **Character** : « un sol, pas une boîte » — creusé là où il faut le montrer.
+- **Character** : discret dans l'application, creusé là où il faut le
+  montrer.
 
 ### Cartes (une forme, pas un composant)
 
@@ -551,9 +575,12 @@ autre radius n'est légitime.
 - **Style** : le fond suit en général la surface « objet » de la table
   `SURFACES` — `--surface-ombre` sur le papier, `--surface-papier` sur
   l'ombre, le givre et la session, `--stone-700` sur la roche ; le bloc de
-  réponse et les blocs de code prennent `--surface-roche`. Aucune ombre. Les
-  cartes de l'écran d'administration (`components/administration/`) portent en
-  plus une bordure `--stone-300`.
+  réponse et les blocs de code prennent `--surface-roche`. Aucune ombre, et
+  pas de bordure : le changement de surface suffit.
+- **Exception, l'administration** : les blocs de `components/administration/`
+  portent une bordure `--stone-300`. C'est un outil interne, dense, que seul
+  l'exploitant voit : le registre y est sobre, et un filet sépare des dizaines
+  de blocs serrés mieux qu'une alternance de surfaces.
 - **Behavior** : l'objet est posé sur la page ; le contraste de surface avec
   le panneau qui l'accueille le distingue.
 
@@ -585,8 +612,8 @@ autre radius n'est légitime.
   `session`, `roche`) pour poser un panneau. Le fond va d'un bord à l'autre.
 - **Do** séparer deux sujets par un changement de surface via `<Strates>`,
   jamais par un `<hr>` ni un filet.
-- **Do** utiliser `--lichen` uniquement sur le sommet du cairn, l'outline de
-  focus, ou le data-mark des graphiques.
+- **Do** utiliser `--lichen` uniquement pour la maîtrise : sommet du cairn,
+  pierre tenue, bonne réponse.
 - **Do** utiliser `--ember` uniquement sur l'affichage du streak.
 - **Do** dessiner le cairn comme la seule audace visuelle du produit — chaque
   page importante peut en porter trace.
@@ -594,9 +621,9 @@ autre radius n'est légitime.
   Satoshi pour le texte, Geist Mono pour les libellés techniques.
 - **Do** monter le grain jusqu'à ce qu'il se sente sur les surfaces sans se
   voir sur le texte.
-- **Do** utiliser les tokens `pas-*` pour toute mesure d'espacement.
-- **Do** écrire les champs de saisie comme un trait sous le texte, sur le
-  papier.
+- **Do** utiliser les tokens `pas-*` pour toute mesure de rythme.
+- **Do** garder les champs de l'application discrets (filet `--stone-300`,
+  appuyé au bas) et réserver le creux au champ de l'essai.
 
 ### Don't:
 
@@ -613,9 +640,9 @@ autre radius n'est légitime.
   une séquence.
 - **Don't** construire un hero avec grand titre centré + illustration
   abstraite décorative + trois cartes-features en dessous.
-- **Don't** enrober un champ de saisie dans une boîte à contour. Un trait sous
-  le champ suffit dans l'application ; sur un champ de conversion, c'est un
-  creux de surface qui le signale, jamais une bordure.
+- **Don't** border le champ de conversion de l'essai : c'est un creux de
+  surface qui le signale. Et ne pas retirer le filet des champs de
+  l'application, qui disparaîtraient sur leur surface.
 - **Don't** ajouter d'ombres à un composant. Seul le cairn en porte au sol.
 - **Don't** utiliser `--lichen` ou `--ember` en dehors de leurs emplois
   réservés — même « juste pour cette fois ».

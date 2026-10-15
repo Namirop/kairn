@@ -26,7 +26,7 @@
   --destructive: var(--alerte);
   --border: var(--stone-100);
   --input: var(--stone-300);
-  --ring: var(--lichen-deep);
+  --ring: var(--accent-profond);
   --radius: var(--r-champ);
 }
 
