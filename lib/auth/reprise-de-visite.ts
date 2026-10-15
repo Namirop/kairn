@@ -3,6 +3,7 @@ import { compterLaVisiteReprise } from "@/lib/db/comptage-de-la-periode";
 import { rattacherAuCompte } from "@/lib/db/depot-de-visite";
 import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 import { lireLaVisite, oublierLaVisite } from "@/lib/auth/visite";
+import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
 import { declencher } from "@/lib/jobs/queue";
 
 /**
@@ -25,7 +26,7 @@ export async function reprendreLaVisite(userId: string): Promise<void> {
 
     if (repris.length === 0) return;
 
-    const concepts = repris.reduce((total, depot) => total + depot.atomIds.length, 0);
+    const concepts = repris.reduce((total, depot) => total + depot.concepts.length, 0);
 
     // Le chemin anonyme ne passe par aucun quota : les concepts de l'essai
     // entrent au compteur du mois ici, premier instant où ils ont un compte.
@@ -33,11 +34,16 @@ export async function reprendreLaVisite(userId: string): Promise<void> {
 
     // Les questions sont lancées tout de suite, un jeu par dépôt : accrocher
     // les concepts à un autre dépôt, souvent `REJECTED`, laisserait des jobs
-    // que rien ne peut plus refermer.
+    // que rien ne peut plus refermer. Même règle du doute qu'au découpage, et
+    // rien pour le concept que l'essai a déjà questionné.
     for (const depot of repris) {
-      if (depot.atomIds.length === 0) continue;
+      const aQuestionner = conceptsAQuestionner(depot.concepts, depot.nature)
+        .filter((concept) => !concept.dejaQuestionne)
+        .map((concept) => concept.id);
 
-      for (const job of await creerJobsDeQuestions(depot.inputId, depot.atomIds)) {
+      if (aQuestionner.length === 0) continue;
+
+      for (const job of await creerJobsDeQuestions(depot.inputId, aQuestionner)) {
         declencher(job.id);
       }
     }

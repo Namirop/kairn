@@ -93,7 +93,7 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
   });
 
   const repris = await rattacherAuCompte(essai.sessionId, userId);
-  const conceptsRepris = repris.reduce((total, depot) => total + depot.atomIds.length, 0);
+  const conceptsRepris = repris.reduce((total, depot) => total + depot.concepts.length, 0);
   const aMoi = await prisma.atom.count({ where: { userId } });
   const orphelins = await prisma.atom.count({
     where: { anonymousSessionId: essai.sessionId },
@@ -115,6 +115,18 @@ export async function casEssaiPuisCompte(userId: string): Promise<void> {
     "Reprise — les concepts restent groupés sous leur dépôt d'origine",
     malRanges === 0 && repris.every((depot) => depot.inputId.length > 0),
     `${repris.length} dépôt(s) repris, ${malRanges} concept(s) hors de leur dépôt`,
+  );
+
+  // Le concept de l'échantillon ne repart pas au modèle : ce serait un appel
+  // pour retirer les questions que la personne vient de voir.
+  const dejaQuestionnes = repris
+    .flatMap((depot) => depot.concepts)
+    .filter((concept) => concept.dejaQuestionne).length;
+
+  noter(
+    "Reprise — le concept questionné pendant l'essai est reconnu, et lui seul",
+    dejaQuestionnes === questionnes,
+    `${dejaQuestionnes} concept(s) marqué(s) déjà questionné(s) pour ${questionnes} questionné(s)`,
   );
 
   // Ce que l'essai a rendu entre au compteur du mois, sinon un compte neuf
