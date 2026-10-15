@@ -11,6 +11,8 @@ export const connexion = {
   recevoir: "Recevoir mon code",
   mecanisme: "Le code reçu par email ouvre ta session, et crée ton compte si tu n'en as pas.",
   echecEnvoi: "Le code n'a pas pu partir. Réessaie dans un instant.",
+  tropDeCodes:
+    "Trop de codes demandés pour l'instant. Utilise le dernier reçu, ou réessaie plus tard.",
   changerDAdresse: "Changer d'adresse",
   code: {
     intitule: "Code à {longueur} chiffres",

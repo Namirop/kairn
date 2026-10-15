@@ -29,6 +29,7 @@ export type ConnexionParCode = {
 export function useConnexionParCode(adresse: string, suite: string): ConnexionParCode {
   const router = useRouter();
   const t = useTranslations("compte.connexion.code");
+  const tConnexion = useTranslations("compte.connexion");
   const [code, setCode] = useState("");
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -82,12 +83,12 @@ export function useConnexionParCode(adresse: string, suite: string): ConnexionPa
     setCode("");
 
     if (error) {
-      setErreur(t("echecRenvoi"));
+      setErreur(error.status === 429 ? tConnexion("tropDeCodes") : t("echecRenvoi"));
       return;
     }
 
     setRenvoye(true);
-  }, [adresse, t]);
+  }, [adresse, t, tConnexion]);
 
   return {
     code,

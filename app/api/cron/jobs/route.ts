@@ -3,6 +3,7 @@ import { estUnCronAutorise } from "@/lib/cron/autorisation";
 import { signalerLeBattement } from "@/lib/cron/battement";
 import { fermerLesJobsEpuises, trouverLesJobsAReprendre } from "@/lib/db/jobs-de-generation";
 import { oublierLesVisitesAbandonnees } from "@/lib/db/depot-de-visite";
+import { oublierLesEnvoisDeCodeClos } from "@/lib/db/envois-de-code";
 import { executerLeJob, type IssueDuJob } from "@/lib/jobs/runner";
 
 /**
@@ -47,6 +48,7 @@ export async function GET(request: Request) {
   // Les essais que personne n'a réclamés : personne n'a accepté que leur texte
   // reste. Les cascades emportent les concepts.
   const visitesOubliees = await oublierLesVisitesAbandonnees();
+  await oublierLesEnvoisDeCodeClos();
   const jobs = await trouverLesJobsAReprendre(JOBS_PAR_PASSAGE);
   const comptes: Record<IssueDuJob, number> = {
     DONE: 0,
