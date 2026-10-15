@@ -124,9 +124,13 @@ describe("forme de sortie de generate_variants", () => {
     const reutilisee = z.object({ premier: partagee, second: partagee });
 
     expect(() => deriverLeSchemaDeSortie(reutilisee)).not.toThrow();
-    expect(() =>
-      deriverLeSchemaDeSortie(z.object({ un: z.intersection(partagee, partagee) })),
-    ).toThrow(/allOf|\$ref/);
+
+    // Une forme récursive ne s'écrit qu'avec un renvoi : c'est le cas qui lève
+    // à coup sûr, quelle que soit la version de Zod.
+    type Noeud = { enfants: Noeud[] };
+    const noeud: z.ZodType<Noeud> = z.object({ enfants: z.array(z.lazy(() => noeud)) });
+
+    expect(() => deriverLeSchemaDeSortie(z.object({ racine: noeud }))).toThrow(/\$defs|\$ref/);
   });
 
   it("dérive la forme, jamais la validation", () => {
