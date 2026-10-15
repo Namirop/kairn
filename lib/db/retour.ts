@@ -22,6 +22,26 @@ export type EcritureDeRetour = { ok: true } | { ok: false; motif: "PLAFOND" };
 /** La fenêtre du plafond par compte : vingt-quatre heures glissantes. */
 const FENETRE_MS = 24 * 60 * 60 * 1000;
 
+function debutDeFenetre(maintenant: Date): Date {
+  return new Date(maintenant.getTime() - FENETRE_MS);
+}
+
+/**
+ * Le plafond lu sans rien réserver, pour refuser avant de décoder une capture :
+ * un compte au plafond ne doit pas pouvoir faire travailler `sharp` en boucle.
+ * Le refus qui fait foi reste celui d'`ecrireUnRetour`.
+ */
+export async function peutEncoreEnvoyerUnRetour(
+  userId: string,
+  maintenant: Date = new Date(),
+): Promise<boolean> {
+  const dejaEnvoyes = await prisma.retour.count({
+    where: { userId, createdAt: { gte: debutDeFenetre(maintenant) } },
+  });
+
+  return peutEncoreEnvoyer(dejaEnvoyes);
+}
+
 /**
  * Écrit un retour, si le compte n'a pas déjà rempli sa journée. Le plafond est
  * ici et non dans la Server Action : c'est le passage obligé vers l'écriture,
@@ -31,27 +51,36 @@ export async function ecrireUnRetour(
   retour: RetourAEcrire,
   maintenant: Date = new Date(),
 ): Promise<EcritureDeRetour> {
-  const depuis = new Date(maintenant.getTime() - FENETRE_MS);
+  // Compter puis écrire, sous un verrou par compte : sans lui, des envois
+  // simultanés lisent tous le même compte et passent tous le plafond.
+  return prisma.$transaction(
+    async (tx): Promise<EcritureDeRetour> => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`retour:${retour.userId}`}))`;
 
-  const dejaEnvoyes = await prisma.retour.count({
-    where: { userId: retour.userId, createdAt: { gte: depuis } },
-  });
+      const dejaEnvoyes = await tx.retour.count({
+        where: { userId: retour.userId, createdAt: { gte: debutDeFenetre(maintenant) } },
+      });
 
-  if (!peutEncoreEnvoyer(dejaEnvoyes)) return { ok: false, motif: "PLAFOND" };
+      if (!peutEncoreEnvoyer(dejaEnvoyes)) return { ok: false, motif: "PLAFOND" };
 
-  await prisma.retour.create({
-    data: {
-      userId: retour.userId,
-      sujet: retour.sujet,
-      message: retour.message,
-      ecran: retour.ecran,
-      contexte: retour.contexte,
-      captureData: retour.capture ? Buffer.from(retour.capture.donnees) : null,
-      captureMediaType: retour.capture?.mediaType ?? null,
+      await tx.retour.create({
+        data: {
+          userId: retour.userId,
+          sujet: retour.sujet,
+          message: retour.message,
+          ecran: retour.ecran,
+          contexte: retour.contexte,
+          captureData: retour.capture ? Buffer.from(retour.capture.donnees) : null,
+          captureMediaType: retour.capture?.mediaType ?? null,
+        },
+      });
+
+      return { ok: true };
     },
-  });
-
-  return { ok: true };
+    // Les envois d'un même compte attendent leur tour sur le verrou : l'attente
+    // d'une connexion par défaut (2 s) ferait échouer un double envoi.
+    { maxWait: 10_000, timeout: 15_000 },
+  );
 }
 
 export type RetourLu = {
