@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { ROUTES } from "@/lib/auth/routes";
 import { lireLUtilisateur } from "@/lib/auth/session";
-import { ecrireUnRetour } from "@/lib/db/retour";
+import { ecrireUnRetour, peutEncoreEnvoyerUnRetour } from "@/lib/db/retour";
 import { signalerUnRetour } from "@/lib/email/signalement-de-retour";
 import { LIBELLE_DE_SUJET } from "@/lib/retours/libelle-du-sujet";
 import { SujetDeRetour } from "@/lib/db/types";
@@ -85,6 +85,12 @@ export async function envoyerUnRetourAction(
       erreur: t("image"),
       message: champs.data.message,
     };
+  }
+
+  // Le plafond avant le décodage : un compte qui l'a atteint ne fait plus
+  // travailler `sharp`.
+  if (!(await peutEncoreEnvoyerUnRetour(utilisateur.id))) {
+    return { erreur: t("plafond", { nombre: RETOURS_PAR_JOUR }), message: champs.data.message };
   }
 
   const capture = jointe ? await preparerCapture(jointe) : null;

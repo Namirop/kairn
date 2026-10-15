@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { emailOTP } from "better-auth/plugins";
 import { ENTETE_DU_FUSEAU } from "@/lib/auth/en-tetes";
 import { envoyerLAccueil } from "@/lib/auth/email-d-accueil";
@@ -8,6 +9,7 @@ import { reprendreLaVisite } from "@/lib/auth/reprise-de-visite";
 import { ouvrirLeCompte } from "@/lib/db/ouverture-du-compte";
 import { langueDesEnTetes } from "@/lib/i18n/langue-des-en-tetes";
 import { prisma } from "@/lib/db/client";
+import { prendreUnEnvoiDeCode } from "@/lib/db/envois-de-code";
 import { envoyerLeCodeDeConnexion, MINUTES_DE_VALIDITE } from "@/lib/email/connexion";
 import { LONGUEUR_DU_CODE } from "@/lib/domain/code-de-connexion";
 import { fuseauReconnu } from "@/lib/domain/jour-local";
@@ -77,7 +79,22 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24,
   },
   socialProviders: fournisseursSociaux(),
-  rateLimit: { enabled: true },
+  rateLimit: { enabled: true, storage: "database" },
+  // Les adresses que Vercel écrit lui-même, dans l'ordre de `adresseDuVisiteur`.
+  advanced: { ipAddress: { ipAddressHeaders: ["x-vercel-forwarded-for", "x-forwarded-for"] } },
+  hooks: {
+    // Avant le plugin, qui remplace le code en cours dès la demande : refuser
+    // plus tard laisserait quand même un tiers invalider le code de quelqu'un.
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/email-otp/send-verification-otp") return;
+
+      const adresse: unknown = ctx.body?.email;
+
+      if (typeof adresse === "string" && !(await prendreUnEnvoiDeCode(adresse))) {
+        throw new APIError("TOO_MANY_REQUESTS", { message: "Trop de codes pour cette adresse." });
+      }
+    }),
+  },
   databaseHooks: {
     user: {
       create: {

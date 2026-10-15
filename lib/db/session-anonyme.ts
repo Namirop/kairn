@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { prisma } from "@/lib/db/client";
+import { prefixeDeLAdresse } from "@/lib/domain/prefixe-de-l-adresse";
 
 /**
  * L'ouverture d'une visite : qui a le droit de déposer sans compte. Ce qu'il
@@ -29,10 +30,14 @@ export const VISITES_PAR_ADRESSE = 2;
 /** La fenêtre de la limite par adresse. Un jour : on n'est pas à la minute. */
 export const FENETRE_ADRESSE_HEURES = 24;
 
+/** L'empreinte de l'abonné : l'IPv4 entière, le /64 d'une IPv6 (voir `prefixeDeLAdresse`). */
 export function empreinteDeLAdresse(adresse: string): string {
   const sel = process.env.BETTER_AUTH_SECRET ?? "";
 
-  return createHash("sha256").update(`${sel}:${adresse}`).digest("hex").slice(0, 32);
+  return createHash("sha256")
+    .update(`${sel}:${prefixeDeLAdresse(adresse)}`)
+    .digest("hex")
+    .slice(0, 32);
 }
 
 export type OuvertureDeSession =

@@ -211,10 +211,10 @@ déployer que servir un code incapable de lire sa propre base.
 Deux passages à déclencher, **depuis un service externe et non depuis
 l'hébergeur** :
 
-| Chemin              | Cadence           | Ce qu'il fait                                                                                                                      |
-| ------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/cron/jobs`    | toutes les 10 min | Reprend les jobs en attente ou morts en route, ferme ceux qui ont épuisé leurs tentatives, efface les essais anonymes non réclamés |
-| `/api/cron/rappels` | toutes les heures | Envoie le rappel quotidien à l'heure locale de chaque compte, et l'alerte de série à 21 h locales quand une série est en sursis    |
+| Chemin              | Cadence           | Ce qu'il fait                                                                                                                                                                 |
+| ------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/cron/jobs`    | toutes les 10 min | Reprend les jobs en attente ou morts en route, ferme ceux qui ont épuisé leurs tentatives, efface les essais anonymes non réclamés et les fenêtres closes des envois de codes |
+| `/api/cron/rappels` | toutes les heures | Envoie le rappel quotidien à l'heure locale de chaque compte, et l'alerte de série à 21 h locales quand une série est en sursis                                               |
 
 Les deux sont des `GET` et exigent l'en-tête `Authorization: Bearer <CRON_SECRET>`,
 comparé en temps constant. C'est tout ce qu'ils demandent : ils ne connaissent

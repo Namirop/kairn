@@ -474,3 +474,15 @@ model Retour {
   /// Le plafond par compte se compte sur une fenêtre glissante.
   @@index([userId, createdAt])
 }
+
+/// Les codes de connexion demandés pour une même adresse, sur une fenêtre.
+///
+/// La limite de better-auth compte par adresse IP : quelques IP suffiraient à
+/// remplir une boîte de codes. Celle-ci compte par destinataire. La clé est
+/// l'empreinte de l'adresse, jamais l'adresse : la table n'a pas à savoir qui
+/// a demandé un code.
+model EnvoisDeCode {
+  cle            String   @id
+  debutDeFenetre DateTime
+  nombre         Int
+}

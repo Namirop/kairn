@@ -38,7 +38,7 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
     setEnCours(false);
 
     if (error) {
-      setErreur(t("echecEnvoi"));
+      setErreur(error.status === 429 ? t("tropDeCodes") : t("echecEnvoi"));
       return;
     }
 

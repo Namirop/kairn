@@ -13,6 +13,7 @@ export const connexion: Messages["compte"]["connexion"] = {
   mecanisme:
     "The code you get by email signs you in, and creates your account if you don't have one.",
   echecEnvoi: "The code couldn't be sent. Try again in a moment.",
+  tropDeCodes: "Too many codes requested for now. Use the last one you got, or try again later.",
   changerDAdresse: "Use a different address",
   code: {
     intitule: "{longueur}-digit code",

@@ -1,6 +1,7 @@
 import type { Langue } from "@/lib/db/types";
 import { LOCALE } from "@/lib/i18n/langues";
 import { textesDEmail } from "../traduction";
+import { echapper } from "./echapper";
 
 /**
  * Gabarit commun des emails.
@@ -79,7 +80,7 @@ export function envelopper({
 <html lang="${LOCALE[langue]}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
 <body style="margin:0;padding:0;background:${PALETTE.ombre};font-family:${SANS};color:${PALETTE.encre};">
-<span style="display:none;font-size:1px;color:${PALETTE.ombre};">${preentete}</span>
+<span style="display:none;font-size:1px;color:${PALETTE.ombre};">${echapper(preentete)}</span>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${PALETTE.ombre};padding:32px 16px;">
 <tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:${PALETTE.papier};border:1px solid ${PALETTE.filet};">

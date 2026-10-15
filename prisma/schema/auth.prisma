@@ -74,3 +74,13 @@ model Verification {
 
   @@index([identifier])
 }
+
+/// Le compteur de la limite de débit de better-auth. En base et non en
+/// mémoire : sur Vercel, chaque instance aurait le sien, remis à zéro à chaque
+/// démarrage, et la limite ne tiendrait pas.
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+}
