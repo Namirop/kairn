@@ -24,7 +24,7 @@ export function Rail({ administrateur }: { administrateur: boolean }) {
       data-coquille="rail"
       /* Les icônes commencent en haut, sans s'aligner sur l'en-tête : il vit
          dans la colonne de droite, pas en face du rail. */
-      className="pt-pas-4 px-pas-2 gap-pas-1 bg-surface-ombre fixed inset-y-0 left-0 z-30 hidden w-28 flex-col items-center md:flex"
+      className="pt-pas-4 px-pas-2 gap-pas-1 bg-surface-ombre w-rail fixed inset-y-0 left-0 z-30 hidden flex-col items-center md:flex"
     >
       {destinationsPour(chemin, administrateur).map((destination) => {
         const { href, libelle, icone: Icone } = destination;

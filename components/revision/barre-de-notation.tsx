@@ -39,7 +39,7 @@ export function BarreDeNotation({
             variant="outline"
             disabled={enCours}
             onClick={() => onNoter(note)}
-            className="h-auto w-full py-3 text-center font-normal whitespace-normal"
+            className="py-pas-3 h-auto w-full text-center font-normal whitespace-normal"
           >
             {t(note)}
           </Button>

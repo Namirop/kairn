@@ -34,7 +34,7 @@ export function BarreDEnregistrement({
       <div
         className={cn(
           modifie &&
-            "md:bottom-pas-6 fixed inset-x-0 bottom-[calc(var(--barre-basse)+var(--pas-2))] z-20 md:pl-28",
+            "md:bottom-pas-6 md:pl-rail fixed inset-x-0 bottom-[calc(var(--barre-basse)+var(--pas-2))] z-20",
         )}
       >
         {/* La mesure et la gouttière sont celles de la colonne du panneau : la

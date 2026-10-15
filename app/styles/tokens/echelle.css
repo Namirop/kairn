@@ -34,6 +34,12 @@
   --barre-basse: calc(3.5rem + var(--pas-2) * 2 + env(safe-area-inset-bottom));
 
   /*
+    La largeur du rail de navigation sur bureau, que la colonne et les barres
+    fixées réservent à gauche : les trois se lisent ici pour ne pas diverger.
+  */
+  --rail: 7rem;
+
+  /*
     Le rythme d'un panneau de campagne. Fixe sur mobile ; à partir de `md` il
     suit la hauteur de la fenêtre (voir `grand-ecran.css`), parce que six pas
     débordent sur un écran bas.

@@ -72,7 +72,7 @@ export function ReponseFermee({
                 // La pierre, pas la pilule : une option tient plusieurs lignes,
                 // et le rayon d'une pilule y mangerait le premier et le dernier
                 // mot.
-                "rounded-pierre gap-pas-3 h-auto w-full justify-start py-3 text-left font-normal whitespace-normal disabled:opacity-100",
+                "rounded-pierre gap-pas-3 py-pas-3 h-auto w-full justify-start text-left font-normal whitespace-normal disabled:opacity-100",
                 // Le papier de la carte, sinon l'option prend la couleur du sol
                 // de la session et ne se voit plus. Une fois la réponse donnée,
                 // les options hors jeu le rendent et redescendent dans le sol.
