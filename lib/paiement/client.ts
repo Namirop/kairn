@@ -28,7 +28,7 @@ export function stripe(): Stripe {
         emplacement qu'une version d'API peut déplacer, et le droit d'un compte
         payant en dépend. Se monte à la main, en relisant ce qu'elle déplace.
       */
-      apiVersion: "2026-08-26.dahlia",
+      apiVersion: "2026-09-30.endive",
       // Affiché à côté de chaque appel dans le tableau de bord Stripe : sert au
       // diagnostic quand deux environnements écrivent sur le même compte.
       appInfo: { name: "Kairn", url: "https://kairn.me" },
