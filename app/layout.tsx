@@ -57,7 +57,9 @@ export const viewport: Viewport = {
 
 export default async function LayoutRacine({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={await getLocale()}>
+    // `base.css` fait défiler en douceur vers l'essai ; l'attribut demande à Next
+    // de couper ce défilement pendant un changement de page, qui doit sauter net.
+    <html lang={await getLocale()} data-scroll-behavior="smooth">
       <body className={classesPolices}>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
         <RegistreServiceWorker />

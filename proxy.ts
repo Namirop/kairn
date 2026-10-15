@@ -20,7 +20,7 @@ import type { Langue } from "@/lib/db/types";
  * session, pour ne pas afficher une coquille vide. La vérification qui fait
  * foi est côté serveur, dans les pages et les route handlers.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const lienCourt = LIENS_COURTS[pathname];
 
