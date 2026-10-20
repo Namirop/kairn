@@ -11,18 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { PRIX_ANNUEL, PRIX_MENSUEL } from "@/lib/domain/prix";
 
-/**
- * Les boutons qui engagent de l'argent, et ce qu'ils disent quand ils échouent.
- *
- * Ce sont les seuls gestes du produit qui ouvrent un paiement, résilient ou
- * envoient chez Stripe : isolés ici, tout ajout d'un geste d'argent se voit en
- * revue.
- */
+/** Les seuls gestes qui engagent de l'argent : isolés ici, tout ajout se voit en revue. */
 
-/**
- * Les deux cadences. Quand le paiement est fermé, c'est l'écran hôte qui dit
- * quoi afficher à la place.
- */
+/** Paiement fermé : l'écran hôte dit quoi afficher à la place. */
 export function Achat({ ouvert }: { ouvert: boolean }) {
   const [etat, action, enCours] = useActionState<EtatDuPaiement, FormData>(payerAction, {});
   const t = useTranslations("compte.offre.achat");
@@ -70,7 +61,7 @@ function Cadence({
   );
 }
 
-/** Arrêter, ou revenir sur son arrêt. Jamais les deux : l'un est l'inverse de l'autre. */
+/** Arrêter, ou revenir sur son arrêt : jamais les deux. */
 export function Renouvellement({ resilieALaFin }: { resilieALaFin: boolean }) {
   const [etat, action, enCours] = useActionState<EtatDuPaiement, FormData>(
     renouvellementAction,
@@ -98,9 +89,8 @@ export function Renouvellement({ resilieALaFin }: { resilieALaFin: boolean }) {
 }
 
 /**
- * Le lien vers le portail Stripe, discret : on y vient rarement, en sachant ce
- * qu'on cherche. Le libellé nomme les deux seules choses que la configuration
- * du portail autorise.
+ * Discret : on y vient rarement, en sachant quoi chercher. Le libellé nomme les
+ * deux seules choses que la configuration du portail autorise.
  */
 export function Portail() {
   const [etat, action, enCours] = useActionState<EtatDuPaiement, FormData>(portailAction, {});
@@ -121,11 +111,7 @@ export function Portail() {
   );
 }
 
-/**
- * Le message n'occupe aucune place tant qu'il est vide : réservée sous chacun
- * des trois gestes, elle écarterait trop la carte. Sous son bouton, il ne décale
- * que ce qui suit.
- */
+/** Sans place réservée tant qu'il est vide : sous les trois gestes, elle écarterait la carte. */
 function Message({ erreur }: { erreur?: string }) {
   return (
     <p className="mt-pas-2 text-petit empty:mt-0" role="status" aria-live="polite">

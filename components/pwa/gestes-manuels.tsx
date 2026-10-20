@@ -3,11 +3,8 @@ import { useTranslations } from "next-intl";
 import type { GesteManuel } from "./environnement-dinstallation";
 
 /**
- * Les chemins d'installation que le navigateur ne sait pas déclencher : sur
- * iPhone, le menu de partage, sous un nom sans le mot « installer » ; sur Mac,
- * le menu Fichier. Le partage montre les deux glyphes qu'on cherche dans la
- * barre du navigateur ; le Mac, dont le menu se lit en toutes lettres, se
- * numérote.
+ * Sur iPhone, le menu de partage, sans le mot « installer » : on montre les
+ * glyphes à chercher. Sur Mac, le menu se lit en toutes lettres : on numérote.
  */
 export function GesteManuel({ geste }: { geste: GesteManuel }) {
   const t = useTranslations("tableau.commun.installation");

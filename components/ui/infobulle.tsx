@@ -7,13 +7,10 @@ import { Popover as PopoverPrimitive, Tooltip as TooltipPrimitive } from "radix-
 import { cn } from "@/lib/fusion-des-classes";
 
 /**
- * Une explication qui s'ouvre au survol, ou au doigt : une info-bulle seule ne
- * s'ouvre jamais sur un téléphone.
- *
- * Au doigt, une tape et non un appui long, qui appartient déjà au système sur
- * iOS comme sur Android. C'est l'appareil qui décide (pointeur fin), pas la
- * largeur de la fenêtre. Au premier rendu, on suppose le survol possible :
- * sinon un indice tactile clignoterait au chargement sur ordinateur.
+ * Au survol, ou au doigt : une info-bulle seule ne s'ouvre jamais sur un
+ * téléphone. Une tape, pas un appui long, qui appartient au système. Le
+ * pointeur décide, pas la largeur. Survol supposé au premier rendu : sinon
+ * l'indice tactile clignoterait sur ordinateur.
  */
 
 const POINTEUR_FIN = "(hover: hover) and (pointer: fine)";
@@ -34,10 +31,7 @@ export function useSurvolPossible(): boolean {
   );
 }
 
-/**
- * La marque qui dit qu'il y a quelque chose à ouvrir, au doigt seulement : sans
- * survol, rien d'autre ne fait découvrir la tape.
- */
+/** Au doigt seulement : sans survol, rien d'autre ne fait découvrir la tape. */
 export function IndiceTactile({ className }: { className?: string }) {
   const survol = useSurvolPossible();
 
@@ -63,7 +57,7 @@ export function Infobulle({
   children,
 }: {
   contenu: React.ReactNode;
-  /** Posé sur le déclencheur : c'est lui que le composant appelant veut habiller. */
+  /** Posé sur le déclencheur. */
   className?: string;
   children: React.ReactNode;
 }) {
@@ -89,8 +83,8 @@ export function Infobulle({
         <PopoverPrimitive.Content
           sideOffset={8}
           collisionPadding={16}
-          /* Le focus reste où il était : le porter dans la fiche fait remonter
-             la page sur un téléphone et referme le clavier virtuel. */
+          /* Focus laissé en place : sur téléphone, il ferait remonter la page
+             et refermerait le clavier. */
           onOpenAutoFocus={(evenement) => evenement.preventDefault()}
           className={FICHE}
         >

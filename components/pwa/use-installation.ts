@@ -6,12 +6,9 @@ import { applicationDejaPosee, gesteManuel, type GesteManuel } from "./environne
 import { confirmerInstallation, enregistrerRefus, lireRefus } from "./memoire-dinstallation";
 
 /**
- * Ce que l'appareil permet de faire de l'installation.
- *
- * Chrome et ses dérivés annoncent `beforeinstallprompt`, qu'on retient pour le
- * déclencher au moment choisi. Safari n'émet rien : sur iPhone comme sur Mac,
- * l'installation est un geste manuel, différent sur chacun. D'où des modes
- * plutôt qu'un booléen : celui qui déclenche, et ceux qui expliquent.
+ * Chrome annonce `beforeinstallprompt`, retenu pour plus tard ; Safari n'émet
+ * rien, l'installation y est un geste manuel différent sur iPhone et sur Mac.
+ * D'où des modes : celui qui déclenche, ceux qui expliquent.
  */
 
 type PromptInstallation = Event & { prompt: () => Promise<void> };
@@ -40,8 +37,7 @@ export function useInstallation(): {
     window.addEventListener("appinstalled", surInstallation);
 
     const surInvite = (evenement: Event) => {
-      // Retient la barre du navigateur, pour proposer l'installation au
-      // moment choisi.
+      // Retient la barre du navigateur jusqu'au moment choisi.
       evenement.preventDefault();
 
       if (!estPromptInstallation(evenement)) return;
@@ -50,15 +46,13 @@ export function useInstallation(): {
       setMode("automatique");
     };
 
-    // L'écoute démarre avant la vérification : l'événement part tôt dans le
-    // chargement, et un `await` posé devant l'écouteur le laisserait passer.
+    // Avant la vérification : l'événement part tôt, un `await` devant le raterait.
     window.addEventListener("beforeinstallprompt", surInvite);
 
     void applicationDejaPosee().then((posee) => {
       if (!vivant) return;
 
-      // Déjà installée : on retire l'écoute plutôt que d'ignorer l'événement,
-      // faute de quoi un `beforeinstallprompt` tardif rallumerait l'invite.
+      // Retirer l'écoute : un `beforeinstallprompt` tardif rallumerait l'invite.
       if (posee) {
         invite.current = null;
         window.removeEventListener("beforeinstallprompt", surInvite);
@@ -68,9 +62,8 @@ export function useInstallation(): {
 
       const geste = gesteManuel();
 
-      // Un appareil à geste manuel n'émettra jamais l'événement. Pour les
-      // autres, on attend l'événement plutôt que d'inventer une consigne pour
-      // un navigateur qu'on ne reconnaît pas.
+      // Un geste manuel n'aura jamais l'événement ; les autres l'attendent, sans
+      // consigne inventée pour un navigateur inconnu.
       if (geste) setMode(geste);
     });
 
@@ -92,10 +85,7 @@ export function useInstallation(): {
     setMode("aucune");
   }, []);
 
-  /**
-   * L'utilisateur déclare avoir installé, là où l'appareil ne sait pas le dire
-   * — voir `confirmerInstallation`.
-   */
+  /** Là où l'appareil ne sait pas le dire — voir `confirmerInstallation`. */
   const confirmer = useCallback(() => {
     confirmerInstallation(new Date());
     setMode("aucune");

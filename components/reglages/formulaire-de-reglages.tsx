@@ -13,11 +13,9 @@ import { PLAFOND_MAX, PLAFOND_MIN } from "@/lib/domain/selection-session";
 import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
- * Ce qu'un compte peut décider : la longueur de sa session, et ce qu'on lui
- * envoie. Un seul bouton pour les deux groupes : rien ne s'écrit tant qu'une
- * saisie est illisible. La distance entre la valeur changée et ce bouton,
- * c'est `BarreDEnregistrement` qui la rattrape ; ici on ne tient que
- * « quelque chose a-t-il bougé ».
+ * Un seul bouton pour les deux groupes : rien ne s'écrit tant qu'une saisie est
+ * illisible. `BarreDEnregistrement` rattrape la distance au bouton ; ici on ne
+ * tient que « quelque chose a bougé ».
  */
 
 const GROUPE = "text-mono font-mono tracking-[0.14em] text-stone-500 uppercase";
@@ -45,14 +43,11 @@ export function FormulaireDeReglages({
   const [alerte, setAlerte] = useState(alerteActive);
   const [modifie, setModifie] = useState(false);
   const t = useTranslations("compte.reglages.formulaire");
-  // L'heure se relit dans la langue de l'écran : « 19 h » en français, « 7 pm » en anglais.
+  // « 19 h » en français, « 7 pm » en anglais.
   const heureEcrite = ecrireHeureDeRappel(heureDuRappel, useLangue());
 
-  /*
-    Une écriture réussie remet le formulaire au repos, un refus non : la barre
-    doit rester pour dire quoi corriger, sinon elle annoncerait écrite une
-    saisie rejetée.
-  */
+  // Un refus garde la barre, pour dire quoi corriger ; seule une réussite la
+  // remet au repos.
   const [etatVu, setEtatVu] = useState(etat);
 
   if (etat !== etatVu) {
@@ -60,8 +55,7 @@ export function FormulaireDeReglages({
     if (etat.message) setModifie(false);
   }
 
-  // `input` remonte des champs de texte ; les interrupteurs n'émettent rien qui
-  // remonte jusqu'ici, d'où leur `setModifie` explicite.
+  // Les interrupteurs n'émettent pas d'`input` : d'où leur `setModifie`.
   return (
     <form action={envoyer} onInput={() => setModifie(true)} className="gap-pas-8 flex flex-col">
       <fieldset className="gap-pas-2 flex flex-col border-0 p-0">
@@ -75,8 +69,7 @@ export function FormulaireDeReglages({
             <Input
               id="plafond"
               name="plafond"
-              // La saisie refusée revient telle quelle : on corrige ce qu'on a
-              // écrit, on ne le retape pas.
+              // La saisie refusée revient telle quelle, à corriger, pas à retaper.
               defaultValue={etat.plafond ?? String(plafond)}
               key={etat.plafond ?? "plafond"}
               inputMode="numeric"

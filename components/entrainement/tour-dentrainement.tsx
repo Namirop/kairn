@@ -18,15 +18,9 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 import type { QuestionServie } from "@/lib/db/question-servie";
 
-/**
- * Un tour d'entraînement, puis le suivant si on en redemande. Aucun compte de
- * fin, aucun score : rien ici ne se cumule.
- */
+/** Aucun compte de fin, aucun score : rien ici ne se cumule. */
 
-/**
- * Ce qui encadre les écrans hors tour (le principe, la fin) : un panneau
- * ordinaire. La fin, un palier, se centre ; le principe se lit de haut en bas.
- */
+/** Hors tour. La fin, un palier, se centre ; le principe se lit de haut en bas. */
 function Cadre({ centre = false, children }: { centre?: boolean; children: ReactNode }) {
   return (
     <PileDePanneaux>
@@ -109,8 +103,8 @@ export function TourDentrainement({
   }
 
   return (
-    // Pas de rail ni de pile : un tour s'arrête quand on veut, une pile à
-    // monter promettrait une fin. Le cairn appartient à la session du jour.
+    // Ni rail ni pile : une pile à monter promettrait une fin. Le cairn
+    // appartient à la session du jour.
     <SceneDeSession
       enTete={
         <EnTeteDeScene

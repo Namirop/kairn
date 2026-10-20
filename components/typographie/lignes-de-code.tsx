@@ -3,12 +3,9 @@ import { cn } from "@/lib/fusion-des-classes";
 import { debutDuCommentaire } from "@/lib/domain/commentaire-de-code";
 
 /**
- * Les lignes d'un extrait, peintes. Une seule nuance, le commentaire : pas de
- * coloration syntaxique, la palette n'a pas de couleurs à y consacrer.
- *
- * L'extrait défile dans sa boîte, jamais la page : couper une ligne de code
- * à la fenêtre la changerait. Seul défilement horizontal du produit, avec son
- * propre ascenseur — celui du système est un rail clair sur un bloc sombre.
+ * Seul le commentaire est nuancé : la palette n'a pas de couleurs pour une
+ * coloration syntaxique. L'extrait défile dans sa boîte : couper une ligne de
+ * code la changerait. Ascenseur propre : celui du système est un rail clair.
  */
 export function LignesDeCode({
   texte,

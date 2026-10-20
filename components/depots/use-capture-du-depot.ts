@@ -12,14 +12,9 @@ import { reprendreLePartage } from "@/components/depots/partage-recu";
 import { reduireLaCapture } from "@/lib/images/reduire-la-capture";
 
 /**
- * La capture d'un dépôt : celle qu'on choisit, et celle qu'apporte un partage.
- *
- * Un partage du système, rangé par le service worker, est repris ici au montage
- * sans partir tout seul : on relit et on taille avant de déposer. Il remplit
- * aussi le texte du formulaire, d'où les deux réglages reçus.
- *
- * Toute capture (sélecteur ou partage) est réduite avant d'entrer dans l'état :
- * le refus de poids et l'envoi ne voient que l'image qui part vraiment.
+ * Un partage rangé par le service worker est repris au montage sans partir seul :
+ * on relit avant de déposer. Toute capture est réduite avant d'entrer dans
+ * l'état : le refus de poids et l'envoi ne voient que l'image qui part.
  */
 export function useCaptureDuDepot({
   setTexte,
@@ -35,11 +30,8 @@ export function useCaptureDuDepot({
   const [capture, setCapture] = useState<File | null>(null);
   const [preparation, setPreparation] = useState(false);
 
-  /*
-    Le rang du choix en cours : la réduction prend du temps, et sans lui une
-    première capture pourrait s'installer après la seconde. Une réduction qui
-    n'est plus la dernière demandée est jetée.
-  */
+  // La réduction prend du temps : sans rang, une première capture pourrait
+  // s'installer après la seconde. Une réduction dépassée est jetée.
   const rang = useRef(0);
 
   const choisirLaCapture = useCallback(async (fichier: File | null) => {
@@ -61,7 +53,7 @@ export function useCaptureDuDepot({
     setPreparation(false);
   }, []);
 
-  // Le partage attend sur l'appareil ; il est lu une fois, puis effacé.
+  // Lu une fois, puis effacé de l'appareil.
   useEffect(() => {
     let monte = true;
 

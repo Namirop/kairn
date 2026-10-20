@@ -3,10 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/fusion-des-classes";
 
-/**
- * Badge retokenisé : un libellé technique en mono, en majuscules espacées. Il
- * porte un statut, jamais une décoration.
- */
+/** Porte un statut, jamais une décoration. */
 const badgeVariants = cva(
   "inline-flex items-center gap-pas-1 rounded-galet font-mono text-mono tracking-[0.12em] uppercase",
   {

@@ -2,13 +2,11 @@ import { useTranslations } from "next-intl";
 import type { SujetDeRetour } from "@/lib/db/types";
 
 /**
- * De quoi le retour parle : quatre choix, de quoi trier sans faire hésiter.
- *
- * Des boutons radio natifs masqués et dessinés : les flèches du clavier
- * circulent, et le focus reste visible par `has-[:focus-visible]`.
+ * Des radios natifs masqués et dessinés : les flèches du clavier circulent, et
+ * le focus reste visible par `has-[:focus-visible]`.
  */
 
-/** L'ordre de lecture, du plus concret au plus vague. */
+/** Du plus concret au plus vague. */
 const ORDRE: SujetDeRetour[] = ["BUG", "COMPORTEMENT", "TEXTE", "AUTRE"];
 
 export function ChoixDuSujet({

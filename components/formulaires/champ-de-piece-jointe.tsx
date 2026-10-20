@@ -7,14 +7,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/fusion-des-classes";
 
 /**
- * Le champ d'une pièce jointe : le sélecteur natif masqué, le bouton trombone
- * qui l'ouvre, le nom du fichier tronqué et de quoi le retirer.
- *
- * Le champ natif sort de la tabulation et de l'arbre d'accessibilité : c'est le
- * bouton qui porte l'action, pour un seul arrêt de tabulation.
- *
- * Il ne tient aucun état : qui l'emploie garde le fichier, la ref du champ, et
- * décide de ce que retirer veut dire.
+ * Le champ natif sort de la tabulation et de l'arbre d'accessibilité : le
+ * bouton porte l'action, un seul arrêt. Sans état : l'appelant garde le
+ * fichier et décide de ce que retirer veut dire.
  */
 export function ChampDePieceJointe({
   champ,
@@ -31,7 +26,6 @@ export function ChampDePieceJointe({
   champ: RefObject<HTMLInputElement | null>;
   id: string;
   name: string;
-  /** Le nom du fichier joint, nul s'il n'y en a pas. */
   nom: string | null;
   libelle: ReactNode;
   libelleRetirer: string;

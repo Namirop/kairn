@@ -1,13 +1,9 @@
 import type { VariantFormat } from "@/lib/db/types";
 
 /**
- * L'ordre dans lequel la vitrine montre les formats, fixe pour que la
- * démonstration se raconte pareil à chaque dépôt (l'ordre du modèle varie).
- *
- * Du plus immédiat au plus exigeant : QCM, vrai ou faux, texte à trou, puis
- * l'explication, la plus lente à lire. `SHORT_ANSWER` et `CODE`, que la vitrine
- * ne génère presque jamais, ferment la marche. Le `Record` sur l'enum oblige à
- * placer tout nouveau format.
+ * Fixe, pour que la vitrine se raconte pareil à chaque dépôt (l'ordre du modèle
+ * varie) : du plus immédiat au plus exigeant, puis les formats qu'elle ne
+ * génère presque jamais. Le `Record` oblige à placer tout nouveau format.
  */
 const RANG_DU_FORMAT: Record<VariantFormat, number> = {
   MCQ: 0,

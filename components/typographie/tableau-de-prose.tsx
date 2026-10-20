@@ -1,20 +1,9 @@
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
- * Le tableau d'un texte déposé, en tableau sur un écran large et en fiches sur
- * un téléphone.
- *
- * Trois colonnes de prose ne tiennent pas dans 320 points (un chemin insécable
- * prend la moitié de la place, chaque cellule s'enroule sur quatre lignes).
- * Sous `sm`, chaque rangée devient un bloc : le titre de colonne au-dessus de
- * sa valeur, un filet entre les rangées.
- *
- * Les `role` sont posés à la main parce que `display: block` efface la
- * sémantique du tableau : sans eux, un lecteur d'écran n'y lit plus que du
- * texte à la suite.
- *
- * La première colonne est à l'encre pleine : c'est elle qu'on lit pour se
- * repérer.
+ * En fiches sous `sm` : trois colonnes de prose ne tiennent pas dans 320 points.
+ * Les `role` sont posés à la main : `display: block` efface la sémantique du
+ * tableau, le lecteur d'écran n'y lirait que du texte à la suite.
  */
 
 const LIBELLE = "text-mono font-mono tracking-[0.14em] text-stone-500 uppercase";
@@ -55,8 +44,6 @@ export function TableauDeProse({ entetes, lignes }: { entetes: string[]; lignes:
                   role="cell"
                   className={`${CELLULE} ${colonne === 0 ? "font-medium text-stone-900" : ""}`}
                 >
-                  {/* Le titre de colonne accompagne sa valeur tant qu'il n'y a
-                      pas de ligne d'en-tête pour le porter. */}
                   {entetes[colonne] ? (
                     <span className={`${LIBELLE} mb-pas-1 block font-normal sm:hidden`}>
                       <TexteTechnique>{entetes[colonne]}</TexteTechnique>

@@ -2,20 +2,13 @@ import { useTranslations } from "next-intl";
 import { IndiceTactile, Infobulle } from "@/components/ui/infobulle";
 
 /**
- * Le titre de la section, qui porte l'explication du cairn : c'est contre le
- * titre qu'on la cherche. Pour le lecteur d'écran, `Cairn` énonce déjà le
- * nombre de pierres par son `aria-label`.
- *
- * `uppercase` est répété sur le déclencheur : `Infobulle` rend un `<button>`,
- * auquel la feuille par défaut des navigateurs impose `text-transform: none`,
- * et la `preflight` de Tailwind ne rétablit pas la casse.
+ * L'explication du cairn est sur le titre, où on la cherche ; le nombre, le
+ * lecteur d'écran l'a par l'`aria-label` de `Cairn`. `uppercase` est
+ * répété : `Infobulle` rend un `<button>`, que les navigateurs mettent en
+ * `text-transform: none` sans que la preflight de Tailwind le rétablisse.
  */
 
-/**
- * « Retenu » et non « consolidé » : le cairn compte deux états, la
- * consolidation que le produit constate et l'archivage que l'utilisateur
- * déclare. Voir `ETATS_QUI_POSENT_UNE_PIERRE`.
- */
+/** « Retenu » et non « consolidé » : voir `ETATS_QUI_POSENT_UNE_PIERRE`. */
 export function TitreDuCairn({ retenus }: { retenus: number }) {
   const t = useTranslations("tableau.aujourdhui.cairn");
 

@@ -4,10 +4,8 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /**
- * L'explication du principe, montrée une seule fois, en plein écran : elle dit
- * une chose contre-intuitive, que s'entraîner ne fait pas avancer.
- *
- * Ensuite, une ligne discrète et permanente suffit — voir `TourDentrainement`.
+ * Une seule fois, en plein écran : elle dit une chose contre-intuitive, que
+ * s'entraîner ne fait pas avancer. Ensuite, une ligne discrète suffit.
  */
 export function PrincipeDeLentrainement({ onCommencer }: { onCommencer: () => void }) {
   const t = useTranslations("revision.entrainement");

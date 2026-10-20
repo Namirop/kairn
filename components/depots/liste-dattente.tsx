@@ -6,11 +6,8 @@ import { rejoindreListeDattenteAction } from "@/app/(app)/depots/actions";
 import { Button } from "@/components/ui/button";
 
 /**
- * Se signaler quand la limite gêne et qu'aucune offre n'y répond : à qui paie
- * déjà, ou à qui bute sur le nombre de dépôts. Un compte gratuit arrêté par les
- * concepts a une offre, et ne voit pas ce bloc.
- *
- * Le bouton nomme la limite (`motif`) : deux plafonds cohabitent sur l'écran.
+ * Quand aucune offre ne répond à la limite : qui paie déjà, ou bute sur les
+ * dépôts. Le bouton nomme la limite : deux plafonds cohabitent sur l'écran.
  */
 
 export function ListeDattente({

@@ -8,13 +8,9 @@ import { GesteManuel } from "./gestes-manuels";
 import { useInstallation } from "./use-installation";
 
 /**
- * L'invite à poser Kairn sur l'écran d'accueil.
- *
- * Sur téléphone elle est dans la page : flottante, elle couvrirait la
- * navigation basse et suivrait pendant la session. Sur grand écran elle flotte
- * en bas à droite, pour ne pas couper le tableau de bord sous le compteur du
- * jour. La pastille a la taille et l'arrondi d'une icône d'écran d'accueil :
- * elle montre ce qui se posera.
+ * Dans la page sur téléphone (flottante, elle couvrirait la navigation basse) ;
+ * flottante sur grand écran, pour ne pas couper le tableau de bord. La
+ * pastille a la forme d'une icône d'écran d'accueil : elle montre ce qui se posera.
  */
 export function InviteInstallation() {
   const { mode, installer, ecarter, confirmer } = useInstallation();
@@ -23,8 +19,7 @@ export function InviteInstallation() {
   if (mode === "aucune") return null;
 
   return (
-    // L'écart au-dessus est porté ici et non par la page : le bloc est le plus
-    // souvent absent, et une marge sur le parent laisserait un trou vide.
+    // L'écart est porté ici : le bloc souvent absent, une marge du parent ferait un trou.
     <aside className="mt-pas-8 rounded-carte bg-surface-ombre p-pas-6 md:right-pas-6 md:bottom-pas-6 relative text-left md:fixed md:z-30 md:mt-0 md:w-[22rem]">
       <button
         type="button"
@@ -57,11 +52,9 @@ export function InviteInstallation() {
         <>
           <GesteManuel geste={mode} />
 
-          {/* Les gestes manuels n'émettent pas `appinstalled`, et sur iPhone
-              l'application installée a son propre bac à sable, invisible depuis
-              Safari : la personne est le seul moyen de savoir que c'est fait.
-              Libellé de constat, pas « Terminer », qui laisserait croire que le
-              bouton installe. */}
+          {/* Pas d'`appinstalled` aux gestes manuels, et sur iPhone l'app a un
+              bac à sable invisible de Safari : seule la personne sait que c'est
+              fait. Un constat, pas « Terminer », qui ferait croire qu'il installe. */}
           <button
             type="button"
             onClick={confirmer}

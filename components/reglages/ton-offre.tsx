@@ -8,31 +8,23 @@ import { type Plan } from "@/lib/domain/plafond-du-plan";
 import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
- * L'offre du compte, et le geste qui la change.
- *
- * Ici on paie ; la comparaison des offres vit sur la page de tarifs. Le
- * registre est donc celui des réglages, pas celui d'une page de vente.
- *
- * En anglais, rien ne se vend : Premium n'y est pas ouvert. Ni offre à prendre,
- * ni lien vers les tarifs, ni portail pour qui n'a jamais payé. Un compte qui
- * paie déjà garde ses gestes et son portail.
+ * Registre des réglages, pas d'une page de vente : la comparaison vit sur les
+ * tarifs. En anglais Premium n'est pas ouvert : rien à prendre ni de portail
+ * pour qui n'a jamais payé ; un compte qui paie garde ses gestes.
  */
 
 type Props = {
-  /** Le plan qui vaut à cet instant, terme dépassé déjà pris en compte. */
+  /** Terme dépassé déjà pris en compte. */
   plan: Plan;
   plafond: number;
-  /** Le terme, déjà dit dans le fuseau de l'utilisateur. Nul si le compte n'a jamais payé. */
+  /** Déjà dit dans le fuseau de l'utilisateur. Nul si le compte n'a jamais payé. */
   terme: string | null;
   resilieALaFin: boolean;
-  /** Faux quand les clés Stripe manquent : l'écran informe alors sans proposer. */
+  /** Faux quand les clés Stripe manquent : l'écran informe sans proposer. */
   ouvert: boolean;
-  /** On revient de Stripe, paiement accepté — le webhook n'est peut-être pas encore passé. */
+  /** Retour de Stripe, paiement accepté — le webhook n'est peut-être pas encore passé. */
   retourDePaiement: boolean;
-  /**
-   * Le compte a un dossier chez Stripe, même sans avoir jamais payé. Sans
-   * dossier, le lien vers le portail mènerait à une erreur.
-   */
+  /** Un dossier Stripe, même sans paiement : sans lui, le portail mène à une erreur. */
   dossier: boolean;
 };
 
@@ -49,7 +41,6 @@ export function TonOffre({
   const paye = plan !== "GRATUIT";
   // Rien ne mène vers une caisse en euros depuis l'interface anglaise.
   const vend = useLangue() === "FR";
-  // Le portail suppose un dossier chez Stripe ; sans vente, il reste à qui paie déjà.
   const portail = dossier && ouvert && (vend || paye);
 
   return (
@@ -106,14 +97,13 @@ export function TonOffre({
         ) : null}
       </div>
 
-      {/* Une carte sœur et non un bloc dans la première : emboîtées, les deux
-          surfaces sont trop proches en luminance pour se séparer. */}
+      {/* Carte sœur : emboîtées, les deux surfaces sont trop proches en luminance. */}
       {!paye && ouvert && vend ? <OffreComplete /> : null}
     </section>
   );
 }
 
-/** Ce que la situation a de particulier, en une phrase. Il y en a toujours exactement une. */
+/** Toujours exactement une phrase. */
 function Etat({
   paye,
   terme,
@@ -130,12 +120,11 @@ function Etat({
 
   if (paye) return <>{t("renouvele", { terme: terme ?? "" })}</>;
 
-  // Le navigateur revient souvent de Stripe avant le webhook : sans cette
-  // phrase, on lirait « Gratuit » juste après avoir payé.
+  // Le navigateur revient souvent avant le webhook : sinon on lirait « Gratuit »
+  // juste après avoir payé.
   if (retourDePaiement) return <>{t("enRoute")}</>;
 
-  // En anglais, la fermeture du paiement ne se dit pas : il n'y a rien à
-  // attendre, et la phrase qui suit la limite le dit déjà.
+  // En anglais, rien à attendre, et la phrase suivante dit déjà la limite.
   if (!ouvert && vend) return <>{t("ferme")}</>;
 
   return <>{t("gratuit")}</>;

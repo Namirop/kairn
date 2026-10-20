@@ -6,30 +6,19 @@ import { blocsDeTexte } from "@/lib/domain/blocs-de-texte";
 import { elementsDeProse, type ElementDeProse } from "@/lib/domain/structure-de-prose";
 
 /**
- * Un texte déposé, rendu avec sa structure : titres, listes, tableaux, blocs de
- * code. Pour la lecture au long seulement ; dans un titre ou une option de QCM,
- * `TexteTechnique` suffit. La découpe vit dans `blocsDeTexte` et
- * `elementsDeProse`.
- *
- * `whitespace-pre-line` est sûr ici : les coupures subies ont été recollées en
- * amont, les retours restants sont voulus.
+ * Un texte déposé, avec sa structure, pour la lecture au long ; en ligne,
+ * `TexteTechnique` suffit. `whitespace-pre-line` est sûr : les coupures subies
+ * sont recollées en amont, les retours restants sont voulus.
  */
 
-/**
- * De l'air au-dessus d'un titre, rien en dessous : c'est l'espacement, plus que
- * la taille, qui fait la hiérarchie. Le premier élément n'en prend pas.
- */
+/** De l'air au-dessus, rien dessous : l'espacement fait la hiérarchie, plus que la taille. */
 const TITRES: Record<1 | 2 | 3, string> = {
   1: "mt-pas-6 text-corps font-semibold text-stone-900",
   2: "mt-pas-6 text-petit font-semibold text-stone-900",
   3: "mt-pas-4 text-petit font-medium text-stone-900",
 };
 
-/**
- * Les titres d'un dépôt descendent de deux crans : le composant vit sous le
- * `h1` de la page et le `h2` de sa section, et un `#` rendu en `h1` casserait
- * le plan du document au lecteur d'écran.
- */
+/** Deux crans plus bas : sous le `h1` et le `h2` de la page, un `#` en `h1` casserait le plan. */
 const BALISES: Record<1 | 2 | 3, "h3" | "h4" | "h5"> = { 1: "h3", 2: "h4", 3: "h5" };
 
 function Titre({ niveau, texte }: { niveau: 1 | 2 | 3; texte: string }) {
@@ -37,16 +26,12 @@ function Titre({ niveau, texte }: { niveau: 1 | 2 | 3; texte: string }) {
 
   return (
     <Balise className={`${TITRES[niveau]} first:mt-0`}>
-      {/* Un titre peut citer du code (« Le dossier `android/` »). */}
       <TexteTechnique>{texte}</TexteTechnique>
     </Balise>
   );
 }
 
-/**
- * Une liste, à puces ou numérotée. Une liste numérotée reprend au numéro écrit
- * dans le dépôt, pas à un.
- */
+/** Une liste numérotée reprend au numéro écrit dans le dépôt, pas à un. */
 function Liste({ element }: { element: Extract<ElementDeProse, { type: "liste" }> }) {
   const entrees = element.entrees.map((entree, rang) => (
     <li key={rang} className="pl-pas-1">

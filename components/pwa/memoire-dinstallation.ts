@@ -1,20 +1,14 @@
 import { REFUS_AVANT_SILENCE, type RefusDInstallation } from "@/lib/domain/report-de-linvite";
 
 /**
- * Ce qu'on retient de l'installation, sur l'appareil et non en base : l'invite
- * ne parle que de l'appareil qu'on a en main, et l'avoir installée sur son
- * téléphone ne dit rien de l'ordinateur.
- *
- * Le stockage est faillible (navigation privée, quota, confidentialité) : on
- * retombe alors sur « jamais refusé », et l'invite reparaîtra.
+ * Sur l'appareil et non en base : installée sur le téléphone, l'app ne l'est pas
+ * sur l'ordinateur. Stockage faillible (navigation privée, quota) : on retombe
+ * sur « jamais refusé », l'invite reparaît.
  */
 
 const CLE = "cairn:invite-installation-ecartee";
 
-/**
- * L'ancien format, un « 1 » qui valait refus pour toujours. Il reste honoré
- * comme un silence définitif sur les appareils qui le portent.
- */
+/** Ancien format, encore présent sur des appareils : vaut silence définitif. */
 const REFUS_DEFINITIF_HISTORIQUE = "1";
 
 export function lireRefus(): RefusDInstallation | null {
@@ -29,20 +23,14 @@ export function lireRefus(): RefusDInstallation | null {
 }
 
 /**
- * L'utilisateur dit avoir installé l'application. On ne lui repropose plus.
- *
- * Sur iPhone, c'est le seul moyen de le savoir : l'application de l'écran
- * d'accueil a son propre bac à sable (ni cookies ni stockage partagés), et
- * Safari n'expose pas `getInstalledRelatedApps`.
- *
- * C'est écrit comme un refus définitif, dont la conséquence est la même : un
- * second champ ferait deux vérités à tenir d'accord.
+ * Sur iPhone, seul moyen de savoir : l'app de l'écran d'accueil a son propre bac
+ * à sable, et Safari n'expose pas `getInstalledRelatedApps`. Écrit comme un refus
+ * définitif, même effet : un second champ ferait deux vérités à accorder.
  */
 export function confirmerInstallation(maintenant: Date): void {
   ecrire({ compte: REFUS_AVANT_SILENCE, dernier: maintenant.toISOString() });
 }
 
-/** Ajoute un refus à ceux déjà comptés, et l'horodate. */
 export function enregistrerRefus(maintenant: Date): void {
   const precedents = lireRefus();
 
@@ -53,7 +41,7 @@ function ecrire(memoire: { compte: number; dernier: string }): void {
   try {
     window.localStorage.setItem(CLE, JSON.stringify(memoire));
   } catch {
-    // Stockage refusé. L'invite reparaîtra, et c'est tout ce qui se passe.
+    // Stockage refusé : l'invite reparaîtra, sans autre conséquence.
   }
 }
 
@@ -65,11 +53,7 @@ function lire(): string | null {
   }
 }
 
-/**
- * Ce qu'on relit, on ne l'a pas forcément écrit. Une valeur illisible vaut
- * absence de refus : se taire sur la foi d'une chaîne illisible serait la pire
- * des deux erreurs.
- */
+/** Illisible vaut absence de refus : se taire sur une chaîne illisible serait la pire erreur. */
 function analyser(brut: string): RefusDInstallation | null {
   try {
     const valeur: unknown = JSON.parse(brut);

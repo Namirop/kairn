@@ -5,10 +5,7 @@ import { Switch as SwitchPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/fusion-des-classes";
 
-/**
- * Interrupteur retokenisé. Le contour reste visible en position éteinte : sans
- * bord sur une surface claire, la piste ne se lit plus comme cliquable.
- */
+/** Contour visible éteint : sans bord sur du clair, la piste ne se lit plus cliquable. */
 function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimitive.Root>) {
   return (
     <SwitchPrimitive.Root

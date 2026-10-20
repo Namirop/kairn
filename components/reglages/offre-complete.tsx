@@ -3,12 +3,9 @@ import { Achat } from "@/components/reglages/gestes-de-loffre";
 import { PLAFOND_PAYANT } from "@/lib/domain/plafond-du-plan";
 
 /**
- * Ce qu'un compte gratuit peut prendre : le seul endroit du produit authentifié
- * qui propose de payer.
- *
- * Il porte la surface `givre`, qui n'a pas d'autre emploi : c'est ce qui la
- * fait lire comme un signal. Le plafond est donné dans la même forme que celui
- * de l'offre en cours, pour se comparer d'un coup d'œil.
+ * Seul endroit du produit authentifié qui propose de payer. `givre` n'a pas
+ * d'autre emploi : c'est ce qui la fait lire comme un signal. Plafond dans la
+ * forme de l'offre en cours, pour comparer d'un coup d'œil.
  */
 export function OffreComplete() {
   const t = useTranslations("compte.offre");

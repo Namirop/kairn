@@ -1,17 +1,12 @@
 /**
- * Ce que le navigateur courant sait de l'installation : des questions à
- * l'appareil, aucune décision (elles se prennent dans `use-installation`).
- *
- * Tout se lit par `Reflect` : ces interfaces n'existent que sur certains
- * navigateurs, et un `as` affirmerait ce qu'on est en train de vérifier.
+ * Questions à l'appareil sur l'installation ; les décisions sont dans
+ * `use-installation`. Tout passe par `Reflect` : ces interfaces n'existent pas
+ * partout, et un `as` affirmerait ce qu'on vérifie.
  */
 
 /**
- * L'application tourne-t-elle dans cette fenêtre-ci depuis l'écran d'accueil ?
- *
- * Les quatre `display-mode` qu'un manifeste peut demander ou qu'un navigateur
- * impose (`window-controls-overlay` sur bureau), `navigator.standalone` qui sert
- * encore sur iPhone, et `android-app://` pour une enveloppe native.
+ * Cette fenêtre-ci est-elle lancée depuis l'écran d'accueil ? `standalone` sert
+ * encore sur iPhone, `android-app://` pour une enveloppe native.
  */
 export function fenetreInstallee(): boolean {
   const modes = ["standalone", "minimal-ui", "fullscreen", "window-controls-overlay"];
@@ -23,13 +18,9 @@ export function fenetreInstallee(): boolean {
 }
 
 /**
- * L'application est-elle posée sur cet appareil, même vue depuis un onglet
- * ordinaire ? `display-mode` ne renseigne que sur la fenêtre courante.
- *
- * `getInstalledRelatedApps` ne répond que sur ce que le manifeste déclare dans
- * `related_applications` — d'où l'entrée qui y désigne Kairn elle-même. Elle
- * n'existe que sur Chrome et dérivés ; ailleurs, on ne sait pas, et on retombe
- * sur les signaux de fenêtre.
+ * Posée sur l'appareil, même vue d'un onglet ordinaire ? `getInstalledRelatedApps`
+ * (Chrome seulement) ne voit que `related_applications` du manifeste, d'où
+ * l'entrée qui y désigne Kairn elle-même.
  */
 export async function applicationDejaPosee(): Promise<boolean> {
   if (fenetreInstallee()) return true;
@@ -49,15 +40,10 @@ export async function applicationDejaPosee(): Promise<boolean> {
 }
 
 /**
- * Le geste à décrire quand le navigateur n'en déclenche aucun.
- *
- * Sur iPhone et iPad, le menu de partage : aucun navigateur d'iOS n'émet
- * `beforeinstallprompt`, Chrome compris (tous tournent sur WebKit). Sur Mac,
- * Safari installe depuis son menu Fichier ; les autres navigateurs de bureau
- * déclenchent l'événement eux-mêmes.
- *
- * L'iPad annonce « Macintosh » dans son agent depuis iPadOS 13 : seul le nombre
- * de points de contact le distingue d'un Mac.
+ * Le geste à décrire quand le navigateur n'en déclenche aucun : aucun navigateur
+ * d'iOS n'émet `beforeinstallprompt` (tous sont WebKit), Safari sur Mac installe
+ * depuis son menu. L'iPad s'annonce « Macintosh » : seuls ses points de contact
+ * le distinguent.
  */
 export type GesteManuel = "partage" | "dock";
 
@@ -72,10 +58,7 @@ export function gesteManuel(): GesteManuel | null {
   return null;
 }
 
-/**
- * Safari, et lui seul : Chrome, Edge et Opera portent aussi « Safari » dans leur
- * agent, on les écarte.
- */
+/** Chrome, Edge et Opera portent aussi « Safari » dans leur agent. */
 function estSafari(agent: string): boolean {
   if (!/Safari/.test(agent)) return false;
 

@@ -6,13 +6,10 @@ import { ROUTES } from "@/lib/auth/routes";
 import type { ChargeDuJour } from "@/lib/domain/selection-session";
 
 /**
- * Ce que le dépôt vient de changer à la journée, dit sur la page du dépôt, qui
- * se recharge quand le découpage aboutit (`SuivreLAvancement`). Sans lui, un
- * compteur « Aujourd'hui » inchangé se lirait comme une panne.
- *
- * Le chiffre est celui de la journée entière, pas de ce dépôt : la session ne
- * connaît pas les dépôts, et c'est elle qui servira. La journée pleine se dit
- * aussi : c'est le seul cas où un concept neuf n'entre pas dans la série.
+ * Sans lui, un compteur « Aujourd'hui » inchangé se lirait comme une panne. Le
+ * chiffre est celui de la journée, pas du dépôt : la session, qui servira, ne
+ * connaît pas les dépôts. La journée pleine se dit : seul cas où un concept
+ * neuf n'entre pas.
  */
 export function EntreeDansLaSerie({ charge }: { charge: ChargeDuJour }) {
   const t = useTranslations("depots.depot.serie");

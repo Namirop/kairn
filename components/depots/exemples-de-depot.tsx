@@ -6,10 +6,9 @@ import { useLangue } from "@/lib/i18n/use-langue";
 import { cn } from "@/lib/fusion-des-classes";
 
 /**
- * L'onboarding tient là : pas de visite guidée, le premier dépôt fait le
- * travail. Les trois exemples sont volontairement sans rapport entre eux, pour
- * dire qu'on peut déposer n'importe quoi. Ils remplissent le champ sans
- * l'envoyer : le dépôt reste le geste de l'utilisateur.
+ * Tout l'onboarding : le premier dépôt fait le travail. Exemples sans rapport
+ * entre eux, pour dire qu'on dépose n'importe quoi ; ils remplissent le champ
+ * sans l'envoyer : le dépôt reste le geste de l'utilisateur.
  */
 export function ExemplesDeDepot({ onChoisir }: { onChoisir: (texte: string) => void }) {
   const t = useTranslations("depots.formulaire");
@@ -23,11 +22,7 @@ export function ExemplesDeDepot({ onChoisir }: { onChoisir: (texte: string) => v
   );
 }
 
-/**
- * Les trois puces seules, sans la phrase qui les introduit : elles servent au
- * premier dépôt de l'application et sous le champ de l'essai public, chacun
- * avec sa propre introduction.
- */
+/** Sans introduction : l'app et l'essai public ont chacun la leur. */
 export function PucesDExemples({
   onChoisir,
   className,
