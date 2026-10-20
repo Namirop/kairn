@@ -12,12 +12,7 @@ import {
   motifDeDefaut,
 } from "@/lib/depots/bornes-du-depot";
 
-/**
- * L'invitation à déposer : le titre, ce qu'on en fait, et le champ.
- *
- * Même grille que les sections qui suivent tant qu'il invite ; une fois le
- * résultat là, c'est `ResultatDeLEssai` qui compose, en pleine largeur.
- */
+/** L'invitation à déposer, sur la grille des sections qui suivent. */
 
 export function FormulaireDEssai({
   invite,
@@ -33,17 +28,16 @@ export function FormulaireDEssai({
   /** Le refus rendu par l'action, quand il a fallu aller jusqu'au serveur. */
   erreurServeur?: string;
   /**
-   * Le dépôt part vraiment : c'est là que la fenêtre de l'essai s'ouvre. Ici et
-   * pas dans un effet sur `enCours`, seul endroit qui distingue « on envoie » de
-   * « on a refusé sur place » — sans quoi l'attente clignoterait sur un refus.
+   * Le dépôt part vraiment : la fenêtre de l'essai s'ouvre. Pas un effet sur
+   * `enCours`, qui ne distingue pas l'envoi du refus sur place : l'attente
+   * clignoterait sur un refus.
    */
   surDepot: () => void;
   /** Un découpage a déjà abouti pendant cette visite, et on en redépose un. */
   reprise: boolean;
 }) {
   const t = useTranslations("site.essai.formulaire");
-  // Les refus sont ceux du serveur, mot pour mot : même règle, mêmes phrases,
-  // dites dans la langue de l'écran.
+  // Les phrases de refus du serveur, mot pour mot.
   const tRefus = useTranslations("depots.refus");
   const champ = useRef<HTMLTextAreaElement>(null);
   const [texte, setTexte] = useState("");
@@ -51,10 +45,8 @@ export function FormulaireDEssai({
   const trop = texte.length > CARACTERES_MAXIMUM_ANONYME;
 
   /*
-    Un défaut de longueur se refuse sur place : un aller-retour ferait passer
-    l'écran par l'attente pour un texte qui n'existe pas. La règle est celle de
-    `bornes-du-depot.ts`, partagée avec le serveur, qui reste seul juge du reste
-    (verrous de la visite, empreinte d'adresse, plafond du jour).
+    La longueur se refuse sur place, sans passer par l'attente. La règle est
+    partagée avec le serveur, seul juge du reste (verrous, plafond du jour).
   */
   const verifierAvantDenvoyer = (evenement: FormEvent<HTMLFormElement>) => {
     const defaut = defautDeLongueur(texte);
@@ -85,8 +77,6 @@ export function FormulaireDEssai({
 
       <Apparition>
         <Temps>
-          {/* Le mécanisme, pas une liste de ce qu'on peut déposer : l'invite du
-              champ et la section « Tu déposes » le disent déjà. */}
           <p className="text-stone-500">{t("mecanisme")}</p>
         </Temps>
 
@@ -103,9 +93,8 @@ export function FormulaireDEssai({
               texte={texte}
               surTexte={(valeur) => {
                 setTexte(valeur);
-                // Le message tombe dès qu'on répare et ne revient qu'au prochain
-                // envoi : recalculé à chaque frappe, il passerait de « il n'y a
-                // rien » à « c'est trop court » sur un texte en train de s'écrire.
+                // Le message ne revient qu'au prochain envoi : recalculé à chaque
+                // frappe, il dirait « trop court » d'un texte en train de s'écrire.
                 if (erreurLocale) setErreurLocale(null);
               }}
               enErreur={erreurLocale !== null}
@@ -115,17 +104,15 @@ export function FormulaireDEssai({
               enCours={enCours}
               trop={trop}
               longueur={texte.length}
-              /* Le dépassement se dit pendant qu'on colle ; les bornes basses
-                 attendent l'envoi (voir `surTexte` plus haut). */
+              /* Le dépassement se dit pendant qu'on colle, les bornes basses à l'envoi. */
               erreur={erreurLocale ?? (trop ? motifDeDefaut("long", tRefus) : erreurServeur)}
               reprise={reprise}
             />
           </form>
         </Temps>
 
-        {/* Sous le geste : une aide pour qui bloque, pas une consigne à
-            traverser. Ils remplissent le champ sans l'envoyer — le dépôt reste
-            le geste de l'utilisateur. */}
+        {/* Sous le geste, une aide pour qui bloque. Les exemples remplissent le
+            champ sans l'envoyer : le dépôt reste le geste de l'utilisateur. */}
         <Temps className="mt-pas-6 md:mt-pas-8">
           <p className="text-petit text-stone-500">{t("exemples")}</p>
 

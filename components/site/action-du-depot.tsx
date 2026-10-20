@@ -6,14 +6,12 @@ import { CARACTERES_MAXIMUM_ANONYME } from "@/lib/depots/bornes-du-depot";
 import { ETIQUETTE_INTL } from "@/lib/i18n/langues";
 import { useLangue } from "@/lib/i18n/use-langue";
 
-/** Au-delà, on montre le compteur. Trois quarts, comme dans le formulaire du produit. */
+/** Seuil du compteur : trois quarts, comme dans le formulaire du produit. */
 const SEUIL_COMPTEUR = Math.floor(CARACTERES_MAXIMUM_ANONYME * 0.75);
 
 /**
- * Le bouton, sa mention, et ce que le dépôt a à dire.
- *
- * Bouton et mention restent sur une ligne, sans `flex-wrap` : sur téléphone,
- * c'est la mention qui se plie, plutôt que de passer dessous comme un bloc.
+ * Le bouton, sa mention, et ce que le dépôt a à dire. Sans `flex-wrap` : sur
+ * téléphone, la mention se plie au lieu de passer dessous.
  */
 export function ActionDuDepot({
   enCours,
@@ -43,8 +41,7 @@ export function ActionDuDepot({
           {enCours ? t("enCours") : t("envoyer")}
         </Button>
 
-        {/* À l'approche de la borne, le compteur remplace la mention rassurante :
-            c'est lui qui dit pourquoi le bouton refuse. */}
+        {/* Près de la borne, le compteur dit pourquoi le bouton refuse. */}
         {longueur > SEUIL_COMPTEUR ? (
           <span
             className={`text-mono min-w-0 font-mono tabular-nums ${trop ? "text-alerte" : "text-stone-500"}`}
@@ -57,9 +54,7 @@ export function ActionDuDepot({
         )}
       </div>
 
-      {/* Pas de place réservée : sous le bouton, le message ne décale que ce qui
-          suit. La balise reste montée pour que la région `aria-live` annonce ;
-          `empty:` retire seulement sa marge. */}
+      {/* Toujours montée pour que `aria-live` annonce ; `empty:` retire sa marge. */}
       <p className="text-petit mt-pas-2 empty:mt-0" role="status" aria-live="polite">
         {erreur ? <span className="text-alerte">{erreur}</span> : null}
         {!erreur && reprise ? <span className="text-stone-500">{t("reprise")}</span> : null}

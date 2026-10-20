@@ -1,11 +1,8 @@
 import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
 
 /**
- * Un cairn du paysage.
- *
- * Pas `SilhouetteDeCairn`, qui tire toujours les mêmes neuf pierres et ferait
- * du paysage un motif répété : celui-ci prend une graine, et chaque cairn est
- * différent de son voisin.
+ * Un cairn du paysage, tiré d'une graine : `SilhouetteDeCairn` tire toujours
+ * les mêmes pierres et ferait du paysage un motif répété.
  */
 export function CairnDuPaysage({
   graine,
@@ -35,9 +32,8 @@ export function CairnDuPaysage({
           key={pierre.cle}
           transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}
         >
-          {/* La pierre du sommet prend la variable `sommet` du plan
-              (`--pierre-proche-sommet` porte le lichen) ; non définie, elle
-              garde la teinte de son empilement. */}
+          {/* Le sommet prend la variable du plan si elle est définie (le
+              lichen, au plan proche), sinon la teinte de l'empilement. */}
           <path
             d={pierre.chemin}
             fill={

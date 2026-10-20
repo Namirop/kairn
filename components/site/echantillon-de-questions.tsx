@@ -11,19 +11,14 @@ import type { QuestionDeVitrine } from "@/lib/db/depot-de-visite";
 import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
 /**
- * Les questions écrites sur l'un des concepts de l'essai, derrière leurs noms
- * de format : le visiteur clique, la question change, et il comprend la
- * rotation sans explication. Les quatre sont déjà écrites (un seul appel), en
- * montrer une seule n'économiserait rien.
- *
- * Un format n'y paraît qu'une fois (`unParFormat`), dans un ordre fixe
- * (`parOrdreDeFormat`) : deux formats identiques côte à côte contrediraient la
- * démonstration. L'attente s'arrête avec l'interrogation, à 90 s, pour ne pas
- * battre indéfiniment sous des concepts déjà affichés.
+ * Les questions d'un concept de l'essai, derrière leurs noms de format :
+ * cliquer change la question, et la rotation se comprend sans explication. Les
+ * quatre viennent du même appel : en montrer une seule n'économiserait rien.
+ * Un format n'y paraît qu'une fois, sans quoi la démonstration se contredit.
+ * L'attente s'arrête à 90 s pour ne pas battre sous des concepts déjà affichés.
  *
  * Des boutons `aria-pressed`, pas des onglets : le motif ARIA des onglets
- * impose les flèches et un `tabindex` mouvant, et à demi implémenté il retire
- * au clavier ce que la souris garde.
+ * impose flèches et `tabindex` mouvant, et à demi fait il prive le clavier.
  */
 
 export function EchantillonDeQuestions({
@@ -43,8 +38,7 @@ export function EchantillonDeQuestions({
   const [rang, setRang] = useState(0);
 
   const montrables = parOrdreDeFormat(unParFormat(questions));
-  // Les questions arrivent après les concepts, donc sous le pli : on va les
-  // chercher. Voir `useArriveeDesQuestions`.
+  // Elles arrivent après les concepts, sous le pli : on va les chercher.
   const ancre = useArriveeDesQuestions(montrables.length);
 
   if (montrables.length === 0) {
@@ -62,20 +56,17 @@ export function EchantillonDeQuestions({
           {t("echantillon.titre", { nombre: montrables.length })}
         </h3>
 
-        {/* Sans mesure maximale, par exception : c'est une légende d'une ligne
-            (717 px dans une fenêtre de 800), pas un paragraphe. Pliée, elle
-            ferait un bloc et pousserait les formats vers le bas. */}
+        {/* Sans mesure maximale, par exception : une légende d'une ligne
+            (717 px à 800 de fenêtre), qui pliée repousserait les formats. */}
         <p className="text-petit text-stone-300">{t("echantillon.rotation")}</p>
       </header>
 
       {montree ? (
         <>
-          {/* Le bouton actif partage la surface de la carte qu'il commande :
-              c'est ce qui les relie sans qu'aucune bordure ait à le dire. */}
+          {/* Le bouton actif partage la surface de sa carte : le lien se passe de bordure. */}
           {montrables.length > 1 ? (
-            /* Sur téléphone, quatre formats ne tiennent pas sur une ligne et
-               `flex-wrap` laisserait un nom orphelin : deux colonnes de la
-               largeur de leur contenu plient deux et deux. */
+            /* Sur téléphone, `flex-wrap` laisserait un format orphelin : deux
+               colonnes plient deux et deux. */
             <div
               role="group"
               aria-label={t("echantillon.formats")}

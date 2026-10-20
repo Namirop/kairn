@@ -4,11 +4,8 @@ import { PhraseTrouee } from "@/components/revision/phrase-trouee";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
- * La question de l'échantillon, dans la carte de l'écran de révision.
- *
- * Même arrondi et même corps d'énoncé que la carte de révision, et le même
- * `PhraseTrouee` : c'est la question telle qu'elle apparaîtra. La carte est de
- * roche, la fenêtre de l'essai étant sombre ; le trou suit (voir `FondDuTrou`).
+ * La question de l'échantillon, telle qu'elle apparaîtra en révision : même
+ * carte, même `PhraseTrouee`. Version roche, la fenêtre de l'essai étant sombre.
  */
 export function CarteDeLEchantillon({
   question,
@@ -27,10 +24,9 @@ export function CarteDeLEchantillon({
         <PhraseTrouee phrase={question} comble={null} fond="roche" />
       </p>
 
-      {/* Les propositions, en texte et non en boutons : ici on ne répond pas.
-          Une par ligne sur téléphone : une proposition de QCM n'a pas de
-          longueur maximale, et deux côte à côte déborderaient de la carte. La
-          bonne n'arrive pas jusqu'ici : voir `optionsDUnQCM`. */}
+      {/* En texte et non en boutons : ici on ne répond pas. Une par ligne sur
+          téléphone, une proposition n'ayant pas de longueur maximale. La bonne
+          n'arrive pas jusqu'ici : voir `optionsDUnQCM`. */}
       {options ? (
         <ul className="gap-x-pas-4 gap-y-pas-1 mt-pas-4 text-petit grid grid-cols-1 text-stone-300 md:flex md:flex-wrap">
           {options.map((option) => (

@@ -3,19 +3,13 @@
 import { useEffect, useState, type RefObject } from "react";
 
 /**
- * L'encre qui s'efface au bas d'une zone dont le texte continue : ce qui
- * remplace l'ascenseur masqué par `sans-ascenseur`, sans quoi plus rien ne dit
- * qu'il reste du contenu.
- *
- * Il ne paraît que s'il y a vraiment quelque chose sous le pli : posé sans
- * condition, il délaverait la dernière ligne d'un texte entier.
- *
- * Le fondu part de la couleur du creux (`surface-ombre`) : il ne se voit que
- * sur ce qu'il recouvre.
+ * Le fondu au bas d'une zone dont le texte continue : il remplace l'ascenseur
+ * masqué. Seulement s'il reste du contenu, sans quoi il délaverait la dernière
+ * ligne d'un texte entier.
  */
 export function VoileDeFin({
   zone,
-  /** Ce qui, en changeant, peut faire apparaître ou disparaître le débordement. */
+  /** Ce qui, en changeant, peut faire naître ou disparaître le débordement. */
   contenu,
 }: {
   zone: RefObject<HTMLTextAreaElement | null>;
@@ -28,8 +22,7 @@ export function VoileDeFin({
     if (!champ) return;
 
     const mesurer = () => {
-      // Un pixel de tolérance : les hauteurs de défilement sont fractionnaires,
-      // et l'égalité stricte laisserait le voile allumé en fin de zone.
+      // Un pixel de tolérance : les hauteurs de défilement sont fractionnaires.
       setReste(champ.scrollTop + champ.clientHeight < champ.scrollHeight - 1);
     };
 

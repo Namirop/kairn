@@ -4,16 +4,12 @@ import { useTranslations } from "next-intl";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 /**
- * Le champ de dépôt, en grand, pour relire un long texte : le champ de la bande
- * a une hauteur fixe pour que coller un article ne pousse pas le bouton hors de
- * l'écran.
- *
- * Les deux champs partagent la même valeur, donc fermer ne valide ni n'annule
- * rien. Seul le champ de la bande porte le `name` : la fenêtre vit dans un
- * portail, hors du `form`.
- *
- * Le focus reste au début du texte, où Radix le pose : on vient relire, et un
- * curseur en fin de texte ferait défiler la zone jusqu'au dernier mot.
+ * Le champ de dépôt en grand, pour relire un long texte : celui de la bande a
+ * une hauteur fixe, qu'un article collé ne pousse pas le bouton hors de l'écran.
+ * Valeur partagée :
+ * fermer ne valide ni n'annule. Seul le champ de la bande porte le `name`, la
+ * fenêtre vivant dans un portail hors du `form`. Le focus reste au début, où
+ * Radix le pose : on vient relire.
  */
 export function ChampEnGrand({
   ouvert,
@@ -44,8 +40,6 @@ export function ChampEnGrand({
 
         <DialogDescription className="sr-only">{t("descriptionEnGrand")}</DialogDescription>
 
-        {/* Les mêmes mesures que le creux de la bande : seule la hauteur
-            change. */}
         <div className="rounded-t-champ bg-surface-ombre p-pas-4 md:p-pas-6 focus-within:border-accent-profond border-b-2 border-stone-300 transition-colors">
           <textarea
             id="essai-en-grand"

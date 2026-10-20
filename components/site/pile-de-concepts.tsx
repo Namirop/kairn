@@ -1,19 +1,12 @@
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
- * Les concepts d'un essai, chacun sur sa dalle, sur une colonne : ils se lisent
- * à la suite, ils ne se comparent pas.
+ * Les concepts d'un essai, sur une colonne : ils se lisent à la suite. Dalle en
+ * `stone-700` : `stone-800` vaut la roche qui la porte (`surfaces.ts`).
  *
- * La dalle est en `stone-700` et non en `stone-800`, qui vaut exactement la
- * roche qui la porte : elle y serait invisible. Voir `surfaces.ts`.
- *
- * Elles arrivent l'une après l'autre, à 70 ms d'écart, comme sorties du texte.
- *
- * L'entrée est en CSS, jamais en `motion` : une animation JavaScript pose
- * l'opacité à zéro en ligne et attend une image suivante pour la remonter. Si
- * elle ne vient pas (onglet en arrière-plan, `requestAnimationFrame` gelé), le
- * seul contenu qui convertisse reste invisible. Une animation CSS finit
- * toujours sur l'état normal de l'élément.
+ * L'entrée est en CSS, jamais en `motion` : l'opacité à zéro posée en ligne
+ * attend une image que `requestAnimationFrame`, gelé en arrière-plan, peut ne
+ * jamais donner. Une animation CSS finit toujours sur l'état normal.
  */
 
 type Concept = { id: string; concept: string; tags: string[] };

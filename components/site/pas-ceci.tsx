@@ -7,13 +7,9 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
- * Ce que le produit n'est pas, sur le panneau de roche de la page publique.
- *
- * La silhouette du cairn déborde du panneau : une forme entière, posée au
- * milieu, redeviendrait une illustration.
- *
- * Les négations arrivent avant l'affirmation, qui en est la conclusion : lue en
- * même temps, elle deviendrait un élément de plus de la liste.
+ * Ce que le produit n'est pas. La silhouette déborde du panneau : entière, elle
+ * redeviendrait une illustration. L'affirmation arrive après les négations,
+ * sans quoi elle se lirait comme un élément de plus de la liste.
  */
 export function PasCeci({ connecte }: { connecte: boolean }) {
   const t = useTranslations("site.accueil.pasCeci");

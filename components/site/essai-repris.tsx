@@ -9,21 +9,14 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
- * Ce que la bande garde quand la fenêtre de l'essai est fermée : sans ce
- * rappel, revenir dans les sept jours du cookie retomberait sur un champ vide
- * alors que les concepts sont là. Un rappel, pas une seconde copie du
- * résultat ; il garde la charpente du formulaire qu'il remplace pour que la
- * bande ne change pas de forme selon son état.
+ * Le rappel d'un essai quand la fenêtre est fermée : sans lui, revenir dans les
+ * sept jours du cookie retomberait sur un champ vide. Il garde la charpente du
+ * formulaire qu'il remplace, pour que la bande ne change pas de forme.
  *
- * Le cairn est dessiné à partir des mêmes identifiants que dans la fenêtre,
- * donc il est identique. Il ne paraît qu'à partir de deux pierres : à un
- * concept, la figure (cent unités de large pour une pierre de quinze) se lit
- * comme un trait. Sur téléphone il s'efface : la ligne du titre y demande
- * 338 points pour 331 disponibles.
- *
- * Le corps du titre suit la largeur (`9.4vw`) tant qu'elle contraint plus que
- * le jeton : réglé pour que « 1 concept t'attend. » tienne sur une ligne d'un
- * téléphone de 390 points.
+ * Le cairn n'apparaît qu'à deux pierres : seule, une pierre de quinze unités
+ * sur cent de large se lit comme un trait. Il s'efface sur téléphone, où la
+ * ligne du titre demande 338 points pour 331. Le `9.4vw` du titre fait tenir
+ * « 1 concept t'attend. » sur une ligne de 390 points.
  */
 export function EssaiRepris({
   concepts,
@@ -41,12 +34,10 @@ export function EssaiRepris({
   surRevoir: () => void;
   surRedepot: () => void;
   /**
-   * Le rappel vient de remplacer une fenêtre qu'on ferme, et le clavier doit
-   * suivre. Sans ça, Radix rend le focus à un bouton d'envoi qui n'existe plus
-   * et il retombe sur le corps du document : on repart du haut de la page.
-   *
-   * Faux au chargement d'une visite qui revient — prendre le focus ferait
-   * défiler la page jusqu'ici avant qu'on ait rien demandé.
+   * Vrai quand le rappel remplace une fenêtre qu'on ferme : sinon Radix rend le
+   * focus à un bouton d'envoi disparu et le clavier repart du haut de la page.
+   * Faux au chargement, où le focus ferait défiler la page sans qu'on ait rien
+   * demandé.
    */
   prendLeFocus: boolean;
 }) {
@@ -78,8 +69,6 @@ export function EssaiRepris({
           <p className="text-stone-500">{t("texte")}</p>
         </Temps>
 
-        {/* Les trois gestes sur une ligne, comme dans le pied de la fenêtre ;
-            `flex-wrap` les replie sur téléphone. */}
         <Temps className="mt-pas-6 md:mt-pas-8">
           <div className="gap-pas-3 md:gap-pas-4 flex flex-wrap items-center">
             <Button asChild size="lg">

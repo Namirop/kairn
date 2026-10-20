@@ -3,9 +3,8 @@ import { crete, teintesDe, terre } from "./geometrie";
 import type { Plan } from "./plans";
 
 /**
- * Un plan : ses cairns, puis sa terre par-dessus leurs pieds — c'est cet ordre
- * qui plante les pierres au lieu de les poser. Le composant ignore la fenêtre :
- * bureau et téléphone sont deux jeux de valeurs, pas deux dessins.
+ * Un plan : ses cairns, puis sa terre par-dessus leurs pieds, ordre qui les
+ * plante au lieu de les poser. Bureau et téléphone sont deux jeux de valeurs.
  */
 export function PlanDuPaysage({ plan, graine }: { plan: Plan; graine: string }) {
   return (
@@ -17,8 +16,7 @@ export function PlanDuPaysage({ plan, graine }: { plan: Plan; graine: string }) 
         <div
           className="absolute"
           key={cairn.gauche}
-          /* Le pied passe sous la crête : deux points de la hauteur du
-             panneau suffisent à ce que la terre le recouvre. */
+          /* Le pied passe deux points sous la crête, que la terre le recouvre. */
           style={{
             left: cairn.gauche,
             bottom: `${(plan.crete * 100 - 2).toFixed(1)}%`,
@@ -41,9 +39,8 @@ export function PlanDuPaysage({ plan, graine }: { plan: Plan; graine: string }) 
         aria-hidden
       >
         <path d={crete(plan).masse} fill={terre(plan.sol)} />
-        {/* L'arête : deux terres voisines ne diffèrent que de quelques
-            centièmes de luminance, le trait rend le relief visible.
-            `non-scaling-stroke`, car la vue est étirée en hauteur. */}
+        {/* Deux terres voisines diffèrent à peine en luminance : l'arête rend
+            le relief. `non-scaling-stroke` : la vue est étirée. */}
         <path
           d={crete(plan).ligne}
           fill="none"

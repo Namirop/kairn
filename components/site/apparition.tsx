@@ -4,27 +4,24 @@ import type { ReactNode } from "react";
 import { motion, useReducedMotion, type Transition } from "motion/react";
 
 /**
- * Comment la page publique arrive : en plusieurs temps, une seule fois. Le
- * mouvement ne sert qu'à donner un ordre de lecture (le constat, puis son
- * retournement) : pas d'échelle, de rotation ni de flou, et `once` pour qu'un
- * panneau ne rejoue pas son entrée à chaque remontée.
+ * L'arrivée de la page publique, en plusieurs temps, une seule fois : le
+ * mouvement ne donne qu'un ordre de lecture, et `once` évite qu'un panneau
+ * rejoue à chaque remontée.
  *
- * Mouvement réduit : un simple bloc, sans opacité initiale ni transformation —
- * même une transition « instantanée » laisserait un style à zéro sur chaque
- * élément.
+ * Mouvement réduit : un simple bloc, car même une transition « instantanée »
+ * laisserait un style initial à zéro.
  */
 
 /** Un déplacement qu'on sent sans le regarder. */
 const MONTEE_PX = 14;
 
-/** Le temps d'un élément, et l'écart entre deux. */
 const DUREE_S = 0.55;
 const ECART_S = 0.09;
 
-/** Sortie douce, sans retour : ça se pose, ça ne rebondit pas. */
+/** Sortie douce, sans rebond. */
 const COURBE: Transition["ease"] = [0.2, 0.8, 0.2, 1];
 
-/** La même, mais qui s'arrête plus franchement : une pierre qu'on cale. */
+/** Plus franche à l'arrêt : une pierre qu'on cale. */
 const COURBE_PIERRE: Transition["ease"] = [0.16, 0.9, 0.2, 1];
 
 const TEMPS = {
@@ -33,10 +30,8 @@ const TEMPS = {
 };
 
 /**
- * Le temps d'une ligne de titre : elle descend sur la précédente, comme une
- * pierre sur le cairn, là où le reste de la page monte. Inverser le sens
- * suffit à ce qu'on ne reconnaisse plus le geste. Son écart, plus long, se
- * règle par `ecart` sur l'`Apparition`.
+ * Une ligne de titre descend sur la précédente, comme une pierre sur le
+ * cairn, quand le reste de la page monte. Son écart se règle par `ecart`.
  */
 const CHUTE_PIERRE_PX = 56;
 
@@ -50,9 +45,8 @@ const PIERRE = {
 };
 
 /**
- * La suite : elle ne bouge pas elle-même, elle cadence ses `Temps`.
- * `attente` retarde le premier temps, pour deux suites qui se répondent dans la
- * même vue.
+ * Ne bouge pas elle-même, cadence ses `Temps`. `attente` décale deux suites
+ * qui se répondent dans la même vue.
  */
 export function Apparition({
   attente = 0,
@@ -61,7 +55,7 @@ export function Apparition({
   children,
 }: {
   attente?: number;
-  /** L'écart entre deux temps. Les titres qui s'empilent le veulent plus long. */
+  /** Plus long pour les titres qui s'empilent. */
   ecart?: number;
   className?: string;
   children: ReactNode;
@@ -84,10 +78,8 @@ export function Apparition({
 }
 
 /**
- * Un temps de la suite. Hors d'une `Apparition`, il ne fait rien.
- *
- * `balise="span"` pour un temps à l'intérieur d'un titre, dont le modèle de
- * contenu n'admet pas de `div` ; à l'appelant de le passer en bloc.
+ * Un temps de la suite, inerte hors d'une `Apparition`. `balise="span"` dans
+ * un titre, qui n'admet pas de `div` ; à l'appelant de le passer en bloc.
  */
 export function Temps({
   balise = "div",

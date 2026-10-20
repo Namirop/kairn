@@ -5,17 +5,12 @@ import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "mo
 import type { MotionValue } from "motion/react";
 
 /**
- * Le sentier qui se trace pendant qu'on le descend, à la vitesse du défilement.
- * Un ressort le suit, sinon chaque cran de molette se verrait comme un saut.
+ * Le sentier qui se trace au défilement, suivi d'un ressort pour que chaque
+ * cran de molette ne se voie pas comme un saut. Un segment par intervalle :
+ * les étapes n'ont pas la même hauteur, un trait continu devrait mesurer la
+ * page. Les pierres grandissent depuis leur axe ; un fondu ferait chargement.
  *
- * Un segment par intervalle entre deux pierres : les étapes n'ont pas la même
- * hauteur, et un trait continu ne saurait pas où s'arrêter sans mesurer la page.
- *
- * Les pierres grandissent depuis leur axe plutôt qu'en fondu, qui aurait l'air
- * d'un chargement.
- *
- * Mouvement réduit : le trait est entier et les pierres posées dès le premier
- * rendu. Rien de ce qui se lit ne dépend de l'animation.
+ * Mouvement réduit : tout est posé dès le premier rendu.
  */
 
 export type EtapeDuSentier = { titre: string; texte: string };
@@ -36,9 +31,7 @@ export function TraceDuSentier({ etapes }: { etapes: EtapeDuSentier[] }) {
   const colonne = useRef<HTMLOListElement>(null);
   const immobile = useReducedMotion() ?? false;
 
-  // La traversée va de la liste qui commence à paraître à la liste entièrement
-  // en vue, pas jusqu'à sa sortie par le haut : le trait doit être fini quand
-  // on a tout sous les yeux, pas une fois la section quittée.
+  // Le trait est fini quand la liste est entière en vue, pas à sa sortie.
   const { scrollYProgress } = useScroll({
     target: colonne,
     offset: ["start 0.8", "end 0.9"],
@@ -77,7 +70,6 @@ export function TraceDuSentier({ etapes }: { etapes: EtapeDuSentier[] }) {
   );
 }
 
-/** Le trait entre deux pierres. Il se remplit du haut vers le bas. */
 function Segment({
   avance,
   anime,

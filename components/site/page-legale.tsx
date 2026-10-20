@@ -7,22 +7,16 @@ import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
- * Le gabarit des deux pages légales : registre sobre, une colonne de lecture.
- *
- * Les rubriques à compléter sont marquées visiblement plutôt que remplies d'un
- * texte plausible : une fausse adresse dans des mentions légales a l'air d'un
- * engagement.
+ * Le gabarit des pages légales. Les rubriques à compléter sont marquées
+ * visiblement plutôt que remplies d'un texte plausible : une fausse adresse
+ * dans des mentions légales a l'air d'un engagement.
  */
 
 export type RubriqueLegale = {
   titre: string;
   /** Ce qui est déjà vrai du produit et se dit sans attendre. */
   corps?: string[];
-  /**
-   * Des couples à mettre en regard (une finalité et sa base légale, une durée et
-   * ce qu'elle borne), rendus en liste de définitions : c'est une information
-   * qu'on cherche par balayage.
-   */
+  /** Une finalité et sa base légale, une durée et ce qu'elle borne : lus par balayage. */
   couples?: { terme: string; valeur: string }[];
   /** Ce que Romain doit renseigner. Rendu comme un trou, pas comme du texte. */
   aRemplir?: string[];

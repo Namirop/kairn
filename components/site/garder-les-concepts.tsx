@@ -7,12 +7,8 @@ import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
- * L'appel à garder, dans le pied fixe de la fenêtre de l'essai : à huit
- * concepts, en bas du corps, il serait à deux écrans du pouce sur téléphone.
- *
- * Bouton `clair` parce que le fond est la roche. Le pied s'empile sur
- * téléphone : trois éléments sur une ligne de 390 px réduisaient la mention à
- * un mot par ligne. Il redevient une ligne à partir de `md`.
+ * L'appel à garder, dans le pied fixe de la fenêtre de l'essai. Empilé sur
+ * téléphone : sur une ligne de 390 px, la mention tomberait à un mot par ligne.
  */
 export function GarderLesConcepts({
   peutRedeposer,

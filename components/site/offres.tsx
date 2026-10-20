@@ -5,18 +5,14 @@ import { useLangue } from "@/lib/i18n/use-langue";
 import { cn } from "@/lib/fusion-des-classes";
 
 /**
- * Les deux offres, côte à côte, de forme identique pour que la seule
- * différence saute aux yeux : le nombre de concepts, seule chose que le produit
- * lit du plan. C'est lui qui porte la display, le prix passe dessous.
- *
- * Le rembourrage est le même des deux côtés, posée ou non : sans quoi les deux
- * colonnes ne se liraient plus sur les mêmes lignes.
+ * Les deux offres, de forme identique pour que saute aux yeux la seule
+ * différence que le produit lit du plan : le nombre de concepts, en display.
+ * Même rembourrage des deux côtés, pour que les colonnes s'alignent.
  */
 
 export function Offres() {
   const t = useTranslations("site.tarifs.offres");
-  // Premium n'est pas vendu en anglais : la colonne payante y dit la limite,
-  // sans prix en euros ni rien qui mène à une caisse.
+  // Premium n'est pas vendu en anglais : ni prix ni chemin vers une caisse.
   const vendable = useLangue() === "FR";
 
   return (
@@ -47,11 +43,8 @@ export function Offres() {
 }
 
 /**
- * La colonne payante, là où elle ne se vend pas.
- *
- * Elle garde sa place et sa surface : la comparaison reste lisible, et ce qui
- * manque se dit au lieu de disparaître. Pas de nombre en display — on ne met
- * pas en avant ce qu'on ne peut pas offrir.
+ * La colonne payante là où elle ne se vend pas : elle garde sa place pour que
+ * le manque se dise, sans nombre en display pour ce qu'on ne peut offrir.
  */
 function PremiumIndisponible() {
   const t = useTranslations("site.tarifs.offres");
@@ -84,7 +77,7 @@ function Offre({
   second?: string;
   concepts: number;
   raison: string;
-  /** L'offre payante. C'est elle qui est posée. */
+  /** L'offre payante, la seule posée sur une surface. */
   vendue?: boolean;
 }) {
   const t = useTranslations("site.tarifs.offres");

@@ -7,25 +7,20 @@ export type Plan = {
   sol: number;
   /** Part d'encre des pierres, le reste est du papier. */
   pierre: number;
-  /** La teinte de l'arête : elle se fonce quand le plan se rapproche. */
+  /** Se fonce quand le plan se rapproche. */
   arete: string;
   /** Le préfixe des variables de pierre de ce plan. */
   pierres: string;
-  /** Son retard à l'arrivée, en millisecondes. Le proche se pose en premier. */
+  /** Retard à l'arrivée, en ms. Le proche se pose en premier. */
   arrivee: number;
   cairns: { gauche: string; haut: string; pierres: number }[];
 };
 
 /**
- * Les deux plans du bureau. Règle de placement : crêtes et cairns restent
- * au-dessus du titre, avec une marge. La seconde ligne du titre est évidée, et
- * un cairn ou une arête qui la traverse rend illisibles et le mot et la pierre.
- *
- * Le plan proche est une ombre pleine de sa crête au bas du panneau, sans
- * strate : sa matière vient du grain. Le nombre de pierres baisse avec la
- * distance, l'encre monte avec la proximité.
- *
- * La colonne de droite reste libre : c'est celle du cairn principal.
+ * Les deux plans du bureau. Crêtes et cairns restent au-dessus du titre, avec
+ * une marge : sa seconde ligne est évidée, et un cairn ou une arête qui la
+ * traverse rend illisibles le mot et la pierre. La colonne de droite reste
+ * libre pour le cairn principal.
  */
 export const PLANS: Plan[] = [
   {
@@ -67,13 +62,10 @@ export const PLANS: Plan[] = [
 ];
 
 /**
- * Les mêmes plans, redessinés pour un écran de 390 px (pas mis à l'échelle).
- *
- * - Les crêtes passent sous le titre : sur une colonne, le titre prend le haut.
- * - Quatre appuis au lieu de sept : la vue fait 1 200 unités quelle que soit la
- *   largeur, et sept appuis y deviennent une dentelure.
- * - Six cairns au lieu de quatorze, écartés du centre, où se tient le cairn
- *   principal sur téléphone.
+ * Les plans redessinés pour 390 px, pas mis à l'échelle : crêtes sous le titre,
+ * qui prend le haut ; quatre appuis, car la vue fait 1 200 unités à toute
+ * largeur et sept y deviennent une dentelure ; des cairns écartés du centre,
+ * où se tient le cairn principal.
  */
 export const PLANS_TELEPHONE: Plan[] = [
   {

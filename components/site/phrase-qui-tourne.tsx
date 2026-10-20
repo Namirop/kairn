@@ -8,23 +8,17 @@ import { useLangue } from "@/lib/i18n/use-langue";
 import { cn } from "@/lib/fusion-des-classes";
 
 /**
- * La voix de l'attente : une phrase qui change à chaque relève (`RELEVE_MS`), et
- * dont le ton descend avec le temps. Elle sert aux deux attentes de l'essai, le
- * découpage et l'écriture des questions. Le catalogue et les paliers sont dans
+ * La voix des deux attentes de l'essai : une phrase qui change à chaque relève
+ * et dont le ton descend avec le temps. Catalogue et paliers :
  * `lib/domain/phrases-dattente.ts`.
  */
 
 /**
- * La phrase du moment.
- *
- * Le temps compté est celui passé devant cet écran, pas celui du travail côté
- * serveur : après un rechargement, on vient d'arriver, et le ton repart du
- * début.
- *
- * Le tirage est fixé au montage : deux dépôts de même durée ne racontent pas la
- * même séquence. Le minuteur bat à la relève exactement, jamais plus vite : un
- * changement de palier attend la relève suivante, sans quoi une phrase pourrait
- * être remplacée une seconde après être apparue.
+ * La phrase du moment. Le temps compté est celui passé devant l'écran, pas celui
+ * du serveur : après un rechargement, le ton repart du début. Le tirage, fixé au
+ * montage, varie la séquence d'un dépôt à l'autre. Le minuteur bat à la relève,
+ * jamais plus vite, pour qu'un changement de palier ne remplace pas une phrase
+ * une seconde après son apparition.
  */
 export function usePhraseQuiTourne(etape: EtapeDeLAttente): string {
   const langue = useLangue();
@@ -41,18 +35,11 @@ export function usePhraseQuiTourne(etape: EtapeDeLAttente): string {
 }
 
 /**
- * La phrase, dans une place qui ne bouge pas.
+ * La phrase, dans une place réservée (deux lignes sur téléphone, une au-delà)
+ * pour ne pas pousser ce qui suit. Le fondu vient du remontage par la clé.
  *
- * Deux lignes réservées sur téléphone, une sur écran large : une phrase qui
- * passe de une à deux lignes ne pousse pas ce qui la suit.
- *
- * Le fondu vient du remontage (la clé change avec la phrase) : ni
- * `AnimatePresence` ni position absolue. Sous `prefers-reduced-motion`, la
- * phrase se remplace sans transition.
- *
- * Elle est masquée aux lecteurs d'écran : lue à chaque relève, elle deviendrait
- * du harcèlement. C'est à l'écran qui la porte d'annoncer, une fois, ce qu'il y
- * a à savoir.
+ * Masquée aux lecteurs d'écran : relue à chaque relève, elle harcèlerait. À
+ * l'écran qui la porte d'annoncer une fois ce qu'il faut savoir.
  */
 export function PhraseQuiTourne({ phrase, className }: { phrase: string; className?: string }) {
   const immobile = useReducedMotion() ?? false;
