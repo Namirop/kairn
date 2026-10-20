@@ -9,10 +9,7 @@ import { lireLaDepenseDuJour, lireLaDepenseParJour } from "@/lib/db/administrati
 
 export const metadata: Metadata = { title: "Dépense · Administration" };
 
-/**
- * Ce que le modèle a coûté : la journée par intention (qu'est-ce qui coûte),
- * puis jour par jour (est-ce que ça dérape).
- */
+/** Par intention (qu'est-ce qui coûte), puis jour par jour (est-ce que ça dérape). */
 export const dynamic = "force-dynamic";
 
 export default async function PageDepense() {

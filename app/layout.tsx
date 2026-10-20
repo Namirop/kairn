@@ -26,9 +26,8 @@ const METADONNEES = {
   applicationName: "Kairn",
   manifest: "/manifest.webmanifest",
 
-  // Il faut déclarer les deux : dès qu'`icons` existe, il remplace la détection
-  // de fichier (`app/icon.png`) au lieu de s'y ajouter, et l'onglet retomberait
-  // sur `/favicon.ico`, qui n'existe pas.
+  // Les deux : `icons` remplace la détection de `app/icon.png` au lieu de s'y
+  // ajouter, et l'onglet retomberait sur `/favicon.ico`, qui n'existe pas.
   icons: {
     icon: { url: "/icon.png", type: "image/png" },
     apple: "/icones/apple-touch-icon.png",
@@ -57,16 +56,14 @@ export const viewport: Viewport = {
 
 export default async function LayoutRacine({ children }: { children: React.ReactNode }) {
   return (
-    // `base.css` fait défiler en douceur vers l'essai ; l'attribut demande à Next
-    // de couper ce défilement pendant un changement de page, qui doit sauter net.
+    // Demande à Next de couper le défilement doux de `base.css` entre deux pages.
     <html lang={await getLocale()} data-scroll-behavior="smooth">
       <body className={classesPolices}>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
         <RegistreServiceWorker />
-        {/* Sans cookie ni identifiant entre sites : c'est ce qui dispense de
-            bandeau, et la page « Confidentialité » le dit. Une mesure qui
-            perdrait ces propriétés changerait d'abord cette page. À la racine,
-            pour suivre le passage de la landing à l'application. */}
+        {/* Sans cookie ni identifiant entre sites : ce qui dispense de bandeau,
+            et « Confidentialité » le dit. À la racine, pour suivre le passage
+            de la landing à l'application. */}
         <Analytics />
       </body>
     </html>

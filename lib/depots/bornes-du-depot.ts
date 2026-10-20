@@ -2,63 +2,39 @@ import type { createTranslator } from "next-intl";
 import type { depots } from "@/lib/i18n/messages/fr/depots";
 
 /**
- * Les bornes d'un dépôt, avec ou sans compte.
- *
- * Ce module ne dépend pas de Prisma ni de `sharp` : l'écran et le serveur
- * l'importent tous les deux, pour que le compteur du champ et le refus serveur
- * disent le même nombre. Ces bornes disent ce qu'un geste peut porter ; le
- * budget, lui, est protégé par le quota de concepts.
+ * Les bornes d'un dépôt. Sans Prisma ni `sharp` : l'écran et le serveur
+ * l'importent, pour que compteur et refus disent le même nombre. Le budget,
+ * lui, est protégé par le quota de concepts.
  */
 
 /**
- * Ce qu'un compte peut coller d'un coup.
- *
- * La limite est la latence, pas le coût : le découpage suit le nombre de
- * concepts (~25 s pour 7 400 signes), et l'écran d'attente renonce à 90 s.
- * À ~338 signes par concept, 16 000 signes donnent ~47 concepts, juste sous
- * `PLAFOND_CONCEPTS_PAR_DEPOT` (50) : les deux bornes se changent ensemble.
+ * Bornée par la latence, pas le coût : ~25 s pour 7 400 signes, abandon de
+ * l'attente à 90 s. À ~338 signes par concept, ~47 concepts, juste sous
+ * `PLAFOND_CONCEPTS_PAR_DEPOT` (50) : les deux se changent ensemble.
  */
 export const CARACTERES_MAXIMUM = 16000;
 
-/**
- * Ce qu'un visiteur peut coller : de quoi se découper en une dizaine de
- * secondes. C'est une démonstration, et sur la page qui convertit chaque
- * seconde d'attente coûte des visiteurs.
- */
+/** Une dizaine de secondes de découpage : sur la page qui convertit, chaque seconde coûte. */
 export const CARACTERES_MAXIMUM_ANONYME = 4000;
 export const CARACTERES_MINIMUM_ANONYME = 40;
 
 /**
- * Le poids maximal d'une capture au moment de partir, après réduction dans le
- * navigateur.
- *
- * Quatre mégaoctets parce que l'hébergeur refuse un corps de requête au-delà de
- * 4,5 Mo : il faut laisser la place au texte et au formulaire. En pratique
- * `reduireLaCapture` ramène une capture à quelques centaines de kilooctets ; la
- * borne ne sert que si la réduction a échoué.
+ * Après réduction dans le navigateur. Vercel refuse un corps au-delà de 4,5 Mo,
+ * il reste de la place pour le formulaire. Ne sert que si `reduireLaCapture`
+ * a échoué.
  */
 export const TAILLE_MAXIMALE_OCTETS = 4 * 1024 * 1024;
 
-/**
- * Le bord long au-delà duquel une capture est réduite, des deux côtés. Au-delà,
- * le modèle facture des pixels sans mieux lire.
- */
+/** Réduite au-delà, des deux côtés : le modèle facturerait des pixels sans mieux lire. */
 export const BORD_LONG_CAPTURE = 1568;
 
-/**
- * Ce qu'une consigne jointe à un dépôt peut faire de long : deux phrases, de quoi
- * cadrer ce qu'il faut retenir. Plus long, ce serait du contenu, qui entrerait en
- * concurrence avec le texte déposé.
- */
+/** Deux phrases pour cadrer : plus long, ce serait du contenu concurrent du texte. */
 export const CONSIGNE_MAXIMUM = 300;
 
 /**
- * Une longueur en signes, convertie en mots : personne ne compte les caractères
- * d'un texte, tout le monde sait ce que pèsent mille mots.
- *
- * Moyenne du français courant (6,5 signes par mot, espace comprise), gardée
- * dans les deux langues pour n'annoncer qu'une borne. Arrondi à la centaine :
- * c'est un ordre de grandeur.
+ * Personne ne compte les signes, tout le monde sait ce que pèsent mille mots.
+ * Moyenne du français, espace comprise, gardée en anglais pour n'annoncer
+ * qu'une borne.
  */
 const SIGNES_PAR_MOT = 6.5;
 
@@ -67,12 +43,8 @@ export function motsEnviron(caracteres: number): number {
 }
 
 /**
- * Ce qui cloche dans la longueur d'un essai, ou `null`.
- *
- * Le formulaire l'appelle pour refuser sur place, le serveur pour refuser
- * vraiment : sans ça, un champ vide partait au serveur et affichait une attente
- * pour rien. Le vide a son propre verdict parce que le problème est une
- * absence, pas une quantité.
+ * Appelé par le formulaire pour refuser sur place, et par le serveur. Le vide a
+ * son verdict : c'est une absence, pas une quantité.
  */
 export type DefautDeLongueur = "vide" | "court" | "long";
 
@@ -87,10 +59,8 @@ export function defautDeLongueur(texte: string): DefautDeLongueur | null {
 }
 
 /**
- * Le refus de longueur d'un essai. Le refus « trop long » doit dire que c'est la
- * limite de la démonstration et non du produit, qui accepte quatre fois plus
- * avec un compte : sans ça, le visiteur conclut que Kairn refuse les textes
- * longs.
+ * « Trop long » dit que c'est la limite de l'essai, pas du produit (quatre fois
+ * plus avec un compte) : sinon le visiteur croit que Kairn refuse les textes longs.
  */
 export function motifDeDefaut(defaut: DefautDeLongueur, t: TraduireLesRefus): string {
   if (defaut === "vide") return t("essai.rienADecouper");

@@ -5,22 +5,15 @@ import { signalerLePaiementEnEchec } from "@/lib/paiement/signalement-de-webhook
 import { traiterLeWebhook } from "@/lib/paiement/webhook";
 
 /**
- * Le webhook Stripe.
+ * Route publique, authentifiée par la seule signature. Corps lu en texte : la
+ * signature porte sur les octets exacts, un aller-retour JSON la casse.
  *
- * Pas de session : la route est publique, et seule la signature du corps
- * l'authentifie. Le corps est lu en texte, jamais en JSON : la signature porte
- * sur les octets exacts, et un aller-retour JSON suffit à la casser.
- *
- * Les codes parlent à Stripe, qui relance trois jours : 400 dit « n'insiste
- * pas », 500 dit « réessaie » — le bon code quand notre catalogue est cassé.
- * Un 500 envoie aussi une alerte (`alerte-de-webhook.ts`) : Stripe a encaissé
- * mais l'abonnement n'a pas bougé, et la personne n'a aucune raison d'écrire.
+ * Stripe relance trois jours : 400 dit « n'insiste pas », 500 « réessaie ». Un
+ * 500 alerte aussi (`alerte-de-webhook.ts`) : Stripe a encaissé, l'abonnement n'a
+ * pas bougé, et la personne n'a aucune raison d'écrire.
  */
 
-/**
- * Le type d'événement, pour l'alerte seulement. Le corps n'est pas encore
- * authentifié ici : ce type ne décide de rien, il dit quel événement rejouer.
- */
+/** Corps non authentifié : ce type ne décide de rien, il dit quel événement rejouer. */
 const corpsAnnonce = z.object({ type: z.string() });
 
 function typeAnnonce(corps: string): string | null {
@@ -47,15 +40,13 @@ export async function POST(request: Request) {
   try {
     const traitement = await traiterLeWebhook(corps, signature);
 
-    // Des identifiants, jamais de contenu. Ce journal sert à répondre à « son
-    // paiement est passé, pourquoi son compte n'a pas changé ».
+    // Des identifiants seulement ; répond à « payé, mais le compte n'a pas changé ».
     console.info("[paiement] webhook", traitement);
 
     return NextResponse.json({ recu: true });
   } catch (erreur) {
     if (erreur instanceof SignatureInvalideError) {
-      // Pas d'alerte : une signature invalide est un scan ou une relance
-      // pendant une rotation de secret. Alerter dessus noierait le canal.
+      // Pas d'alerte : un scan ou une relance pendant une rotation de secret.
       console.warn("[paiement] signature refusée");
 
       // i18n-ignore — réponse à Stripe, jamais lue par une personne

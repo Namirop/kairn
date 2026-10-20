@@ -21,11 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("titre") };
 }
 
-/**
- * Le tableau de bord : ce qu'il y a à faire et ce qu'on a déposé en deux
- * colonnes, puis le cairn sur la roche. Le sol est la roche, pour que la pile
- * se prolonge jusqu'en bas de la fenêtre.
- */
+/** Sol de roche, pour que la pile se prolonge jusqu'en bas de la fenêtre. */
 export default async function PageAujourdhui() {
   const utilisateur = await lireLUtilisateur();
 
@@ -37,11 +33,9 @@ export default async function PageAujourdhui() {
 
   return (
     <PileDePanneaux sol="roche">
-      {/* `md:z-20` sert l'invite d'installation, qui flotte à partir de `md`
-          mais vit dans ce panneau. Le panneau est un contexte d'empilement :
-          le `z-30` de l'invite n'y vaut qu'à l'intérieur, et le panneau de
-          roche suivant se peindrait par-dessus. C'est le panneau qu'il faut
-          lever, pas l'invite. */}
+      {/* `md:z-20` pour l'invite d'installation, flottante dès `md` : le panneau
+          est un contexte d'empilement, son `z-30` n'y vaut qu'à l'intérieur et
+          la roche suivante passerait dessus. On lève le panneau, pas l'invite. */}
       <Panneau
         surface="papier"
         className="md:py-pas-16 gap-pas-12 md:gap-pas-16 grid md:z-20 md:grid-cols-[0.8fr_1.2fr]"
@@ -66,9 +60,8 @@ export default async function PageAujourdhui() {
             </div>
           ) : null}
 
-          {/* Sous le compteur, qui reste la première chose lue, mais encore
-              dans le premier écran d'un téléphone. Ici seulement : c'est
-              l'écran d'entrée, où proposer d'installer ne coupe rien. */}
+          {/* Sous le compteur, encore dans le premier écran d'un téléphone. Ici
+              seulement : à l'entrée, proposer d'installer ne coupe rien. */}
           <InviteInstallation />
         </div>
 
@@ -77,10 +70,8 @@ export default async function PageAujourdhui() {
 
       <Strates de="papier" vers="roche" graine="aujourdhui-cairn" />
 
-      {/* Marges plus amples que le rythme ordinaire : la coupe de roche est un
-          changement de registre, et un titre collé dessous semble déborder de
-          la jointure. L'écart avant le filet de la bande doit dépasser celui
-          d'après, sinon le filet flotte au lieu de séparer. */}
+      {/* Marges amples : collé à la coupe, un titre semble déborder de la
+          jointure. L'écart avant le filet dépasse celui d'après, sinon il flotte. */}
       <Panneau
         surface="roche"
         remplit
@@ -96,7 +87,7 @@ export default async function PageAujourdhui() {
           </div>
 
           {/* `atomsConsolidated` compte aussi les archivés, qui posent une
-              pierre : le nom de colonne est resté pour éviter une migration. */}
+              pierre ; le nom évite une migration. */}
           <ColonneCairn
             retenus={tableau.stats?.atomsConsolidated ?? 0}
             graines={tableau.grainesDuCairn}

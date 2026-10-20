@@ -22,21 +22,16 @@ import { declencher } from "@/lib/jobs/queue";
 import { etatDuDepot, type EtatDepot as EtatDeLaChaine } from "@/lib/domain/etat-depot";
 
 /**
- * Les gestes de l'ingestion. Chacun vérifie la session puis la propriété :
- * l'identifiant vient de la session, jamais du formulaire, et une ressource
- * d'un autre compte n'est pas trouvée, donc pas touchée.
+ * Chaque geste vérifie la session puis la propriété : l'identifiant vient de la
+ * session, et une ressource d'un autre compte n'est pas trouvée, donc pas touchée.
  */
 
 export type EtatDepot = { erreur?: string; quota?: boolean };
 
-/** Ce que l'écran de détail relit à chaque tour : deux valeurs, pas une page. */
+/** Relu à chaque tour par l'écran de détail : deux valeurs, pas une page. */
 export type EtatDepotSuivi = { etat: EtatDeLaChaine; concepts: number };
 
-/**
- * Tout ce qui vient du client passe par Zod, champs de formulaire comme
- * arguments d'action. Un identifiant refusé vaut une ressource introuvable : le
- * geste ne fait rien, comme pour un identifiant d'un autre compte.
- */
+/** Un identifiant refusé vaut une ressource introuvable : le geste ne fait rien. */
 const Identifiant = z.string().min(1).max(64);
 const TexteDeConcept = z.string().trim().min(20).max(CARACTERES_MAXIMUM);
 
@@ -50,7 +45,6 @@ function champIdentifiant(donnees: FormData, nom: string): string | null {
   return lireIdentifiant(donnees.get(nom));
 }
 
-/** Rafraîchit la page d'un dépôt, si le formulaire dit lequel. */
 function revaliderLeDepot(donnees: FormData): void {
   const inputId = champIdentifiant(donnees, "inputId");
 
@@ -67,7 +61,7 @@ async function utilisateurOuRefus(): Promise<string> {
 
 export async function deposerAction(_precedent: EtatDepot, donnees: FormData): Promise<EtatDepot> {
   const userId = await utilisateurOuRefus();
-  // Les refus reviennent à l'écran : ils se disent dans la langue de la personne.
+  // Les refus s'affichent : dans la langue de la personne.
   const resultat = await deposer(userId, donnees, await getTranslations("depots.refus"));
 
   if (!resultat.ok) {
@@ -76,15 +70,12 @@ export async function deposerAction(_precedent: EtatDepot, donnees: FormData): P
 
   revalidatePath(ROUTES.depots);
 
-  // Vers le dépôt et non la liste : c'est le seul écran qui se recharge tout
-  // seul quand le découpage aboutit ; la liste resterait figée sur « en cours ».
+  // Vers le dépôt : seul écran qui se recharge quand le découpage aboutit, la
+  // liste resterait figée sur « en cours ».
   redirect(`${ROUTES.depots}/${resultat.inputId}`);
 }
 
-/**
- * Lance les questions demandées par un geste, après la réponse. Un job qui ne
- * part pas reste en attente, et le cron le ramasse.
- */
+/** Après la réponse ; un job qui ne part pas reste en attente et le cron le ramasse. */
 function lancer(jobs: string[]): void {
   for (const jobId of jobs) declencher(jobId);
 }
@@ -118,7 +109,6 @@ export async function confirmerConceptAction(donnees: FormData): Promise<void> {
   }
 }
 
-/** Remet dans le cycle un concept sorti, depuis la page du dépôt. */
 export async function desarchiverConceptAction(donnees: FormData): Promise<void> {
   const userId = await utilisateurOuRefus();
   const atomId = champIdentifiant(donnees, "atomId");
@@ -129,20 +119,15 @@ export async function desarchiverConceptAction(donnees: FormData): Promise<void>
   }
 }
 
-/**
- * Le même geste, défait dans la session juste après l'avoir fait. Rend un
- * booléen : l'appelant est un bouton, qui doit savoir si la bande d'annulation
- * peut disparaître.
- */
+/** Le même geste, depuis la session ; le booléen dit si la bande d'annulation peut partir. */
 export async function annulerMaitriseAction(atomId: string): Promise<boolean> {
   const userId = await utilisateurOuRefus();
   const id = lireIdentifiant(atomId);
 
   if (!id) return false;
 
-  // Aucune revalidation, volontairement : elle rafraîchirait la session, le
-  // serveur recomposerait une autre liste de questions et l'écran changerait de
-  // question sous les doigts. Le tableau de bord est rendu à la demande.
+  // Pas de revalidation : la session serait recomposée et la question changerait
+  // sous les doigts. Le tableau de bord est rendu à la demande.
   return desarchiverConcept(id, userId);
 }
 
@@ -153,7 +138,6 @@ export async function supprimerConceptAction(donnees: FormData): Promise<void> {
   if (atomId && (await supprimerConcept(atomId, userId))) revaliderLeDepot(donnees);
 }
 
-/** Efface le dépôt et tout ce qui en découle, puis renvoie à la liste. */
 export async function supprimerDepotAction(donnees: FormData): Promise<void> {
   const userId = await utilisateurOuRefus();
   const inputId = champIdentifiant(donnees, "inputId");
@@ -186,11 +170,7 @@ export async function rejoindreListeDattenteAction(): Promise<void> {
   revalidatePath(`${ROUTES.depots}/nouveau`);
 }
 
-/**
- * Où en est le découpage d'un dépôt, pour l'écran qui l'attend : l'état et le
- * nombre de concepts, et l'écran décide de se recharger quand l'un bouge.
- * `null` ne distingue pas un dépôt inexistant d'un dépôt d'un autre compte.
- */
+/** `null` ne distingue pas un dépôt inexistant d'un dépôt d'un autre compte. */
 export async function avancementDuDepotAction(inputId: string): Promise<EtatDepotSuivi | null> {
   const userId = await utilisateurOuRefus();
   const id = lireIdentifiant(inputId);

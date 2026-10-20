@@ -14,11 +14,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Qui opère Kairn, et sur quoi il tourne.
- *
- * Les identités et adresses des sous-traitants viennent de leurs propres
- * documents juridiques, jamais d'un annuaire d'entreprises : les agrégateurs se
- * trompent souvent, et ici une erreur a l'air d'un engagement.
+ * Les sous-traitants se citent d'après leurs propres documents juridiques, pas
+ * d'un annuaire : les agrégateurs se trompent, et ici une erreur engage.
  */
 type Espace = Messages["legal"]["mentionsLegales"];
 type Cle = MessageKeys<Espace, NestedKeyOf<Espace>>;

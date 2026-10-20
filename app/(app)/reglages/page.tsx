@@ -29,19 +29,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("metaTitre") };
 }
 
-/**
- * La page est recalculée à chaque visite : les réglages viennent d'être écrits,
- * et une version en cache montrerait l'état d'avant.
- */
+/** Les réglages viennent d'être écrits : une version en cache montrerait l'état d'avant. */
 export const dynamic = "force-dynamic";
 
-/** Les intitulés de groupe de cette page, comme dans le formulaire de réglages. */
+/** Comme dans le formulaire de réglages. */
 const GROUPE = "text-mono font-mono tracking-[0.14em] text-stone-500 uppercase";
 
-/**
- * Une donnée du compte qu'on ne change pas ici, et pourquoi : une valeur
- * intouchable sans raison écrite ressemble à une fonctionnalité oubliée.
- */
+/** Une valeur intouchable sans raison écrite ressemble à une fonctionnalité oubliée. */
 function Ligne({ intitule, valeur, raison }: { intitule: string; valeur: string; raison: string }) {
   return (
     <div className="px-pas-4 py-pas-3 rounded-champ bg-surface-papier">
@@ -54,7 +48,7 @@ function Ligne({ intitule, valeur, raison }: { intitule: string; valeur: string;
   );
 }
 
-/** Ce que porte l'adresse au retour de Stripe. Rien d'autre n'est lu ici. */
+/** Le retour de Stripe ; rien d'autre n'est lu ici. */
 type Parametres = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
 export default async function PageReglages({ searchParams }: Parametres) {
@@ -65,17 +59,13 @@ export default async function PageReglages({ searchParams }: Parametres) {
   const [reglages, offre, dossier, parametres] = await Promise.all([
     lireReglages(utilisateur.id),
     lireLOffreDuCompte(utilisateur.id),
-    // Un dossier chez Stripe, même sans abonnement en cours : c'est ce qui dit
-    // s'il y a des factures et une carte à aller voir.
+    // Même sans abonnement : dit s'il y a des factures et une carte à voir.
     lireDossierStripe(utilisateur.id),
     searchParams,
   ]);
 
-  /**
-   * L'exploitant ne voit ni « Comment ça marche », ni l'export, ni la
-   * suppression : il détient déjà les données, et ce bouton qui efface tout
-   * n'a rien à faire sur l'écran qu'il ouvre pour vérifier son fuseau.
-   */
+  // Ni guide, ni export, ni suppression pour l'exploitant : il détient déjà les
+  // données, et un bouton qui efface tout n'a rien à faire sur son écran.
   const administrateur = estAdministrateur(utilisateur.email);
   const t = await getTranslations("compte.reglages");
 
@@ -114,8 +104,7 @@ export default async function PageReglages({ searchParams }: Parametres) {
           />
         </dl>
 
-        {/* Le geste d'achat est ici et pas sur la page de tarifs : là-bas on
-            décide, ici on paie. */}
+        {/* L'achat ici, pas sur les tarifs : là-bas on décide, ici on paie. */}
         <TonOffre
           plan={offre.plan}
           plafond={offre.plafond}
@@ -134,9 +123,8 @@ export default async function PageReglages({ searchParams }: Parametres) {
           dossier={dossier.clientId !== null}
         />
 
-        {/* Le seul endroit où signaler autre chose qu'une question. Ici et pas
-            dans la navigation : c'est une porte de service, trouvable sans
-            occuper le devant. */}
+        {/* Hors de la navigation : une porte de service, trouvable sans occuper
+            le devant. */}
         <section className="mt-pas-12">
           <h2 className={GROUPE}>{t("probleme.titre")}</h2>
 
@@ -149,8 +137,8 @@ export default async function PageReglages({ searchParams }: Parametres) {
           </div>
         </section>
 
-        {/* Pas de lien vers l'administration : il est dans le rail, et un
-            raccourci en double finit par mentir. */}
+        {/* Pas de lien d'administration : il est dans le rail, un doublon finit
+            par mentir. */}
         {administrateur ? null : (
           <div className="gap-pas-4 mt-pas-8 flex flex-col items-start">
             <Link

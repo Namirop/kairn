@@ -9,14 +9,12 @@ import { lireLUtilisateur } from "@/lib/auth/session";
 import { poserLesReglages, type ReglagesPosés } from "@/lib/db/reglages";
 
 /**
- * Poser les réglages d'exploitation depuis l'écran interne.
- *
- * L'autorisation est revérifiée ici : une Server Action est une route,
- * atteignable sans passer par l'écran. `ADMIN_EMAILS` reste hors de portée de
- * ce chemin : un écran qui étend ses propres administrateurs n'a plus de porte.
+ * Autorisation revérifiée : une Server Action est une route, atteignable sans
+ * l'écran. `ADMIN_EMAILS` reste hors de portée : un écran qui étend ses propres
+ * administrateurs n'a plus de porte.
  */
 
-/** Un champ vide veut dire « rends la main à l'environnement ». */
+/** Un champ vide rend la main à l'environnement. */
 const optionnel = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess(
     (valeur) => (valeur === "" || valeur === undefined ? null : valeur),

@@ -14,15 +14,9 @@ import { lireFuseauUtilisateur, marquerEspacementVu } from "@/lib/db/reglages-du
 import type { SignalDeMaitrise } from "@/lib/domain/signal-maitrise";
 import type { Messages } from "@/lib/i18n/messages";
 
-/**
- * Les gestes d'une session. Chaque passage est écrit dès qu'il est donné ; la
- * propriété du concept est revérifiée à l'écriture.
- */
+/** Chaque passage est écrit dès qu'il est donné ; la propriété est revérifiée à l'écriture. */
 
-/**
- * Un onglet peut rester ouvert une nuit : au-delà d'un quart d'heure, le temps
- * ne dit plus rien du rappel et fausserait le signal de maîtrise. On plafonne.
- */
+/** Au-delà, le temps ne dit plus rien du rappel (onglet resté ouvert) et fausserait la maîtrise. */
 const TEMPS_MAXIMUM_MS = 15 * 60 * 1000;
 
 /** La limite de débit est très au-dessus d'un humain : ce refus vise les automates. */
@@ -63,12 +57,8 @@ export async function repondreAction(donnees: ReponseDonnee): Promise<ResultatRe
     return { ok: false, motif: t("introuvable") };
   }
 
-  /*
-    Le tableau et la liste des dépôts sont périmés dès cette réponse. Marqué ici
-    et non à la sortie, parce qu'une session se quitte par n'importe quelle porte
-    (lien, retour arrière, barre du bas, onglet fermé) : seul le moment où la
-    donnée change est sûr.
-  */
+  // Ici et non à la sortie : une session se quitte par n'importe quelle porte,
+  // seul le moment où la donnée change est sûr.
   revalidatePath(ROUTES.aujourdhui);
   revalidatePath(ROUTES.depots);
 
@@ -78,18 +68,15 @@ export async function repondreAction(donnees: ReponseDonnee): Promise<ResultatRe
 const signalementSchema = z.object({
   variantId: z.string().min(1),
   motif: z.enum(["INCOMPREHENSIBLE", "FAUSSE", "HORS_SUJET", "TROP_FACILE"]),
-  // Facultatif, et borné : c'est une précision, pas un canal de discussion.
+  // Borné : une précision, pas un canal de discussion.
   commentaire: z.string().trim().max(500).default(""),
 });
 
 export type SignalementDonne = z.input<typeof signalementSchema>;
 
 /**
- * Signale une question qui ne va pas.
- *
- * Le client n'envoie que l'identifiant et un motif : le contexte de diagnostic
- * est relu en base, pour que ce qui signale ne puisse pas l'arranger. Limite de
- * débit comme pour les autres gestes : c'est une écriture répétable à volonté.
+ * Le contexte de diagnostic est relu en base, pour que le client ne puisse pas
+ * l'arranger. Limite de débit : c'est une écriture répétable à volonté.
  */
 export async function signalerAction(donnees: SignalementDonne): Promise<boolean> {
   const utilisateur = await lireLUtilisateur();
@@ -114,12 +101,7 @@ export async function signalerAction(donnees: SignalementDonne): Promise<boolean
 
 const reclamationSchema = z.array(z.string().min(1)).max(50);
 
-/**
- * Réclame la carte de maîtrise à la fin de la session.
- *
- * Le client envoie les candidats dans l'ordre de passage ; la base n'en marque
- * qu'un, pour que deux onglets sur la même session n'obtiennent pas deux cartes.
- */
+/** La base n'en marque qu'un : deux onglets sur la même session n'obtiennent pas deux cartes. */
 export async function reclamerMaitriseAction(
   atomIds: string[],
 ): Promise<{ atomId: string; concept: string } | null> {
@@ -131,8 +113,7 @@ export async function reclamerMaitriseAction(
 
   if (!valide.success) return null;
 
-  // Pas de revalidation ici : la fin de session en demande une seule, via
-  // `relireLeTableauAction`.
+  // Pas de revalidation : la fin de session la demande via `relireLeTableauAction`.
   return reclamerSignalDeMaitrise(utilisateur.id, valide.data);
 }
 
@@ -145,10 +126,7 @@ export async function compterDemainAction(): Promise<number> {
   return compterDusDemain(utilisateur.id);
 }
 
-/**
- * L'espacement a été expliqué. Appelée à l'affichage et non à la lecture : une
- * explication qui revient jusqu'à ce qu'on l'accuse est une modale déguisée.
- */
+/** À l'affichage : une explication qui revient jusqu'à l'accusé est une modale déguisée. */
 export async function espacementVuAction(): Promise<void> {
   const utilisateur = await lireLUtilisateur();
 
@@ -158,18 +136,10 @@ export async function espacementVuAction(): Promise<void> {
 }
 
 /**
- * Le tableau de bord est périmé : qu'il soit relu.
- *
- * N'écrit rien ; sans elle, le client ressert l'accueil chargé avant la
- * session. Nommée d'après son effet, pas d'après une porte, parce que
- * l'invariant est : tout ce qui sort d'une session l'appelle avant de partir.
- * Deux sorties, dans `components/revision/` : `ArreterLa` (abandon) et
- * `FinDeSession` (achèvement), qui l'appelle à son affichage plutôt qu'à
- * chacun de ses liens.
- *
- * Suppose que l'écran de fin survive au rafraîchissement de la route courante :
- * c'est pourquoi `/reviser` passe l'écran vide en accessoire à
- * `SessionDeRevision` au lieu de le laisser en décider.
+ * Sans elle, le client ressert l'accueil chargé avant la session. Invariant :
+ * tout ce qui sort d'une session l'appelle (`ArreterLa`, et `FinDeSession` à son
+ * affichage). Suppose que l'écran de fin survive au rafraîchissement : d'où
+ * l'écran vide passé en accessoire à `SessionDeRevision` par `/reviser`.
  */
 export async function relireLeTableauAction(): Promise<void> {
   const utilisateur = await lireLUtilisateur();

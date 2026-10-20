@@ -44,16 +44,12 @@ export default async function PageNouveauDepot({
     lireUsageDeLaPeriode(utilisateur.id, fuseau),
     estEnListeDattente(utilisateur.id),
     compterLesDepots(utilisateur.id),
-    // L'offre entière : l'écran dit pourquoi la période est pleine, selon le plan.
     lireLOffreDuCompte(utilisateur.id),
   ]);
-  // Au premier dépôt seulement, l'écran montre des exemples.
   const aucunDepot = depotsFaits === 0;
-  // On annonce les concepts restants ; le plafond de dépôts est un second
-  // rideau qui ne s'annonce pas, il se rencontre.
+  // Seuls les concepts s'annoncent ; le plafond de dépôts se rencontre.
   const restants = Math.max(0, offre.plafond - usage.concepts);
-  // Le rideau des dépôts suit le plan, sinon une offre payée s'arrêterait bien
-  // avant son plafond de concepts.
+  // Suit le plan, sinon une offre payée s'arrêterait avant son plafond de concepts.
   const depotsMax = plafondDeDepots(offre.plafond);
   const depotsPleins = usage.depots >= depotsMax;
   const t = await getTranslations("depots.formulaire");
@@ -66,12 +62,10 @@ export default async function PageNouveauDepot({
     ),
   );
   const plein = restants === 0 || depotsPleins;
-  // Quand les deux ferment ensemble, on nomme les concepts : c'est la limite
-  // qui se paie.
+  // Les deux pleins : on nomme les concepts, la limite qui se paie.
   const motif = restants === 0 ? "concepts" : "depots";
-  // L'invite change à chaque visite, et c'est voulu. Un Server Component se rend
-  // une fois par requête : la règle de pureté, qui ne le distingue pas d'un
-  // composant client, ne s'applique pas ici.
+  // Voulu : un Server Component se rend une fois par requête, la règle de pureté
+  // vise les composants client.
   // eslint-disable-next-line react-hooks/purity
   const invite = inviteDeDepot(Math.random(), await langueDeLaRequete());
 
@@ -91,15 +85,13 @@ export default async function PageNouveauDepot({
             inscrit={inscrit}
             motif={motif}
             limite={motif === "concepts" ? offre.plafond : depotsMax}
-            // L'offre ne se propose que si elle ouvre quelque chose : pas à qui
-            // paie déjà, pas contre le rideau des dépôts qu'elle ne lève pas, pas
-            // sans clés de paiement.
+            // Seulement si elle ouvre quelque chose : elle ne lève pas le plafond
+            // de dépôts.
             offreAProposer={offre.plan === "GRATUIT" && motif === "concepts" && paiementOuvert()}
           />
         ) : (
-          // La clé d'envoi, tirée à chaque affichage, rend le double envoi
-          // inoffensif sans confondre deux dépôts. L'invite est tirée ici et non
-          // dans le composant : un tirage côté client divergerait du serveur.
+          // La clé rend le double envoi inoffensif sans confondre deux dépôts.
+          // L'invite est tirée ici : côté client, le tirage divergerait du serveur.
           <FormulaireDepot
             restants={restants}
             cleEnvoi={crypto.randomUUID()}

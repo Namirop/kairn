@@ -13,14 +13,9 @@ import { lireLaDepenseParJour } from "@/lib/db/administration-depense";
 export const metadata: Metadata = { title: "Administration" };
 
 /**
- * La synthèse : quatre chiffres et deux courbes ; le détail ligne par ligne
- * vit dans les autres onglets.
- *
- * Les deux séries partagent la même fenêtre de jours, pour se comparer à l'œil
- * sans piège.
- *
- * Une configuration illisible s'énonce ici au lieu de faire tomber l'écran :
- * c'est celui où l'on vient chercher ce qui ne va pas.
+ * Les deux séries partagent la même fenêtre, pour se comparer sans piège. Une
+ * config illisible s'énonce au lieu de faire tomber l'écran : c'est ici qu'on
+ * vient chercher ce qui ne va pas.
  */
 export const dynamic = "force-dynamic";
 
@@ -33,8 +28,7 @@ export default async function PageSynthese() {
     diagnostiquerLaConfig(),
   ]);
 
-  // Les lectures rendent le plus récent d'abord, ce qui est l'ordre d'un
-  // tableau ; un axe du temps va dans l'autre sens.
+  // Lu du plus récent au plus ancien ; un axe du temps va dans l'autre sens.
   const depense = [...serie]
     .reverse()
     .map((ligne) => ({ jour: ligne.jour, valeur: ligne.coutReel ?? ligne.coutCatalogue }));

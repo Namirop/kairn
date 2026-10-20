@@ -7,13 +7,10 @@ import { listerLesSignalementsPagines } from "@/lib/db/signalement";
 
 export const metadata: Metadata = { title: "Signalements · Administration" };
 
-/** Cinq par page : un signalement se lit en entier, et cinq remplissent l'écran. */
+/** Un signalement se lit en entier, et cinq remplissent l'écran. */
 const PAR_PAGE = 5;
 
-/**
- * Les questions signalées pendant une session. Le rang de page vient de l'URL :
- * la lecture le ramène dans les bornes plutôt que de rendre une page vide.
- */
+/** Le rang de page vient de l'URL ; la lecture le ramène dans les bornes. */
 export const dynamic = "force-dynamic";
 
 export default async function PageSignalements({

@@ -12,18 +12,11 @@ import { MESSAGES } from "@/lib/i18n/messages";
 import { TAILLE_DE_PARTAGE } from "@/lib/site/dessin-de-partage";
 
 /**
- * La coquille publique.
- *
- * Aucune mesure ici : chaque panneau porte la sienne, et le fond va d'un bord à
- * l'autre. Elle lit la session pour ne pas proposer « Se connecter » à
- * quelqu'un de connecté ; le prix est que les pages légales ne sont plus
- * statiques.
+ * Aucune mesure ici : chaque panneau porte la sienne. La session est lue pour ne
+ * pas proposer « Se connecter » à un connecté ; le prix : les pages légales ne
+ * sont plus statiques.
  */
-/**
- * Chaque page publique désigne sa version dans l'autre langue, et celles de
- * `/en` leur carte de partage anglaise. Un `openGraph` posé ici remplace celui
- * de la racine en entier, image comprise : il reprend donc ce qu'elle y mettait.
- */
+/** Un `openGraph` posé ici remplace celui de la racine en entier : il le reprend donc. */
 export async function generateMetadata(): Promise<Metadata> {
   const enTetes = await headers();
   const chemin = enTetes.get(EN_TETE_DU_CHEMIN);
@@ -59,13 +52,11 @@ export default async function CoquilleSite({ children }: { children: React.React
 
   return (
     <div className="bg-surface-papier flex min-h-dvh flex-col">
-      {/* L'en-tête porte le grain comme les panneaux : sans lui, il paraît
-          plus clair que le hero de même teinte, et la couture se voit. */}
+      {/* Sans grain, il paraît plus clair que le hero de même teinte : la
+          couture se voit. */}
       <header className="entete-du-site grain relative z-20">
-        {/* La même mesure et les mêmes gouttières que la mesure « page » d'un
-            Panneau, pour que la marque s'aligne sur le titre qu'elle surplombe.
-            La hauteur (`h-20`) est recopiée dans la hauteur d'ouverture du hero,
-            qui se mesure au pli moins l'en-tête : les deux se changent ensemble. */}
+        {/* Mesure « page » d'un Panneau, pour aligner la marque sur le titre.
+            `h-20` est recopiée dans la hauteur du hero : à changer ensemble. */}
         <div className="px-pas-6 md:px-pas-8 relative z-10 mx-auto flex h-20 w-full max-w-6xl items-center justify-between 2xl:max-w-[84rem]">
           <Link href={ROUTES.accueil} className="rounded-galet">
             <Marque taille={30} />

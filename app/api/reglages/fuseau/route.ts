@@ -5,11 +5,8 @@ import { poserLeFuseau } from "@/lib/db/reglages-du-compte";
 import { fuseauReconnu } from "@/lib/domain/jour-local";
 
 /**
- * Enregistre le fuseau détecté par le navigateur.
- *
- * L'inscription par formulaire le pose déjà en en-tête ; ce point d'entrée
- * couvre l'arrivée par Google et le cas où l'utilisateur change de fuseau.
- * L'identité vient de la session, jamais du corps de la requête.
+ * L'inscription par formulaire pose déjà le fuseau en en-tête ; ceci couvre
+ * Google et le changement de fuseau. L'identité vient de la session, pas du corps.
  */
 
 const schemaDuCorps = z.object({

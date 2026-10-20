@@ -7,14 +7,10 @@ import { listerLesRetoursPagines } from "@/lib/db/retour";
 
 export const metadata: Metadata = { title: "Retours · Administration" };
 
-/** Cinq par page : un retour se lit en entier, et cinq remplissent l'écran. */
+/** Un retour se lit en entier, et cinq remplissent l'écran. */
 const PAR_PAGE = 5;
 
-/**
- * Ce que les comptes disent du produit lui-même. Le rang de page vient de
- * l'URL : la lecture le ramène dans les bornes plutôt que de rendre une page
- * vide.
- */
+/** Le rang de page vient de l'URL ; la lecture le ramène dans les bornes. */
 export const dynamic = "force-dynamic";
 
 export default async function PageRetours({

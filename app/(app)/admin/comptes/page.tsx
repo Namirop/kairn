@@ -9,10 +9,7 @@ import { lireLaListeDesComptes } from "@/lib/db/liste-des-comptes";
 
 export const metadata: Metadata = { title: "Comptes · Administration" };
 
-/**
- * Qui a un compte, et qui s'en sert. Les chiffres d'abord, les comptes nommés
- * ensuite : on vient ici pour la tendance.
- */
+/** Les chiffres avant les comptes nommés : on vient ici pour la tendance. */
 export const dynamic = "force-dynamic";
 
 export default async function PageComptes() {

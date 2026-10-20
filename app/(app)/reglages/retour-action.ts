@@ -21,11 +21,8 @@ import {
 import { redirect } from "next/navigation";
 
 /**
- * L'envoi d'un retour sur le produit.
- *
- * L'identifiant du compte est lu dans la session ; le contexte est recomposé
- * ici à partir de deux nombres et d'une chaîne de navigateur — pas d'adresse,
- * pas de contenu déposé, pas d'identifiant.
+ * Le compte vient de la session ; le contexte se recompose ici de deux nombres et
+ * d'une chaîne de navigateur — ni adresse, ni contenu déposé, ni identifiant.
  */
 
 const CHAMPS = z.object({
@@ -38,10 +35,10 @@ const CHAMPS = z.object({
 });
 
 export type EtatDuRetour = {
-  /** L'envoi a abouti : le formulaire se remplace par un mot, il ne se vide pas. */
+  /** Le formulaire se remplace par un mot, il ne se vide pas. */
   envoye?: boolean;
   erreur?: string;
-  /** La saisie refusée, rendue telle quelle : on la corrige, on ne la retape pas. */
+  /** La saisie refusée : on la corrige, on ne la retape pas. */
   message?: string;
 };
 
@@ -87,8 +84,7 @@ export async function envoyerUnRetourAction(
     };
   }
 
-  // Le plafond avant le décodage : un compte qui l'a atteint ne fait plus
-  // travailler `sharp`.
+  // Avant le décodage : un compte au plafond ne fait plus travailler `sharp`.
   if (!(await peutEncoreEnvoyerUnRetour(utilisateur.id))) {
     return { erreur: t("plafond", { nombre: RETOURS_PAR_JOUR }), message: champs.data.message };
   }
@@ -119,8 +115,8 @@ export async function envoyerUnRetourAction(
     };
   }
 
-  // Différé après la réponse : pas d'attente sur Resend, et un email qui échoue
-  // ne transforme pas un retour écrit en erreur à l'écran.
+  // Après la réponse : pas d'attente sur Resend, et un email en échec n'affiche
+  // pas d'erreur pour un retour écrit.
   signalerUnRetour({
     sujet: LIBELLE_DE_SUJET[champs.data.sujet],
     ecran: lireLEcran(champs.data.ecran),

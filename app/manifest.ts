@@ -3,12 +3,8 @@ import { PAPIER } from "@/lib/design/couleurs-hors-css";
 import { ORIGINE_DU_SITE } from "@/lib/site/origine";
 
 /**
- * Manifeste PWA.
- *
- * Il reste en français : servi à une adresse fixe, mis en cache et demandé sans
- * cookie, il ne peut pas suivre la langue de la personne. Le nom et l'icône
- * n'en dépendent pas ; seule la description, lue dans la fenêtre
- * d'installation de Chrome, est concernée.
+ * En français : servi à une adresse fixe, mis en cache et demandé sans cookie,
+ * il ne peut pas suivre la langue de la personne. Seule la description en pâtit.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -24,21 +20,15 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait",
 
     /**
-     * Un lien capturé réutilise la fenêtre de l'application. Ce n'est qu'un
-     * confort : le navigateur décide, et iOS ne le fait pas du tout — d'où le
-     * code à six chiffres plutôt qu'un lien pour se connecter.
+     * Un confort seulement : le navigateur décide, et iOS l'ignore — d'où le code
+     * à six chiffres plutôt qu'un lien pour se connecter.
      */
     launch_handler: { client_mode: "navigate-existing" },
     /**
-     * Kairn dans la feuille de partage du système (absent sur iOS). Les noms de
-     * champs sont ceux du formulaire de dépôt, qui les reçoit à l'arrivée.
-     *
-     * L'envoi est intercepté par le service worker et rangé sur l'appareil : un
-     * partage abandonné n'envoie rien. La route `/depots/partage` ne sert que si
-     * le worker ne répond pas.
-     *
-     * Les quatre types d'image sont ceux que la lecture sait décoder : `image/*`
-     * proposerait Kairn pour des formats refusés ensuite.
+     * Absent sur iOS. Les champs sont ceux du formulaire de dépôt. Le service
+     * worker intercepte l'envoi et le range sur l'appareil ; la route ne sert que
+     * s'il ne répond pas. Les types d'image sont ceux que la lecture décode :
+     * `image/*` proposerait Kairn pour des formats refusés ensuite.
      */
     share_target: {
       action: "/depots/partage",
@@ -56,10 +46,9 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["education", "productivity"],
 
     /**
-     * L'application se déclare elle-même comme application liée : c'est le seul
-     * moyen, depuis un onglet ordinaire, que `getInstalledRelatedApps()` dise
-     * que Kairn est déjà installée, et ne pas reproposer l'installation.
-     * `prefer_related_applications` reste faux : la liste sert à reconnaître.
+     * Se déclarer liée à soi-même : seul moyen, depuis un onglet, que
+     * `getInstalledRelatedApps()` voie l'installation. La liste sert à reconnaître,
+     * pas à préférer.
      */
     related_applications: [{ platform: "webapp", url: `${ORIGINE_DU_SITE}/manifest.webmanifest` }],
     prefer_related_applications: false,
