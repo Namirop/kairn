@@ -29,9 +29,9 @@ passent la campagne 2. Inutile de payer la génération de questions d'un modèl
 
 ## §1 · La passerelle
 
-**OpenRouter.** Un seul solde en dollars alimente tous les modèles : <cite index="56-1">on
+**OpenRouter.** Un seul solde en dollars alimente tous les modèles : on
 n'achète pas un bloc de crédits GPT et un autre bloc Claude, le coût applicable est déduit du même
-solde après chaque requête.</cite> Un seul compte, une seule clé, un seul adaptateur au lieu de
+solde après chaque requête. Un seul compte, une seule clé, un seul adaptateur au lieu de
 quatre.
 
 Il expose les sorties structurées par `response_format: json_schema`, ce que `schema-de-sortie.ts`
@@ -39,12 +39,12 @@ sait déjà produire.
 
 **Trois pièges à traiter dans l'implémentation :**
 
-- **tous les modèles ne supportent pas les sorties structurées** — <cite index="55-1">la requête
-  échoue avec une erreur signalant l'absence de support.</cite> Vérifier chaque modèle retenu dans
+- **tous les modèles ne supportent pas les sorties structurées** — la requête
+  échoue avec une erreur signalant l'absence de support. Vérifier chaque modèle retenu dans
   le listing OpenRouter **avant** de lancer quoi que ce soit, et échouer proprement au démarrage
   plutôt qu'au milieu d'un passage
-- **le cache de prompt ne traverse pas les fournisseurs** — <cite index="55-1">les moteurs doivent
-  stocker un instantané du prompt traité, qui n'est pas partagé entre fournisseurs.</cite> Les
+- **le cache de prompt ne traverse pas les fournisseurs** — les moteurs doivent
+  stocker un instantané du prompt traité, qui n'est pas partagé entre fournisseurs. Les
   challengers paient donc leur entrée **plein tarif**, alors que la colonne Sonnet tournait à 92 %
   de lecture au cache. Les coûts par colonne ci-dessous en tiennent compte ; ne pas comparer les
   factures brutes entre colonnes, seulement les prix catalogue

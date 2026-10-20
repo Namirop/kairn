@@ -105,6 +105,17 @@ et rend la main.
 
 Le détail est dans [`docs/architecture.md`](docs/architecture.md).
 
+## Choisir le modèle sur mesure, pas sur réputation
+
+Le modèle en production n'a pas été choisi sur sa notoriété. `scripts/evaluation/` est un banc
+qui passe le même corpus de dépôts (texte court, article long, capture d'écran, affirmation fausse,
+opinion à rejeter, langue étrangère…) à plusieurs modèles et mesure ce qui se vérifie : concepts
+manqués ou inventés, doublons, fidélité des questions, formats. Un juge d'une autre lignée note
+les sorties, et la règle de décision a été écrite avant de voir les chiffres. Deux campagnes,
+extraction puis questions, ont retenu le même challenger. Il remplace Claude Sonnet à moins d'un
+dixième du prix catalogue, sans perte mesurée. Le protocole est dans
+[`docs/campagne-modeles.md`](docs/campagne-modeles.md).
+
 ## Qualité
 
 - **CI sur chaque PR** : lint, types, format, tests, code mort (knip) et build. `main` est protégée :
