@@ -13,26 +13,20 @@ import {
 } from "./generate-variants-question";
 
 /**
- * Quatre clés nommées par concept, plusieurs concepts par appel, chacun désigné
- * par son rang dans l'envoi. La facette est le nom de la clé : elle ne peut être
- * ni répétée, ni omise, ni inventée.
- *
- * La validation ne rejette jamais l'envoi : un appel qui porte trois concepts
- * est trop cher pour être jeté. Ce qui dépasse se tronque ; ce qu'on ne sait pas
- * servir fait disparaître son lot seul, et le rang manquant remonte à
- * l'appelant.
+ * Une clé par facette, pour qu'elle ne puisse être ni répétée, ni omise, ni
+ * inventée ; chaque concept est désigné par son rang dans l'envoi. La validation
+ * ne rejette jamais l'envoi, trop cher : ce qui dépasse se tronque, un lot
+ * inservable disparaît seul et son rang remonte à l'appelant.
  */
 
-/** Concepts traités en un appel. Au-delà, la sortie frôlerait `max_tokens`. */
+/** Au-delà, la sortie frôlerait `max_tokens`. */
 export const CONCEPTS_PAR_APPEL = 3;
 
-/** Assez de variantes pour accepter une réponse ; au-delà, on n'en lit plus. */
 const FORMES_ACCEPTEES_MAXIMUM = 8;
 
-/** Trois leurres suffisent à quatre pistes ; le reste ne se montrerait pas. */
+/** Trois leurres et la bonne réponse font quatre pistes ; le reste ne se montre pas. */
 const LEURRES_MAXIMUM = 3;
 
-/** Ce que chaque facette demande, et les formats qu'elle ouvre. */
 const FACETTE = {
   recognition: {
     formats: FORMATS_VERIFIABLES,
@@ -53,9 +47,8 @@ const FACETTE = {
 } as const satisfies Record<FacetteDuLot, unknown>;
 
 /**
- * La forme d'un envoi, avec l'emplacement du texte à trou déjà décidé : il passe
- * par la grammaire (la facette désignée n'ouvre que `CLOZE`), pas par une
- * consigne. `lotLu` n'a pas à le connaître, `CLOZE` étant légitime partout.
+ * L'emplacement du trou passe par la grammaire (la facette désignée n'ouvre que
+ * `CLOZE`), pas par une consigne. `lotLu` l'ignore, `CLOZE` étant légitime partout.
  */
 function formeDuLot(trou: FacetteDuLot | undefined) {
   const champ = (facette: FacetteDuLot) =>
@@ -89,7 +82,7 @@ function formeDeLEnvoi(trou: FacetteDuLot | undefined) {
 
 export const formeDeGeneration = formeDeLEnvoi(undefined);
 
-/** Le même lot, relu : plus aucune borne de comptage, les énumérations restent. */
+/** Relu : plus de borne de comptage, les énumérations restent. */
 const lotLu = z.object({
   rang: z.number().int(),
   recognition: questionLue(FORMATS_VERIFIABLES),
@@ -100,7 +93,7 @@ const lotLu = z.object({
 
 const sortieLue = z.object({ lots: z.array(lotLu).min(1) });
 
-/** L'ordre servi, et la facette que porte chaque clé. */
+/** L'ordre servi. */
 const FACETTES = [
   ["recognition", "RECOGNITION"],
   ["mechanism", "MECHANISM"],
@@ -111,11 +104,8 @@ const FACETTES = [
 type QuestionLue = z.infer<typeof lotLu>["recognition"];
 
 /**
- * La charge d'une question, quand elle correspond au format déclaré.
- *
- * Une charge au mauvais format est ignorée, jamais refusée : rien de ce qui se
- * relit ne fait échouer un appel déjà payé. `chargeIgnoree` la signale tout de
- * même au contrôle, pour que le défaut ne soit pas rattrapé en silence.
+ * Une charge au mauvais format est ignorée, pas refusée (l'appel est payé) ;
+ * `chargeIgnoree` la signale au contrôle pour que le défaut ne passe pas en silence.
  */
 function chargesDe(posee: QuestionLue) {
   const mcq = posee.format === "MCQ" ? (posee.mcq ?? null) : null;
@@ -126,14 +116,10 @@ function chargesDe(posee: QuestionLue) {
 }
 
 /**
- * Une question qu'on ne saurait pas servir : la servir noterait faux quelqu'un
- * qui a raison, ou montrerait une carte vide.
- *
- * C'est le vide sous toutes ses formes, pas une longueur hors bornes (la
- * relecture n'en a plus, à dessein) : texte ou réponse sans lettre ni chiffre
- * (le modèle abrège parfois un lot en « ... » sans être tronqué), QCM aux options
- * indistinguables ou dont la bonne réponse ne désigne rien, phrase à trou sans
- * trou. Seul le lot concerné disparaît.
+ * Servie, elle noterait faux quelqu'un qui a raison ou montrerait une carte vide.
+ * C'est le vide, pas une longueur hors bornes : texte sans lettre ni chiffre (le
+ * modèle abrège parfois un lot en « ... »), QCM indistinguable ou sans bonne
+ * réponse, phrase à trou sans trou.
  */
 function inexploitable(posee: QuestionLue): boolean {
   const { mcq, cloze } = chargesDe(posee);
@@ -151,7 +137,6 @@ function inexploitable(posee: QuestionLue): boolean {
   return posee.format === "CLOZE" && (cloze === null || !cloze.sentence.includes(TROU));
 }
 
-/** Les options d'un QCM, ramenées à un jeu utilisable. */
 function optionsDe(posee: QuestionLue) {
   const { mcq } = chargesDe(posee);
   const normalisees = mcq ? normaliserLesOptions(mcq.options, mcq.correctIndex) : null;
@@ -163,8 +148,7 @@ function optionsDe(posee: QuestionLue) {
 }
 
 const validationDeGeneration = sortieLue.transform((sortie) => {
-  // Deux lots au même rang : le premier gagne. Refuser emporterait les lots
-  // corrects du même envoi.
+  // Deux lots au même rang : le premier gagne, refuser emporterait les autres.
   const vus = new Set<number>();
   const uniques = sortie.lots.filter((entree) => {
     if (vus.has(entree.rang)) return false;
@@ -178,8 +162,7 @@ const validationDeGeneration = sortieLue.transform((sortie) => {
     FACETTES.every(([cle]) => !inexploitable(entree[cle])),
   );
 
-  // Les rangs retirés par la relecture, distingués de ceux que le modèle n'a
-  // jamais rendus : sans ce compte, les deux causes produisent le même silence.
+  // Sans ce compte, un rang écarté ici et un rang jamais rendu font le même silence.
   const ecartes = uniques
     .filter((entree) => !servables.includes(entree))
     .map((entree) => entree.rang);
@@ -190,9 +173,8 @@ const validationDeGeneration = sortieLue.transform((sortie) => {
       rang: entree.rang,
       variants: FACETTES.map(([cle, facet]) => {
         const { cloze, chargeIgnoree } = chargesDe(entree[cle]);
-        // L'écran n'affiche jamais le champ `question` d'un CLOZE, et le modèle y
-        // écrit souvent une consigne générique ou un « placeholder ». On le
-        // dérive de la phrase pour qu'aucune coquille n'aille en base.
+        // Le `question` d'un CLOZE ne s'affiche pas et le modèle y met souvent un
+        // « placeholder » : dérivé de la phrase, aucune coquille ne va en base.
         const questionDerivee =
           entree[cle].format === "CLOZE" && cloze ? cloze.sentence : entree[cle].question;
 
@@ -219,11 +201,7 @@ const validationDeGeneration = sortieLue.transform((sortie) => {
 
 export type SortieDeGeneration = z.infer<typeof validationDeGeneration>;
 
-/**
- * Le contrat d'un envoi, avec l'emplacement du trou qui lui a été assigné.
- * `purpose` reste le même quel que soit le trou : même dépense, même registre,
- * même fixture en mode mock.
- */
+/** `purpose` ne dépend pas du trou : même registre, même fixture en mode mock. */
 export function contratDeGeneration(trou?: FacetteDuLot): ContratDeSortie<SortieDeGeneration> {
   return {
     purpose: "generate_variants",
@@ -232,5 +210,5 @@ export function contratDeGeneration(trou?: FacetteDuLot): ContratDeSortie<Sortie
   };
 }
 
-/** Le contrat sans emplacement imposé : les tests et les fixtures s'en servent. */
+/** Sans trou imposé, pour les tests et les fixtures. */
 export const CONTRAT_DE_GENERATION = contratDeGeneration();

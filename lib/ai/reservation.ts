@@ -14,13 +14,11 @@ import {
 } from "./errors";
 
 /**
- * Qui paie un appel, et dans quel ordre. Trois compteurs : la part d'un compte
- * protège les comptes entre eux, celle du trafic sans compte protège landing et
- * comptes l'un de l'autre, le plafond global protège le budget. Ils vivent
- * ensemble pour qu'aucun chemin n'en oublie un.
+ * Qui paie un appel. La part d'un compte protège les comptes entre eux, celle du
+ * sans-compte protège landing et comptes l'un de l'autre, le global protège le
+ * budget. Ensemble pour qu'aucun chemin n'en oublie un.
  */
 
-/** D'où vient l'appel, pour savoir à quel seau le facturer. */
 export type Provenance = { userId: string } | { anonyme: true } | { interne: true };
 
 export function provenanceDeLAppel(params: { userId?: string; anonyme?: boolean }): Provenance {
@@ -31,18 +29,13 @@ export function provenanceDeLAppel(params: { userId?: string; anonyme?: boolean 
 }
 
 /**
- * Les deux places d'un appel : la part de qui le demande, puis celle du produit.
+ * La part du demandeur d'abord, car elle se rend tant que rien n'est émis ; la
+ * place globale ne se rend jamais, un appel échoué ayant pu consommer des tokens.
+ * L'inverse ferait payer au produit les refus d'une part pleine. L'interne
+ * (reprise, outil, évaluation) n'a pas de part : personne derrière à protéger.
  *
- * Chaque compteur est signalé après son incrément, refus compris : c'est le
- * seul moment où l'on sait qu'un plafond est atteint. Le signalement ne bloque
- * ni ne lève (voir `signalement-de-plafond.ts`).
- *
- * La part d'abord, parce qu'elle se rend tant que rien n'est émis ; la place
- * globale ne se rend jamais, un appel échoué ayant pu consommer des tokens.
- * L'inverse ferait payer au produit les refus d'une part pleine.
- *
- * L'interne (reprise, outil, évaluation) n'a pas de part : personne derrière à
- * protéger. Le trafic anonyme, lui, en a une.
+ * Chaque compteur est signalé après son incrément, refus compris : seul moment
+ * où l'on sait qu'un plafond est atteint.
  */
 export async function reserverLesDeuxPlaces(
   config: ConfigIa,
@@ -96,12 +89,10 @@ export async function reserverLesDeuxPlaces(
 }
 
 /**
- * La place d'un repli : une seconde émission réelle, donc une place au plafond
- * global, qui protège le budget. Pas de part de compte ni de trafic anonyme :
- * elles comptent des demandes, et la demande a déjà pris la sienne.
+ * Seconde émission réelle, donc une place globale ; pas de part, qui compte les
+ * demandes et que la demande a déjà prise.
  *
- * Rend `false` quand le plafond est atteint, sans lever : l'appelant renonce au
- * repli et laisse remonter l'échec du modèle primaire.
+ * `false` au plafond, sans lever : l'appelant laisse remonter l'échec du primaire.
  */
 export async function reserverLaPlaceDuRepli(config: ConfigIa): Promise<boolean> {
   const reservation = await reserverAppelModele(config.dailyCallCap);

@@ -8,23 +8,14 @@ import {
 } from "./alerte-de-bascule";
 import { differer } from "@/lib/hors-chemin-critique";
 
-/**
- * Le câblage de la surveillance des bascules : la base, les emails, l'attente.
- * `alerte-de-bascule.ts` ne connaît que des types et se teste sans base ni
- * emails ; ce qui touche au monde réel est ici.
- */
+/** Le câblage réel (base, emails) d'`alerte-de-bascule.ts`, qui se teste sans. */
 
 const OUTILS: OutilsDAlerteBascule = {
   reserver: reserverLAlerte,
   envoyer: envoyerLAlerteDeBascule,
 };
 
-/**
- * Signale qu'une bascule vient de se produire, sans faire attendre l'appelant.
- *
- * La bascule a réussi et `callAI` a déjà rendu sa valeur : la surveillance se
- * fait après.
- */
+/** Différé : `callAI` a déjà sa valeur, la surveillance ne la retarde pas. */
 export function signalerUneBascule(motif: string, maintenant = new Date()): void {
   differer(async () => {
     const bascules = await compterBasculesDuJour(maintenant);

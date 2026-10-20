@@ -1,19 +1,13 @@
 import type { Langue } from "@/lib/db/types";
 
 /**
- * Ce qui change d'une langue de sortie à l'autre dans les consignes au modèle.
+ * Les consignes restent en français, où chaque règle a été mesurée ; seuls
+ * varient les passages qui nomment la langue, sans condition, car laisser le
+ * modèle la choisir le faisait se tromper.
  *
- * Les consignes restent en français, une seule fois : chaque règle a été
- * mesurée sur ce texte. Seuls varient les passages qui nomment la langue, et
- * toujours sans condition (« tu écris en … ») : laisser le modèle choisir la
- * langue le faisait se tromper.
- *
- * Les passages français ne doivent pas bouger d'un octet : leur empreinte porte
- * le cache du fournisseur et la traçabilité des questions déjà écrites.
- *
- * Les passages anglais précisent que les exemples sont en français et que les
- * tournures interdites valent pour leurs équivalents anglais. Ils n'ont pas
- * encore été passés au banc.
+ * Les passages français ne bougent pas d'un octet : leur empreinte porte le cache
+ * du fournisseur et la traçabilité des questions écrites. Les passages anglais
+ * n'ont pas encore été passés au banc.
  */
 
 export interface LangueDExtraction {

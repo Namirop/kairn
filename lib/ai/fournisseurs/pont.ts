@@ -1,17 +1,11 @@
 import type { MessageIa } from "../message";
 import type { SchemaDeSortie } from "../schema-de-sortie";
 
-/**
- * L'interface commune aux fournisseurs de modèle (Anthropic, OpenRouter). Un
- * pont est un émetteur : plafonds, repli et registre vivent dans `client.ts`.
- */
+/** Un pont ne fait qu'émettre : plafonds, repli et registre vivent dans `client.ts`. */
 
 export type Fournisseur = "anthropic" | "openrouter";
 
-/**
- * Ce qu'un pont rend d'un appel réussi. `responseText` est le JSON brut que
- * `lireSortieStructuree` validera, extrait par chaque pont à sa façon.
- */
+/** `responseText` : le JSON brut, extrait par chaque pont à sa façon, validé ensuite. */
 export type ResultatDEmission = {
   responseText: string;
   consommation: {
@@ -21,25 +15,21 @@ export type ResultatDEmission = {
     cacheReadTokens: number;
   };
   latencyMs: number;
-  /** Le modèle effectivement servi — OpenRouter peut re-router chez un fournisseur alternatif. */
+  /** OpenRouter peut re-router chez un autre fournisseur. */
   modeleServi: string;
-  /**
-   * La raison d'arrêt. `length` = tronqué, et le client lève
-   * `SortieTronqueeError` ; `other` n'est pas un échec en soi, la sortie
-   * passe à la validation comme pour `stop`.
-   */
+  /** `length` = tronqué ; `other` n'est pas un échec, la sortie passe à la validation. */
   finishReason: "stop" | "length" | "other";
 };
 
 export type ParametresDEmission = {
-  /** Le modèle à appeler (identifiant natif du fournisseur, tel quel). */
+  /** Identifiant natif du fournisseur, tel quel. */
   model: string;
   maxTokens: number;
   system: string;
   messages: MessageIa[];
-  /** Dérivé de `deriverLeSchemaDeSortie(contract.forme)`. Anthropic le passe tel quel ; OpenRouter n'en prend que `.schema`. */
+  /** Anthropic le passe tel quel ; OpenRouter n'en prend que `.schema`. */
   formatSchema: SchemaDeSortie;
-  /** L'intention (`contract.purpose`) — sert de nom au `response_format`. */
+  /** Sert de nom au `response_format`. */
   purpose: string;
 };
 

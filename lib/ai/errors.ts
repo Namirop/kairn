@@ -1,7 +1,6 @@
 /**
- * Les échecs d'appel modèle sont typés : un appelant doit pouvoir distinguer
- * « le produit a coupé les appels » de « le modèle a mal répondu », et les
- * journaux doivent porter un code stable plutôt qu'un message libre.
+ * Typés pour qu'un appelant distingue « appels coupés » de « mauvaise réponse »,
+ * et que les journaux portent un code stable plutôt qu'un message libre.
  */
 export abstract class AppelModeleError extends Error {
   abstract readonly code: string;
@@ -22,10 +21,8 @@ export class AppelsCoupesError extends AppelModeleError {
 }
 
 /**
- * Plafond journalier **global** atteint. Vérifié avant l'émission, jamais après.
- *
- * C'est un report, pas un échec : rien ne s'est cassé, et le même travail
- * réussira demain à l'identique. `executerLeJob` la traite à part pour cette raison.
+ * Plafond journalier global atteint, vérifié avant l'émission. Un report, pas un
+ * échec : le même travail réussira demain, `executerLeJob` la traite à part.
  */
 export class PlafondGlobalAtteintError extends AppelModeleError {
   readonly code = "AI_QUOTA";
@@ -38,12 +35,7 @@ export class PlafondGlobalAtteintError extends AppelModeleError {
   }
 }
 
-/**
- * Ce compte a pris toute sa part de la journée.
- *
- * Distincte d'`PlafondGlobalAtteintError` : l'une dit « le produit est plein » et se
- * reporte au lendemain, l'autre « tu es plein » et regarde son auteur.
- */
+/** « Tu es plein », quand le plafond global dit « le produit est plein » et se reporte. */
 export class PartDuCompteEpuiseeError extends AppelModeleError {
   readonly code = "AI_USER_QUOTA";
 
@@ -56,12 +48,9 @@ export class PartDuCompteEpuiseeError extends AppelModeleError {
 }
 
 /**
- * Part du jour épuisée pour le trafic **sans compte**.
- *
- * Volontairement pas une sous-classe d'`PlafondGlobalAtteintError` : l'exécuteur traite
- * celle-ci comme un report, ce qui laisserait un visiteur devant une attente
- * sans fin. Elle suit le chemin ordinaire de l'échec : le dépôt part en
- * `FAILED`, une panne qui ne consomme pas d'essai.
+ * Part du jour épuisée pour le trafic sans compte. Pas une sous-classe de
+ * `PlafondGlobalAtteintError`, dont le report laisserait le visiteur attendre sans
+ * fin : le dépôt part en `FAILED`, une panne qui ne consomme pas d'essai.
  */
 export class PartSansCompteEpuiseeError extends AppelModeleError {
   readonly code = "AI_ANONYMOUS_QUOTA";
@@ -74,10 +63,7 @@ export class PartSansCompteEpuiseeError extends AppelModeleError {
   }
 }
 
-/**
- * La sortie du modèle ne respecte pas le schéma. Elle n'est pas réparée, mais
- * conservée dans `raw` pour le diagnostic.
- */
+/** Sortie hors schéma : jamais réparée, conservée dans `raw` pour le diagnostic. */
 export class SortieInvalideError extends AppelModeleError {
   readonly code = "AI_INVALID_OUTPUT";
 
@@ -91,19 +77,13 @@ export class SortieInvalideError extends AppelModeleError {
 }
 
 /**
- * La réponse a été coupée par `max_tokens`. Le bloc d'outil est peut-être
- * présent et syntaxiquement valide, mais incomplet : c'est un échec, pas un
- * succès partiel.
+ * Coupée par `max_tokens` : peut-être valide mais incomplète, donc un échec.
  *
- * **Ce n'est pas le signal qu'il faut relever `AI_MAX_TOKENS`.** Un appel
- * ordinaire rend ~1 800 jetons (8 400 au plus) ; la troncature mesurée a tapé
- * les 10 000 du plafond deux fois, sur deux modèles différents : une génération
- * qui part en vrille, pas une sortie un peu longue. Relever le plafond brûlerait
- * plus de jetons et ferait déborder les 60 s du passage de cron.
- *
- * Ce qui rattrape, c'est `scinderApresTroncature` : le groupe repart coupé en
- * deux, en appels ordinaires. Le plafond ne se relève que pour un concept seul
- * qui déborde, le seul cas que `scinderLeGroupe` ne sait pas traiter.
+ * Ne pas relever `AI_MAX_TOKENS` pour autant. Un appel rend ~1 800 jetons (8 400
+ * au plus) ; les troncatures mesurées ont tapé les 10 000, sur deux modèles : une
+ * génération en vrille, qui brûlerait plus et déborderait les 60 s du cron.
+ * `scinderApresTroncature` coupe le groupe en deux ; le plafond ne se relève que
+ * pour un concept seul, que `scinderLeGroupe` ne sait pas traiter.
  */
 export class SortieTronqueeError extends AppelModeleError {
   readonly code = "AI_TRUNCATED";
@@ -152,10 +132,8 @@ export class ConfigIaInvalideError extends AppelModeleError {
 }
 
 /**
- * Une forme ne se traduit pas en schéma de sortie.
- *
- * Levée avant d'émettre : perdre en silence un mot-clé qui contraint la sortie
- * (une énumération, par exemple) la laisserait sans contrainte.
+ * Levée avant d'émettre : perdre en silence un mot-clé contraignant (une
+ * énumération) laisserait la sortie sans contrainte.
  */
 export class SchemaIntraduisibleError extends AppelModeleError {
   readonly code = "AI_SCHEMA";

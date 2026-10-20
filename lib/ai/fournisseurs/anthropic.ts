@@ -4,21 +4,14 @@ import { versMessageDuSdk } from "../message";
 import type { ParametresDEmission, ResultatDEmission, PontFournisseur } from "./pont";
 
 /**
- * Le pont Anthropic, seul endroit du projet qui importe le SDK. Le point
- * d'entrée unique tient : `client.ts` est l'entrée métier, ce fichier l'entrée
- * réseau.
- *
- * Le prompt système porte `cache_control: ephemeral` : il est identique d'un
- * appel à l'autre. Sous le minimum de mise en cache du modèle, rien n'est mis
- * en cache — le registre le dit.
- *
- * `thinking: disabled` : aucune des trois intentions n'a montré besoin de
- * raisonnement. Le rouvrir se décide sur une mesure.
+ * Seul fichier qui importe le SDK : `client.ts` est l'entrée métier, celui-ci
+ * l'entrée réseau. Le prompt système, identique d'un appel à l'autre, est mis en
+ * cache (au-dessus du minimum du modèle). `thinking: disabled` : aucune intention
+ * n'en a montré le besoin ; le rouvrir se décide sur une mesure.
  */
 
 let cachedClient: { key: string; sdk: Anthropic } | null = null;
 
-/** Le SDK, prêt à servir. Privé : ce fichier est le seul à connaître le paquet. */
 function sdkFor(apiKey: string | undefined): Anthropic {
   const key = apiKey ?? "";
   if (cachedClient?.key !== key) {

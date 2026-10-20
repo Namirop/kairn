@@ -7,16 +7,12 @@ import { promptDeQuestions } from "./generate-variants";
 import { PROMPT_DE_LECTURE } from "./ocr-extract";
 
 /**
- * Prompts système, un par intention du produit. Ceux du banc voyagent avec
- * leur juge, dans `scripts/evaluation/`.
+ * Un prompt par intention du produit ; ceux du banc voyagent avec leur juge.
+ * Aucun ne dit « réponds en JSON » : le schéma de sortie porte la forme (seul le
+ * pont OpenRouter ajoute un préambule pour les modèles qu'il ne contraint pas).
  *
- * Aucun ne dit « réponds en JSON » : la forme est portée par le schéma de
- * sortie dérivé de Zod (seul le pont OpenRouter ajoute un préambule, pour les
- * modèles qu'il ne contraint pas).
- *
- * La langue est celle du dépôt, jamais celle de la personne au moment de
- * l'appel : une question régénérée parle la langue de ses sœurs. La lecture
- * d'image n'en prend pas, elle transcrit.
+ * La langue est celle du dépôt, pas celle de la personne à l'appel : une question
+ * régénérée parle la langue de ses sœurs.
  */
 export function promptsSysteme(langue: Langue): Record<IntentionDuProduit, string> {
   return {
@@ -26,13 +22,12 @@ export function promptsSysteme(langue: Langue): Record<IntentionDuProduit, strin
   };
 }
 
-/** Les consignes françaises, pour le banc, qui ne mesure encore qu'elles. */
+/** Pour le banc, qui ne mesure encore que le français. */
 export const PROMPTS_SYSTEME_FR = promptsSysteme("FR");
 
 /**
- * L'empreinte d'un prompt, pour savoir sous quel réglage une question a été
- * écrite — et donc si un défaut signalé vient d'un réglage déjà corrigé. Une
- * empreinte plutôt qu'un numéro : elle change exactement quand le texte change.
+ * Dit sous quel réglage une question a été écrite, donc si un défaut signalé est
+ * déjà corrigé. Une empreinte plutôt qu'un numéro : elle change exactement avec le texte.
  */
 function empreinte(prompt: string): string {
   return createHash("sha256").update(prompt).digest("hex").slice(0, 12);

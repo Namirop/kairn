@@ -1,45 +1,33 @@
 import type { LangueDExtraction } from "./consignes-de-langue";
 
 /**
- * Découpage d'un Input en concepts unitaires.
- *
- * Ce texte se recopie mot pour mot : il ne se reformule pas sans un passage au
- * banc (`scripts/evaluation/evaluer-generation.ts`). Plusieurs règles n'y sont
- * pas passées et se jugent sur les dépôts réels. Les champs cités — `nature`,
- * `uncertain`, `rejected`, `retenu` — sont ceux de
- * `lib/ai/schemas/extract-atoms.ts`, et les valeurs de `nature` celles de
- * l'enum Prisma `InputNature` : rien ne doit diverger.
+ * Découpage d'un Input en concepts unitaires. Ce texte ne se reformule pas sans
+ * passage au banc (`scripts/evaluation/evaluer-generation.ts`) ; certaines règles
+ * n'y sont pas passées et se jugent sur les dépôts réels. Les champs cités sont
+ * ceux de `lib/ai/schemas/extract-atoms.ts`, les natures celles de `InputNature`.
  *
  * Ce qui paraîtrait superflu et ne l'est pas :
- * - L'ordre du texte est demandé, pas un classement par importance : le modèle
- *   rend l'ordre de lecture quoi qu'on lui dise, et c'est ce qui permet à
- *   l'écran de dire où la lecture s'est arrêtée. Une propriété de distribution
- *   ne se tient pas par de la prose.
- * - « Une seule chose par concept » est bornée aux mécanismes différents : plus
- *   zélée, elle ferait revenir les doublons que « QUAND FUSIONNER » écarte.
- * - Le nombre de questions par concept n'est pas laissé au modèle : les quatre
- *   facettes sont imposées, et le concept pauvre est traité dans
- *   `generate-variants.ts` (« la fidélité prime sur la variété »).
- * - Une comparaison doit porter ses deux termes parce que l'écran de révision
- *   ne montre jamais les concepts voisins.
- * - L'indicatif est exigé sur un contenu douteux : le doute est porté par
- *   `uncertain`, et une tournure rapportée resterait gravée après confirmation.
- * - Le contre-exemple `PERSONNEL` est là parce que la frontière est étroite :
- *   une procédure d'équipe s'apprend, une intention sur cette équipe non.
- * - La langue de sortie est imposée sans condition (`consignes-de-langue.ts`) :
- *   « écris dans la langue du dépôt » se trompait dès qu'un texte citait une
- *   langue étrangère. La seule règle restante est de ne pas traduire le cité.
- * - Le code cité va entre accents graves parce que le rendu en jetons ne
- *   relève que ceux-là ; le stock déjà écrit est réparé à la lecture par
- *   `releverLeCodeCite`.
+ * - L'ordre du texte, pas l'importance : le modèle rend l'ordre de lecture quoi
+ *   qu'on dise, et l'écran s'en sert pour dire où la lecture s'est arrêtée.
+ * - « Une seule chose » est bornée aux mécanismes différents : plus zélée, elle
+ *   ferait revenir les doublons que « QUAND FUSIONNER » écarte.
+ * - Le nombre de questions n'est pas laissé au modèle : le concept pauvre se
+ *   traite dans `generate-variants.ts`.
+ * - Une comparaison porte ses deux termes : la révision ne montre jamais les
+ *   concepts voisins.
+ * - L'indicatif sur un contenu douteux : le doute est dans `uncertain`, une
+ *   tournure rapportée resterait gravée après confirmation.
+ * - Le contre-exemple `PERSONNEL` : une procédure d'équipe s'apprend, une
+ *   intention sur cette équipe non.
+ * - La langue imposée sans condition (`consignes-de-langue.ts`) : « la langue du
+ *   dépôt » se trompait dès qu'un texte citait une langue étrangère.
+ * - Les accents graves : le rendu en jetons ne relève qu'eux (le stock est réparé
+ *   par `releverLeCodeCite`).
  *
- * La consigne facultative vit à côté du dépôt, jamais dedans (voir
- * `depotADecouper`). C'est la seule entrée par laquelle une personne écrit dans
- * un prompt : sa section est rédigée en limites, et la première — elle
- * retranche, elle n'ajoute pas — garde la règle qu'un concept est entièrement
- * soutenu par le dépôt. L'injection est bornée par construction : le dépôt est
- * annoncé comme du contenu, la consigne n'atteint ni le schéma ni les
- * garde-fous de dépense, et le pire est un découpage raté sur son propre dépôt.
+ * La consigne de la personne est la seule entrée écrite par elle dans un prompt :
+ * rédigée en limites, elle retranche sans ajouter. L'injection est bornée : le
+ * dépôt est annoncé comme du contenu (`depotADecouper`), la consigne n'atteint ni
+ * le schéma ni les garde-fous de dépense, le pire est un découpage raté.
  */
 export function promptDExtraction(langue: LangueDExtraction): string {
   return `Tu découpes ce qu'une personne vient d'apprendre en concepts unitaires, pour qu'ils

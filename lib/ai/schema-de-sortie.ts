@@ -2,16 +2,13 @@ import { z, type ZodType } from "zod";
 import { SchemaIntraduisibleError } from "./errors";
 
 /**
- * Le schéma de sortie contrainte, dérivé de la forme Zod.
+ * Le schéma de sortie contrainte, dérivé de la forme Zod. Pas le helper du SDK :
+ * il rétrograde `enum` et `const` en description, et un format inventé
+ * n'échouerait qu'à la validation.
  *
- * Pas le helper du SDK : il rétrograde `enum` et `const` en description alors
- * que la grammaire sait les imposer, et un format inventé passe alors la
- * génération pour n'échouer qu'à la validation.
- *
- * Les mots-clés qui bornent une valeur (longueurs, minimum, maximum) ne sont pas
- * imposables : ils partent dans la description, et Zod les applique ensuite.
- * Ceux qui décident de la structure (`$ref`, `allOf`, `not`…) n'ont pas
- * d'équivalent en description : les y verser les perdrait en silence, on lève.
+ * Les bornes de valeur (longueurs, minimum, maximum) ne sont pas imposables :
+ * elles partent en description. Les mots-clés de structure (`$ref`, `allOf`,
+ * `not`…) s'y perdraient en silence : on lève.
  */
 
 export type SchemaDeSortie = { type: "json_schema"; schema: Record<string, unknown> };
@@ -36,9 +33,9 @@ const FORMATS_CONNUS = new Set([
 const CONTRAINTES = ["type", "enum", "const", "required"];
 
 /**
- * Les mots-clés structurels, intraduisibles. `$ref` et `$defs` sont le cas
- * concret : Zod inline aujourd'hui la facette de `generate_variants`, réutilisée
- * quatre fois ; si ce défaut change, on veut l'apprendre par une erreur.
+ * `$ref` et `$defs` sont le cas concret : Zod y extrait toute instance partagée,
+ * d'où les schémas neufs de `generate-variants-question.ts`. Un partage qui
+ * s'y glisserait doit se voir par une erreur.
  */
 const STRUCTURELS = [
   "$ref",
@@ -68,7 +65,7 @@ function sousNoeuds(valeur: unknown): Noeud[] {
   return Array.isArray(valeur) ? valeur.filter(estNoeud) : [];
 }
 
-/** Ce qui reste après tri : rendu au modèle comme indication, pas comme règle. */
+/** Ce qui reste après tri, rendu au modèle comme indication. */
 function enIndication(reste: Noeud, description: unknown): string | undefined {
   const notes = Object.entries(reste).map(([cle, valeur]) => `${cle}: ${JSON.stringify(valeur)}`);
   const texte = typeof description === "string" ? description : undefined;
