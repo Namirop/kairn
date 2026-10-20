@@ -1,9 +1,6 @@
 /**
- * La carte de question et ce qui se fait dessous : les formats, la correction,
- * la notation, les gestes qui portent sur le concept ou sur la question.
- *
- * Aucune de ces phrases ne félicite. Une bonne réponse se constate ; la
- * récompense est l'espacement qui s'allonge.
+ * La carte de question. Aucune phrase ne félicite : une bonne réponse se
+ * constate, la récompense est l'espacement qui s'allonge.
  */
 export const question = {
   dernierPassage:
@@ -13,7 +10,7 @@ export const question = {
   terminer: "Terminer",
   continuer: "Continuer",
   tempsDeLire: "Le temps de la lire.",
-  /** Muet à l'écran : ce qu'un lecteur d'écran entend du verdict. */
+  /** Pour le lecteur d'écran seulement. */
   verdict: {
     juste: "Réponse juste.",
     faux: "Réponse fausse.",
@@ -40,7 +37,7 @@ export const question = {
     pistes: "L'un de ces termes",
     rappelAide: "Compté comme un rappel aidé : le concept revient un peu plus tôt.",
   },
-  /** Une graduation, dite du point de vue de celui qui se juge. Aucun n'est une note. */
+  /** Du point de vue de celui qui se juge : une graduation, pas une note. */
   notation: {
     question: "Où en étais-tu ?",
     AGAIN: "Je ne l'avais pas",

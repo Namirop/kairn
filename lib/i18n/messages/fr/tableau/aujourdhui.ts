@@ -1,9 +1,6 @@
 /**
- * L'écran Aujourd'hui : le compteur du jour, le signal de retard, la liste des
- * dépôts récents, le panneau du cairn et sa progression.
- *
- * Le compteur affiche son nombre en grand au-dessus de sa phrase : `aRevoir` ne
- * le répète donc pas, il n'en prend que l'accord.
+ * L'écran Aujourd'hui. Le compteur affiche son nombre en grand au-dessus :
+ * `aRevoir` ne le répète pas, il n'en prend que l'accord.
  */
 export const aujourdhui = {
   titre: "Aujourd'hui",
@@ -39,7 +36,7 @@ export const aujourdhui = {
     toutVoir: "Tout voir",
     videConstat: "Tu n'as encore rien déposé.",
     videContexte: "Une phrase, un pavé collé, une capture d'écran — tout fait un point de départ.",
-    /** Lu par un lecteur d'écran en tête d'un dépôt d'image ; l'icône, elle, est muette. */
+    /** Lu en tête d'un dépôt d'image ; l'icône est muette. */
     capture: "Capture.",
     captureEnLecture: "Capture en cours de lecture",
     concepts: "{nombre, plural, one {# concept} other {# concepts}}",

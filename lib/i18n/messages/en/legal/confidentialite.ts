@@ -1,9 +1,9 @@
 import type { Messages } from "../../fr";
 
 /**
- * La version anglaise dit les mêmes engagements, ni plus ni moins. Les mentions
- * de droit français (« entrepreneur individuel », la CNIL) gardent leur nom
- * d'origine à côté de leur traduction : c'est sous ce nom qu'elles existent.
+ * Les mêmes engagements, ni plus ni moins. Les notions de droit français
+ * (« entrepreneur individuel », la CNIL) gardent leur nom d'origine à côté de
+ * la traduction : c'est sous ce nom qu'elles existent.
  */
 export const confidentialite: Messages["legal"]["confidentialite"] = {
   titre: "Privacy",

@@ -4,12 +4,8 @@ import { textesDEmail } from "../traduction";
 import { echapper } from "./echapper";
 
 /**
- * Gabarit commun des emails.
- *
- * Les couleurs sont en dur parce que les clients mail ne lisent pas les
- * variables CSS ; elles suivent `app/styles/tokens/couleurs.css`. Composition du
- * produit : un fond d'ombre, une surface de papier posée dessus, jamais de
- * blanc pur.
+ * En dur : les clients mail ne lisent pas les variables CSS. Suit
+ * `app/styles/tokens/couleurs.css` : papier posé sur l'ombre, jamais de blanc pur.
  */
 const PALETTE = {
   ombre: "#CFE3EC",
@@ -17,15 +13,12 @@ const PALETTE = {
   filet: "#7FB3C8",
   secondaire: "#345770",
   encre: "#0D2236",
-  /**
-   * Les boutons portent l'accent : un geste est ce que le produit demande, pas
-   * une maîtrise. Du blanc sur le lichen saturé tomberait à 1,9 pour 1.
-   */
+  /** Un geste est ce que le produit demande, pas une maîtrise : pas de lichen (1,9 pour 1). */
   accent: "#1B4FC4",
-  /** Le libellé posé sur l'accent : le seul blanc pur des emails, jamais une surface. */
+  /** Le seul blanc pur des emails, jamais une surface. */
   surAccent: "#FFFFFF",
   ember: "#B4552F",
-  /// Sémantique, et pas la couleur du produit : un échec n'est pas un accent.
+  /** Sémantique : un échec n'est pas un accent. */
   alerte: "#9A3B2C",
 } as const;
 
@@ -35,33 +28,24 @@ const MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 
 export const STYLE_DES_EMAILS = { ...PALETTE, SANS, MONO } as const;
 
-/** Le bouton porte le mot de l'interface, et le même dans tout le flux. */
+/** Le libellé reprend le mot de l'interface, le même dans tout le flux. */
 export function bouton(href: string, libelle: string): string {
   return `<a href="${href}" style="display:inline-block;background:${PALETTE.accent};color:${PALETTE.surAccent};text-decoration:none;padding:12px 20px;font-size:15px;">${libelle}</a>`;
 }
 
-/** Ce que rend chaque modèle : l'objet, la version HTML et la version texte. */
 export type EmailRendu = { subject: string; html: string; text: string };
 
 export type ContenuDuGabarit = {
   preentete: string;
   corps: string;
-  /**
-   * Absent sur un email dont on ne peut pas se désabonner, comme le code de
-   * connexion : un `List-Unsubscribe` y ferait ranger un message transactionnel
-   * avec les envois de masse.
-   */
+  /** Absent sur un transactionnel : un `List-Unsubscribe` le rangerait avec les envois de masse. */
   lienDeDesinscription?: string;
-  /** Ce qui justifie l'envoi, dit au pied. Sans lui, le pied disparaît. */
+  /** Sans lui, le pied disparaît. */
   raisonDeLEnvoi?: string;
-  /**
-   * La langue du destinataire, pour le `lang` du document et le pied.
-   * Facultative : les alertes d'exploitation n'ont qu'un lecteur, en français.
-   */
+  /** Facultative : les alertes d'exploitation n'ont qu'un lecteur, francophone. */
   langue?: Langue;
 };
 
-/** Enveloppe le contenu : largeur fixe, fond d'ombre, papier posé dessus, pied de désinscription. */
 export function envelopper({
   preentete,
   corps,

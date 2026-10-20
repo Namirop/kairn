@@ -21,19 +21,12 @@ import { textesDesRefus } from "@/lib/depots/textes-des-refus";
 import { mettreEnFile } from "@/lib/jobs/queue";
 
 /**
- * Le dépôt d'un visiteur, avant tout compte : la landing montre un vrai
- * découpage, parce que c'est ce qui convertit.
- *
- * Pour rester finançable, la chaîne s'arrête à un seul concept questionné
- * (l'échantillon affiché) ; les autres questions s'écrivent à la création du
- * compte. Pas d'image : la lecture d'une capture doublerait le coût d'un
- * visiteur.
+ * Le dépôt d'un visiteur : un vrai découpage, parce que c'est ce qui convertit.
+ * Pour rester finançable, un seul concept est questionné, le reste à la
+ * création du compte. Pas d'image : la lecture doublerait le coût.
  */
 
-/**
- * La longueur se juge par `defautDeLongueur`, la même fonction que l'écran.
- * Construit à l'appel, parce que les messages dépendent de la langue de `t`.
- */
+/** Construit à l'appel : les messages dépendent de la langue de `t`. */
 function schemaAnonyme(t: TraduireLesRefus) {
   return z.object({
     texte: z
@@ -50,10 +43,7 @@ function schemaAnonyme(t: TraduireLesRefus) {
 export type ResultatDepotAnonyme =
   { ok: true; sessionId: string; inputId: string } | { ok: false; motif: string };
 
-/**
- * Pourquoi la visite est fermée, lu en base plutôt que deviné : chaque refus
- * (`depots.refus.essai.*`) ne vaut que si sa cause est réelle.
- */
+/** Lu en base, pas deviné : chaque refus ne vaut que si sa cause est réelle. */
 async function motifDuRefus(sessionId: string, t: TraduireLesRefus): Promise<string> {
   if (await essaiAbouti(sessionId)) return t("essai.duJourFaits");
 
@@ -65,24 +55,18 @@ async function motifDuRefus(sessionId: string, t: TraduireLesRefus): Promise<str
 }
 
 /**
- * Dépose sans compte, ou dit pourquoi c'est refusé.
- *
  * La visite du cookie est réutilisée tant qu'il lui reste des essais (deux par
- * 24 h, voir `sessionDisponible`) : tout ce qui a été déposé part ainsi au compte
- * le jour où il est créé.
- *
- * Avec `ESSAI_ANONYME_SANS_LIMITE` (voir `essai-sans-limite.ts`), le cookie est
- * ignoré : une visite rouverte accumulerait des dépôts que l'écran ne montre pas.
- *
- * Sans traducteur, les refus sont en français : la landing anglaise passe
- * `getTranslations("depots.refus")`.
+ * 24 h) : tout ce qu'elle a déposé part au compte à sa création. Sans limite,
+ * le cookie est ignoré : la visite accumulerait des dépôts que l'écran ne
+ * montre pas. Le traducteur par défaut est français ; la landing anglaise
+ * passe le sien.
  */
 export async function deposerSansCompte(
   texte: string,
   adresse: string,
   sessionExistante: string | null,
   t: TraduireLesRefus = textesDesRefus(),
-  /** La langue de la page, figée sur le dépôt. Le défaut sert aux scripts. */
+  /** Figée sur le dépôt. Le défaut sert aux scripts. */
   langue: Langue = "FR",
 ): Promise<ResultatDepotAnonyme> {
   const valide = schemaAnonyme(t).safeParse({ texte });
@@ -105,8 +89,7 @@ export async function deposerSansCompte(
     return { ok: false, motif: await motifDuRefus(sessionExistante, t) };
   }
 
-  // « close » ouvre une visite neuve : le cookie désigne une visite disparue ou
-  // déjà rattachée à un compte, sur laquelle ce visiteur n'a rien dépensé.
+  // « close » : visite disparue ou rattachée à un compte, rien n'y a été dépensé.
   const session =
     visite === "ouverte" && sessionExistante
       ? { ouverte: true as const, sessionId: sessionExistante }
@@ -121,8 +104,7 @@ export async function deposerSansCompte(
       rawContent: valide.data.texte,
       sourceType: "TEXT",
       status: "PENDING",
-      // Pas de clé d'envoi : son unicité porte sur `(userId, clé)`. Ce sont les
-      // essais comptés sur la visite qui empêchent le double dépôt.
+      // Unicité sur `(userId, clé)` : ici, les essais comptés empêchent le doublon.
       submissionKey: null,
     },
     select: { id: true },

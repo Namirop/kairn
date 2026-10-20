@@ -1,29 +1,19 @@
-// i18n-ignore-fichier — outil de l'administrateur, qui reste en français par décision du 08/10/2026.
+// i18n-ignore-fichier — outil de l'administrateur, qui reste en français.
 import { echapper } from "./echapper";
 import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
 import { heureUtc, lignesDeValeurs } from "./blocs-d-alerte";
 
-/**
- * L'alerte d'exploitation quand un webhook de paiement n'aboutit pas : Stripe a
- * encaissé, le compte reste gratuit, et Stripe renonce après trois jours de
- * relances. Sans cet email, le seul signe serait une ligne de journal.
- *
- * Il dit de quoi agir sans rien ouvrir : le type d'événement, l'erreur, et où
- * le rejouer depuis le tableau de bord Stripe.
- */
+/** Sans cet email, le seul signe d'un compte payé resté gratuit serait une ligne de journal. */
 
 export type AlerteDePaiementPayload = {
-  /** Le type d'événement Stripe qui a échoué, ou « inconnu » si le corps ne s'est pas lu. */
+  /** « inconnu » si le corps ne s'est pas lu. */
   type: string;
-  /** Le code d'erreur du produit quand il y en a un — `PAIEMENT_RAPPORT_ILLISIBLE`, etc. */
   code: string;
-  /** Ce que l'erreur dit, coupé : c'est un indice, pas la trace complète. */
   motif: string;
-  /** L'instant de l'alerte, pour dire l'heure qu'il est en UTC. */
   instant: Date;
 };
 
-/** Assez pour reconnaître la panne, pas assez pour faire un email de trace. */
+/** Un indice pour reconnaître la panne, pas la trace. */
 const MOTIF_MAXIMUM = 500;
 
 export function composerLAlerteDePaiement(payload: AlerteDePaiementPayload): EmailRendu {

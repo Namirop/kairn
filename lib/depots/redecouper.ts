@@ -7,13 +7,7 @@ import { refusDeQuota } from "@/lib/depots/refus-de-quota";
 import { textesDesRefus } from "@/lib/depots/textes-des-refus";
 import { mettreEnFile } from "@/lib/jobs/queue";
 
-/**
- * Relance l'extraction sur un texte déjà déposé, quand le découpage n'a rien
- * donné d'utilisable, sans dupliquer le texte en base.
- *
- * Ça coûte une extraction, donc une place du jour comme un dépôt : gratuit, le
- * redécoupage contournerait le quota.
- */
+/** Prend une place comme un dépôt : gratuit, le redécoupage contournerait le quota. */
 
 export type ResultatRedecoupage = { ok: true } | { ok: false; motif: string; quota?: boolean };
 
@@ -39,7 +33,6 @@ export async function redecouper(
 
   if (!place.accorde) return { ok: false, ...refusDeQuota(place.motif, place.plafond, t) };
 
-  // Un redécoupage qui n'a pas lieu rend sa place.
   if (!(await repartirEnDecoupage(inputId, userId))) {
     await rendreDepot(userId, fuseau);
     return { ok: false, motif: t("introuvable") };

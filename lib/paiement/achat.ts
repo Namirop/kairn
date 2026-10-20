@@ -8,25 +8,15 @@ import { clientStripeDuCompte } from "./dossier-client";
 import { AbonnementDejaOuvertError, objetIntrouvableChezStripe } from "./erreurs";
 import { lireLeRapport } from "./rapport";
 
-/**
- * Ouvrir un paiement, et rendre l'adresse où l'envoyer. La carte se saisit chez
- * Stripe : un numéro qui ne traverse jamais ce serveur ne peut pas y fuiter.
- */
+/** La carte se saisit chez Stripe : un numéro qui ne traverse pas ce serveur n'y fuit pas. */
 
-/**
- * Le paramètre du retour d'un paiement accepté. Le navigateur revient souvent
- * avant le webhook : sans lui, l'écran afficherait « offre gratuite » à qui
- * vient de payer.
- */
+/** Le navigateur devance souvent le webhook : sans lui, « gratuit » à qui vient de payer. */
 export const PARAMETRE_DE_RETOUR = "paiement";
 export const RETOUR_ACCEPTE = "fait";
 
 /**
- * Refuse d'ouvrir un paiement à qui en a déjà un. Deux onglets suffisent à
- * créer deux abonnements chez Stripe, dont un seul retenu par notre ligne :
- * l'autre prélèverait sans que Kairn le voie.
- *
- * Ici et pas dans l'action, pour que tout ce qui vend la traverse.
+ * Deux onglets créeraient deux abonnements, dont un prélevant sans que Kairn le
+ * voie. Ici et pas dans l'action, pour que tout ce qui vend la traverse.
  */
 async function refuserSiDejaAbonne(userId: string): Promise<void> {
   const { abonnementId } = await lireDossierStripe(userId);
@@ -38,8 +28,7 @@ async function refuserSiDejaAbonne(userId: string): Promise<void> {
   try {
     abonnement = await stripe().subscriptions.retrieve(abonnementId);
   } catch (erreur) {
-    // Un abonnement inconnu de Stripe (gardé du mode test, par exemple) ne
-    // facture rien, donc n'interdit rien.
+    // Inconnu de Stripe (venu du mode test) : il ne facture rien.
     if (objetIntrouvableChezStripe(erreur)) return;
 
     throw erreur;
@@ -68,16 +57,14 @@ export async function ouvrirLePaiement(
     success_url: `${app}${ROUTES.reglages}?${PARAMETRE_DE_RETOUR}=${RETOUR_ACCEPTE}`,
     cancel_url: `${app}${ROUTES.reglages}`,
     client_reference_id: compte.id,
-    // Kairn ne demande pas de nom : on recopie sur le client celui du titulaire
-    // saisi dans le tunnel, sans quoi les factures sortent au nom de personne.
+    // Kairn ne demande pas de nom : sans celui du titulaire, factures au nom de personne.
     customer_update: { name: "auto" },
     // Pour le diagnostic seulement : le rattachement passe par le client Stripe.
     subscription_data: { metadata: { userId: compte.id } },
-    // Le vendeur, c'est Kairn. Managed Payments, actif par défaut sur le compte,
-    // ferait de Stripe le marchand de référence pour 3,5 % de plus par
-    // transaction, et rejette la session faute de code de taxe au catalogue.
-    // Sa conformité TVA ne sert qu'au-delà de 10 000 € de ventes UE ; activé
-    // plus tard, il ne couvrirait que les abonnements souscrits ensuite.
+    // Managed Payments, actif par défaut, ferait de Stripe le marchand (+3,5 %)
+    // et rejette la session sans code de taxe au catalogue. Sa TVA ne sert
+    // qu'au-delà de 10 000 € de ventes UE ; activé plus tard, il ne couvrirait
+    // que les abonnements souscrits ensuite.
     managed_payments: { enabled: false },
   });
 

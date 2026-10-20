@@ -4,38 +4,27 @@ import { STYLE_DES_EMAILS as S, envelopper, type EmailRendu } from "./gabarit";
 import { heureUtc, lignesDeValeurs } from "./blocs-d-alerte";
 
 /**
- * L'alerte d'exploitation quand un compteur d'appels se remplit.
- *
- * Elle s'adresse à qui tient le produit et doit permettre de décider sans
- * ouvrir le tableau de bord : le compteur, l'heure UTC (36/50 à 2 h ou à 23 h
- * ne dit pas la même chose, la journée se compte en UTC), la dépense du jour et
- * le nom exact de la variable à changer.
- *
- * Aucun désabonnement : ce n'est pas un envoi périodique, et le destinataire est
- * une adresse d'exploitation, pas un compte.
+ * Quand un compteur d'appels se remplit. Doit permettre de décider sans ouvrir le
+ * tableau de bord, d'où l'heure UTC (36/50 à 2 h ou à 23 h ne dit pas la même
+ * chose) et la variable à changer. Pas de désabonnement : adresse d'exploitation.
  */
 
 export type AlerteDePlafondPayload = {
   compteur: CompteurDeQuota;
-  /** Le compte concerné, pour le compteur par compte. Nul pour les deux autres. */
+  /** Nul hors du compteur par compte. */
   cible: string | null;
   seuil: number;
   utilisees: number;
   plafond: number;
-  /** Le nom exact de la variable d'environnement qui porte ce plafond. */
   variable: string;
-  /** Dépense du jour, en dollars, telle que le registre l'a enregistrée. */
+  /** Telle que le registre l'a enregistrée. */
   depenseDuJourUsd: string;
-  /** L'instant de l'alerte, pour dire l'heure qu'il est en UTC. */
   instant: Date;
 };
 
 /**
- * Ce que chaque compteur s'appelle, et ce qu'on en dit quand il est plein.
- *
- * `plein` s'écrit en bas de casse : il suit toujours « Kairn — » dans un objet
- * d'email. Il est écrit entier plutôt que composé à partir de `nom`, pour
- * l'accord : deux compteurs sur trois sont féminins.
+ * `plein` en bas de casse : il suit « Kairn — » dans l'objet. Écrit entier, pas
+ * composé de `nom`, pour l'accord en genre.
  */
 const COMPTEURS: Record<CompteurDeQuota, { nom: string; plein: string; protege: string }> = {
   GLOBAL: {
@@ -64,10 +53,7 @@ function dollars(montant: string): string {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "USD" }).format(valeur);
 }
 
-/**
- * À 100 %, l'objet constate ce qui se casse pendant qu'on lit : des dépôts
- * échouent.
- */
+/** À 100 %, l'objet dit ce qui casse pendant qu'on lit. */
 function sujet({ compteur, cible, seuil }: AlerteDePlafondPayload): string {
   const { nom, plein } = COMPTEURS[compteur];
   const qui = compteur === "COMPTE" && cible ? ` — ${cible}` : "";
@@ -107,8 +93,7 @@ ${compteConcerne}
 <p style="margin:0 0 24px;font-size:15px;line-height:23px;color:${S.secondaire};">${constat} ${COMPTEURS[compteur].protege}</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0;">${tableau}</table>`;
 
-  // Les lignes vides séparent les blocs de la version texte : seul `null`
-  // disparaît.
+  // Les chaînes vides séparent les blocs : seul `null` disparaît.
   const text = [
     `${COMPTEURS[compteur].nom} : ${seuil} %.`,
     compteur === "COMPTE" && cible ? `Compte ${cible}.` : null,

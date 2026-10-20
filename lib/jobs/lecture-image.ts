@@ -8,11 +8,7 @@ import type { GenerationJob } from "@/lib/db/types";
 import { mettreEnFile } from "./queue";
 import { textesDesRefus } from "@/lib/depots/textes-des-refus";
 
-/**
- * La lecture d'une capture. Les octets de l'image ne survivent pas à cette
- * étape : ils sont effacés dès que le texte est obtenu ou qu'on sait qu'il n'y
- * en aura pas.
- */
+/** Les octets de l'image ne survivent pas à cette étape, texte obtenu ou non. */
 
 const TYPES_LISIBLES = z.enum(["image/jpeg", "image/png", "image/gif", "image/webp"]);
 
@@ -28,7 +24,7 @@ export async function lireImage(job: GenerationJob): Promise<void> {
     return;
   }
 
-  // Le texte déposé à côté de l'image lui sert de contexte, quand il y en a un.
+  // Le texte déposé à côté sert de contexte.
   const contexte = depot.rawContent.trim();
   const lu = await callAI({
     contract: CONTRAT_DE_LECTURE,
@@ -51,10 +47,9 @@ export async function lireImage(job: GenerationJob): Promise<void> {
   });
 
   if (!lu.usable) {
-    // Rien à lire sur la capture : un rejet, pas une panne.
+    // Un rejet, pas une panne.
     await oublierImage(depot.id);
-    // Le motif est enregistré puis affiché tel quel : il se dit dans la langue
-    // figée sur le dépôt.
+    // Affiché tel quel : dans la langue figée sur le dépôt.
     await marquerRejet(depot.id, textesDesRefus(depot.langue)("captureSansTexte"));
     return;
   }

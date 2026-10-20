@@ -3,14 +3,9 @@ import { depuisLaCarte, versLaCarte, type ChampsDeCarte } from "@/lib/db/carte-f
 import type { ReviewRating } from "@/lib/db/types";
 
 /**
- * Le calcul d'échéance, délégué à ts-fsrs : la carte stockée est celle que
- * l'algorithme rend. Seul endroit de l'application qui appelle l'ordonnanceur.
- *
- * Le brouillage (`enable_fuzz`) décale chaque intervalle d'un peu de hasard :
- * des concepts révisés le même jour avec la même note ne reviennent pas tous
- * le même jour, et la charge des sessions se lisse. ts-fsrs le désactive par
- * défaut, d'où le réglage explicite. Le seed (`prisma/seed/rejeu.ts`) le
- * coupe, pour rester reproductible.
+ * Seul appel à l'ordonnanceur ts-fsrs ; la carte stockée est celle qu'il rend.
+ * `enable_fuzz`, désactivé par défaut, étale les retours d'une même journée et
+ * lisse la charge des sessions. Le seed (`prisma/seed/rejeu.ts`) le coupe.
  */
 
 const ordonnanceur = fsrs(generatorParameters({ enable_fuzz: true }));
@@ -24,7 +19,7 @@ const NOTES: Record<ReviewRating, Rating.Again | Rating.Hard | Rating.Good | Rat
 
 export type Planification = {
   carte: ChampsDeCarte;
-  /** Jours jusqu'au prochain passage, tels que l'algorithme les a posés. */
+  /** Tels que l'algorithme les a posés. */
   intervalleJours: number;
   stabiliteAvant: number;
   stabiliteApres: number;

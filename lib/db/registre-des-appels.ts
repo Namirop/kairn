@@ -2,35 +2,28 @@ import { prisma } from "@/lib/db/client";
 import type { Fournisseur } from "@/lib/ai/fournisseurs";
 import { debutDuJourUtc } from "@/lib/domain/fenetre-utc";
 
-/**
- * Le registre des appels modèle. C'est ce que `callAI()` lit avant d'émettre et
- * écrit après, succès comme échec.
- */
+/** `callAI()` y écrit chaque appel, succès comme échec. */
 
 export type AppelAEnregistrer = {
   purpose: string;
   model: string;
-  /** Persisté dans la colonne `AiCall.provider`. */
+  /** Colonne `AiCall.provider`. */
   fournisseur: Fournisseur;
   inputTokens: number;
   outputTokens: number;
   cacheCreationTokens?: number;
   cacheReadTokens?: number;
-  /** Chaîne décimale, voir lib/ai/cout-des-appels.ts. */
+  /** Chaîne décimale, voir `lib/ai/cout-des-appels.ts`. */
   costUsd: string;
   latencyMs: number;
   success: boolean;
   errorCode?: string | null;
   userId?: string | null;
   jobId?: string | null;
-  /**
-   * L'appel au modèle primaire a échoué et le modèle de repli, chez le même
-   * fournisseur, a servi à sa place. Compté par `compterBasculesDuJour`.
-   */
+  /** Le repli, chez le même fournisseur, a servi à la place du primaire. */
   basculee?: boolean;
 };
 
-/** Ce qu'une fenêtre de temps a consommé. */
 export type ConsommationFenetre = {
   calls: number;
   inputTokens: number;
@@ -40,10 +33,7 @@ export type ConsommationFenetre = {
   costUsd: string;
 };
 
-/**
- * Appels, tokens et dollars d'une fenêtre. Le banc d'évaluation s'en sert pour
- * chiffrer un dépôt : la dépense se lit au registre, elle ne s'estime pas.
- */
+/** Pour le banc d'évaluation : la dépense se lit au registre, elle ne s'estime pas. */
 export async function sommerLesAppels(depuis: Date, jusqua?: Date): Promise<ConsommationFenetre> {
   const { _count, _sum } = await prisma.aiCall.aggregate({
     where: { createdAt: { gte: depuis, ...(jusqua ? { lte: jusqua } : {}) } },
@@ -89,10 +79,8 @@ export async function enregistrerLAppel(appel: AppelAEnregistrer): Promise<void>
 }
 
 /**
- * Bascules sur le modèle de repli depuis minuit UTC, pour l'alerte
- * d'exploitation (`SEUIL_BASCULES`). L'index partiel
- * `AiCall_basculee_createdAt_idx` garde la lecture bornée quand le registre
- * grossit.
+ * Depuis minuit UTC, pour `SEUIL_BASCULES`. L'index partiel
+ * `AiCall_basculee_createdAt_idx` borne la lecture quand le registre grossit.
  */
 export async function compterBasculesDuJour(maintenant: Date = new Date()): Promise<number> {
   return prisma.aiCall.count({

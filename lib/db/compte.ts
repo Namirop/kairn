@@ -1,19 +1,12 @@
 import { prisma } from "@/lib/db/client";
 
-/**
- * Ce qu'un compte peut faire de ses propres données : les emporter, ou les
- * effacer, sans condition ni délai.
- */
+/** Emporter ses données ou les effacer, sans condition ni délai. */
 
 /**
- * Efface le compte et tout ce qui en découle, par les cascades du schéma : la
- * base tient la liste, et `scripts/verification/cases/compte-efface.ts` vérifie
- * qu'elle est complète.
- *
- * Trois tables survivent, détachées (`SetNull`) : `AiCall` (la dépense engagée
- * reste comptée), `Signalement` et `Retour` (ils portent un défaut à corriger,
- * pas des données personnelles). La capture d'un retour est effacée, elle, et
- * avant le `delete` : ensuite on ne saurait plus quelle ligne viser.
+ * Par les cascades du schéma ; `scripts/verification/cases/compte-efface.ts`
+ * vérifie la liste. Survivent détachées (`SetNull`) : `AiCall` (la dépense
+ * reste comptée), `Signalement` et `Retour` (un défaut, pas une donnée
+ * personnelle). La capture d'un retour part avant : après, plus de ligne à viser.
  */
 export async function supprimerLeCompte(userId: string): Promise<boolean> {
   await prisma.retour.updateMany({
@@ -27,7 +20,7 @@ export async function supprimerLeCompte(userId: string): Promise<boolean> {
 }
 
 export type CompteExporte = {
-  /** Ce que ce fichier contient, pour qui l'ouvre sans contexte. */
+  /** Pour qui ouvre le fichier sans contexte. */
   aPropos: string;
   exporteLe: string;
   compte: { email: string; nom: string; inscritLe: string; fuseau: string };
@@ -52,17 +45,13 @@ export type CompteExporte = {
       passages: { le: string; note: string; mode: string; tempsMs: number }[];
     }[];
   }[];
-  /** Ce que la personne nous a écrit sur le produit. La capture n'y est pas. */
+  /** Sans la capture. */
   retours: { envoyeLe: string; sujet: string; ecran: string | null; message: string }[];
 };
 
 /**
- * Tout ce que la personne a déposé, et où elle en est. Lisible sans
- * documentation : clés dans le vocabulaire du produit, dates en ISO, aucun
- * identifiant interne.
- *
- * Les questions, passages et retours y sont. Pas la capture d'un retour : en
- * base64, elle rendrait le JSON illisible.
+ * Lisible sans documentation : clés du vocabulaire produit, dates ISO, aucun
+ * identifiant interne. Pas de capture : en base64, le JSON deviendrait illisible.
  */
 export async function exporterLeCompte(userId: string): Promise<CompteExporte | null> {
   const compte = await prisma.user.findUnique({

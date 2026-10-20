@@ -1,17 +1,12 @@
 import { cookies, headers } from "next/headers";
 
-/**
- * Le cookie qui porte une visite sans compte, et l'adresse qui la borne.
- *
- * Le seul endroit qui sait reconnaître un visiteur : nom et durée du cookie,
- * lecture de l'adresse derrière un proxy.
- */
+/** Le seul endroit qui reconnaît un visiteur sans compte : son cookie et son adresse. */
 
 export const COOKIE_DE_VISITE = "kairn_visite";
 
 /**
- * Une semaine, la même durée que la conservation côté base : un cookie qui
- * survit à sa session ferait croire à un dépôt déjà fait et bloquerait l'essai.
+ * Comme la conservation en base : un cookie qui survit à sa session ferait
+ * croire à un dépôt déjà fait et bloquerait l'essai.
  */
 const DUREE_SECONDES = 7 * 24 * 60 * 60;
 
@@ -34,17 +29,11 @@ export async function oublierLaVisite(): Promise<void> {
 }
 
 /**
- * L'adresse du visiteur, telle que l'hébergeur la rapporte.
- *
- * **Ce qui rend cet en-tête digne de foi n'est pas dans ce fichier.** Une
- * adresse forgée différemment à chaque requête, sans cookie renvoyé, donnerait
- * des visites illimitées : `ouvrirUneSession` ne trouverait jamais rien de
- * récent à compter. Le verrou tient parce que Vercel réécrit `x-forwarded-for`
- * avec l'adresse vue par le bord. Derrière un proxy qui laisse passer l'en-tête
- * du client, il ne vaut plus rien.
- *
- * `x-vercel-forwarded-for` d'abord : la plateforme l'écrit et aucune couche ne
- * le réécrit. Dans une chaîne de relais, la première entrée est le client.
+ * **La confiance dans cet en-tête ne vient pas de ce fichier** : Vercel réécrit
+ * `x-forwarded-for` au bord. Derrière un proxy qui laisse passer celui du
+ * client, une adresse forgée à chaque requête donnerait des essais illimités.
+ * `x-vercel-forwarded-for` d'abord : aucune couche ne le réécrit. La première
+ * entrée d'une chaîne de relais est le client.
  */
 export async function adresseDuVisiteur(): Promise<string> {
   const entetes = await headers();
@@ -56,9 +45,8 @@ export async function adresseDuVisiteur(): Promise<string> {
 
   if (transmise) return transmise;
 
-  // Le repli échoue fermé (un seau commun pour tous les visiteurs sans
-  // en-tête), donc il ferme la landing : le dire évite de chercher un bug de
-  // quota.
+  // Échoue fermé (un seau commun) et ferme donc la landing : le dire évite de
+  // chercher un bug de quota.
   console.warn(
     "Adresse du visiteur introuvable : les essais anonymes tombent dans un seau commun.",
   );

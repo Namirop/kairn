@@ -2,10 +2,7 @@ import { prisma } from "@/lib/db/client";
 import { marquerPretSiPlusRienEnAttente } from "@/lib/db/fin-de-depot";
 import type { GenerationJob, GenerationKind, JobStatus } from "@/lib/db/types";
 
-/**
- * Accès aux jobs de génération. Le passage en RUNNING est une prise de jeton
- * atomique : deux exécuteurs qui visent le même job, seul l'un des deux part.
- */
+/** Le passage en RUNNING est une prise atomique : de deux exécuteurs, un seul part. */
 
 /** Au-delà, un job repris en boucle est déclaré en échec. */
 export const TENTATIVES_MAX = 3;
@@ -21,11 +18,8 @@ export async function creerJobDeGeneration(
 }
 
 /**
- * Prend le job s'il est encore à prendre : en attente, ou bloqué en cours
- * depuis `BLOCAGE_APRES_MS`. Rend `null` si quelqu'un d'autre l'a déjà pris.
- *
- * La garde sur `notBefore` est ici parce que c'est le seul passage obligé vers
- * l'exécution : plus haut, un déclenchement direct la contournerait.
+ * `null` si un autre l'a pris. La garde `notBefore` vit ici, seul passage obligé
+ * vers l'exécution : plus haut, un déclenchement direct la contournerait.
  */
 export async function prendreLeJob(
   jobId: string,
@@ -51,9 +45,8 @@ export async function prendreLeJob(
 }
 
 /**
- * Rend le job à la file sans lui compter sa tentative. Réservé au plafond
- * d'appels atteint : ce n'est pas un échec, et compter la tentative le
- * condamnerait au bout de trois journées chargées.
+ * Réservé au plafond d'appels atteint : pas un échec, et compter la tentative
+ * condamnerait le job après trois journées chargées.
  */
 export async function reporterJob(jobId: string, motif: string): Promise<void> {
   await prisma.generationJob.update({
@@ -63,14 +56,9 @@ export async function reporterJob(jobId: string, motif: string): Promise<void> {
 }
 
 /**
- * Le travail rendu par un job est incomplet : il est rétréci aux concepts sans
- * questions et rendu à la file, où le cron le reprend. Terminé `DONE`, ces
- * concepts ne seraient repris par personne, et l'écran ne dirait rien tant
- * qu'un seul concept est servable.
- *
- * La tentative reste comptée, sans quoi un modèle qui rend toujours deux lots
- * sur trois boucle sans fin. Rend `false` quand elles sont épuisées : l'appelant
- * laisse alors le job échouer.
+ * Travail incomplet : rétréci aux concepts sans questions et rendu au cron.
+ * `DONE`, personne ne les reprendrait. La tentative reste comptée, sinon un
+ * modèle qui rend deux lots sur trois boucle sans fin ; `false` si épuisées.
  */
 export async function reprendreCeQuiManque(
   jobId: string,
@@ -94,11 +82,7 @@ export async function tentativesEpuisees(jobId: string): Promise<boolean> {
   return !job || job.attempts >= TENTATIVES_MAX;
 }
 
-/**
- * Rend le job à la file, rétréci à `atomIds`, sans toucher au compte de ses
- * tentatives. Rendue sans être attendue, pour pouvoir entrer dans une
- * transaction.
- */
+/** Tentatives inchangées. Non attendue, pour pouvoir entrer dans une transaction. */
 export function remettreEnFile(jobId: string, atomIds: string[], motif: string) {
   return prisma.generationJob.update({
     where: { id: jobId },
@@ -118,15 +102,11 @@ export async function terminerLeJob(
 }
 
 /**
- * Jobs que le cron peut relancer : en file, ou bloqués en cours. Les trois
- * natures y sont : un job de questions dont le déclenchement après réponse s'est
- * perdu (processus recyclé) n'a pas d'autre filet.
- *
- * Une régénération passe toujours après un dépôt, quel que soit son âge :
- * personne ne l'attend, alors qu'un dépôt est quelqu'un devant un écran. À trois
- * jobs par passage toutes les quinze minutes, un lot de régénérations échues
- * devant un dépôt le laisse des heures sans questions. L'ancienneté départage
- * ensuite ; les régénérations ne meurent pas de faim, la file des dépôts se vide.
+ * Les trois natures : un job de questions dont le déclenchement s'est perdu
+ * (processus recyclé) n'a pas d'autre filet. Une régénération passe après tout
+ * dépôt : personne ne l'attend, et à trois jobs par quart d'heure un lot échu
+ * laisserait un dépôt des heures sans questions. Pas de famine : la file des
+ * dépôts se vide.
  */
 export async function trouverLesJobsAReprendre(
   limite: number,
@@ -148,10 +128,7 @@ export async function trouverLesJobsAReprendre(
   });
 }
 
-/**
- * Ferme les jobs bloqués qui ont épuisé leurs tentatives. Sans ça ils
- * resteraient RUNNING pour toujours, jamais repris.
- */
+/** Sans ça, un job bloqué sans tentative restante resterait RUNNING pour toujours. */
 export async function fermerLesJobsEpuises(maintenant: Date = new Date()): Promise<number> {
   const seuilDeBlocage = new Date(maintenant.getTime() - BLOCAGE_APRES_MS);
 
@@ -175,8 +152,7 @@ export async function fermerLesJobsEpuises(maintenant: Date = new Date()): Promi
     },
   });
 
-  // Ces dépôts n'attendent plus rien : sans cette clôture, ils annonceraient un
-  // travail en cours indéfiniment.
+  // Sinon ces dépôts annonceraient un travail en cours indéfiniment.
   for (const inputId of new Set(bloques.map((job) => job.inputId))) {
     await marquerPretSiPlusRienEnAttente(inputId, "Ce dépôt a été interrompu trop de fois.");
   }

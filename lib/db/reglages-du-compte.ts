@@ -1,10 +1,9 @@
 import { prisma } from "@/lib/db/client";
 import type { Langue, UserSettings, UserStats } from "@/lib/db/types";
 
-/** Réglages et compteurs d'un compte. Toujours lus par l'id de session. */
+/** Réglages et compteurs d'un compte, toujours lus par l'id de session. */
 
-/** Un compte sans réglages n'aurait pas dû être créé : les deux sont écrits
- *  dans la même transaction à l'inscription. */
+/** Impossible en principe : compte et réglages naissent dans une même transaction. */
 export class ReglagesIntrouvablesError extends Error {
   readonly code = "REGLAGES_INTROUVABLES";
 
@@ -14,14 +13,12 @@ export class ReglagesIntrouvablesError extends Error {
   }
 }
 
-/** Lecture tolérante, pour les chemins qui savent traiter l'absence (l'envoi
- *  d'email se contente de ne rien envoyer). */
+/** Pour les chemins qui savent traiter l'absence, comme l'envoi d'email. */
 export async function trouverLesReglages(userId: string): Promise<UserSettings | null> {
   return prisma.userSettings.findUnique({ where: { userId } });
 }
 
-/** Lecture stricte, pour les écrans : un réglage par défaut inventé mentirait
- *  sur l'état du compte. */
+/** Stricte : un réglage par défaut inventé mentirait sur l'état du compte. */
 export async function lireReglages(userId: string): Promise<UserSettings> {
   const reglages = await trouverLesReglages(userId);
 
@@ -30,10 +27,7 @@ export async function lireReglages(userId: string): Promise<UserSettings> {
   return reglages;
 }
 
-/**
- * Le fuseau de l'utilisateur, sans repli sur « UTC » : mieux vaut signaler un
- * compte cassé qu'afficher une échéance fausse.
- */
+/** Sans repli sur UTC : mieux vaut un compte cassé signalé qu'une échéance fausse. */
 export async function lireFuseauUtilisateur(userId: string): Promise<string> {
   const reglages = await prisma.userSettings.findUnique({
     where: { userId },
@@ -45,10 +39,7 @@ export async function lireFuseauUtilisateur(userId: string): Promise<string> {
   return reglages.timezone;
 }
 
-/**
- * Le fuseau et le plafond de session, lus ensemble : la session et le tableau
- * de bord les demandent toujours tous les deux.
- */
+/** Lus ensemble : session et tableau de bord demandent toujours les deux. */
 export type CadreDeSession = { fuseau: string; plafond: number };
 
 export async function lireCadreDeSession(userId: string): Promise<CadreDeSession> {
@@ -66,7 +57,7 @@ export async function trouverLesCompteurs(userId: string): Promise<UserStats | n
   return prisma.userStats.findUnique({ where: { userId } });
 }
 
-/** Écrit le fuseau détecté côté client. Sans effet s'il n'a pas changé. */
+/** Le fuseau détecté côté client. */
 export async function poserLeFuseau(userId: string, timezone: string): Promise<void> {
   await prisma.userSettings.update({
     where: { userId },
@@ -74,10 +65,7 @@ export async function poserLeFuseau(userId: string, timezone: string): Promise<v
   });
 }
 
-/**
- * Note que le principe de l'entraînement libre a été expliqué. N'écrit que si
- * la date est vide : c'est le premier passage qui compte.
- */
+/** N'écrit que si la date est vide : c'est le premier passage qui compte. */
 export async function marquerPrincipeVu(userId: string, quand: Date = new Date()): Promise<void> {
   await prisma.userSettings.updateMany({
     where: { userId, trainingIntroSeenAt: null },
@@ -86,23 +74,19 @@ export async function marquerPrincipeVu(userId: string, quand: Date = new Date()
 }
 
 /**
- * Ce qu'un compte peut changer depuis ses réglages : le plafond de session et
- * les notifications. Le fuseau se détecte, l'adresse est l'identité du compte.
- * Tout s'écrit d'un coup, pour ne jamais laisser un état à moitié appliqué.
+ * Le fuseau se détecte, l'adresse est l'identité du compte. Tout s'écrit d'un
+ * coup, jamais à moitié appliqué.
  */
 export type ReglagesModifiables = {
-  /** Concepts au plus dans une session. Ce qui déborde revient le lendemain. */
+  /** Ce qui déborde revient le lendemain. */
   sessionCap: number;
   dailyReminderEnabled: boolean;
-  /** Heure locale, 0 à 23. Le passage horaire la compare à l'heure de chacun. */
+  /** Heure locale, 0 à 23, comparée à l'heure de chacun par le passage horaire. */
   dailyReminderHour: number;
   streakAlertEnabled: boolean;
 };
 
-/**
- * Enregistre les réglages modifiables d'un compte. `updateMany` pour rendre
- * `false` quand aucune ligne n'existe, là où `update` lèverait.
- */
+/** `updateMany` rend `false` sans ligne, là où `update` lèverait. */
 export async function enregistrerLesReglages(
   userId: string,
   reglages: ReglagesModifiables,
@@ -112,10 +96,7 @@ export async function enregistrerLesReglages(
   return count > 0;
 }
 
-/**
- * Rend les emails à quelqu'un qui les avait coupés. `couperLesEmails` éteint
- * aussi le rappel et l'alerte de série ; on ne les rallume pas à sa place.
- */
+/** Rappel et alerte de série, éteints par `couperLesEmails`, ne se rallument pas à sa place. */
 export async function reprendreLesEmails(userId: string): Promise<boolean> {
   const { count } = await prisma.userSettings.updateMany({
     where: { userId },
@@ -125,10 +106,7 @@ export async function reprendreLesEmails(userId: string): Promise<boolean> {
   return count > 0;
 }
 
-/**
- * Coupe les emails. Appelé par le lien de désinscription, qui ne demande pas de
- * session : le jeton signé du lien fait foi.
- */
+/** Appelé par le lien de désinscription, sans session : son jeton signé fait foi. */
 export async function couperLesEmails(userId: string, quand: Date = new Date()): Promise<void> {
   await prisma.userSettings.update({
     where: { userId },
@@ -136,10 +114,7 @@ export async function couperLesEmails(userId: string, quand: Date = new Date()):
   });
 }
 
-/**
- * Note que l'espacement a été expliqué, à la fin de la première session. Même
- * écriture conditionnelle que `marquerPrincipeVu`.
- */
+/** À la fin de la première session ; même écriture conditionnelle que `marquerPrincipeVu`. */
 export async function marquerEspacementVu(userId: string, quand: Date = new Date()): Promise<void> {
   await prisma.userSettings.updateMany({
     where: { userId, spacingIntroSeenAt: null },
@@ -147,10 +122,7 @@ export async function marquerEspacementVu(userId: string, quand: Date = new Date
   });
 }
 
-/**
- * La langue de la personne, sans repli : un dépôt généré dans une langue
- * inventée reste figé.
- */
+/** Sans repli : un dépôt généré dans une langue inventée reste figé. */
 export async function lireLangueUtilisateur(userId: string): Promise<Langue> {
   const reglages = await prisma.userSettings.findUnique({
     where: { userId },
@@ -162,7 +134,7 @@ export async function lireLangueUtilisateur(userId: string): Promise<Langue> {
   return reglages.langue;
 }
 
-/** La langue du compte. Rien de ce qui est déjà déposé ne change avec elle. */
+/** Rien de ce qui est déjà déposé ne change avec elle. */
 export async function changerDeLangue(userId: string, langue: Langue): Promise<boolean> {
   const { count } = await prisma.userSettings.updateMany({ where: { userId }, data: { langue } });
 

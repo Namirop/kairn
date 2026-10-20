@@ -2,14 +2,13 @@ import { prisma } from "@/lib/db/client";
 import { debutEnDate, periodeDeQuota, type PeriodeDeQuota } from "@/lib/domain/periode-de-quota";
 
 /**
- * Où en est un compte dans sa période. Lecture seule : ce qui prend et rend des
- * places vit dans `quota-depots.ts`, et les écrans qui lisent ici ne peuvent pas
- * écrire par accident.
+ * Lecture seule : prendre et rendre vit dans `quota-depots.ts`, et les écrans
+ * qui lisent ici ne peuvent pas écrire par accident.
  */
 
 /**
- * La période en cours, ancrée à l'inscription. Un compte supprimé entre deux
- * requêtes ancre sur maintenant : il n'obtiendra rien, autant ne pas lever.
+ * Ancrée à l'inscription. Un compte supprimé entre-temps ancre sur maintenant :
+ * il n'obtiendra rien, autant ne pas lever.
  */
 export async function periodeDuCompte(
   userId: string,

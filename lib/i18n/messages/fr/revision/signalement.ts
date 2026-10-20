@@ -1,7 +1,4 @@
-/**
- * Signaler une question : ce que la personne pense au moment où elle clique,
- * pas ce que le système fait de son clic.
- */
+/** Les motifs disent ce que la personne pense en cliquant, pas ce que le système en fait. */
 export const signalement = {
   declencheur: "Cette question ne va pas",
   titre: "Qu'est-ce qui ne va pas ?",

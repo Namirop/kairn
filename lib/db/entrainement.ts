@@ -6,27 +6,18 @@ import { questionServable } from "@/lib/domain/question-servable";
 import { apresLePassage } from "@/lib/domain/rotation-variantes";
 import { composerEntrainement, QUESTIONS_PAR_TOUR } from "@/lib/domain/selection-entrainement";
 
-/**
- * Concepts lus pour composer un tour : dix fois ce qu'un tour sert, de quoi
- * alterner les sujets sans que la lecture grandisse avec le corpus.
- */
+/** Dix fois un tour : de quoi alterner les sujets sans lire tout le corpus. */
 const CONCEPTS_PAR_TOUR = 120;
 
 /**
- * L'entraînement libre : lire un tour de questions, écrire un passage.
- *
- * Rien ici ne touche à la mémoire (échéance, stabilité, difficulté, état,
- * carte ts-fsrs). C'est volontairement un fichier à part de `revision.ts` : ne
- * pas fusionner les deux derrière un drapeau, une ligne oubliée suffirait à
- * laisser l'entraînement déplacer une échéance.
+ * Rien ici ne touche à la mémoire. À part de `revision.ts` exprès : fusionnés
+ * derrière un drapeau, une ligne oubliée laisserait l'entraînement déplacer une
+ * échéance.
  */
 
 /**
- * Un tour de questions tirées des concepts de cette personne, échus ou non.
- *
- * Seuls les concepts sortis du cycle par l'utilisateur sont exclus. L'archivage
- * automatique (`ARCHIVED`) reste : l'exclure retirerait de l'entraînement ce
- * qu'on croit le mieux savoir.
+ * Échus ou non. L'archivage automatique (`ARCHIVED`) reste : l'exclure
+ * retirerait ce qu'on croit le mieux savoir. Seul l'archivage déclaré sort.
  */
 export async function lireTourDentrainement(
   userId: string,
@@ -39,9 +30,7 @@ export async function lireTourDentrainement(
       archivedByUser: false,
       variants: { some: { retiredAt: null } },
     },
-    // Le moins récemment entraîné d'abord : chaque passage horodate son concept
-    // (`trainedAt`), ce qui fait tourner la fenêtre sur un corpus plus grand
-    // qu'elle.
+    // `trainedAt` fait tourner la fenêtre sur un corpus plus grand qu'elle.
     orderBy: { trainedAt: { sort: "asc", nulls: "first" } },
     take: CONCEPTS_PAR_TOUR,
     select: {
@@ -66,8 +55,7 @@ export async function lireTourDentrainement(
     },
   });
 
-  // Même filet que dans la session : une formulation sans texte ni réponse
-  // s'afficherait en carte blanche. Voir `question-servable.ts`.
+  // Même filet qu'en session : sans texte ni réponse, une carte blanche.
   const posables = concepts.map((concept) => ({
     ...concept,
     variants: concept.variants.filter(questionServable),
@@ -106,13 +94,9 @@ export type PassageDentrainement = {
 };
 
 /**
- * Écrit un passage d'entraînement.
- *
- * Rend `false` quand le concept n'est pas à cette personne, ou que la question
- * ne porte pas sur lui : les identifiants viennent du client.
- *
- * `stabilityBefore` et `stabilityAfter` recopient la stabilité du moment : un
- * zéro ferait croire, dans l'historique, à un effondrement.
+ * `false` si le concept n'est pas le sien ou la question pas la sienne : les
+ * identifiants viennent du client. Stabilité recopiée avant et après : un zéro
+ * ferait croire à un effondrement dans l'historique.
  */
 export async function enregistrerEntrainement(
   passage: PassageDentrainement,
@@ -124,8 +108,7 @@ export async function enregistrerEntrainement(
       id: true,
       inputId: true,
       stability: true,
-      // Retirées comprises : une question retirée pendant qu'on y répondait
-      // reste une question à laquelle on a répondu.
+      // Retirées comprises : retirée en cours de réponse, elle a été répondue.
       variants: {
         select: {
           id: true,
@@ -164,13 +147,12 @@ export async function enregistrerEntrainement(
       where: { id: variante.id },
       data: { trainingCount: { increment: 1 }, lastTrainedAt: maintenant },
     }),
-    // Le curseur de rotation des tours, et rien d'autre : aucune échéance ne le lit.
+    // Curseur de rotation des tours ; aucune échéance ne le lit.
     prisma.atom.update({ where: { id: atome.id }, data: { trainedAt: maintenant } }),
   ]);
 
-  // Les questions s'usent d'être lues, quel que soit le mode : c'est du
-  // renouvellement de stock, pas de la planification, et il est plafonné à une
-  // régénération par concept et par semaine.
+  // L'usure vaut en tout mode : c'est du stock, pas de la planification,
+  // plafonné à une régénération par concept et par semaine.
   await regenererSiUsees(atome, apresLePassage(actives, variante.id, "TRAINING"), maintenant);
 
   return true;

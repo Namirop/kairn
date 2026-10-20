@@ -9,26 +9,22 @@ import { tagsSansReponse } from "@/lib/domain/tags-sans-reponse";
 import { phraseSansDevoilement } from "@/lib/domain/trou-devoile";
 
 /**
- * Une question telle qu'un écran la reçoit, quel que soit le mode. Session,
- * entraînement et vitrine de l'essai lisent le `payload` ici et nulle part
- * ailleurs : deux lectures finiraient par diverger.
+ * Une question telle qu'un écran la reçoit. Session, entraînement et vitrine
+ * lisent le `payload` ici seulement : deux lectures finiraient par diverger.
  */
 
-/** Les options d'un QCM, telles que la génération les a écrites. */
 const PAYLOAD_CHOIX = z.object({
   options: z.array(z.string()).min(2),
   correctIndex: z.number().int().min(0),
 });
 
-/** Ce qu'un vrai ou faux pose à côté de sa question, quand il pose quelque chose. */
+/** Facultatif : un vrai ou faux peut ne rien porter. */
 const PAYLOAD_VRAI_FAUX = z.object({ expected: z.boolean() });
 
-/** La phrase trouée, les formes acceptées, et les leurres du coup de pouce. */
 const PAYLOAD_CLOZE = z.object({
   sentence: z.string().min(1),
   accepted: z.array(z.string().min(1)).min(1),
-  // Une question peut ne pas en porter : le tableau vide est une valeur
-  // normale, et l'écran n'offre alors aucune aide.
+  // Les leurres du coup de pouce ; vide, l'écran n'offre aucune aide.
   leurres: z.array(z.string().min(1)).default([]),
 });
 
@@ -54,18 +50,11 @@ export type QuestionServie = {
   options: string[] | null;
   correctIndex: number | null;
   cloze: { sentence: string; accepted: string[]; leurres: string[] } | null;
-  /**
-   * Depuis combien de jours civils ce concept n'avait pas été reposé. Nul à la
-   * première fois, et nul en entraînement, qui ne touche pas au cycle.
-   */
+  /** En jours civils ; nul la première fois et en entraînement, hors du cycle. */
   vuIlYaJours: number | null;
 };
 
-/**
- * L'écart entre le dernier passage et maintenant, en jours civils de
- * l'utilisateur : dix heures qui traversent minuit font un jour, comme pour la
- * planification.
- */
+/** En jours civils de l'utilisateur, comme la planification : minuit franchi fait un jour. */
 function ecartDepuis(
   lastReview: Date | null | undefined,
   repere: { maintenant: Date; fuseau: string } | undefined,
@@ -81,11 +70,9 @@ function ecartDepuis(
 }
 
 /**
- * Les choix à proposer, ou `null` si la question doit repartir en format ouvert.
- *
- * Un vrai ou faux ne porte pas d'options en base : le domaine les reconstruit,
- * sans quoi il tomberait en format ouvert et l'utilisateur devrait se juger sur
- * une réponse pourtant connue.
+ * `null` : la question repart en format ouvert. Un vrai ou faux n'a pas
+ * d'options en base ; le domaine les reconstruit, sinon l'utilisateur se
+ * jugerait seul sur une réponse pourtant connue.
  */
 function lireChoix(
   format: VariantFormat,
@@ -103,20 +90,15 @@ function lireChoix(
   const lu = PAYLOAD_CHOIX.safeParse(payload);
 
   if (!lu.success) return null;
-  // Un index hors des options viendrait d'une génération abîmée : mieux vaut
-  // servir la question sans ses choix que proposer une bonne réponse fausse.
+  // Génération abîmée : mieux vaut aucun choix qu'une bonne réponse fausse.
   if (lu.data.correctIndex >= lu.data.options.length) return null;
-  // Des propositions identiques (abrégées en « ... », par exemple) ne se
-  // choisissent pas. Voir `optionsDistinguables`.
+  // Des propositions identiques (abrégées en « ... ») ne se choisissent pas.
   if (!optionsDistinguables(lu.data.options)) return null;
 
   return lu.data;
 }
 
-/**
- * Les seules options d'un QCM, pour la vitrine de l'essai : `correctIndex` ne
- * descend pas au client.
- */
+/** Pour la vitrine de l'essai : `correctIndex` ne descend pas au client. */
 export function optionsDUnQCM(format: VariantFormat, payload: unknown): string[] | null {
   if (format !== "MCQ") return null;
 
@@ -126,14 +108,9 @@ export function optionsDUnQCM(format: VariantFormat, payload: unknown): string[]
 }
 
 /**
- * Le texte à trou, ou `null` si le format n'en est pas un — ou si sa phrase est
- * illisible, auquel cas la question repart en format ouvert plutôt que de poser
- * un champ de saisie que rien ne pourra vérifier.
- *
- * Deux réparations à la lecture, pour rattraper aussi les questions déjà
- * écrites, dans cet ordre : `trouSansRedite` rogne le terme qui redit un mot
- * posé contre le trou, puis `phraseSansDevoilement` masque ce qui en reste
- * partout où la phrase le réécrit en clair.
+ * Phrase illisible : `null`, la question repart en format ouvert plutôt que
+ * d'offrir une saisie invérifiable. Réparé à la lecture, pour couvrir les
+ * questions déjà écrites, et dans cet ordre : rogner la redite, puis masquer.
  */
 export function texteATrouServi(format: VariantFormat, payload: unknown): QuestionServie["cloze"] {
   if (format !== "CLOZE") return null;
@@ -141,8 +118,7 @@ export function texteATrouServi(format: VariantFormat, payload: unknown): Questi
   const lu = PAYLOAD_CLOZE.safeParse(payload);
 
   if (!lu.success) return null;
-  // Une phrase sans trou n'est pas un texte à trou : l'écran poserait un champ
-  // de saisie sous une phrase entière, et rien n'y manquerait.
+  // Sans trou, l'écran poserait une saisie sous une phrase à qui rien ne manque.
   if (!lu.data.sentence.includes(TROU)) return null;
 
   const rogne = trouSansRedite(lu.data);
@@ -153,7 +129,7 @@ export function texteATrouServi(format: VariantFormat, payload: unknown): Questi
 export function questionServie(
   concept: { id: string; concept: string; tags: string[]; lastReview?: Date | null },
   variante: VarianteEnBase,
-  /** L'instant et le fuseau, quand l'écran dit depuis quand le concept dormait. */
+  /** Quand l'écran dit depuis quand le concept dormait. */
   repere?: { maintenant: Date; fuseau: string },
 ): QuestionServie {
   const choix = lireChoix(variante.format, variante.payload, variante.answerKey);
@@ -162,9 +138,8 @@ export function questionServie(
   return {
     atomId: concept.id,
     concept: concept.concept,
-    // Les étiquettes qui donnent la réponse sont cachées ici, seul endroit qui
-    // sait à la fois ce qu'on affiche et ce qu'on attend. Le concept garde les
-    // siennes pour le classement et l'alternance des sujets.
+    // Filtré ici, seul endroit qui sait ce qu'on affiche et ce qu'on attend.
+    // Le concept garde les siennes pour le classement et l'alternance.
     tags: tagsSansReponse(concept.tags, [
       variante.answerKey,
       choix ? choix.options[choix.correctIndex] : null,

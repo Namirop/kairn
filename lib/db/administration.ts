@@ -2,23 +2,16 @@ import { lireLaDepenseDuJour, type BlocDepense } from "@/lib/db/administration-d
 import { prisma } from "@/lib/db/client";
 import { debutDuJourUtc, ilYA } from "@/lib/domain/fenetre-utc";
 
-/**
- * Les chiffres de l'écran d'administration, en lecture seule. Tout est daté en
- * UTC : deux calendriers sur un même écran rendraient les lignes incomparables.
- * La dépense vit dans `administration-depense.ts`.
- */
+/** Tout en UTC : deux calendriers sur un écran rendraient les lignes incomparables. */
 
-/**
- * Nombre de jours montrés par les séries et les tableaux. Une seule fenêtre
- * pour tous, sinon deux séries côte à côte se comparent à tort.
- */
+/** Une seule fenêtre pour tous, sinon deux séries côte à côte se comparent à tort. */
 export const JOURS_MONTRES = 14;
 
 export type BlocComptes = {
   total: number;
   nouveaux7j: number;
   nouveaux30j: number;
-  /** Comptes ayant fait au moins un passage dans la fenêtre. */
+  /** Au moins un passage dans la fenêtre. */
   actifs7j: number;
   actifs30j: number;
   seriesEnCours: number;
@@ -35,7 +28,7 @@ export type LigneDeJour = {
 
 export type BlocSignalements = {
   total: number;
-  /** Ce qui est arrivé dans la fenêtre, seule mesure qui dise si ça s'aggrave. */
+  /** Seule mesure qui dise si ça s'aggrave. */
   sur7j: number;
 };
 
@@ -57,11 +50,8 @@ type LigneDeComptes = {
 };
 
 /**
- * « Actif » se lit sur les passages et non sur la connexion : ouvrir l'écran
- * ne dit pas qu'on se sert du produit.
- *
- * `Review` n'a pas de `createdAt` : le passage est daté par `reviewedAt`, que
- * couvre l'index `[userId, reviewedAt]`.
+ * « Actif » se lit sur les passages : ouvrir l'écran n'est pas se servir du
+ * produit. `Review` se date par `reviewedAt` (index `[userId, reviewedAt]`).
  */
 export async function lireLesComptes(maintenant: Date = new Date()): Promise<BlocComptes> {
   const sept = ilYA(maintenant, 7);
@@ -91,10 +81,7 @@ export async function lireLesComptes(maintenant: Date = new Date()): Promise<Blo
 
 type LigneDeVolume = { jour: string; depots: number; concepts: number };
 
-/**
- * Les jours sont engendrés par la base (`generate_series`) plutôt que déduits
- * des lignes trouvées : un jour sans dépôt doit apparaître à zéro.
- */
+/** `generate_series` plutôt que les lignes trouvées : un jour vide apparaît à zéro. */
 export async function lireLesVolumes(maintenant: Date = new Date()): Promise<LigneDeJour[]> {
   const premier = debutDuJourUtc(ilYA(maintenant, JOURS_MONTRES - 1));
   const dernier = debutDuJourUtc(maintenant);
@@ -118,10 +105,7 @@ export async function lireLesVolumes(maintenant: Date = new Date()): Promise<Lig
   }));
 }
 
-/**
- * Combien de questions ont été signalées, et combien récemment : la liste dit
- * lesquelles, pas si le rythme s'emballe (un prompt qui vient de casser).
- */
+/** La liste dit lesquelles, pas si le rythme s'emballe (un prompt qui vient de casser). */
 export async function compterLesSignalements(
   maintenant: Date = new Date(),
 ): Promise<BlocSignalements> {

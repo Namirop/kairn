@@ -2,29 +2,21 @@ import { prisma } from "@/lib/db/client";
 import { jourLocal } from "@/lib/domain/jour-local";
 
 /**
- * La limite de débit des gestes de révision (répondre, s'entraîner, demander un
- * tour) : ils ne coûtent aucun appel modèle, mais écrivent en base, et une
- * boucle côté client n'aurait rien devant elle. Elle protège le serveur à la
- * minute.
- *
- * Même mécanisme que la fenêtre des dépôts : la fenêtre vit sur la ligne qu'on
- * verrouille, pour que compter et refuser tiennent dans une seule instruction.
+ * Les gestes de révision ne coûtent aucun appel mais écrivent en base : sans
+ * limite, une boucle côté client n'aurait rien devant elle. Comme pour les
+ * dépôts, la fenêtre vit sur la ligne verrouillée : compter et refuser tiennent
+ * en une instruction.
  */
 
-/** Fenêtre courte, et ce qu'on y tolère. */
 export const FENETRE_GESTES_SECONDES = 60;
 
 /**
- * Large à dessein : une session plafonne à vingt questions par défaut et un tour
- * à douze. Personne n'approche ce chiffre au clavier, une boucle le franchit à
- * la première seconde.
+ * Large à dessein (session de vingt par défaut, tour de douze) : personne ne
+ * l'approche au clavier, une boucle le franchit à la première seconde.
  */
 export const GESTES_PAR_FENETRE = 120;
 
-/**
- * Prend une place dans la fenêtre des gestes, ou la refuse. La ligne est celle
- * du jour local de l'utilisateur ; la fenêtre, elle, glisse.
- */
+/** La ligne est celle du jour local ; la fenêtre, elle, glisse. */
 export async function prendreUnGeste(
   userId: string,
   fuseau: string,

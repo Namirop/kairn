@@ -8,19 +8,11 @@ import { jourLocal } from "@/lib/domain/jour-local";
 import { choisirLesRappelsDus } from "@/lib/domain/selection-des-rappels";
 
 /**
- * Les envois du passage horaire : rappel quotidien et alerte de série.
- *
- * Les fonctions pures tranchent qui est à l'heure ; `envoyerLaNotification` vérifie
- * en dernier le refus d'emails et le réglage du type, et aucun chemin ne le
- * contourne. `EmailDelivery` (clé compte, type, jour local) empêche un second
- * envoi le même jour, même si le passage est rejoué.
+ * `envoyerLaNotification` vérifie en dernier refus et réglage ; `EmailDelivery`
+ * (compte, type, jour local) empêche un second envoi même si le passage est rejoué.
  */
 
-/**
- * Le rappel quotidien, pour ceux dont l'heure locale est arrivée. Un compte
- * sans rien à revoir ne reçoit rien : un rappel qui n'annonce rien apprend à ne
- * plus ouvrir les suivants.
- */
+/** Rien à revoir, rien d'envoyé : un rappel vide apprend à ne plus ouvrir les suivants. */
 export async function envoyerLesRappels(maintenant: Date = new Date()): Promise<Passage> {
   const candidats = await trouverLesDestinataires();
   const alHeure = choisirLesRappelsDus(candidats, maintenant);
@@ -51,12 +43,7 @@ export async function envoyerLesRappels(maintenant: Date = new Date()): Promise<
   return resultat;
 }
 
-/**
- * L'alerte de série, pour ceux qui vont perdre la leur ce soir : l'heure est
- * venue, la série est en sursis, et il reste quelque chose de dû. Sans rien de
- * dû, la série casse quoi qu'on fasse ; l'alerte se tait plutôt que d'annoncer
- * l'inévitable.
- */
+/** Sans rien de dû, la série casse quoi qu'on fasse : l'alerte se tait. */
 export async function envoyerLesAlertesDeStreak(maintenant: Date = new Date()): Promise<Passage> {
   const candidats = await trouverLesDestinataires("STREAK_ALERT");
   const alHeure = candidats

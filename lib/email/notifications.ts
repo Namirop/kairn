@@ -20,17 +20,9 @@ import {
 import { creerLeJetonDeDesinscription } from "./desinscription";
 
 /**
- * Point d'entrée unique des notifications, par email. Le refus de
- * l'utilisateur est vérifié ici, pas chez l'appelant : aucun chemin ne peut le
- * contourner.
- *
- * Le rappel, l'alerte de série et la relance partent du passage horaire ;
- * l'accueil part du hook d'inscription. L'unicité de l'accueil et de la relance
- * est garantie chez l'appelant (pour la relance, une lecture d'`EmailDelivery`
- * sur le type, sans condition de jour).
- *
- * Le lien de connexion ne passe pas par ici : transactionnel, il doit partir
- * même à qui a coupé ses emails (`connexion.ts`).
+ * Point d'entrée unique des notifications : le refus d'emails se vérifie ici, où
+ * aucun chemin ne le contourne. L'unicité de l'accueil et de la relance est
+ * garantie chez l'appelant. Le code de connexion passe à côté (`connexion.ts`).
  */
 
 export type Notification =
@@ -48,13 +40,8 @@ export type IssueDeNotification =
 type Liens = { lienDeSession: string; lienDeDepot: string; lienDeDesinscription: string };
 
 /**
- * Le réglage qui gouverne ce type-là.
- *
- * Une table plutôt qu'un ternaire : un type ajouté sans sa ligne ne compile
- * pas, au lieu d'hériter d'un interrupteur qui ne le concerne pas.
- *
- * L'accueil et la relance n'ont pas d'interrupteur, puisqu'on les reçoit une
- * fois ; le refus global, vérifié avant, les arrête comme les autres.
+ * Une table : un type ajouté sans sa ligne ne compile pas. Accueil et relance,
+ * reçus une fois, n'ont que le refus global.
  */
 function estActive(
   type: TypeDeNotification,
@@ -70,7 +57,6 @@ function estActive(
   return gouverne[type];
 }
 
-/** L'email est écrit dans la langue du compte, celle de son interface. */
 function composer(notification: Notification, liens: Liens, langue: Langue): EmailRendu {
   switch (notification.type) {
     case "DAILY_REMINDER":
@@ -114,8 +100,7 @@ export async function envoyerLaNotification(
     subject: email.subject,
     html: email.html,
     text: email.text,
-    // Désabonnement en un clic (RFC 8058) : sans ces en-têtes, Gmail range
-    // plus volontiers l'envoi en indésirable.
+    // RFC 8058 : sans ces en-têtes, Gmail range plus volontiers en indésirable.
     headers: {
       "List-Unsubscribe": `<${lienDeDesinscription}>`,
       // i18n-ignore — valeur d'en-tête fixée par la RFC 8058.

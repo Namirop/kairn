@@ -2,13 +2,10 @@ import { ROUTES } from "@/lib/auth/routes";
 import type { Langue } from "@/lib/db/types";
 
 /**
- * Les adresses qui portent leur langue : seulement les pages publiques, celles
- * qu'on partage et qu'un moteur indexe. L'application suit le réglage du
- * compte.
- *
- * `/en` est servi par le proxy à la même page — il n'y a pas de dossier
- * `en/` dans `app/`. Le français n'a pas de préfixe ; `/fr` ne fait que poser le
- * choix avant d'y renvoyer.
+ * Seules les pages publiques (partagées, indexées) portent leur langue dans
+ * l'adresse ; l'application suit le réglage du compte. Le proxy sert `/en` sur
+ * la même page, sans dossier `en/` dans `app/`. Le français n'a pas de
+ * préfixe : `/fr` pose le choix puis y renvoie.
  */
 export const PAGES_PUBLIQUES: readonly string[] = [
   ROUTES.accueil,
@@ -24,7 +21,7 @@ export function estPagePublique(chemin: string): boolean {
   return PAGES_PUBLIQUES.includes(chemin);
 }
 
-/** L'adresse d'une page publique dans une langue : `/tarifs` → `/en/tarifs`. */
+/** `/tarifs` → `/en/tarifs`. */
 export function adressePublique(chemin: string, langue: Langue): string {
   if (langue === "FR") return chemin;
 
@@ -34,10 +31,7 @@ export function adressePublique(chemin: string, langue: Langue): string {
 /** Posé par le proxy : la page publique servie, sans son préfixe de langue. */
 export const EN_TETE_DU_CHEMIN = "x-kairn-chemin";
 
-/**
- * Les deux versions d'une page publique, pour `alternates.languages` : un
- * moteur sert alors à chacun la sienne au lieu de les tenir pour un doublon.
- */
+/** Pour `alternates.languages` : sans quoi un moteur tient les deux pour un doublon. */
 export function versionsDeLaPage(chemin: string): Record<string, string> {
   return {
     fr: adressePublique(chemin, "FR"),

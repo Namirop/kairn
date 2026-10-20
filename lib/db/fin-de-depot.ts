@@ -3,22 +3,15 @@ import { rendreDepot } from "@/lib/db/quota-depots";
 import { lireFuseauUtilisateur } from "@/lib/db/reglages-du-compte";
 
 /**
- * Comment un dépôt s'arrête, et qui paie quand il s'arrête mal. Trois fins à ne
- * pas confondre : **rejeté** (rien à retenir, la place du dépôt est due),
- * **en panne** (l'utilisateur n'y est pour rien, sa place lui revient),
- * **prêt** (il a ses concepts, même si des questions manquent).
+ * Trois fins : **rejeté** (rien à retenir, la place est due), **en panne**
+ * (pas du fait de l'utilisateur, sa place lui revient), **prêt** (il a ses
+ * concepts, même s'il manque des questions).
  */
 
 /**
- * Le dépôt s'arrête sur une panne — timeout, sortie illisible, plafond du
- * produit — et sa place de la période lui est rendue : il n'est pas l'auteur de
- * l'incident.
- *
- * La transition est conditionnelle : un dépôt déjà arrêté ne se rembourse pas
- * deux fois, même si un autre chemin l'a déjà arrêté.
- *
- * À réserver aux vraies casses : ce que le contenu ne porte pas (une URL nue)
- * relève de `marquerRejet`, sinon on annonce une panne du produit.
+ * Timeout, sortie illisible, plafond du produit : la place est rendue.
+ * Transition conditionnelle, pour ne pas rembourser deux fois. Un contenu vide
+ * (une URL nue) relève de `marquerRejet`, sinon on annonce une panne du produit.
  */
 export async function marquerEchec(inputId: string, motif: string): Promise<void> {
   const { count } = await prisma.input.updateMany({
@@ -30,12 +23,9 @@ export async function marquerEchec(inputId: string, motif: string): Promise<void
 }
 
 /**
- * Rend à la période la place qu'un dépôt en panne avait prise.
- *
- * La période se recalcule à cet instant. Si la panne survient après la bascule
- * de période, le remboursement tombe sur une période où rien n'a été pris et la
- * clause `deposits > 0` de `rendreDepot` le laisse sans effet : on rate un
- * remboursement plutôt que d'en accorder un faux.
+ * Période recalculée maintenant : après une bascule, `deposits > 0` dans
+ * `rendreDepot` annule le geste. Mieux vaut rater un remboursement qu'en
+ * accorder un faux.
  */
 async function rembourserLaPlace(inputId: string): Promise<void> {
   const depot = await prisma.input.findUnique({
@@ -49,12 +39,7 @@ async function rembourserLaPlace(inputId: string): Promise<void> {
   await rendreDepot(depot.userId, await lireFuseauUtilisateur(depot.userId));
 }
 
-/**
- * La chaîne a lu le dépôt et n'y a rien trouvé à retenir.
- *
- * Le motif vient du modèle et dit ce qui manquait : c'est ce qui apprend à mieux
- * déposer. Ne pas l'écraser par une phrase générique.
- */
+/** Le motif du modèle dit ce qui manquait et apprend à mieux déposer : ne pas le généraliser. */
 export async function marquerRejet(inputId: string, motif: string): Promise<void> {
   await prisma.input.update({
     where: { id: inputId },
@@ -63,11 +48,8 @@ export async function marquerRejet(inputId: string, motif: string): Promise<void
 }
 
 /**
- * Clôt le dépôt quand plus aucun job n'est en attente.
- *
- * Appelée à la fin de chaque travail, réussi ou non : c'est le seul endroit qui
- * décide qu'un dépôt cesse d'annoncer un travail en cours. Le motif ne sert que
- * si le dépôt s'arrête sans un seul concept.
+ * Appelée à la fin de chaque travail : seul endroit qui décide qu'un dépôt
+ * cesse d'annoncer un travail en cours. Le motif ne sert que sans concept.
  */
 export async function marquerPretSiPlusRienEnAttente(
   inputId: string,
@@ -79,9 +61,8 @@ export async function marquerPretSiPlusRienEnAttente(
 
   if (restants > 0) return false;
 
-  // Un dépôt déjà arrêté ne se rouvre pas : le découpage marque lui-même le
-  // rejet puis termine son job normalement, et sans cette garde la clôture
-  // effacerait le motif et rendrait le dépôt « prêt » sans un concept.
+  // Le découpage marque lui-même le rejet puis finit son job : sans cette
+  // garde, la clôture effacerait le motif et rendrait « prêt » un dépôt vide.
   const depot = await prisma.input.findUnique({ where: { id: inputId }, select: { status: true } });
 
   if (depot?.status === "FAILED" || depot?.status === "REJECTED") return false;
@@ -90,10 +71,8 @@ export async function marquerPretSiPlusRienEnAttente(
   const concepts = await prisma.atom.count({ where: { inputId } });
 
   // Des questions manquantes ne condamnent pas un dépôt qui a ses concepts.
-  //
-  // Les octets de l'image partent quoi qu'il arrive : `enregistrerTexteLu` et
-  // `oublierImage` ne couvrent que les lectures allées au bout. Si l'appel lève
-  // ou si le job est abandonné, c'est ici seulement que la capture s'efface.
+  // L'image s'efface ici quoi qu'il arrive : `enregistrerTexteLu` et
+  // `oublierImage` ne couvrent que les lectures allées au bout.
   const enPanne = enEchec > 0 && concepts === 0;
 
   await prisma.input.update({
@@ -107,7 +86,7 @@ export async function marquerPretSiPlusRienEnAttente(
     },
   });
 
-  // La garde ci-dessus a écarté un dépôt déjà arrêté : on ne rembourse qu'une fois.
+  // Un dépôt déjà arrêté a été écarté plus haut : un seul remboursement.
   if (enPanne) await rembourserLaPlace(inputId);
 
   return true;

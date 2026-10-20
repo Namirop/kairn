@@ -2,32 +2,22 @@ import sharp from "sharp";
 import { BORD_LONG_CAPTURE, TAILLE_MAXIMALE_OCTETS } from "@/lib/depots/bornes-du-depot";
 
 /**
- * Ce qu'on accepte d'une capture, et ce qu'on en fait avant de l'envoyer.
- *
- * Le type se décide par le décodeur, jamais par l'extension ni le type annoncé,
- * qui se falsifient.
- *
- * La réduction double celle du navigateur (`reduireLaCapture`) : ce qui arrive
- * ici n'a pas forcément vu de navigateur (partage du système, outil interne).
+ * Le type se décide au décodeur, jamais à l'extension ni au type annoncé, qui se
+ * falsifient. La réduction double celle du navigateur : un partage du système
+ * n'en a pas vu.
  */
 
 const FORMATS_LISIBLES = new Set(["jpeg", "png", "webp", "gif"]);
 
 /**
- * Le plafond de pixels d'une image décodée. Quatre mégaoctets de PNG peuvent
- * annoncer 16 384 × 16 384 pixels, soit un gigaoctet une fois décodés. Une
- * capture de téléphone en fait moins de 4 millions, et le navigateur réduit
- * avant l'envoi : 50 millions laisse passer toute photo qui tient sous 4 Mo.
+ * 4 Mo de PNG peuvent annoncer 16 384² pixels, un gigaoctet décodé. Une capture
+ * de téléphone fait moins de 4 millions : 50 laisse passer toute photo sous 4 Mo.
  */
 const PIXELS_MAXIMUM = 50_000_000;
 
 export type CaptureLue = { donnees: Uint8Array<ArrayBuffer>; mediaType: "image/webp" };
 
-/**
- * Pourquoi une capture est refusée. Un code et non une phrase : l'appelant la
- * dit dans la langue de la personne (`depots.refus.imageTropLourde`,
- * `imageIllisible`).
- */
+/** Un code, pas une phrase : l'appelant la dit dans la langue de la personne. */
 export type RefusDeCapture = "lourde" | "illisible";
 
 export type LectureCapture =
@@ -39,9 +29,8 @@ export async function preparerCapture(fichier: File): Promise<LectureCapture> {
   }
 
   const octets = Buffer.from(await fichier.arrayBuffer());
-  // Les métadonnées se lisent dans l'en-tête, sans décoder l'image. Sans la
-  // limite de pixels ici : sharp la ferait échouer, et une image trop grande
-  // serait dite illisible.
+  // L'en-tête seul, sans limite de pixels : sharp échouerait, et une image trop
+  // grande serait dite illisible au lieu de lourde.
   const entete = await sharp(octets)
     .metadata()
     .catch(() => undefined);

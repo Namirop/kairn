@@ -1,10 +1,6 @@
 import type { Messages } from "../../fr";
 
-/**
- * L'éditeur est français et le reste : la version anglaise traduit les
- * mentions de droit français en gardant leur intitulé d'origine, sans rien
- * changer aux faits.
- */
+/** L'éditeur reste français : les mentions gardent leur intitulé d'origine, les faits ne changent pas. */
 export const mentionsLegales: Messages["legal"]["mentionsLegales"] = {
   titre: "Legal notice",
   chapeau: "Who publishes Kairn, where the service is hosted, and who to contact.",

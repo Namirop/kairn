@@ -3,33 +3,21 @@ import { creerJobsDeQuestions } from "@/lib/db/lots";
 import { assezEspacee, JOURS_ENTRE_REGENERATIONS } from "@/lib/domain/rotation-variantes";
 
 /**
- * Le seul endroit d'où l'on redemande les questions d'un concept — seuil
- * d'usure, modification, confirmation d'un concept douteux. Tous passent par le
- * plafond hebdomadaire : un chemin qui le contournerait laisserait vingt clics
- * sur « modifier » acheter vingt appels.
- *
- * Le découpage d'un dépôt ne passe pas par ici : ses concepts n'ont jamais eu de
- * questions, il n'y a rien à plafonner.
+ * Seul point d'où l'on redemande des questions (usure, modification,
+ * confirmation), sous le plafond hebdomadaire : sinon vingt clics sur
+ * « modifier » achèteraient vingt appels. Un premier découpage n'a rien à
+ * plafonner.
  */
 
-/**
- * Sépare une réécriture d'un premier jeu. Les questions retirées comptent,
- * puisque `relancerLesQuestions` les retire juste avant d'appeler ici ; un
- * concept douteux qu'on confirme n'en a jamais eu.
- */
+/** Les retirées comptent : `relancerLesQuestions` les retire juste avant. */
 async function aDejaEuDesQuestions(atomId: string): Promise<boolean> {
   return (await prisma.variant.count({ where: { atomId } })) > 0;
 }
 
 /**
- * Quand ce concept a consommé sa place hebdomadaire pour la dernière fois.
- *
- * On lit les jobs, pas les questions : c'est la dépense qu'on plafonne, et un
- * job échoué a coûté un appel. Seules les réécritures comptent — compter le
- * premier jeu interdirait pendant une semaine la correction qui suit un dépôt.
- *
- * `notBefore` prime sur `createdAt` : une demande reportée ne dépense qu'au jour
- * où elle part, et c'est ce jour-là qui ouvre la fenêtre suivante.
+ * Les jobs, pas les questions : on plafonne la dépense, et un échec a coûté un
+ * appel. Le premier jeu ne compte pas, sinon il bloquerait la correction qui
+ * suit un dépôt. `notBefore` prime : un report ne dépense qu'au jour où il part.
  */
 async function derniereReecriture(atomId: string): Promise<Date | null> {
   const jobs = await prisma.generationJob.findMany({
@@ -54,28 +42,20 @@ async function dejaEnFile(atomId: string): Promise<boolean> {
 const SEMAINE_MS = JOURS_ENTRE_REGENERATIONS * 24 * 60 * 60 * 1000;
 
 export type DemandeDeQuestions =
-  /** Le job est écrit et prêt : à l'appelant de le déclencher s'il est pressé. */
+  /** À l'appelant de le déclencher s'il est pressé. */
   | { etat: "partie"; jobs: string[] }
-  /** Le job est écrit et attend la date où il devient légitime. */
   | { etat: "reportee"; partiraLe: Date }
-  /** Une demande attend déjà pour ce concept : on n'en empile pas une seconde. */
   | { etat: "deja-en-file" }
-  /** Trop tôt, et le concept n'a rien à perdre à attendre qu'on redemande. */
+  /** Le concept n'a rien à perdre à attendre. */
   | { etat: "trop-tot"; possibleLe: Date };
 
 /**
- * Ce qu'on fait d'une demande que le plafond hebdomadaire refuse.
- *
- * `reporter` sert les chemins qui viennent de retirer les questions : refuser
- * sans rien écrire laisserait le concept sans question pour toujours. La demande
- * est écrite avec sa date et part seule ce jour-là.
- *
- * Le seuil d'usure ne reporte pas : ses questions fonctionnent encore, il se
- * redéclenchera au passage suivant, et on ne dépense que pour un usage constaté.
+ * `reporter` : pour qui vient de retirer les questions, qu'un refus sec
+ * laisserait sans question pour toujours. L'usure ne reporte pas : ses
+ * questions servent encore, elle se redéclenchera au passage suivant.
  */
 export type OptionsDeDemande = { reporter?: boolean };
 
-/** Demande des questions pour un concept, ou dit quand elles viendront. */
 export async function demanderDesQuestions(
   atome: { id: string; inputId: string },
   maintenant: Date = new Date(),
@@ -92,7 +72,7 @@ export async function demanderDesQuestions(
     return { etat: "partie", jobs: jobs.map((job) => job.id) };
   }
 
-  // `assezEspacee` vient de dire que `derniere` existe et qu'elle est récente.
+  // `assezEspacee` a dit que `derniere` existe et est récente.
   const prochaine = new Date((derniere?.getTime() ?? maintenant.getTime()) + SEMAINE_MS);
 
   if (!options.reporter) return { etat: "trop-tot", possibleLe: prochaine };

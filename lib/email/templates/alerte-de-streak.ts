@@ -2,16 +2,12 @@ import type { Langue } from "@/lib/db/types";
 import { textesDEmail } from "../traduction";
 import { STYLE_DES_EMAILS as S, bouton, envelopper, type EmailRendu } from "./gabarit";
 
-/**
- * L'alerte de série, envoyée le soir et seulement quand il y a quelque chose à
- * perdre. Elle constate, elle ne presse pas. Seule occurrence de l'ember dans
- * les emails : cet accent n'appartient qu'à la série.
- */
+/** Constate, ne presse pas. Seule occurrence de l'ember dans les emails. */
 
 export type AlerteDeStreakPayload = {
-  /** Sessions d'affilée en cours. Toujours au moins une, sinon rien n'est en jeu. */
+  /** Au moins une, sinon rien n'est en jeu. */
   currentStreak: number;
-  /** Concepts dus aujourd'hui. Toujours au moins un, sinon rien n'est jouable. */
+  /** Au moins un, sinon rien n'est jouable. */
   dus: number;
 };
 

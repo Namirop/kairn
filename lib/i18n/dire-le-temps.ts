@@ -2,12 +2,9 @@ import { jourEnDateUtc } from "@/lib/domain/jour-local";
 import type { RemiseAZero } from "@/lib/domain/remise-a-zero";
 
 /**
- * Les paramètres de `temps.remiseAZero`, à partir de ce que le domaine a décidé.
- *
- * Le message prend toujours ses trois arguments — c'est le `select` qui choisit
- * lequel il lit. La date se formate ici, dans la langue de l'écran : le jour
- * civil est un minuit UTC, donc il se lit en UTC et jamais dans le fuseau de la
- * machine, qui le ferait reculer d'un jour à l'ouest.
+ * Les paramètres de `temps.remiseAZero` : toujours les trois, le `select`
+ * choisit. Le jour civil est un minuit UTC : formaté dans le fuseau de la
+ * machine, il reculerait d'un jour à l'ouest.
  */
 export function parametresDeRemise(
   remise: RemiseAZero,

@@ -1,8 +1,6 @@
 /**
- * L'offre du compte, les gestes d'argent et ce qu'ils répondent.
- *
- * `indisponible` ne s'affiche qu'en anglais, où Premium n'est pas vendu : la clé
- * existe des deux côtés parce que la forme des messages est le contrat.
+ * `indisponible` ne s'affiche qu'en anglais, où Premium n'est pas vendu ; la
+ * clé existe des deux côtés, la forme des messages étant le contrat.
  */
 export const offre = {
   titre: "Ton offre",

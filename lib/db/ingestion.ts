@@ -2,18 +2,15 @@ import { prisma } from "@/lib/db/client";
 import type { Input, InputNature } from "@/lib/db/types";
 import { lireLangueUtilisateur } from "@/lib/db/reglages-du-compte";
 
-/**
- * Les écritures qui font avancer un dépôt. Ce qui l'arrête — rejet, panne,
- * clôture — vit dans `fin-de-depot.ts`, où se décide qui paie.
- */
+/** Ce qui fait avancer un dépôt ; ce qui l'arrête vit dans `fin-de-depot.ts`. */
 
 export type DepotADeposer = {
   userId: string;
   texte: string;
   image?: { donnees: Uint8Array<ArrayBuffer>; mediaType: string };
-  /** La clé de l'envoi : deux fois la même ne crée qu'un dépôt. */
+  /** Deux fois la même clé ne crée qu'un dépôt. */
   cleEnvoi: string;
-  /** Ce que la personne a dit de son dépôt, pour cadrer le découpage. */
+  /** Ce que la personne dit de son dépôt, pour cadrer le découpage. */
   consigne?: string;
 };
 
@@ -23,10 +20,7 @@ export type ConceptAEcrire = {
   uncertain: boolean;
 };
 
-/**
- * Crée le dépôt, ou rend celui que le même envoi a déjà créé. La contrainte
- * d'unicité fait foi : deux requêtes simultanées ne peuvent pas la contourner.
- */
+/** La contrainte d'unicité fait foi : deux requêtes simultanées ne la contournent pas. */
 export async function creerDepot(
   depot: DepotADeposer,
 ): Promise<{ input: Input; nouveau: boolean }> {
@@ -56,7 +50,7 @@ export async function creerDepot(
 
     return { input, nouveau: true };
   } catch (erreur) {
-    // Course perdue contre une requête jumelle : c'est elle qui a créé le dépôt.
+    // Course perdue contre une requête jumelle, qui a créé le dépôt.
     const rattrape = await prisma.input.findUnique({
       where: { userId_submissionKey: { userId: depot.userId, submissionKey: depot.cleEnvoi } },
     });
@@ -71,10 +65,7 @@ export async function lireDepot(inputId: string): Promise<Input | null> {
   return prisma.input.findUnique({ where: { id: inputId } });
 }
 
-/**
- * Ce que l'extraction a lu du dépôt lui-même. Écrit même sur un rejet : sa
- * nature dit pourquoi le dépôt n'a rien rendu.
- */
+/** Écrit même sur un rejet : la nature dit pourquoi le dépôt n'a rien rendu. */
 export async function enregistrerLExtraction(
   inputId: string,
   lecture: { nature: InputNature; conceptsTronques: boolean; texteRetenu: string | null },
@@ -86,10 +77,7 @@ export async function marquerEnCours(inputId: string): Promise<void> {
   await prisma.input.update({ where: { id: inputId }, data: { status: "PROCESSING" } });
 }
 
-/**
- * Range le texte lu et efface les octets de l'image dans la même écriture :
- * dès que le texte existe, l'image n'a plus de raison d'être.
- */
+/** Efface l'image dans la même écriture : le texte lu la remplace. */
 export async function enregistrerTexteLu(
   inputId: string,
   texte: string,
@@ -107,7 +95,7 @@ export async function enregistrerTexteLu(
   });
 }
 
-/** L'image n'a rien donné : on l'efface quand même, elle ne servira plus. */
+/** L'image n'a rien donné : effacée quand même, elle ne servira plus. */
 export async function oublierImage(inputId: string): Promise<void> {
   await prisma.input.update({
     where: { id: inputId },
@@ -115,11 +103,7 @@ export async function oublierImage(inputId: string): Promise<void> {
   });
 }
 
-/**
- * Écrit les concepts d'un dépôt. Le propriétaire — compte ou session anonyme —
- * est relu sur le dépôt plutôt que passé par l'appelant : il n'y a qu'une
- * source de vérité.
- */
+/** Le propriétaire, compte ou visite, est relu sur le dépôt : une seule source de vérité. */
 export async function enregistrerConcepts(
   inputId: string,
   concepts: ConceptAEcrire[],

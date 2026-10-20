@@ -1,23 +1,13 @@
 import type { TraduireLesRefus } from "@/lib/depots/bornes-du-depot";
 import { textesDesRefus } from "@/lib/depots/textes-des-refus";
 
-/**
- * La cause d'un refus de quota, partagée par le dépôt et le redécoupage. Chaque
- * cause a son message : attendre une minute et attendre le mois prochain ne
- * demandent pas la même chose.
- */
+/** Un message par cause : attendre une minute ou le mois prochain, ce n'est pas pareil. */
 export type MotifDeRefus = "concepts" | "depots" | "debit";
 
 /**
- * Le message d'un refus de quota.
- *
- * Le plafond est reçu, car il dépend du plan du compte. Le message dit « autour
- * de » : un dépôt passe tant qu'il reste une place, et le dernier peut dépasser
- * le plafond. Il ne dit pas quand le quota repart, la date dépend du compte et
- * l'écran l'ajoute.
- *
- * `quota` distingue la limite de la période (des semaines) de celle du débit
- * (des secondes).
+ * Le plafond dépend du plan. « Autour de » : le dernier dépôt peut dépasser. La
+ * date de reprise dépend du compte, l'écran l'ajoute. `quota` sépare la période
+ * (des semaines) du débit (des secondes).
  */
 export function refusDeQuota(
   motif: MotifDeRefus,

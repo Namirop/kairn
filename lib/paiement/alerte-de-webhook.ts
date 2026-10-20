@@ -3,32 +3,22 @@ import type { AlerteDePaiementPayload } from "@/lib/email/templates/alerte-de-pa
 import { PaiementError } from "./erreurs";
 
 /**
- * Prévenir quand un webhook de paiement n'aboutit pas.
+ * Prévient quand un webhook de paiement échoue : Stripe a encaissé, `Subscription`
+ * n'a pas bougé, l'écran affiche « Gratuit ». Stripe relance trois jours puis
+ * renonce ; renvoyer la livraison depuis son tableau de bord répare en un clic.
  *
- * La seule panne qui coûte de l'argent à quelqu'un : Stripe a encaissé, la
- * ligne `Subscription` n'a pas bougé, et l'écran affiche « Gratuit » sans
- * raison d'écrire. Stripe relance trois jours puis renonce ; la réparation
- * (renvoyer la livraison depuis le tableau de bord Stripe) tient en un clic,
- * encore faut-il le savoir.
+ * - Ne casse jamais le webhook : il doit rendre son 500 pour que Stripe relance.
+ * - Hors du chemin critique : Stripe compte le temps de réponse.
+ * - Une par jour au plus, sinon 72 emails pour trois jours de relances horaires.
  *
- * Mêmes règles que les autres alertes d'exploitation :
- * 1. Elle ne casse jamais ce qu'elle surveille : toute erreur est journalisée et
- *    avalée, le webhook doit rendre son 500 à Stripe pour qu'il relance.
- * 2. Hors du chemin critique : Stripe compte le temps de réponse de l'endpoint.
- * 3. Une par jour au plus — sinon trois jours de relances horaires feraient
- *    soixante-douze emails pour une panne.
- *
- * La signature refusée n'arrive pas ici : c'est du bruit (scan, rotation de
- * secret), écarté dans le route handler.
- *
- * Les collaborateurs sont reçus, jamais importés : le fichier se teste sans base
- * ni réseau. Le câblage vit dans `signalement-de-webhook.ts`.
+ * Une signature refusée n'arrive pas ici (bruit de scan ou rotation de secret).
+ * Collaborateurs reçus, pas importés, pour tester sans base ; câblage dans
+ * `signalement-de-webhook.ts`.
  */
 
-/** Sert de `cible` dans la clé d'alerte — distincte des cibles de plafond et de bascule. */
+/** Distincte des cibles de plafond et de bascule. */
 const CIBLE_PAIEMENT = "webhook-paiement";
 
-/** Ce qu'on sait de l'échec au moment de le signaler. */
 export type EchecDeWebhook = {
   /** Le type d'événement Stripe, ou `null` si le corps n'a pas été lu jusque-là. */
   type: string | null;
@@ -40,17 +30,12 @@ export type OutilsDAlerteDePaiement = {
   envoyer: (payload: AlerteDePaiementPayload) => Promise<void>;
 };
 
-/**
- * Le code de l'échec, quand le produit en a posé un.
- *
- * `PaiementError` en porte un stable, qui distingue « Stripe a changé de
- * forme » de « une variable manque ». Le reste passe par le motif.
- */
+/** Distingue « Stripe a changé de forme » d'« une variable manque ». */
 export function codeDeLEchec(erreur: unknown): string {
   return erreur instanceof PaiementError ? erreur.code : "INCONNU";
 }
 
-/** Ce que l'erreur raconte, réduit à une ligne lisible dans un email. */
+/** Une ligne lisible dans un email. */
 export function motifDeLEchec(erreur: unknown): string {
   if (erreur instanceof Error) return `${erreur.name} : ${erreur.message}`;
 
@@ -64,8 +49,7 @@ export async function signalerLEchecDuWebhook(
 ): Promise<void> {
   try {
     const pris = await outils.reserver(
-      // Pas de palier ici : le seuil fait partie de la clé primaire
-      // d'`AlerteQuota` et reste à zéro, ce qui donne « une par jour ».
+      // Le seuil est dans la clé primaire d'`AlerteQuota` : à zéro, une par jour.
       { compteur: "GLOBAL", cible: CIBLE_PAIEMENT, seuil: 0 },
       maintenant,
     );

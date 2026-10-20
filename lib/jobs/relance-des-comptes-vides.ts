@@ -4,14 +4,8 @@ import { envoyerLaNotification } from "@/lib/email/notifications";
 import { journaliser, passage, type Passage } from "./passage-de-notification";
 
 /**
- * La relance des comptes restés vides, depuis le même passage horaire.
- *
- * Pas d'`aNotifier` ici, contrairement aux autres passages : il écarte sur
- * `(compte, type, jour local)`, ce qui autoriserait une relance par jour. La
- * sélection des candidats écarte déjà en SQL tout compte portant une relance,
- * quelle qu'en soit la date : l'envoi est unique dans la vie d'un compte.
- *
- * Les journaux ne portent que des comptes, jamais une adresse ni un contenu.
+ * Pas d'`aNotifier`, qui écarte par jour local et permettrait une relance par
+ * jour : la sélection SQL écarte tout compte déjà relancé, à vie.
  */
 export async function relancerLesComptesVides(maintenant: Date = new Date()): Promise<Passage> {
   const candidats = await trouverLesComptesARelancer(maintenant);

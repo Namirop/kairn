@@ -3,21 +3,13 @@ import { textesDEmail } from "../traduction";
 import { STYLE_DES_EMAILS, envelopper, type EmailRendu } from "./gabarit";
 
 /**
- * Le code qui ouvre une session. Un code, pas un lien : un lien s'ouvre dans le
- * navigateur par défaut, jamais dans l'application installée (voir
- * `lib/domain/code-de-connexion.ts`).
- *
- * Le mot « code » précède les chiffres exprès : iOS et Android s'appuient sur
- * lui pour proposer le code au-dessus du clavier.
- *
- * Les chiffres sont espacés à la lecture mais écrits d'un bloc : une sélection
- * les rapporte sans séparateur.
+ * Un code, pas un lien : un lien s'ouvre dans le navigateur, jamais dans l'app
+ * installée. « code » précède les chiffres : iOS et Android s'y fient pour le
+ * proposer au clavier. Espacés à l'œil, d'un bloc à la sélection.
  */
 
 export type CodeDeConnexionPayload = {
-  /** Le code tel qu'il a été émis, six chiffres. */
   code: string;
-  /** Minutes de validité, telles que la configuration les fixe. */
   minutes: number;
 };
 
@@ -50,7 +42,7 @@ ${t("code.ignore")}
     html: envelopper({
       preentete: t("code.preheader", { code }),
       corps,
-      // Ni désinscription ni raison d'envoi : cet email vient d'être demandé.
+      // Ni désinscription ni raison : il vient d'être demandé.
       langue,
     }),
     text: `${t("code.intro")}\n\n${t("code.ligneCode", { code })}\n\n${t("code.retape", { minutes })}\n${t("code.ignoreCourt")}`,

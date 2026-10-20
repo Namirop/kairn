@@ -2,17 +2,11 @@ import { LICHEN, PIERRES_CLAIRES, PIERRES_SOMBRES, ROCHE } from "@/lib/design/co
 import { cadreDuSymbole, empilementDuLogo, nuanceDuRang } from "@/lib/design/marque";
 
 /**
- * Le symbole en SVG littéral, pour ce qui sort de l'application.
- *
- * Les icônes cuites, le fichier de partage et l'image Open Graph ne traversent
- * aucune feuille de style : il leur faut des couleurs écrites.
- *
- * Ce n'est pas un second dessin : géométrie (`empilementDuLogo`), dégradation
- * (`nuanceDuRang`) et couleurs (`couleurs-hors-css`) viennent des mêmes
- * sources que le composant. N'y recopie rien.
+ * En couleurs littérales, pour les icônes et images qui ne traversent aucune
+ * feuille de style. Pas un second dessin : tout vient des mêmes sources que le
+ * composant. N'y recopie rien.
  */
 
-/** Les chemins des pierres, dans le repère de l'empilement. */
 function corps(pierres: number, clair: boolean): string {
   const empilement = empilementDuLogo(pierres);
   const teintes = clair ? PIERRES_CLAIRES : PIERRES_SOMBRES;
@@ -28,10 +22,8 @@ function corps(pierres: number, clair: boolean): string {
     .join("");
 }
 
-/** Le cadrage serré, le même que celui du composant. */
 const cadre = cadreDuSymbole;
 
-/** Le symbole seul, sur fond transparent, à sa proportion naturelle. */
 export function symboleSeul({
   pierres,
   clair = false,
@@ -48,13 +40,8 @@ export function symboleSeul({
 }
 
 /**
- * Le symbole posé sur un carré sombre.
- *
- * `part` : fraction du côté occupée en hauteur. À un contre un, l'icône se fait
- * rogner par le masque de la plateforme.
- *
- * `rayon` : fraction du côté, nul pour une icône que la plateforme masque
- * elle-même — arrondir deux fois laisse quatre coins vides.
+ * `part` : hauteur en fraction du côté ; à 1, le masque de la plateforme rogne.
+ * `rayon` : nul quand la plateforme masque elle-même, sinon quatre coins vides.
  */
 export function symboleSurPastille({
   pierres,

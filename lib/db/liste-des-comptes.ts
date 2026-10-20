@@ -2,26 +2,24 @@ import { prisma } from "@/lib/db/client";
 import { type Plan, planEffectif } from "@/lib/domain/plafond-du-plan";
 
 /**
- * Les comptes un par un, nommés (`administration.ts`, lui, agrège).
- *
- * L'écran est derrière `exigerUnAdministrateur` : c'est le seul endroit du
- * produit où une adresse s'affiche en clair.
+ * Les comptes nommés (`administration.ts` agrège). Derrière
+ * `exigerUnAdministrateur` : seul endroit où une adresse s'affiche en clair.
  */
 
-/** Ce qu'on montre d'un compte. Les compteurs sont des totaux, pas des fenêtres. */
+/** Les compteurs sont des totaux, pas des fenêtres. */
 export type CompteInscrit = {
   id: string;
   email: string;
   nom: string;
-  /** Une adresse non vérifiée est un compte qui n'a peut-être jamais ouvert son courrier. */
+  /** Non vérifiée : peut-être jamais ouvert son courrier. */
   emailVerifie: boolean;
   inscritLe: Date;
-  /** Nul si le compte n'a jamais fait un seul passage. */
+  /** Nul sans aucun passage. */
   dernierPassage: Date | null;
   depots: number;
   concepts: number;
   serie: number;
-  /** Le plan qui vaut à l'instant de la lecture : un terme passé rend au gratuit. */
+  /** À l'instant de la lecture : un terme passé rend au gratuit. */
   plan: Plan;
 };
 
@@ -39,10 +37,7 @@ type Ligne = {
   currentPeriodEnd: Date | null;
 };
 
-/**
- * Un garde-fou, pas de la pagination : le jour où il faudra paginer, l'écran
- * sera à repenser.
- */
+/** Un garde-fou, pas de la pagination : s'il faut paginer, l'écran est à repenser. */
 export const COMPTES_AU_PLUS = 200;
 
 export async function lireLaListeDesComptes(
@@ -78,8 +73,7 @@ export async function lireLaListeDesComptes(
     depots: ligne.depots,
     concepts: ligne.concepts,
     serie: ligne.serie,
-    // Jugé par la règle du domaine et pas dans le SQL, pour rendre la même chose
-    // qu'ailleurs dans le produit.
+    // Règle du domaine plutôt que SQL : le même verdict qu'ailleurs dans le produit.
     plan: planEffectif(
       { plan: ligne.plan ?? "GRATUIT", finDePeriode: ligne.currentPeriodEnd },
       maintenant,

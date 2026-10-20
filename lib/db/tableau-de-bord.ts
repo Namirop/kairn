@@ -10,26 +10,20 @@ import type { DepotListe } from "@/lib/db/depots";
 /** Une seule lecture pour tout le tableau de bord, requêtes en parallèle. */
 
 export type TableauDeBord = {
-  /** Ce que la session servira maintenant, et ce qu'elle reporte à demain. */
+  /** Ce que la session sert maintenant et ce qu'elle reporte. */
   charge: ChargeDuJour;
-  /** Fuseau de l'utilisateur : toute échéance se lit dans son calendrier. */
+  /** Toute échéance se lit dans le calendrier de l'utilisateur. */
   fuseau: string;
   stats: UserStats | null;
-  /** Identifiants des Atoms consolidés : une pierre chacun. */
+  /** Une pierre par Atom consolidé. */
   grainesDuCairn: string[];
   depots: DepotListe[];
   totalAtoms: number;
-  /** L'arriéré, et depuis quand. Ce qui décide si on le dit, et comment. */
+  /** Et depuis quand : décide si on le dit, et comment. */
   arriere: ArriereSuivi;
-  /**
-   * Combien de concepts n'ont pas encore de question. Un compte et non un
-   * drapeau : il explique une session plus courte que le nombre de concepts.
-   */
+  /** Un nombre, pas un drapeau : il explique une session plus courte que prévu. */
   conceptsSansQuestions: number;
-  /**
-   * Le plafond de session (réglable) et ce qui en est déjà consommé
-   * aujourd'hui : les deux disent pourquoi des concepts attendent.
-   */
+  /** Avec `faitsAujourdhui`, dit pourquoi des concepts attendent. */
   plafond: number;
   faitsAujourdhui: number;
 };
@@ -39,7 +33,7 @@ export async function lireTableauDeBord(
   maintenant: Date = new Date(),
 ): Promise<TableauDeBord> {
   const [duJour, stats, consolides, depots, totalAtoms, sansQuestions] = await Promise.all([
-    // Le même compte que la session : « est dû » n'a qu'une définition.
+    // Le même compte que la session : « dû » n'a qu'une définition.
     lireChargeDuJour(userId, maintenant),
     prisma.userStats.findUnique({ where: { userId } }),
     prisma.atom.findMany({

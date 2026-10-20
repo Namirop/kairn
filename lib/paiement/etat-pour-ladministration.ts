@@ -4,20 +4,16 @@ import { CLE_DU_PRIX, prixDeLaCadence } from "./catalogue";
 import { modeDePaiement, type ModeDePaiement } from "./config";
 
 /**
- * Ce que l'écran de pilotage sait du paiement : une lecture, jamais un levier
- * (`PAIEMENT_LIVE` reste un geste chez l'hébergeur, voir `config.ts`).
- *
- * Il dit le mode et si le catalogue répond : des clés ou montants divergents
- * feraient échouer chaque achat, sans autre signal avant le premier client.
- * Aucun secret ne sort d'ici.
+ * Une lecture, jamais un levier (`PAIEMENT_LIVE` reste un geste chez
+ * l'hébergeur). Un catalogue divergent ferait échouer chaque achat sans autre
+ * signal avant le premier client. Aucun secret ne sort d'ici.
  */
 
 export type LigneDeCatalogue = {
   cadence: CadenceStripe;
   cle: string;
-  /** Ce que la page annonce, en euros. */
+  /** En euros. */
   annonce: number;
-  /** L'identifiant résolu, ou la raison du refus. */
   resolu: { prix: string } | { erreur: string };
 };
 
@@ -49,7 +45,7 @@ async function resoudre(cadence: CadenceStripe): Promise<LigneDeCatalogue> {
   try {
     return { ...ligne, resolu: { prix: await prixDeLaCadence(cadence) } };
   } catch (erreur) {
-    // Le refus de `prixDeLaCadence`, tel quel : c'est celui qu'aurait un achat.
+    // Tel quel : c'est celui qu'aurait un achat.
     return { ...ligne, resolu: { erreur: erreur instanceof Error ? erreur.message : "illisible" } };
   }
 }

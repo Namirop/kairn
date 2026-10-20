@@ -2,11 +2,8 @@ import { prisma } from "@/lib/db/client";
 import type { Langue } from "@/lib/db/types";
 
 /**
- * Crée les réglages et les compteurs d'un compte, dans une même transaction :
- * un compte sans `UserStats` casserait le tableau de bord au premier affichage.
- *
- * La langue est celle de l'inscription ; elle décide de l'email d'accueil et de
- * la langue du premier dépôt.
+ * Une transaction : sans `UserStats`, le tableau de bord casserait au premier
+ * affichage. La langue d'inscription décide de l'accueil et du premier dépôt.
  */
 export async function ouvrirLeCompte(
   userId: string,

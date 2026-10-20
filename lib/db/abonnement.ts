@@ -8,17 +8,13 @@ import {
 } from "@/lib/domain/plafond-du-plan";
 
 /**
- * L'abonnement d'un compte, réduit à ce qui décide de ses droits. Un compte sans
- * ligne vaut gratuit : la ligne ne se crée pas à l'inscription.
- *
- * Ce module lit. Seul le webhook écrit — un abonnement accordé par un chemin que
- * Stripe n'a pas confirmé serait un abonnement offert.
+ * Sans ligne, gratuit : elle ne naît pas à l'inscription. Ce module lit ; seul
+ * le webhook écrit, sinon un chemin non confirmé par Stripe offrirait un plan.
  */
 export async function lireAbonnement(userId: string): Promise<Abonnement> {
   return (await lireLaLigne(userId)).abonnement;
 }
 
-/** La ligne d'abonnement du compte, et la résiliation qu'elle annonce. */
 async function lireLaLigne(
   userId: string,
 ): Promise<{ abonnement: Abonnement; resilieALaFin: boolean }> {
@@ -35,7 +31,6 @@ async function lireLaLigne(
   };
 }
 
-/** Le plafond de concepts d'un compte, à cet instant. */
 export async function plafondDuCompte(
   userId: string,
   maintenant: Date = new Date(),
@@ -44,11 +39,8 @@ export async function plafondDuCompte(
 }
 
 /**
- * Ce que l'écran de l'offre a besoin de savoir, en une lecture.
- *
- * Le plan rendu est celui qui vaut : un abonnement échu sort en `GRATUIT`, comme
- * dans le calcul du plafond. La page n'a aucune règle à réappliquer, et
- * n'affiche jamais un plan payant à qui est déjà retombé au plafond gratuit.
+ * Le plan qui vaut : échu, il sort en `GRATUIT` comme dans le plafond. La page
+ * n'a aucune règle à réappliquer.
  */
 export type OffreDuCompte = {
   plan: Plan;

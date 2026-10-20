@@ -1,8 +1,4 @@
-/**
- * Ce que le dessin du cairn dit à qui ne le voit pas, et la commande qui le
- * donne au doigt. Le cairn renversable vit sur la page publique : ces textes y
- * passent aussi.
- */
+/** Le cairn pour qui ne le voit pas. Servis aussi sur la page publique (cairn renversable). */
 export const cairn = {
   legendeVide: "Aucune pierre posée",
   legendePile: "Empilement de {total, plural, one {# pierre} other {# pierres}}",

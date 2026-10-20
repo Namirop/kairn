@@ -2,18 +2,11 @@
 import { echapper } from "./echapper";
 import { STYLE_DES_EMAILS as S } from "./gabarit";
 
-/**
- * Les blocs communs aux alertes d'exploitation : l'heure UTC de l'alerte et le
- * tableau « valeur / légende » qui permet de décider sans ouvrir le tableau de
- * bord.
- */
-
-/** L'heure de l'alerte en UTC : la journée des plafonds et des bascules se compte en UTC. */
+/** La journée des plafonds et des bascules se compte en UTC. */
 export function heureUtc(instant: Date): string {
   return `${instant.toISOString().slice(11, 16)} UTC`;
 }
 
-/** Les lignes du tableau, la valeur en chasse fixe, la légende à côté. */
 export function lignesDeValeurs(lignes: readonly (readonly [string, string])[]): string {
   return lignes
     .map(

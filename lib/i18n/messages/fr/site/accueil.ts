@@ -1,10 +1,7 @@
 /**
- * La landing hors de l'essai : l'ouverture, l'en-tête public, le sentier, le
- * panneau de roche et le pied de page.
- *
- * `--t-ouverture` est calibré sur la largeur de « Tu lis beaucoup. » : une
- * ligne d'ouverture plus longue, ici ou traduite, se remesure, sinon le titre
- * passe à la ligne.
+ * La landing hors de l'essai. `--t-ouverture` est calibré sur « Tu lis
+ * beaucoup. » : une ouverture plus longue, traduite ou non, se remesure, sinon
+ * le titre passe à la ligne.
  */
 export const accueil = {
   hero: {
@@ -23,7 +20,7 @@ export const accueil = {
     mentionsLegales: "Mentions légales",
     confidentialite: "Confidentialité",
   },
-  /** Le titre s'empile une ligne à la fois : chaque moitié est un bloc. */
+  /** Une moitié de titre par ligne. */
   sentier: {
     titreHaut: "Trois gestes,",
     titreBas: "et c'est tout.",

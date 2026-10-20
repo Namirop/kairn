@@ -3,19 +3,12 @@ import { textesDEmail } from "../traduction";
 import { STYLE_DES_EMAILS as S, bouton, envelopper, type EmailRendu } from "./gabarit";
 
 /**
- * L'accueil, une fois, à l'inscription : il dit quoi faire maintenant, et rien
- * d'autre.
- *
- * Deux corps : un compte peut naître déjà plein, quand la reprise de visite
- * rattache un essai. Le corps se choisit sur ce que le compte porte, pas sur le
- * fait qu'il soit neuf.
+ * Dit quoi faire maintenant, rien d'autre. Deux corps : un compte peut naître
+ * plein quand un essai est repris ; on choisit sur ce qu'il porte, pas sur sa nouveauté.
  */
 
 export type AccueilPayload = {
-  /**
-   * Concepts déjà au compte à l'envoi. Au-dessus de zéro, c'est un essai
-   * repris, et l'email pointe la session plutôt que le dépôt.
-   */
+  /** Au-dessus de zéro, un essai repris : l'email pointe la session plutôt que le dépôt. */
   nombreDeConcepts: number;
 };
 

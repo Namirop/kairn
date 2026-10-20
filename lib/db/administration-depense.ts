@@ -4,11 +4,8 @@ import { jourLocal } from "@/lib/domain/jour-local";
 import { coutSelonConventions } from "@/lib/domain/tarifs";
 
 /**
- * La dépense, lue au registre `AiCall`. Le jour est celui d'UTC, calendrier du
- * plafond d'appels, pour recouvrir exactement les lignes qu'il résume.
- *
- * Les échecs sont comptés : un appel qui échoue a pu consommer des tokens et a
- * pris sa place au plafond.
+ * Jour UTC, celui du plafond d'appels. Les échecs comptent : ils ont pu
+ * consommer des tokens et ont pris leur place au plafond.
  */
 
 export type LigneDIntention = {
@@ -18,7 +15,7 @@ export type LigneDIntention = {
   entree: number;
   sortie: number;
   coutCatalogue: number;
-  /** Nul quand un modèle de la ligne n'a pas de conversion par facteur unique. */
+  /** Nul si un modèle de la ligne n'a pas de conversion par facteur unique. */
   coutReel: number | null;
 };
 
@@ -51,10 +48,7 @@ type LigneDAppels = {
   cout: number;
 };
 
-/**
- * Additionne deux coûts réels en propageant l'absence : traiter une absence
- * comme zéro sous-estimerait le total.
- */
+/** L'absence se propage : la compter zéro sous-estimerait le total. */
 function ajouterReel(cumul: number | null | undefined, ajout: number | null): number | null {
   if (cumul === null || ajout === null) return null;
 
@@ -70,12 +64,8 @@ type LigneDeJourEtModele = {
 };
 
 /**
- * La dépense jour par jour sur une fenêtre glissante, pour dire si le chiffre
- * du jour est habituel.
- *
- * `generate_series` engendre les jours vides, qui doivent rester dans la série.
- * Groupé par jour et modèle, parce que la conversion de tarif dépend des deux,
- * puis replié par jour.
+ * Dit si le chiffre du jour est habituel. `generate_series` garde les jours
+ * vides ; groupé par jour et modèle, dont dépend la conversion, puis replié.
  */
 export async function lireLaDepenseParJour(
   maintenant: Date,
@@ -109,7 +99,7 @@ export async function lireLaDepenseParJour(
     };
     const cumul = parJour.get(ligne.jour) ?? vide;
 
-    // Jour sans appel : la jointure ouverte le rend avec un modèle nul.
+    // Jour sans appel : la jointure externe le rend avec un modèle nul.
     if (ligne.model === null) {
       parJour.set(ligne.jour, cumul);
       continue;
@@ -129,16 +119,13 @@ export async function lireLaDepenseParJour(
   return [...parJour.values()];
 }
 
-/**
- * La dépense du jour par intention. La base groupe par intention et par
- * modèle, maille où la conversion de tarif est juste, puis on replie.
- */
+/** Groupé par intention et modèle, maille où la conversion est juste, puis replié. */
 export async function lireLaDepenseDuJour(maintenant: Date): Promise<BlocDepense> {
   const jour = jourLocal(maintenant, "UTC");
   const debut = debutDuJourUtc(maintenant);
   const fin = new Date(debut.getTime() + 24 * 60 * 60 * 1000);
 
-  // Bornée des deux côtés, pour rester juste sur une journée passée.
+  // Bornée des deux côtés : juste aussi sur une journée passée.
   const lignes = await prisma.$queryRaw<LigneDAppels[]>`
     SELECT
       "purpose", "model",

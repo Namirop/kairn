@@ -7,12 +7,8 @@ import { conceptsAQuestionner } from "@/lib/domain/nature-du-depot";
 import { declencher } from "@/lib/jobs/queue";
 
 /**
- * Ce qu'un visiteur avait déposé lui revient à la création de son compte, et
- * c'est ici que la dépense reprend : l'essai s'arrête à l'extraction, les
- * questions n'arrivent qu'une fois le compte créé.
- *
- * Rien ne lève : une inscription ne doit pas échouer pour un dépôt d'essai.
- * L'échec est journalisé, et la personne redéposera.
+ * L'essai revient au compte, et la dépense reprend ici : les questions
+ * attendaient le compte. Rien ne lève : une inscription n'échoue pas pour un essai.
  */
 export async function reprendreLaVisite(userId: string): Promise<void> {
   try {
@@ -28,14 +24,11 @@ export async function reprendreLaVisite(userId: string): Promise<void> {
 
     const concepts = repris.reduce((total, depot) => total + depot.concepts.length, 0);
 
-    // Le chemin anonyme ne passe par aucun quota : les concepts de l'essai
-    // entrent au compteur du mois ici, premier instant où ils ont un compte.
+    // L'essai n'a passé aucun quota : ses concepts entrent ici au compteur du mois.
     await compterLaVisiteReprise(userId, await lireFuseauUtilisateur(userId), concepts);
 
-    // Les questions sont lancées tout de suite, un jeu par dépôt : accrocher
-    // les concepts à un autre dépôt, souvent `REJECTED`, laisserait des jobs
-    // que rien ne peut plus refermer. Même règle du doute qu'au découpage, et
-    // rien pour le concept que l'essai a déjà questionné.
+    // Un jeu par dépôt : accrochés à un autre, souvent `REJECTED`, les jobs ne
+    // se refermeraient plus. Même règle du doute qu'au découpage.
     for (const depot of repris) {
       const aQuestionner = conceptsAQuestionner(depot.concepts, depot.nature)
         .filter((concept) => !concept.dejaQuestionne)

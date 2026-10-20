@@ -1,7 +1,4 @@
-/**
- * La liste des dépôts, et la page d'un dépôt : son texte, ses concepts, ce
- * qu'on peut en faire, et pourquoi il n'en montre aucun.
- */
+/** La liste des dépôts et la page d'un dépôt. */
 export const liste = {
   metaTitre: "Dépôts",
   titre: "Ce que tu as déposé",
@@ -13,7 +10,7 @@ export const depot = {
   metaTitre: "Dépôt",
   retour: "Retour aux dépôts",
   titre: "{nombre, plural, one {# concept} other {# concepts}}",
-  /** `quand` arrive dit par `temps.anciennete`. */
+  /** `quand` vient de `temps.anciennete`. */
   depose: "Déposé {quand}",
   ceQueTuAsDepose: "Ce que tu as déposé",
   consigneEcartait:
@@ -48,7 +45,7 @@ export const depot = {
     explication:
       "Redécouper relance une extraction sur le même texte, et prend une place de la journée comme un dépôt.",
   },
-  /** Les quatre raisons d'un dépôt sans concept — voir `components/depots/vide-du-depot.tsx`. */
+  /** Voir `components/depots/vide-du-depot.tsx`. */
   vide: {
     rejete: {
       constat: "Rien à retenir dans ce dépôt.",

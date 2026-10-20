@@ -2,11 +2,8 @@ import { prisma } from "@/lib/db/client";
 import type { MotifDeSignalement, VariantFacet, VariantFormat } from "@/lib/db/types";
 
 /**
- * Ce que quelqu'un dit d'une question qui ne va pas : le seul signal sur une
- * mauvaise question, qui se subit en silence.
- *
- * Rien n'est régénéré automatiquement : la question sort du tirage, c'est
- * tout. Réécrire coûterait un appel sur la foi d'un clic et effacerait la
+ * Le seul signal sur une mauvaise question, qui se subit en silence. Rien n'est
+ * régénéré : réécrire coûterait un appel sur la foi d'un clic et effacerait la
  * trace qu'on veut garder.
  */
 
@@ -18,14 +15,9 @@ export type SignalementAEcrire = {
 };
 
 /**
- * Écrit le signalement et retire la question du tirage.
- *
- * Le client n'envoie que des identifiants et un motif : le contexte (question,
- * réponse, concept, modèle, version du prompt) est lu en base, donc ne peut
- * pas être arrangé. Les textes sont recopiés, pour rester lisibles après la
- * suppression du concept, geste naturel après un signalement.
- *
- * Rend `false` si la question n'appartient pas à cette personne.
+ * Le contexte est lu en base, pas reçu du client : il ne peut pas être arrangé.
+ * Textes recopiés, lisibles après la suppression du concept, geste naturel
+ * après un signalement. `false` si la question n'est pas à cette personne.
  */
 export async function signalerUneQuestion(
   signalement: SignalementAEcrire,
@@ -88,24 +80,20 @@ export type SignalementLu = {
   promptVersion: string | null;
   atomId: string | null;
   inputId: string | null;
-  /** Nul quand le concept a été supprimé depuis : le signalement, lui, reste. */
+  /** Faux si le concept a été supprimé : le signalement, lui, reste. */
   conceptExisteEncore: boolean;
   createdAt: Date;
 };
 
 export type PageDeSignalements = {
   lignes: SignalementLu[];
-  /** Le total de la table, pas celui de la page : c'est lui qui pagine. */
+  /** De la table, pas de la page. */
   total: number;
   page: number;
   pages: number;
 };
 
-/**
- * Une page de signalements, la plus récente d'abord. Le rang vient de l'URL :
- * il est ramené dans les bornes plutôt que refusé, la dernière page étant
- * manifestement ce qu'on voulait.
- */
+/** Le rang vient de l'URL : ramené dans les bornes plutôt que refusé. */
 export async function listerLesSignalementsPagines(
   rang: number,
   parPage: number,
@@ -123,18 +111,13 @@ export async function listerLesSignalementsPagines(
   return { lignes: await enrichir(lignes), total, page, pages };
 }
 
-/** Les signalements, les plus récents d'abord. Lecture d'administration. */
 export async function listerLesSignalements(limite = 100): Promise<SignalementLu[]> {
   return enrichir(
     await prisma.signalement.findMany({ orderBy: { createdAt: "desc" }, take: limite }),
   );
 }
 
-/**
- * Dit, pour chaque ligne, si le concept d'origine existe encore, en une requête
- * pour toute la page. La copie du concept ne prouve pas qu'il n'a pas été
- * supprimé depuis.
- */
+/** En une requête par page : la copie du concept ne dit pas s'il existe encore. */
 async function enrichir(
   lignes: Awaited<ReturnType<typeof prisma.signalement.findMany>>,
 ): Promise<SignalementLu[]> {

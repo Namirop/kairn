@@ -14,12 +14,8 @@ import { envoyerLeCodeDeConnexion, MINUTES_DE_VALIDITE } from "@/lib/email/conne
 import { LONGUEUR_DU_CODE } from "@/lib/domain/code-de-connexion";
 import { fuseauReconnu } from "@/lib/domain/jour-local";
 
-/**
- * L'instance better-auth. Elle possède les modèles User, Session, Account et
- * Verification ; tout ce qui est applicatif vit dans UserSettings et UserStats.
- */
+/** better-auth possède User, Session, Account et Verification ; l'applicatif vit à côté. */
 
-/** Google n'est proposé que si ses identifiants sont présents. */
 function fournisseursSociaux() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -32,12 +28,9 @@ function fournisseursSociaux() {
 export const googleEstPropose = Object.keys(fournisseursSociaux()).length > 0;
 
 /**
- * Les origines admises en plus de `baseURL`. Celle du déploiement courant, sans
- * quoi une preview Vercel refuse toute connexion en 403.
- *
- * Ce n'est pas un précédent pour ajouter `www` à côté de l'apex : un cookie de
- * session appartient à son hôte, et deux hôtes servant le même environnement
- * donneraient deux sessions distinctes. Une preview est un environnement séparé.
+ * Sans le déploiement courant, une preview Vercel refuse toute connexion en 403.
+ * Pas un précédent pour `www` : un cookie appartient à son hôte, deux hôtes du
+ * même environnement donneraient deux sessions.
  */
 function originesDeConfiance(): string[] {
   const deploiement = process.env.VERCEL_URL;
@@ -46,13 +39,9 @@ function originesDeConfiance(): string[] {
 }
 
 /**
- * L'adresse LAN du serveur de dev (`AUTH_ORIGINE_LOCALE`, qui change avec le
- * réseau), pour tester depuis un téléphone. Sans elle, better-auth répond
- * « Invalid origin » et l'écran dit « Le code n'a pas pu partir » : la panne
- * semble venir de l'email.
- *
- * `NODE_ENV` vaut `production` sur Vercel comme dans un build local : aucun
- * poste voisin n'y devient une origine de confiance.
+ * Pour tester depuis un téléphone. Sans elle, « Invalid origin » s'affiche en
+ * « Le code n'a pas pu partir » : la panne semble venir de l'email. Jamais en
+ * production, build local compris.
  */
 function originesDuReseauLocal(): string[] {
   if (process.env.NODE_ENV === "production") return [];
@@ -67,24 +56,21 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
   trustedOrigins: originesDeConfiance(),
-  // Pas de mot de passe : Kairn écrit tous les jours, l'adresse doit être
-  // vérifiée dès le premier, et un code reçu par email le garantit par
-  // construction.
+  // Kairn écrit tous les jours : un code par email vérifie l'adresse par construction.
   emailAndPassword: { enabled: false },
 
-  // Un mois, repoussé à chaque visite : un usage quotidien ne doit jamais
-  // redemander de code.
+  // Repoussée à chaque visite : un usage quotidien ne redemande jamais de code.
   session: {
     expiresIn: 60 * 60 * 24 * 30,
     updateAge: 60 * 60 * 24,
   },
   socialProviders: fournisseursSociaux(),
   rateLimit: { enabled: true, storage: "database" },
-  // Les adresses que Vercel écrit lui-même, dans l'ordre de `adresseDuVisiteur`.
+  // Celles que Vercel écrit lui-même, dans l'ordre de `adresseDuVisiteur`.
   advanced: { ipAddress: { ipAddressHeaders: ["x-vercel-forwarded-for", "x-forwarded-for"] } },
   hooks: {
-    // Avant le plugin, qui remplace le code en cours dès la demande : refuser
-    // plus tard laisserait quand même un tiers invalider le code de quelqu'un.
+    // Avant le plugin, qui remplace le code en cours : refuser après laisserait
+    // un tiers invalider le code de quelqu'un.
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path !== "/email-otp/send-verification-otp") return;
 
@@ -99,23 +85,16 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user, context) => {
-          // Le fuseau est détecté côté client. Le formulaire d'inscription le
-          // pose en en-tête ; par Google il n'y en a pas, et la coquille de
-          // l'application le réconcilie au premier affichage.
+          // Absent par Google : la coquille le réconcilie au premier affichage.
           const envoye = context?.headers?.get(ENTETE_DU_FUSEAU);
           const fuseau = envoye && fuseauReconnu(envoye) ? envoye : "UTC";
 
-          // La langue de l'inscription : le choix fait sur le site, à défaut le
-          // navigateur. Par Google comme par code, la requête porte les deux.
           await ouvrirLeCompte(user.id, fuseau, langueDesEnTetes(context?.headers));
 
-          // Seul instant où l'on tient à la fois le compte neuf et le cookie de
-          // la visite : le dépôt du visiteur lui revient ici.
+          // Seul instant qui tient à la fois le compte neuf et le cookie de visite.
           await reprendreLaVisite(user.id);
 
-          // Après la reprise, parce que son contenu dépend de ce que le compte
-          // porte déjà. Son échec ne remonte pas : une inscription ne se perd
-          // pas pour un email.
+          // Après la reprise, dont dépend son contenu. Son échec ne remonte pas.
           await envoyerLAccueil(user.id);
         },
       },
@@ -123,15 +102,10 @@ export const auth = betterAuth({
   },
   plugins: [
     /**
-     * Un code plutôt qu'un lien : sur iOS, un lien s'ouvre dans Safari, dont le
-     * stockage est séparé de l'application installée, et la session n'y arrive
-     * jamais. Un code se retape là où on l'a demandé.
-     *
-     * `disableSignUp` reste faux : entrer et s'inscrire sont le même geste, et
-     * le code part dans les deux cas, ce qui tait l'existence d'une adresse.
-     *
-     * Un code court se devine : trois tentatives, dix minutes de validité, et
-     * stocké haché pour qu'une lecture de `Verification` ne suffise pas.
+     * Un code, pas un lien : sur iOS un lien s'ouvre dans Safari, au stockage
+     * séparé de l'app installée. `disableSignUp` reste faux : le code part dans
+     * les deux cas, ce qui tait l'existence d'une adresse. Haché, pour qu'une
+     * lecture de `Verification` ne suffise pas.
      */
     emailOTP({
       otpLength: LONGUEUR_DU_CODE,
@@ -139,14 +113,11 @@ export const auth = betterAuth({
       allowedAttempts: 3,
       storeOTP: "hashed",
       sendVerificationOTP: async ({ email, otp, type }, ctx) => {
-        // Ni mot de passe ni changement d'adresse : tout autre type lève plutôt
-        // que d'envoyer un email au texte faux.
+        // Tout autre type lève plutôt que d'envoyer un email au texte faux.
         if (type !== "sign-in") {
           throw new Error(`Type de code non pris en charge : ${type}.`);
         }
 
-        // La langue du code : celle du compte s'il existe déjà, sinon celle de
-        // la requête — à l'inscription, le code part avant le compte.
         const compte = await ctx?.context.internalAdapter.findUserByEmail(email);
 
         await envoyerLeCodeDeConnexion(email, otp, {
@@ -155,8 +126,7 @@ export const auth = betterAuth({
         });
       },
     }),
-    // En dernier : il pose les cookies de session sur la réponse, et doit voir
-    // ce que les plugins d'avant ont produit.
+    // En dernier : il pose les cookies d'après ce que les autres ont produit.
     nextCookies(),
   ],
 });
