@@ -1,10 +1,6 @@
 import { fusionnerLaProse, type MorceauMarque } from "./segments-fusionnes";
 
-/**
- * Découpe d'un texte en prose et termes de code cités entre accents graves,
- * convention qu'écrivent aussi bien le modèle que la personne qui colle une
- * doc.
- */
+/** Découpe d'un texte en prose et termes de code cités entre accents graves. */
 
 const MARQUEUR = "`";
 

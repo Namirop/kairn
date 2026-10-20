@@ -2,23 +2,15 @@ import { aplati } from "./texte-aplati";
 import { tirageDe } from "./tirage-deterministe";
 
 /**
- * Le coup de pouce d'un texte à trou : ce qu'on montre, et ce qu'il coûte.
- *
- * Sans aide, un terme exact qui ne vient pas enregistre un échec complet là où
- * il y avait un rappel partiel. Trois ou quatre pistes réduisent le champ sans
- * donner la réponse.
- *
- * L'aide fait descendre la note d'un cran : sans ce prix, elle deviendrait le
- * geste par défaut et la mémoire enregistrerait de fausses réussites.
+ * Le coup de pouce d'un texte à trou. Sans aide, un terme qui ne vient pas
+ * enregistre un échec complet là où il y avait un rappel partiel. L'aide coûte
+ * un cran de note, sinon elle deviendrait le geste par défaut.
  */
 
 /** Au-delà, on ne réduit plus le champ, on donne une liste à parcourir. */
 const PISTES_MAXIMUM = 4;
 
-/**
- * En deçà, l'aide est un vrai ou faux déguisé, gagné une fois sur deux sans
- * rien savoir : il faut au moins deux leurres à côté du terme attendu.
- */
+/** En deçà, l'aide est un vrai ou faux déguisé : au moins deux leurres. */
 const PISTES_MINIMUM = 3;
 
 /** Minuscules, sans accents : deux formes du même mot ne s'affichent pas deux fois. */
@@ -27,14 +19,9 @@ function cleDuTerme(terme: string): string {
 }
 
 /**
- * Les termes proposés à qui sèche, dans un ordre stable.
- *
- * Le terme attendu est mélangé aux leurres par un tirage dérivé de la graine
- * (l'identifiant de la question) : sinon il serait toujours au même rang, et
- * une même question doit s'afficher pareil d'une fois à l'autre.
- *
- * Un leurre qui redit le terme attendu est retiré (deux bonnes réponses).
- * Vide quand il n'y a pas de quoi réduire honnêtement le champ.
+ * Mélangés par la graine (l'id de la question) : l'attendu ne tombe pas toujours
+ * au même rang, et la question s'affiche pareil d'une fois à l'autre. Vide quand
+ * il n'y a pas de quoi réduire honnêtement le champ.
  */
 export function pistesDuTrou(
   attendu: string,
@@ -73,11 +60,8 @@ export function pistesDuTrou(
 }
 
 /**
- * La note d'un passage, un cran plus bas si l'aide a été demandée : retrouver
- * le terme parmi quatre reste un rappel, plus facile.
- *
- * `EASY` n'apparaît pas sur ce format (réservé à la sortie du cycle), mais il
- * descend aussi, pour ne pas laisser passer un cas imprévu.
+ * Retrouver le terme parmi trois ou quatre reste un rappel, plus facile : un cran plus
+ * bas. `EASY` n'apparaît pas sur ce format mais descend aussi, par prudence.
  */
 export type NoteDeTrou = "AGAIN" | "HARD" | "GOOD" | "EASY";
 

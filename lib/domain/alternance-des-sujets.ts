@@ -1,13 +1,9 @@
 /**
  * L'ordre de service d'une session : alterner les sujets, puis les gestes.
  *
- * Réviser par blocs retient moins bien. À chaque tour, on sert le sujet le plus
- * fourni parmi ceux qui ne viennent pas d'être servis ; sans cette préférence,
- * le sujet majoritaire finirait la session d'un bloc.
- *
- * Le geste de réponse ne départage qu'ensuite : enchaîner le même geste lasse,
- * enchaîner le même sujet retient moins bien, et c'est l'apprentissage qui
- * prime. Rien n'est tiré au hasard.
+ * Réviser par blocs retient moins bien. Le sujet le plus fourni passe en
+ * premier, sinon le majoritaire finirait la session d'un bloc. Le geste ne
+ * départage qu'ensuite : la lassitude compte moins que l'apprentissage.
  */
 
 /** Le strict nécessaire pour ranger un concept sous un sujet. */

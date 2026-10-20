@@ -1,10 +1,7 @@
 /**
  * La part d'une adresse IP qui désigne un abonné, pour compter les visites par
- * personne et non par adresse.
- *
- * Une IPv4 se compte entière. Une IPv6 se compte par son préfixe /64 : un
- * abonné ou un téléphone reçoit tout le /64 et peut sortir sur une adresse
- * neuve à chaque requête, ce qui ouvrirait autant de visites qu'il le veut.
+ * personne. Une IPv6 se compte par son /64 : un abonné reçoit tout le préfixe et
+ * peut sortir sur une adresse neuve à chaque requête.
  */
 
 const GROUPES_IPV6 = 8;
@@ -12,7 +9,7 @@ const GROUPES_DU_PREFIXE = 4;
 const IPV4 = /^\d{1,3}(\.\d{1,3}){3}$/;
 const GROUPE = /^[0-9a-f]{1,4}$/;
 
-/** Les huit groupes d'une IPv6, développés, ou `null` si elle ne se lit pas. */
+/** Les huit groupes développés, ou `null` si l'adresse ne se lit pas. */
 function groupesIpv6(adresse: string): string[] | null {
   const morceaux = adresse.split("::");
 
@@ -44,7 +41,7 @@ function groupesIpv6(adresse: string): string[] | null {
   return [...gauche, ...Array.from({ length: manquants }, () => "0"), ...droite];
 }
 
-/** L'adresse à compter : l'IPv4 entière, le /64 d'une IPv6, l'entrée telle quelle sinon. */
+/** L'IPv4 entière, le /64 d'une IPv6, l'entrée telle quelle sinon. */
 export function prefixeDeLAdresse(adresse: string): string {
   const nette = adresse.trim().toLowerCase().replace(/%.*$/, "");
   const ipv4Encapsulee = /^::ffff:(\d{1,3}(\.\d{1,3}){3})$/.exec(nette);

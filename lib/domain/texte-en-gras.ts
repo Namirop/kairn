@@ -1,32 +1,21 @@
 import { fusionnerLaProse, type MorceauMarque } from "./segments-fusionnes";
 
 /**
- * Découpe d'un texte en parties ordinaires et parties mises en avant.
- *
- * Le pendant de `texte-code.ts` pour le gras `**…**`.
- *
- * Deux astérisques, jamais un : un astérisque seul marque aussi une puce ou
- * apparaît dans une formule, et le confondre abîmerait un texte déposé.
- *
- * Le gras se découpe avant le code, car un passage en gras contient des termes
- * cités et pas l'inverse : découper d'abord sur les accents graves sépare les
- * deux marques d'une paire. Un `**` écrit dans un terme cité reste du code
- * (`\`2 ** 3\``), d'où la connaissance des accents graves ici.
+ * Le pendant de `texte-code.ts` pour le gras `**…**`. Deux astérisques, jamais
+ * un : un seul marque aussi une puce ou une formule. Le gras se découpe avant le
+ * code, un passage en gras contenant des termes cités et pas l'inverse ; un `**`
+ * dans un terme cité (`\`2 ** 3\``) reste du code, d'où les accents graves ici.
  */
 
 const MARQUEUR = "**";
 const ACCENT = "`";
 
 export type SegmentEnGras = {
-  /** Vrai pour une partie mise en avant, faux pour le reste. */
   gras: boolean;
   texte: string;
 };
 
-/**
- * Les bornes des termes cités : un accent grave ouvre, le suivant ferme, et ce
- * qui n'est pas refermé n'est pas un terme (même règle que `texte-code.ts`).
- */
+/** Même règle que `texte-code.ts` : ce qui n'est pas refermé n'est pas un terme. */
 function termesCites(texte: string): { debut: number; fin: number }[] {
   const places: { debut: number; fin: number }[] = [];
   let ouverture = texte.indexOf(ACCENT);
@@ -43,7 +32,6 @@ function termesCites(texte: string): { debut: number; fin: number }[] {
   return places;
 }
 
-/** La marque suivante qui ne tombe pas dans un terme cité. */
 function marqueSuivante(
   texte: string,
   depuis: number,
@@ -59,9 +47,8 @@ function marqueSuivante(
 }
 
 /**
- * Une paire ouvre, la suivante ferme. Une paire non refermée ou vide reste
- * littérale : c'est le plus souvent une puissance ou une note, et l'avaler
- * ferait disparaître des signes du dépôt.
+ * Une paire non refermée ou vide reste littérale : le plus souvent une puissance
+ * ou une note, que l'avaler ferait disparaître du dépôt.
  */
 export function segmentsEnGras(texte: string): SegmentEnGras[] {
   const cites = termesCites(texte);

@@ -1,24 +1,15 @@
 /**
- * Combien de concepts un seul dépôt peut donner, et ce qui arrive au reste.
- *
- * Une contrainte que la grammaire ne fait pas respecter ne doit jamais faire
- * échouer un appel déjà payé : on tronque, on ne rejette pas. Un `.max()` sur la
- * sortie du modèle n'est pour lui qu'une indication (voir
- * `lib/ai/schema-de-sortie.ts`), et le faire tenir par Zod jetait tout le dépôt.
- *
- * La coupe est positionnelle : le modèle rend les concepts dans l'ordre du
- * texte, pas par importance, donc c'est la fin du texte qui part. Une consigne
- * de classement ne tient pas ; la seule défense est un plafond assez haut pour
- * ne pas se déclencher.
+ * Combien de concepts un seul dépôt peut donner. On tronque, on ne rejette pas :
+ * un `.max()` n'est qu'une indication pour le modèle (`lib/ai/schema-de-sortie.ts`),
+ * et le faire tenir par Zod jetterait un dépôt payé. Le modèle suit l'ordre du
+ * texte, donc c'est la fin qui part : la seule défense est un plafond assez haut
+ * pour ne pas se déclencher.
  */
 
 /**
- * Une soupape contre l'abus (un glossaire de deux cents entrées), pas une
- * limite de produit. À ~338 signes par concept mesurés, les 16 000 signes de
- * `CARACTERES_MAXIMUM` donnent ~47 concepts.
- *
- * Égal à `PLAFOND_GRATUIT` : un dépôt ne peut pas dépasser à lui seul le mois
- * d'un compte gratuit. Les deux se changent ensemble.
+ * Une soupape contre l'abus, pas une limite de produit : ~338 signes mesurés par
+ * concept font ~47 concepts dans `CARACTERES_MAXIMUM`. Égal à `PLAFOND_GRATUIT`,
+ * avec qui il se change : un dépôt ne dépasse pas le mois d'un compte gratuit.
  */
 export const PLAFOND_CONCEPTS_PAR_DEPOT = 50;
 
@@ -30,10 +21,7 @@ export type Troncature<T> = {
   tronque: boolean;
 };
 
-/**
- * Le plafond appliqué à une liste de concepts. `rendus` est conservé même sans
- * coupe : c'est la mesure qui dit si le plafond est à la bonne hauteur.
- */
+/** `rendus` est conservé même sans coupe : il dit si le plafond est à la bonne hauteur. */
 export function appliquerLePlafond<T>(
   concepts: readonly T[],
   plafond: number = PLAFOND_CONCEPTS_PAR_DEPOT,

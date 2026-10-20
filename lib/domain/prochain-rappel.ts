@@ -1,11 +1,8 @@
 import { heureLocale } from "./jour-local";
 
 /**
- * Quand tombera le prochain rappel quotidien. L'heure est un réglage local, donc
- * « aujourd'hui ou demain » se tranche sur l'heure locale, pas sur l'UTC.
- *
- * L'heure entamée appartient au passé : à 19 h 30, le rappel de 19 h est parti,
- * d'où la comparaison stricte avec `heureLocale`.
+ * Quand tombera le prochain rappel quotidien, tranché sur l'heure locale. La
+ * comparaison est stricte : à 19 h 30, le rappel de 19 h est parti.
  */
 export type ProchainRappel = { jour: "aujourdhui" | "demain"; heure: number };
 

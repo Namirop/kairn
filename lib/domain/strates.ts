@@ -1,26 +1,22 @@
 import { tirageDe } from "./tirage-deterministe";
 
 /**
- * Géométrie d'une jointure entre deux panneaux : une bande de strates (une
- * ligne de coupe et deux veines) plutôt qu'un filet d'un pixel.
- *
- * Le motif ne reprend pas la pierre du cairn : elle reste réservée à ce qui
- * informe. Chaque jointure a sa graine, sinon le même dessin répété redevient un
- * séparateur de gabarit.
- *
- * Unités de viewBox (100 × 10), étirées par `preserveAspectRatio="none"`.
+ * Une jointure entre deux panneaux en bande de strates plutôt qu'en filet. La
+ * pierre du cairn reste réservée à ce qui informe. Chaque jointure a sa graine,
+ * sinon le même dessin répété redevient un séparateur de gabarit. ViewBox
+ * 100 × 10, étirée par `preserveAspectRatio="none"`.
  */
 
 export const LARGEUR_STRATES = 100;
 export const HAUTEUR_STRATES = 10;
 
-/** Points de contrôle d'une ligne. Assez pour onduler, pas assez pour vibrer. */
+/** Assez pour onduler, pas assez pour vibrer. */
 const SEGMENTS = 6;
 
 export type Strates = {
-  /** La coupe principale : la surface du dessous, jusqu'en bas de la bande. */
+  /** La surface du dessous, jusqu'en bas de la bande. */
   coupe: string;
-  /** Deux veines intermédiaires, du haut vers le bas. */
+  /** Du haut vers le bas. */
   veines: [string, string];
 };
 
@@ -28,7 +24,6 @@ function arrondi(valeur: number): number {
   return Math.round(valeur * 100) / 100;
 }
 
-/** Une ligne qui traverse la bande, ondulée autour de `hauteur`, en courbes lisses. */
 function ligne(hauteur: number, amplitude: number, tirage: () => number): string {
   const pas = LARGEUR_STRATES / SEGMENTS;
   const hauteurs = Array.from({ length: SEGMENTS + 1 }, () =>
@@ -46,7 +41,7 @@ function ligne(hauteur: number, amplitude: number, tirage: () => number): string
   return [debut, ...courbes].join(" ");
 }
 
-/** Ferme une ligne sur le bas de la bande : ce qui est dessous est rempli. */
+/** Ce qui est sous la ligne est rempli. */
 function jusquenBas(chemin: string): string {
   return `${chemin} L ${LARGEUR_STRATES} ${HAUTEUR_STRATES} L 0 ${HAUTEUR_STRATES} Z`;
 }
@@ -54,9 +49,8 @@ function jusquenBas(chemin: string): string {
 export function strates(graine: string): Strates {
   const tirage = tirageDe(graine);
 
-  // Chaque ligne ondule un peu moins que celle du dessus. Ne pas réduire
-  // l'amplitude : étirée sur un écran large, une ondulation timide redevient un
-  // filet droit.
+  // Ne pas réduire l'amplitude : étirée sur un écran large, une ondulation timide
+  // redevient un filet droit.
   const premiere = ligne(2.6, 2.2, tirage);
   const seconde = ligne(5.4, 1.8, tirage);
   const troisieme = ligne(7.8, 1.4, tirage);

@@ -1,8 +1,4 @@
-/**
- * La mise au propre commune aux découpes d'un texte en parties marquées et
- * parties ordinaires (`texte-code.ts`, `texte-en-gras.ts`) : chaque découpe
- * repère ses marques, celle-ci range les morceaux.
- */
+/** La mise au propre commune à `texte-code.ts` et `texte-en-gras.ts`. */
 
 export type MorceauMarque = {
   /** Vrai pour une partie relevée par la marque, faux pour le reste. */
@@ -10,11 +6,7 @@ export type MorceauMarque = {
   texte: string;
 };
 
-/**
- * Les morceaux dans l'ordre, sans les vides, et la prose voisine fusionnée en
- * un seul morceau. Deux parties marquées voisines restent séparées : ce sont
- * deux termes distincts.
- */
+/** Deux parties marquées voisines restent séparées : ce sont deux termes distincts. */
 export function fusionnerLaProse(morceaux: readonly MorceauMarque[]): MorceauMarque[] {
   const fusionnes: MorceauMarque[] = [];
 

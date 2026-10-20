@@ -1,11 +1,7 @@
 /**
- * La structure markdown d'un texte déposé (réponses d'assistant, documentation,
- * cours copiés), pour que l'écran rende la notation au lieu de l'afficher.
- *
- * L'Input n'est jamais réécrit : seul le rendu change. La grammaire est
- * volontairement courte (titres, listes, tableaux). Le gras relève de
- * `texte-en-gras.ts`, les extraits entre barrières de `blocs-de-texte.ts` : ce
- * module ne voit que de la prose.
+ * La structure markdown d'un dépôt, pour que l'écran rende la notation au lieu
+ * de l'afficher. Grammaire volontairement courte (titres, listes, tableaux) ; le
+ * gras et les extraits de code sont traités ailleurs.
  */
 
 export type ElementDeProse =
@@ -16,22 +12,18 @@ export type ElementDeProse =
   | { type: "liste"; ordonnee: true; depart: number; entrees: string[] }
   | { type: "tableau"; entetes: string[]; lignes: string[][] };
 
-/** Un à six dièses puis une espace. Au-delà de trois, on retombe sur trois. */
+/** Au-delà de trois dièses, on retombe sur trois. */
 const TITRE = /^ {0,3}(#{1,6})\s+(.*)$/;
 
-/** Une puce, quelle que soit la marque qu'on a sous la main. */
 const PUCE = /^ {0,3}[-*•–]\s+(.*)$/;
 
-/** Un numéro, suivi d'un point ou d'une parenthèse. */
 const NUMERO = /^ {0,3}(\d{1,3})[.)]\s+(.*)$/;
 
-/** Une ligne de tableau : elle commence par une barre. */
 const RANGEE = /^ {0,3}\|/;
 
-/** La ligne qui sépare l'en-tête du corps, et qui ne porte rien à lire. */
+/** La ligne qui sépare l'en-tête du corps. */
 const SEPARATRICE = /^ {0,3}\|[\s|:-]*\|?\s*$/;
 
-/** Les cellules d'une rangée, barres de bord retirées. */
 function cellules(ligne: string): string[] {
   return ligne
     .trim()
@@ -42,10 +34,8 @@ function cellules(ligne: string): string[] {
 }
 
 /**
- * Un tableau, à partir des rangées qui se suivent.
- *
- * L'en-tête n'existe que si une ligne séparatrice le suit. Les rangées sont
- * ramenées à la largeur de la plus large, sans trou à droite au rendu.
+ * L'en-tête n'existe que si une ligne séparatrice le suit. Les rangées prennent
+ * la largeur de la plus large, sans trou à droite au rendu.
  */
 function tableauDe(rangees: string[]): ElementDeProse | null {
   const grille = rangees.filter((ligne) => !SEPARATRICE.test(ligne)).map(cellules);
@@ -76,7 +66,7 @@ function natureDe(ligne: string): "titre" | "puce" | "numero" | "rangee" | null 
   return null;
 }
 
-/** Trois niveaux suffisent à un dépôt ; au-delà, on ne sait plus les distinguer. */
+/** Au-delà de trois niveaux, on ne sait plus les distinguer. */
 const NIVEAUX = [1, 2, 3] as const;
 
 function titreDe(ligne: string): ElementDeProse {
@@ -94,10 +84,6 @@ function listeAPuces(lignes: string[]): ElementDeProse {
   };
 }
 
-/**
- * Une liste numérotée, et le numéro par lequel elle commence : un dépôt coupé au
- * milieu d'une énumération reprend à quatre, pas à un.
- */
 function listeNumerotee(lignes: string[]): ElementDeProse {
   const premier = Number(NUMERO.exec(lignes[0] ?? "")?.[1] ?? "1");
 
@@ -109,7 +95,6 @@ function listeNumerotee(lignes: string[]): ElementDeProse {
   };
 }
 
-/** Le bloc que forment des lignes de même nature, une fois qu'elles s'arrêtent. */
 function blocDe(lignes: string[], nature: ReturnType<typeof natureDe>): ElementDeProse[] {
   if (lignes.length === 0) return [];
 
@@ -128,12 +113,7 @@ function blocDe(lignes: string[], nature: ReturnType<typeof natureDe>): ElementD
   return texte.length > 0 ? [{ type: "paragraphe", texte }] : [];
 }
 
-/**
- * Les éléments d'un texte de prose, dans l'ordre où ils s'y trouvent.
- *
- * Une ligne vide ferme ce qui est ouvert, un changement de nature aussi : une
- * puce sous un paragraphe ouvre une liste sans ligne vide, comme on l'écrit.
- */
+/** Un changement de nature ferme le bloc : une puce sous un paragraphe ouvre une liste sans ligne vide. */
 export function elementsDeProse(texte: string): ElementDeProse[] {
   const elements: ElementDeProse[] = [];
   let courant: string[] = [];

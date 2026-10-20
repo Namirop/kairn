@@ -1,16 +1,9 @@
 /**
- * L'étalon débarrassé de l'étiquette que la génération lui met devant.
- *
- * Le modèle ouvre souvent par « Réponse attendue : », sous un intitulé qui dit
- * déjà « la réponse ». On ne retire qu'une étiquette de tête, et seulement si
- * quelque chose la suit : un étalon réduit à « Réponse : » reste tel quel.
- *
- * Le texte à trou a la sienne (« Le terme attendu est « X » : … »), qui redit
- * le terme qu'on vient de lire dans la phrase. Le prompt ne la produit plus,
- * mais les questions déjà stockées la portent encore.
- *
- * Les étiquettes anglaises sont lues avec les françaises sans connaître la
- * langue : aucune n'ouvre une phrase de l'autre langue.
+ * L'étalon débarrassé de l'étiquette de tête que le modèle lui met (« Réponse
+ * attendue : »), seulement si quelque chose la suit. L'étiquette du texte à
+ * trou (« Le terme attendu est « X » : ») n'est plus produite mais reste en
+ * base. Les deux langues sont lues ensemble : aucune étiquette n'ouvre une
+ * phrase de l'autre.
  */
 const ETIQUETTES: readonly RegExp[] = [
   /^\s*(?:l[ae]\s+)?(?:r[eé]ponse(?:\s+(?:attendue?s?|correcte?s?))?|attendu|[eé]talon)\s*[:—-]\s*/i,
@@ -20,12 +13,7 @@ const ETIQUETTES: readonly RegExp[] = [
   /^\s*the\s+(?:expected|missing|hidden)\s+(?:term|word|answer)\s+is\s*[«"“']?[^«»"“”:]{1,60}[»"”']?\s*[:—–-]\s*/i,
 ];
 
-/**
- * Sans son étiquette, la phrase commence souvent en minuscule : on remonte le
- * premier signe en capitale s'il est une lettre minuscule. Du code entre
- * accents graves reste donc tel quel, mais du code nu (`at(-1)` sans accents)
- * serait capitalisé.
- */
+/** Du code entre accents graves reste tel quel ; du code nu serait capitalisé. */
 function enPhrase(texte: string): string {
   const premiere = texte[0] ?? "";
 

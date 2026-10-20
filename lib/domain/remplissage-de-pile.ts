@@ -1,16 +1,10 @@
 /**
- * Combien de pierres une pile compte, et jusqu'où elle est comblée.
- *
- * La pile est plafonnée ; au-delà, une pierre vaut une part du chemin et non une
- * question. La part comblée est continue pour que chaque réponse fasse bouger
- * quelque chose. Sous le plafond, une part vaut une question et la pierre en
- * cours est vide ou pleine : un seul calcul pour les deux régimes.
+ * Combien de pierres une pile compte, et jusqu'où elle est comblée. Au-delà du
+ * plafond, une pierre vaut une part du chemin, comblée en continu pour que
+ * chaque réponse fasse bouger quelque chose ; en deçà, une question.
  */
 
-/**
- * Au-delà, la pile cesse de se lire comme un empilement : sept pierres se
- * voient sans se compter et tiennent dans une colonne sans dominer l'écran.
- */
+/** Sept pierres se voient sans se compter et tiennent dans une colonne. */
 export const PIERRES_MAX = 7;
 
 export type RemplissageDePile = {
@@ -31,8 +25,7 @@ export function remplissageDePile(
   const pierres = Math.max(Math.min(questions, Math.floor(max)), 1);
   const faites = Math.min(Math.max(Math.floor(rang), 0), questions);
 
-  // La multiplication avant la division : `2 / 3 * 3` vaut 1,999...998 en
-  // flottant et poserait une pierre de moins.
+  // Multiplier d'abord : `2 / 3 * 3` vaut 1,999...998 et poserait une pierre de moins.
   const avance = (faites * pierres) / questions;
   const posees = Math.min(Math.floor(avance), pierres);
 

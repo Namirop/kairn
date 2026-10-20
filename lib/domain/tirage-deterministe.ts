@@ -1,12 +1,7 @@
 /**
- * Le hasard reproductible du projet.
- *
- * Ce qui doit paraître irrégulier sans changer entre deux affichages (pierres
- * du cairn, strates, ordre des options d'un QCM) tire d'ici : même graine, même
- * suite, sur n'importe quelle machine.
- *
- * Ne pas modifier ces fonctions : changer la suite réarrangerait les cairns
- * déjà construits.
+ * Le hasard reproductible du projet : même graine, même suite, sur toute
+ * machine. Ne pas modifier : changer la suite réarrangerait les cairns déjà
+ * construits.
  */
 
 /** FNV-1a 32 bits : une chaîne quelconque ramenée à un entier bien étalé. */

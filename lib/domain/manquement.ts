@@ -1,13 +1,8 @@
 /**
- * Ce qu'on peut reprocher à une génération sans jugement humain.
- *
- * Le banc d'évaluation lit ces manquements pour dire « regarde ici ». Ce sont
- * des détecteurs de fumée : ils peuvent rater une mauvaise question, mais ne
- * doivent pas crier sur une bonne.
- *
- * Certaines règles doublent les schémas Zod de `lib/ai/` : le banc juge aussi
- * des sorties qui ne passent pas par `callAI()` (dump, contre-exemple écrit à
- * la main).
+ * Ce qu'on peut reprocher à une génération sans jugement humain. Des détecteurs
+ * de fumée : ils peuvent rater une mauvaise question, pas crier sur une bonne.
+ * Certaines règles doublent les schémas Zod : le banc juge aussi des sorties
+ * qui ne passent pas par `callAI()`.
  */
 export type Manquement = {
   /** Le nom de la règle enfreinte, court, réutilisé d'un rapport à l'autre. */

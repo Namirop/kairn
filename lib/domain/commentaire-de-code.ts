@@ -1,23 +1,13 @@
 /**
- * Où commence le commentaire d'une ligne de code, s'il y en a un.
- *
- * C'est la seule nuance d'un bloc de code : pas de thème de coloration, le
- * produit n'a qu'un accent. Le commentaire est la partie d'une ligne qui ne
- * s'exécute pas, ce qu'on lit plutôt que ce qu'on recopie.
- *
- * Les commentaires en bloc ne sont pas traités : ils demanderaient un état
- * d'une ligne à l'autre, pour un cas presque absent des extraits courts.
+ * Où commence le commentaire d'une ligne de code : la seule nuance d'un bloc,
+ * le produit n'ayant qu'un accent. Les commentaires en bloc ne sont pas
+ * traités : ils demanderaient un état d'une ligne à l'autre, pour un cas rare.
  */
 
-/** Les marques de commentaire d'une ligne, par famille de langage. */
 const DOUBLE_BARRE = ["//"];
 const DIESE = ["#"];
 
-/**
- * Les langages où le dièse ouvre un commentaire. Ailleurs il est fréquent
- * (sélecteur CSS, couleur, directive de préprocesseur) : sans langage, on s'en
- * tient à la double barre.
- */
+/** Ailleurs le dièse est fréquent (CSS, couleur, préprocesseur) : sans langage, double barre. */
 const LANGAGES_A_DIESE = new Set([
   "bash",
   "conf",
@@ -54,11 +44,8 @@ function marques(langage: string | null): string[] {
 }
 
 /**
- * L'indice où commence le commentaire de cette ligne, ou `-1`.
- *
- * La marque doit être hors de toute chaîne, sinon `"https://exemple.fr"` serait
- * coupé en deux. Les trois délimiteurs courants et l'échappement par barre
- * oblique inverse sont suivis.
+ * L'indice du commentaire, ou `-1`. La marque doit être hors de toute chaîne,
+ * sinon `"https://exemple.fr"` serait coupé en deux.
  */
 export function debutDuCommentaire(ligne: string, langage: string | null = null): number {
   const attendues = marques(langage);

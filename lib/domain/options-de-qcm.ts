@@ -1,16 +1,9 @@
 /**
- * Rendre exploitables les options d'un QCM que le modèle vient de rendre.
- *
- * Le nombre d'options et la borne de l'index ne sont que des indications pour
- * le modèle (voir `lib/ai/schema-de-sortie.ts`) : refuser une option de trop
- * ferait perdre tout le lot, appel payé.
- *
- * On garde la bonne réponse et les premières mauvaises jusqu'au compte voulu.
- * Ce n'est pas un ordre d'affichage : il est décidé par
- * `lib/domain/ordre-des-options.ts`.
- *
- * Seul un index qui ne désigne aucune option est irrécupérable (`null`) : la
- * bonne réponse est inconnue.
+ * Rendre exploitables les options d'un QCM rendu par le modèle. Leur nombre
+ * n'est qu'une indication pour lui (`lib/ai/schema-de-sortie.ts`) : refuser une
+ * option de trop perdrait le lot, appel payé. L'ordre rendu n'est pas celui
+ * d'affichage (`ordre-des-options.ts`). Seul un index hors des options est
+ * irrécupérable (`null`).
  */
 
 export const OPTIONS_PAR_QCM = 4;
@@ -23,11 +16,8 @@ function telQuAffiche(option: string): string {
 }
 
 /**
- * Les options affichent-elles au moins deux textes différents ? Un modèle peut
- * abréger toutes ses options en « ... ».
- *
- * Seuls les espaces sont normalisés, car c'est l'affichage qui compte :
- * `at(-1)` et `at(1)` restent deux réponses différentes.
+ * Un modèle peut abréger toutes ses options en « ... ». Seuls les espaces sont
+ * normalisés : `at(-1)` et `at(1)` restent deux réponses différentes.
  */
 export function optionsDistinguables(options: readonly string[]): boolean {
   return new Set(options.map(telQuAffiche)).size >= 2;

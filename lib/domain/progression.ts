@@ -1,40 +1,29 @@
 import { jourSuivant } from "./jour-local";
 
 /**
- * XP, niveaux et série.
- *
- * Rien ici ne mesure la justesse : un score qui punit l'échec pousse à éviter
- * les sujets durs et à s'auto-noter généreusement sur les formats libres. On
- * compte l'effort, qui ne se triche pas. L'entraînement ne rapporte rien : il
- * ne doit pas devenir plus attirant que la session.
+ * XP, niveaux et série. Rien ne mesure la justesse : punir l'échec pousse à
+ * éviter les sujets durs et à s'auto-noter large. L'entraînement ne rapporte
+ * rien, pour ne pas devenir plus attirant que la session.
  */
 
-/** Un passage en session du jour. C'est l'unité : être venu, pas avoir eu bon. */
+/** L'unité : être venu, pas avoir eu bon. */
 export const XP_PAR_PASSAGE = 1;
 
 /**
- * Le bonus d'un concept raté au passage précédent et retrouvé maintenant. Le
- * résultat ne compte que dans ce sens : rater ne coûte jamais rien, sans quoi
- * la meilleure stratégie serait de ne réviser que le facile.
+ * Raté au passage précédent, retrouvé maintenant. Rater ne coûte jamais rien,
+ * sans quoi la meilleure stratégie serait de ne réviser que le facile.
  */
 export const XP_DE_RATTRAPAGE = 1;
 
-/** Ce que coûte le passage du niveau 1 au niveau 2. Chaque palier ajoute autant. */
+/** Du niveau 1 au 2 ; chaque palier ajoute autant. */
 export const XP_DU_PREMIER_PALIER = 20;
 
-/**
- * L'XP d'un passage en session.
- *
- * `ratePrecedemment` regarde le passage d'avant sur ce concept, pas celui-ci.
- */
+/** `ratePrecedemment` regarde le passage d'avant sur ce concept, pas celui-ci. */
 export function xpDuPassage(ratePrecedemment: boolean, reussiMaintenant: boolean): number {
   return XP_PAR_PASSAGE + (ratePrecedemment && reussiMaintenant ? XP_DE_RATTRAPAGE : 0);
 }
 
-/**
- * L'XP cumulée qu'il faut pour atteindre un niveau : somme arithmétique, le
- * niveau 2 coûte 20, le 3 en coûte 40 de plus, le 4 encore 60.
- */
+/** Cumulée, en somme arithmétique : 20 pour le niveau 2, 40 de plus pour le 3. */
 export function xpDuNiveau(niveau: number): number {
   const rang = Math.max(1, Math.floor(niveau));
 
@@ -49,13 +38,7 @@ export type Progression = {
   seuilSuivant: number;
 };
 
-/**
- * Le niveau atteint avec cette XP.
- *
- * L'estimation inverse la somme arithmétique, puis les boucles la corrigent
- * d'un cran : la racine flottante n'atterrit pas toujours du bon côté d'un
- * palier.
- */
+/** Les boucles corrigent la racine flottante, qui peut tomber du mauvais côté d'un palier. */
 export function progressionPourXp(xp: number): Progression {
   const acquis = Math.max(0, Math.floor(xp));
   let niveau = Math.max(
@@ -71,23 +54,17 @@ export function progressionPourXp(xp: number): Progression {
 
 export type AvancementDuNiveau = {
   niveau: number;
-  /** Part du palier courant déjà parcourue, entre 0 et 1. */
+  /** Entre 0 et 1. */
   part: number;
-  /** XP qu'il reste à gagner avant le palier suivant. */
   restant: number;
 };
 
-/**
- * Où l'on en est dans son niveau : la part parcourue et ce qu'il reste, que
- * le cumul seul ne permet pas de situer.
- */
 export function avancementDuNiveau(xp: number): AvancementDuNiveau {
   const acquis = Math.max(0, Math.floor(xp));
   const { niveau, seuilDuNiveau, seuilSuivant } = progressionPourXp(acquis);
   const palier = seuilSuivant - seuilDuNiveau;
 
-  // Impossible avec la courbe actuelle, mais une division par zéro rendrait
-  // NaN et une barre invisible.
+  // Impossible avec cette courbe, mais NaN rendrait une barre invisible.
   if (palier <= 0) return { niveau, part: 1, restant: 0 };
 
   return {
@@ -98,15 +75,10 @@ export function avancementDuNiveau(xp: number): AvancementDuNiveau {
 }
 
 /**
- * Un jour où quelque chose attendait est-il passé sans personne ? La série
- * compte les rendez-vous tenus, pas les jours du calendrier.
- *
- * Il faut les deux conditions : un jour sauté (revenir le lendemain ne manque
- * jamais rien, même après une session qui a débordé du plafond), et une
- * échéance antérieure à aujourd'hui, donc en attente pendant le trou.
- *
- * Les échéances sont des jours civils `AAAA-MM-JJ` de l'utilisateur : l'ordre
- * lexicographique est l'ordre chronologique, sans repasser par un fuseau.
+ * La série compte les rendez-vous tenus, pas les jours. Il faut un jour sauté
+ * (revenir le lendemain ne manque rien, même après une session qui a débordé du
+ * plafond) et une échéance en attente pendant le trou. Les `AAAA-MM-JJ` se
+ * comparent dans l'ordre lexicographique, qui est chronologique.
  */
 export function unRendezVousManque(
   joursDEcheance: string[],
@@ -119,14 +91,9 @@ export function unRendezVousManque(
 }
 
 /**
- * La série après un passage, dans le calendrier de l'utilisateur.
- *
- * Les jours sont des étiquettes `AAAA-MM-JJ`, jamais des instants : 23 h 50
- * puis 00 h 10 font deux jours, et les changements d'heure n'y font rien. Une
- * seule révision suffit à tenir la série.
- *
- * Un trou ne la casse que si quelque chose attendait (`unRendezVousManque`) :
- * le produit demande de revenir quand on est appelé, pas tous les jours.
+ * Les jours sont des étiquettes, jamais des instants : 23 h 50 puis 00 h 10 font
+ * deux jours. Un trou ne casse la série que si quelque chose attendait : on
+ * demande de revenir quand on est appelé, pas tous les jours.
  */
 export function serieApresPassage(
   dernierJour: string | null,

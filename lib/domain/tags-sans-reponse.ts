@@ -1,21 +1,12 @@
 import { motsNormalises } from "./mots-normalises";
 
 /**
- * Les étiquettes d'un concept, moins celles qui donnent la réponse
- * (`EFFET-MAGNUS` au-dessus d'un QCM dont « Effet Magnus » est la bonne option).
- *
- * Retirées à l'affichage seulement : le concept les garde pour le classement et
- * l'alternance des sujets. En cas de doute on retire ; une étiquette de trop
- * montrée coûte la question, une de trop retirée ne coûte rien.
- *
- * Les deux côtés passent par `motsNormalises` : `EFFET-MAGNUS` et « effet
- * Magnus » s'y rejoignent.
+ * Les étiquettes d'un concept, moins celles qui donnent la réponse. À
+ * l'affichage seulement : le concept les garde pour le classement. En cas de
+ * doute on retire ; une étiquette de trop montrée coûte la question.
  */
 
-/**
- * Sous cette longueur, une étiquette (« js », « ui ») se retrouve partout par
- * hasard sans rien trahir.
- */
+/** En deçà, une étiquette (« js », « ui ») se retrouve partout sans rien trahir. */
 const LONGUEUR_MINIMALE = 4;
 
 export function tagsSansReponse(tags: string[], reponses: (string | null | undefined)[]): string[] {

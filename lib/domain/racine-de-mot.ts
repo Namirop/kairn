@@ -1,19 +1,12 @@
 import { aplati } from "./texte-aplati";
 
 /**
- * La racine grossière d'un mot, pour comparer deux textes sans buter sur les
- * accords : on coupe une terminaison connue et on s'arrête là (« exécution »,
- * « exécutent » → `execut`). Pas de la lemmatisation.
- *
- * Faite pour comparer deux phrases voisines du même modèle (voir
- * `etalon-utile.ts`), pas pour une recherche ou un index : elle rapproche des
- * mots sans lien (« est » et « et »). L'anglais passe par la même liste.
+ * Une racine grossière : une terminaison coupée, pas de lemmatisation. Faite
+ * pour comparer deux phrases voisines (`etalon-utile.ts`), pas pour un index :
+ * elle rapproche « est » et « et ». L'anglais passe par la même liste.
  */
 
-/**
- * Les terminaisons, de la plus longue à la plus courte. La première qui tombe
- * est la seule qu'on coupe : on ne dérive pas en cascade.
- */
+/** De la plus longue à la plus courte ; seule la première qui tombe est coupée. */
 const TERMINAISONS = [
   "issements",
   "issement",
@@ -42,10 +35,7 @@ const TERMINAISONS = [
   "s",
 ] as const;
 
-/**
- * En deçà, on ne coupe plus : une racine vide ne compare rien. Bas exprès, pour
- * que « le »/« les » ou « de »/« des » se rejoignent.
- */
+/** Bas exprès, pour que « le »/« les » ou « de »/« des » se rejoignent. */
 const RACINE_MINIMUM = 1;
 
 export function racineDeMot(mot: string): string {

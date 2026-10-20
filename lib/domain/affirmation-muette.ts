@@ -1,14 +1,8 @@
 /**
- * Une affirmation dont on ne sait pas si elle est vraie.
- *
- * Un vrai ou faux tient son verdict de `estVraie`. Sans lui, la question
- * retombe en question ouverte, et une affirmation fausse par construction se
- * lit comme le concept à retenir : le produit fixerait une contre-vérité.
- *
- * Le schéma n'oblige pas le modèle à rendre `estVraie` (l'écriture, elle, est
- * traitée dans `payloadDe`, `lib/db/variants.ts`) : ce filtre empêche une telle
- * question d'atteindre la base. La facette manquante revient à la réécriture
- * suivante.
+ * Un vrai ou faux sans `estVraie` retombe en question ouverte : une affirmation
+ * fausse s'y lirait comme le concept à retenir. Le schéma n'oblige pas le modèle
+ * à le rendre, donc ce filtre l'arrête avant la base ; la facette revient à la
+ * réécriture suivante.
  */
 
 /** Un lot débarrassé des affirmations qui ne disent pas leur verdict. */

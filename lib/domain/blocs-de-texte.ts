@@ -2,10 +2,7 @@ import { lignesRecollees } from "./lignes-recollees";
 
 /**
  * Un texte déposé, séparé en prose et en blocs de code entre barrières (```).
- *
- * Ce découpage passe avant `segmentsDeCode`, qui ne connaît que le code en
- * ligne et lirait un bloc comme une suite de jetons sans rapport. Le code se
- * garde tel quel ; la prose se recolle.
+ * Passe avant `segmentsDeCode`, qui lirait un bloc comme des jetons sans rapport.
  */
 
 export type BlocDeTexte =

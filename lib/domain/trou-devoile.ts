@@ -1,28 +1,16 @@
 import { normaliserReponse, TROU } from "./reponse-cloze";
 
 /**
- * Le terme masqué qu'on peut lire ailleurs dans sa propre phrase : la question
- * ne demande plus de savoir, seulement de recopier.
- *
- * `bord-du-trou.ts` traite les mots collés au trou, qui cassent la comparaison ;
- * ici on regarde le reste de la phrase, où rien n'est cassé mais rien n'est
- * plus testé.
- *
- * La comparaison passe par `normaliserReponse`, celle qui note les réponses : la
- * question est de savoir si recopier serait compté juste.
+ * Le terme masqué qu'on peut lire ailleurs dans sa phrase, où il suffit de
+ * recopier (`bord-du-trou.ts` traite les mots collés au trou). On compare avec
+ * `normaliserReponse`, celle qui note : recopier serait-il compté juste ?
  */
 
-/** Les mots d'un texte, normalisés comme une réponse. Vide si le texte l'est. */
 function mots(texte: string): string[] {
   return normaliserReponse(texte).split(" ").filter(Boolean);
 }
 
-/**
- * La suite `aiguille` apparaît-elle telle quelle dans `meule` ?
- *
- * On cherche le terme entier, mot à mot : pour « sommeil paradoxal », un
- * « sommeil » répété seul ne dévoile rien.
- */
+/** Le terme entier : un « sommeil » seul ne dévoile pas « sommeil paradoxal ». */
 function contient(meule: readonly string[], aiguille: readonly string[]): boolean {
   if (aiguille.length === 0 || aiguille.length > meule.length) return false;
 
@@ -33,10 +21,6 @@ function contient(meule: readonly string[], aiguille: readonly string[]): boolea
   );
 }
 
-/**
- * Le terme attendu est-il écrit ailleurs dans la phrase trouée ?
- * Le trou est retiré avant la recherche ; une phrase sans trou ne dévoile rien.
- */
 export function trouDevoileSaReponse(phrase: string, terme: string): boolean {
   if (!phrase.includes(TROU)) return false;
 
@@ -45,11 +29,7 @@ export function trouDevoileSaReponse(phrase: string, terme: string): boolean {
   return contient(reste, mots(terme));
 }
 
-/**
- * Un mot de la phrase d'origine, avec ses bornes, pour rendre une phrase et non
- * un verdict. Un caractère appartient à un mot dès qu'il survit à
- * `normaliserReponse` : mêmes coupes que `mots`.
- */
+/** Un mot avec ses bornes dans l'original ; mêmes coupes que `mots`. */
 type MotSitue = { mot: string; debut: number; fin: number };
 
 function motsSitues(texte: string): MotSitue[] {
@@ -77,10 +57,7 @@ function motsSitues(texte: string): MotSitue[] {
 
 type Place = { debut: number; fin: number };
 
-/**
- * Où le terme est écrit en clair dans la phrase, sans chevauchement. Le trou ne
- * porte aucune lettre : chaque place relevée est une occurrence de trop.
- */
+/** Sans chevauchement. Le trou ne porte aucune lettre : chaque place est de trop. */
 function placesDuTerme(phrase: string, attendu: readonly string[]): Place[] {
   const situes = motsSitues(phrase);
   const places: Place[] = [];
@@ -104,15 +81,10 @@ function placesDuTerme(phrase: string, attendu: readonly string[]): Place[] {
 }
 
 /**
- * La phrase dont les autres occurrences du terme sont masquées à leur tour.
- *
- * Réparé à la lecture, comme `trouSansRedite`, parce que les questions déjà en
- * base sont servies telles quelles. On masque plutôt que jeter : jeter coûterait
- * au concept le seul format qui force une récupération en mémoire (voir
- * `emplacement-du-trou.ts`).
- *
- * Si plus aucun mot ne restait visible, la phrase d'origine est rendue : deux
- * trous bout à bout ne sont pas une question. `controlerQuestion` la signale.
+ * Réparé à la lecture, pour couvrir les questions déjà en base. On masque
+ * plutôt que jeter : ce format est le seul qui force une récupération en
+ * mémoire (`emplacement-du-trou.ts`). Si plus rien ne reste visible, la phrase
+ * d'origine est rendue, et `controlerQuestion` la signale.
  */
 export function phraseSansDevoilement(phrase: string, terme: string): string {
   if (!phrase.includes(TROU)) return phrase;

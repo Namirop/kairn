@@ -1,11 +1,8 @@
 /**
  * Le chemin où mener quelqu'un après la connexion, lu dans l'URL : il vient du
- * client, donc il ne doit jamais sortir du site.
- *
- * Tester « commence par `/` mais pas `//` » ne suffit pas : les navigateurs
- * lisent `/\evil.com` et `/<tab>/evil.com` comme `//evil.com`. On refuse donc
- * la barre inverse et les caractères de contrôle, puis on résout le chemin
- * contre une origine fictive et on exige qu'il y reste.
+ * client et ne doit jamais sortir du site. Refuser `//` ne suffit pas, les
+ * navigateurs lisent `/\evil.com` et `/<tab>/evil.com` comme `//evil.com` :
+ * d'où le filtre, puis la résolution contre une origine fictive.
  */
 
 const ORIGINE_FICTIVE = "https://kairn.invalid";

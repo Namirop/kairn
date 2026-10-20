@@ -1,9 +1,8 @@
 import type { Catalogue, EtapeDeLAttente } from "./catalogue-dattente";
 
 /**
- * Les phrases d'attente en anglais, écrites pour l'anglais et non calquées : même
- * ton, mais une phrase drôle ne l'est pas mot pour mot. Les paliers suivent le
- * catalogue français ; les tests de `phrases-dattente` vérifient la structure.
+ * Écrites pour l'anglais, pas traduites : une phrase drôle ne l'est pas mot pour
+ * mot. Les paliers suivent le catalogue français (testés dans `phrases-dattente`).
  */
 
 const LECTURE: Catalogue = [
