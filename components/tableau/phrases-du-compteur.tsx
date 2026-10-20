@@ -4,12 +4,8 @@ import { ROUTES } from "@/lib/auth/routes";
 import { PLAFOND_SESSION } from "@/lib/domain/selection-session";
 
 /**
- * La phrase du compteur, quand il est à zéro. Quatre zéros distincts : rien
- * déposé, questions en cours d'écriture, journée faite, rien à revoir.
- *
- * La journée faite se reconnaît à ce qu'on a revu quelque chose : le plafond
- * est journalier, et la phrase « calme » serait fausse si des concepts
- * attendent derrière lui.
+ * Le compteur à zéro. La journée faite se reconnaît à ce qu'on a revu : le
+ * plafond est journalier, « calme » serait faux si des concepts attendent derrière.
  */
 export function PhraseDuJour({
   aDesAtoms,
@@ -31,11 +27,7 @@ export function PhraseDuJour({
   return <>{t("calme")}</>;
 }
 
-/**
- * Pourquoi des concepts dus ne seront pas servis aujourd'hui. Le plafond cité
- * est celui de la personne, qui se règle. La journée entamée n'est pas redite
- * ici : c'est `PhraseDuJour` qui la porte.
- */
+/** Le plafond cité est celui de la personne ; la journée entamée, `PhraseDuJour` la dit. */
 export function PourquoiCertainsAttendent({
   enAttente,
   plafond,

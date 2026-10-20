@@ -1,15 +1,9 @@
 import { cadreDuSymbole, empilementDuLogo, nuanceDuRang } from "@/lib/design/marque";
 
 /**
- * L'empilement du logo. Il diffère du cairn du tableau de bord sur deux points.
- *
- * La nuance est imposée par le rang, pas tirée : un logo demande une
- * dégradation franche, la plus sombre en bas.
- *
- * Le sommet est une pierre entièrement lichen, et non une arête : à 16 px, une
- * arête d'un pixel et demi disparaît. Il ne s'inverse pas sur fond sombre ; sur
- * la roche, il porte environ 7 contre 1, au-dessus des 3 exigés d'un objet
- * graphique.
+ * Contrairement au cairn du tableau de bord : nuance imposée par le rang (un logo
+ * veut une dégradation franche) et sommet tout lichen, car à 16 px une arête
+ * disparaît. Le lichen ne s'inverse pas : ~7:1 sur la roche, au-dessus des 3:1.
  */
 
 const NUANCES = ["fill-stone-900", "fill-stone-800", "fill-stone-700"] as const;
@@ -22,7 +16,7 @@ export function SymboleDeMarque({
   className,
 }: {
   pierres: number;
-  /** La hauteur rendue, en pixels. */
+  /** Hauteur, en pixels. */
   taille: number;
   clair?: boolean;
   className?: string;

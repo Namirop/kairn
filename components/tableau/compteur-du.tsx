@@ -6,14 +6,9 @@ import type { ChargeDuJour } from "@/lib/domain/selection-session";
 import { PhraseDuJour, PourquoiCertainsAttendent } from "./phrases-du-compteur";
 
 /**
- * Ce qu'il y a à revoir aujourd'hui : le chiffre, souligné d'un filet d'accent,
- * puis sa phrase.
- *
- * Le chiffre est celui de la session, pas celui du retard : un retard de 38
- * décourage quand la session en servira 20, et le reste revient demain sans
- * perte. Le total reste dit sous le compteur, le cacher serait mentir.
- *
- * Ses phrases à zéro et en attente vivent dans `phrases-du-compteur.tsx`.
+ * Le chiffre est celui de la session, pas du retard : 38 en retard découragent
+ * quand la session en sert 20, et le reste revient demain sans perte. Le total
+ * reste dit dessous : le cacher serait mentir.
  */
 export function CompteurDu({
   charge,
@@ -25,15 +20,10 @@ export function CompteurDu({
 }: {
   charge: ChargeDuJour;
   aDesAtoms: boolean;
-  /** Combien de concepts n'ont pas encore une seule question écrite. */
   conceptsSansQuestions: number;
-  /** Le plafond de session du compte, et ce qu'il en reste consommé aujourd'hui. */
   plafond: number;
   faitsAujourdhui: number;
-  /**
-   * Le signal de dette est affiché juste en dessous : il dit déjà ce qui attend,
-   * en mieux, et la phrase d'attente ferait doublon.
-   */
+  /** Affiché juste dessous, il dit mieux ce qui attend : la phrase d'attente se tait. */
   detteSignalee: boolean;
 }) {
   const { aujourdhui, enAttente } = charge;
@@ -41,8 +31,7 @@ export function CompteurDu({
   const t = useTranslations("tableau.aujourdhui");
 
   return (
-    // Centré sur une colonne, au fer à gauche en deux colonnes (un seul axe de
-    // lecture par écran). Le point de bascule est celui de la grille.
+    // Un seul axe de lecture par écran ; la bascule est celle de la grille.
     <section aria-labelledby="titre-aujourdhui" className="text-center md:text-left">
       <h1
         id="titre-aujourdhui"
@@ -51,9 +40,8 @@ export function CompteurDu({
         {t("titre")}
       </h1>
 
-      {/* Interlignage sous un : des chiffres n'ont pas de jambage, et une ligne
-          pleine éloignerait l'étiquette du nombre qu'elle nomme. Échelle :
-          `--t-compteur`. */}
+      {/* Sous un : des chiffres n'ont pas de jambage, une ligne pleine
+          éloignerait l'étiquette du nombre. */}
       <p className="mt-pas-2 font-display text-compteur leading-[0.8] font-bold tabular-nums">
         {aujourdhui}
       </p>
@@ -77,8 +65,7 @@ export function CompteurDu({
         </p>
       ) : null}
 
-      {/* Des concepts encore sans question : sans cette phrase, ils
-          manqueraient à la session sans explication. */}
+      {/* Sinon ces concepts manqueraient à la session sans explication. */}
       {questionsEnRoute && aujourdhui > 0 ? (
         <p className="mt-pas-2 text-petit mx-auto text-stone-500 md:mx-0">
           {t("compteur.sansQuestions", { nombre: conceptsSansQuestions })}
@@ -90,8 +77,8 @@ export function CompteurDu({
           <Link href={ROUTES.reviser}>{t("compteur.commencer")}</Link>
         </Button>
       ) : aDesAtoms && !questionsEnRoute ? (
-        // L'entraînement ne se propose que quand la session n'a rien à donner :
-        // côte à côte, les deux boutons auraient l'air de se valoir.
+        // Seulement quand la session n'a rien à donner : côte à côte, les deux
+        // boutons auraient l'air de se valoir.
         <div className="mt-pas-6 flex flex-col items-center md:items-start">
           <Button asChild size="lg" variant="outline" className="w-full md:w-fit">
             <Link href={ROUTES.entrainement}>{t("compteur.entrainer")}</Link>

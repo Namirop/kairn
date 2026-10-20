@@ -7,10 +7,7 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/fusion-des-classes";
 
-/**
- * Dialogue retokenisé. Voile de pierre plutôt que noir pur, angles taillés,
- * aucune ombre portée : le panneau se détache par le contraste de surface.
- */
+/** Aucune ombre portée : le panneau se détache par le contraste de surface. */
 
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
@@ -45,9 +42,8 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "gap-pas-4 p-pas-6 rounded-carte bg-surface-papier fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 outline-none",
-          // Garde-fou : une fenêtre plus haute que l'écran défile en elle-même,
-          // sinon centrée elle serait coupée en bas, là où est le bouton qui
-          // valide. Le contenu doit quand même tenir sans défiler.
+          // Garde-fou : centrée et trop haute, elle perdrait son bas, où est le
+          // bouton qui valide. Le contenu doit quand même tenir sans défiler.
           "max-h-[calc(100dvh-2rem)] overflow-y-auto",
           "data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
           className,

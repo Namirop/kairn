@@ -6,11 +6,7 @@ import { ROUTES } from "@/lib/auth/routes";
 import type { PageDeSignalements } from "@/lib/db/signalement";
 import { cn } from "@/lib/fusion-des-classes";
 
-/**
- * Les signalements de questions, les plus récents d'abord. L'empreinte de
- * prompt de chaque ligne rattache une série de plaintes à un réglage précis.
- * Paginée court : un signalement se lit en entier, cinq occupent déjà un écran.
- */
+/** Paginée court : un signalement se lit en entier, cinq occupent déjà un écran. */
 export function BlocSignalements({ page }: { page: PageDeSignalements }) {
   return (
     <Section
@@ -66,10 +62,7 @@ function Pagination({ page }: { page: PageDeSignalements }) {
   );
 }
 
-/**
- * Un bout de page qui n'existe pas ne s'affiche pas : un lien mort resterait
- * atteignable au clavier. La grille garde sa place, le rang de page ne bouge pas.
- */
+/** Pas de lien mort, qui resterait atteignable au clavier ; la grille garde sa place. */
 function Rang({ cible, actif, children }: { cible: number; actif: boolean; children: string }) {
   if (!actif) return <span aria-hidden />;
 

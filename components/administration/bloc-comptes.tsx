@@ -3,11 +3,7 @@ import { Mesure, Section } from "@/components/administration/section";
 import { nombre } from "@/components/administration/formats";
 import type { BlocComptes as Chiffres } from "@/lib/db/administration";
 
-/**
- * Qui a un compte, et qui s'en sert, côte à côte : l'écart entre inscriptions
- * et comptes actifs est le signal le plus précoce. Le total et les actifs sur
- * sept jours sont dans le bandeau, pas ici.
- */
+/** Côte à côte : l'écart entre inscriptions et actifs est le signal le plus précoce. */
 export function BlocComptes({ chiffres }: { chiffres: Chiffres }) {
   return (
     <Section

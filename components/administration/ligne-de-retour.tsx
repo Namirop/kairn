@@ -11,9 +11,8 @@ import type { RetourLu } from "@/lib/db/retour";
 import { LIBELLE_DE_SUJET } from "@/lib/retours/libelle-du-sujet";
 
 /**
- * Un retour, tel qu'on le relit. La capture est dans un `<details>` : l'image
- * n'est chargée qu'à l'ouverture, sans JavaScript. « Traité » se bascule dans
- * les deux sens, pour qu'un mauvais clic ne sorte pas un retour de la pile.
+ * `<details>` : l'image ne charge qu'à l'ouverture, sans JavaScript. « Traité »
+ * se bascule dans les deux sens : un mauvais clic ne sort rien de la pile.
  */
 
 const JOUR = new Intl.DateTimeFormat("fr-BE", { dateStyle: "medium", timeStyle: "short" });
@@ -52,8 +51,7 @@ export function LigneDeRetour({ retour }: { retour: RetourLu }) {
             Voir la capture
           </summary>
 
-          {/* Sans dimensions imposées : téléphone, écran large ou recadrage, en
-              fixer les déformerait. */}
+          {/* Sans dimensions : téléphone ou écran large, les fixer déformerait. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`/api/admin/retours/${retour.id}/capture`}

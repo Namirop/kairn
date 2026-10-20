@@ -11,14 +11,9 @@ import type { SujetDeRetour } from "@/lib/db/types";
 import { MESSAGE_MAX } from "@/lib/domain/retour-sur-le-produit";
 
 /**
- * Un retour sur le produit, depuis les réglages. Distinct du signalement d'une
- * question (écran de révision), qui retire une formulation du tirage : ceci ne
- * retire rien.
- *
- * Le formulaire demande le strict minimum : sujet présélectionné, écran et
- * capture facultatifs. La taille de la fenêtre et le navigateur partent avec,
- * pour reproduire un défaut d'affichage ; rien d'autre (ni adresse, ni contenu
- * déposé).
+ * Un retour sur le produit : contrairement au signalement d'une question, il ne
+ * retire rien du tirage. La fenêtre et le navigateur partent avec, pour
+ * reproduire un défaut d'affichage ; rien d'autre (ni adresse, ni contenu).
  */
 /** Rien à écouter : les valeurs se relisent au rendu. */
 function sansAbonnement(): () => void {
@@ -36,9 +31,8 @@ export function UnRetour() {
   const fichier = useRef<HTMLInputElement>(null);
   const t = useTranslations("compte.retour");
 
-  // Ces trois valeurs n'existent pas au rendu serveur : il rend des zéros, et le
-  // client ne pose les vraies qu'après l'hydratation. Lues à chaque rendu, sans
-  // écouter le redimensionnement : c'est l'état au moment de l'envoi qui compte.
+  // Absentes au rendu serveur : des zéros, puis les vraies après hydratation.
+  // Sans écoute du redimensionnement : seul compte l'état à l'envoi.
   const largeur = useSyncExternalStore(
     sansAbonnement,
     () => window.innerWidth,
@@ -55,8 +49,7 @@ export function UnRetour() {
     () => "",
   );
 
-  // Le champ natif appartient à ce composant : c'est ici qu'on le vide, pour
-  // pouvoir rejoindre un même fichier après l'avoir retiré.
+  // Vider le champ natif, pour pouvoir rejoindre le même fichier après retrait.
   function retirerLaCapture() {
     setCapture(null);
     if (fichier.current) fichier.current.value = "";
@@ -81,8 +74,7 @@ export function UnRetour() {
         <textarea
           id="retour-message"
           name="message"
-          // La saisie refusée revient telle quelle : on la corrige, on ne la
-          // retape pas.
+          // La saisie refusée revient telle quelle, à corriger sans la retaper.
           defaultValue={etat.message ?? ""}
           key={etat.message ?? "message"}
           rows={4}
@@ -133,7 +125,7 @@ export function UnRetour() {
   );
 }
 
-/** La capture, facultative : on n'en garde que le nom, le champ porte le fichier. */
+/** On n'en garde que le nom : le champ porte le fichier. */
 function CaptureDuRetour({
   capture,
   onCapture,

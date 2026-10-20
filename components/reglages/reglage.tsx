@@ -1,11 +1,8 @@
 import { Label } from "@/components/ui/label";
 
 /**
- * Une décision : son nom, ce qu'elle change, son contrôle, et sa suite.
- *
- * L'explication n'a pas de `max-w` : la carte la borne déjà, et le panneau
- * tient la mesure de lecture. Une seconde borne laissait un vide à droite de
- * chaque phrase.
+ * L'explication n'a pas de `max-w` : le panneau tient déjà la mesure, une
+ * seconde borne laisserait un vide à droite de chaque phrase.
  */
 export function Reglage({
   nom,

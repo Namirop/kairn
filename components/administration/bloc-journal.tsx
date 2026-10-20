@@ -4,10 +4,8 @@ import { ABSENT } from "@/components/administration/formats";
 import type { LigneDeJournal } from "@/lib/db/reglages";
 
 /**
- * Ce qui a été changé, par qui, et depuis quelle valeur.
- *
- * Un réglage qui se change en un clic doit laisser une trace. Un tiret dans une
- * colonne veut dire « rendu à la valeur d'environnement ».
+ * Un réglage qui se change en un clic laisse une trace. Un tiret veut dire
+ * « rendu à la valeur d'environnement ».
  */
 export function BlocJournal({ lignes }: { lignes: LigneDeJournal[] }) {
   if (lignes.length === 0) {

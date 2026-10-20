@@ -3,9 +3,8 @@ import * as React from "react";
 import { cn } from "@/lib/fusion-des-classes";
 
 /**
- * Champ retokenisé. Le trait sous le champ est plus marqué que son contour :
- * on lit une ligne à remplir, pas une boîte. 44 px de haut, taille 16 px sur
- * mobile pour que Safari ne zoome pas à la mise au point.
+ * Le trait du bas, plus marqué, fait lire une ligne à remplir, pas une boîte.
+ * 16 px sur mobile : en deçà, Safari zoome à la mise au point.
  */
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (

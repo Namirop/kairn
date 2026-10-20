@@ -1,14 +1,8 @@
 /**
- * Les surfaces, et ce qu'elles emportent.
- *
- * Une page est une pile de panneaux, et chaque panneau porte l'une d'elles :
- * c'est le changement de fond qui sépare deux sujets, jamais un filet.
- *
- * `session` est le sol d'un seul écran, celui de la session, où la carte de la
- * question est posée comme un objet. Aucun autre écran ne la prend.
- *
- * Le tableau dit aussi l'encre et le texte second de chaque surface : un
- * panneau sombre qui hériterait des gris du papier serait illisible.
+ * Les surfaces et ce qu'elles emportent. C'est le changement de fond qui sépare
+ * deux sujets, jamais un filet. `session` n'est le sol que de la session.
+ * Chaque surface porte ses encres : un panneau sombre aux gris du papier serait
+ * illisible.
  */
 
 export type Surface = "papier" | "ombre" | "givre" | "roche" | "session";
@@ -19,7 +13,7 @@ type Habillage = {
   second: string;
   /** Le grain se pose en multiply sur les clairs, en overlay sur la roche. */
   grain: string;
-  /** Ce qu'on pose sur cette surface pour qu'un objet s'en détache. */
+  /** Le fond d'un objet qui doit se détacher de cette surface. */
   objet: string;
   sombre: boolean;
 };
@@ -49,10 +43,7 @@ export const SURFACES: Record<Surface, Habillage> = {
     objet: "bg-surface-papier",
     sombre: false,
   },
-  /*
-    Le texte second fonce d'un cran : sur cet aplat teinté, le gris réglé pour
-    le papier passe sous le seuil de contraste.
-  */
+  // Un cran plus foncé : le gris du papier passe ici sous le seuil de contraste.
   session: {
     fond: "bg-surface-session",
     encre: "text-stone-900",
@@ -66,16 +57,13 @@ export const SURFACES: Record<Surface, Habillage> = {
     encre: "text-stone-50",
     second: "text-stone-300",
     grain: "grain grain-clair",
-    /*
-      Plus clair que la roche et non plus sombre : sur une surface sombre, un
-      objet posé capte la lumière, il ne creuse pas.
-    */
+    // Plus clair : sur du sombre, un objet posé capte la lumière, il ne creuse pas.
     objet: "bg-stone-700",
     sombre: true,
   },
 };
 
-/** La variable CSS d'une surface, pour ce qui se calcule hors classe Tailwind. */
+/** Pour ce qui se calcule hors classe Tailwind. */
 export function variableDe(surface: Surface): string {
   return `var(--surface-${surface})`;
 }

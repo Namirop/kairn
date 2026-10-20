@@ -10,11 +10,7 @@ export type Frapper = (depuis: Point, vers: Point, vitesse: number) => void;
 /** Au-delà, un geste est considéré comme un coup porté. */
 const VITESSE_MINIMALE = 40;
 
-/**
- * Vitesse d'un geste entre deux points du viewBox, ou `null` si elle reste sous
- * le seuil d'un coup. La durée est bornée par le bas : deux événements trop
- * rapprochés ne doivent pas donner une vitesse infinie.
- */
+/** `null` sous le seuil. Durée bornée : deux événements collés donneraient l'infini. */
 function vitesseDuCoup(depuis: Point, vers: Point, dureeMs: number): number | null {
   const dt = Math.max(dureeMs / 1000, 1 / 240);
   const vitesse = Math.hypot(vers.x - depuis.x, vers.y - depuis.y) / dt;
@@ -22,21 +18,13 @@ function vitesseDuCoup(depuis: Point, vers: Point, dureeMs: number): number | nu
   return vitesse < VITESSE_MINIMALE ? null : vitesse;
 }
 
-/**
- * Capte les gestes portés au cairn — souris, stylet, appui et balayage au
- * doigt — et les transmet à `frapper`.
- */
+/** Souris, stylet, appui et balayage au doigt, transmis à `frapper`. */
 export function useGestesSurLeCairn(actif: boolean, tenu: boolean, frapper: Frapper) {
   const refSvg = useRef<SVGSVGElement>(null);
-  /**
-   * La zone qui dit si un geste est parti du cairn. Elle est plus large que le
-   * dessin : le geste qui fauche commence à côté des pierres. Voir la bande de
-   * prise dans `CairnRenversable`.
-   */
+  /** Plus large que le dessin : le geste qui fauche part d'à côté des pierres. */
   const refZoneDeJeu = useRef<HTMLDivElement>(null);
   const posePrecedente = useRef<{ x: number; y: number; t: number } | null>(null);
 
-  /** Point du geste, ramené dans le repère du viewBox. */
   const enCoordonneesLocales = useCallback((clientX: number, clientY: number) => {
     const svg = refSvg.current;
     const matrice = svg?.getScreenCTM();
@@ -47,10 +35,8 @@ export function useGestesSurLeCairn(actif: boolean, tenu: boolean, frapper: Frap
   }, []);
 
   /**
-   * Le passage d'un pointeur au travers de l'empilement. À la souris, le survol
-   * suffit ; un stylet doit appuyer. Le doigt est ignoré ici : le navigateur
-   * annule le pointeur dès qu'il décide de défiler, avant que le doigt atteigne
-   * une pierre. Le balayage tactile est écouté sur la fenêtre, plus bas.
+   * Souris au survol, stylet à l'appui. Le doigt passe par la fenêtre, plus
+   * bas : le navigateur annule son pointeur dès qu'il décide de défiler.
    */
   const surDeplacement = useCallback(
     (evenement: React.PointerEvent<Element>) => {
@@ -75,10 +61,7 @@ export function useGestesSurLeCairn(actif: boolean, tenu: boolean, frapper: Frap
     [actif, enCoordonneesLocales, frapper],
   );
 
-  /**
-   * L'appui simple, au doigt. Un tapotement n'a pas de vitesse à donner : la
-   * secousse est fixe, de quoi déséquilibrer sans faucher.
-   */
+  /** Un tapotement n'a pas de vitesse : secousse fixe, qui déséquilibre sans faucher. */
   const surAppui = useCallback(
     (evenement: React.PointerEvent<Element>) => {
       if (!actif || evenement.pointerType === "mouse") return;
@@ -94,26 +77,17 @@ export function useGestesSurLeCairn(actif: boolean, tenu: boolean, frapper: Frap
   }, []);
 
   /**
-   * Le balayage au doigt, écouté sur la fenêtre.
+   * Le balayage au doigt. Les événements tactiles, eux, continuent pendant le
+   * défilement : les écouter en passif voit le geste sans bloquer la page.
    *
-   * Le navigateur annule le pointeur dès qu'il décide de défiler, alors que les
-   * événements tactiles continuent d'être émis pendant le défilement : les
-   * écouter, en passif, est le seul moyen de voir le geste sans bloquer le
-   * défilement de la page d'ouverture.
-   *
-   * Un geste dont la part verticale l'emporte est un défilement et ne transmet
-   * rien. Seule exception : la prise armée et un geste parti du cairn — la zone
-   * porte alors `touch-action: none`, la page ne défile pas, et toutes les
-   * directions valent.
-   *
-   * Les deux points sont projetés avec la matrice du moment : si la page a
-   * défilé entre deux images, le décalage s'annule au lieu de s'ajouter au coup.
+   * Un geste surtout vertical est un défilement, sauf parti du cairn la prise
+   * armée (`touch-action: none`, toutes directions). Les deux points sont
+   * projetés avec la matrice du moment, pour que le défilement n'ajoute rien.
    */
   useEffect(() => {
     if (!actif) return;
 
     let precedent: { x: number; y: number; t: number } | null = null;
-    /** Le geste en cours est-il parti du cairn, la prise armée. */
     let depuisLaPrise = false;
 
     const oublier = () => {

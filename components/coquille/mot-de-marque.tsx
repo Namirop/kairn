@@ -1,25 +1,14 @@
 import { COTE_DU_POINT, pierreDuPoint } from "@/lib/design/marque";
 
 /**
- * « Kairn » composé, avec ou sans la pierre sur le i.
- *
- * Le i est un i sans point (U+0131) et la pierre prend la place du point : un
- * point recouvert dépasserait d'un cheveu autour d'une pierre irrégulière. Le
- * glyphe existe dans le sous-ensemble latin de Bricolage Grotesque, donc il ne
- * tombe pas sur une police de repli.
+ * Un i sans point (U+0131) sous la pierre : un point recouvert dépasserait d'un
+ * cheveu. Le glyphe est dans le sous-ensemble latin de Bricolage Grotesque.
  */
 
-/**
- * Sous ce corps, la pierre du i n'est plus qu'une tache de quelques pixels, et le
- * mot reste nu. En pixels, parce que c'est une limite de perception et pas une
- * proportion.
- */
+/** En pixels : limite de perception, pas proportion. En dessous, la pierre est une tache. */
 export const CORPS_MINIMAL_DE_LA_PIERRE = 40;
 
-/**
- * La place optique du point, en parts de corps, relevée sur Bricolage
- * Grotesque : un peu au-dessus de la hauteur d'x, et de la largeur du fût.
- */
+/** Relevé sur Bricolage Grotesque, en parts de corps : largeur du fût, au-dessus de l'x. */
 const LARGEUR_EM = 0.14;
 const BASE_EM = 0.63;
 
@@ -44,7 +33,7 @@ export function MotDeMarque({
   clair = false,
   avecPierre = false,
 }: {
-  /** Le corps du mot, en pixels. Un logotype ne change pas de taille au md. */
+  /** En pixels : un logotype ne change pas de taille au md. */
   taille: number;
   clair?: boolean;
   /** Réservé au mot seul : dans le verrouillage, le symbole le dit déjà. */
@@ -54,12 +43,8 @@ export function MotDeMarque({
 
   return (
     <span
-      /*
-        Correction optique : « Kairn » n'a aucun jambage descendant, donc tout
-        ce qui centre sa boîte centre aussi le vide du bas, et le mot paraît
-        monter. Le décalage vaut l'écart mesuré entre le milieu de l'encre et
-        celui de la boîte, en `em` pour suivre le corps.
-      */
+      // Sans jambage, le mot centré paraît monter : 0,06em est l'écart mesuré
+      // entre le milieu de l'encre et celui de la boîte.
       className={`font-display translate-y-[0.06em] leading-none font-semibold tracking-[-0.02em] ${
         clair ? "text-stone-50" : "text-stone-900"
       }`}

@@ -16,24 +16,14 @@ import {
 } from "@/lib/depots/bornes-du-depot";
 
 /**
- * Le geste de dépôt : un champ, une pièce jointe facultative, un bouton.
- *
- * La clé d'envoi vient du serveur, tirée à l'affichage : deux clics sur le même
- * formulaire n'écrivent qu'un dépôt. `useId()` ne convient pas, il rend la même
- * valeur à chaque chargement.
- *
- * La capture, choisie ou apportée par un partage du système, est tenue par
- * `useCaptureDuDepot`.
+ * La clé d'envoi est tirée par le serveur à l'affichage : deux clics n'écrivent
+ * qu'un dépôt. `useId()` rendrait la même valeur à chaque chargement.
  */
 
-/** Au-delà, on montre le compteur : avant, il n'apprend rien à personne. */
+/** Avant, le compteur n'apprend rien à personne. */
 const SEUIL_COMPTEUR = Math.floor(CARACTERES_MAXIMUM * 0.75);
 
-/**
- * Ce qui empêche ce dépôt de partir, ou `null`. Un seul refus à la fois : la
- * réponse du serveur passe avant ce que l'écran voit venir. Les phrases sont
- * celles du serveur, `depots.refus`.
- */
+/** Un refus à la fois, celui du serveur d'abord ; mêmes phrases que lui. */
 function refusDuFormulaire(
   t: TraduireLesRefus,
   erreur: string | undefined,
@@ -105,8 +95,7 @@ export function FormulaireDepot({
         />
       </div>
 
-      {/* Fermer la consigne l'efface : une consigne qu'on ne voit plus mais qui
-          partirait quand même serait le pire des deux états. */}
+      {/* Fermer la consigne l'efface : cachée, elle partirait quand même. */}
       {consigneOuverte ? (
         <ChampDeConsigne
           valeur={consigne}
@@ -118,8 +107,7 @@ export function FormulaireDepot({
         />
       ) : null}
 
-      {/* Sur téléphone, le bouton de dépôt passe sous les facultatifs et prend
-          la largeur ; les facultatifs tiennent leur ligne en raccourcissant
+      {/* Sur téléphone, les facultatifs tiennent leur ligne en raccourcissant
           leur libellé (`libelle-qui-se-raccourcit.tsx`). */}
       <div className="gap-pas-4 flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between">
         <div className="gap-pas-3 flex flex-wrap items-center">
@@ -147,8 +135,7 @@ export function FormulaireDepot({
         </div>
       </div>
 
-      {/* L'espace du message est réservé : l'apparition d'une erreur ne doit pas
-          décaler ce qui est au-dessus. */}
+      {/* Place réservée : une erreur qui apparaît ne décale rien. */}
       <p className="text-petit min-h-5 text-stone-500" role="status" aria-live="polite">
         {refus ? (
           <span className="text-alerte">{refus}</span>
@@ -160,10 +147,7 @@ export function FormulaireDepot({
   );
 }
 
-/**
- * Ce qu'on dit quand rien ne bloque : d'abord ce qui vient d'arriver, sinon ce
- * qui reste à retenir ce mois-ci.
- */
+/** Quand rien ne bloque : ce qui vient d'arriver, sinon ce qui reste ce mois-ci. */
 function Conseil({
   lienSeul,
   partageManque,
@@ -178,7 +162,6 @@ function Conseil({
   if (partageManque) return t("partageManque");
   if (lienSeul) return t("lienSansMatiere");
 
-  // `restants` se compte en concepts, sur le plafond mensuel : le message doit
-  // dire « ce mois-ci », pas « aujourd'hui ».
+  // En concepts, sur le plafond mensuel : « ce mois-ci », pas « aujourd'hui ».
   return t("restants", { restants });
 }

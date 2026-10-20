@@ -4,27 +4,19 @@ import type { ReactNode } from "react";
 import { motion } from "motion/react";
 
 /**
- * Comment une pierre se pose : celles du bas descendent de peu, presque
- * ensemble ; celle du sommet vient de plus haut, penchée, un peu plus lentement.
- * Partagé par le cairn du tableau de bord et celui de la page publique.
- *
- * Il n'anime que son contenu, jamais sa position : la place de la pierre est
- * portée par le groupe parent, que la physique de la page publique déplace
- * aussi. Les deux ne doivent pas se disputer le même `transform`.
+ * Comment une pierre se pose ; le sommet vient de plus haut, penché, plus
+ * lentement. N'anime que son contenu : la place est portée par le groupe
+ * parent, que la physique déplace aussi, et deux animations ne se disputent
+ * pas un `transform`.
  */
 
-/** L'état posé. Tout part de plus haut et y revient. */
 const POSE = { y: "0%", rotate: 0, opacity: 1 } as const;
 
-/** L'écart entre deux pierres. Assez pour compter, trop peu pour attendre. */
+/** Assez pour compter, trop peu pour attendre. */
 const ECART_S = 0.06;
-/**
- * Ce que la pose entière ne dépasse jamais, en secondes. Au-delà d'une
- * quinzaine de pierres, l'écart se resserre pour tenir dans ce budget.
- */
+/** Budget de la pose entière : au-delà d'une quinzaine de pierres, l'écart se resserre. */
 const ETALEMENT_MAX_S = 0.9;
 
-/** Le retard d'une pierre, resserré quand l'empilement s'allonge. */
 function retardDe(rang: number, total: number): number {
   return rang * Math.min(ECART_S, ETALEMENT_MAX_S / Math.max(total - 1, 1));
 }
@@ -50,8 +42,7 @@ export function PoseDePierre({
 
   return (
     <motion.g
-      // Remonter le groupe quand l'animation devient possible est ce qui permet
-      // de partir de l'état posé : `initial` n'est lu qu'au montage.
+      // Remonté quand l'animation devient possible : `initial` n'est lu qu'au montage.
       key={anime ? "chute" : "posee"}
       style={{ transformBox: "fill-box", transformOrigin: "center" }}
       initial={anime ? depart : false}

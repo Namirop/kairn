@@ -8,12 +8,8 @@ import { ROUTES } from "@/lib/auth/routes";
 import { signOut } from "@/lib/auth/client";
 
 /**
- * La déconnexion, et le rafraîchissement qui doit la suivre.
- *
- * `router.push` seul resert la landing gardée dans le cache du routeur, encore
- * rendue connectée. `router.refresh` redemande le rendu au serveur, qui n'a
- * plus de session ; après le `push`, car c'est la page d'arrivée qu'il faut
- * rafraîchir.
+ * `router.push` seul resert la landing du cache du routeur, encore rendue
+ * connectée. `refresh` après le `push` : c'est la page d'arrivée à redemander.
  */
 export function BoutonDeconnexion() {
   const router = useRouter();

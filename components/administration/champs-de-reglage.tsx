@@ -1,9 +1,6 @@
 import type { ReactNode } from "react";
 
-/**
- * Les champs d'un réglage surchargeable. Chacun montre la valeur
- * d'environnement à côté : c'est elle qui s'applique quand le champ est vide.
- */
+/** La valeur d'environnement, montrée à côté, s'applique quand le champ est vide. */
 
 const CHAMP =
   "rounded-champ border border-stone-300 bg-surface-papier px-pas-3 py-pas-1 text-petit font-mono tabular-nums";

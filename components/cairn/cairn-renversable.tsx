@@ -16,21 +16,11 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
 import { cn } from "@/lib/fusion-des-classes";
 
 /**
- * Le cairn de la page publique, que l'on peut faire tomber d'un geste.
+ * Le cairn de la page publique, qu'un geste fait tomber. Réservé au marketing :
+ * sur le tableau de bord, chaque pierre est un concept consolidé.
  *
- * Réservé au marketing : sur le tableau de bord, chaque pierre est un concept
- * consolidé, et la faire tomber serait un mauvais message.
- *
- * Sans bords (`SANS_BORDS`, `overflow-visible`) : les pierres peuvent sortir de
- * la fenêtre par un côté ou l'autre.
- *
- * Avec `prefers-reduced-motion`, il rend le cairn ordinaire sans aucun
- * gestionnaire.
- *
- * La pose et la chute ne se gênent pas : la physique déplace le groupe
- * extérieur `<g>`, `PoseDePierre` n'anime que son contenu.
- *
- * Au doigt, voir `PriseDuCairn`.
+ * La physique déplace le `<g>` extérieur, `PoseDePierre` n'anime que son
+ * contenu : pose et chute ne se gênent pas. Au doigt, voir `PriseDuCairn`.
  */
 export function CairnRenversable({
   nombre,
@@ -46,8 +36,7 @@ export function CairnRenversable({
   const pose = useAnimationPossible(immobile);
   const { pierres, hauteur, ySol } = useMemo(() => empiler(nombre, graines), [nombre, graines]);
   const { tenu, basculer, refZone } = usePriseDuCairn();
-  // Déstructuré : refs et gestionnaires vont chacun où ils servent, au lieu
-  // d'un objet que le React Compiler lirait en entier comme une ref.
+  // Déstructuré : le React Compiler lirait l'objet entier comme une ref.
   const { refZoneDeJeu, refSvg, refsGroupes, surDeplacement, surAppui, surSortie } =
     useChuteDesPierres(pierres, !immobile, { cadre: SANS_BORDS, tenu });
 
@@ -57,15 +46,13 @@ export function CairnRenversable({
     <div ref={refZone} className={cn("relative h-full w-full", className)}>
       <div
         ref={refZoneDeJeu}
-        /* En tactile, ce bloc ne prend le geste (`touch-none`) que prise armée :
-           voir `useChuteDesPierres` et `PriseDuCairn`. Les gestionnaires
-           ci-dessous ne servent qu'à la souris et au tapotement. */
+        /* En tactile, `touch-none` seulement prise armée ; ces gestionnaires ne
+           servent qu'à la souris et au tapotement. */
         className={cn("relative h-full w-full cursor-crosshair", tenu && "touch-none")}
         onPointerMove={surDeplacement}
         onPointerDown={surAppui}
         onPointerLeave={surSortie}
-        /* La fin d'un geste tactile efface le dernier point : sinon le geste
-           suivant se mesurerait depuis là, avec une vitesse absurde. */
+        /* Sinon le geste suivant se mesurerait depuis ce point, à une vitesse absurde. */
         onPointerUp={surSortie}
         onPointerCancel={surSortie}
       >
@@ -97,12 +84,11 @@ export function CairnRenversable({
           ))}
         </svg>
 
-        {/* Le geste part à côté des pierres : voir `BandeDePrise`. */}
         {tenu ? <BandeDePrise /> : null}
       </div>
 
-      {/* Hors du bloc qui joue, et pas dedans : un appui sur la prise ne doit pas
-          traverser jusqu'à `surAppui` et secouer une pierre au passage. */}
+      {/* Hors du bloc qui joue : un appui sur la prise ne doit pas atteindre
+          `surAppui` et secouer une pierre. */}
       <PriseDuCairn tenu={tenu} surBascule={basculer} />
     </div>
   );

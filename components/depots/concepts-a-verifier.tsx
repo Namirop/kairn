@@ -2,16 +2,12 @@ import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * Le rappel, en tête d'un dépôt, qu'il reste des concepts à trancher : sur un
- * long dépôt, les concepts douteux sont loin dans la liste, et ils restent sans
- * questions tant qu'on ne les a pas regardés.
- *
- * Le badge est le même que sur les cartes : il apprend quoi chercher en
- * défilant. Le lien est une ancre vers le premier concept douteux, insécable
- * pour ne pas se couper en deux sur téléphone.
+ * Sur un long dépôt, les concepts douteux sont loin, et restent sans questions
+ * tant qu'on ne les a pas regardés. Même badge que sur les cartes : il apprend
+ * quoi chercher en défilant.
  */
 
-/** L'ancre posée sur le premier concept douteux, et visée par le lien. */
+/** Posée sur le premier concept douteux. */
 export const ANCRE_A_VERIFIER = "a-verifier";
 
 export function ConceptsAVerifier({ nombre }: { nombre: number }) {

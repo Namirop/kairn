@@ -5,9 +5,8 @@ import type { SignalementLu } from "@/lib/db/signalement";
 import type { MotifDeSignalement } from "@/lib/db/types";
 
 /**
- * Un signalement, tel qu'on le relit. Le concept suit la question parce que
- * c'est lui qui dit si elle était juste ; s'il a été supprimé depuis, on le
- * dit, c'est souvent le geste qui suit un signalement.
+ * Le concept suit la question : c'est lui qui dit si elle était juste. Sa
+ * suppression est dite, c'est souvent le geste qui suit un signalement.
  */
 
 const MOTIFS: Record<MotifDeSignalement, string> = {
@@ -51,8 +50,6 @@ export function LigneDeSignalement({ signalement }: { signalement: SignalementLu
         {signalement.conceptExisteEncore ? "" : " (supprimé depuis)"}
       </p>
 
-      {/* Cinq valeurs courtes qu'on parcourt : une ligne en prose plutôt
-          qu'une table. */}
       <p className="mt-pas-2 text-mono font-mono text-stone-500">
         {signalement.format} · {signalement.facet} · {signalement.model} · prompt{" "}
         {signalement.promptVersion ?? "inconnu"} · dépôt {signalement.inputId ?? "détaché"}

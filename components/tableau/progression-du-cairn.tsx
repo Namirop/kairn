@@ -3,15 +3,9 @@ import { IndiceTactile, Infobulle } from "@/components/ui/infobulle";
 import { avancementDuNiveau } from "@/lib/domain/progression";
 
 /**
- * La progression, en bande sous le cairn. C'est la seule récompense du
- * produit (on ne félicite pas, on montre ce qui est construit), d'où le grand
- * chiffre.
- *
- * La série porte l'ember, seule occurrence du produit. Le niveau a sa barre de
- * part parcourue, en gris et jamais en accent : sur ce panneau, le lichen
- * appartient au sommet du cairn. Pas de cartes : ce panneau n'a aucun
- * contenant. Les explications passent par `Infobulle`, qui s'ouvre aussi au
- * doigt — un survol seul les cacherait sur téléphone.
+ * La seule récompense du produit, d'où le grand chiffre. La série porte l'ember,
+ * seule occurrence ; la barre du niveau reste grise, le lichen étant au sommet
+ * du cairn. `Infobulle` s'ouvre aussi au doigt : un survol seul cacherait l'aide.
  */
 
 const ETIQUETTE = "text-mono font-mono tracking-[0.14em] text-stone-400 uppercase";
@@ -56,9 +50,8 @@ function Niveau({ xp }: { xp: number }) {
       </p>
       <p className={CHIFFRE}>{niveau}</p>
 
-      {/* Angles vifs : une strate qui monte, pas une jauge. Le rail est en
-          `stone-500` et non dans le gris des séparateurs, sinon il ne dirait
-          pas ce qui reste. */}
+      {/* Angles vifs : une strate, pas une jauge. Rail plus foncé que les
+          séparateurs, sinon il ne dit pas ce qui reste. */}
       <span aria-hidden className="mt-pas-4 block h-1 w-full overflow-hidden bg-stone-500">
         <span
           className="block h-full bg-stone-50"
@@ -73,11 +66,7 @@ function Niveau({ xp }: { xp: number }) {
   );
 }
 
-/**
- * Centrée et bornée, pour que les deux mesures se lisent ensemble plutôt
- * qu'aux deux bords de l'écran. Sur téléphone, c'est la gouttière qui écarte :
- * elle s'y resserre.
- */
+/** Bornée pour que les deux mesures se lisent ensemble, pas aux deux bords. */
 export function ProgressionDuCairn({ streak, xp }: { streak: number; xp: number }) {
   return (
     <div className="pt-pas-8 gap-pas-4 md:gap-pas-16 mx-auto grid w-full max-w-2xl grid-cols-2 items-start border-t border-stone-700">

@@ -2,13 +2,7 @@ import type { ReactNode } from "react";
 import { Panneau } from "@/components/coquille/panneau";
 import { PileDePanneaux } from "@/components/coquille/pile-de-panneaux";
 
-/**
- * La coquille commune aux écrans d'administration : chaque page ne porte que
- * sa garde, ses lectures et ses blocs.
- *
- * Registre interne : pas de police display, pas d'élément signature, pas
- * d'accent du produit.
- */
+/** Registre interne : ni police display, ni élément signature, ni accent du produit. */
 export function PageAdmin({
   titre,
   contexte,

@@ -3,21 +3,14 @@ import { MotDeMarque } from "@/components/coquille/mot-de-marque";
 import { densiteDuSymbole } from "@/lib/design/marque";
 
 /**
- * La marque : un empilement, un mot, ou les deux.
- *
- * Tout ce qui affiche la marque passe par ici ; la géométrie vient
- * d'`empiler()`. Seule exception : `app/opengraph-image.tsx` recompose le
- * verrouillage en styles en ligne, son moteur de rendu ne lisant pas de classes.
- * Le symbole y reste partagé (`symboleSeul()`).
- *
- * La pierre sur le i et le symbole ne coexistent jamais : le point du i en
- * pierre n'existe que pour le mot seul.
+ * Tout ce qui affiche la marque passe par ici, sauf `app/opengraph-image.tsx`
+ * dont le moteur ne lit pas de classes. Le point du i en pierre n'existe que
+ * pour le mot seul : il ne coexiste jamais avec le symbole.
  */
 
 export type VarianteDeMarque = "symbole" | "mot" | "verrouillage";
 export type TonDeMarque = "encre" | "papier";
 
-/** La hauteur du symbole, en pixels, quand l'appelant n'en demande pas d'autre. */
 const TAILLE_PAR_DEFAUT = 24;
 
 export function Marque({
@@ -27,10 +20,7 @@ export function Marque({
 }: {
   variante?: VarianteDeMarque;
   ton?: TonDeMarque;
-  /**
-   * La hauteur du symbole, en pixels. Elle décide de sa densité — cinq pierres
-   * au-dessus du seuil, trois en dessous — et le mot s'aligne dessus.
-   */
+  /** Hauteur du symbole en pixels : elle décide de sa densité, le mot s'aligne dessus. */
   taille?: number;
 }) {
   const clair = ton === "papier";
@@ -43,9 +33,7 @@ export function Marque({
     return <SymboleDeMarque clair={clair} taille={taille} pierres={densiteDuSymbole(taille)} />;
   }
 
-  // Le verrouillage suit la même règle de densité que le symbole seul : il se
-  // pose aussi dans un en-tête, où cinq pierres sur vingt-quatre pixels feraient
-  // un pâté.
+  // Même densité que le symbole seul : en en-tête, cinq pierres sur 24 px font un pâté.
   return (
     <span className="gap-pas-2 inline-flex items-center">
       <SymboleDeMarque clair={clair} taille={taille} pierres={densiteDuSymbole(taille)} />

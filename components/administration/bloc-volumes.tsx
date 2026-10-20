@@ -4,13 +4,9 @@ import { moyenne, nombre } from "@/components/administration/formats";
 import type { LigneDeJour } from "@/lib/db/administration";
 
 /**
- * Ce qui est entré dans le produit, jour par jour.
- *
- * La moyenne de concepts par dépôt dit si le découpage rend ce qu'il devrait :
- * elle s'effondre sur les rejets et grimpe sur les articles entiers, ce que les
- * compteurs bruts confondent.
- *
- * Un jour sans dépôt affiche un tiret, pas un zéro : la moyenne n'existe pas.
+ * La moyenne par dépôt dit si le découpage rend ce qu'il devrait : elle
+ * s'effondre sur les rejets, grimpe sur les articles entiers. Sans dépôt, un
+ * tiret : la moyenne n'existe pas.
  */
 export function BlocVolumes({ jours }: { jours: LigneDeJour[] }) {
   return (

@@ -12,10 +12,8 @@ import { TexteTechnique } from "@/components/typographie/texte-technique";
 import { conceptsLisibles, travailEnCours } from "@/lib/domain/etat-depot";
 
 /**
- * L'avancement d'un dépôt. Un dépôt prêt affiche ce qu'il a produit, pas son
- * état ; le compte de concepts paraît dès qu'il existe, sans attendre les
- * questions. L'alerte est réservée à la panne : un texte qui ne portait rien à
- * retenir n'est pas une avarie.
+ * Prêt, un dépôt affiche ce qu'il a produit, pas son état. L'alerte est pour la
+ * panne : un texte sans rien à retenir n'est pas une avarie.
  */
 function Avancement({ depot }: { depot: DepotListe }) {
   const tEtat = useTranslations("etatDepot");
@@ -52,13 +50,10 @@ export function ListeDepots({
   depots: DepotListe[];
   maintenant: Date;
   fuseau: string;
-  /**
-   * Nul sur la page dédiée, où le titre de page dit déjà de quoi il s'agit.
-   * Absent, c'est « Ce que tu as déposé ».
-   */
+  /** `null` sur la page dédiée, que son titre nomme déjà ; absent, le titre par défaut. */
   titre?: string | null;
   avecLien?: boolean;
-  /** La surface du panneau qui porte la liste : les cartes prennent l'autre. */
+  /** Celle du panneau porteur : les cartes prennent l'autre. */
   surface?: "papier" | "ombre";
 }) {
   const tTemps = useTranslations("temps");
@@ -95,8 +90,6 @@ export function ListeDepots({
             <li key={depot.id}>
               <Link
                 href={`${ROUTES.depots}/${depot.id}`}
-                // Une carte cliquable se soulève : le survol change de surface
-                // et décolle d'un cheveu, il ne baisse pas l'opacité.
                 className={cn(
                   "p-pas-4 rounded-carte block transition-[transform,background-color] duration-150",
                   "hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",
@@ -106,9 +99,7 @@ export function ListeDepots({
                 )}
               >
                 <div className="gap-pas-3 flex">
-                  {/* La gouttière de provenance est réservée sur toutes les
-                      lignes, vide ou non, pour garder un seul bord gauche au
-                      texte. */}
+                  {/* Réservée même vide : un seul bord gauche au texte. */}
                   <span className="mt-pas-1 size-4 shrink-0">
                     {depot.sourceType === "IMAGE" ? (
                       <Capture aria-hidden className="size-4 text-stone-500" />
@@ -117,13 +108,11 @@ export function ListeDepots({
 
                   <div className="min-w-0 flex-1">
                     <p className="text-corps line-clamp-2">
-                      {/* L'icône est muette : la provenance se dit ici au
-                          lecteur d'écran. */}
+                      {/* L'icône est muette : la provenance se dit ici. */}
                       {depot.sourceType === "IMAGE" ? (
                         <span className="sr-only">{t("capture")} </span>
                       ) : null}
-                      {/* L'aperçu est tronqué : un accent grave resté seul
-                          s'affiche littéralement, c'est voulu. */}
+                      {/* Aperçu tronqué : un accent grave orphelin s'affiche, c'est voulu. */}
                       <TexteTechnique>{depot.apercu || t("captureEnLecture")}</TexteTechnique>
                     </p>
                     <p className="mt-pas-2 gap-pas-3 text-mono flex flex-wrap items-center text-stone-500">

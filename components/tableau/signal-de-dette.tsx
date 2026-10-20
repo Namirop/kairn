@@ -5,14 +5,9 @@ import { ROUTES } from "@/lib/auth/routes";
 import { PLAFOND_MAX } from "@/lib/domain/selection-session";
 
 /**
- * Quand quelqu'un dépose plus vite qu'il ne révise : un constat, jamais un
- * reproche, toujours avec sa sortie.
- *
- * La sortie est le plafond de session, dans les réglages : une seconde session
- * le jour même ne servirait rien, le plafond journalier étant consommé. Déjà au
- * maximum (`PLAFOND_MAX`), il ne reste qu'à lever le pied, et c'est dit tel quel.
- *
- * En gris de pierre et non en ember, qui appartient à la série seule.
+ * Un constat, jamais un reproche, avec sa sortie : le plafond de session, une
+ * seconde session le jour même ne servant à rien. Au `PLAFOND_MAX`, il ne reste
+ * qu'à lever le pied. Pas d'ember : il appartient à la série.
  */
 export function SignalDeDette({
   enAttente,
@@ -21,7 +16,7 @@ export function SignalDeDette({
 }: {
   enAttente: number;
   jours: number;
-  /** Le plafond de session du compte : c'est lui qui dit s'il reste une marche à monter. */
+  /** Celui du compte : dit s'il reste une marche à monter. */
   plafond: number;
 }) {
   const t = useTranslations("tableau.aujourdhui.dette");

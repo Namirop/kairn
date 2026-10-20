@@ -7,16 +7,10 @@ import { useTranslations } from "next-intl";
 import { LignesDeCode } from "@/components/typographie/lignes-de-code";
 
 /**
- * Un extrait de code cité en bloc, sur la roche : c'est la seule chose qui s'y
- * pose sans être un panneau, parce qu'un extrait se recopie plutôt qu'il ne se
- * lit dans le flux.
- *
- * Il s'ouvre en grand : une ligne de code dépasse souvent la largeur d'une
- * carte, et sur téléphone défiler à l'horizontale pour lire revient à
- * abandonner.
- *
- * La barre du haut existe toujours, avec ou sans langage : elle porte le
- * bouton, et la carte garde la même forme d'un extrait à l'autre.
+ * Seule chose posée sur la roche sans être un panneau : un extrait se recopie
+ * plus qu'il ne se lit dans le flux. Il s'ouvre en grand : une ligne de code
+ * dépasse souvent la carte, et défiler à l'horizontale sur téléphone décourage.
+ * La barre existe même sans langage : elle porte le bouton, la forme reste stable.
  */
 
 const CARTE = "rounded-carte bg-surface-roche overflow-hidden";
@@ -46,15 +40,13 @@ export function BlocDeCode({ texte, langage }: { texte: string; langage: string 
       </div>
 
       <DialogPrimitive.Portal>
-        {/* Plus sombre que le voile des autres dialogues : celui-ci sert à
-            lire, et la page derrière n'a plus à rester reconnaissable. */}
+        {/* Plus sombre que les autres voiles : on lit, la page derrière peut s'effacer. */}
         <DialogPrimitive.Overlay className="data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 fixed inset-0 z-50 bg-stone-900/85" />
 
         <DialogPrimitive.Content
           className={`${CARTE} data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 fixed top-1/2 left-1/2 z-50 flex max-h-[88dvh] w-[calc(100%-1.5rem)] max-w-5xl -translate-x-1/2 -translate-y-1/2 flex-col outline-none`}
         >
-          {/* Le titre existe pour les lecteurs d'écran et pour Radix, qui refuse
-              un dialogue sans nom. À l'écran, l'étiquette du langage suffit. */}
+          {/* Radix refuse un dialogue sans nom ; à l'écran, l'étiquette suffit. */}
           <DialogPrimitive.Title className="sr-only">
             {langage ? t("titreEn", { langage }) : t("titre")}
           </DialogPrimitive.Title>

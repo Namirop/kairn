@@ -5,15 +5,10 @@ import { PhraseQuiTourne, usePhraseQuiTourne } from "@/components/site/phrase-qu
 import type { EtapeDeLAttente } from "@/lib/domain/catalogue-dattente";
 
 /**
- * Ce qu'on montre d'un dépôt tant qu'il n'a rien donné : la phrase qui tourne
- * de l'essai, pour qu'une chaîne qui travaille ne ressemble pas à un écran
- * coincé.
- *
- * La mise en page reprend celle d'`EtatVide` sans le composer : son constat est
- * une chaîne, celui-ci un paragraphe qui se remplace en fondu.
- *
- * La place de la phrase est réservée (deux lignes sur téléphone, une sur écran
- * large), sinon le contexte saute quand elle change de longueur.
+ * La phrase qui tourne, pour qu'une chaîne qui travaille ne ressemble pas à un
+ * écran coincé. Mise en page d'`EtatVide` sans le composer : son constat est
+ * une chaîne, celui-ci se remplace en fondu. Place réservée, sinon le contexte
+ * saute quand la phrase change de longueur.
  */
 export function AttenteDuDepot({
   etape,
@@ -21,7 +16,7 @@ export function AttenteDuDepot({
   graine,
 }: {
   etape: EtapeDeLAttente;
-  /** Ce qui arrive ensuite. Fixe, lui : c'est la seule promesse de l'écran. */
+  /** Fixe : c'est la seule promesse de l'écran. */
   contexte: string;
   graine: string;
 }) {

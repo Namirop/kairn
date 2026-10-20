@@ -8,11 +8,8 @@ import { ENTETE_DU_FUSEAU } from "@/lib/auth/en-tetes";
 import { codeComplet, lireLeCode } from "@/lib/domain/code-de-connexion";
 
 /**
- * La vérification et le renvoi du code de connexion.
- *
- * Le code part dès qu'il est complet ; le dernier code parti est retenu pour
- * qu'un code refusé ne se rejoue pas seul en boucle. Le bouton, lui, rejoue
- * sans cette retenue, pour laisser un recours.
+ * Le code part dès qu'il est complet ; le dernier parti est retenu pour qu'un
+ * refus ne se rejoue pas en boucle. Le bouton rejoue quand même : un recours.
  */
 
 export type ConnexionParCode = {
@@ -42,8 +39,7 @@ export function useConnexionParCode(adresse: string, suite: string): ConnexionPa
       setErreur(null);
       setEnCours(true);
 
-      // Le compte se crée dans cette requête s'il n'existe pas : c'est la seule
-      // occasion de transmettre le fuseau du navigateur.
+      // Le compte peut naître dans cette requête : seule occasion de passer le fuseau.
       const fuseau = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const entetes = fuseau ? { [ENTETE_DU_FUSEAU]: fuseau } : {};
 
@@ -58,8 +54,7 @@ export function useConnexionParCode(adresse: string, suite: string): ConnexionPa
         return;
       }
 
-      // Pas de `setEnCours(false)` : le bouton se rouvrirait le temps que la
-      // navigation aboutisse.
+      // Pas de `setEnCours(false)` : le bouton se rouvrirait avant la navigation.
       router.push(suite);
       router.refresh();
     },

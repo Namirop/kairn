@@ -8,20 +8,14 @@ import type { Langue } from "@/lib/db/types";
 import { LANGUES } from "@/lib/i18n/langues";
 import { Reglage } from "./reglage";
 
-/**
- * Chaque langue se nomme dans sa propre langue : quelqu'un qui ne lit pas
- * l'écran courant doit encore reconnaître la sienne.
- */
+/** Dans sa propre langue : qui ne lit pas l'écran doit reconnaître la sienne. */
 const NOMS: Record<Langue, string> = {
   // i18n-ignore — un nom de langue s'écrit dans cette langue, quelle que soit l'autre
   FR: "Français",
   EN: "English",
 };
 
-/**
- * La langue du compte, en radios natifs habillés. Le choix s'enregistre au
- * clic : un bouton « Enregistrer » pour un seul geste serait un péage.
- */
+/** Enregistré au clic : un « Enregistrer » pour un seul geste serait un péage. */
 export function ChoixDeLaLangue({ langue }: { langue: Langue }) {
   const t = useTranslations("compte.reglages.langue");
   const router = useRouter();

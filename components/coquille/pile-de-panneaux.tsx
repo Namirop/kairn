@@ -3,13 +3,10 @@ import { cn } from "@/lib/fusion-des-classes";
 import { SURFACES, type Surface } from "./surfaces";
 
 /**
- * La pile de panneaux d'un écran, et le sol sur lequel elle repose : le sol
- * reprend la surface du dernier panneau et remplit la hauteur restante, sans
- * quoi une page courte laisserait voir le fond du corps.
- *
- * Le dégagement de la barre basse est un élément à part, grain compris : sans
- * grain, la même teinte se lirait plus claire. Le grain ne peut pas aller sur
- * la pile elle-même — en pseudo-élément, il se peindrait par-dessus les panneaux.
+ * Le sol reprend la surface du dernier panneau et remplit la hauteur, sinon une
+ * page courte montre le fond du corps. Le dégagement de la barre basse porte
+ * son propre grain (sans lui la teinte se lirait plus claire) : en
+ * pseudo-élément de la pile, il se peindrait par-dessus les panneaux.
  */
 export function PileDePanneaux({
   sol = "papier",
@@ -21,16 +18,14 @@ export function PileDePanneaux({
   return (
     <div
       className={cn(
-        // La coquille est une colonne : la pile prend ce qui reste sous
-        // l'en-tête sans connaître sa hauteur, ni même savoir s'il est là.
+        // Prend ce qui reste sous l'en-tête, sans connaître sa hauteur.
         "flex flex-1 flex-col",
         SURFACES[sol].fond,
       )}
     >
       {children}
 
-      {/* Le dégagement de la barre basse appartient à la pile : sur la
-          coquille, il prendrait la couleur du corps. */}
+      {/* Dans la pile : sur la coquille, il prendrait la couleur du corps. */}
       <div
         aria-hidden
         className={cn(

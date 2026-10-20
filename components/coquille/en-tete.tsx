@@ -3,14 +3,11 @@ import { ROUTES } from "@/lib/auth/routes";
 import { Marque } from "./marque";
 
 /**
- * L'en-tête de l'application : la marque, et rien d'autre — la navigation vit
- * dans le rail et la barre basse, donc il peut disparaître sans rien emporter.
- *
- * Opaque et grainé comme le panneau qu'il coiffe : translucide, le texte
- * défilant se lisait au travers ; sans grain, il formait une troisième valeur.
- * `z-30`, le rang de la coquille : une page ne monte jamais au-dessus de
- * `z-20`, et à égalité le dernier dans le balisage gagne. Pendant une session,
- * c'est `app/styles/coquille.css` qui le retire, ce qui le garde composant serveur.
+ * La marque seule : la navigation est ailleurs, il peut disparaître sans rien
+ * emporter. Opaque et grainé : translucide, le texte défilant se lit au travers ;
+ * sans grain, il fait une troisième valeur. `z-30` : une page ne dépasse jamais
+ * `z-20`, et à égalité le dernier balisé gagne. En session, `coquille.css` le
+ * retire, ce qui le garde composant serveur.
  */
 const TAILLE_DE_LA_MARQUE = 32;
 
@@ -20,8 +17,7 @@ export function EnTete() {
       data-coquille="en-tete"
       className="px-pas-4 md:px-pas-8 bg-surface-papier grain sticky top-0 z-30 flex h-14 items-center justify-center md:h-16"
     >
-      {/* Au-dessus du grain, pseudo-élément positionné qui passerait sinon
-          par-dessus la marque. */}
+      {/* Le grain est un pseudo-élément positionné : il passerait par-dessus. */}
       <Link href={ROUTES.aujourdhui} className="rounded-galet relative z-10">
         <Marque taille={TAILLE_DE_LA_MARQUE} />
       </Link>

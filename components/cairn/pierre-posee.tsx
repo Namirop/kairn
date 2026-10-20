@@ -4,11 +4,7 @@ import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
 import { PoseDePierre } from "@/components/cairn/pose-de-pierre";
 import type { Pierre } from "@/lib/domain/cairn-empilement";
 
-/**
- * Une pierre de l'empilement, à sa place. La position finale passe par
- * l'attribut `transform` du SVG, en unités de viewBox ; le geste de la pose vit
- * dans `PoseDePierre`, partagé avec l'empilement de la page publique.
- */
+/** La place, en unités de viewBox, sur le groupe ; la pose anime son contenu. */
 export function PierrePosee({
   pierre,
   rang,

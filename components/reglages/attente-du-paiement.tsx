@@ -5,12 +5,9 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 /**
- * L'écran qui se met à jour tout seul, le temps que le webhook arrive : le
- * retour de Stripe gagne souvent la course, et l'écran resterait à « Gratuit »
- * jusqu'à un rechargement manuel.
- *
- * Quinze essais à deux secondes. Un webhook absent après trente secondes est
- * en incident : on cesse, et on le dit.
+ * Le retour de Stripe devance souvent le webhook : sans relecture, l'écran
+ * resterait à « Gratuit ». Un webhook absent après trente secondes est en
+ * incident : on cesse, et on le dit.
  */
 
 const CADENCE_MS = 2000;
@@ -25,8 +22,7 @@ export function AttenteDuPaiement() {
     if (restants <= 0) return;
 
     const minuteur = setTimeout(() => {
-      // `refresh` rejoue le composant serveur : dès que le webhook a écrit, le
-      // plan change et cet écran d'attente disparaît de lui-même.
+      // Dès que le webhook a écrit, le serveur ne rend plus cette attente.
       router.refresh();
       setRestants((reste) => reste - 1);
     }, CADENCE_MS);

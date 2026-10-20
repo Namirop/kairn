@@ -7,35 +7,23 @@ import { segmentsEnGras } from "@/lib/domain/texte-en-gras";
 /**
  * Un texte dont les termes de code sont relevés en jetons.
  *
- * Les mesures du jeton sont en `em` : il sert aussi bien dans un titre de 40 px
- * que dans une ligne de corps. Le poids est fixé plutôt qu'hérité : dans un
- * titre en gras, un jeton en gras se lit comme un pâté.
+ * Tout en `em` : le jeton sert du titre de 40 px à la ligne de corps. Poids
+ * fixé : un jeton gras dans un titre gras fait un pâté. `clone` donne son cadre
+ * entier à chaque morceau d'un extrait coupé.
  *
- * `box-decoration-break: clone` donne à chaque morceau d'un extrait coupé son
- * cadre entier, au lieu d'un cadre fendu. `break-words` empêche un identifiant
- * plus large que sa colonne de déborder.
- *
- * L'interligne à 1,7 empêche deux jetons de lignes consécutives de se
- * chevaucher : un `line-height` réduit ne rétrécit pas la boîte peinte d'un
- * élément en ligne (métriques de fonte + rembourrage + bordure), il ne fait que
- * réserver la place dans la ligne. À 1,7, la ligne loge la hauteur peinte plus
- * quelques pixels d'air, à toutes les tailles puisque tout est en `em`. Baisser
- * cet interligne, ou monter le rembourrage, rouvre le chevauchement.
+ * L'interligne de 1,7 empêche deux jetons de lignes voisines de se chevaucher :
+ * un `line-height` réduit ne rétrécit pas la boîte peinte d'un élément en ligne.
+ * Le baisser, ou monter le rembourrage, rouvre le chevauchement.
  */
 export const JETON =
   "rounded-champ bg-jeton border border-jeton-bord font-mono text-[0.86em] font-medium leading-[1.7] px-[0.36em] py-[0.06em] [box-decoration-break:clone] break-words";
 
-/**
- * Au-delà, un jeton ne tient plus sur la ligne la plus étroite du produit : un
- * énoncé de révision sur un téléphone de 390 points laisse un peu plus de vingt
- * signes de mono par ligne.
- */
+/** Un énoncé de révision sur 390 points laisse un peu plus de vingt signes de mono. */
 const SIGNES_INSECABLES = 20;
 
 /**
- * Le jeton court ne se coupe pas : un trait d'union (`s-maxage=300`) est une
- * occasion de coupure, et avec le cadre cloné on lirait deux termes là où il
- * n'y en a qu'un. Les longs extraits, eux, gardent la coupure.
+ * Le jeton court ne se coupe pas : coupé au trait d'union (`s-maxage=300`), son
+ * cadre cloné ferait lire deux termes. Les longs extraits gardent la coupure.
  */
 export function jetonInsecable(terme: string): boolean {
   return terme.trim().length <= SIGNES_INSECABLES;
@@ -45,11 +33,8 @@ export function jetonInsecable(terme: string): boolean {
 function Jetons({ texte }: { texte: string }) {
   return (
     <>
-      {/*
-        Le relevé passe avant le découpage, et jamais dans un extrait en bloc :
-        ce qu'un dépôt écrit entre trois accents graves est recopié tel quel,
-        guillemets compris. Voir `releverLeCodeCite`.
-      */}
+      {/* Le relevé passe avant le découpage, jamais dans un extrait en bloc,
+          recopié tel quel. Voir `releverLeCodeCite`. */}
       {segmentsDeCode(releverLeCodeCite(texte)).map((segment, rang) =>
         segment.code ? (
           <code
@@ -67,10 +52,8 @@ function Jetons({ texte }: { texte: string }) {
 }
 
 /**
- * Le gras se découpe en premier, les jetons à l'intérieur. Dans l'ordre
- * inverse, un passage en gras qui contient un terme de code voit ses marques
- * ouvrante et fermante tomber dans deux morceaux différents, et les astérisques
- * s'affichent. `segmentsEnGras` ignore déjà une marque écrite dans un terme cité.
+ * Le gras d'abord, les jetons dedans : dans l'ordre inverse, un gras contenant
+ * du code verrait ses marques séparées, et les astérisques s'afficheraient.
  */
 function Segments({ texte }: { texte: string }) {
   return (
@@ -89,12 +72,9 @@ function Segments({ texte }: { texte: string }) {
 }
 
 /**
- * L'extrait de plusieurs lignes, réduit à un jeton, faute de mieux.
- *
- * Ce composant vit en ligne (titre de carte, option de QCM, aperçu) ; le bloc
- * de code se rend dans `TexteRiche`. Mais `segmentsDeCode` ne connaît que la
- * paire d'accents en ligne et éclaterait une barrière de trois accents en
- * plusieurs cadres : un seul jeton pour tout l'extrait reste lisible.
+ * L'extrait de plusieurs lignes réduit à un jeton : ce composant vit en ligne
+ * (le bloc se rend dans `TexteRiche`), et `segmentsDeCode` éclaterait une
+ * barrière de trois accents en plusieurs cadres.
  */
 function ExtraitsEnLigne({ texte }: { texte: string }) {
   return (

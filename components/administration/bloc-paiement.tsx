@@ -3,13 +3,9 @@ import { Section } from "@/components/administration/section";
 import type { EtatDuPaiement } from "@/lib/paiement/etat-pour-ladministration";
 
 /**
- * Où en est le paiement, en lecture seule : `PAIEMENT_LIVE` est le dernier
- * verrou avant d'encaisser, et ne se manœuvre pas depuis l'écran qu'il protège
- * (même règle que `ADMIN_EMAILS`).
- *
- * Le catalogue confronte chaque prix annoncé à ce que Stripe rend : une clé ou
- * un montant qui diverge fait échouer chaque achat, et rien d'autre ne le dirait
- * avant le premier client.
+ * En lecture seule : `PAIEMENT_LIVE`, dernier verrou avant d'encaisser, ne se
+ * manœuvre pas depuis l'écran qu'il protège. Le catalogue confronte les prix
+ * annoncés à Stripe : un écart ferait échouer chaque achat sans autre signe.
  */
 
 const CE_QUE_LE_MODE_VEUT_DIRE = {
@@ -57,8 +53,7 @@ export function BlocPaiement({ etat }: { etat: EtatDuPaiement }) {
                     {"prix" in ligne.resolu ? (
                       <span className="text-stone-500">{ligne.resolu.prix}</span>
                     ) : (
-                      // Le message de refus, tel quel : c'est mot pour mot ce
-                      // qui empêcherait une vente d'aboutir.
+                      // Tel quel : mot pour mot ce qui bloquerait une vente.
                       <span className="text-alerte">{ligne.resolu.erreur}</span>
                     )}
                   </td>

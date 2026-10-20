@@ -9,10 +9,8 @@ import { Label } from "@/components/ui/label";
 import { LONGUEUR_DU_CODE } from "@/lib/domain/code-de-connexion";
 
 /**
- * Le second temps de l'entrée : les six chiffres reçus par email. Trois
- * chemins remplissent le champ : la suggestion du clavier mobile
- * (`one-time-code`, déclenchée par le mot « code » près des chiffres dans
- * l'email), le bouton coller, et la frappe.
+ * Le clavier mobile suggère le code (`one-time-code`) grâce au mot « code »
+ * près des chiffres dans l'email ; restent le bouton coller et la frappe.
  */
 export function SaisieDuCode({ adresse, suite }: { adresse: string; suite: string }) {
   const { code, ecrireLeCode, enCours, erreur, renvoye, complet, valider, renvoyer } =
@@ -43,8 +41,7 @@ export function SaisieDuCode({ adresse, suite }: { adresse: string; suite: strin
             aria-invalid={erreur ? true : undefined}
             aria-describedby="code-erreur"
             onChange={(evenement) => ecrireLeCode(evenement.target.value)}
-            // `pr-14` : la réserve du bouton coller, sans quoi le sixième
-            // chiffre passe sous l'icône.
+            // `pr-14` : sinon le sixième chiffre passe sous le bouton coller.
             className="h-13 pr-14 font-mono text-[1.375rem] tracking-[0.3em] tabular-nums"
           />
 
@@ -55,7 +52,7 @@ export function SaisieDuCode({ adresse, suite }: { adresse: string; suite: strin
           />
         </div>
 
-        {/* La place du message est réservée : l'erreur ne décale pas le bouton. */}
+        {/* Place réservée : l'erreur ne décale pas le bouton. */}
         <p id="code-erreur" className="text-mono text-alerte min-h-4" role="status">
           {erreur}
         </p>

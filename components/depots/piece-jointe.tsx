@@ -6,11 +6,8 @@ import { LibelleQuiSeRaccourcit } from "@/components/depots/libelle-qui-se-racco
 import { ChampDePieceJointe } from "@/components/formulaires/champ-de-piece-jointe";
 
 /**
- * La capture qu'on joint à un dépôt.
- *
- * Le fichier est tenu par le formulaire : un partage du système peut en
- * apporter un sans sélecteur, et le formulaire a besoin de son poids pour
- * refuser avant l'envoi.
+ * Fichier tenu par le formulaire : un partage peut l'apporter sans sélecteur,
+ * et son poids sert à refuser avant l'envoi.
  */
 export function PieceJointe({
   fichier,
@@ -22,12 +19,8 @@ export function PieceJointe({
   const t = useTranslations("depots.formulaire.pieceJointe");
   const champ = useRef<HTMLInputElement>(null);
 
-  /*
-    Un fichier venu d'ailleurs que le sélecteur doit être posé dans le champ,
-    sinon il ne part pas avec le formulaire. Un `DataTransfer` est le seul moyen
-    de régler `input.files` par code. La comparaison d'identité évite de
-    réécrire un fichier que le sélecteur vient d'y mettre.
-  */
+  // Un fichier hors sélecteur doit être posé dans le champ pour partir ; seul un
+  // `DataTransfer` règle `input.files` par code.
   useEffect(() => {
     const entree = champ.current;
 

@@ -1,10 +1,6 @@
 /**
- * Le libellé d'un bouton, raccourci sous `md` pour que les deux facultatifs du
- * dépôt (capture, consigne) tiennent sur une ligne de téléphone : mesurés, ils
- * font 385 px pour 342 px de colonne sur un écran de 390.
- *
- * Le lecteur d'écran entend toujours le libellé complet, replié en `sr-only` ;
- * le mot court est masqué, sinon il serait lu deux fois.
+ * Raccourci sous `md` : en entier, les deux facultatifs du dépôt font 385 px
+ * pour 342 px de colonne sur 390. Le lecteur d'écran n'entend que le complet.
  */
 export function LibelleQuiSeRaccourcit({ complet, court }: { complet: string; court: string }) {
   return (

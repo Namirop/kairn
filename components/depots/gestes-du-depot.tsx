@@ -7,12 +7,8 @@ import { SuppressionEnDeuxTemps } from "@/components/depots/suppression-en-deux-
 import { Button } from "@/components/ui/button";
 
 /**
- * Ce qu'on peut faire d'un dépôt entier : « Redécouper » garde le texte et
- * retente l'extraction ; « Supprimer » emporte tout.
- *
- * La suppression demande confirmation sur place : elle est irréversible et
- * emporte aussi les questions et les passages faits, ce que le second bouton
- * annonce.
+ * « Redécouper » garde le texte et retente l'extraction ; « Supprimer » emporte
+ * aussi questions et passages, ce que le second bouton annonce.
  */
 export function GestesDuDepot({
   inputId,
@@ -60,8 +56,7 @@ export function GestesDuDepot({
       />
 
       {redecoupable ? (
-        /* Pleine largeur, sans `max-w-prose`, comme la conséquence de la
-           suppression juste au-dessus. */
+        // Sans `max-w-prose`, comme la conséquence juste au-dessus.
         <p className="mt-pas-3 text-petit text-stone-500">{t("explication")}</p>
       ) : null}
 

@@ -8,13 +8,9 @@ import { Button } from "@/components/ui/button";
 import { CONSIGNE_MAXIMUM } from "@/lib/depots/bornes-du-depot";
 
 /**
- * Ce qu'on dit du dépôt, à côté du dépôt — typiquement, ce qu'une capture
- * montre en trop.
- *
- * Repliée par défaut : le produit repose sur la vitesse du dépôt, et un second
- * champ permanent demanderait une décision à chaque fois, pour un cas sur
- * vingt. Fermer le champ efface la consigne : une consigne invisible qui
- * partirait quand même serait le pire des deux.
+ * Repliée par défaut : un second champ permanent demanderait une décision à
+ * chaque dépôt, pour un cas sur vingt. Fermer efface : une consigne invisible
+ * qui partirait quand même serait le pire.
  */
 
 export function BoutonDeConsigne({ onOuvrir }: { onOuvrir: () => void }) {
@@ -76,8 +72,6 @@ export function ChampDeConsigne({
         className="p-pas-3 md:text-petit rounded-champ mt-pas-2 field-sizing-content w-full resize-y border border-stone-300 bg-stone-50 text-base leading-relaxed text-stone-900 placeholder:text-stone-500"
       />
 
-      {/* Une seule ligne sous le champ : l'aide, puis le compte quand la borne
-          approche. */}
       <p className="mt-pas-2 text-petit text-stone-500">
         {reste < 60 ? (
           <span

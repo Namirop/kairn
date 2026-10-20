@@ -5,11 +5,9 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /**
- * Une suppression qui demande confirmation sur place, pas dans une modale :
- * l'objet visé doit rester sous les yeux pendant qu'on répond. Le second
- * bouton dit ce qui part — « Supprimer » deux fois ne demande rien, ça fait
- * cliquer deux fois. Partagé par le dépôt et le concept, deux gestes également
- * irréversibles.
+ * Confirmation sur place, pas en modale : l'objet visé reste sous les yeux. Le
+ * second bouton dit ce qui part : « Supprimer » deux fois fait juste cliquer
+ * deux fois.
  */
 export function SuppressionEnDeuxTemps({
   action,
@@ -21,16 +19,15 @@ export function SuppressionEnDeuxTemps({
   avant,
 }: {
   action: (donnees: FormData) => void | Promise<void>;
-  /** Ce que le formulaire porte, en champs cachés. */
+  /** En champs cachés. */
   champs: Record<string, string>;
-  /** Le libellé au repos. Il nomme l'objet : « Supprimer ce dépôt ». */
+  /** Nomme l'objet : « Supprimer ce dépôt ». */
   declencheur: string;
-  /** Le libellé qui engage. Il nomme ce qui part avec. */
+  /** Nomme ce qui part avec. */
   confirmation: string;
-  /** La phrase qui détaille l'irréversible, montrée pendant la confirmation. */
   consequence: string;
   taille?: "sm" | "default";
-  /** Les autres gestes de la même rangée, posés avant celui-ci. */
+  /** Les autres gestes de la rangée. */
   avant?: ReactNode;
 }) {
   const t = useTranslations("depots.concept");
@@ -62,9 +59,7 @@ export function SuppressionEnDeuxTemps({
         )}
       </div>
 
-      {/* La conséquence n'apparaît qu'une fois la question posée : affichée en
-          permanence, elle deviendrait du décor. Pleine largeur de sa carte,
-          comme le texte du concept au-dessus. */}
+      {/* Seulement la question posée : permanente, elle deviendrait du décor. */}
       {confirme ? <p className="mt-pas-3 text-petit text-stone-500">{consequence}</p> : null}
     </div>
   );

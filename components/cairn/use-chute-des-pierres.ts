@@ -17,26 +17,16 @@ import type { Pierre } from "@/lib/domain/cairn-empilement";
 import { useGestesSurLeCairn } from "@/components/cairn/use-gestes-sur-le-cairn";
 
 /**
- * Pilote la chute des pierres.
- *
- * La boucle écrit directement l'attribut `transform` de chaque groupe : passer
- * soixante images par seconde dans l'état de React ferait re-rendre tout
- * l'arbre pour déplacer six chemins. Elle s'arrête d'elle-même dès que plus
- * rien ne bouge — aucune image d'animation n'est consommée au repos.
+ * La boucle écrit `transform` directement : soixante images par seconde dans
+ * l'état de React re-rendraient l'arbre pour six chemins. Elle s'arrête quand
+ * rien ne bouge.
  */
 
-/** Temps d'arrêt avant que le cairn ne se reconstruise, en millisecondes. */
+/** En millisecondes. */
 const AVANT_REMONTEE = 1600;
-/**
- * Durée maximale d'une chute, en millisecondes. Un solveur à impulsions peut
- * osciller sans jamais atteindre le repos (une pierre en équilibre sur une
- * arête) : ce délai garantit que la boucle d'animation s'arrête.
- */
+/** En ms : un solveur à impulsions peut osciller sans fin (pierre sur une arête). */
 const CHUTE_MAXIMALE = 9000;
-/**
- * Plafond de la force transmise. Les pierres peuvent sortir du cadre : un geste
- * franc doit pouvoir les envoyer loin.
- */
+/** Haut à dessein : un geste franc doit pouvoir envoyer les pierres hors du cadre. */
 const VITESSE_MAXIMALE = 640;
 
 type Phase = "pose" | "chute" | "attente" | "remontee";
@@ -48,8 +38,7 @@ export function useChuteDesPierres(
   { cadre = CADRE_SERRE, tenu = false }: { cadre?: Cadre; tenu?: boolean } = {},
 ) {
   const refsGroupes = useRef<(SVGGElement | null)[]>([]);
-  // Initialisation paresseuse : seul le premier rendu sert, l'effet réinitialise
-  // ensuite à chaque nouvel empilement.
+  // Premier rendu seulement : l'effet réinitialise à chaque nouvel empilement.
   const [corpsDeDepart] = useState(() => initialiser(pierres));
   const corps = useRef<Corps[]>(corpsDeDepart);
   const phase = useRef<Phase>("pose");
@@ -66,9 +55,7 @@ export function useChuteDesPierres(
     });
   }, []);
 
-  // Une image de la boucle, qui demande la suivante : `function` et non une
-  // constante, pour qu'elle puisse se nommer elle-même sans être lue avant
-  // d'exister.
+  // `function` et non une constante : elle se rappelle sans être lue avant d'exister.
   const tourner = useCallback(
     (depart: number) => {
       function image(precedent: number) {

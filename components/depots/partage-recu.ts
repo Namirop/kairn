@@ -1,17 +1,11 @@
 import { composerLePartage, type PartageCompose } from "@/lib/domain/texte-partage";
 
 /**
- * Ce qu'un partage du système a laissé pour le formulaire, et comment on le reprend.
+ * Le partage du système, rangé sur l'appareil par le service worker et repris
+ * ici. Rien ne part au serveur avant « Déposer » : qui renonce n'a rien envoyé.
  *
- * Le service worker reçoit le partage d'Android (pas une route), le range sur
- * l'appareil et renvoie vers le formulaire, qui le reprend ici. Rien ne part au
- * serveur avant « Déposer » : qui partage puis renonce n'a rien envoyé.
- *
- * Les clés sont recopiées dans `public/sw.js`, servi sans compilation donc
- * incapable d'importer : les deux côtés bougent ensemble.
- *
- * Un champ par clé plutôt qu'un objet sérialisé : rien à analyser ni à valider
- * au retour.
+ * Clés recopiées dans `public/sw.js`, servi sans compilation : les deux bougent
+ * ensemble. Un champ par clé : rien à analyser ni valider au retour.
  */
 
 export const CACHE_PARTAGE = "kairn-partage";
@@ -28,10 +22,7 @@ export const EN_TETE_DU_NOM = "x-nom-du-fichier";
 
 export type PartageRepris = PartageCompose & { capture: File | null };
 
-/**
- * Le partage en attente, s'il y en a un. Effacé en le lisant : laissé en place,
- * il reviendrait remplir le champ au dépôt suivant.
- */
+/** Effacé à la lecture : sinon il remplirait le champ au dépôt suivant. */
 export async function reprendreLePartage(): Promise<PartageRepris | null> {
   // `caches` est absent hors contexte sécurisé.
   if (typeof caches === "undefined") return null;
