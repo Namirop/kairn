@@ -10,16 +10,10 @@ import { etalonLisible } from "@/lib/domain/etalon-lisible";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
- * Ce qui suit une réponse à choix.
- *
- * Le passage est déjà écrit au clic sur l'option : ce bouton ne note rien, il
- * enchaîne.
- *
- * Le verdict n'est écrit que pour les lecteurs d'écran : à l'écran, les options
- * le portent déjà.
- *
- * Faux, le bouton attend le temps de lire le pourquoi, et dit qu'il attend : un
- * bouton inerte sans raison se clique plusieurs fois avant qu'on comprenne.
+ * Ce qui suit une réponse à choix, déjà écrite au clic : le bouton enchaîne sans
+ * noter. Le verdict n'est dit qu'au lecteur d'écran, les options le montrent.
+ * Faux, le bouton attend le temps de lire et dit qu'il attend : inerte sans
+ * raison, il se clique plusieurs fois.
  */
 export function CorrectionFermee({
   juste,
@@ -59,7 +53,7 @@ export function CorrectionFermee({
           {dernier ? t("terminer") : t("continuer")}
         </Button>
 
-        {/* La place est tenue : la ligne s'efface sans faire remonter la carte. */}
+        {/* Place tenue : la ligne s'efface sans faire remonter la carte. */}
         <p className="text-petit min-h-5 text-stone-500" aria-hidden>
           {lu ? "" : t("tempsDeLire")}
         </p>

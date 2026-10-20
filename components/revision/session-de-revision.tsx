@@ -16,14 +16,9 @@ import type { QuestionServie } from "@/lib/db/question-servie";
 import type { ProchainRappel } from "@/lib/domain/prochain-rappel";
 
 /**
- * La session du jour.
- *
- * Chaque passage est écrit dès qu'il est donné : une session interrompue à la
- * troisième question sur dix garde ses trois révisions. Personne ne perd son
- * travail parce qu'il a fermé un onglet.
- *
- * Ce qui est propre à ce mode et à lui seul : la replanification, la sortie du
- * cycle, et la carte de maîtrise réclamée à la fin.
+ * La session du jour. Chaque passage s'écrit dès qu'il est donné : fermer
+ * l'onglet en route ne perd rien. Propres à ce mode : la replanification, la
+ * sortie du cycle et la carte de maîtrise réclamée à la fin.
  */
 export function SessionDeRevision({
   questions,
@@ -35,25 +30,20 @@ export function SessionDeRevision({
 }: {
   questions: QuestionServie[];
   /**
-   * Ce qu'on montre quand il n'y a rien à poser, rendu par la page. Il arrive
-   * tout fait pour que l'écran de fin survive à un rafraîchissement du serveur :
-   * voir `/reviser/page.tsx`.
+   * Rien à poser. Rendu par la page, pour que l'écran de fin survive à un
+   * rafraîchissement du serveur (voir `/reviser/page.tsx`).
    */
   vide: ReactNode;
-  /** Le jour de la session, déjà écrit dans le fuseau de l'utilisateur. */
+  /** Déjà écrit dans le fuseau de l'utilisateur. */
   jour: string;
   serie: number;
-  /** Quand tombe le prochain rappel quotidien. Nul s'il est coupé. */
+  /** Nul si le rappel quotidien est coupé. */
   rappel: ProchainRappel | null;
   expliquerLEspacement?: boolean;
 }) {
-  /*
-    La liste est gelée au premier rendu. Le serveur ne renvoie plus les concepts
-    déjà répondus : toute relecture de la route rendrait une liste plus courte,
-    et le rang tenu par le client désignerait la question d'après. Gelée, elle
-    permet de revalider le tableau de bord à chaque réponse. Quitter l'écran
-    démonte le composant et la liste se refait, comme voulu.
-  */
+  // Gelée au premier rendu : le serveur ne renvoie plus les concepts répondus,
+  // et une relecture de la route raccourcirait la liste sous le rang tenu ici.
+  // C'est ce qui permet de revalider le tableau de bord à chaque réponse.
   const [liste] = useState(questions);
   const t = useTranslations("revision.session");
   const [termine, setTermine] = useState(false);
@@ -61,15 +51,13 @@ export function SessionDeRevision({
   const [revus, setRevus] = useState(0);
   const [carte, setCarte] = useState<{ atomId: string; concept: string } | null>(null);
   const [sorti, setSorti] = useState<{ atomId: string; concept: string } | null>(null);
-  // Une réponse est sous les yeux sans être notée : la porte de sortie le dit,
-  // et écrit le passage avant de partir.
+  // Une réponse lue mais pas notée : la sortie le dit, et écrit le passage.
   const [enSuspens, setEnSuspens] = useState(false);
 
-  // Une ref plutôt qu'un état : la fin de session la lit dans la foulée du
-  // dernier envoi, avant qu'un rendu ait eu lieu.
+  // Ref : la fin de session la lit juste après le dernier envoi, avant tout rendu.
   const eligibles = useRef<string[]>([]);
-  // La fonction en ref, seul le booléen en état : sinon chaque nouvelle
-  // fermeture relancerait un rendu à chaque frappe.
+  // La fonction en ref : en état, chaque nouvelle fermeture relancerait un rendu
+  // à chaque frappe.
   const viderLeSuspens = useRef<(() => Promise<void>) | null>(null);
 
   const suivreLeSuspens = useCallback((abandonner: (() => Promise<void>) | null) => {
@@ -108,9 +96,8 @@ export function SessionDeRevision({
     setTermine(true);
   }, []);
 
-  // `termine` passe avant le compte de questions : une session finie a vidé ce
-  // qui était dû, et si la liste vide décidait, l'écran de fin s'effacerait
-  // devant « tu es à jour » au premier rafraîchissement.
+  // Avant la liste vide : sinon un rafraîchissement remplacerait l'écran de fin
+  // par « tu es à jour ».
   if (termine) {
     return (
       <PileDePanneaux>
@@ -118,9 +105,7 @@ export function SessionDeRevision({
           <FinDeSession
             revus={revus}
             carte={carte}
-            // L'heure seule, pas le jour : la fin de session parle toujours de
-            // demain — la journée est faite, et le cron n'écrit qu'à qui a
-            // quelque chose à revoir.
+            // L'heure seule : la fin de session parle toujours de demain.
             heureDuRappel={rappel?.heure ?? null}
             expliquerLEspacement={expliquerLEspacement}
           />
@@ -132,8 +117,7 @@ export function SessionDeRevision({
   if (liste.length === 0) return vide;
 
   return (
-    // « Session » va en marge (il nomme le mode, constant), la date reste dans
-    // l'en-tête : ce qui change se lit là où l'on lit.
+    // Le mode, constant, va en marge ; la date, qui change, reste dans l'en-tête.
     <SceneDeSession
       enTete={
         <EnTeteDeScene
@@ -142,11 +126,8 @@ export function SessionDeRevision({
           intituleEnMarge
           sortie={{
             titre: t("arreterTitre"),
-            /*
-              Partir sans se noter après avoir lu la réponse s'écrit comme un
-              échec (sinon on gagnerait du temps sans rien savoir), et la
-              phrase le dit avant.
-            */
+            // Partir sans se noter après avoir lu la réponse compte comme un
+            // échec, sinon on gagnerait du temps sans rien savoir.
             consequence: enSuspens ? t("consequenceEnSuspens") : t("consequence"),
             avantDeSortir: enSuspens
               ? () => viderLeSuspens.current?.() ?? Promise.resolve()

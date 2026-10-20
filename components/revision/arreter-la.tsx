@@ -17,9 +17,8 @@ import {
 import { ROUTES } from "@/lib/auth/routes";
 
 /**
- * La porte de sortie d'un passage de questions, avec confirmation. Rien n'est
- * perdu en sortant ; on confirme parce que, sur téléphone, ce lien est là où
- * le pouce se pose en remontant l'écran.
+ * Sortir d'un passage. Rien n'est perdu ; on confirme parce que, sur téléphone,
+ * ce lien est là où le pouce se pose en remontant l'écran.
  */
 export function ArreterLa({
   titre,
@@ -28,16 +27,16 @@ export function ArreterLa({
   rafraichirLeTableau = false,
 }: {
   titre: string;
-  /** Ce qu'il advient de ce qu'on laisse. Une phrase, écrite par l'écran. */
+  /** Ce qu'il advient de ce qu'on laisse. */
   consequence: string;
   /**
-   * Ce qui doit être écrit avant de partir (une réponse affichée mais pas
-   * notée). La porte l'attend, sinon la navigation part avec la requête en vol.
+   * Une réponse affichée mais pas notée, à écrire avant de partir. Attendue,
+   * sinon la navigation part avec la requête en vol.
    */
   avantDeSortir?: () => Promise<void>;
   /**
    * Une session a déplacé des échéances : sans relecture, le client resservirait
-   * le tableau d'avant. Un entraînement n'a rien à faire relire.
+   * le tableau d'avant. L'entraînement n'en a pas besoin.
    */
   rafraichirLeTableau?: boolean;
 }) {
@@ -49,12 +48,10 @@ export function ArreterLa({
   async function partir() {
     setSortie(true);
 
-    // Ce qui reste à écrire part avant tout le reste : la relecture du tableau
-    // doit voir ce passage-là, pas l'état d'avant.
+    // D'abord : la relecture du tableau doit voir ce passage.
     if (avantDeSortir) await avantDeSortir();
 
-    // Attendu avant de naviguer : c'est l'attente qui garantit que la page
-    // d'arrivée sera relue, et non resservie telle qu'on l'avait laissée.
+    // Attendu : c'est ce qui garantit que la page d'arrivée sera relue, pas resservie.
     if (rafraichirLeTableau) await relireLeTableauAction();
 
     router.push(ROUTES.aujourdhui);
@@ -62,8 +59,7 @@ export function ArreterLa({
 
   return (
     <Dialog open={ouvert} onOpenChange={setOuvert}>
-      {/* Le rembourrage donne une cible tactile ; la marge négative la ramène
-          sur l'alignement de la colonne. */}
+      {/* Rembourrage pour la cible tactile, marge négative pour l'alignement. */}
       <DialogTrigger className="text-petit rounded-galet px-pas-2 py-pas-2 -mr-pas-2 -my-pas-2 shrink-0 text-stone-900 underline-offset-4 hover:underline focus-visible:underline">
         {t("arreterLa")}
       </DialogTrigger>

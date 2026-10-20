@@ -16,14 +16,11 @@ import {
 import type { MotifDeSignalement } from "@/lib/db/types";
 
 /**
- * Dire qu'une question ne va pas.
- *
- * Le motif se choisit, puis s'envoie : deux gestes, pour laisser le temps de
- * préciser et de se relire. L'action est discrète, sous la carte : ce n'est pas
- * une note à donner, c'est un défaut à remonter.
+ * Dire qu'une question ne va pas. Choisir le motif, puis envoyer : deux gestes,
+ * pour laisser le temps de préciser et de se relire.
  */
 
-/** L'ordre des motifs ; leurs mots vivent dans l'espace `revision.signalement`. */
+/** L'ordre des motifs ; leurs mots vivent dans `revision.signalement`. */
 const MOTIFS: MotifDeSignalement[] = ["INCOMPREHENSIBLE", "FAUSSE", "HORS_SUJET", "TROP_FACILE"];
 
 export function SignalerLaQuestion({ variantId }: { variantId: string }) {
@@ -64,8 +61,7 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
       open={ouvert}
       onOpenChange={(etat) => {
         setOuvert(etat);
-        // Refermer sans envoyer efface le choix : rouvrir repose la question à
-        // neuf.
+        // Refermer sans envoyer efface le choix.
         if (!etat) setMotif(null);
       }}
     >
@@ -79,13 +75,11 @@ export function SignalerLaQuestion({ variantId }: { variantId: string }) {
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
-        {/* Des boutons radio natifs, dessinés : les flèches du clavier
-            circulent, et le focus du champ masqué se voit sur son étiquette.
-
-            Arrondi de carte et non pilule : sur un motif de deux lignes, la
-            pilule rentrerait là où passe le texte. Pas de marge propre aux
-            blocs, la grille du dialogue les espace déjà : la fenêtre doit tenir
-            dans le pli d'un téléphone, bouton « Envoyer » compris. */}
+        {/* Radios natifs, dessinés : les flèches circulent, et le focus du
+            champ masqué se voit sur l'étiquette. Arrondi de carte : une pilule
+            mordrait sur un motif de deux lignes. Pas de marge propre, la grille
+            du dialogue espace déjà : tout doit tenir dans le pli d'un
+            téléphone, « Envoyer » compris. */}
         <ul className="gap-pas-1 flex flex-col">
           {MOTIFS.map((choix) => (
             <li key={choix}>

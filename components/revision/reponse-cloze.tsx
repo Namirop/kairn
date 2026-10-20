@@ -10,17 +10,10 @@ import type { TexteATrou } from "@/components/revision/use-suite-de-questions";
 import { LONGUEUR_MAX_SAISIE } from "@/lib/domain/reponse-cloze";
 
 /**
- * Le texte à trou. La phrase est l'énoncé, porté par la carte ; ici, la
- * consigne, le champ et la vérification.
- *
- * La vérification est locale : les formes acceptées sont écrites avec la
- * question. Juste, l'écran le dit et attend un clic, pour qu'on sache que la
- * réponse a été lue — le passage est déjà écrit, la confirmation ne retient
- * rien. Raté, on montre le terme attendu et on laisse dire « je l'avais » : un
- * synonyme absent de la liste n'est pas une erreur.
- *
- * Le coup de pouce donne des pistes sans la réponse : c'est encore un rappel,
- * plus facile, et compté comme tel. Le prix est dit avant qu'on le paie.
+ * Consigne, champ et vérification du texte à trou ; la phrase est portée par la
+ * carte. Vérification locale contre les formes acceptées. Juste, on attend un
+ * clic pour savoir la réponse lue (le passage est déjà écrit). Raté, on laisse
+ * dire « je l'avais » : un synonyme absent de la liste n'est pas une erreur.
  */
 export function ReponseCloze({
   trou,
@@ -64,8 +57,7 @@ export function ReponseCloze({
           })}
         </p>
 
-        {/* Deux issues nommées comme la graduation des formats ouverts : chaque
-            bouton dit ce qu'il enregistre. */}
+        {/* Nommées comme la graduation des formats ouverts : chaque bouton dit ce qu'il enregistre. */}
         <div className="gap-pas-2 mt-pas-6 flex flex-wrap">
           <Button
             type="button"
@@ -91,8 +83,7 @@ export function ReponseCloze({
         onVerifier();
       }}
     >
-      {/* La consigne au poids du corps, comme sur les autres formats : c'est ce
-          qu'on demande, pas une légende du champ. */}
+      {/* Au poids du corps : c'est ce qu'on demande, pas une légende du champ. */}
       <label htmlFor="trou" className="text-corps block text-stone-900">
         {t("cloze.consigne")}
       </label>
@@ -104,9 +95,8 @@ export function ReponseCloze({
           autoCapitalize="off"
           spellCheck={false}
           maxLength={LONGUEUR_MAX_SAISIE}
-          /* Pas de `flex-1` sous `sm` : la rangée y passe en colonne, où
-             `flex-1` gouverne la hauteur et écrase le champ. 48 px sur
-             téléphone, comme le bouton qui le suit. */
+          /* Pas de `flex-1` sous `sm` : en colonne, il gouverne la hauteur et
+             écrase le champ. 48 px sur téléphone, comme le bouton. */
           className="w-full max-sm:h-12 sm:flex-1"
           value={trou.saisie}
           onChange={(evenement) => trou.saisir(evenement.target.value)}
@@ -123,14 +113,10 @@ export function ReponseCloze({
 }
 
 /**
- * Le coup de pouce : la porte, puis les pistes.
- *
- * Absent si la question n'a pas de leurres (formulations anciennes) : une aide
- * proposée qui n'arrive pas serait pire. Une fois ouvert, il dit son prix avec
- * ce qu'il donne, et vient en vue car il se pose sous le pli d'un téléphone.
- *
- * Les termes ne sont pas cliquables, délibérément : produire la réponse fixe le
- * souvenir, une liste à cliquer en ferait un QCM de plus.
+ * Des pistes sans la réponse : encore un rappel, plus facile, et payé d'un cran.
+ * Absent sans leurres : une aide proposée qui n'arrive pas serait pire. Ouvert,
+ * il vient en vue (il tombe sous le pli d'un téléphone). Les termes ne se
+ * cliquent pas exprès : produire la réponse fixe le souvenir, pas la choisir.
  */
 function CoupDePouce({ trou }: { trou: TexteATrou }) {
   const pistes = useVenirEnVue<HTMLDivElement>(trou.aide);
@@ -140,8 +126,7 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
 
   if (!trou.aide) {
     return (
-      /* Même registre et même bord que l'autre sortie de secours : elle ne
-         doit pas se présenter plus fort que celle qui renonce. */
+      /* Pas plus fort que l'autre sortie de secours, celle qui renonce. */
       <div className="sortie-de-secours mt-pas-6">
         <Button
           type="button"
@@ -157,8 +142,7 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
   }
 
   return (
-    /* Le jeton, pas la pilule : dans l'échelle des formes la pilule est un
-       geste, et ces termes ne se cliquent pas. */
+    /* Le jeton, pas la pilule : la pilule est un geste, ces termes ne se cliquent pas. */
     <div
       ref={pistes}
       className="rounded-carte bg-surface-papier px-pas-4 py-pas-3 mt-pas-4 max-w-xl"
@@ -168,8 +152,8 @@ function CoupDePouce({ trou }: { trou: TexteATrou }) {
         {t("pistes")}
       </p>
 
-      {/* Le jeton est en `em` : la taille se pose sur la liste, jamais sur le
-          jeton (deux `font-size` sur un élément, le gagnant ne se lit pas). */}
+      {/* Jeton en `em` : la taille va sur la liste, jamais sur le jeton (deux
+          `font-size` sur un élément, le gagnant ne se lit pas). */}
       <ul className="gap-pas-2 mt-pas-3 text-corps flex flex-wrap">
         {trou.pistes.map((piste) => (
           <li

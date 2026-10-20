@@ -5,23 +5,16 @@ import type { QuestionServie } from "@/lib/db/question-servie";
 import { blocsDeTexte, porteDuCodeEnBloc } from "@/lib/domain/blocs-de-texte";
 
 /**
- * Ce que la carte pose en titre.
+ * Ce que la carte pose en titre. Pour le texte à trou, c'est la phrase trouée :
+ * son champ `question` n'est jamais lu, il la redit sous une forme qui varie.
  *
- * Pour presque tous les formats, c'est l'énoncé écrit à la génération. Le texte
- * à trou fait exception : sa phrase, avec son trou, est l'énoncé. Son champ
- * `question` n'est jamais lu — il redit la phrase, et sa forme varie d'une
- * génération à l'autre.
- *
- * Un extrait de code entre trois accents graves descend sous l'énoncé, dans
- * `BlocDeCode` : en ligne, `TexteTechnique` en ferait un seul jeton dont les
- * retours à la ligne s'effondrent en espaces. Sans barrière, le rendu reste
- * celui de `TexteTechnique`, sans découpe.
+ * Un bloc de code entre trois accents graves descend sous l'énoncé : en ligne,
+ * `TexteTechnique` en ferait un seul jeton aux retours à la ligne effondrés.
  */
 
 /**
- * Le titre de la carte. `break-words` retient les saisies absurdes dans la
- * carte. Centré sur téléphone, où une dernière ligne courte ferait pencher la
- * carte ; aligné à gauche dès `md`.
+ * `break-words` retient les saisies absurdes dans la carte. Centré sur
+ * téléphone, où une dernière ligne courte ferait pencher la carte.
  */
 const ENONCE =
   "text-enonce leading-tight font-bold text-pretty break-words text-stone-900 max-md:text-center";
@@ -31,7 +24,7 @@ export function EnonceDeQuestion({
   comble,
 }: {
   question: QuestionServie;
-  /** Ce qui remplit le trou d'un texte à trou. Ignoré des autres formats. */
+  /** Remplit le trou d'un texte à trou ; ignoré des autres formats. */
   comble: string | null;
 }) {
   if (question.cloze) {
@@ -65,8 +58,7 @@ export function EnonceDeQuestion({
 
       {blocs.map((bloc, rang) =>
         bloc.type === "code" ? (
-          // L'extrait vient après toute la prose qui l'annonce : une question
-          // pose sa consigne puis montre l'extrait.
+          // Après toute la prose : la consigne d'abord, l'extrait ensuite.
           <div key={rang} className="mt-pas-4 text-left">
             <BlocDeCode texte={bloc.texte} langage={bloc.langage} />
           </div>

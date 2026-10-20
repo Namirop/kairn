@@ -4,10 +4,9 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /**
- * Renoncer à une question. Sans cette sortie, un texte à trou dont le terme ne
- * revient pas pousse à inventer une saisie fausse, qui écrit un passage
- * mensonger. Discret et sous la réponse — renoncer doit rester moins
- * confortable que chercher —, il disparaît dès qu'une réponse existe.
+ * Renoncer à une question : sans cette sortie, un terme qui ne revient pas
+ * pousse à une saisie inventée, donc à un passage mensonger. Discret, pour que
+ * renoncer reste moins confortable que chercher.
  */
 export function JeterLaPierre({ enCours, onJeter }: { enCours: boolean; onJeter: () => void }) {
   const t = useTranslations("revision.question");
@@ -20,9 +19,8 @@ export function JeterLaPierre({ enCours, onJeter }: { enCours: boolean; onJeter:
         size="sm"
         disabled={enCours}
         onClick={onJeter}
-        /* Discret mais pas petit : 44 px de haut sur téléphone. Le rembourrage
-           gauche est repris en marge négative pour aligner le mot sur le bord
-           du contenu et sur l'autre sortie. */
+        /* 44 px de haut sur téléphone ; la marge négative aligne le mot sur le
+           bord du contenu. */
         className="max-sm:px-pas-4 -ml-pas-4 max-sm:h-11"
       >
         {t("jeterLaPierre")}

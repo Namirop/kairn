@@ -10,12 +10,8 @@ import { etalonLisible } from "@/lib/domain/etalon-lisible";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
- * Les formats où seule la personne peut juger : réponse courte, explication,
- * code.
- *
- * Elle formule sa réponse, demande à voir, puis se juge sur l'étalon. Le
- * chronomètre s'arrête quand elle demande à voir : le temps de lecture ne dit
- * rien du rappel.
+ * Les formats où seule la personne peut juger, sur l'étalon. Le chronomètre
+ * s'arrête quand elle demande à voir : le temps de lecture ne dit rien du rappel.
  */
 export function ReponseOuverte({
   answerKey,

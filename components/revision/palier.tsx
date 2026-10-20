@@ -3,22 +3,15 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 
 /**
- * Un palier : l'écran sur lequel on tombe quand il n'y a pas de question à
- * poser (journée faite, rien à revoir, session ou tour d'entraînement fini).
- *
- * Centré et titré au corps d'un titre de campagne : c'est le titre qui porte le
- * vide. Une halte, pas une récompense — rien n'y est ajouté pour faire nombre,
- * et l'emblème n'est admis que s'il est l'information elle-même (la pile qu'on
- * a montée).
+ * L'écran quand il n'y a pas de question à poser. Le titre porte le vide. Une
+ * halte, pas une récompense : rien pour faire nombre, et l'emblème n'est admis
+ * que s'il est l'information elle-même.
  */
 
 export type Lien = {
   libelle: string;
   href: string;
-  /**
-   * Ce que fait cette action, en une phrase. Elle s'affiche sous la paire de
-   * boutons, pas sous le sien : elle doit donc nommer l'action dont elle parle.
-   */
+  /** Affichée sous la paire, pas sous son bouton : elle doit nommer son action. */
   precision?: string;
 };
 
@@ -41,10 +34,7 @@ export function Palier({
   pied,
   children,
 }: {
-  /**
-   * Ce qui vient de se passer, dessiné au-dessus du titre : une pile qu'on a
-   * montée, jamais un pictogramme de félicitation.
-   */
+  /** Une pile qu'on a montée, jamais un pictogramme de félicitation. */
   embleme?: ReactNode;
   /** Ce que ce palier clôt, en petites capitales. Facultatif. */
   intitule?: string;
@@ -87,8 +77,7 @@ export function Palier({
       {children}
 
       {action || bouton ? (
-        /* Les actions forment une paire : mêmes dimensions, même ligne de base.
-           Une précision sous un seul bouton décentrait optiquement la rangée. */
+        /* Une paire alignée : une précision sous un seul bouton la décentrerait. */
         <div className="gap-pas-3 sm:gap-pas-4 mt-pas-8 md:mt-pas-12 flex flex-col items-center sm:flex-row">
           {bouton}
 

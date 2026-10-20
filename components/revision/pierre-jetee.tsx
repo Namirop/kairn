@@ -9,8 +9,8 @@ import { etalonLisible } from "@/lib/domain/etalon-lisible";
 import { TexteTechnique } from "@/components/typographie/texte-technique";
 
 /**
- * Ce qui suit une pierre jetée (on renonce) : la réponse, et ce qui est noté.
- * Le bouton attend le temps de lire, comme après une réponse fausse.
+ * Ce qui suit un renoncement : la réponse, et ce qui est noté. Le bouton
+ * attend le temps de lire, comme après une réponse fausse.
  */
 export function PierreJetee({
   reponse,
@@ -20,7 +20,7 @@ export function PierreJetee({
   onSuite,
 }: {
   reponse: string;
-  /** Ce que l'étalon ajoute à la réponse, quand il ajoute quelque chose. */
+  /** Ce que l'étalon ajoute à la réponse, s'il ajoute quelque chose. */
   precision?: string;
   enCours: boolean;
   dernier: boolean;
@@ -41,8 +41,8 @@ export function PierreJetee({
         ) : null}
       </BlocReponse>
 
-      {/* Le texte dit ce qui est noté, pas ce que ça déclenche : en
-          entraînement, rien ne se replanifie. */}
+      {/* Ce qui est noté, pas ce que ça déclenche : en entraînement, rien ne
+          se replanifie. */}
       <p className="mt-pas-6 text-petit text-stone-500">{t("nonRetrouve")}</p>
 
       <div className="gap-pas-4 mt-pas-3 flex flex-wrap items-center">
