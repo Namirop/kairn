@@ -1,13 +1,8 @@
 /**
- * Lecture d'une capture d'écran déposée par l'utilisateur.
- *
- * Le prompt nomme `usable` et `extractedText` : ce sont les champs de
- * `lib/ai/schemas/ocr-extract.ts`.
- *
- * La convention de code est demandée explicitement : sans elle, le modèle met
- * ou non des barrières selon le tirage, et l'écran d'un dépôt rend un extrait
- * sans barrière comme de la prose. Les accents graves simples sont ceux que
- * relève `segmentsDeCode` pour les termes en ligne.
+ * Lecture d'une capture d'écran ; `usable` et `extractedText` sont les champs de
+ * `lib/ai/schemas/ocr-extract.ts`. La convention de code est explicite : sans
+ * elle, les barrières dépendent du tirage et un extrait nu s'affiche en prose.
+ * Les accents graves simples sont ceux que relève `segmentsDeCode`.
  */
 export const PROMPT_DE_LECTURE = `Tu lis une image déposée par quelqu'un qui veut retenir ce qu'elle contient.
 

@@ -1,20 +1,15 @@
 import { tarifCatalogue, type Tarif } from "@/lib/domain/tarifs";
 
 /**
- * Ce qu'un appel coûte, au tarif catalogue (tables dans `lib/domain/tarifs.ts`)
- * plutôt qu'au tarif facturé : pour un garde-fou de budget, surestimer est le
- * bon sens de l'erreur. L'administration montre les deux.
+ * Au tarif catalogue plutôt que facturé : pour un garde-fou de budget, surestimer
+ * est le bon sens de l'erreur. L'administration montre les deux.
  */
 export type TarifDuModele = Tarif;
 
 /**
- * Les multiplicateurs de cache dépendent du modèle, pas du fournisseur : Sonnet
- * via OpenRouter reste facturé comme Anthropic. Le préfixe du modèle dit qui
- * facture (`gpt-` / `openai/` → OpenAI, tout le reste → Anthropic, qui
- * surestime).
- *
- * Anthropic : écriture 1,25×, lecture 0,1×. OpenAI : écriture non facturée
- * (cache automatique), lecture 0,5×.
+ * Le cache se facture selon le modèle, pas le fournisseur : Sonnet via OpenRouter
+ * reste au barème Anthropic. Tout ce qui n'est pas OpenAI tombe sur Anthropic, qui
+ * surestime. OpenAI ne facture pas l'écriture (cache automatique).
  */
 type LigneeCache = "anthropic" | "openai";
 
@@ -28,7 +23,6 @@ function ligneeDuCache(modele: string): LigneeCache {
   return "anthropic";
 }
 
-/** Ce qu'un appel a consommé. Les tokens de cache sont comptés à part. */
 export type Consommation = {
   inputTokens: number;
   outputTokens: number;
@@ -41,11 +35,8 @@ export function tarifDuModele(modele: string): TarifDuModele {
 }
 
 /**
- * Coût d'un appel en chaîne à huit décimales : `AiCall.costUsd` est un Decimal,
- * on n'y fait pas passer un flottant.
- *
- * `inputTokens` ne compte que l'entrée hors cache : l'API sépare les trois
- * postes, chacun a son tarif.
+ * En chaîne : `AiCall.costUsd` est un Decimal, on n'y fait pas passer un flottant.
+ * `inputTokens` ne compte que l'entrée hors cache, l'API séparant les trois postes.
  */
 export function coutEnDollars(modele: string, consommation: Consommation): string {
   const { entreePerMillion, sortiePerMillion } = tarifDuModele(modele);

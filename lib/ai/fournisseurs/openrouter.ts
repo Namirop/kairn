@@ -4,22 +4,15 @@ import type { MessageIa } from "../message";
 import type { ParametresDEmission, ResultatDEmission, PontFournisseur } from "./pont";
 
 /**
- * Le pont OpenRouter, avec les réglages du banc
- * (`scripts/evaluation/openrouter/client.ts`) :
- *
- * - `strict: false` pour les modèles OpenAI : leur validateur exige que
- *   `required` liste tous les champs, `.nullish()` compris, alors que
- *   `deriverLeSchemaDeSortie` rend les optionnels comme optionnels — ce que les autres
- *   fournisseurs attendent. Zod rattrape côté nous une sortie non conforme.
- * - Un préambule schéma-en-clair pour les modèles non stricts, qui sinon
- *   renomment les clés.
- * - `provider.require_parameters: true` : ne router que vers un fournisseur qui
- *   supporte `response_format`.
+ * Mêmes réglages que le banc (`scripts/evaluation/openrouter/client.ts`) :
+ * - `strict: false` pour OpenAI, dont le validateur exige tous les champs dans
+ *   `required`, `.nullish()` compris ; Zod rattrape une sortie non conforme.
+ * - Un préambule schéma-en-clair pour les non stricts, qui sinon renomment les clés.
+ * - `require_parameters` : seulement les fournisseurs qui supportent `response_format`.
  * - Pas de `reasoning` : certains fournisseurs répondent 404.
  *
- * La clé `OPENROUTER_API_KEY` est distincte de celle du banc
- * (`OPENROUTERAI_KEY`) : chacun dépense sur ses crédits, et l'un se coupe sans
- * l'autre.
+ * `OPENROUTER_API_KEY` est distincte de la clé du banc : chacun ses crédits, et
+ * l'un se coupe sans l'autre.
  */
 
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
@@ -40,7 +33,7 @@ const usage = z.object({
   total_tokens: z.number(),
   /** Certains modèles renvoient le coût facturé, d'autres non. */
   cost: z.number().optional(),
-  /** OpenAI (via OpenRouter) rend les tokens en cache dans `prompt_tokens_details.cached_tokens`. */
+  /** Les tokens en cache d'OpenAI. */
   prompt_tokens_details: z.object({ cached_tokens: z.number().optional() }).optional(),
 });
 
@@ -82,9 +75,8 @@ export function pontOpenRouter(apiKey: string | undefined): PontFournisseur {
         throw new Error("OPENROUTER_API_KEY absente — la lignée OpenRouter ne peut pas partir.");
       }
 
-      // Le schéma n'est pas imposé aux modèles OpenAI — leur mode strict refuse
-      // nos schémas —, alors on le leur dit en toutes lettres. Sonnet, imposé,
-      // n'en reçoit pas : sa consigne reste celle que les campagnes ont validée.
+      // Sonnet, à qui le schéma est imposé, n'a pas de préambule : sa consigne
+      // reste celle que les campagnes ont validée.
       const strict = !params.model.startsWith("openai/");
       const preambule = strict
         ? ""
@@ -94,8 +86,7 @@ ${JSON.stringify(params.formatSchema.schema)}
 
 `;
 
-      // Fournisseur épinglé pour les modèles OpenAI : re-routé vers Azure ou une
-      // autre passerelle, l'appel perdrait le cache d'OpenAI.
+      // Épinglé : re-routé vers Azure ou ailleurs, l'appel perdrait le cache d'OpenAI.
       const provider: Record<string, unknown> = { require_parameters: true };
       if (!strict) {
         provider.order = ["OpenAI"];
@@ -143,9 +134,8 @@ ${JSON.stringify(params.formatSchema.schema)}
         );
       }
 
-      // Le chronomètre s'arrête après la lecture du corps : `fetch` rend la main
-      // dès les en-têtes, et le corps se remplit au fil de la génération. Mesuré
-      // avant, on chronométrerait la poignée de main.
+      // Après la lecture du corps : `fetch` rend la main dès les en-têtes, le
+      // corps se remplit au fil de la génération.
       const brut: unknown = await reponse.json();
       const latencyMs = Date.now() - debut;
       const parseReponse = schemaDeReponse.safeParse(brut);
@@ -190,9 +180,8 @@ ${JSON.stringify(params.formatSchema.schema)}
 
 function consommationDepuisUsage(u: z.infer<typeof usage>): ResultatDEmission["consommation"] {
   const cacheRead = u.prompt_tokens_details?.cached_tokens ?? 0;
-  // OpenAI ne facture pas l'écriture du cache, d'où `cacheCreationTokens` à 0.
-  // `prompt_tokens` est un total : `inputTokens` n'en garde que la part non
-  // cachée.
+  // OpenAI ne facture pas l'écriture du cache. `prompt_tokens` est un total,
+  // cache compris.
   return {
     inputTokens: Math.max(0, u.prompt_tokens - cacheRead),
     outputTokens: u.completion_tokens,

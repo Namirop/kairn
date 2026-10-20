@@ -3,17 +3,14 @@ import { VariantFormat } from "@/lib/db/types";
 import { TROU } from "@/lib/domain/reponse-cloze";
 
 /**
- * La forme d'une question, et ce que chaque format lui ajoute. La grammaire du
- * décodage contraint est compilée depuis ces objets.
- *
- * Les bornes chiffrées n'y sont pas imposées : elles partent en description
- * (`lib/ai/schema-de-sortie.ts`) et le modèle les lit comme des indications. Elles
- * vivent donc dans la forme et pas dans la relecture, où elles ne feraient que
- * jeter un appel payé qui porte trois concepts. La relecture ne garde que ce que
- * la grammaire tient : les énumérations, et `minItems` à 0 ou 1.
+ * La forme d'une question, d'où se compile la grammaire du décodage contraint.
+ * Les bornes chiffrées n'y sont que des indications (versées en description par
+ * `lib/ai/schema-de-sortie.ts`) : à la relecture, elles jetteraient un appel payé
+ * qui porte trois concepts. La relecture ne garde que ce que la grammaire tient,
+ * les énumérations et `minItems` à 0 ou 1.
  */
 
-/** Ce qu'un MCQ ajoute. Une clé facultative plutôt que deux champs à annuler. */
+/** Une clé facultative plutôt que deux champs à annuler. */
 function mcq() {
   return z.object({
     options: z
@@ -24,7 +21,7 @@ function mcq() {
   });
 }
 
-/** Le même MCQ, relu : le compte des options est rattrapé, pas exigé. */
+/** Relu : le compte des options est rattrapé, pas exigé. */
 function mcqLu() {
   return z.object({
     options: z.array(z.string()),
@@ -32,27 +29,22 @@ function mcqLu() {
   });
 }
 
-/** Le même texte à trou, relu. `min(1)` tient : la grammaire le recopie. */
+/** Relu. `min(1)` reste : la grammaire le tient. */
 function clozeLu() {
   return z.object({
     sentence: z.string(),
     accepted: z.array(z.string()).min(1),
-    // Facultatifs à la relecture, imposés à l'écriture : des questions en base
-    // n'en portent pas, et elles restent servables.
+    // Facultatifs à la relecture : des questions en base n'en portent pas et
+    // restent servables.
     leurres: z.array(z.string()).nullish(),
   });
 }
 
 /**
- * Ce qu'un CLOZE ajoute : la phrase trouée, et de quoi vérifier la saisie sans
- * rappeler le modèle.
- *
- * La comparaison vit dans `lib/domain/reponse-cloze.ts`. Le terme masqué vient
- * en premier : c'est celui qu'on montre en cas d'erreur, et celui dont on mesure
- * la longueur.
- *
- * Les leurres (le coup de pouce de la révision) se demandent au même appel : les
- * fabriquer plus tard voudrait dire un appel modèle pendant une session.
+ * De quoi vérifier la saisie sans rappeler le modèle (`lib/domain/reponse-cloze.ts`).
+ * Le terme masqué vient en premier : on le montre en cas d'erreur et on en mesure
+ * la longueur. Les leurres se demandent au même appel, sans quoi le coup de pouce
+ * coûterait un appel pendant la session.
  */
 function cloze() {
   return z.object({
@@ -75,11 +67,7 @@ function cloze() {
   });
 }
 
-/**
- * L'énoncé et la réponse attendue, communs à toute question écrite. Une
- * instance neuve à chaque appel, pour la même raison que `z.enum()` plus bas :
- * une instance partagée partirait dans `$defs`.
- */
+/** Une instance neuve à chaque appel : partagée, elle partirait dans `$defs`. */
 function enonce() {
   return z.string().min(10).max(800);
 }
@@ -89,12 +77,9 @@ function reponseAttendue(description: string) {
 }
 
 /**
- * Les formats ouverts à chaque facette.
- *
- * Le quota « au plus une question à s'auto-noter » est tenu par la grammaire,
- * pas par une consigne (que le modèle ne respectait pas hors informatique) :
- * seul `MECHANISM` ouvre le texte libre, parce que « explique pourquoi » vaut
- * souvent mieux qu'un choix à cocher.
+ * « Au plus une question à s'auto-noter » est tenu par la grammaire : en
+ * consigne, le modèle ne le respectait pas hors informatique. Seul `MECHANISM`
+ * ouvre le texte libre, où « explique pourquoi » vaut mieux qu'un choix à cocher.
  */
 export const FORMATS_VERIFIABLES = [
   "MCQ",
@@ -112,9 +97,9 @@ export const FORMATS_DU_MECANISME = [
 ] as const satisfies readonly VariantFormat[];
 
 /**
- * `z.enum()` est appelé ici, une fois par facette, et jamais partagé : Zod
- * extrait vers `$defs` dès qu'une même instance de schéma est réutilisée, et la
- * contrainte y devient une description que le décodage n'applique plus.
+ * `z.enum()` est appelé une fois par facette, jamais partagé : Zod extrait une
+ * instance réutilisée vers `$defs`, où la contrainte devient une description que
+ * le décodage n'applique plus.
  */
 export function question(formats: readonly [VariantFormat, ...VariantFormat[]], facette: string) {
   return z
@@ -137,12 +122,9 @@ export function question(formats: readonly [VariantFormat, ...VariantFormat[]], 
 }
 
 /**
- * La question dont le serveur a décidé qu'elle serait un texte à trou.
- *
- * Une énumération à une valeur et une charge requise, deux mots-clés que la
- * grammaire tient réellement : le modèle ne peut ni changer de format ni omettre
- * la phrase trouée. Une consigne dans le prompt ne suffisait pas. `mcq` et
- * `estVraie` sont absents pour ne pas pouvoir revenir.
+ * Le texte à trou imposé par le serveur. Énumération à une valeur et charge
+ * requise, que la grammaire tient (une consigne ne suffisait pas) ; `mcq` et
+ * `estVraie` sont absents pour qu'aucun autre format ne revienne.
  */
 export function questionATrou(facette: string) {
   return z
@@ -158,14 +140,10 @@ export function questionATrou(facette: string) {
 }
 
 /**
- * La même question, relue. L'énumération des formats reste (la grammaire la
- * tient, c'est elle qui garantit la règle des facettes) ; les longueurs partent :
- * une question trop courte ou trop longue reste lisible et ne vaut pas de perdre
- * trois lots. `z.enum()` est appelé à chaque invocation, comme dans `question`.
- *
- * `estVraie` se relit sans contrainte : un `TRUE_FALSE` qui l'omet ou rend
- * l'inverse de la cible lève un manquement au contrôle, pas un refus. La
- * question reste servable.
+ * Relue : l'énumération reste (elle garantit la règle des facettes), les
+ * longueurs partent, une question hors bornes ne valant pas trois lots perdus.
+ * `estVraie` omise ou contraire à la cible est un manquement au contrôle, pas un
+ * refus.
  */
 export function questionLue(formats: readonly [VariantFormat, ...VariantFormat[]]) {
   return z.object({

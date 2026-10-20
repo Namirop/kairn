@@ -1,8 +1,4 @@
-/**
- * Forme des messages passés à `callAI()`, indépendante du SDK Anthropic : il ne
- * s'importe que dans `fournisseurs/anthropic.ts`, et chaque pont traduit ces
- * messages au moment d'émettre.
- */
+/** Indépendante du SDK Anthropic, qui ne s'importe que dans `fournisseurs/anthropic.ts`. */
 
 export type PartieTexte = {
   type: "text";
@@ -24,10 +20,7 @@ export type MessageIa = {
   content: string | PartieDeMessage[];
 };
 
-/**
- * Forme attendue par le SDK, décrite sans l'importer ; la compilation du pont
- * Anthropic vérifie que les deux coïncident.
- */
+/** Décrite sans importer le SDK ; la compilation du pont vérifie qu'elle coïncide. */
 export type MessageDuSdk = {
   role: "user" | "assistant";
   content:
@@ -59,7 +52,7 @@ export function versMessageDuSdk(message: MessageIa): MessageDuSdk {
   };
 }
 
-/** Le texte soumis, mis bout à bout. Le mode mock y choisit sa fixture. */
+/** Le mode mock y choisit sa fixture. */
 export function texteMisBoutABout(messages: MessageIa[]): string {
   return messages
     .map((message) =>

@@ -1,12 +1,7 @@
 /**
- * Le message qu'on tend au découpage : le dépôt, et la consigne s'il y en a une.
- *
- * Sans consigne, le message est le texte nu : y ajouter des balises déplacerait
- * le comportement mesuré au banc.
- *
- * Avec consigne, le dépôt arrive entre des marques annoncées comme du contenu,
- * jamais une instruction (garde contre un dépôt qui dirait « ignore tes
- * consignes »), puis la consigne sous sa propre marque.
+ * Sans consigne, le texte nu : des balises déplaceraient le comportement mesuré
+ * au banc. Avec consigne, le dépôt est encadré et annoncé comme du contenu, contre
+ * un dépôt qui dirait « ignore tes consignes ».
  */
 
 const OUVERTURE =

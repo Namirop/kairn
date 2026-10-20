@@ -2,15 +2,11 @@ import { z } from "zod";
 import { ConfigIaInvalideError } from "./errors";
 import type { Fournisseur } from "./fournisseurs";
 
-/**
- * Les garde-fous, lus et validés à chaque appel plutôt qu'au chargement du
- * module : couper les appels doit prendre effet tout de suite, sans redémarrage.
- */
+/** Lus à chaque appel, pas au chargement : couper les appels prend effet sans redémarrage. */
 
 /**
- * « true » depuis l'environnement, `true` depuis la base. Normalisé avant
- * validation plutôt qu'en union, pour qu'un refus nomme les deux valeurs
- * attendues au lieu de « Invalid input ».
+ * « true » de l'environnement, `true` de la base. Normalisé plutôt qu'en union,
+ * pour qu'un refus nomme les valeurs attendues au lieu de « Invalid input ».
  */
 const booleen = z.preprocess(
   (valeur) => (typeof valeur === "boolean" ? String(valeur) : valeur),
@@ -28,11 +24,7 @@ const schemaDeConfig = z.object({
   model: z.string().min(1),
   maxTokens: z.coerce.number().int().positive(),
   apiKey: z.string().min(1).optional(),
-  /**
-   * Le fournisseur qui sert les appels, `anthropic` si la variable manque.
-   * `openrouter` (voir `fournisseurs/openrouter.ts`) exige `OPENROUTER_API_KEY`,
-   * distincte de la clé du banc.
-   */
+  /** `openrouter` exige `OPENROUTER_API_KEY`, distincte de la clé du banc. */
   fournisseur: z
     .enum(["anthropic", "openrouter"] as const satisfies readonly Fournisseur[])
     .default("anthropic"),
@@ -44,10 +36,7 @@ export type ConfigIa = z.infer<typeof schemaDeConfig>;
 /** Ce qu'une surcharge peut porter. Une clé absente laisse l'environnement. */
 export type SurchargesDeConfig = Partial<Omit<ConfigIa, "apiKey">>;
 
-/**
- * Les variables de plafond, à part parce qu'une alerte de plafond nomme celle à
- * changer : une seconde table ailleurs finirait par diverger.
- */
+/** À part car l'alerte de plafond nomme la variable à changer : une seconde table divergerait. */
 const VARIABLE_DE_PLAFOND = {
   dailyCallCap: "AI_DAILY_CALL_CAP",
   userDailyCallCap: "AI_DAILY_CALL_CAP_PAR_COMPTE",
@@ -64,17 +53,14 @@ const VARIABLE: Record<string, string> = {
   fournisseur: "AI_FOURNISSEUR",
 };
 
-/** Le nom de la variable derrière un plafond, pour qui doit le changer. */
 export function variableDuPlafond(champ: keyof typeof VARIABLE_DE_PLAFOND): string {
   return VARIABLE_DE_PLAFOND[champ];
 }
 
 /**
- * Une valeur d'environnement sans espaces de bord ni paire de guillemets :
- * l'interface d'un hébergeur, contrairement à `dotenv`, ne nettoie rien. Vide
- * vaut absente, un champ effacé y laissant une chaîne vide.
- *
- * Un `# …` de fin de ligne n'est pas retiré : un `#` peut appartenir à la valeur.
+ * L'interface d'un hébergeur, contrairement à `dotenv`, ne retire ni espaces ni
+ * guillemets, et un champ effacé y laisse une chaîne vide. Un `# …` final reste :
+ * un `#` peut appartenir à la valeur.
  */
 function propre(valeur: string | undefined): string | undefined {
   const nette = valeur
@@ -93,12 +79,9 @@ function extrait(valeur: unknown): string {
 }
 
 /**
- * Chaque refus nomme la variable, la valeur reçue et sa provenance : sans la
- * valeur, une espace ou un commentaire en trop reste invisible ; « reçu rien »
- * envoie chez l'hébergeur, « posé à » vers l'écran de pilotage.
- *
- * Les clés d'API ne sont pas dans `VARIABLE` et ne sont donc jamais montrées :
- * ce message part dans des journaux.
+ * Variable, valeur et provenance : sans la valeur, une espace en trop reste
+ * invisible ; « reçu » envoie chez l'hébergeur, « posé à » vers l'écran de pilotage.
+ * Les clés d'API, absentes de `VARIABLE`, ne sont jamais montrées : ceci part en journaux.
  */
 function diagnostic(
   erreur: z.ZodError,
@@ -124,7 +107,6 @@ function diagnostic(
     .join(" ; ");
 }
 
-/** Ce que l'environnement propose, tel quel : des chaînes, ou rien. */
 function environnementBrut(): Record<string, string | undefined> {
   return {
     enabled: propre(process.env.AI_ENABLED),
@@ -139,11 +121,8 @@ function environnementBrut(): Record<string, string | undefined> {
 }
 
 /**
- * L'environnement comme défaut, les surcharges de la base par-dessus : retirer
- * une surcharge suffit à revenir au défaut.
- *
- * Seul l'empilement est validé, jamais l'environnement seul : une variable
- * manquante doit pouvoir être remplacée depuis l'écran pendant un incident.
+ * L'environnement, les surcharges de la base par-dessus. Seul l'empilement est
+ * validé : une variable manquante doit pouvoir se remplacer depuis l'écran en incident.
  */
 export function assemblerLaConfig(surcharges: SurchargesDeConfig = {}): ConfigIa {
   const brut: Record<string, unknown> = environnementBrut();
@@ -171,11 +150,7 @@ export function assemblerLaConfig(surcharges: SurchargesDeConfig = {}): ConfigIa
   return parsed.data;
 }
 
-/**
- * La configuration de l'environnement seul, utilisée par les scripts de
- * vérification. Jamais pour décider d'un appel : c'est la configuration
- * effective, surcharges comprises, qui décide.
- */
+/** Pour les scripts de vérification. Un appel se décide sur la configuration effective. */
 export function lireLaConfigDeLEnvironnement(): ConfigIa {
   return assemblerLaConfig();
 }

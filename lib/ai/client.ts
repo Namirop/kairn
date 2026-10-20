@@ -19,29 +19,18 @@ import type { ContratDeSortie } from "./schemas";
 import { signalerUneBascule } from "./signalement-de-bascule";
 
 /**
- * Le seul point d'entrée vers le modèle. C'est lui qui protège le budget.
+ * Le seul point d'entrée vers le modèle, celui qui protège le budget : garde-fous,
+ * registre `AiCall` succès comme échec, aucun retry. Le réseau vit dans `fournisseurs/`.
  *
- * Les appels réseau vivent dans `fournisseurs/`. Ici : garde-fous
- * (interrupteur, mock, réservation), registre `AiCall` succès comme échec, et
- * aucun retry.
- *
- * Quand l'appel tombe — réseau, 5xx, sortie invalide ou tronquée —, Sonnet
- * prend le relais sur le même pont, mêmes prompts, même schéma. La bascule est
- * marquée dans `AiCall.basculee` et alerte au-delà de `SEUIL_BASCULES` par jour.
- *
- * Le repli reste chez le fournisseur primaire : une panne d'OpenRouter lui-même
- * n'est pas couverte, pas plus que celles de l'hébergeur ou de la base, et un
- * second compte payé pour ce seul cas achèterait la redondance où elle est
- * facile, pas où elle sert. Le pont Anthropic reste câblé pour une bascule
- * manuelle par variable d'environnement.
+ * Un appel tombé (réseau, 5xx, sortie invalide ou tronquée) bascule une fois sur
+ * Sonnet, même pont, mêmes prompts, marqué `AiCall.basculee`. Le repli reste chez
+ * le fournisseur primaire : une panne d'OpenRouter lui-même n'est pas couverte, un
+ * second compte payé n'achèterait la redondance que là où elle est facile.
  */
 
 const LATENCE_DU_MOCK_MS = 300;
 
-/**
- * Le modèle du repli. Deux entrées pour un seul modèle : OpenRouter veut le nom
- * préfixé, le SDK d'Anthropic le nom court. `AI_MODEL` porte le primaire.
- */
+/** Un seul modèle : OpenRouter veut le nom préfixé, le SDK d'Anthropic le nom court. */
 export const MODELE_DE_REPLI: Record<Fournisseur, string> = {
   openrouter: "anthropic/claude-sonnet-5",
   anthropic: "claude-sonnet-5",
@@ -61,29 +50,21 @@ export type ParametresDAppel<T> = {
   messages: MessageIa[];
   maxTokens?: number;
   /**
-   * Le modèle, quand il ne doit pas être celui de la configuration : les juges
-   * du banc, des décisions binaires qui coûteraient dix fois plus sur le modèle
-   * d'extraction.
-   *
-   * Pas un réglage de confort : le produit garde `AI_MODEL`, sinon deux chemins
-   * d'ingestion sur deux modèles rendraient les mesures incomparables. Coupe
-   * aussi le repli automatique (voir `doitBasculer`).
+   * Réservé aux juges du banc (décisions binaires, dix fois moins chères ailleurs).
+   * Le produit garde `AI_MODEL`, sinon ses mesures deviendraient incomparables.
+   * Coupe le repli (voir `doitBasculer`).
    */
   model?: string;
   userId?: string;
   jobId?: string;
   /**
-   * L'appel sert un visiteur sans compte. Déclaré et non déduit de l'absence
-   * d'`userId`, qui couvre aussi le cron et les outils internes : ceux-là ne
-   * doivent pas puiser dans la part du public.
+   * Visiteur sans compte. Déclaré, pas déduit d'un `userId` absent : le cron et
+   * les outils internes n'en ont pas non plus et ne puisent pas dans cette part.
    */
   anonyme?: boolean;
 };
 
-/**
- * Émet une seule fois via le pont donné et journalise dans `AiCall`.
- * `basculee` marque la ligne de l'émission de repli.
- */
+/** Une seule émission, journalisée dans `AiCall`. */
 async function emettreEtJournaliser<T>(
   pont: PontFournisseur,
   params: ParametresDAppel<T>,
@@ -132,8 +113,7 @@ async function emettreEtJournaliser<T>(
   const cout = coutEnDollars(config.model, sortie.consommation);
 
   try {
-    // Une réponse coupée peut rester valide au schéma (cinq concepts sur
-    // huit) : c'est un échec quand même.
+    // Coupée, une réponse peut rester valide au schéma (cinq concepts sur huit).
     if (sortie.finishReason === "length") {
       throw new SortieTronqueeError(contract.purpose, maxTokens);
     }
@@ -163,13 +143,10 @@ async function emettreEtJournaliser<T>(
   }
 }
 
-/** Décide si l'échec de l'appel doit basculer sur le modèle de repli. */
 function doitBasculer<T>(erreur: unknown, config: ConfigIa, params: ParametresDAppel<T>): boolean {
-  // Primaire déjà sur le modèle de repli : rejouer l'appel serait le retry que
-  // ce fichier s'interdit.
+  // Primaire déjà sur Sonnet : rejouer serait le retry interdit.
   if (config.model === MODELE_DE_REPLI[config.fournisseur]) return false;
-  // Un appelant qui cible un modèle précis (les juges du banc) ne doit pas être
-  // remis en silence sur Sonnet : la mesure serait faussée.
+  // Un modèle ciblé (juges du banc) remis sur Sonnet fausserait la mesure.
   if (params.model !== undefined) return false;
   if (!(erreur instanceof AppelModeleError)) return false;
   return CODES_DE_REPLI.has(erreur.code);
@@ -189,11 +166,10 @@ async function emettreAvecRepli<T>(params: ParametresDAppel<T>, config: ConfigIa
     return await emettreEtJournaliser(pont, params, config, false);
   } catch (erreur) {
     if (!doitBasculer(erreur, config, params)) throw erreur;
-    // Le repli est une seconde émission réelle : il prend sa place au plafond
-    // global, sinon une panne du primaire doublerait les émissions sous le même
-    // plafond. Plafond atteint, l'échec du primaire remonte.
+    // Seconde émission réelle : elle prend sa place au plafond global, sinon une
+    // panne du primaire doublerait les émissions sous le même plafond.
     if (!(await reserverLaPlaceDuRepli(config))) throw erreur;
-    // Si le repli échoue aussi, l'erreur remonte : pas de troisième tentative.
+    // Repli en échec : l'erreur remonte, pas de troisième tentative.
     const configRepli: ConfigIa = { ...config, model: MODELE_DE_REPLI[config.fournisseur] };
     const resultat = await emettreEtJournaliser(pont, params, configRepli, true);
     signalerUneBascule(motifDeBascule(erreur));
@@ -202,16 +178,13 @@ async function emettreAvecRepli<T>(params: ParametresDAppel<T>, config: ConfigIa
 }
 
 /**
- * Appelle le modèle et rend une valeur déjà validée. Dans l'ordre :
- * interrupteur, mode mock, part du compte, plafond journalier, émission avec
- * `max_tokens` explicite et sortie contrainte par grammaire, refus d'une
- * réponse tronquée, validation stricte, puis écriture au registre — succès
- * comme échec. Aucun retry ; un seul repli vers Sonnet (voir `emettreAvecRepli`).
+ * Rend une valeur validée. Dans l'ordre : interrupteur, mock, part du compte,
+ * plafond journalier, émission (`max_tokens` explicite, sortie contrainte par
+ * schéma), refus d'une troncature, validation, registre. Aucun retry.
  */
 export async function callAI<T>(params: ParametresDAppel<T>): Promise<T> {
   const effective = await lireLaConfigEffective();
-  // La surcharge est appliquée ici, avant tout le reste : le registre, le calcul
-  // de coût et la réservation doivent tous voir le modèle réellement appelé.
+  // Avant tout le reste : registre, coût et réservation voient le modèle réellement appelé.
   const config = params.model ? { ...effective, model: params.model } : effective;
 
   if (!config.enabled) {
@@ -223,8 +196,7 @@ export async function callAI<T>(params: ParametresDAppel<T>): Promise<T> {
     return chargerLaFixture(params.contract, texteMisBoutABout(params.messages), params.system);
   }
 
-  // Les places sont réservées avant d'émettre, chacune en une seule instruction :
-  // deux appels simultanés ne peuvent pas obtenir la même.
+  // Une instruction par place : deux appels simultanés n'obtiennent pas la même.
   await reserverLesDeuxPlaces(config, provenanceDeLAppel(params));
 
   return emettreAvecRepli(params, config);

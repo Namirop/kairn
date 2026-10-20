@@ -1,46 +1,27 @@
 import type { LangueDesQuestions } from "./consignes-de-langue";
 
 /**
- * Écriture des quatre Variants d'un Atom.
+ * Écriture des quatre Variants d'un Atom. Formats et facettes sont les valeurs
+ * des enums Prisma `VariantFormat` et `VariantFacet`.
  *
- * Les formats et les facettes cités sont ceux des enums `VariantFormat` et
- * `VariantFacet` du schéma Prisma : le prompt et la base nomment les mêmes
- * valeurs.
+ * Le prompt ne demande pas ce que le serveur tient, une proportion en prose ne
+ * tenant pas : la position de la bonne option (en tête 92 % du temps,
+ * `lib/domain/ordre-des-options.ts`), la part d'affirmations fausses (88 %
+ * demandée en prose, `lib/domain/vrai-ou-faux.ts`). Les règles catégoriques,
+ * elles, tiennent.
  *
- * Ce que le prompt ne doit pas demander, parce que le serveur le tient :
- * - la position de la bonne option d'un QCM — le modèle la mettait en tête
- *   92 % du temps ; les options sont remises en ordre à l'écriture
- *   (`lib/domain/ordre-des-options.ts`) ;
- * - la part d'affirmations fausses — demandée en prose, elle sortait à 88 % ;
- *   la cible est tirée par question et transmise dans l'envoi
- *   (`lib/domain/vrai-ou-faux.ts`).
- * Une consigne de proportion ne tient pas et masquerait la mesure. Les règles
- * catégoriques (langue, tutoiement, renvoi au concept), elles, tiennent.
+ * Plusieurs consignes ont un filet à la lecture ou au contrôle ; la consigne
+ * évite d'en produire : `etalonUtile` (seule la redite mot pour mot s'efface),
+ * `unParFormat`, `sansAffirmationMuette`, `trouSansRedite`,
+ * `phraseSansDevoilement`, `trouDevoileSaReponse`, `renvoiAuConcept`,
+ * `controlerRenvoi`, `releverLeCodeCite`.
  *
- * Plusieurs consignes ont un filet côté lecture ou contrôle, qui répare le stock
- * ou écarte la question ; la consigne évite d'en produire :
- * `etalonUtile` (étalon qui recopie l'option mot pour mot — d'où « mot pour
- * mot » : une paraphrase n'est pas effacée), `unParFormat` (un seul CLOZE),
- * `sansAffirmationMuette` (vrai ou faux sans `estVraie`), `trouSansRedite`
- * (terme qui borde son trou), `phraseSansDevoilement` et `trouDevoileSaReponse`
- * (terme répété dans sa phrase), `renvoiAuConcept` et `controlerRenvoi`
- * (question qui renvoie au concept, y compris par le participe seul),
- * `releverLeCodeCite` (code entre guillemets).
+ * Aucun étalon n'ouvre par un verdict : il ne s'affiche qu'après une erreur. Et
+ * `estVraie` décrit l'affirmation écrite : une cible manquée se tolère, un
+ * verdict faux corrige quelqu'un qui a raison.
  *
- * Sur un concept pauvre, la fidélité prime sur la variété : un étalon ou une
- * question qui radote coûte du bruit, une invention coûte une fausse certitude.
- *
- * Les leurres du texte à trou se demandent dans ce même appel : les fabriquer
- * au besoin voudrait un appel modèle pendant une session
- * (`lib/domain/aide-du-trou.ts`).
- *
- * Aucun étalon n'ouvre par un verdict : le bloc « Pourquoi » ne s'affiche
- * qu'après une mauvaise réponse. `estVraie` décrit l'affirmation écrite, pas la
- * cible demandée : le contrôle tolère une cible manquée, mais un verdict faux
- * fait corriger quelqu'un qui a raison.
- *
- * Si une consigne locale ne prend pas, teste la longueur avant d'ajouter des
- * lignes : le prompt dépasse 13 000 caractères et une règle s'y dilue.
+ * Le prompt dépasse 13 000 caractères : si une consigne ne prend pas, teste la
+ * longueur avant d'ajouter des lignes.
  */
 export function promptDeQuestions(langue: LangueDesQuestions): string {
   return `On te donne un ou plusieurs concepts issus d'un même dépôt. Tu écris quatre questions
