@@ -2,12 +2,7 @@
 import Link from "next/link";
 import { ROUTES } from "@/lib/auth/routes";
 
-/**
- * Ce qui s'affiche quand la configuration du modèle est refusée.
- *
- * Le diagnostic est rendu tel quel : il nomme la variable et montre ce qui a
- * été reçu, ce qu'une reformulation perdrait.
- */
+/** Le motif tel quel : variable et valeur reçue, qu'une reformulation perdrait. */
 export function ConfigIllisible({ motif }: { motif: string }) {
   return (
     <section aria-labelledby="config-illisible" className="px-pas-4 py-pas-4 bg-alerte-surface">

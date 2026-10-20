@@ -8,14 +8,9 @@ import { Button } from "@/components/ui/button";
 import { emailOtp } from "@/lib/auth/client";
 
 /**
- * Une adresse, un code. Inscription et connexion sont un même geste : personne
- * n'a à savoir s'il a déjà un compte.
- *
- * L'écran ne dit jamais si l'adresse existe : sinon il révélerait à n'importe
- * qui si telle personne a un compte ici.
- *
- * Un code plutôt qu'un lien : un lien s'ouvre dans le navigateur par défaut,
- * jamais dans l'application installée. Voir `lib/domain/code-de-connexion.ts`.
+ * Inscription et connexion sont un même geste, et l'écran ne dit jamais si
+ * l'adresse existe : il révélerait qui a un compte. Un code plutôt qu'un lien,
+ * qui s'ouvrirait hors de l'app installée (`lib/domain/code-de-connexion.ts`).
  */
 export function FormulaireConnexion({ suite }: { suite: string }) {
   const [adresse, setAdresse] = useState("");
@@ -74,7 +69,7 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
         onChange={(evenement) => setAdresse(evenement.target.value)}
       />
 
-      {/* L'espace du message est réservé : l'erreur ne décale pas le bouton. */}
+      {/* Place réservée : l'erreur ne décale pas le bouton. */}
       <p className="text-petit min-h-5" role="status" aria-live="polite">
         {erreur ? <span className="text-alerte">{erreur}</span> : null}
       </p>
@@ -83,8 +78,6 @@ export function FormulaireConnexion({ suite }: { suite: string }) {
         {enCours ? t("envoi") : t("recevoir")}
       </Button>
 
-      {/* Le mécanisme du code, dit une fois, sous le champ où la question se
-          pose. */}
       <p className="text-petit text-stone-500">{t("mecanisme")}</p>
     </form>
   );

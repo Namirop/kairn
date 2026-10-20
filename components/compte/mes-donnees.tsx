@@ -7,11 +7,7 @@ import { Button } from "@/components/ui/button";
 import { MOT_DE_CONFIRMATION } from "@/lib/domain/confirmation-de-suppression";
 import { useLangue } from "@/lib/i18n/use-langue";
 
-/**
- * Emporter ses données, ou les effacer. La suppression, irréversible, demande
- * de recopier un mot (une case se coche sans lire), et son formulaire ne se
- * déplie qu'au clic.
- */
+/** La suppression fait recopier un mot : une case se coche sans lire. */
 export function MesDonnees() {
   const [ouvert, setOuvert] = useState(false);
   const [etat, action, enCours] = useActionState<EtatSuppression, FormData>(
@@ -55,7 +51,7 @@ export function MesDonnees() {
               className="rounded-galet mt-pas-2 px-pas-3 py-pas-2 md:text-petit focus-visible:border-alerte w-full max-w-64 border border-stone-300 bg-transparent text-base text-stone-900 outline-none"
             />
 
-            {/* L'espace du message est réservé : l'erreur ne décale pas les boutons. */}
+            {/* Place réservée : l'erreur ne décale pas les boutons. */}
             <p className="mt-pas-2 text-petit min-h-5" role="status" aria-live="polite">
               {etat.erreur ? <span className="text-alerte">{etat.erreur}</span> : null}
             </p>

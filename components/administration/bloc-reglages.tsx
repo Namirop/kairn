@@ -9,14 +9,9 @@ import { Button } from "@/components/ui/button";
 import type { ReglagesPosés } from "@/lib/db/reglages";
 
 /**
- * Les réglages d'exploitation, modifiables sans redéploiement.
- *
- * Une variable d'environnement se change au déploiement ; ces réglages-là
- * doivent pouvoir se changer *pendant* un incident. La configuration étant relue
- * à chaque appel, ce qui est posé ici s'applique au suivant.
- *
- * `ADMIN_EMAILS` n'y est pas et n'y sera pas : la liste qui décide qui ouvre cet
- * écran ne se modifie pas depuis cet écran.
+ * Changeables *pendant* un incident, sans redéploiement : la configuration est
+ * relue à chaque appel. `ADMIN_EMAILS` n'y sera jamais : la liste qui ouvre cet
+ * écran ne se modifie pas depuis lui.
  */
 
 const VIDE: EtatDesReglages = {};

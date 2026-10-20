@@ -1,10 +1,8 @@
 import type { ReactNode } from "react";
 
 /**
- * Une section de l'écran d'administration. Registre interne, volontairement
- * l'inverse du produit : pas de display, pas d'accent, de la densité. Le filet
- * en tête sépare les sujets, l'espace seul ne suffisant pas entre des contenus
- * faits de lignes réglées.
+ * Registre interne, l'inverse du produit : ni display ni accent, de la densité.
+ * Filet en tête : entre des lignes réglées, l'espace seul ne sépare pas.
  */
 export function Section({
   intitule,
@@ -26,7 +24,6 @@ export function Section({
   );
 }
 
-/** Une mesure : son libellé, son chiffre en `tabular-nums` pour aligner les colonnes. */
 export function Mesure({ intitule, valeur }: { intitule: string; valeur: string }) {
   return (
     <div className="gap-pas-4 py-pas-2 flex items-baseline justify-between border-b border-stone-300 last:border-b-0">

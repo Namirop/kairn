@@ -4,16 +4,11 @@ import { useSyncExternalStore } from "react";
 import { ClipboardPaste } from "lucide-react";
 
 /**
- * Colle le presse-papier dans le champ qui le porte, posé au bout du champ.
- *
- * `readText` n'existe pas partout (Firefox ne l'expose pas aux pages, Chrome
- * peut refuser la permission) : le bouton ne s'affiche que là où l'API existe.
- * C'est un raccourci ; le clavier mobile propose le code, la frappe reste.
- *
- * Le serveur ne connaît pas le presse-papier : il rend sans bouton, et le client
- * ne l'ajoute qu'après l'hydratation, ce que `useSyncExternalStore` garantit.
+ * Un raccourci, affiché seulement là où `readText` existe (pas sur Firefox) ;
+ * le clavier mobile propose aussi le code. Le serveur rend sans bouton, le
+ * client l'ajoute après l'hydratation (`useSyncExternalStore`).
  */
-/** L'API ne change pas pendant la vie de la page : rien à écouter. */
+/** L'API ne change pas pendant la vie de la page. */
 function sansAbonnement(): () => void {
   return () => {};
 }
@@ -32,7 +27,7 @@ export function BoutonColler({
   className,
 }: {
   onTexte: (texte: string) => void;
-  /** Ce qu'un lecteur d'écran entend : l'icône seule ne dit rien. */
+  /** L'icône seule ne dit rien au lecteur d'écran. */
   intitule: string;
   className?: string;
 }) {
@@ -44,7 +39,7 @@ export function BoutonColler({
     try {
       onTexte(await navigator.clipboard.readText());
     } catch (erreur: unknown) {
-      // Un refus de permission n'est pas une panne : tracé, rien à afficher.
+      // Un refus de permission n'est pas une panne.
       console.info("Le presse-papier n'a pas pu être lu.", erreur);
     }
   }

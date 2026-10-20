@@ -6,11 +6,7 @@ import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
 import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
 import { cn } from "@/lib/fusion-des-classes";
 
-/**
- * L'attente : trois pierres qui se posent l'une après l'autre, en boucle. La
- * géométrie vient de `empiler`. Sous `prefers-reduced-motion`, les pierres
- * restent posées.
- */
+/** L'attente : trois pierres qui se posent en boucle, immobiles sous `prefers-reduced-motion`. */
 
 const PIERRES = 3;
 
@@ -19,7 +15,7 @@ export function PileEnConstruction({
   clair = false,
 }: {
   className?: string;
-  /** Sur un panneau de roche, les pierres s'inversent en gris clairs. */
+  /** Pour un panneau de roche. */
   clair?: boolean;
 }) {
   const t = useTranslations("tableau.cairn");

@@ -6,24 +6,16 @@ import { HAUTEUR_STRATES, LARGEUR_STRATES, strates } from "@/lib/domain/strates"
 import { SURFACES, variableDe, type Surface } from "./surfaces";
 
 /**
- * La jointure entre deux panneaux : une coupe de roche, étirée sur toute la
- * largeur (`preserveAspectRatio="none"`).
- *
- * Les veines se mêlent à `--stone-500` par `color-mix` plutôt que d'interpoler
- * entre les deux surfaces : entre le papier et l'ombre, l'écart est trop faible
- * pour se voir. Elles ne bougent qu'au défilement, jamais seules, et la plus
- * haute dérive deux fois plus que l'autre : c'est l'écart de vitesse qui fait
- * la profondeur.
+ * La jointure entre deux panneaux. Les veines se mêlent à `--stone-500` plutôt
+ * qu'aux deux surfaces : entre papier et ombre, l'écart ne se voit pas. Elles ne
+ * bougent qu'au défilement, la haute deux fois plus : l'écart fait la profondeur.
  */
 
-/** Dérive de chaque veine sur une traversée complète, en unités de viewBox. */
+/** Sur une traversée complète, en unités de viewBox. */
 const DERIVE_HAUTE = 1.3;
 const DERIVE_BASSE = 0.6;
 
-/**
- * La coupe, elle, ne bouge pas : elle porte la surface du dessous jusqu'en bas
- * de la bande, et la décaler découvrirait une couture d'un pixel.
- */
+/** La coupe ne bouge pas : décalée, elle découvrirait une couture d'un pixel. */
 export function Strates({ de, vers, graine }: { de: Surface; vers: Surface; graine: string }) {
   const { coupe, veines } = strates(graine);
   const bande = useRef<HTMLDivElement>(null);

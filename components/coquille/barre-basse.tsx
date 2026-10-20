@@ -7,17 +7,12 @@ import { destinationsPour, estActive, railInterne } from "./destinations";
 import { cn } from "@/lib/fusion-des-classes";
 
 /**
- * Navigation mobile : une barre basse, dans la zone du pouce. Le rembourrage bas
- * suit l'encoche gestuelle (`safe-area-inset-bottom`).
+ * Navigation mobile, dans la zone du pouce. Sa hauteur est reprise par
+ * `--barre-basse` (`app/styles/tokens/echelle.css`) : un changement ici se
+ * reporte là-bas.
  *
- * Sa hauteur totale est reprise par `--barre-basse` dans
- * `app/styles/tokens/echelle.css`, auquel se réfère ce qui se pose au-dessus
- * d'elle : une cible ou un rembourrage qui change ici se reporte là-bas.
- *
- * Le rail de l'administration a trop d'entrées pour des parts égales sur un
- * téléphone : ses onglets défilent plutôt que d'abréger. Leur largeur est un
- * plancher (`min-w-20`) et non une mesure, sinon un long libellé déborde de la
- * pastille qui marque l'état actif.
+ * Le rail de l'administration, trop long, défile plutôt que d'abréger ; sa
+ * largeur est un plancher, sinon un long libellé déborde de la pastille active.
  */
 export function BarreBasse({ administrateur }: { administrateur: boolean }) {
   const chemin = usePathname();

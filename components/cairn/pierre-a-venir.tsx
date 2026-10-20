@@ -4,22 +4,14 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
 import { cn } from "@/lib/fusion-des-classes";
 
 /**
- * L'emplacement de la première pierre : un contour, sur le sol.
- *
- * Jamais une pierre offerte pour meubler un cairn vide : le cairn ne compte que
- * les concepts retenus, et une pierre donnée ferait mentir le compteur. On
- * montre le creux, à la forme qu'`empiler` pose en premier.
- *
- * La graine est fixe : la forme désigne un emplacement, pas un concept.
+ * Un contour, jamais une pierre offerte : le cairn ne compte que les concepts
+ * retenus, une pierre donnée ferait mentir le compteur.
  */
 
+/** Fixe : la forme désigne un emplacement, pas un concept. */
 const GRAINE = "premiere-pierre";
 
-/**
- * L'air réservé au-dessus de l'emplacement, en unités de vue : sans lui, la vue
- * s'arrête juste au-dessus de la pierre, et contour et sol flottent au milieu de
- * leur boîte au lieu de se poser en bas.
- */
+/** En unités de vue. Sans cet air, contour et sol flottent au milieu de leur boîte. */
 const AIR_AU_DESSUS = 10;
 
 export function PierreAVenir({
@@ -44,12 +36,9 @@ export function PierreAVenir({
     >
       <SolDuCairn clair={clair} />
       <g transform={`translate(${pierre.x} ${pierre.y}) rotate(${pierre.rotation})`}>
-        {/* Le tireté est la convention de l'emplacement vide ; plein, le
-            contour se lirait comme une vraie pierre.
-
-            En unités de vue (la pierre en fait ~60 de large) : tiret et vide
-            égaux, à deux fois l'épaisseur du trait. Plus long, il découpe le
-            bord haut en quelques traits sur la boîte de 256 px du téléphone. */}
+        {/* Tireté : plein, il se lirait comme une vraie pierre. Tiret et vide à
+            deux épaisseurs de trait ; plus long, il hache le bord haut dans la
+            boîte de 256 px du téléphone. */}
         <path
           d={pierre.chemin}
           fill="none"

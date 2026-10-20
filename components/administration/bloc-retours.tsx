@@ -7,10 +7,8 @@ import type { PageDeRetours } from "@/lib/db/retour";
 import { cn } from "@/lib/fusion-des-classes";
 
 /**
- * Les retours écrits par les comptes, sur tout sauf une question générée (ça,
- * ce sont les signalements). Ce qui n'est pas traité passe devant quel que soit
- * son âge : trié par date seule, un retour non lu redescendrait sous les
- * retours classés.
+ * Sur tout sauf une question générée (les signalements). Le non-traité passe
+ * devant quel que soit son âge, sinon il redescendrait sous les classés.
  */
 export function BlocRetours({ page }: { page: PageDeRetours }) {
   return (
@@ -69,10 +67,7 @@ function Pagination({ page }: { page: PageDeRetours }) {
   );
 }
 
-/**
- * Un rang qui n'existe pas ne s'affiche pas, ni lien mort ni libellé grisé ;
- * la grille tient sa place.
- */
+/** Absent, ni lien mort ni libellé grisé ; la grille tient sa place. */
 function Rang({ cible, actif, children }: { cible: number; actif: boolean; children: string }) {
   if (!actif) return <span aria-hidden />;
 

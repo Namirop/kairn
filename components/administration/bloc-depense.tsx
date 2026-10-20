@@ -4,17 +4,9 @@ import { dollars, nombre } from "@/components/administration/formats";
 import type { BlocDepense as Chiffres } from "@/lib/db/administration-depense";
 
 /**
- * Ce que la journée a coûté, dans les deux conventions de prix.
- *
- * Le catalogue est ce qu'enregistre le registre : il majore volontairement, le
- * bon sens de l'erreur pour un garde-fou. Le réel est ce qui est facturé,
- * remises d'introduction comprises ; seul, il ferait oublier que les remises
- * expirent et que la dépense montera d'une marche.
- *
- * Les échecs ont leur colonne : un appel raté a pu consommer des tokens et
- * compte au plafond.
- *
- * Les totaux sont en pied de tableau ; la synthèse vit dans `Bandeau`.
+ * Le catalogue, celui du registre, majore exprès : le bon sens de l'erreur pour
+ * un garde-fou. Le réel, remises comprises, ferait seul oublier qu'elles
+ * expirent. Un échec a sa colonne : il a pu consommer et compte au plafond.
  */
 export function BlocDepense({ chiffres }: { chiffres: Chiffres }) {
   return (

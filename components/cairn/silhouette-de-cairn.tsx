@@ -2,12 +2,7 @@ import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
 import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
 import { cn } from "@/lib/fusion-des-classes";
 
-/**
- * Un cairn en très faible opacité, comme texture de fond. Un seul dans toute
- * l'application (sur `PasCeci`) : répété, il deviendrait un habillage.
- *
- * La géométrie vient de `empiler`, comme partout.
- */
+/** Un seul dans l'application (sur `PasCeci`) : répété, il deviendrait un habillage. */
 
 const PIERRES = 9;
 

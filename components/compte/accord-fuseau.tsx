@@ -3,11 +3,8 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Réconcilie le fuseau enregistré avec celui du navigateur, une seule fois par
- * chargement et seulement s'ils diffèrent. Ne rend rien.
- *
- * C'est ce qui rattrape l'inscription par Google, où aucun formulaire ne peut
- * porter le fuseau, et le déménagement d'un utilisateur.
+ * Rattrape l'inscription par Google, où aucun formulaire ne porte le fuseau, et
+ * le déménagement. Une fois par chargement, seulement s'ils diffèrent.
  */
 export function AccordFuseau({ enregistre }: { enregistre: string }) {
   const dejaEnvoye = useRef(false);

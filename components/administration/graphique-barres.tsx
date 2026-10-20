@@ -1,21 +1,16 @@
 import { cn } from "@/lib/fusion-des-classes";
 
 /**
- * Une série de jours, en barres.
+ * Une série de jours, en barres d'une seule teinte : une grandeur, pas
+ * d'identités à distinguer. Le jour courant est atténué, il monte encore ; le
+ * jour à zéro garde une amorce, un trou se lirait comme une interruption.
  *
- * Une seule teinte : chaque série mesure une grandeur, sans identité à
- * distinguer. Seule la barre du jour courant est atténuée, parce qu'elle monte
- * encore.
- *
- * Le jour à zéro garde une amorce grise : un trou se lirait comme une série
- * interrompue.
- *
- * Pas de bibliothèque : deux graphiques ne justifient pas une dépendance ni un
- * rendu client. L'infobulle native de `title` porte la valeur exacte.
+ * Pas de bibliothèque : deux graphiques ne justifient ni dépendance ni rendu
+ * client. La valeur exacte est dans l'infobulle native de `title`.
  */
 
 export type PointDeSerie = {
-  /** L'abscisse, en `YYYY-MM-DD`. Sert de clé et d'étiquette. */
+  /** `YYYY-MM-DD`, clé et étiquette. */
   jour: string;
   valeur: number;
 };
@@ -27,9 +22,8 @@ export function GraphiqueBarres({
   hauteur = "h-28",
 }: {
   points: PointDeSerie[];
-  /** Ce qu'on écrit dans l'infobulle et sur le sommet. */
   format: (valeur: number) => string;
-  /** Nommé pour les lecteurs d'écran : le graphique n'est pas décrit par ses barres. */
+  /** Pour les lecteurs d'écran, à qui les barres ne disent rien. */
   intitule: string;
   hauteur?: string;
 }) {
@@ -44,8 +38,7 @@ export function GraphiqueBarres({
         aria-label={`${intitule}. ${points.map((point) => `${point.jour} : ${format(point.valeur)}`).join(", ")}`}
       >
         {points.map((point) => {
-          // Deux pixels d'amorce sous chaque barre : une valeur minuscule reste
-          // distincte du zéro.
+          // L'amorce de 2px sépare une valeur minuscule du zéro.
           const part = maximum === 0 ? 0 : point.valeur / maximum;
           const hauteurBarre =
             point.valeur === 0 ? "2px" : `calc(2px + ${(part * 100).toFixed(2)}%)`;
@@ -80,12 +73,7 @@ export function GraphiqueBarres({
   );
 }
 
-/**
- * Un graphique et son titre, tels qu'ils se posent sur la synthèse.
- *
- * Le titre nomme la série, ce qui dispense de légende : une légende pour une
- * seule série répète le titre à côté d'un carré de couleur.
- */
+/** Le titre nomme la série : une légende pour une seule série le répéterait. */
 export function Carte({
   titre,
   contexte,

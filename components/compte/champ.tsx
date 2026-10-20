@@ -1,10 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-/**
- * Un champ de formulaire. La place du message d'erreur est réservée en
- * permanence : signaler une erreur ne doit pas faire sauter la mise en page.
- */
+/** Place de l'erreur réservée : la signaler ne fait pas sauter la mise en page. */
 export function Champ({
   id,
   intitule,

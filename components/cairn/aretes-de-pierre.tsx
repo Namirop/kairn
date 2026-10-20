@@ -1,21 +1,14 @@
 import type { Pierre } from "@/lib/domain/cairn-empilement";
 
 /**
- * Le tracé d'une pierre : sa forme, et l'arête de lichen quand c'est la
- * dernière posée.
- *
- * Sans dépendance d'animation, contrairement à `pierre-posee.tsx` : un état
- * vide ou un compteur de session n'embarquent pas Motion pour ne jamais bouger.
+ * Sans Motion, contrairement à `pierre-posee.tsx` : un état vide ou un compteur
+ * de session ne l'embarquent pas pour ne jamais bouger.
  */
 
-/** Les nuances d'une pierre : claires sur la roche, sombres sur le papier. */
 const NUANCES = ["fill-stone-900", "fill-stone-800", "fill-stone-700"] as const;
 const NUANCES_CLAIRES = ["fill-stone-50", "fill-stone-100", "fill-stone-300"] as const;
 
-/**
- * Une pierre pas encore posée : le contour seul, en pointillé, qui dit
- * l'emplacement sans prétendre au volume.
- */
+/** Le contour seul : l'emplacement, sans prétendre au volume. */
 function Emplacement({ pierre, clair }: { pierre: Pierre; clair: boolean }) {
   return (
     <path
@@ -29,7 +22,6 @@ function Emplacement({ pierre, clair }: { pierre: Pierre; clair: boolean }) {
   );
 }
 
-/** Le tracé de la pierre, et l'arête de lichen sur la dernière posée. */
 export function ArêtesDePierre({
   pierre,
   derniere,

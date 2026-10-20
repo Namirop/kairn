@@ -2,10 +2,7 @@ import { ArêtesDePierre } from "@/components/cairn/aretes-de-pierre";
 import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
 import { cn } from "@/lib/fusion-des-classes";
 
-/**
- * Une pierre posée au sol, seule, pour les états vides : l'empilement à un,
- * dont la géométrie vient de `empiler` comme toutes les pierres du produit.
- */
+/** Pour les états vides : l'empilement à un, par `empiler` comme toute pierre du produit. */
 export function PierreSeule({ graine, className }: { graine?: string; className?: string }) {
   const { pierres, hauteur, ySol } = empiler(1, graine ? [graine] : undefined);
   const pierre = pierres[0];

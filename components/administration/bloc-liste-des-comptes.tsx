@@ -3,11 +3,7 @@ import { Section } from "@/components/administration/section";
 import { ABSENT, nombre } from "@/components/administration/formats";
 import type { CompteInscrit } from "@/lib/db/liste-des-comptes";
 
-/**
- * Les comptes nommés, un par ligne : la seule vue qui permette d'écrire à
- * quelqu'un ou de rapprocher un retour de son auteur. Un tableau, pour comparer
- * colonne par colonne.
- */
+/** La seule vue qui permette d'écrire à quelqu'un ou de relier un retour à son auteur. */
 const JOUR = new Intl.DateTimeFormat("fr-BE", { dateStyle: "medium" });
 const JOUR_ET_HEURE = new Intl.DateTimeFormat("fr-BE", { dateStyle: "medium", timeStyle: "short" });
 
@@ -29,8 +25,7 @@ export function BlocListeDesComptes({ comptes }: { comptes: CompteInscrit[] }) {
       intitule="Qui a un compte"
       contexte="Du plus récent au plus ancien. Les compteurs sont des totaux depuis l'inscription, pas des fenêtres."
     >
-      {/* Sept colonnes ne tiennent pas sur téléphone : le tableau défile dans
-          sa boîte, sans emporter la page. */}
+      {/* Le tableau défile dans sa boîte, sans emporter la page. */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[46rem] border-collapse text-left">
           <thead>
@@ -49,8 +44,7 @@ export function BlocListeDesComptes({ comptes }: { comptes: CompteInscrit[] }) {
               <tr key={compte.id} className="border-b border-stone-300 last:border-b-0">
                 <td className="py-pas-2 pr-pas-4 text-petit text-stone-900">
                   <span className="font-medium">{compte.email}</span>
-                  {/* Une adresse non vérifiée explique un rappel qui ne produit
-                      rien. */}
+                  {/* Explique un rappel qui ne produit rien. */}
                   {compte.emailVerifie ? null : (
                     <span className="text-mono ml-pas-2 font-mono text-stone-500">
                       non vérifiée

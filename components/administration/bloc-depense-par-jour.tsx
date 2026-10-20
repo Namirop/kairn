@@ -3,11 +3,7 @@ import { Section } from "@/components/administration/section";
 import { dollars, nombre } from "@/components/administration/formats";
 import type { LigneDeDepenseParJour } from "@/lib/db/administration-depense";
 
-/**
- * La dépense des derniers jours, en valeurs ; le graphique de la synthèse en
- * donne la forme. La colonne des échecs dit si la dépense monte avec l'usage
- * ou avec les échecs.
- */
+/** Les échecs disent si la dépense monte avec l'usage ou avec eux. */
 export function BlocDepenseParJour({ jours }: { jours: LigneDeDepenseParJour[] }) {
   return (
     <Section
@@ -42,10 +38,7 @@ export function BlocDepenseParJour({ jours }: { jours: LigneDeDepenseParJour[] }
   );
 }
 
-/**
- * Un échec non nul se colore ; la teinte accompagne le chiffre sans le
- * remplacer, pour qui ne la distingue pas.
- */
+/** La teinte accompagne le chiffre sans le remplacer, pour qui ne la distingue pas. */
 function Cellule({ children, alerte = false }: { children: string; alerte?: boolean }) {
   return (
     <td
