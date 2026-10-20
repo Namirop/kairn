@@ -1,9 +1,6 @@
 /**
- * La coquille : le rail, la barre basse, l'en-tête.
- *
- * Les libellés du rail commandent sa largeur — cent douze pixels, réglés sur
- * « Aujourd'hui ». Un libellé plus long ici ou dans une autre langue se vérifie
- * à l'écran avant de partir.
+ * Le rail fait 112 px, réglés sur « Aujourd'hui » : un libellé plus long, en
+ * toute langue, se vérifie à l'écran.
  */
 export const navigation = {
   principale: "Navigation principale",

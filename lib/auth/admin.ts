@@ -1,10 +1,7 @@
 /**
- * Qui a accès à l'administration (signalements, retours, pilotage) : une liste
- * d'adresses en variable d'environnement, plutôt qu'un rôle sur `User` pour une
- * seule personne.
- *
- * À comparer à l'adresse vérifiée de la session, jamais à une valeur du client.
- * Casse et espaces ignorés : la variable se recopie à la main.
+ * Une variable plutôt qu'un rôle sur `User` pour une seule personne. À comparer
+ * à l'adresse vérifiée de la session, jamais à une valeur du client. Casse et
+ * espaces ignorés : la variable se recopie à la main.
  */
 export function administrateurs(): string[] {
   return (process.env.ADMIN_EMAILS ?? "")

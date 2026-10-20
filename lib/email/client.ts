@@ -1,15 +1,10 @@
 import { Resend } from "resend";
 
 /**
- * Le seul fichier qui importe Resend.
- *
- * En développement, sans `RESEND_API_KEY`, rien ne part : l'objet est
- * journalisé, jamais le contenu. Celui du code de connexion porte le code,
- * c'est là qu'on le lit pour se connecter en local.
- *
- * En production, ce chemin lève : l'écran annoncerait « code envoyé » et
- * personne ne pourrait entrer sans que rien ne le signale. Le code ne peut donc
- * pas s'y retrouver dans un journal.
+ * Seul fichier qui importe Resend. Sans clé en développement, seul l'objet est
+ * journalisé : celui du code de connexion le porte, pour entrer en local. En
+ * production ce chemin lève, sinon « code envoyé » sans que personne n'entre ;
+ * le code n'y finit donc jamais dans un journal.
  */
 
 export type EmailSortant = {
@@ -20,7 +15,6 @@ export type EmailSortant = {
   headers?: Record<string, string>;
 };
 
-/** Identifiant rendu par le fournisseur, `null` quand rien n'est parti. */
 export type ResultatDEnvoi = { sent: boolean; providerId: string | null };
 
 let enCache: Resend | null = null;

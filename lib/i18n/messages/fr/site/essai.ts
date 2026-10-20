@@ -1,10 +1,7 @@
 /**
- * L'essai sans compte : le formulaire, la fenêtre, l'attente, ce qu'il a donné
- * et le rappel qui reste dans la bande.
- *
- * Deux titres ont une mesure à tenir : « 1 concept t'attend. » tient sur une
- * ligne de téléphone de 390 points (voir `EssaiRepris`), et la plus longue
- * paire de noms de format doit tenir dans la fenêtre.
+ * L'essai sans compte. Deux mesures à tenir : « 1 concept t'attend. » sur une
+ * ligne de 390 points (voir `EssaiRepris`), et la plus longue paire de noms de
+ * format dans la fenêtre.
  */
 export const essai = {
   formulaire: {
@@ -59,7 +56,7 @@ export const essai = {
       "Tes concepts sont déjà là, c’est l’échantillon qui manque. Il s’écrit toujours, et il s’affichera ici la prochaine fois que tu passes.",
     verifier: "Vérifier maintenant",
   },
-  /** Les noms de format, recopiés de `depots.formats` : la landing en démontre la rotation. */
+  /** Copie de `depots.formats`, pour la rotation démontrée sur la landing. */
   libelleFormat: {
     MCQ: "QCM",
     CLOZE: "Texte à trou",

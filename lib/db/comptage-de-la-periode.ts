@@ -2,16 +2,11 @@ import { prisma } from "@/lib/db/client";
 import { periodeDuCompte } from "@/lib/db/periode-du-compte";
 
 /**
- * Ce qui s'ajoute au compteur une fois la dépense faite. La décision se prend
- * avant, dans `quota-depots.ts` ; ici rien n'est refusé, d'où l'absence de
- * valeur de retour, et un compte peut donc dépasser son plafond.
+ * Après la dépense ; la décision se prend avant, dans `quota-depots.ts`. Rien
+ * n'est refusé ici : un compte peut dépasser son plafond.
  */
 
-/**
- * Les concepts qu'un dépôt vient de rendre entrent au compteur. La période se
- * recalcule à cet instant : une extraction qui rend après le basculement compte
- * sur la période neuve.
- */
+/** Période recalculée maintenant : rendu après la bascule, il compte sur la neuve. */
 export async function compterConceptsRetenus(
   userId: string,
   fuseau: string,
@@ -32,10 +27,8 @@ export async function compterConceptsRetenus(
 }
 
 /**
- * Ce qu'un essai fait sans compte prend au compteur, une fois réclamé. Le
- * chemin anonyme ne passe par aucun quota : sans ce décompte, l'essai
- * s'ajouterait au plafond affiché. Le dépôt entre aussi, son extraction a été
- * payée comme les autres.
+ * Le chemin anonyme ne passe par aucun quota : sans ce décompte, l'essai
+ * s'ajouterait au plafond. Le dépôt compte aussi : son extraction a été payée.
  */
 export async function compterLaVisiteReprise(
   userId: string,

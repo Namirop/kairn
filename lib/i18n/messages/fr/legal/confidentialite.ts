@@ -1,7 +1,4 @@
-/**
- * La page de confidentialité. Les coordonnées arrivent en paramètres depuis
- * `lib/site/editeur.ts`, jamais recopiées ici.
- */
+/** Les coordonnées arrivent en paramètres depuis `lib/site/editeur.ts`, jamais recopiées. */
 export const confidentialite = {
   titre: "Confidentialité",
   chapeau:

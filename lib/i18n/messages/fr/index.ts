@@ -11,11 +11,9 @@ import { emails } from "./emails";
 import { legal } from "./legal";
 
 /**
- * Les textes de l'interface en français, la langue de référence : la forme de
- * cet objet est le contrat de l'anglais, une clé manquante ne compile pas.
- *
- * Syntaxe ICU de next-intl. Avec `{n, plural, one {…} other {…}}`, le français
- * met zéro au singulier et l'anglais au pluriel, sans rien à écrire de plus.
+ * Le français, langue de référence : sa forme est le contrat de l'anglais, une
+ * clé manquante ne compile pas. En ICU, `one` couvre zéro en français, pas en
+ * anglais, sans rien écrire de plus.
  */
 export const fr = {
   revision,

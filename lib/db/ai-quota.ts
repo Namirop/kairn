@@ -2,15 +2,10 @@ import { prisma } from "@/lib/db/client";
 import { jourEnDateUtc, jourLocal } from "@/lib/domain/jour-local";
 
 /**
- * Réservation de places d'appel modèle pour la journée en cours.
- *
- * Lire puis écrire un compteur laisse passer deux appels simultanés. Ici,
- * l'incrément et le refus tiennent dans une seule instruction : quand la clause
- * `WHERE` du `DO UPDATE` est fausse, `RETURNING` ne rend rien, et ce « rien »
- * vaut refus.
- *
- * La place globale n'est jamais rendue : un appel qui échoue a pu consommer des
- * tokens.
+ * Places d'appel modèle du jour. Incrément et refus en une instruction (lu puis
+ * écrit, un compteur laisse passer deux appels) : si le `WHERE` du `DO UPDATE`
+ * est faux, `RETURNING` ne rend rien, et ce rien vaut refus. La place globale
+ * n'est jamais rendue : un appel qui échoue a pu consommer des tokens.
  */
 
 export type Reservation = {
@@ -19,19 +14,17 @@ export type Reservation = {
   utilisees: number;
 };
 
-/** Le plafond est global au produit, la journée se compte donc en UTC. */
+/** Plafond global au produit : la journée se compte en UTC. */
 function jourUtc(instant: Date): string {
   return jourLocal(instant, "UTC");
 }
 
-/** Réserve une place d'appel au plafond global du jour. */
 export async function reserverAppelModele(
   plafond: number,
   maintenant: Date = new Date(),
 ): Promise<Reservation> {
-  // La clause `WHERE` ne garde que le `DO UPDATE` : la première réservation de
-  // la journée s'insère sans être confrontée au plafond. Un plafond à zéro doit
-  // pourtant tout refuser.
+  // Le `WHERE` ne garde que le `DO UPDATE` : la première insertion du jour
+  // échappe au plafond, qui à zéro doit pourtant tout refuser.
   if (plafond < 1) {
     return { obtenue: false, utilisees: await lireReservationsDuJour(maintenant) };
   }
@@ -55,20 +48,16 @@ export async function reserverAppelModele(
 }
 
 /**
- * La part d'un compte dans les appels du jour.
- *
- * Le plafond global protège le budget, pas un compte de son voisin : un seul
- * compte pourrait fermer la journée de tous. Ce second verrou est pris **avant**
- * la place globale, avec la même instruction atomique, et se compte en UTC
- * comme elle pour que les deux fenêtres ferment au même instant.
+ * Le plafond global ne protège pas un compte de son voisin, qui fermerait la
+ * journée de tous. Pris **avant** la place globale, en UTC comme elle pour que
+ * les deux fenêtres ferment au même instant.
  */
 export async function reserverPlaceDeCompte(
   userId: string,
   plafond: number,
   maintenant: Date = new Date(),
 ): Promise<Reservation> {
-  // Même garde que pour le plafond global : la première réservation du jour
-  // échappe à la clause `WHERE`.
+  // Même garde que le plafond global.
   if (plafond < 1) {
     return { obtenue: false, utilisees: await lirePlacesDeCompte(userId, maintenant) };
   }
@@ -92,17 +81,14 @@ export async function reserverPlaceDeCompte(
 }
 
 /**
- * La part du trafic sans compte dans les appels du jour.
- *
- * Un seul seau pour tous les visiteurs : on borne ce que la landing peut prendre
- * au produit. La répartition entre visiteurs relève de `VISITES_PAR_ADRESSE`.
+ * Un seul seau pour tous les visiteurs : borne ce que la landing prend au
+ * produit. La répartition entre eux relève de `VISITES_PAR_ADRESSE`.
  */
 export async function reserverPlaceAnonyme(
   plafond: number,
   maintenant: Date = new Date(),
 ): Promise<Reservation> {
-  // Même garde que les deux autres compteurs : la première réservation du jour
-  // échappe à la clause `WHERE`, et un plafond à zéro doit tout refuser.
+  // Même garde que le plafond global.
   if (plafond < 1) {
     return { obtenue: false, utilisees: await lirePlacesAnonymes(maintenant) };
   }
@@ -125,10 +111,7 @@ export async function reserverPlaceAnonyme(
   return { obtenue: false, utilisees: await lirePlacesAnonymes(maintenant) };
 }
 
-/**
- * Rend une place anonyme prise pour rien : la place globale a été refusée juste
- * après, rien n'a été émis.
- */
+/** Prise pour rien : la place globale a été refusée juste après, rien n'est parti. */
 export async function rendrePlaceAnonyme(maintenant: Date = new Date()): Promise<void> {
   await prisma.aiAnonymousQuota.updateMany({
     where: { day: jourEnDateUtc(jourUtc(maintenant)), reserved: { gte: 1 } },
@@ -144,10 +127,7 @@ export async function lirePlacesAnonymes(maintenant: Date = new Date()): Promise
   return lignes[0]?.reserved ?? 0;
 }
 
-/**
- * Rend des places de compte prises pour rien : la place globale a été refusée
- * juste après, rien n'a été émis.
- */
+/** Prises pour rien : la place globale a été refusée juste après, rien n'est parti. */
 export async function rendrePlacesDeCompte(
   userId: string,
   places = 1,
@@ -171,7 +151,7 @@ export async function lirePlacesDeCompte(
   return lignes[0]?.reserved ?? 0;
 }
 
-/** Places déjà prises aujourd'hui. Pour l'observation et les messages d'erreur. */
+/** Pour l'observation et les messages d'erreur. */
 export async function lireReservationsDuJour(maintenant: Date = new Date()): Promise<number> {
   const lignes = await prisma.$queryRaw<{ reserved: number }[]>`
     SELECT "reserved" FROM "AiCallQuota" WHERE "day" = ${jourUtc(maintenant)}::date

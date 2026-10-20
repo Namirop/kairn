@@ -1,17 +1,13 @@
 /**
- * Les emails : sujets, corps, pieds de page.
- *
- * Seuls les emails reçus par les personnes passent ici : les alertes
- * d'exploitation restent en français dans leurs gabarits.
- *
- * Un paragraphe par clé : les versions HTML et texte d'un même email se
- * composent des mêmes phrases et ne peuvent pas diverger.
+ * Les emails reçus par les personnes ; les alertes d'exploitation restent en
+ * français dans leurs gabarits. Un paragraphe par clé : HTML et texte
+ * partagent les mêmes phrases et ne peuvent pas diverger.
  */
 export const emails = {
   commun: {
-    /** Le libellé de la série, après son nombre : « 12 sessions d'affilée ». */
+    /** Suit le nombre : « 12 sessions d'affilée ». */
     uniteDeSerie: "{nombre, plural, =1 {session} other {sessions d'affilée}}",
-    /** Le bouton porte le mot de l'interface, et le même dans tout le flux. */
+    /** Le mot de l'interface, le même dans tout le flux. */
     commencer: "Commencer",
     deposer: "Déposer",
     nePlusRecevoirEmails: "Ne plus recevoir d'emails de Kairn : {url}",
@@ -60,10 +56,7 @@ export const emails = {
     raison:
       "Tu reçois ce message une fois, parce que ton compte Kairn est resté vide depuis son ouverture.",
   },
-  /**
-   * Le code de connexion. Le mot « code » reste près des chiffres dans chaque
-   * langue : c'est sur lui que s'appuie la suggestion du clavier mobile.
-   */
+  /** « code » reste près des chiffres en toute langue : le clavier mobile s'y fie pour suggérer. */
   code: {
     sujet: "{code} — ton code pour entrer dans Kairn",
     preheader: "Ton code de connexion Kairn : {code}",

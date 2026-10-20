@@ -3,10 +3,8 @@ import { cache } from "react";
 import { auth } from "./config";
 
 /**
- * La session, côté serveur. Un `userId` vient toujours d'ici, jamais d'un
- * paramètre de requête ou d'un champ de formulaire.
- *
- * Mémoïsée sur le rendu : la mise en page et sa page la demandent toutes deux.
+ * Un `userId` vient toujours d'ici, jamais de la requête. Mémoïsée sur le rendu :
+ * la mise en page et sa page la demandent toutes deux.
  */
 
 export type UtilisateurDeSession = {
@@ -39,10 +37,7 @@ export const lireLUtilisateur = cache(async (): Promise<UtilisateurDeSession | n
   };
 });
 
-/**
- * Pour les route handlers et les Server Actions. Une page préfère
- * `lireLUtilisateur()` suivi d'une redirection, plutôt qu'un écran d'erreur.
- */
+/** Pour les routes et actions ; une page préfère rediriger qu'afficher une erreur. */
 export async function exigerLUtilisateur(): Promise<UtilisateurDeSession> {
   const utilisateur = await lireLUtilisateur();
 

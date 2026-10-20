@@ -2,7 +2,6 @@ import { prisma } from "@/lib/db/client";
 import { jourEnDateUtc } from "@/lib/domain/jour-local";
 import type { NotificationType } from "@/lib/db/types";
 
-/** Ce dont le rappel quotidien a besoin pour être écrit et adressé. */
 export type DestinataireDeRappel = {
   userId: string;
   email: string;
@@ -12,12 +11,8 @@ export type DestinataireDeRappel = {
 };
 
 /**
- * Comptes qui acceptent encore ce type d'envoi ; chaque type a son propre
- * réglage.
- *
- * L'heure locale se filtre en mémoire, car elle dépend du fuseau de chacun. La
- * borne évite un tour complet de la table : quand la base grossira, il faudra
- * découper par tranche d'heure plutôt que relever la borne.
+ * L'heure locale se filtre en mémoire, selon le fuseau de chacun. Quand la base
+ * grossira, découper par tranche d'heure plutôt que relever la borne.
  */
 export async function trouverLesDestinataires(
   type: NotificationType = "DAILY_REMINDER",
@@ -48,7 +43,7 @@ export async function trouverLesDestinataires(
   }));
 }
 
-/** Ceux déjà notifiés ce jour-là, pour ne pas écrire deux fois. */
+/** Pour ne pas écrire deux fois le même jour. */
 export async function trouverLesDejaNotifies(
   type: NotificationType,
   entrees: { userId: string; jour: string }[],
@@ -69,7 +64,7 @@ export async function trouverLesDejaNotifies(
   return new Set(lignes.map((ligne) => ligne.userId));
 }
 
-/** Trace l'envoi. La clé primaire (userId, type, day) le rend idempotent. */
+/** La clé primaire (userId, type, day) rend l'écriture idempotente. */
 export async function enregistrerLEnvoi(
   userId: string,
   type: NotificationType,

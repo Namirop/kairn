@@ -2,30 +2,21 @@ import { prisma } from "@/lib/db/client";
 import { remettreEnFile, tentativesEpuisees } from "@/lib/db/jobs-de-generation";
 import type { GenerationJob } from "@/lib/db/types";
 
-/**
- * Les jobs de questions : les écrire, et les couper quand ils débordent. Un job
- * naît en attente et part en appel direct, qu'il vienne d'un dépôt ou d'une
- * régénération.
- */
+/** Un job de questions naît en attente et part en appel direct, dépôt ou régénération. */
 
 /**
- * Concepts par requête.
- *
- * Trois amortit le mieux la consigne, longue, sur un même appel ; descendre
- * doublerait les appels d'un dépôt. Trois peut toucher `max_tokens` : un groupe
- * qui déborde se coupe en deux au lieu d'échouer — voir
+ * Trois amortit le mieux la consigne, longue ; descendre doublerait les appels
+ * d'un dépôt. Un groupe qui touche `max_tokens` se coupe en deux, voir
  * `scinderLeJobDeQuestions`.
  */
 export const CONCEPTS_PAR_JOB = 3;
 
 /**
- * `partiraLe` diffère le départ ; `regeneration` fait compter le job dans le
- * plafond hebdomadaire du concept. Seul `lib/db/demande-de-questions.ts` les
- * pose : le découpage d'un dépôt écrit des premiers jeux.
+ * `regeneration` compte dans le plafond hebdomadaire. Seul
+ * `demande-de-questions.ts` les pose : un dépôt écrit des premiers jeux.
  */
 export type FormeDuJob = { partiraLe?: Date; regeneration?: boolean };
 
-/** Un job par groupe de trois concepts, dans l'ordre d'extraction. */
 export async function creerJobsDeQuestions(
   inputId: string,
   atomIds: string[],
@@ -53,16 +44,9 @@ export async function creerJobsDeQuestions(
 }
 
 /**
- * Coupe en deux un job de questions dont la sortie a été tronquée : il repart en
- * file avec `garde`, et `reporte` devient un job neuf — sinon la reprise
- * redemanderait exactement ce qui n'a pas tenu.
- *
- * Une seule transaction : rétrécir puis créer perdrait les concepts reportés si
- * la seconde écriture échouait, créer puis rétrécir les écrirait deux fois.
- *
- * Le job neuf hérite de la date de départ et du drapeau de régénération.
- *
- * Rend `false` quand les tentatives sont épuisées : l'échec reste un échec.
+ * Sortie tronquée : la reprise entière redemanderait ce qui n'a pas tenu. Une
+ * transaction : rétrécir puis créer perdrait `reporte` sur un échec, créer puis
+ * rétrécir l'écrirait deux fois. `false` si les tentatives sont épuisées.
  */
 export async function scinderLeJobDeQuestions(
   job: GenerationJob,

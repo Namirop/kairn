@@ -4,21 +4,18 @@ import { stripe } from "./client";
 import { objetIntrouvableChezStripe } from "./erreurs";
 
 /**
- * Ce client existe-t-il encore, dans le mode où l'on parle ? Un identifiant en
- * base peut pointer vers un client de l'autre mode (test contre live) : Stripe
- * répond « No such customer » et ni l'achat ni le portail n'aboutissent. Un
- * aller-retour de plus sur un geste rare.
+ * Un id en base peut venir de l'autre mode (test contre live) : « No such
+ * customer » bloquerait achat et portail. Un aller-retour de plus, sur un geste rare.
  */
 async function repondEncore(clientId: string): Promise<boolean> {
   try {
     const client = await stripe().customers.retrieve(clientId);
 
-    // Un client supprimé répond encore, avec un drapeau : il vaut un absent.
+    // Un client supprimé répond encore, avec un drapeau.
     return !("deleted" in client && client.deleted);
   } catch (erreur) {
     if (objetIntrouvableChezStripe(erreur)) {
-      // Seule erreur du paiement après laquelle on avance, donc journalisée :
-      // un dossier remplacé coupe l'historique de facturation en deux.
+      // Journalisée : un dossier remplacé coupe l'historique de facturation en deux.
       console.info("[paiement] dossier client remplacé", { ancien: clientId });
 
       return false;
@@ -29,10 +26,9 @@ async function repondEncore(clientId: string): Promise<boolean> {
 }
 
 /**
- * Le client Stripe d'un compte, un pour toujours, créé par nous et non par
- * Checkout : c'est lui qui relie chaque webhook à un compte Kairn, là où les
- * métadonnées de session ne sont portées que par le premier événement. Un
- * réabonnement retombe ainsi dans le même dossier.
+ * Un pour toujours, créé par nous et non par Checkout : il relie chaque webhook
+ * au compte, quand les métadonnées de session ne suivent que le premier
+ * événement. Un réabonnement retombe dans le même dossier.
  */
 export async function clientStripeDuCompte(compte: {
   id: string;
@@ -47,16 +43,13 @@ export async function clientStripeDuCompte(compte: {
     {
       email: compte.email,
       name: compte.name,
-      // Pour retrouver un compte depuis le tableau de bord Stripe ; c'est notre
-      // ligne qui fait foi.
+      // Pour le tableau de bord Stripe ; notre ligne fait foi.
       metadata: { userId: compte.id },
-      // Sur le client et non la facture : Stripe le recopie sur chacune, y
-      // compris les renouvellements, que ce code ne voit pas passer.
+      // Sur le client : Stripe le recopie sur chaque facture, renouvellements compris.
       invoice_settings: { footer: mentionDeFacture(TVA_COLLECTEE) ?? undefined },
     },
-    // Deux clics rapprochés créeraient deux clients, dont un orphelin. La clé
-    // est scopée par mode et vit 24 h : un dossier remplacé dans cette fenêtre
-    // récupère le client précédent, qui est bien celui du compte.
+    // Contre le double clic. Scopée par mode, 24 h : un dossier remplacé dans la
+    // fenêtre récupère le client précédent, qui est bien celui du compte.
     { idempotencyKey: `client-kairn-${compte.id}` },
   );
 

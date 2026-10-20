@@ -1,7 +1,4 @@
-/**
- * Les mentions légales. Comme pour la confidentialité, l'identité de l'éditeur
- * arrive en paramètres depuis `lib/site/editeur.ts`.
- */
+/** L'identité de l'éditeur arrive en paramètres depuis `lib/site/editeur.ts`. */
 export const mentionsLegales = {
   titre: "Mentions légales",
   chapeau: "Qui édite Kairn, où le service est hébergé, et à qui s'adresser.",

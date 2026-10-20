@@ -1,7 +1,4 @@
-/**
- * « Comment ça marche » : le fonctionnement en entier, en six sections de deux
- * paragraphes. L'ordre des sections est celui de la page.
- */
+/** L'ordre des sections est celui de la page. */
 export const commentCaMarche = {
   titre: "Comment ça marche",
   intro:

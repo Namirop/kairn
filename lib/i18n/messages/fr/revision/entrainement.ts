@@ -1,9 +1,4 @@
-/**
- * L'entraînement : son principe, montré une fois, son en-tête, et la fin d'un tour.
- *
- * La promesse qu'il porte est que le planning ne bouge pas ; chaque phrase ici
- * doit la tenir.
- */
+/** Promesse de l'entraînement : le planning ne bouge pas. Chaque phrase doit la tenir. */
 export const entrainement = {
   intitule: "Entraînement",
   principe: {

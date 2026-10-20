@@ -1,9 +1,6 @@
 /**
- * Point de sortie unique des types du schéma vers le reste du projet.
- *
- * Le client généré ne s'importe que dans `lib/db/` (règle ESLint). Les écrans et
- * les composants passent par ce fichier, ce qui garde les types dérivés du
- * schéma Prisma plutôt que redéclarés à la main.
+ * Sortie unique des types du schéma : le client généré ne s'importe que dans
+ * `lib/db/` (règle ESLint), et les types restent dérivés plutôt que redéclarés.
  */
 export {
   AtomState,
@@ -23,8 +20,7 @@ export {
   VariantFormat,
 } from "@/lib/db/generated/enums";
 
-// Prisma 7 suffixe les types de ligne par `Model`. On les réexporte sous le nom
-// du modèle : c'est le vocabulaire du domaine qui doit apparaître dans le code.
+// Prisma 7 suffixe les types de ligne par `Model` ; le code parle le vocabulaire du domaine.
 export type {
   AiCallModel as AiCall,
   AtomModel as Atom,

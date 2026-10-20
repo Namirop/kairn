@@ -3,13 +3,8 @@ import { textesDEmail } from "../traduction";
 import { STYLE_DES_EMAILS as S, bouton, envelopper, type EmailRendu } from "./gabarit";
 
 /**
- * La relance d'un compte resté vide, une fois, quelques jours après l'inscription.
- *
- * Elle constate sans reprocher : le plus souvent, on n'a pas vu quoi déposer,
- * et l'email donne des exemples assez ordinaires pour en avoir un sous la main.
- *
- * Pas de compteur ni de série : à zéro, ils diraient au compte qu'il est en
- * retard.
+ * Constate sans reprocher : souvent on n'a pas vu quoi déposer, d'où des
+ * exemples ordinaires. Ni compteur ni série : à zéro, ils diraient « en retard ».
  */
 
 export type RelanceDuCompteVidePayload = Record<string, never>;

@@ -4,29 +4,18 @@ import { heureUtc, lignesDeValeurs } from "./blocs-d-alerte";
 import { echapper } from "./echapper";
 
 /**
- * L'alerte d'exploitation quand les bascules Luna → Sonnet s'accumulent.
- *
- * Elle dit, sans ouvrir le tableau de bord, le nombre de bascules du jour
- * contre le seuil, le motif de la dernière, et la variable qui change de
- * lignée sans commit : `AI_FOURNISSEUR=anthropic` restaure Sonnet natif.
- *
- * Le repli tient les dépôts, mais au-delà du seuil c'est le fournisseur qu'il
- * faut regarder.
- *
- * Aucun désabonnement, comme l'alerte de plafond.
+ * Quand les bascules Luna → Sonnet s'accumulent : le repli tient les dépôts,
+ * mais c'est le fournisseur qu'il faut regarder. Donne la variable qui change
+ * de lignée sans commit.
  */
 
 export type AlerteDeBasculePayload = {
-  /** Combien de bascules aujourd'hui, seuil compris. */
+  /** Seuil compris. */
   bascules: number;
-  /** Le seuil dépassé (`SEUIL_BASCULES`). */
+  /** `SEUIL_BASCULES`. */
   seuil: number;
-  /**
-   * Motif de la dernière bascule (l'échec Luna qui a déclenché l'alerte).
-   * Coupé à 500 caractères — c'est un indice, pas la trace complète.
-   */
+  /** De la dernière bascule, coupé à 500 caractères : un indice, pas la trace. */
   motif: string;
-  /** L'instant de l'alerte, pour dire l'heure qu'il est en UTC. */
   instant: Date;
 };
 

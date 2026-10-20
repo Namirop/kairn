@@ -1,9 +1,6 @@
 import type { Messages } from "../../fr";
 
-/**
- * Premium n'est pas vendu en anglais : `achat` et `complete` ne s'affichent pas
- * dans cette langue, mais restent traduits pour qu'aucune clé ne manque.
- */
+/** Premium n'est pas vendu en anglais : `achat` et `complete` sont traduits sans s'afficher. */
 export const offre: Messages["compte"]["offre"] = {
   titre: "Your plan",
   complet: "Premium",

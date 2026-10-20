@@ -2,18 +2,10 @@ import { clsx, type ClassValue } from "clsx";
 import { extendTailwindMerge } from "tailwind-merge";
 
 /**
- * Fusion de classes Tailwind.
- *
- * Notre échelle porte des noms maison que tailwind-merge ne connaît pas : sans
- * les déclarer, il laisse passer les deux classes en conflit et c'est l'ordre
- * de la feuille qui tranche — une surcharge qui ne prend pas, sans erreur.
- *
- * Tailles de police : sans elles, `text-corps` passe pour une couleur et
- * supprime le `text-stone-50` qui le précède.
- *
- * Pas d'espacement : sans eux, `px-pas-4` n'écrase pas un `px-pas-8` posé avant.
- * `spacing` est la clef de thème consultée pour tout ce qui espace (rembourrages,
- * marges, gouttières, écarts).
+ * tailwind-merge ignore nos noms maison : non déclarés, deux classes en conflit
+ * passent et l'ordre de la feuille tranche, sans erreur. Sans les tailles,
+ * `text-corps` passe pour une couleur et efface `text-stone-50` ; sans les pas,
+ * `px-pas-4` n'écrase pas `px-pas-8`. `spacing` couvre tout ce qui espace.
  */
 const TAILLES = [
   "mono",

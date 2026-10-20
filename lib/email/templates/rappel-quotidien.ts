@@ -3,15 +3,12 @@ import { textesDEmail } from "../traduction";
 import { STYLE_DES_EMAILS as S, bouton, envelopper, type EmailRendu } from "./gabarit";
 
 /**
- * Le rappel quotidien. Il énonce ce qui attend, il ne motive pas.
- *
- * Pas de version « rien à revoir aujourd'hui » : rien ne part quand rien n'est
- * dû. Un message quotidien qui annonce qu'il n'y a rien à faire s'apprend à ne
- * plus ouvrir, et abîme la remise des suivants.
+ * Énonce ce qui attend, ne motive pas. Pas de version « rien à revoir » : elle
+ * apprendrait à ne plus ouvrir et abîmerait la remise des suivants.
  */
 
 export type RappelQuotidienPayload = {
-  /** Concepts dus aujourd'hui. Toujours au moins un : à zéro, rien ne part. */
+  /** Au moins un : à zéro, rien ne part. */
   dus: number;
   currentStreak: number;
 };

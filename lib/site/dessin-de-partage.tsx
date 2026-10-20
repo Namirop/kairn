@@ -8,25 +8,17 @@ import type { Langue } from "@/lib/db/types";
 import { MESSAGES } from "@/lib/i18n/messages";
 
 /**
- * L'aperçu d'un lien vers Kairn, dans une messagerie ou sur un réseau : le
- * verrouillage et une phrase, rien d'autre, parce qu'elle se lit en un instant
- * à trois cents pixels de large.
+ * L'aperçu d'un lien partagé : le verrouillage et une phrase, lus en un instant
+ * à 300 px de large. Le symbole passe en image (le moteur ne compose que texte
+ * et boîtes) ; pas de grain, il ignore les filtres SVG. Rendu ici plutôt que par
+ * `sharp`, qui prendrait les polices du système et non Bricolage.
  *
- * Le symbole est le même SVG que la favicon (`symboleSeul()`), passé en image :
- * le moteur ne compose que du texte et des boîtes.
- *
- * Elle est rendue ici et non par le script d'export des icônes : `sharp`
- * composerait le texte avec les polices du système qui la fabrique, pas avec
- * Bricolage Grotesque, embarquée ici. Pas de grain : ce moteur ignore les
- * filtres SVG.
- *
- * Une langue par adresse, jamais par requête : les robots qui la demandent
- * n'ont ni cookie ni session. Le français passe par `app/opengraph-image.tsx`,
- * l'anglais par `/partage/en`, que les pages `/en` désignent.
+ * Une langue par adresse, jamais par requête : les robots n'ont ni cookie ni
+ * session. Français par `app/opengraph-image.tsx`, anglais par `/partage/en`.
  */
 export const TAILLE_DE_PARTAGE = { width: 1200, height: 630 };
 
-/** L'encre et le gris second : ce moteur ne lit pas les variables CSS. */
+/** Ce moteur ne lit pas les variables CSS. */
 const ENCRE = "#0d2236";
 const GRIS = "#345770";
 
@@ -36,8 +28,7 @@ export async function dessinerLImageDePartage(langue: Langue): Promise<ImageResp
 
   const display = await readFile(join(process.cwd(), "app/fonts/BricolageGrotesque-600.ttf"));
 
-  // Affiché à cent vingt pixels, au-dessus de `SEUIL_SYMBOLE_DENSE` : les cinq
-  // pierres restent distinctes même une fois l'image réduite.
+  // Affiché à 120 px, au-dessus de `SEUIL_SYMBOLE_DENSE` : cinq pierres distinctes.
   const symbole = symboleSeul({ pierres: PIERRES_DENSE, hauteurPx: 240 });
 
   return new ImageResponse(
@@ -53,7 +44,7 @@ export async function dessinerLImageDePartage(langue: Langue): Promise<ImageResp
         fontFamily: "Bricolage",
       }}
     >
-      {/* Le mot n'y porte pas la pierre sur son i : le symbole est déjà là. */}
+      {/* Pas de pierre sur le i : le symbole est déjà là. */}
       <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- ce moteur rend
               une image, pas une page : `next/image` n'y existe pas. */}
@@ -65,8 +56,6 @@ export async function dessinerLImageDePartage(langue: Langue): Promise<ImageResp
         <div style={{ fontSize: 68, color: ENCRE, letterSpacing: "-0.02em" }}>Kairn</div>
       </div>
 
-      {/* Deux blocs, comme sur la page : un constat et son retournement, pas
-            un titre de deux lignes. */}
       <div style={{ display: "flex", flexDirection: "column" }}>
         {accroche.map((ligne) => (
           <div
@@ -79,7 +68,6 @@ export async function dessinerLImageDePartage(langue: Langue): Promise<ImageResp
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
-        {/* L'accent et non le lichen : le lichen ne dit que la maîtrise. */}
         <div style={{ width: 96, height: 6, background: ACCENT, marginBottom: 28 }} />
         <div style={{ fontSize: 32, lineHeight: 1.35, color: GRIS, maxWidth: 780 }}>{phrase}</div>
       </div>

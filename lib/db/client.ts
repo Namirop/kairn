@@ -2,11 +2,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/lib/db/generated/client";
 
 /**
- * Le seul endroit du projet qui instancie Prisma. Tout le reste passe par les
- * fonctions d'accès de `lib/db/`.
- *
- * Prisma 7 compile les requêtes côté client et exige un driver adapter : c'est
- * `pg` qui tient la connexion, pas un moteur natif.
+ * Seule instanciation de Prisma. Prisma 7 exige un driver adapter : `pg` tient
+ * la connexion, pas un moteur natif.
  */
 function creerLeClientPrisma(): PrismaClient {
   const connectionString = process.env.DATABASE_URL;
@@ -22,8 +19,8 @@ function creerLeClientPrisma(): PrismaClient {
 }
 
 declare global {
-  // Le rechargement à chaud recrée les modules à chaque édition. Sans cette
-  // référence globale, chaque rechargement ouvrirait un pool de plus.
+  // Le rechargement à chaud recrée les modules : sans cette référence globale,
+  // chaque édition ouvrirait un pool de plus.
   var cairnPrisma: PrismaClient | undefined;
 }
 

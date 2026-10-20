@@ -3,34 +3,23 @@ import { STYLE_DES_EMAILS as S, bouton, envelopper, type EmailRendu } from "./ga
 import { echapper } from "./echapper";
 
 /**
- * Un retour vient d'arriver.
- *
- * Elle part à chaque retour, pas une fois par jour comme les autres alertes
- * d'exploitation : un plafond ou une bascule sont des états qui durent, un
- * retour est un événement. `RETOURS_PAR_JOUR` borne le pire cas.
- *
- * Elle porte le message presque entier ; la capture et l'auteur attendent dans
- * l'administration. L'adresse de l'auteur n'y figure pas : un email transite
- * par un tiers, autant qu'il porte le défaut et pas la personne.
- *
- * Aucun désabonnement, comme les autres alertes d'exploitation.
+ * À chaque retour, pas une fois par jour : un retour est un événement, pas un
+ * état qui dure. `RETOURS_PAR_JOUR` borne le pire cas. Sans l'adresse de
+ * l'auteur : l'email transite par un tiers, il porte le défaut, pas la personne.
  */
 
 export type AlerteDeRetourPayload = {
-  /** Le sujet, déjà mis en mots — l'email n'a pas à connaître l'énumération. */
+  /** Déjà mis en mots : l'email n'a pas à connaître l'énumération. */
   sujet: string;
-  /** L'écran nommé par la personne, si elle l'a fait. */
   ecran: string | null;
   message: string;
-  /** Largeur de fenêtre et navigateur, tels que le retour les a enregistrés. */
   contexte: string | null;
-  /** Une capture attend dans l'écran : le dire évite d'aller voir pour rien. */
   avecCapture: boolean;
-  /** L'adresse de l'écran des retours, absolue. */
+  /** Absolue. */
   lien: string;
 };
 
-/** Au-delà, on lit la suite dans l'écran : un email n'est pas une page. */
+/** Au-delà, la suite se lit dans l'écran. */
 const MESSAGE_MAX = 1200;
 
 export function composerLAlerteDeRetour(payload: AlerteDeRetourPayload): EmailRendu {
@@ -54,8 +43,7 @@ ${bouton(lien, "Ouvrir les retours")}`;
   );
 
   return {
-    // Le sujet porte le début du message et non le nombre de retours : c'est ce
-    // qui décide si on ouvre maintenant ou ce soir.
+    // Le début du message : c'est ce qui décide d'ouvrir maintenant ou ce soir.
     subject: `Kairn — retour : ${court.slice(0, 60)}${court.length > 60 ? "…" : ""}`,
     html: envelopper({
       preentete: entete,

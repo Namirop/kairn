@@ -1,17 +1,14 @@
 import { prisma } from "@/lib/db/client";
 
 /**
- * La carte « tu maîtrises ça », réclamée en fin de session. Marquée en base
- * pour ne jamais revenir sur le même concept : rare, elle garde son sens.
- * L'entraînement libre n'y passe pas : bien répondre trois fois en dix minutes,
- * c'est de la mémoire de travail.
+ * La carte « tu maîtrises ça », une fois par concept : rare, elle garde son
+ * sens. Pas en entraînement : trois bonnes réponses en dix minutes, c'est de la
+ * mémoire de travail.
  */
 
 /**
- * Réclame la carte pour le premier concept qui n'en a jamais eu. Une par
- * session, parce qu'on ne réclame qu'en fin de session. Jamais deux fois par
- * concept : la marque n'est posée que si elle est vide, donc deux onglets
- * simultanés n'en obtiennent qu'une.
+ * Une par session, réclamée à la fin. La marque ne se pose que si elle est
+ * vide : deux onglets simultanés n'en obtiennent qu'une.
  */
 export async function reclamerSignalDeMaitrise(
   userId: string,

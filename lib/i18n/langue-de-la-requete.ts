@@ -7,11 +7,9 @@ import { langueDepuisCode, langueDevinee } from "@/lib/domain/langue-devinee";
 import { COOKIE_DE_LANGUE, EN_TETE_DE_LANGUE } from "./langues";
 
 /**
- * La langue dans laquelle rendre cette requête.
- *
- * Une page publique dont l'adresse porte la langue la suit, même connecté :
- * une adresse partagée montre la même chose à tous. Ailleurs, le réglage du
- * compte ; sans compte, le cookie, puis le navigateur.
+ * Une adresse qui porte la langue l'impose, même connecté : partagée, elle
+ * montre la même chose à tous. Sinon le réglage du compte ; sans compte, le
+ * cookie, puis le navigateur.
  */
 export const langueDeLaRequete = cache(async (): Promise<Langue> => {
   const enTetes = await headers();

@@ -1,10 +1,8 @@
 import { prisma } from "@/lib/db/client";
 
 /**
- * Qui a dit que la limite le gênait : le seul signal pour savoir s'il faut
- * monter le plafond gratuit. Un compte qui sature sans rien dire ne distingue
- * pas « je voulais continuer » de « j'avais fini », et les ventes ne le disent
- * pas non plus.
+ * Seul signal pour monter le plafond gratuit : saturer sans rien dire ne
+ * distingue pas « je voulais continuer » de « j'avais fini », les ventes non plus.
  */
 export async function inscrireEnListeDattente(userId: string, motif?: string): Promise<void> {
   await prisma.waitlistEntry.upsert({

@@ -2,15 +2,11 @@ import { prisma } from "@/lib/db/client";
 import { evenementARetenir, type EtatDAbonnement } from "@/lib/domain/rapport-de-stripe";
 
 /**
- * Ce qui écrit la ligne d'abonnement, à part de `abonnement.ts` qui la lit :
- * seul le webhook rend un compte payant, et rien ne doit pouvoir accorder un
- * plan en important le module d'affichage.
- *
- * Le dossier client fait exception : il s'écrit avant tout paiement et n'ouvre
- * aucun droit.
+ * Écrit la ligne d'abonnement, à part de `abonnement.ts` qui la lit : seul le
+ * webhook rend un compte payant, rien ne doit accorder un plan en important le
+ * module d'affichage. Le dossier client, écrit avant paiement, n'ouvre aucun droit.
  */
 
-/** Le dossier d'un compte chez Stripe, tel qu'on le connaît. */
 export type DossierStripe = {
   clientId: string | null;
   abonnementId: string | null;
@@ -28,11 +24,7 @@ export async function lireDossierStripe(userId: string): Promise<DossierStripe> 
   };
 }
 
-/**
- * Rattache un compte à son client Stripe, en créant la ligne si elle manque.
- * N'accorde rien : on a un client Stripe dès qu'on ouvre la page de paiement,
- * même sans payer.
- */
+/** N'accorde rien : ouvrir la page de paiement suffit à avoir un client Stripe. */
 export async function attacherLeClientStripe(userId: string, clientId: string): Promise<void> {
   await prisma.subscription.upsert({
     where: { userId },
@@ -41,7 +33,7 @@ export async function attacherLeClientStripe(userId: string, clientId: string): 
   });
 }
 
-/** Le compte derrière un client Stripe. Nul si ce client n'est pas des nôtres. */
+/** Nul si ce client n'est pas des nôtres. */
 export async function compteDuClientStripe(clientId: string): Promise<string | null> {
   const ligne = await prisma.subscription.findUnique({
     where: { stripeCustomerId: clientId },
@@ -51,17 +43,13 @@ export async function compteDuClientStripe(clientId: string): Promise<string | n
   return ligne?.userId ?? null;
 }
 
-/** Ce qu'une écriture d'abonnement a donné, pour que le journal puisse le dire. */
+/** Pour que le journal puisse le dire. */
 export type Ecriture = "ecrit" | "ignore";
 
 /**
- * Écrit l'état d'un abonnement si l'événement est plus récent que le dernier
- * retenu.
- *
- * La règle est vérifiée deux fois, à dessein : `evenementARetenir` décide ce
- * qu'on rapporte, la condition du `where` sert de verrou. Sans elle, deux
- * webhooks en parallèle liraient la même valeur et le plus vieux pourrait
- * gagner.
+ * Si l'événement est plus récent que le dernier retenu. Vérifié deux fois :
+ * `evenementARetenir` décide ce qu'on rapporte, le `where` sert de verrou, sans
+ * quoi de deux webhooks parallèles le plus vieux pourrait gagner.
  */
 export async function enregistrerLEtatDeLAbonnement(entree: {
   userId: string;

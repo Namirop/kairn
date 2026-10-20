@@ -1,19 +1,14 @@
 /**
- * L'interrupteur qui lève les verrous de l'essai anonyme (essais par visite,
- * visites par adresse sur 24 h), pour éprouver la landing en production, seul
- * endroit où le découpage tourne avec la vraie clé.
- *
- * Absente, la variable laisse les verrous en place. Elle ne lève jamais
- * `AI_DAILY_CALL_CAP` : une variable oubliée coûte au plus ce plafond, et chaque
- * dépôt qu'elle laisse passer est journalisé.
+ * Lève les verrous de l'essai anonyme pour éprouver la landing en production,
+ * seul endroit où le découpage tourne avec la vraie clé. Jamais
+ * `AI_DAILY_CALL_CAP` : oubliée, la variable coûte au plus ce plafond.
  */
 
 export const VARIABLE_SANS_LIMITE = "ESSAI_ANONYME_SANS_LIMITE";
 
 /**
- * Seul `true` allume l'interrupteur : sur une page publique, une valeur mal
- * comprise (`1`, `on`…) doit laisser la porte fermée. Elle est journalisée, pour
- * qu'on sache pourquoi rien ne s'ouvre ; une variable absente ne dit rien.
+ * Seul `true` : sur une page publique, `1` ou `on` laissent la porte fermée, et
+ * le journal dit pourquoi rien ne s'ouvre.
  */
 export function essaiSansLimite(): boolean {
   const pose = process.env[VARIABLE_SANS_LIMITE]?.trim();

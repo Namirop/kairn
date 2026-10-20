@@ -4,14 +4,9 @@ import { ROUTES } from "./routes";
 import { lireLUtilisateur } from "./session";
 
 /**
- * La garde de tous les écrans internes, en un appel en tête de page : une page
- * qui l'oublie s'ouvre à tout le monde sans rien casser, et un appel unique se
- * vérifie d'un coup d'œil.
- *
- * Un 404 et non un 403 : l'existence de ces pages n'a pas à se confirmer.
- *
- * Elle ne remplace pas la vérification dans les Server Actions, atteignables
- * sans passer par l'écran qui les propose.
+ * En tête de chaque écran interne : une page qui l'oublie s'ouvre à tous sans
+ * rien casser. Un 404, pas un 403 : ces pages n'ont pas à se confirmer. Ne
+ * dispense pas les Server Actions, atteignables sans l'écran.
  */
 export async function exigerUnAdministrateur(): Promise<void> {
   const utilisateur = await lireLUtilisateur();

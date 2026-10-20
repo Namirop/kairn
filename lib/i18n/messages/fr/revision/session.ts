@@ -1,7 +1,4 @@
-/**
- * La session du jour : son en-tête, sa porte de sortie, sa bande d'état, et ce
- * que le serveur répond quand un passage ne s'écrit pas.
- */
+/** La session du jour, et les réponses du serveur quand un passage ne s'écrit pas. */
 export const session = {
   intitule: "Session",
   arreterTitre: "Arrêter la session ?",
@@ -16,11 +13,11 @@ export const session = {
   },
   etat: {
     aujourdhui: "Aujourd'hui",
-    /** Le nombre est écrit à part, dans sa propre chasse. */
+    /** Le nombre s'écrit à part, dans sa propre chasse. */
     serie: "{serie, plural, one {session} other {sessions d'affilée}}",
     concepts: "concepts",
     prochainRappel: "Prochain rappel",
-    /** `heure` est l'heure seule, `heureLue` la même déjà formatée dans la langue. */
+    /** Reçoit `heure` (nombre seul, lu ici) et `heureLue` (formatée, lue en anglais). */
     quandLeRappelTombe: "{jour, select, aujourdhui {aujourd'hui} other {demain}}, {heure} h",
   },
   serveur: {

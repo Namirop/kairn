@@ -1,7 +1,4 @@
-/**
- * Les briques transverses : l'attente entre deux écrans, les écrans d'erreur,
- * les extraits de code, la fermeture des dialogues et l'invite à installer.
- */
+/** Les textes transverses aux écrans de l'application. */
 export const commun = {
   chargement: "Un instant.",
   erreur: {
@@ -34,7 +31,7 @@ export const commun = {
     texte: "Posée sur ton écran d'accueil, elle s'ouvre d'un geste, sans la barre du navigateur.",
     installer: "Installer",
     cestFait: "C'est fait, ne plus me le proposer",
-    /** Les noms de menus sont ceux que le système affiche, dans sa langue. */
+    /** Noms de menus tels que le système les affiche, dans sa langue. */
     dockMenu: "Ouvre le menu Fichier de Safari.",
     dockChoix: "Choisis « Ajouter au Dock ».",
     partageMenu: "Ouvre le menu de partage.",

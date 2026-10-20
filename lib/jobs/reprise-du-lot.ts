@@ -4,12 +4,8 @@ import type { GenerationJob } from "@/lib/db/types";
 import { scinderLeGroupe } from "@/lib/domain/scission-de-groupe";
 
 /**
- * Le signal qu'un job de questions n'a pas tout rendu et repart en file.
- *
- * Ni un succès ni un échec : les deux fermeraient le job, laissant des concepts
- * sans questions ou faisant réécrire ceux déjà écrits. Le job a déjà été
- * rétréci et rendu à la file ; l'erreur demande seulement à l'exécuteur de ne
- * pas le refermer.
+ * Le job, déjà rétréci et rendu à la file, ne doit pas être refermé : succès ou
+ * échec laisseraient des concepts sans questions ou en feraient réécrire.
  */
 export class LotIncomplet extends Error {
   constructor(message: string) {
@@ -19,17 +15,10 @@ export class LotIncomplet extends Error {
 }
 
 /**
- * Ce qu'on fait d'un groupe dont la réponse a buté sur le plafond de jetons.
- *
  * Rien ne reprend un job échoué : sans cette coupe, ses concepts n'auraient
- * jamais de questions. On coupe le groupe en deux plutôt que de le rejouer, la
- * seule reprise qui demande moins que ce qui n'a pas tenu. Le job garde la
- * moitié haute et retourne en file, l'autre part dans un job neuf. Un concept
- * seul qui déborde encore ne se découpe plus : c'est le plafond qu'il faut
- * relever.
- *
- * Ne rend jamais la main : elle lève `LotIncomplet` si la coupe a eu lieu, et
- * l'erreur d'origine sinon.
+ * jamais de questions. Couper en deux est la seule reprise qui demande moins
+ * que ce qui n'a pas tenu ; un concept seul qui déborde, c'est le plafond à
+ * relever. Lève `LotIncomplet` si la coupe a eu lieu, l'erreur d'origine sinon.
  */
 export async function scinderApresTroncature(
   job: GenerationJob,

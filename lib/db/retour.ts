@@ -2,10 +2,7 @@ import { prisma } from "@/lib/db/client";
 import type { SujetDeRetour } from "@/lib/db/types";
 import { peutEncoreEnvoyer } from "@/lib/domain/retour-sur-le-produit";
 
-/**
- * Les retours sur le produit : ce qu'on en écrit, ce qu'on en relit. Le
- * plafond est haut à dessein : il ne refuse que l'usage détourné de la table.
- */
+/** Plafond haut à dessein : il ne refuse que l'usage détourné de la table. */
 
 export type RetourAEcrire = {
   userId: string;
@@ -16,10 +13,9 @@ export type RetourAEcrire = {
   capture: { donnees: Uint8Array; mediaType: string } | null;
 };
 
-/** Ce que l'écriture rend, et le seul refus possible. */
 export type EcritureDeRetour = { ok: true } | { ok: false; motif: "PLAFOND" };
 
-/** La fenêtre du plafond par compte : vingt-quatre heures glissantes. */
+/** Glissante, par compte. */
 const FENETRE_MS = 24 * 60 * 60 * 1000;
 
 function debutDeFenetre(maintenant: Date): Date {
@@ -27,8 +23,7 @@ function debutDeFenetre(maintenant: Date): Date {
 }
 
 /**
- * Le plafond lu sans rien réserver, pour refuser avant de décoder une capture :
- * un compte au plafond ne doit pas pouvoir faire travailler `sharp` en boucle.
+ * Sans réserver, pour refuser avant que `sharp` décode une capture en boucle.
  * Le refus qui fait foi reste celui d'`ecrireUnRetour`.
  */
 export async function peutEncoreEnvoyerUnRetour(
@@ -42,17 +37,12 @@ export async function peutEncoreEnvoyerUnRetour(
   return peutEncoreEnvoyer(dejaEnvoyes);
 }
 
-/**
- * Écrit un retour, si le compte n'a pas déjà rempli sa journée. Le plafond est
- * ici et non dans la Server Action : c'est le passage obligé vers l'écriture,
- * qu'un second appelant ne contournera pas.
- */
+/** Plafond ici, pas dans la Server Action : un second appelant ne le contournera pas. */
 export async function ecrireUnRetour(
   retour: RetourAEcrire,
   maintenant: Date = new Date(),
 ): Promise<EcritureDeRetour> {
-  // Compter puis écrire, sous un verrou par compte : sans lui, des envois
-  // simultanés lisent tous le même compte et passent tous le plafond.
+  // Verrou par compte : sans lui, des envois simultanés passent tous le plafond.
   return prisma.$transaction(
     async (tx): Promise<EcritureDeRetour> => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`retour:${retour.userId}`}))`;
@@ -77,8 +67,7 @@ export async function ecrireUnRetour(
 
       return { ok: true };
     },
-    // Les envois d'un même compte attendent leur tour sur le verrou : l'attente
-    // d'une connexion par défaut (2 s) ferait échouer un double envoi.
+    // Les envois attendent le verrou : les 2 s par défaut feraient échouer un doublé.
     { maxWait: 10_000, timeout: 15_000 },
   );
 }
@@ -92,24 +81,22 @@ export type RetourLu = {
   aUneCapture: boolean;
   traiteLe: Date | null;
   createdAt: Date;
-  /** L'adresse de qui a écrit, ou null si le compte est parti depuis. */
+  /** Null si le compte est parti depuis. */
   auteur: string | null;
 };
 
 export type PageDeRetours = {
   lignes: RetourLu[];
   total: number;
-  /** Ce qui reste à lire, tous rangs confondus : c'est le seul chiffre utile. */
+  /** Tous rangs confondus : le seul chiffre utile. */
   aLire: number;
   page: number;
   pages: number;
 };
 
 /**
- * Une page de retours : ce qui n'est pas traité d'abord, puis le plus récent.
- * Par date seule, un retour non lu redescendrait sous les traités.
- *
- * Le rang est ramené dans les bornes plutôt que refusé : il vient d'une URL.
+ * Non traités d'abord : par date seule, un non lu passerait sous les traités.
+ * Le rang vient d'une URL : ramené dans les bornes plutôt que refusé.
  */
 export async function listerLesRetoursPagines(
   rang: number,
@@ -147,8 +134,7 @@ export async function listerLesRetoursPagines(
       message: ligne.message,
       ecran: ligne.ecran,
       contexte: ligne.contexte,
-      // La colonne d'octets n'est jamais chargée pour une liste : quelques
-      // captures pèseraient un mégaoctet dont on n'affiche rien.
+      // Jamais les octets dans une liste : un mégaoctet dont on n'affiche rien.
       aUneCapture: ligne.captureMediaType !== null,
       traiteLe: ligne.traiteLe,
       createdAt: ligne.createdAt,
@@ -161,7 +147,7 @@ export async function listerLesRetoursPagines(
   };
 }
 
-/** Bascule l'état « traité » d'un retour, et rend ce qu'il vaut désormais. */
+/** Rend le nouvel état. */
 export async function basculerLeTraitement(
   id: string,
   maintenant: Date = new Date(),
@@ -180,10 +166,7 @@ export async function basculerLeTraitement(
   return traite;
 }
 
-/**
- * La capture d'un retour, pour la seule route qui la sert. Seule requête qui
- * rapporte des octets d'image : ne pas les charger ailleurs.
- */
+/** Seule requête qui rapporte des octets d'image : ne pas les charger ailleurs. */
 export async function lireLaCapture(
   id: string,
 ): Promise<{ donnees: Uint8Array; mediaType: string } | null> {

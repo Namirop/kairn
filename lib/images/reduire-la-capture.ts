@@ -2,26 +2,17 @@ import { BORD_LONG_CAPTURE } from "@/lib/depots/bornes-du-depot";
 import { dimensionsReduites } from "@/lib/domain/reduction-de-capture";
 
 /**
- * La capture, réduite dans le navigateur avant de partir.
- *
- * Une action de serveur Next refuse par défaut un corps de plus d'un mégaoctet,
- * l'hébergeur tout corps au-delà de 4,5 Mo, et une capture de téléphone en pèse
- * deux ou trois : le plafond de `next.config.ts` est un garde-fou, pas une
- * solution.
- *
- * Elle réduit à la mesure que `preparerCapture` applique déjà côté serveur,
- * qui reste seul juge (type lu au contenu, seconde réduction) : ce module ne
- * fait qu'épargner les octets du voyage.
- *
- * Elle rend l'original dès que quelque chose ne va pas (décodeur, canevas,
- * rendu plus lourd) : la borne de poids rattrape le reste. Ce module améliore
- * un envoi, il n'a jamais le droit de l'empêcher.
+ * Réduite dans le navigateur avant de partir : une Server Action refuse 1 Mo
+ * par défaut, Vercel 4,5 Mo, et une capture de téléphone en pèse deux ou trois.
+ * Même mesure que `preparerCapture`, qui reste seul juge ; ici on n'épargne que
+ * le voyage. Au moindre accroc, l'original part : ce module améliore un envoi,
+ * il n'a jamais le droit de l'empêcher.
  */
 
-/** En deçà, réencoder ne ferait que dégrader le texte que la lecture doit reconnaître. */
+/** En deçà, réencoder ne ferait que dégrader le texte à lire. */
 const POIDS_SANS_RETOUCHE = 900 * 1024;
 
-/** Haut, parce que le serveur repassera derrière à 82 : deux passes se cumulent. */
+/** Haut : le serveur repasse à 82, et deux passes se cumulent. */
 const QUALITE = 0.92;
 
 function dessinable(): boolean {
@@ -30,12 +21,10 @@ function dessinable(): boolean {
 
 async function decoder(fichier: File): Promise<ImageBitmap> {
   try {
-    // L'orientation EXIF s'applique ici ou jamais : le réencodage perd les
-    // métadonnées, et le `.rotate()` du serveur n'aurait plus rien à lire.
+    // Ici ou jamais : le réencodage perd l'EXIF que lirait le `.rotate()` du serveur.
     return await createImageBitmap(fichier, { imageOrientation: "from-image" });
   } catch {
-    // Certains navigateurs refusent l'option sans refuser l'image ; une capture
-    // d'écran n'a de toute façon pas d'orientation à appliquer.
+    // Certains navigateurs refusent l'option, pas l'image.
     return createImageBitmap(fichier);
   }
 }
@@ -44,12 +33,7 @@ function encoder(toile: HTMLCanvasElement, type: string): Promise<Blob | null> {
   return new Promise((resoudre) => toile.toBlob(resoudre, type, QUALITE));
 }
 
-/**
- * Le nom que portait le fichier, avec l'extension de ce qu'il est devenu.
- *
- * L'écran montre ce nom à côté du bouton « changer la capture » : c'est à lui
- * qu'on reconnaît ce qu'on vient de joindre.
- */
+/** Le nom d'origine reste : l'écran l'affiche pour reconnaître ce qu'on a joint. */
 function renommer(nom: string, type: string): string {
   const extension = type === "image/webp" ? "webp" : "jpg";
   const base = nom.replace(/\.[^.]*$/, "").trim();
@@ -80,16 +64,14 @@ export async function reduireLaCapture(fichier: File): Promise<File> {
 
     pinceau.drawImage(image, 0, 0, mesure.largeur, mesure.hauteur);
 
-    // JPEG en repli explicite : un navigateur qui ne sait pas encoder le WebP
-    // rend `null`, et son défaut serait un PNG de plusieurs mégaoctets.
+    // Sans WebP, `toBlob` rend `null` ; son défaut serait un PNG de plusieurs Mo.
     const rendu = (await encoder(toile, "image/webp")) ?? (await encoder(toile, "image/jpeg"));
 
     if (!rendu || rendu.size >= fichier.size) return fichier;
 
     return new File([rendu], renommer(fichier.name, rendu.type), { type: rendu.type });
   } catch (erreur) {
-    // Le poids et le type, jamais le nom ni le contenu : pas de contenu
-    // utilisateur dans les journaux.
+    // Jamais le nom : pas de contenu utilisateur dans les journaux.
     console.warn(
       `[kairn] capture non réduite (${fichier.size} octets, ${fichier.type || "type inconnu"})`,
       erreur,

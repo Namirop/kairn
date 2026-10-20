@@ -7,31 +7,17 @@ import { lireConfigDePaiement } from "./config";
 import { AucunDossierStripeError, objetIntrouvableChezStripe } from "./erreurs";
 
 /**
- * Le portail hébergé de Stripe, pour les factures et le changement de carte :
- * des écrans rares que Stripe tient à jour à notre place.
- *
- * Arrêter et reprendre restent dans Kairn : un abonnement qu'on ne peut
- * résilier que sur un site tiers est un abonnement difficile à quitter.
+ * Factures et carte : des écrans rares que Stripe tient à jour. Arrêter et
+ * reprendre restent dans Kairn : résilier sur un site tiers, c'est dur à quitter.
  */
 
-/**
- * Ce qui reconnaît notre configuration parmi celles du compte. Comme les
- * `lookup_key` du catalogue : l'identifiant d'une configuration change entre
- * test et production, une marque en métadonnée est la même des deux côtés.
- */
+/** Comme les `lookup_key` : l'id change entre test et production, la métadonnée non. */
 const MARQUE = "portail-kairn";
 
-/**
- * La configuration résolue, gardée tant que la clé ne change pas : un passage
- * de test à production ne doit jamais réutiliser celle de l'autre mode.
- */
+/** Indexé par la clé : un passage en production ne réutilise jamais celle du test. */
 let cache: { cle: string; configuration: string } | null = null;
 
-/**
- * Ce que le portail a le droit de faire, écrit ici plutôt que réglé dans le
- * tableau de bord Stripe : la frontière entre ce que le produit assume et ce
- * qu'il délègue doit se relire dans le code.
- */
+/** Écrite ici, pas au tableau de bord : ce que le produit délègue se relit dans le code. */
 async function configurationDuPortail(): Promise<string> {
   const { cleSecrete } = lireConfigDePaiement();
 
@@ -57,23 +43,19 @@ async function creerLaConfiguration() {
     features: {
       invoice_history: { enabled: true },
       payment_method_update: { enabled: true },
-      // Résilier et changer d'offre se font dans Kairn, qui sait dire ce que
-      // ça change pour le compte.
+      // Dans Kairn, qui sait dire ce que ça change pour le compte.
       subscription_cancel: { enabled: false },
       subscription_update: { enabled: false },
-      // L'adresse du compte est l'identité de connexion : changée d'un côté
-      // seulement, elle casserait le rattachement.
+      // L'adresse est l'identité de connexion : changée d'un seul côté, elle
+      // casserait le rattachement.
       customer_update: { enabled: false },
     },
   });
 }
 
 /**
- * Ouvre le portail pour un compte, et rend l'adresse où l'envoyer.
- *
- * Le dossier Stripe vient de notre base, jamais du navigateur. Sans dossier,
- * l'écran ne propose pas le lien : l'erreur ne se rencontre qu'avec un onglet
- * en retard.
+ * Le dossier vient de notre base, jamais du navigateur. Sans dossier l'écran
+ * n'offre pas le lien : l'erreur ne vient que d'un onglet en retard.
  */
 export async function ouvrirLePortail(userId: string): Promise<string> {
   const { clientId } = await lireDossierStripe(userId);
@@ -83,8 +65,7 @@ export async function ouvrirLePortail(userId: string): Promise<string> {
   try {
     return await sessionDePortail(clientId);
   } catch (erreur) {
-    // Le dossier date d'un autre mode, ou a été supprimé : il n'a ni facture ni
-    // carte à montrer. Le prochain achat en ouvrira un neuf.
+    // Dossier d'un autre mode ou supprimé : rien à montrer, le prochain achat en ouvre un.
     if (objetIntrouvableChezStripe(erreur)) throw new AucunDossierStripeError();
 
     throw erreur;
@@ -96,8 +77,7 @@ async function sessionDePortail(clientId: string): Promise<string> {
     customer: clientId,
     configuration: await configurationDuPortail(),
     locale: "fr",
-    // Le retour n'a rien à relire : le portail ne change qu'une carte, et ce
-    // qui toucherait à un droit passerait par un webhook.
+    // Rien à relire au retour : ce qui toucherait un droit passe par le webhook.
     return_url: `${adresseDeLApp()}${ROUTES.reglages}`,
   });
 

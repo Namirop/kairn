@@ -1,8 +1,6 @@
 /**
- * Les échecs du paiement sont typés, pour la même raison que ceux du modèle :
- * un appelant doit distinguer « le paiement n'est pas configuré » de « Stripe a
- * refusé », et les journaux doivent porter un code stable plutôt qu'un message
- * libre.
+ * Typés : l'appelant distingue « pas configuré » de « Stripe a refusé », et le
+ * journal porte un code stable.
  */
 export abstract class PaiementError extends Error {
   abstract readonly code: string;
@@ -13,7 +11,6 @@ export abstract class PaiementError extends Error {
   }
 }
 
-/** Une variable manque, ou ne vaut rien. Le paiement n'est pas ouvert. */
 export class PaiementConfigError extends PaiementError {
   readonly code = "PAIEMENT_CONFIG";
 
@@ -27,10 +24,8 @@ export class PaiementConfigError extends PaiementError {
 }
 
 /**
- * Une clé de production a été posée sans que la production soit demandée.
- * Empêche un aperçu de branche ou une machine de dev d'encaisser de vraies
- * cartes : les clés test et live se copient depuis la même page, et l'erreur ne
- * se verrait qu'au relevé bancaire d'un client.
+ * Empêche un aperçu de branche ou un poste de dev d'encaisser : test et live se
+ * copient depuis la même page, l'erreur ne se verrait qu'au relevé d'un client.
  */
 export class PaiementLiveNonAutoriseError extends PaiementError {
   readonly code = "PAIEMENT_LIVE_NON_AUTORISE";
@@ -45,7 +40,6 @@ export class PaiementLiveNonAutoriseError extends PaiementError {
   }
 }
 
-/** La signature du webhook ne correspond pas. La requête n'est pas de Stripe. */
 export class SignatureInvalideError extends PaiementError {
   readonly code = "PAIEMENT_SIGNATURE";
 
@@ -55,7 +49,6 @@ export class SignatureInvalideError extends PaiementError {
   }
 }
 
-/** Stripe a répondu quelque chose que le contrat ne prévoit pas. */
 export class RapportIllisibleError extends PaiementError {
   readonly code = "PAIEMENT_RAPPORT_ILLISIBLE";
 
@@ -65,10 +58,7 @@ export class RapportIllisibleError extends PaiementError {
   }
 }
 
-/**
- * Un geste d'abonnement a été demandé sur un compte qui n'en a pas : un onglet
- * en retard, pas une faute de l'utilisateur.
- */
+/** Un onglet en retard, pas une faute de l'utilisateur. */
 export class AucunAbonnementError extends PaiementError {
   readonly code = "PAIEMENT_AUCUN_ABONNEMENT";
 
@@ -78,11 +68,7 @@ export class AucunAbonnementError extends PaiementError {
   }
 }
 
-/**
- * Un achat a été demandé sur un compte qui a déjà un abonnement vivant. L'écran
- * cache le bouton, mais un onglet en retard ou un second clic y mènent, et payer
- * deux fois ferait deux abonnements.
- */
+/** L'écran cache le bouton, mais un onglet en retard ou un second clic ferait deux abonnements. */
 export class AbonnementDejaOuvertError extends PaiementError {
   readonly code = "PAIEMENT_ABONNEMENT_DEJA_OUVERT";
 
@@ -92,10 +78,7 @@ export class AbonnementDejaOuvertError extends PaiementError {
   }
 }
 
-/**
- * Le portail a été demandé pour un compte qui n'a jamais approché le paiement,
- * donc sans client chez Stripe. L'écran ne propose pas le lien dans ce cas.
- */
+/** L'écran ne propose pas le portail dans ce cas. */
 export class AucunDossierStripeError extends PaiementError {
   readonly code = "PAIEMENT_AUCUN_DOSSIER";
 
@@ -106,12 +89,8 @@ export class AucunDossierStripeError extends PaiementError {
 }
 
 /**
- * Cet objet Stripe a-t-il disparu — ou n'a-t-il jamais existé dans ce mode ?
- *
- * Test et production sont deux jeux de données étanches : un identifiant écrit
- * en base sous une clé de test échoue en `resource_missing` sous une clé de
- * production, comme un objet supprimé depuis le tableau de bord. Dans les deux
- * cas l'identifiant est à remplacer ou oublier ; réessayer ne sert à rien.
+ * Supprimé, ou d'un autre mode : test et production sont étanches, un id de test
+ * échoue en `resource_missing` sous une clé live. Réessayer ne sert à rien.
  */
 export function objetIntrouvableChezStripe(erreur: unknown): boolean {
   return (

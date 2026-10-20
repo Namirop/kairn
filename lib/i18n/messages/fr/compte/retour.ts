@@ -1,7 +1,4 @@
-/**
- * Le retour sur le produit, depuis les réglages. Les sujets sont redits ici :
- * `lib/retours/libelle-du-sujet.ts` sert l'exploitant, toujours en français.
- */
+/** Sujets redits ici : `lib/retours/libelle-du-sujet.ts` sert l'exploitant, en français. */
 export const retour = {
   sujet: "De quoi s'agit-il",
   sujets: {

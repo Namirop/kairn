@@ -15,13 +15,9 @@ import { preparerCapture } from "@/lib/images/capture";
 import { mettreEnFile } from "@/lib/jobs/queue";
 
 /**
- * Le geste de dépôt, côté serveur : validation, place du jour, image réduite,
- * dépôt écrit, travail mis en file. Aucun appel modèle ici, l'utilisateur ne
- * l'attend jamais dans sa requête.
- *
- * Une place prise pour un dépôt qui n'aboutit pas est rendue : le compteur suit
- * ce qui a été déposé, pas ce qui a été tenté. Les refus sont dans la langue de
- * `t` (français par défaut, pour les scripts).
+ * Aucun appel modèle : l'utilisateur ne l'attend jamais dans sa requête. Une
+ * place prise pour un dépôt qui n'aboutit pas est rendue : le compteur suit ce
+ * qui est déposé, pas ce qui est tenté.
  */
 
 function schemaDuDepot(t: TraduireLesRefus) {
@@ -31,8 +27,7 @@ function schemaDuDepot(t: TraduireLesRefus) {
     texte: z.string().max(CARACTERES_MAXIMUM, {
       error: t("depotTropLong", { longueur: longueurEnClairAvec(t, CARACTERES_MAXIMUM) }),
     }),
-    // Champ technique rempli par le formulaire. Le message est explicite pour ne
-    // pas afficher la phrase brute de Zod, en anglais, sous le bouton.
+    // Rempli par le formulaire ; le message évite la phrase brute de Zod, en anglais.
     cleEnvoi: z.string().min(8, { error: cleIllisible }).max(64, { error: cleIllisible }),
     consigne: z.string().max(CONSIGNE_MAXIMUM, {
       error: (issue) =>
@@ -111,14 +106,13 @@ export async function deposer(
   const { input, nouveau } = await creerDepot({
     userId,
     texte,
-    // Une consigne faite d'espaces vaut absente.
     consigne: valide.data.consigne.trim() || undefined,
     image: capture?.ok ? capture.capture : undefined,
     cleEnvoi: valide.data.cleEnvoi,
   });
 
   if (!nouveau) {
-    // Le même envoi reçu deux fois : la place prise à tort est rendue.
+    // Le même envoi reçu deux fois.
     await rendreDepot(userId, fuseau);
     return { ok: true, inputId: input.id, nouveau: false };
   }

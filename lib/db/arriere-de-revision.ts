@@ -8,17 +8,14 @@ import {
 import { jourEnDateUtc, jourLocal } from "@/lib/domain/jour-local";
 
 /**
- * Le suivi de l'arriéré, d'un jour à l'autre.
- *
- * Seul un arriéré qui dure veut dire quelque chose, et son premier jour ne se
- * reconstruit pas à partir des échéances, que les révisions ont déplacées : il
- * faut l'écrire. L'écriture se fait à la lecture du tableau de bord, seul
- * endroit qui regarde l'arriéré, et seulement quand l'état change.
+ * Seul un arriéré qui dure compte, et son premier jour ne se déduit pas des
+ * échéances, que les révisions déplacent : il s'écrit, à la lecture du tableau
+ * de bord (seul à le regarder) et seulement quand l'état change.
  */
 export type ArriereSuivi = {
   /** Assez long pour qu'on le dise. */
   signaler: boolean;
-  /** Depuis combien de jours, aujourd'hui compris. Zéro quand il n'y en a pas. */
+  /** Aujourd'hui compris ; zéro sans arriéré. */
   jours: number;
 };
 
@@ -34,8 +31,7 @@ export async function suivreLArriere(
     select: { backlogSince: true },
   });
 
-  // `ouvrirLeCompte` crée la ligne à l'inscription ; si elle manque, il n'y a
-  // rien à suivre, et ce n'est pas ici qu'on la crée.
+  // `ouvrirLeCompte` crée la ligne ; absente, rien à suivre, et pas à créer ici.
   if (!stats) return { signaler: false, jours: 0 };
 
   const avant: SuiviDeLArriere = {

@@ -52,8 +52,8 @@ export const essai: Messages["site"]["essai"] = {
       "Your concepts are already here; it's the sample that's missing. It's still being written, and it will show up here the next time you stop by.",
     verifier: "Check now",
   },
-  // « Fill the gap » plutôt que « Fill in the blank » : deux par ligne sur
-  // téléphone, la paire la plus longue doit tenir dans la fenêtre.
+  // « Fill the gap », pas « Fill in the blank » : deux par ligne sur
+  // téléphone, la paire la plus longue doit tenir.
   libelleFormat: {
     MCQ: "Multiple choice",
     CLOZE: "Fill the gap",
@@ -63,8 +63,8 @@ export const essai: Messages["site"]["essai"] = {
     EXPLAIN: "Explain",
   },
   repris: {
-    // « to keep » et non « is waiting » : mesuré, « 1 concept to keep. » est
-    // un peu plus court que « 1 concept t'attend. », sur lequel la ligne est réglée.
+    // « to keep », pas « is waiting » : plus court que « 1 concept t'attend. »,
+    // sur lequel la ligne est réglée.
     titre: "{nombre, plural, one {# concept to keep.} other {# concepts to keep.}}",
     texte:
       "We pulled them out of what you just dropped in. Your email address is all it takes for us to bring them back at the right moment, and you keep these ones.",

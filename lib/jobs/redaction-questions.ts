@@ -13,12 +13,9 @@ import { sansRenvoiAuConcept } from "@/lib/domain/renvoi-au-concept";
 import { messageDuGroupe } from "@/lib/domain/envoi-de-questions";
 import { LotIncomplet, scinderApresTroncature } from "./reprise-du-lot";
 
-/**
- * L'écriture des questions d'un job, en appel direct : l'entraînement les rend
- * utiles dès l'instant du dépôt.
- */
+/** En appel direct : l'entraînement les rend utiles dès le dépôt. */
 
-/** Les concepts d'un job, dans l'ordre du job : c'est le rang annoncé au modèle. */
+/** Dans l'ordre du job : c'est le rang annoncé au modèle. */
 export async function conceptsDuJob(atomIds: string[]) {
   const atomes = await prisma.atom.findMany({
     where: { id: { in: atomIds } },
@@ -29,19 +26,14 @@ export async function conceptsDuJob(atomIds: string[]) {
 }
 
 /**
- * L'envoi d'un groupe, semé sur l'id de chaque Atom : la cible du vrai ou faux
- * en dérive, et doit rester stable d'une régénération à l'autre. Le banc, qui
- * n'écrit rien en base, sème sur le texte du concept.
+ * Semé sur l'id de l'Atom : la cible du vrai ou faux en dérive et reste stable
+ * d'une régénération à l'autre. Le banc, sans base, sème sur le concept.
  */
 export function messageSemeParAtome(concepts: { id: string; concept: string }[]): string {
   return messageDuGroupe(concepts.map(({ id, concept }) => ({ graine: id, concept })));
 }
 
-/**
- * Le contrat de cet envoi, avec l'emplacement du texte à trou déjà décidé. Il
- * dérive du premier Atom et vaut pour tout l'appel, la grammaire étant compilée
- * une fois par appel.
- */
+/** Le trou dérive du premier Atom : la grammaire se compile une fois par appel. */
 export function contratDuGroupe(concepts: { id: string }[]) {
   return contratDeGeneration(emplacementDuTexteATrou(concepts[0]?.id ?? ""));
 }
@@ -49,11 +41,9 @@ export function contratDuGroupe(concepts: { id: string }[]) {
 type LotRendu = { rang: number; variants: Parameters<typeof ecrireQuestions>[1] };
 
 /**
- * Range les lots rendus sous leurs concepts et rend les rangs restés sans
- * réponse. Un lot manquant n'emporte pas les autres.
- *
- * Le modèle est lu ici et descendu jusqu'à l'écriture : `lib/db/` qui
- * appellerait `lib/ai/` refermerait un cycle sur `lib/db/reglages`.
+ * Rend les rangs sans réponse ; un lot manquant n'emporte pas les autres. Le
+ * modèle est lu ici : `lib/db/` appelant `lib/ai/` ferait un cycle sur
+ * `lib/db/reglages`.
  */
 async function rangerLesLots(atomIds: string[], lots: LotRendu[]): Promise<number[]> {
   const { model } = await lireLaConfigEffective();
@@ -67,14 +57,10 @@ async function rangerLesLots(atomIds: string[], lots: LotRendu[]): Promise<numbe
       continue;
     }
 
-    // Filet derrière le prompt, au dernier endroit qui voit un lot entier :
-    // une question qui renvoie au concept (jamais montré en révision) et un vrai
-    // ou faux sans verdict ne s'écrivent pas. Voir `sansRenvoiAuConcept` et
-    // `sansAffirmationMuette`.
+    // Filet derrière le prompt, au dernier endroit qui voit un lot entier.
     const gardees = sansAffirmationMuette(sansRenvoiAuConcept(lot.variants));
 
-    // Un lot écarté en entier vaut un lot absent : le concept repart en file
-    // au lieu de rester sans question sur un job clos en succès.
+    // Vaut un lot absent : le concept repart en file plutôt que sans question.
     if (gardees.length === 0) {
       manquants.push(rang + 1);
       continue;
@@ -86,7 +72,7 @@ async function rangerLesLots(atomIds: string[], lots: LotRendu[]): Promise<numbe
   return manquants;
 }
 
-/** Les rangs (ce que le modèle nomme) ramenés aux concepts, qui repartent en file. */
+/** Le modèle nomme des rangs ; la file reprend des concepts. */
 function conceptsSansQuestions(atomIds: string[], manquants: number[]): string[] {
   return manquants.flatMap((rang) => {
     const atomId = atomIds[rang - 1];
@@ -96,9 +82,8 @@ function conceptsSansQuestions(atomIds: string[], manquants: number[]): string[]
 }
 
 /**
- * Un appel, les questions écrites. L'exécuteur clôt le job : on lui rend la
- * main sans le terminer, et on lève quand il manque des questions pour que le
- * motif soit enregistré.
+ * L'exécuteur clôt le job : on rend la main sans le terminer, et on lève s'il
+ * manque des questions pour que le motif soit enregistré.
  */
 export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
   const depot = await prisma.input.findUnique({
@@ -111,15 +96,13 @@ export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
     throw new Error(`Les concepts du job ${job.id} ont disparu.`);
   }
 
-  // Une sortie coupée au plafond se reproduirait à l'identique : le groupe
-  // repart coupé en deux (`scinderApresTroncature`) plutôt qu'en échec.
+  // Une sortie tronquée se reproduirait à l'identique : le groupe repart coupé en deux.
   const rendu = await callAI({
     contract: contratDuGroupe(concepts),
     system: promptsSysteme(depot?.langue ?? "FR").generate_variants,
     jobId: job.id,
     userId: depot?.userId ?? undefined,
-    // L'essai d'un visiteur passe aussi par ici : sans ce drapeau, sa question
-    // se compterait sur le plafond des comptes au lieu de la part publique.
+    // Sinon l'essai d'un visiteur compterait sur le plafond des comptes.
     anonyme: depot?.anonymousSessionId != null,
     messages: [{ role: "user", content: messageSemeParAtome(concepts) }],
   }).catch(async (erreur: unknown) => {
@@ -134,9 +117,8 @@ export async function redigerLesQuestions(job: GenerationJob): Promise<void> {
 
   if (manquants.length === 0) return;
 
-  // Ce qui manque repart en file, où le cron le reprend : sinon ces concepts
-  // resteraient sans question, et l'écran ne le dit pas tant qu'un seul est
-  // servable.
+  // Repris par le cron : l'écran ne signale pas un concept sans question tant
+  // qu'un autre est servable.
   const motif = `Aucune question rendue pour le concept ${manquants.join(", ")}.`;
 
   if (await reprendreCeQuiManque(job.id, conceptsSansQuestions(job.atomIds, manquants), motif)) {

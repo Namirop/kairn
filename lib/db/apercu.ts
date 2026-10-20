@@ -1,11 +1,7 @@
 import { prisma } from "@/lib/db/client";
 import type { VarianteEnBase } from "@/lib/db/question-servie";
 
-/**
- * Charge un Variant et son Atom pour la vitrine d'assets, qui montre une vraie
- * question dans un état de réponse figé. Lecture seule ; la route qui l'appelle
- * est inerte hors développement.
- */
+/** Pour la vitrine d'assets, figée sur une vraie question ; sa route est inerte hors dev. */
 
 export type ConceptEtVariante = {
   concept: { id: string; concept: string; tags: string[]; lastReview: Date | null };

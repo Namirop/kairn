@@ -1,15 +1,12 @@
 import { prisma } from "@/lib/db/client";
 import { etatDuDepot, type EtatDepot } from "@/lib/domain/etat-depot";
 
-/**
- * Ce qu'on peut faire à un dépôt existant : le redécouper (le texte reste, les
- * concepts sont refaits) ou l'effacer. Toute écriture filtre par propriétaire.
- */
+/** Redécouper un dépôt ou l'effacer. Toute écriture filtre par propriétaire. */
 
 export type DepotAReprendre = {
   id: string;
   etat: EtatDepot;
-  /** Faux quand il ne reste rien à redécouper : une capture jamais lue. */
+  /** Faux pour une capture jamais lue : rien à redécouper. */
   aDuTexte: boolean;
 };
 
@@ -43,9 +40,8 @@ export async function lireDepotAReprendre(
 }
 
 /**
- * Remet le dépôt au point de départ du découpage. Les anciens jobs partent avec
- * les concepts : laissés en base, ils feraient clore le dépôt sur un état qui
- * n'est plus le sien. Le texte n'est jamais touché.
+ * Les anciens jobs partent avec les concepts : restés en base, ils feraient
+ * clore le dépôt sur un état qui n'est plus le sien. Le texte reste intact.
  */
 export async function repartirEnDecoupage(inputId: string, userId: string): Promise<boolean> {
   const depot = await prisma.input.findFirst({
@@ -67,10 +63,7 @@ export async function repartirEnDecoupage(inputId: string, userId: string): Prom
   return true;
 }
 
-/**
- * Efface un dépôt, et par la cascade du schéma ses concepts, leurs questions
- * et leurs passages.
- */
+/** Concepts, questions et passages partent par cascade. */
 export async function supprimerDepot(inputId: string, userId: string): Promise<boolean> {
   const { count } = await prisma.input.deleteMany({ where: { id: inputId, userId } });
 

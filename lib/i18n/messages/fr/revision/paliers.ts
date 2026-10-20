@@ -1,16 +1,11 @@
-/**
- * Les paliers : la fin d'une session, et les raisons de n'avoir rien à réviser.
- *
- * Ce sont des haltes, pas des récompenses : on ne félicite pas quelqu'un
- * d'être venu.
- */
+/** Fin de session et raisons de n'avoir rien à réviser : des haltes, pas des récompenses. */
 export const paliers = {
   intituleSession: "Session",
   deposer: "Déposer",
   deposerAutreChose: "Déposer autre chose",
   sentrainer: "S'entraîner",
   retourAujourdhui: "Retour à aujourd'hui",
-  /** La promesse de l'entraînement, dite une fois pour toutes les portes qui y mènent. */
+  /** Une seule phrase pour toutes les portes de l'entraînement. */
   entrainementLibre:
     "S'entraîner pose d'autres questions sur les mêmes concepts, sans rien changer à ton planning.",
   fin: {
@@ -18,7 +13,7 @@ export const paliers = {
     demainRien: "Rien ne revient demain : tu es à jour. Ce que tu déposeras reviendra à son tour.",
     demain:
       "{nombre, plural, one {Un concept revient demain.} other {# concepts reviennent demain.}}",
-    /** L'heure est insécable : « 19 h » est un nombre et son unité. */
+    /** Espace insécable : « 19 h » est un nombre et son unité. */
     demainAvecRappel:
       "{nombre, plural, one {Un concept revient demain, rappel à {heure} h.} other {# concepts reviennent demain, rappel à {heure} h.}}",
     maitrise: "Tu maîtrises ça",
@@ -39,7 +34,7 @@ export const paliers = {
     voirDepots: "Voir ce que tu as déposé",
     aJourTitre: "Tu es à jour",
     aJour: "Rien à revoir aujourd'hui.",
-    /** `delai` arrive dit par l'espace `temps` : « demain », « dans 3 jours ». */
+    /** `delai` vient de l'espace `temps` : « demain », « dans 3 jours ». */
     aJourProchain: "Rien à revoir aujourd'hui. Le prochain concept revient {delai}.",
   },
 };

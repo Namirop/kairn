@@ -3,21 +3,14 @@ import { optionsDUnQCM, texteATrouServi } from "@/lib/db/question-servie";
 import type { InputNature, VariantFormat } from "@/lib/db/types";
 
 /**
- * Ce qu'une visite sans compte a produit : le lire pour l'afficher, le rattacher
- * à un compte, l'effacer quand personne ne le réclame. Qui a le droit de déposer
- * se décide dans `session-anonyme.ts`.
- *
- * Le dépôt anonyme est un `Input` ordinaire qui porte `anonymousSessionId` au
- * lieu d'un `userId` ; l'identifiant de session vit dans le cookie
- * `kairn_visite`. Le cron `/api/cron/jobs` efface les sessions non réclamées,
- * et les cascades emportent dépôts et concepts.
+ * Ce qu'une visite sans compte a produit : le lire, le rattacher à un compte,
+ * l'effacer. Le droit de déposer se décide dans `session-anonyme.ts`. Un dépôt
+ * anonyme est un `Input` qui porte `anonymousSessionId` au lieu d'un `userId`.
  */
 
 /**
- * Durée de conservation d'une visite non réclamée. Égale à celle du cookie
- * (`lib/auth/visite.ts`) : un cookie qui survivrait à la session désignerait un
- * dépôt effacé, et la page refuserait l'essai de qui revient trop tard. Les deux
- * se changent ensemble.
+ * Égale à la durée du cookie (`lib/auth/visite.ts`) : un cookie plus long
+ * désignerait un dépôt effacé. Les deux se changent ensemble.
  */
 export const JOURS_AVANT_OUBLI = 7;
 
@@ -27,17 +20,13 @@ export type DepotAnonyme = {
   motifDechec: string | null;
   concepts: { id: string; concept: string; tags: string[] }[];
   /**
-   * Les questions du concept qui en a reçu, toutes montrées : la rotation des
-   * formulations est ce qu'on vend. Ce n'est pas forcément le premier concept
-   * (les incertains n'en reçoivent pas), et un tableau vide est une fin normale.
+   * Toutes montrées : la rotation des formulations est ce qu'on vend. Un
+   * concept incertain n'en reçoit pas ; un tableau vide est une fin normale.
    */
   questions: QuestionDeVitrine[];
 };
 
-/**
- * Une question de l'échantillon, avec ses propositions quand c'est un QCM. La
- * bonne réponse ne descend pas — voir `optionsDUnQCM`.
- */
+/** La bonne réponse d'un QCM ne descend pas — voir `optionsDUnQCM`. */
 export type QuestionDeVitrine = {
   question: string;
   format: VariantFormat;
@@ -59,8 +48,7 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
           id: true,
           concept: true,
           tags: true,
-          // Un lot porte quatre questions ; `take: 4` empêche l'écran de
-          // s'allonger seul si ce nombre montait.
+          // Quatre par lot ; borné pour que l'écran ne s'allonge pas si ça monte.
           variants: {
             orderBy: { createdAt: "asc" },
             select: { question: true, format: true, payload: true },
@@ -80,8 +68,7 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
     concepts: depot.atoms.map(({ id, concept, tags }) => ({ id, concept, tags })),
     questions: depot.atoms.flatMap((atome) =>
       atome.variants.map((variante) => ({
-        // Un texte à trou se montre tel qu'il sera servi en session — voir
-        // `texteATrouServi`.
+        // Un texte à trou se montre tel qu'il sera servi en session.
         question: texteATrouServi(variante.format, variante.payload)?.sentence ?? variante.question,
         format: variante.format,
         options: optionsDUnQCM(variante.format, variante.payload),
@@ -90,20 +77,6 @@ export async function lireLeDepotAnonyme(sessionId: string): Promise<DepotAnonym
   };
 }
 
-/**
- * Rattache à un compte ce qu'une session anonyme a produit.
- *
- * Dépôts, concepts et marque `claimedAt` passent dans une même transaction : un
- * dépôt sans ses concepts serait une liste vide présentée comme la sienne, et
- * la marque met la session hors de portée du cron de nettoyage.
- *
- * Rend les concepts groupés par dépôt d'origine : une visite en porte plusieurs,
- * et accrocher les jobs de questions au mauvais dépôt laisserait celui-ci dans
- * un état que `marquerPretSiPlusRienEnAttente` ne referme jamais.
- *
- * C'est à l'appelant de demander les questions : la dépense reprend là, et doit
- * se voir dans le code qui décide.
- */
 export type DepotRepris = {
   inputId: string;
   nature: InputNature | null;
@@ -111,12 +84,18 @@ export type DepotRepris = {
 };
 
 /**
- * `dejaQuestionne` : l'essai a déjà questionné ce concept, ou le fait encore.
- * Le redemander paierait un appel pour retirer les questions que la personne
- * vient de voir.
+ * `dejaQuestionne` : questions déjà faites ou en cours. Les redemander paierait
+ * un appel pour retirer celles que la personne vient de voir.
  */
 export type ConceptRepris = { id: string; uncertain: boolean; dejaQuestionne: boolean };
 
+/**
+ * Dépôts, concepts et `claimedAt` dans une même transaction : un dépôt sans ses
+ * concepts serait une liste vide, et la marque soustrait la session au cron.
+ * Groupé par dépôt : un job accroché au mauvais dépôt ne serait jamais refermé
+ * par `marquerPretSiPlusRienEnAttente`. L'appelant demande les questions : la
+ * dépense doit se voir dans le code qui décide.
+ */
 export async function rattacherAuCompte(
   sessionId: string,
   userId: string,
@@ -148,12 +127,10 @@ export async function rattacherAuCompte(
     },
   });
 
-  // Un essai terminal et vide ne suit pas au compte : son verdict a déjà été
-  // rendu à l'écran, et il ouvrirait la liste sur une ligne que rien ne
-  // remplira. Terminal et vide, les deux : un dépôt sans concept encore en
-  // extraction n'a pas fini. On le supprime plutôt que de l'abandonner, car une
-  // session réclamée échappe au cron de nettoyage. Hors transaction sans risque :
-  // ces dépôts n'ont pas de concepts à perdre.
+  // Un essai terminal et vide ne suit pas : son verdict est déjà rendu, il
+  // ouvrirait la liste sur une ligne vide (sans concept mais en extraction, il
+  // n'a pas fini). Supprimé, car le cron ignore une session réclamée ; hors
+  // transaction sans risque, il n'a pas de concepts à perdre.
   const perdus = tous
     .filter(
       (depot) =>
@@ -202,11 +179,7 @@ export async function rattacherAuCompte(
   }));
 }
 
-/**
- * Efface les visites que personne n'a réclamées, avec leurs dépôts par cascade.
- * C'est une obligation autant qu'un ménage : sans compte, aucune conservation
- * n'a été acceptée.
- */
+/** Dépôts emportés par cascade. Une obligation : sans compte, nul n'a accepté de conservation. */
 export async function oublierLesVisitesAbandonnees(maintenant: Date = new Date()): Promise<number> {
   const limite = new Date(maintenant.getTime() - JOURS_AVANT_OUBLI * 24 * 60 * 60 * 1000);
 

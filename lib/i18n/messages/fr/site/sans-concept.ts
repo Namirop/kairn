@@ -1,7 +1,6 @@
 /**
- * L'essai a tourné et n'a rien rendu : quatre situations, voir
- * `EssaiSansConcept`. Les refus d'avant l'envoi, eux, sont ceux du dépôt —
- * `depots.refus` —, mot pour mot des deux côtés.
+ * L'essai n'a rien rendu, voir `EssaiSansConcept`. Les refus d'avant l'envoi
+ * sont ceux de `depots.refus`, mot pour mot.
  */
 export const sansConcept = {
   vientDeNous: "Ça vient de nous.",

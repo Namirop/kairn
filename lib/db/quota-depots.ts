@@ -6,23 +6,15 @@ import { jourLocal } from "@/lib/domain/jour-local";
 import { debutEnDate } from "@/lib/domain/periode-de-quota";
 
 /**
- * Prendre une place de la période, ou la refuser, **avant** la dépense. La
- * lecture vit dans `periode-du-compte.ts`, le décompte après coup dans
- * `comptage-de-la-periode.ts` ; ce module est le seul qui puisse dire non.
- *
- * Trois limites, qui ne se remplacent pas :
- * - le plafond de concepts, au mois, sur une période ancrée au jour
- *   d'inscription. C'est un plafond commercial, pas de coût (un dépôt complet
- *   coûte ~0,004 $) : le monter ne met aucun budget en danger ;
- * - le plafond de dépôts, au mois aussi : un dépôt rejeté paie son extraction
- *   sans rendre de concept, donc échappe au premier. Sa valeur se dérive du
- *   plafond du compte, voir `plafondDeDepots` ;
- * - la fenêtre de débit, à la minute, qui protège le serveur. Elle vit dans la
- *   ligne qu'on verrouille pour que l'incrément et le refus tiennent dans la
- *   même instruction : ne pas la sortir dans une requête à part.
+ * Seul module qui puisse refuser une place, **avant** la dépense (lecture :
+ * `periode-du-compte.ts`, décompte : `comptage-de-la-periode.ts`). Trois limites :
+ * - concepts au mois, période ancrée à l'inscription : plafond commercial, pas
+ *   de coût (~0,004 $ le dépôt complet) ;
+ * - dépôts au mois : un rejet paie son extraction sans rendre de concept ;
+ * - débit à la minute, pour le serveur. Il vit dans la ligne verrouillée pour
+ *   que l'incrément et le refus tiennent en une instruction : ne pas l'en sortir.
  */
 
-/** Fenêtre courte du débit, et ce qu'on y tolère. */
 export const FENETRE_DEBIT_SECONDES = 60;
 export const DEPOTS_PAR_FENETRE = 3;
 
@@ -32,25 +24,16 @@ export type Autorisation =
       accorde: false;
       motif: "concepts" | "depots" | "debit";
       restants: number;
-      /**
-       * La limite qui a refusé. Portée par le refus pour que le message dise
-       * celle qui a décidé : une relecture en base pourrait rendre autre chose.
-       */
+      /** Celle qui a décidé : une relecture en base pourrait rendre autre chose. */
       plafond: number;
     };
 
 /**
- * Prend une place de la période, ou la refuse.
- *
- * Deux compteurs, chacun incrémenté et refusé d'une seule instruction (un
- * compteur lu puis écrit laisse passer les envois simultanés). La période
- * d'abord, la fenêtre de débit ensuite, et la place est rendue si la fenêtre
- * refuse : dans l'ordre inverse, un mois plein consommerait aussi un jeton de
- * débit.
- *
- * Le refus porte sur les concepts déjà retenus ; ce dépôt-ci ne compte qu'après
- * son extraction. Le dernier dépôt d'une période peut donc déborder le plafond,
- * et il est annoncé comme approximatif.
+ * Chaque compteur s'incrémente et refuse en une instruction (lu puis écrit, il
+ * laisserait passer les envois simultanés). La période d'abord, rendue si le
+ * débit refuse : dans l'autre ordre, un mois plein brûlerait un jeton de débit.
+ * Ce dépôt ne compte ses concepts qu'après extraction : le dernier de la période
+ * peut déborder, d'où un plafond annoncé comme approximatif.
  */
 export async function reserverDepot(
   userId: string,
@@ -59,8 +42,7 @@ export async function reserverDepot(
 ): Promise<Autorisation> {
   const periode = await periodeDuCompte(userId, fuseau, maintenant);
   const debut = periode.debut;
-  // Lu une fois, puis porté jusqu'au refus : un abonnement qui commence entre
-  // deux lectures ferait annoncer une limite qui n'est pas celle qui a décidé.
+  // Lu une fois : un abonnement pris entre deux lectures fausserait le refus.
   const plafond = await plafondDuCompte(userId, maintenant);
 
   const lignes = await prisma.$queryRaw<{ deposits: number; concepts: number }[]>`
@@ -99,9 +81,8 @@ export async function reserverDepot(
 }
 
 /**
- * La fenêtre courte, sur la ligne du jour. Compter les dépôts récents dans une
- * requête à part serait une course (des envois simultanés lisent tous zéro).
- * Un redécoupage, qui n'écrit aucun dépôt, y entre au même titre.
+ * Sur la ligne du jour : compter à part serait une course (les envois
+ * simultanés liraient zéro). Un redécoupage, sans dépôt écrit, y entre aussi.
  */
 async function fenetreDeDebitOuverte(
   userId: string,
@@ -137,10 +118,7 @@ async function fenetreDeDebitOuverte(
   return lignes.length > 0;
 }
 
-/**
- * Pourquoi la place a été refusée, relu après coup : les deux causes ne
- * s'annoncent pas de la même façon.
- */
+/** Relu après coup : les deux causes ne s'annoncent pas de la même façon. */
 async function motifDuRefus(
   userId: string,
   fuseau: string,
@@ -154,7 +132,7 @@ async function motifDuRefus(
   return { motif: "depots", restants: Math.max(0, plafond - usage.concepts) };
 }
 
-/** Le dépôt n'a finalement pas été écrit : sa place retourne au compteur. */
+/** Pour un dépôt finalement pas écrit. */
 export async function rendreDepot(
   userId: string,
   fuseau: string,

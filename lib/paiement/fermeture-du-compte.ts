@@ -5,21 +5,14 @@ import { objetIntrouvableChezStripe } from "./erreurs";
 import { lireLeRapport } from "./rapport";
 
 /**
- * Couper l'abonnement d'un compte qui va disparaître. La cascade efface la
- * ligne `Subscription` et l'identifiant du client, mais l'abonnement Stripe
- * continuerait de prélever sans plus aucune trace.
- *
- * Contrairement à `resiliation.ts`, on coupe tout de suite : il ne reste
- * personne pour profiter des jours payés. Ils ne sont pas remboursés, ce qui
- * serait une décision commerciale.
+ * La cascade efface notre trace, pas l'abonnement Stripe, qui prélèverait
+ * encore. Coupé tout de suite, à la différence de `resiliation.ts` : personne
+ * ne profitera des jours payés. Les rembourser serait une décision commerciale.
  */
 
 /**
- * Annule l'abonnement du compte s'il en a un qui vit encore ; sans dossier ou
- * abonnement fini, Stripe n'est pas appelé.
- *
- * Lève si l'annulation échoue : l'appelant doit alors renoncer à supprimer le
- * compte, un compte de trop étant réparable, un prélèvement sans trace non.
+ * Lève si l'annulation échoue, et l'appelant renonce à supprimer : un compte de
+ * trop se répare, un prélèvement sans trace non.
  */
 export async function fermerLAbonnementDuCompte(userId: string): Promise<void> {
   const { abonnementId } = await lireDossierStripe(userId);
@@ -31,8 +24,7 @@ export async function fermerLAbonnementDuCompte(userId: string): Promise<void> {
   try {
     abonnement = await stripe().subscriptions.retrieve(abonnementId);
   } catch (erreur) {
-    // Introuvable : il ne prélève rien. Refuser ici bloquerait la suppression
-    // pour toujours.
+    // Introuvable, il ne prélève rien ; refuser bloquerait la suppression à jamais.
     if (objetIntrouvableChezStripe(erreur)) return;
 
     throw erreur;

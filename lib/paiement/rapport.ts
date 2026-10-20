@@ -4,12 +4,9 @@ import type { RapportDeStripe } from "@/lib/domain/rapport-de-stripe";
 import { RapportIllisibleError } from "./erreurs";
 
 /**
- * Réduire un abonnement Stripe aux quatre champs qui décident d'un droit : la
- * frontière entre le SDK et la règle de `lib/domain/`.
- *
- * Le statut est validé et non transtypé : le SDK le type `… | string`, et un
- * statut inconnu doit faire échouer la lecture plutôt que tomber sur « pas
- * payant », qui couperait l'accès de quelqu'un qui a payé.
+ * La frontière entre le SDK et `lib/domain/`. Statut validé, pas transtypé (le
+ * SDK dit `… | string`) : un inconnu doit échouer, pas tomber sur « pas payant »
+ * et couper quelqu'un qui a payé.
  */
 
 const schemaDuStatut = z.enum([
@@ -25,11 +22,7 @@ const schemaDuStatut = z.enum([
 
 const schemaDeCadence = z.enum(["month", "year"]);
 
-/**
- * Le rapport, ou une erreur qui dit ce qui ne se lit pas. Un abonnement Kairn
- * porte exactement une ligne ; plusieurs (une retouche à la main chez Stripe)
- * rendraient la cadence ambiguë, donc on refuse.
- */
+/** Une seule ligne : plusieurs (retouche manuelle chez Stripe) rendraient la cadence ambiguë. */
 export function lireLeRapport(abonnement: Stripe.Subscription): RapportDeStripe {
   const lignes = abonnement.items.data;
   const ligne = lignes.length === 1 ? lignes[0] : undefined;
@@ -56,7 +49,7 @@ export function lireLeRapport(abonnement: Stripe.Subscription): RapportDeStripe 
   return {
     statut: statut.data,
     cadence: cadence.data,
-    // Secondes chez Stripe, et le terme vit sur la ligne, pas sur l'abonnement.
+    // En secondes, et sur la ligne, pas sur l'abonnement.
     finDePeriode: new Date(ligne.current_period_end * 1000),
     resilieALaFin: abonnement.cancel_at_period_end,
   };

@@ -9,24 +9,20 @@ import {
 } from "@/lib/domain/progression";
 
 /**
- * L'écriture de la progression (`UserStats`), après un passage en session du
- * jour. Seul ce fichier l'alimente ; l'entraînement libre ne l'importe pas.
- *
- * Transaction interactive : la série se déduit de la valeur précédente, et
- * lire puis écrire hors transaction laisserait deux passages simultanés compter
- * deux fois le même jour.
+ * Seul écrivain de `UserStats` ; l'entraînement ne l'importe pas. Transaction
+ * interactive : la série se déduit de la valeur précédente, et hors transaction
+ * deux passages simultanés compteraient deux fois le même jour.
  */
 
 export type PassageCompte = {
   userId: string;
-  /** Le passage précédent sur ce concept avait échoué. */
+  /** Le passage précédent sur ce concept a échoué. */
   ratePrecedemment: boolean;
   reussiMaintenant: boolean;
   fuseau: string;
   /**
-   * L'échéance du concept avant ce passage, fournie par l'appelant : la
-   * replanification l'a déjà déplacée. Sans elle, un concept en retard revu
-   * maintenant ferait tenir la série qu'il vient de casser.
+   * Fournie par l'appelant, la replanification l'ayant déjà déplacée. Sans
+   * elle, un retard revu maintenant ferait tenir la série qu'il a cassée.
    */
   echeanceAvant: Date;
 };
@@ -34,20 +30,16 @@ export type PassageCompte = {
 export type ProgressionEcrite = {
   xp: number;
   niveau: number;
-  /** Vrai quand ce passage vient de faire monter d'un niveau. */
   niveauFranchi: boolean;
   serie: number;
-  /** Vrai quand ce passage ouvre un jour de plus dans la série. */
+  /** Ce passage ouvre un jour de plus dans la série. */
   serieAllongee: boolean;
   consolides: number;
 };
 
 /**
- * Compte un passage de session, et rend l'état d'après.
- *
- * Les consolidés sont recomptés plutôt qu'incrémentés : un concept peut entrer
- * dans `ETATS_QUI_POSENT_UNE_PIERRE` comme en sortir. Le comptage s'appuie sur l'index
- * `[userId, state]`.
+ * Consolidés recomptés, pas incrémentés : un concept peut entrer dans
+ * `ETATS_QUI_POSENT_UNE_PIERRE` comme en sortir. Index `[userId, state]`.
  */
 export async function compterLePassage(
   passage: PassageCompte,
@@ -113,24 +105,19 @@ export async function compterLePassage(
   });
 }
 
-/**
- * Les jours d'échéance déjà atteints : celle du concept revu, et celles de ce
- * qui reste en attente. Borne SQL large, comparaison de jour local en mémoire.
- */
+/** Celle du concept revu et celles en attente. Borne SQL large, jour local en mémoire. */
 async function echeancesPassees(passage: PassageCompte, maintenant: Date): Promise<string[]> {
   const enAttente = await prisma.atom.findMany({
     where: {
       userId: passage.userId,
       uncertain: false,
       state: { not: "ARCHIVED" },
-      // Mêmes conditions que pour être servable : un concept sans question
-      // active ne pouvait pas être révisé, il n'a manqué aucun rendez-vous.
+      // Comme pour être servable : sans question active, aucun rendez-vous manqué.
       variants: { some: { retiredAt: null } },
       due: { lte: maintenant },
     },
     select: { due: true },
-    // Couvre tout arriéré réel (`PLAFOND_PAYANT` : 500 concepts par période), et
-    // seule l'existence d'une échéance dans le trou compte.
+    // = `PLAFOND_PAYANT`, tout arriéré réel ; seule compte une échéance dans le trou.
     take: 500,
   });
 

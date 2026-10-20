@@ -2,60 +2,40 @@ import { empiler, tailler, type Empilement } from "@/lib/domain/cairn-empilement
 import { tirageDe } from "@/lib/domain/tirage-deterministe";
 
 /**
- * La géométrie de la marque, dérivée de celle du cairn : le logo sort
- * d'`empiler()` comme le cairn du tableau de bord, pour que symbole, pastille,
- * favicon et cairn ne puissent pas diverger.
- *
- * Ce module rend des données, jamais du balisage : le composant les traduit en
- * classes Tailwind, le script d'export en couleurs littérales (un `.png` ne lit
- * pas une variable CSS).
+ * Le logo sort d'`empiler()` comme le cairn du tableau de bord : symbole,
+ * favicon et cairn ne peuvent pas diverger. Des données, jamais du balisage :
+ * le composant en fait des classes, l'export des couleurs littérales.
  */
 
 /**
- * La graine du logo. Elle ne change jamais : elle changerait le logo.
- *
- * Choisie pour tenir à seize pixels : chaque pierre plus étroite que celle du
- * dessous, au moins 11 % d'écart entre voisines, 3 % d'inclinaison au plus, et
- * un rapport hauteur/largeur de 0,80 qui remplit un carré d'icône.
+ * Ne change jamais : elle changerait le logo. Choisie pour tenir à 16 px : chaque
+ * pierre plus étroite que celle du dessous, 11 % d'écart au moins, 3 %
+ * d'inclinaison au plus, un rapport de 0,80 qui remplit un carré d'icône.
  */
 export const GRAINE_DU_LOGO = "kairn-logo";
 
-/**
- * Les graines des `nombre` premières pierres.
- *
- * Le rang est dans la graine : les densités 3 et 5 partagent leurs trois
- * premières silhouettes, c'est le même logo à densité réduite.
- */
+/** Le rang dans la graine : les densités 3 et 5 partagent leurs trois premières pierres. */
 export function grainesDuLogo(nombre: number): string[] {
   return Array.from({ length: nombre }, (_, rang) => `${GRAINE_DU_LOGO}-${rang}`);
 }
 
-/** Les deux densités du symbole. */
 export const PIERRES_DENSE = 5;
 export const PIERRES_REDUITE = 3;
 
-/**
- * En dessous, le symbole passe à trois pierres : à seize pixels, cinq étages
- * ne se distinguent plus.
- */
+/** En dessous, trois pierres : à 16 px, cinq étages ne se distinguent plus. */
 export const SEUIL_SYMBOLE_DENSE = 64;
 
 export function densiteDuSymbole(tailleEnPx: number): number {
   return tailleEnPx >= SEUIL_SYMBOLE_DENSE ? PIERRES_DENSE : PIERRES_REDUITE;
 }
 
-/** L'empilement du logo, à la densité demandée. */
 export function empilementDuLogo(pierres: number): Empilement {
   return empiler(pierres, grainesDuLogo(pierres));
 }
 
 /**
- * Le cadre serré sur les pierres, et non la vue d'`empiler()` : celle-ci garde
- * du vide sur les côtés pour la chute des pierres, qui décalerait tout ce qui
- * touche le symbole.
- *
- * Une unité de jeu de chaque côté absorbe l'inclinaison des pierres (moins
- * d'une unité à 3,5°).
+ * Cadre serré plutôt que la vue d'`empiler()`, dont le vide latéral (pour la
+ * chute) décalerait ce qui touche le symbole. Une unité absorbe l'inclinaison.
  */
 const JEU = 1;
 
@@ -80,9 +60,8 @@ export function cadreDuSymbole(pierres: number): CadreDuSymbole {
 }
 
 /**
- * La nuance d'une pierre du logo, imposée par le rang : sombre en bas, plus
- * claire en montant. `empiler()` la tire au hasard, ce qui convient au cairn
- * mais pas à une marque. Le sommet ne passe pas par ici : il est lichen.
+ * Imposée par le rang, sombre en bas : le tirage d'`empiler()` convient au cairn,
+ * pas à une marque. Le sommet, lichen, ne passe pas par ici.
  */
 export function nuanceDuRang(rang: number, total: number): 0 | 1 | 2 {
   if (total <= 1) return 0;
@@ -96,9 +75,8 @@ export function nuanceDuRang(rang: number, total: number): 0 | 1 | 2 {
 }
 
 /**
- * La pierre qui remplace le point du i, taillée par `tailler()` comme les
- * autres : un rectangle arrondi se lirait « puce » plutôt que « pierre ».
- * Chemin centré sur l'origine, boîte de 10 sur 10 ; l'appelant la pose.
+ * Le point du i, taillé comme les autres : un rectangle arrondi se lirait
+ * « puce ». Centré sur l'origine ; l'appelant le pose.
  */
 export const COTE_DU_POINT = 10;
 

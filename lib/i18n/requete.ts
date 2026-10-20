@@ -4,10 +4,8 @@ import { LOCALE } from "./langues";
 import { MESSAGES } from "./messages";
 
 /**
- * Ce que next-intl sait de la requête : sa langue et ses textes.
- *
- * Pas de fuseau : chaque écran passe celui de la personne là où il formate, et
- * un défaut ferait afficher une heure fausse à qui l'oublierait.
+ * Pas de fuseau par défaut : chaque écran passe celui de la personne, et un
+ * défaut afficherait une heure fausse à qui l'oublierait.
  */
 export default getRequestConfig(async () => {
   const langue = await langueDeLaRequete();

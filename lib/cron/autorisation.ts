@@ -1,10 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 
-/**
- * Les routes cron sont publiques par nature : elles doivent s'authentifier
- * autrement que par une session. Le déclencheur envoie `CRON_SECRET` en
- * `Authorization: Bearer`, comparé en temps constant.
- */
+/** Publiques par nature, sans session : `CRON_SECRET` en Bearer, comparé en temps constant. */
 function egales(a: string, b: string): boolean {
   const gauche = Buffer.from(a);
   const droite = Buffer.from(b);

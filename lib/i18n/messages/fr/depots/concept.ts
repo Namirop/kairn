@@ -22,11 +22,7 @@ export const concept = {
   modifier: "Modifier",
 };
 
-/**
- * Ce que chaque facette demande, dit à l'utilisateur : les valeurs de l'enum
- * sont la langue du schéma, pas celle de l'écran. Le `Record` fait échouer la
- * compilation d'une facette sans libellé.
- */
+/** L'enum parle la langue du schéma ; le `Record` refuse une facette sans libellé. */
 export const facettes: Record<VariantFacet, string> = {
   RECOGNITION: "Reconnaître",
   MECHANISM: "Expliquer",
@@ -34,10 +30,7 @@ export const facettes: Record<VariantFacet, string> = {
   APPLICATION: "Appliquer",
 };
 
-/**
- * Sous quelle forme une question est posée, dit à l'utilisateur. Le pendant de
- * `facettes`.
- */
+/** Le pendant de `facettes` pour les formats. */
 export const formats: Record<VariantFormat, string> = {
   MCQ: "QCM",
   CLOZE: "Texte à trou",

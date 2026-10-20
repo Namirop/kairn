@@ -2,12 +2,8 @@ import { prisma } from "@/lib/db/client";
 import { envoyerLaNotification } from "@/lib/email/notifications";
 
 /**
- * L'accueil, envoyé une fois, depuis le hook d'inscription. Il ne peut pas
- * faire échouer une inscription : l'erreur est loguée avec l'identifiant du
- * compte, jamais l'adresse.
- *
- * À appeler après la reprise de visite : c'est seulement alors qu'on sait si
- * des concepts sont arrivés avec le compte (voir `templates/accueil.ts`).
+ * Ne fait jamais échouer une inscription. Après la reprise de visite : alors
+ * seulement on sait si des concepts sont arrivés avec le compte.
  */
 export async function envoyerLAccueil(userId: string): Promise<void> {
   try {

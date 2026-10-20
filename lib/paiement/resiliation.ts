@@ -5,11 +5,9 @@ import { AucunAbonnementError } from "./erreurs";
 import { lireLeRapport } from "./rapport";
 
 /**
- * Arrêter, et reprendre, depuis Kairn plutôt que le portail Stripe : on ne rend
- * pas un abonnement difficile à quitter.
- *
- * Résilier lève un drapeau et laisse courir jusqu'au terme ; avant lui,
- * reprendre est un retour en arrière sans nouveau paiement.
+ * Depuis Kairn plutôt que le portail : un abonnement ne doit pas être dur à
+ * quitter. Résilier laisse courir jusqu'au terme ; avant lui, reprendre ne
+ * repaie rien.
  */
 
 export async function arreterLAbonnement(userId: string): Promise<void> {
@@ -21,11 +19,9 @@ export async function reprendreLAbonnement(userId: string): Promise<void> {
 }
 
 /**
- * Le geste, écrit sans attendre le webhook : sinon l'écran réaffiché montrerait
- * l'état d'avant le clic. Le webhook sera ignoré comme un rejeu
- * (`stripeEventAt`).
- *
- * L'abonnement vient de notre ligne, jamais du client.
+ * Écrit sans attendre le webhook, sinon l'écran montrerait l'état d'avant le
+ * clic ; le webhook sera ignoré comme un rejeu (`stripeEventAt`). L'abonnement
+ * vient de notre ligne, jamais du client.
  */
 async function basculerLaResiliation(userId: string, resilier: boolean): Promise<void> {
   const dossier = await lireDossierStripe(userId);
