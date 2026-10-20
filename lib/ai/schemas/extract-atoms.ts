@@ -72,7 +72,7 @@ export const formeDExtraction = sortieLue.omit({ retenu: true }).extend({
       }),
     )
     .max(GARDE_FOU_CONCEPTS)
-    .describe("Classés du plus important au moins important. Vide si le dépôt n'en donne aucun."),
+    .describe("Dans l'ordre du texte. Vide si le dépôt n'en donne aucun."),
   rejected: z
     .string()
     .min(1)
