@@ -5,15 +5,11 @@ import type { ProchainRappel } from "@/lib/domain/prochain-rappel";
 import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
- * Où en est la session du jour : la série, le chemin parcouru, le prochain
- * rappel (seulement s'il est réglé). En colonne sur grand écran, en bande
- * au-dessus.
- *
- * Sur téléphone, le rappel est masqué pour que la bande, qui suit le
- * défilement, tienne sur une ligne : il se lit au tableau de bord.
+ * La série, le chemin parcouru, le prochain rappel. Sur téléphone, le rappel
+ * est masqué pour que la bande collante tienne sur une ligne ; il se lit au
+ * tableau de bord.
  */
 
-/** L'intitulé d'un bloc : mono, très petit, espacé, sur la roche. */
 const ETIQUETTE = "text-mono font-mono tracking-[0.14em] text-stone-400 uppercase";
 
 export function EtatDeSession({
@@ -22,11 +18,10 @@ export function EtatDeSession({
   serie,
   rappel,
 }: {
-  /** Combien de concepts sont passés. */
   faites: number;
   total: number;
   serie: number;
-  /** Quand tombe le prochain rappel quotidien. Nul quand il est coupé. */
+  /** Nul si le rappel quotidien est coupé. */
   rappel: ProchainRappel | null;
 }) {
   const t = useTranslations("revision.session.etat");
@@ -45,8 +40,7 @@ export function EtatDeSession({
       </div>
 
       <div className="gap-pas-3 order-1 flex items-center lg:order-2 lg:flex-col">
-        {/* La pile n'existe qu'en colonne : en bande, elle tiendrait dans 60 px
-            et ne se lirait plus. Le compte reste partout. */}
+        {/* En colonne seulement : en bande, elle tiendrait dans 60 px. */}
         <div className="hidden lg:block">
           <PileDeSession rang={faites} total={total} clair />
         </div>
@@ -63,7 +57,7 @@ export function EtatDeSession({
         <p className="order-3 w-full max-sm:hidden lg:w-auto">
           <span className={ETIQUETTE}>{t("prochainRappel")}</span>{" "}
           <span className="text-mono lg:mt-pas-1 font-mono text-stone-300 lg:block">
-            {/* L'heure du rappel, dans le calendrier de la personne et non en UTC. */}
+            {/* Dans le calendrier de la personne, pas en UTC. */}
             {t("quandLeRappelTombe", {
               jour: rappel.jour,
               heure: rappel.heure,

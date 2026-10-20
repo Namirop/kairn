@@ -15,11 +15,7 @@ import {
 import { ZoneDeReponse } from "@/components/revision/zone-de-reponse";
 import type { QuestionServie } from "@/lib/db/question-servie";
 
-/**
- * Le déroulé d'une suite de questions, commun à la session et à
- * l'entraînement. La mécanique vit dans `useSuiteDeQuestions`, les formats dans
- * `ZoneDeReponse` et `EnonceDeQuestion`.
- */
+/** Commun à la session et à l'entraînement ; la mécanique vit dans `useSuiteDeQuestions`. */
 
 export type { PassageDonne, Valider };
 
@@ -40,11 +36,7 @@ export function DerouleQuestions({
   onFini: (revus: number) => void;
   /** Combien de questions sont passées, pour ce que le mode montre à côté. */
   onAvance?: (faites: number) => void;
-  /**
-   * Signale la réponse qui est sous les yeux sans être notée, et donne de quoi
-   * l'écrire avant de partir ; `null` dès qu'il n'y a plus rien en suspens.
-   * Seul le mode qui replanifie s'en sert.
-   */
+  /** De quoi écrire la réponse vue mais pas notée avant de partir, sinon `null`. Session seulement. */
   onSuspens?: (abandonner: (() => Promise<void>) | null) => void;
   /** Ce que ce mode-là autorise sous la question. Rien, par défaut. */
   actions?: (contexte: {
@@ -57,11 +49,8 @@ export function DerouleQuestions({
   const question = suite.question;
   const enSuspens = suite.enSuspens;
 
-  /*
-    On ne signale que le basculement du drapeau, jamais la fermeture. Prendre
-    `abandonner` en dépendance (identité neuve à chaque rendu) relancerait
-    l'effet, qui remonte un état au parent, qui re-rend l'enfant : boucle infinie.
-  */
+  // `abandonner` change d'identité à chaque rendu : en dépendance, l'effet
+  // remonterait un état au parent à chaque fois, en boucle. Seul le drapeau compte.
   const dernierAbandon = useRef(suite.abandonner);
 
   useEffect(() => {
@@ -107,15 +96,14 @@ export function DerouleQuestions({
             onNoter={(note) => void suite.suivre(note)}
           />
 
-          {/* Renoncer n'a de sens que là où il faut produire quelque chose ;
-              sur une question ouverte, « Voir la réponse » est déjà la sortie. */}
+          {/* Sur une question ouverte, « Voir la réponse » est déjà la sortie. */}
           {suite.engage || !demandeUneProduction(question) ? null : (
             <JeterLaPierre enCours={suite.enCours} onJeter={suite.jeter} />
           )}
         </>
       )}
 
-      {/* L'espace du message est réservé : une erreur ne décale pas la carte. */}
+      {/* Espace réservé : une erreur ne décale pas la carte. */}
       <p className="mt-pas-4 text-petit min-h-5" role="status" aria-live="polite">
         {suite.erreur ? <span className="text-alerte">{suite.erreur}</span> : null}
       </p>

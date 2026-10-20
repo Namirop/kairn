@@ -5,22 +5,15 @@ import { segmentsDeCode } from "@/lib/domain/texte-code";
 import { TROU } from "@/lib/domain/reponse-cloze";
 
 /**
- * La phrase d'un texte à trou : son trou vide, comblé de ce qu'on saisit, ou du
- * terme attendu une fois la réponse vérifiée.
- *
- * Le découpage en termes de code passe avant la recherche du trou : dans
- * l'ordre inverse, « `valeurs.___` » laisserait deux accents graves orphelins
- * au lieu d'un jeton. Le trou peut ainsi se creuser dans un jeton.
- *
- * Les mesures sont en `em` : le même composant sert dans un titre et dans une
- * ligne de corps.
+ * La phrase d'un texte à trou. Le code se découpe avant de chercher le trou :
+ * dans l'ordre inverse, « `valeurs.___` » laisserait deux accents graves
+ * orphelins au lieu d'un jeton troué. Mesures en `em` : sert en titre comme en corps.
  */
 
 /**
- * Les surfaces sur lesquelles un trou peut se creuser. Le creux est toujours
- * plus sombre que son fond ; sur la roche il descend jusqu'à `stone-900`, sinon
- * il se lit comme un surlignage. `ombre` sert aussi sur du papier quand le trou
- * tombe dans un jeton de code, dont l'encre diluée mange le gris du papier.
+ * Le creux est toujours plus sombre que son fond, sinon il se lit comme un
+ * surlignage. `ombre` sert aussi sur papier dans un jeton de code, dont l'encre
+ * diluée mange le gris du papier.
  */
 export type FondDuTrou = "papier" | "ombre" | "roche";
 
@@ -41,8 +34,7 @@ function Trou({
   fond: FondDuTrou;
 }) {
   if (comble === null) {
-    // Un emplacement de la hauteur d'une capitale et de la largeur de trois
-    // lettres : plus large et plat, il se lirait comme un soulignement.
+    // Haut d'une capitale, large de trois lettres : plus plat, il se lirait comme un soulignement.
     return (
       <span
         aria-hidden
@@ -66,15 +58,11 @@ export function PhraseTrouee({
 }) {
   return (
     <>
-      {/*
-        Le relevé passe avant le découpage, comme dans `TexteTechnique` : une
-        phrase trouée cite les mêmes termes que l'énoncé qui l'entoure, et le
-        modèle les écrit entre guillemets. Voir `releverLeCodeCite`.
-      */}
+      {/* Relevé avant découpage, comme dans `TexteTechnique` : le modèle écrit
+          aussi ici les termes de code entre guillemets. */}
       {segmentsDeCode(releverLeCodeCite(phrase)).map((segment, rang) => {
-        // Un segment porte d'ordinaire un seul trou — mais la lecture en creuse
-        // un second quand la phrase réécrivait le terme en clair, et c'est alors
-        // le même mot à retrouver deux fois. Voir `phraseSansDevoilement`.
+        // Parfois deux trous : la lecture creuse le terme réécrit en clair dans
+        // la phrase, le même mot deux fois. Voir `phraseSansDevoilement`.
         const morceaux = segment.texte.split(TROU);
         const contenu: ReactNode =
           morceaux.length === 1
@@ -89,9 +77,8 @@ export function PhraseTrouee({
               ));
 
         return segment.code ? (
-          // Un jeton court ne se coupe pas en bout de ligne : coupé, il se lit
-          // comme deux termes. Un jeton long se coupe, même troué — insécable, il
-          // sortirait de la carte sur un téléphone. Voir `jetonInsecable`.
+          // Court, insécable (coupé, il se lit comme deux termes) ; long, il se
+          // coupe, sinon il sort de la carte sur téléphone. Voir `jetonInsecable`.
           <code
             key={rang}
             className={`${JETON} ${jetonInsecable(segment.texte) ? "whitespace-nowrap" : ""}`}

@@ -2,12 +2,9 @@ import { etalonUtile } from "@/lib/domain/etalon-utile";
 import type { QuestionServie } from "@/lib/db/question-servie";
 
 /**
- * Ce qu'on montre d'une question quand on a jeté la pierre.
- *
- * Sur un format à choix, la bonne option telle qu'on l'aurait cliquée, plutôt
- * que l'étalon qui la reformule. L'étalon ne vient en précision que s'il
- * ajoute quelque chose (`etalonUtile`) : sur un vrai ou faux, il commence
- * souvent par le mot déjà affiché.
+ * Ce qu'on montre quand on a jeté la pierre. Sur un format à choix, la bonne
+ * option plutôt que l'étalon qui la reformule ; l'étalon en précision seulement
+ * s'il ajoute quelque chose (un vrai ou faux le commence souvent par le même mot).
  */
 export function reponseDeSecours(question: QuestionServie): {
   reponse: string;

@@ -7,18 +7,13 @@ import { delaiAvantLeJour } from "@/lib/domain/echeance";
 /**
  * Les quatre raisons de n'avoir rien à réviser. Être à jour est l'état normal :
  * une session ne se remplit jamais de concepts non échus pour faire nombre.
- *
- * Le plafond du jour atteint est le seul cas où quelque chose reste dû : il ne
- * dit pas « tu es à jour », et n'ouvre pas sur un dépôt.
- *
- * Toutes passent par le même `Palier` que la fin de session et d'entraînement.
  */
 
 type Props = {
   totalConcepts: number;
   conceptsEnAttenteDeQuestions: number;
   prochainJourServi: string | null;
-  /** Ce qui est dû et que la journée ne servira plus. Zéro le reste du temps. */
+  /** Dû mais au-delà du plafond du jour. */
   reporteAuLendemain: number;
   fuseau: string;
   maintenant: Date;
@@ -35,7 +30,7 @@ export function RienAReviser({
   const tTemps = useTranslations("temps");
   const t = useTranslations("revision.paliers");
 
-  // Plafond atteint, des concepts restent dus : la seule porte ouverte est
+  // Le seul cas où quelque chose reste dû : ni « tu es à jour » ni dépôt, seul
   // l'entraînement, qui ne touche pas à la mémoire.
   if (reporteAuLendemain > 0) {
     return (
@@ -62,8 +57,7 @@ export function RienAReviser({
     );
   }
 
-  // Aucun concept ne porte encore de question : on dit l'attente, pas la file
-  // de jobs.
+  // On dit l'attente, pas la file de jobs.
   if (!prochainJourServi && conceptsEnAttenteDeQuestions > 0) {
     return (
       <Palier
@@ -74,7 +68,7 @@ export function RienAReviser({
     );
   }
 
-  // Déposer d'abord, c'est ce qui fait avancer ; s'entraîner en second.
+  // Déposer d'abord, s'entraîner en second.
   return (
     <Palier
       titre={t("rien.aJourTitre")}

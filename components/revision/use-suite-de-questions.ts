@@ -9,12 +9,8 @@ import { noteApresAide, pistesDuTrou } from "@/lib/domain/aide-du-trou";
 import { reponseAcceptee } from "@/lib/domain/reponse-cloze";
 
 /**
- * La mécanique d'une suite de questions : ce qui est écrit, ce qui avance, et où
- * en est le geste de réponse de la question courante.
- *
- * Elle ne sait rien de ce qu'on écrit derrière (session ou entraînement, c'est
- * `onRepondre` qui décide). Elle connaît en revanche la justesse, parce que
- * c'est elle qui décide quelle note part.
+ * La mécanique d'une suite de questions. Elle ignore le mode (session ou
+ * entraînement, c'est `onRepondre`) mais connaît la justesse : elle choisit la note.
  */
 
 export type PassageDonne = {
@@ -31,11 +27,7 @@ export type Valider = (note: ReviewRating, maitrise?: boolean) => Promise<void>;
 /** Ce qu'une saisie de texte à trou a donné. Rien encore, juste, ou à côté. */
 export type VerdictDuTrou = null | "JUSTE" | "RATE";
 
-/**
- * L'état d'un texte à trou, partagé par l'énoncé et le champ : le trou de la
- * phrase, au-dessus du champ, se remplit à la frappe, puis montre le terme
- * attendu.
- */
+/** Partagé par l'énoncé et le champ : le trou de la phrase suit la frappe, puis montre le terme attendu. */
 export type TexteATrou = {
   saisie: string;
   saisir: (valeur: string) => void;
@@ -44,10 +36,7 @@ export type TexteATrou = {
   attendu: string;
   /** Ce qui comble le trou : la saisie en cours, puis le terme attendu. */
   comble: string | null;
-  /**
-   * Les termes proposés à qui sèche, ou rien quand la question n'a pas de quoi
-   * réduire honnêtement le champ. Voir `lib/domain/aide-du-trou.ts`.
-   */
+  /** Vide quand la question ne peut pas réduire honnêtement le champ (`lib/domain/aide-du-trou.ts`). */
   pistes: string[];
   /** Le coup de pouce a été demandé : les pistes sont à l'écran, et il se paie. */
   aide: boolean;
@@ -72,10 +61,9 @@ export function useSuiteDeQuestions({
   const [revelee, setRevelee] = useState(false);
   const [saisie, setSaisie] = useState("");
   const [verdict, setVerdict] = useState<VerdictDuTrou>(null);
-  // Une réponse a été produite : le geste de renoncement n'a plus de sens.
+  // Une réponse est produite : renoncer n'a plus de sens.
   const [engage, setEngage] = useState(false);
-  // Le coup de pouce a été demandé sur cette question-là : il fait descendre la
-  // note d'un cran, et il se remet à faux en passant à la suivante.
+  // Coup de pouce sur la question courante : un cran de note en moins.
   const [aide, setAide] = useState(false);
   const [jetee, setJetee] = useState(false);
   const [enCours, setEnCours] = useState(false);
@@ -141,13 +129,9 @@ export function useSuiteDeQuestions({
   );
 
   /**
-   * Le passage engagé mais pas encore noté, écrit avant de quitter la session.
-   * Sans lui, une réponse vue puis abandonnée serait reposée telle quelle, et
-   * l'espacement se réglerait sur un rappel qui n'a pas eu lieu.
-   *
-   * La note est `AGAIN` : avoir vu la réponse sans se situer ne démontre rien.
-   * `engage` sans `ecrit` désigne ce cas ; un QCM écrit au clic et n'est jamais
-   * en suspens.
+   * Écrit en `AGAIN` le passage engagé mais pas noté, avant de quitter : sinon la
+   * réponse vue serait reposée telle quelle, l'espacement réglé sur un rappel qui
+   * n'a pas eu lieu. Voir la réponse sans se situer ne démontre rien.
    */
   const abandonner = useCallback(async () => {
     if (!engage || ecrit) return;
@@ -156,9 +140,8 @@ export function useSuiteDeQuestions({
   }, [ecrit, engage, enregistrer]);
 
   const suivre: Valider = async (note, maitrise = false) => {
-    // Sur un format dont la justesse est connue, le passage est parti au moment
-    // de la réponse ; s'il a échoué, on retente avant d'avancer plutôt que de
-    // laisser filer une réponse donnée.
+    // Justesse connue : le passage est parti à la réponse. S'il a échoué, on le
+    // retente ici plutôt que de laisser filer une réponse donnée.
     if (ecrit && !maitrise) {
       avancer(revus);
       return;
@@ -183,12 +166,10 @@ export function useSuiteDeQuestions({
       saisir: setSaisie,
       verdict,
       attendu,
-      // Le trou porte la saisie tant qu'on cherche, puis le terme attendu —
-      // aussi quand on renonce : c'est la phrase juste qu'on vient apprendre.
+      // Le terme attendu aussi quand on renonce : c'est la phrase juste qu'on apprend.
       comble: verdict === null && !jetee ? saisie.trim() || null : attendu,
-      // La graine est l'identifiant de la question : l'ordre des pistes ne bouge
-      // pas d'un affichage à l'autre, et le terme attendu ne tombe pas toujours
-      // au même rang d'une question à l'autre.
+      // Graine = la question : ordre stable d'un affichage à l'autre, sans que le
+      // terme attendu tombe toujours au même rang.
       pistes: question?.cloze
         ? pistesDuTrou(attendu, question.cloze.leurres, question.variantId)
         : [],
@@ -209,8 +190,8 @@ export function useSuiteDeQuestions({
       arreter();
       setRevelee(true);
     },
-    // Juste, le passage part tout de suite : le temps de lire la confirmation
-    // ne compte pas, et rien ne se perd si l'onglet se ferme.
+    // Juste, le passage part tout de suite : la lecture de la confirmation ne
+    // compte pas, et rien ne se perd si l'onglet se ferme.
     verifier: () => {
       if (!question?.cloze || saisie.trim().length === 0) return;
 
@@ -222,8 +203,7 @@ export function useSuiteDeQuestions({
       }
 
       setVerdict("JUSTE");
-      // L'aide coûte un cran de note, sans quoi elle deviendrait le geste par
-      // défaut.
+      // Gratuite, l'aide deviendrait le geste par défaut.
       void enregistrer(noteApresAide("GOOD", aide));
     },
     jeter: () => {

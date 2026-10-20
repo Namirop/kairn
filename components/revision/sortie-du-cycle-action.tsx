@@ -4,13 +4,9 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /**
- * « Je maîtrise ça », sous la question de la session du jour.
- *
- * Le geste appartient à la session : il repousse l'échéance et sort le concept
- * du cycle. L'entraînement ne le propose pas, il ne touche pas à la mémoire.
- *
- * Le geste le plus lourd de l'écran : un bouton dessiné, sa conséquence collée
- * à lui, pour qu'elle ne se rapporte à aucune autre action de la rangée.
+ * « Je maîtrise ça » : sort le concept du cycle, donc session seulement,
+ * l'entraînement ne touche pas à la mémoire. Geste le plus lourd de l'écran, sa
+ * conséquence collée à lui pour ne se rapporter à aucune autre action.
  */
 export function SortieDuCycleAction({
   enCours,
@@ -29,14 +25,13 @@ export function SortieDuCycleAction({
         size="sm"
         disabled={enCours}
         onClick={onSortir}
-        /* 44 px sur téléphone : à la hauteur `sm`, il se ratait au doigt. */
+        /* 44 px sur téléphone : à la hauteur `sm`, il se rate au doigt. */
         className="max-sm:px-pas-6 self-start max-sm:h-11 sm:self-auto"
       >
         {t("geste")}
       </Button>
 
-      {/* Sans mesure : la phrase tient sur une ligne dès que la colonne a la
-          largeur. */}
+      {/* Sans mesure : la phrase tient sur une ligne dès que la colonne le permet. */}
       <p className="text-petit text-stone-500">{t("precision")}</p>
     </div>
   );

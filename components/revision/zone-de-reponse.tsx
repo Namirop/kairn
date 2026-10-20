@@ -9,11 +9,8 @@ import type { QuestionServie } from "@/lib/db/question-servie";
 import type { ReviewRating } from "@/lib/db/types";
 
 /**
- * Le geste de réponse, choisi d'après le format de la question : le seul
- * endroit qui connaît les formats, le déroulé n'en sait rien.
- *
- * Un format dont la charge utile est abîmée retombe sur la question ouverte
- * plutôt que de bloquer l'écran : on peut toujours se juger contre l'étalon.
+ * Le seul endroit qui connaît les formats. Une charge utile abîmée retombe sur
+ * la question ouverte plutôt que de bloquer : on peut toujours se juger sur l'étalon.
  */
 export function ZoneDeReponse({
   question,
@@ -30,7 +27,6 @@ export function ZoneDeReponse({
   question: QuestionServie;
   choisi: number | null;
   revelee: boolean;
-  /** L'état du texte à trou, partagé avec l'énoncé qui porte la phrase. */
   trou: TexteATrou;
   enCours: boolean;
   dernier: boolean;
@@ -66,8 +62,7 @@ export function ZoneDeReponse({
 
   if (question.cloze) {
     return (
-      // Le texte à trou note lui-même, par `trou.juger` : un coup de pouce
-      // demandé fait descendre la note d'un cran (règle du domaine).
+      // Il note lui-même par `trou.juger`, qui retire un cran si l'aide a servi.
       <ReponseCloze trou={trou} enCours={enCours} dernier={dernier} onVerifier={onVerifier} />
     );
   }

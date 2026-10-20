@@ -3,19 +3,12 @@ import { empiler, LARGEUR_VUE } from "@/lib/domain/cairn-empilement";
 import { remplissageDePile } from "@/lib/domain/remplissage-de-pile";
 
 /**
- * L'avancement d'une session, en pierres : une pile qu'on monte au fil des
- * réponses.
- *
- * Géométrie de `empiler`, remplissage de `remplissageDePile` : les emplacements
- * à venir sont les mêmes pierres, pas encore posées. Au-delà du plafond de la
- * pile, la pierre en cours se comble par le bas, pour que chaque réponse
- * déplace quelque chose.
+ * L'avancement d'une session, en pierres. Les emplacements à venir sont les
+ * mêmes pierres, pas encore posées ; au-delà du plafond, la pierre en cours se
+ * comble par le bas, pour que chaque réponse déplace quelque chose.
  */
 
-/**
- * La hauteur suit le nombre de pierres pour que la pierre garde sa taille ; le
- * plafond de pierres (`PIERRES_MAX`) borne la hauteur.
- */
+/** La hauteur suit le nombre de pierres, borné par `PIERRES_MAX`, pour garder leur taille. */
 const HAUTEUR_PAR_PIERRE = 1.9;
 const HAUTEUR_MINIMALE = 6;
 
@@ -26,17 +19,16 @@ export function PileDeSession({
   graine = "session",
   intitule,
 }: {
-  /** Combien de questions sont passées. La pile ne compte pas la courante. */
+  /** Questions passées, sans la courante. */
   rang: number;
   total: number;
-  /** Sur la roche, les pierres s'inversent en gris clairs. */
+  /** Pour la roche. */
   clair?: boolean;
   /** Préfixe des identifiants de découpe : deux piles sur un écran se gêneraient. */
   graine?: string;
   /**
-   * Ce qu'un lecteur d'écran entend de la pile. Absent, elle est muette (le
-   * compte est écrit à côté). L'entraînement, qui n'affiche pas son compte, le
-   * passe ici : le choix visuel ne doit pas priver de l'information.
+   * Absent, la pile est muette (le compte est écrit à côté). L'entraînement,
+   * qui n'affiche pas son compte, le donne ici au lecteur d'écran.
    */
   intitule?: string;
 }) {
@@ -50,7 +42,7 @@ export function PileDeSession({
     <svg
       viewBox={`0 ${-hauteur + ySol} ${LARGEUR_VUE} ${hauteur}`}
       // Peu de pierres, la pile est plus large que haute : `max-w-52` évite le
-      // galet géant, et le calage par le bas la garde sur la ligne du texte.
+      // galet géant, le calage par le bas la garde sur la ligne du texte.
       // i18n-ignore — une valeur d'attribut SVG, jamais lue.
       preserveAspectRatio="xMidYMax meet"
       style={{ height: `${Math.max(HAUTEUR_MINIMALE, nombre * HAUTEUR_PAR_PIERRE)}rem` }}
@@ -82,9 +74,8 @@ export function PileDeSession({
 
             {index === posees && part > 0 ? (
               <>
-                {/* La découpe vit dans le repère de la pierre et penche avec
-                    elle ; elle descend sous la pierre pour couvrir la pente de
-                    sa face inférieure. */}
+                {/* Dans le repère de la pierre, elle penche avec elle et
+                    descend sous sa face inférieure pour en couvrir la pente. */}
                 <clipPath id={decoupe}>
                   <rect
                     x={-pierre.largeur}
