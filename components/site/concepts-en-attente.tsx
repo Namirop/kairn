@@ -7,18 +7,14 @@ import { Button } from "@/components/ui/button";
 import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
 /**
- * Les quelques secondes où le découpage tourne, dans la fenêtre de l'essai :
- * de 2,5 à 15 s en production, 6,3 de médiane. Un écran immobile fait fermer
- * l'onglet juste avant le résultat.
+ * L'attente du découpage, de 2,5 à 15 s en production (6,3 de médiane) : un
+ * écran immobile fait fermer l'onglet juste avant le résultat. Les lecteurs
+ * d'écran n'entendent que la promesse stable du bas, la phrase qui tourne étant
+ * masquée.
  *
- * L'empilement est celui de l'attente de l'application. La phrase qui tourne
- * (`lib/domain/phrases-dattente.ts`) est masquée aux lecteurs d'écran : dans la
- * région `aria-live`, elle serait relue toutes les trois secondes. Ils
- * n'entendent que la promesse stable du bas.
- *
- * Pas d'étapes racontées (« lecture… découpage… ») : l'extraction est un seul
- * appel, on n'en connaît pas l'avancement. Pas de squelette non plus : dans une
- * fenêtre, le changement de hauteur est la révélation.
+ * Pas d'étapes racontées : l'extraction est un seul appel, sans avancement
+ * connu. Pas de squelette : dans une fenêtre, le changement de hauteur est la
+ * révélation.
  */
 export function ConceptsEnAttente({ attente }: { attente: EtatDeLAttente }) {
   const t = useTranslations("site.essai.attente");
@@ -44,14 +40,10 @@ export function ConceptsEnAttente({ attente }: { attente: EtatDeLAttente }) {
 }
 
 /**
- * L'écran de l'abandon, à 90 s (`ABANDON_MS`), quand l'interrogation s'arrête
- * pour de bon — avant, `ConceptsEnAttente` reste affiché, car l'écran cherche
- * encore. Le cas est réel : un job reporté par le plafond journalier d'appels
- * repartira, mais pas dans la minute.
- *
- * Le texte doit rester vrai : le traitement continue côté serveur même si la
- * fenêtre se ferme, et le cookie de visite (sept jours) suffit à retrouver ses
- * concepts en revenant.
+ * L'abandon, à 90 s (`ABANDON_MS`), quand l'interrogation s'arrête : un job
+ * reporté par le plafond journalier repartira, mais pas dans la minute. Le
+ * texte doit rester vrai : le serveur continue, et le cookie de visite (sept
+ * jours) retrouve les concepts au retour.
  */
 export function AttenteAbandonnee({ onVerifier }: { onVerifier: () => void }) {
   const t = useTranslations("site.essai.attente");

@@ -4,14 +4,9 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 /**
- * De quoi recommencer, ou de quoi comprendre qu'on ne peut plus.
- *
- * Passé les deux essais par vingt-quatre heures, le lien est remplacé par une
- * phrase : une limite qu'on ne nomme pas se lit comme une panne. Elle ne
- * rappelle pas de créer un compte, l'appel est déjà sur la même ligne.
- *
- * Rien ne paraît tant que la chaîne tourne : `peutRedeposer` est faux pendant
- * l'extraction aussi, le dépôt en cours comptant déjà comme un essai.
+ * De quoi recommencer, ou comprendre qu'on ne peut plus : passé deux essais
+ * par 24 h, une phrase nomme la limite, sans quoi elle se lirait comme une
+ * panne. Rien tant que la chaîne tourne : le dépôt en cours compte déjà.
  */
 export function PorteDeSortie({
   peutRedeposer,
@@ -23,7 +18,7 @@ export function PorteDeSortie({
   /** L'extraction est allée au bout, quel qu'ait été son verdict. */
   chaineFinie: boolean;
   surRedepot: () => void;
-  /** Sur la roche, le lien et la phrase s'inversent en gris clairs. */
+  /** Sur la roche. */
   clair?: boolean;
 }) {
   const t = useTranslations("site.essai.sortie");

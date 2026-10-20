@@ -5,11 +5,9 @@ export const encre = (part: number) =>
   `color-mix(in oklab, var(--stone-500) ${part.toFixed(1)}%, var(--ciel-teinte))`;
 
 /**
- * Les trois nuances d'un cairn, dérivées de sa part d'encre.
- *
- * Chacune passe par une variable dont le repli est la dérivation : une palette
- * peut ainsi poser ses propres pierres, par exemple sombres sur un plan proche
- * clair, ce qu'un mélange avec le ciel ne sait pas faire.
+ * Les trois nuances d'un cairn. Chacune passe par une variable dont le repli est
+ * la dérivation : une palette peut poser ses propres pierres, sombres sur un
+ * plan clair par exemple, ce qu'un mélange avec le ciel ne sait pas faire.
  */
 export const teintesDe = (part: number, variable: string): [string, string, string] => [
   `var(${variable}-1, ${encre(part)})`,
@@ -22,9 +20,8 @@ export const terre = (part: number) =>
   `color-mix(in oklab, var(--terre) ${part.toFixed(0)}%, var(--ciel-teinte))`;
 
 /**
- * Une ligne de crête, tracée dans l'espace commun aux deux plans. Les appuis
- * diffèrent d'un plan à l'autre : deux crêtes au même rythme feraient des
- * rayures, pas un relief.
+ * Une ligne de crête dans la vue commune. Les appuis diffèrent d'un plan à
+ * l'autre : au même rythme, deux crêtes feraient des rayures, pas un relief.
  */
 export function cheminDeCrete(y: number, appuis: number[]) {
   const pas = 1200 / (appuis.length - 1);
@@ -49,5 +46,4 @@ export function cheminDeCrete(y: number, appuis: number[]) {
   return { ligne, masse: `${ligne} L1200,1000 L0,1000 Z` };
 }
 
-/** La crête d'un plan, dans la vue commune. */
 export const crete = (plan: Plan) => cheminDeCrete(1000 * (1 - plan.crete), plan.appuis);

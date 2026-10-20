@@ -10,16 +10,11 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 import type { EtatDeLAttente } from "@/lib/depots/rythme-de-lattente";
 
 /**
- * Ce que l'essai a donné : l'attente, les concepts, ou aucun des deux. Rendu
- * dans `FenetreDeLEssai`.
+ * Ce que l'essai a donné : l'attente, les concepts, ou aucun des deux. Le cairn
+ * y est dessiné des vrais identifiants, seul endroit public où il l'est.
  *
- * Le compte de concepts est accompagné du cairn, dessiné à partir de leurs
- * identifiants : le seul endroit public où l'élément signature porte du vrai
- * contenu. Les sections se séparent par du vide, jamais par un filet.
- *
- * L'appel à garder n'est pas ici mais dans le pied de la fenêtre, qui ne défile
- * pas : au bout de la liste, il serait à deux écrans du pouce sur téléphone.
- * Voir `GarderLesConcepts`.
+ * L'appel à garder vit dans le pied fixe de la fenêtre (`GarderLesConcepts`) :
+ * au bout de la liste, il serait à deux écrans du pouce sur téléphone.
  */
 export function ResultatDeLEssai({
   avancement,
@@ -34,11 +29,7 @@ export function ResultatDeLEssai({
   attente: EtatDeLAttente;
   onVerifier: () => void;
 }) {
-  /*
-    On montre ce qui existe dès qu'il existe : les concepts arrivent avant les
-    questions, et attendre les secondes pour afficher les premiers retarderait
-    tout le résultat.
-  */
+  // Les concepts s'affichent sans attendre les questions, qui arrivent après.
   const t = useTranslations("site.essai.resultat");
   const rienEncore = !avancement || avancement.concepts.length === 0;
 
@@ -59,13 +50,9 @@ export function ResultatDeLEssai({
   return (
     <div className="gap-pas-8 md:gap-pas-12 flex flex-col" role="status">
       <header className="gap-pas-4 md:gap-pas-6 flex items-center">
-        {/* Le cairn se borne en largeur, jamais en hauteur : sa vue est aussi
-            haute qu'il a de pierres, et bornée en hauteur une pile d'une pierre
-            deviendrait un galet géant qui écrase le titre.
-
-            Il attend deux pierres : la vue fait cent unités de large pour une
-            pierre de quinze de haut, et une pierre seule se lit comme une barre,
-            pas comme un cairn. */}
+        {/* Borné en largeur, jamais en hauteur : sa vue grandit avec les
+            pierres, et une pile d'une pierre deviendrait un galet géant. Il en
+            attend deux : seule, une pierre se lit comme une barre. */}
         {combien > 1 ? (
           <Cairn
             nombre={combien}
@@ -86,8 +73,6 @@ export function ResultatDeLEssai({
 
       <PileDeConcepts concepts={avancement.concepts} />
 
-      {/* De vraies questions sur l'un des concepts : la page montre sous quelle
-          forme on te les reposera. */}
       <EchantillonDeQuestions
         questions={avancement.questions}
         enCours={avancement.enCours}

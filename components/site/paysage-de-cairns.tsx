@@ -2,23 +2,12 @@ import { PlanDuPaysage } from "./paysage/plan-du-paysage";
 import { PLANS, PLANS_TELEPHONE } from "./paysage/plans";
 
 /**
- * Le paysage de l'ouverture : deux terrasses de terrain, peuplées de cairns.
+ * Le paysage de l'ouverture : deux terrasses peuplées de cairns. Le sol de
+ * chaque plan mord le pied de ses cairns, et le recul se joue en contraste
+ * (`color-mix` vers `--ciel-teinte`), jamais en `opacity`.
  *
- * Trois indices de profondeur :
- * - chaque plan a sa ligne d'appui, plus haute à mesure qu'il s'éloigne ;
- * - chaque plan dessine ses cairns puis son sol par-dessus, qui mord leur pied
- *   (l'occlusion) ; le sol de l'ouverture se pose en dernier sur l'ensemble ;
- * - le recul se joue en contraste, pas en transparence : l'encre se mêle vers
- *   `--ciel-teinte` par `color-mix`, jamais d'`opacity`.
- *
- * Sur téléphone, le paysage de bureau passerait sous le titre et au travers de
- * ses lettres évidées : il a ses propres plans, voir `PLANS_TELEPHONE` dans
- * `paysage/plans.ts`.
- */
-
-/**
- * Les deux versions sont montées et l'affichage en choisit une : du SVG inerte,
- * sans mesure au montage, jamais en retard d'une rotation d'écran.
+ * Les versions bureau et téléphone sont toutes deux montées, le CSS en choisit
+ * une : du SVG inerte, sans mesure au montage, jamais en retard d'une rotation.
  */
 export function PaysageDeCairns() {
   return (

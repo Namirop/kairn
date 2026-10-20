@@ -4,12 +4,9 @@ import { usePathname } from "next/navigation";
 import { useLangue } from "@/lib/i18n/use-langue";
 
 /**
- * Le passage à l'autre langue, sur les pages publiques. L'autre langue est
- * nommée dans cette langue : qui ne lit pas la page doit reconnaître la sienne.
- * Il mène à `/fr…` ou `/en…`, que le proxy retient en cookie.
- *
- * `<a>` et non `Link` : le changement de langue doit repasser par le
- * proxy et recharger les textes, ce qu'une navigation client ne ferait pas.
+ * Le passage à l'autre langue, sur les pages publiques. Un `<a>` et non `Link` :
+ * il doit repasser par le proxy, qui retient la langue en cookie, et recharger
+ * les textes.
  */
 export function LienDeLangue() {
   const langue = useLangue();

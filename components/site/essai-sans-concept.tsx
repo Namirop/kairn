@@ -7,20 +7,13 @@ import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 import type { Messages } from "@/lib/i18n/messages";
 
 /**
- * L'essai n'a rien donné. Quatre situations : panne ou rejet, croisé avec le
- * fait qu'il reste ou non de quoi retenter.
+ * L'essai n'a rien donné : panne ou rejet, avec ou sans essai restant. Une
+ * panne vient de nous, jamais « change ton texte » ; sans reprise, le compte
+ * est offert pour revenir plus tard, sans prétendre garder des concepts qui
+ * n'existent pas. Un rejet montre le motif du modèle.
  *
- * - Panne, avec une reprise : ça vient de nous, et surtout pas « change ton
- *   texte ».
- * - Panne, sans reprise : toujours pas sa faute ; le compte est offert pour
- *   reprendre plus tard, pas pour garder des concepts qui n'existent pas.
- * - Rejet, avec un essai : le motif du modèle dit ce qui manquait.
- * - Rejet, sans essai : le motif reste, et le compte est proposé sans
- *   prétendre qu'il y a quelque chose à récupérer.
- *
- * Rendu dans la fenêtre de l'essai, donc aux encres de la roche. Le titre est
- * fixe, jamais `motifDechec` : une phrase de modèle de longueur inconnue ne
- * tient pas dans un display ; elle garde le corps.
+ * Le titre est fixe, jamais `motifDechec` : une phrase de modèle de longueur
+ * inconnue ne tient pas dans un display.
  */
 type Cle = keyof Messages["site"]["sansConcept"];
 
@@ -78,7 +71,7 @@ export function EssaiSansConcept({
   const t = useTranslations("site.sansConcept");
   const tRefus = useTranslations("depots.refus");
   const situation = situationDeLEchec(panne, peutRedeposer, motifDechec);
-  // La longueur se dit comme dans les refus du dépôt : une seule tournure.
+  // Même tournure que les refus du dépôt.
   const compte = longueurEnClairAvec(tRefus, CARACTERES_MAXIMUM);
   const constat =
     typeof situation.constat === "string" ? t(`${situation.constat}`) : situation.constat.motif;

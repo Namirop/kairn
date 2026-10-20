@@ -10,11 +10,7 @@ import {
 } from "@/lib/depots/rythme-de-lattente";
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
-/**
- * Redemander où en est le découpage de l'essai, jusqu'à ce qu'il s'arrête.
- * Le rythme et les paliers vivent dans `rythme-de-lattente.ts`, partagés avec
- * le détail d'un dépôt.
- */
+/** Redemande où en est le découpage de l'essai, au rythme de `rythme-de-lattente.ts`. */
 export function useAvancementDeLEssai({
   essai,
   reprend,
@@ -28,13 +24,10 @@ export function useAvancementDeLEssai({
   depart: AvancementDeLEssai | null;
 }) {
   const [avancement, setAvancement] = useState<AvancementDeLEssai | null>(depart);
-  // Trois valeurs et non un booléen : « c'est long » demande de patienter,
-  // « on a arrêté » demande un geste.
   const [attente, setAttente] = useState<EtatDeLAttente>("NORMALE");
   const [relance, setRelance] = useState(0);
 
-  // On interroge aussi quand la page se charge sur un découpage déjà en route :
-  // après un rechargement, aucune action ne revient pour lancer la boucle.
+  // Après un rechargement, aucune action ne revient lancer la boucle.
   const aPoursuivre = Boolean(essai) || reprend;
 
   useEffect(() => {
@@ -44,8 +37,7 @@ export function useAvancementDeLEssai({
     let ecoule = RYTHME_VIF_MS;
     let minuteur: ReturnType<typeof setTimeout>;
 
-    // Un enchaînement de délais plutôt qu'un intervalle : le rythme change en
-    // cours de route, et un `setInterval` ne sait pas ralentir.
+    // Des délais enchaînés : le rythme ralentit, ce que `setInterval` ne sait pas.
     const tour = async () => {
       const suite = await avancementDeLEssaiAction();
 
@@ -59,8 +51,7 @@ export function useAvancementDeLEssai({
 
       setAttente(ou);
 
-      // On s'arrête là, et l'écran le dit : au-delà, ce n'est plus une
-      // extraction lente mais un job reporté que le cron reprendra.
+      // Au-delà, c'est un job reporté que le cron reprendra.
       if (ou === "ABANDONNEE") return;
 
       const pause = pauseApres(ecoule);
@@ -75,23 +66,18 @@ export function useAvancementDeLEssai({
       vivant = false;
       clearTimeout(minuteur);
     };
-    // `essai` et non la session : deux essais d'une même visite partagent la
-    // session, et l'effet ne serait pas rejoué pour le second.
+    // `essai` et non la session, partagée par deux essais d'une même visite.
   }, [essai, aPoursuivre, relance]);
 
   return {
     avancement,
     attente,
-    /** Un dépôt vient de partir : on oublie le verdict du précédent. */
+    /** Un dépôt part : on oublie le verdict du précédent. */
     repartirDeZero: () => {
       setAttente("NORMALE");
       setAvancement(null);
     },
-    /**
-     * Reprend l'interrogation pour un tour complet, après qu'elle a renoncé. La
-     * minute repart de zéro : c'est un geste volontaire, pas une reprise
-     * automatique.
-     */
+    /** Après abandon, relance un tour complet : le compte des 90 s repart de zéro. */
     verifierANouveau: () => {
       setAttente("NORMALE");
       setRelance((tour) => tour + 1);

@@ -11,16 +11,12 @@ import { useAvancementDeLEssai } from "@/components/site/use-avancement-de-lessa
 import type { AvancementDeLEssai } from "@/lib/depots/essai-en-cours";
 
 /**
- * L'essai, sur la landing : on dépose sans compte, et les concepts arrivent pour
- * de vrai. Le compte n'est demandé qu'après, pour garder ce qu'on a vu.
+ * L'essai sans compte de la landing : la bande rend le formulaire ou le rappel,
+ * le reste se joue dans `FenetreDeLEssai`.
  *
- * La bande rend le formulaire ou le rappel d'un essai ; le reste se joue dans
- * `FenetreDeLEssai`.
- *
- * La fenêtre s'ouvre sur le geste (`surDepot`, après les refus de longueur du
- * formulaire), pas dans un effet sur `enCours` : un effet la rouvrirait au rendu
- * suivant si le visiteur l'avait fermée pendant le découpage. Au chargement,
- * elle ne s'ouvre que sur un découpage encore en route.
+ * La fenêtre s'ouvre sur le geste (`surDepot`), pas dans un effet sur
+ * `enCours` : un effet la rouvrirait si le visiteur l'avait fermée pendant le
+ * découpage.
  */
 export function EssaiDeDepot({
   invite,
@@ -31,11 +27,10 @@ export function EssaiDeDepot({
   essaiPrecedent: AvancementDeLEssai | null;
 }) {
   const [etat, action, enCours] = useActionState<EtatEssai, FormData>(essayerAction, {});
-  // Rouvre le champ sur un essai déjà rendu. La base tranchera : elle accorde
-  // deux essais par tranche de vingt-quatre heures, quoi qu'ils aient donné.
+  // Rouvre le champ sur un essai déjà rendu ; la base tranche (deux essais par
+  // vingt-quatre heures, quoi qu'ils aient donné).
   const [recommence, setRecommence] = useState(false);
   const [dernierEssai, setDernierEssai] = useState<string | null>(null);
-  // Ouverte d'emblée sur un découpage déjà en route, et sur rien d'autre.
   const [fenetreOuverte, setFenetreOuverte] = useState(() => Boolean(essaiPrecedent?.enCours));
   const [rendreLeFocus, setRendreLeFocus] = useState(false);
 
@@ -45,17 +40,15 @@ export function EssaiDeDepot({
     depart: essaiPrecedent,
   });
 
-  // Un essai vient de partir : l'écran repart de zéro, et `recommence` retombe
-  // (sinon le formulaire masquerait le second essai pour toujours). Ajusté
-  // pendant le rendu et non dans un effet, qui laisserait passer une image avec
-  // le verdict de l'essai précédent.
+  // Un essai vient de partir : `recommence` retombe, sinon le formulaire
+  // masquerait le second essai. Ajusté au rendu et non dans un effet, qui
+  // laisserait passer une image avec le verdict précédent.
   if (etat.inputId && etat.inputId !== dernierEssai) {
     setDernierEssai(etat.inputId);
     setRecommence(false);
     repartirDeZero();
   }
 
-  // Le rappel remplace la fenêtre qu'on vient de fermer, et le clavier le suit.
   const fermerLaFenetre = () => {
     setFenetreOuverte(false);
     setRendreLeFocus(true);
@@ -70,8 +63,7 @@ export function EssaiDeDepot({
   // Un dépôt en vol masque le verdict du précédent, le temps de l'aller-retour.
   const montre = enCours ? null : avancement;
   const concepts = montre?.concepts ?? [];
-  // Le rappel ne vaut que pour un essai qui a produit quelque chose. Un échec
-  // n'a rien à rappeler : ce qu'il faut offrir alors, c'est le champ.
+  // Un échec n'a rien à rappeler : on offre le champ.
   const rappel = !recommence && concepts.length > 0;
 
   return (
@@ -95,8 +87,8 @@ export function EssaiDeDepot({
             setFenetreOuverte(true);
             setRendreLeFocus(false);
           }}
-          // Le champ se rouvre sur un découpage qui a abouti : on le dit, sinon on
-          // laisse croire qu'on remplace ce qu'on vient de montrer.
+          // Dit qu'on rouvre sur un découpage abouti, sans laisser croire qu'on
+          // remplace ce qu'on vient de montrer.
           reprise={recommence && (avancement?.concepts.length ?? 0) > 0}
         />
       )}

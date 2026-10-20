@@ -3,16 +3,13 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Amener les questions sous les yeux à l'instant où elles arrivent : elles
- * arrivent sous le pli pendant qu'on lit les concepts, et sans défilement rien
- * ne dit que l'essai est fini. La marge vient du `scroll-mt` de la cible, que
- * `scrollIntoView` respecte.
+ * Amène les questions sous les yeux à leur arrivée : elles tombent sous le pli
+ * pendant qu'on lit les concepts, et rien d'autre ne dit que l'essai est fini.
+ * La marge vient du `scroll-mt` de la cible.
  *
- * Seul le passage de zéro à quelque chose déclenche : rouvrir un essai abouti
- * ne doit pas sauter par-dessus les concepts qu'on vient demander à revoir.
- *
- * Avec `prefers-reduced-motion`, un saut au lieu d'un glissement, jamais rien :
- * le changement de position est l'information.
+ * Seul le passage de zéro déclenche : rouvrir un essai abouti ne doit pas
+ * sauter les concepts qu'on demande à revoir. Sous `prefers-reduced-motion`, un
+ * saut plutôt que rien : le changement de position est l'information.
  */
 export function useArriveeDesQuestions(combien: number) {
   const ancre = useRef<HTMLElement>(null);

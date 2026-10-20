@@ -7,21 +7,15 @@ import { ChampEnGrand } from "@/components/site/champ-en-grand";
 import { VoileDeFin } from "@/components/site/voile-de-fin";
 
 /**
- * L'endroit où l'on dépose : un creux dans le papier, fait d'une surface, sans
- * contour ni ombre portée.
+ * Le champ de dépôt : un creux dans le papier, sans contour ni ombre.
  *
- * Le focus est signalé par le trait du bas, qui passe à l'accent, et non par un
- * anneau qui redessinerait une boîte. Ce trait impose les angles du bas vifs :
- * sur un angle arrondi, il s'interromprait au début de la courbe.
+ * Le focus passe par le trait du bas, pas par un anneau qui redessinerait une
+ * boîte ; ce trait impose des angles du bas vifs, sinon il s'interromprait à la
+ * courbe. L'invite reste en `stone-500` : `stone-400` tombe sous AA sur ce creux.
  *
- * L'invite est en `stone-500` : c'est la seule phrase qui dise quoi écrire, et
- * `stone-400` tombe sous le seuil AA sur ce creux.
- *
- * La hauteur est fixe et c'est le champ qui défile, sinon un article collé
- * repousserait le bouton hors de l'écran. Le rembourrage est donc sur le creux,
- * pas sur le champ, pour que la ligne coupée ait de l'air en dessous d'elle.
- * L'ascenseur est masqué ; la suite se dit par `VoileDeFin`, et la relecture
- * d'un long texte passe par `ChampEnGrand`.
+ * Hauteur fixe, le champ défile : un article collé repousserait sinon le bouton
+ * hors de l'écran. Le rembourrage est sur le creux pour que la ligne coupée ait
+ * de l'air. L'ascenseur masqué, `VoileDeFin` dit la suite.
  */
 export function ChampDeDepot({
   champ,
@@ -41,8 +35,8 @@ export function ChampDeDepot({
 
   return (
     <div>
-      {/* La loupe vit sur la ligne de l'intitulé : posée sur le creux, il
-          faudrait réserver sa place sur chaque ligne du texte. */}
+      {/* Sur la ligne de l'intitulé : sur le creux, la loupe demanderait sa
+          place sur chaque ligne du texte. */}
       <div className="gap-pas-3 flex items-center justify-between">
         <label
           htmlFor="essai"
