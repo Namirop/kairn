@@ -19,10 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("reviser") };
 }
 
-/**
- * La session du jour. Recalculée à chaque visite : ce qui est dû dépend de
- * l'heure chez l'utilisateur, et une session en cache serait d'un autre moment.
- */
+/** Ce qui est dû dépend de l'heure locale : une session en cache serait d'un autre moment. */
 export const dynamic = "force-dynamic";
 
 export default async function PageReviser() {
@@ -44,11 +41,8 @@ export default async function PageReviser() {
     <SessionDeRevision
       questions={session.questions}
       /*
-        L'écran vide est passé en accessoire, et c'est `SessionDeRevision` qui
-        décide de l'afficher. Si la page en décidait, la revalidation de fin de
-        session relirait une session vide et remplacerait l'écran de fin par
-        « tu es à jour ». L'état « session finie » vit dans le client, où un
-        rafraîchissement du serveur ne peut pas le contredire.
+        Le client décide : si la page le faisait, la revalidation de fin de
+        session remplacerait l'écran de fin par « tu es à jour ».
       */
       vide={
         <PileDePanneaux>
@@ -74,10 +68,7 @@ export default async function PageReviser() {
   );
 }
 
-/**
- * Le jour de la session, chez l'utilisateur : sans fuseau explicite, le serveur
- * écrirait sa propre date, et 00 h 30 à Sydney afficherait la veille.
- */
+/** Sans fuseau explicite, le serveur écrit sa date : 00 h 30 à Sydney afficherait la veille. */
 function jourDeLaSession(maintenant: Date, fuseau: string, etiquette: string): string {
   return new Intl.DateTimeFormat(etiquette, {
     day: "numeric",

@@ -13,12 +13,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Le fonctionnement en entier, pour qui veut le lire : elle évite que chaque
- * écran explique un bout du principe à qui ne l'a pas demandé. Le produit doit
- * rester compréhensible sans elle.
+ * Évite que chaque écran explique un bout du principe à qui ne l'a pas demandé.
+ * Le produit doit rester compréhensible sans elle.
  */
 
-/** Les sections, dans l'ordre de la page ; leurs textes vivent dans les messages. */
+/** Dans l'ordre de la page ; les textes vivent dans les messages. */
 const SECTIONS: (keyof Messages["tableau"]["commentCaMarche"]["sections"])[] = [
   "oubli",
   "decoupage",
@@ -28,7 +27,6 @@ const SECTIONS: (keyof Messages["tableau"]["commentCaMarche"]["sections"])[] = [
   "compte",
 ];
 
-/** Chaque section porte deux paragraphes. */
 const PARAGRAPHES = ["un", "deux"] as const;
 
 export default async function PageCommentCaMarche() {

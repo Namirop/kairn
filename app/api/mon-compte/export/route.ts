@@ -4,14 +4,13 @@ import { exigerLUtilisateur, SessionAbsenteError } from "@/lib/auth/session";
 import { exporterLeCompte } from "@/lib/db/compte";
 
 /**
- * L'export des données, en un fichier. Une route et non une Server Action : il
- * faut un téléchargement avec un nom de fichier. L'identité vient de la
- * session, jamais de l'URL. `no-store` : des données personnelles n'ont rien à
- * faire dans le cache d'un intermédiaire.
+ * Une route, pas une Server Action : il faut un téléchargement nommé. Identité
+ * par la session. `no-store` : pas de données personnelles dans un cache
+ * intermédiaire.
  */
 export const dynamic = "force-dynamic";
 
-/** Le nom du fichier se lit dans le dossier de téléchargement : il suit la langue. */
+/** Il se lit dans le dossier de téléchargement : il suit la langue. */
 async function nomDuFichier(): Promise<string> {
   const t = await getTranslations("compte.donnees");
 

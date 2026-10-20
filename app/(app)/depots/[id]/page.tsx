@@ -30,13 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("metaTitre") };
 }
 
-/**
- * Un dépôt et ce qu'il a donné.
- *
- * Trois fins sans concept sont distinguées — rejeté faute de matière, arrêté
- * par une panne, vidé par son auteur — parce qu'elles n'appellent pas la même
- * conduite.
- */
+/** Trois fins sans concept (sans matière, en panne, vidé) : chacune appelle sa conduite. */
 export default async function PageDepot({ params }: { params: Promise<{ id: string }> }) {
   const tEtat = await getTranslations("etatDepot");
   const tTemps = await getTranslations("temps");
@@ -56,26 +50,18 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
     travaux: depot.travauxEnCours,
     concepts: depot.concepts.length,
   });
-  // Lu seulement une fois la chaîne finie : c'est le seul état où le compte de
-  // la journée tient compte de ce dépôt.
+  // Chaîne finie seulement : avant, le compte du jour ignore ce dépôt.
   const duJour = etat === "pret" ? await lireChargeDuJour(utilisateur.id) : null;
   const depose = depot.rawContent.trim() || depot.extractedText || "";
-  /*
-    On montre ce sur quoi on sera questionné : quand la consigne écarte une
-    partie du dépôt, seule la partie retenue s'affiche, avec une mention dessous.
-    `rawContent` reste intact et c'est lui qui repartirait au modèle. Voir
-    `lib/domain/texte-retenu.ts`.
-  */
+  // On montre ce sur quoi on sera questionné ; `rawContent` reste intact et c'est
+  // lui qui repartirait au modèle. Voir `lib/domain/texte-retenu.ts`.
   const texte = depot.texteRetenu ?? depose;
-  // Les concepts que le modèle a marqués douteux, dans l'ordre de la liste :
-  // c'est le premier qui porte l'ancre, et c'est vers lui que le chapeau mène.
+  // Dans l'ordre de la liste : le premier porte l'ancre vers laquelle le chapeau mène.
   const aVerifier = depot.concepts.filter((concept) => concept.uncertain);
 
   return (
     <PileDePanneaux sol="ombre">
       <Panneau surface="papier" mesure="colonne">
-        {/* Le chapeau se centre sur mobile ; le texte et les concepts, lecture
-            au long, restent au fer à gauche sur tous les écrans. */}
         <div className="text-center md:text-left">
           <Link
             href={ROUTES.depots}
@@ -90,11 +76,8 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
 
           <p className="mt-pas-2 gap-pas-3 text-mono flex flex-wrap items-center justify-center text-stone-500 md:justify-start">
             {etat === "pret" ? null : (
-              // Seule une panne prend la couleur d'alerte : un dépôt sans
-              // matière n'a rien cassé.
+              // Alerte pour une panne seulement : un dépôt sans matière n'a rien cassé.
               <Badge variant={etat === "echec" ? "alerte" : "pose"}>
-                {/* Le point dit que ça tourne là où le libellé, seul, ne dit que
-                    l'étape — voir `PointDeTravail`. */}
                 {travailEnCours(etat) ? <PointDeTravail /> : null}
                 {tEtat(etat)}
               </Badge>
@@ -108,15 +91,11 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
 
           <ConceptsAVerifier nombre={aVerifier.length} />
 
-          {/* Monté seulement quand un travail tourne : ailleurs, l'interrogation
-              bouclerait sur une page qui ne bougera plus. Une demande qui
-              attend sa date n'en est pas un — voir `travailEnCours`. */}
+          {/* Sinon l'interrogation bouclerait sur une page qui ne bougera plus. */}
           {travailEnCours(etat) ? (
             <SuivreLAvancement inputId={depot.id} etat={etat} concepts={depot.concepts.length} />
           ) : null}
 
-          {/* Seulement quand la chaîne a fini : avant, on compterait des
-              concepts qui n'ont pas encore leurs questions. */}
           {duJour ? <EntreeDansLaSerie charge={duJour.charge} /> : null}
         </div>
 
@@ -125,10 +104,8 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
             <h2 className="text-mono font-mono tracking-[0.14em] text-stone-500 uppercase">
               {t("ceQueTuAsDepose")}
             </h2>
-            {/* `TexteRiche` et non `whitespace-pre-wrap` : celui-ci garderait les
-                retours à la ligne d'un éditeur qui enroule, et ignorerait les
-                barrières de code. Les termes entre accents graves sont relevés
-                comme dans les concepts ; on ne devine pas le code. */}
+            {/* Pas `whitespace-pre-wrap` : il garderait les retours d'un éditeur
+                qui enroule et ignorerait les barrières de code. */}
             <div className="mt-pas-3 p-pas-4 text-petit rounded-carte bg-surface-ombre text-stone-700">
               <TexteRiche>{texte}</TexteRiche>
             </div>
@@ -142,8 +119,7 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
               </p>
             ) : null}
 
-            {/* La consigne se lit sous le dépôt et sans titre : un titre en
-                ferait une troisième section de même poids que les deux vraies. */}
+            {/* Sans titre : elle deviendrait une troisième section du même poids. */}
             {depot.instruction ? (
               <p className="mt-pas-3 text-petit text-stone-500">
                 {t("taConsigne", { consigne: depot.instruction })}
@@ -162,11 +138,8 @@ export default async function PageDepot({ params }: { params: Promise<{ id: stri
 
         {depot.conceptsTronques ? (
           /*
-            Les concepts sortent dans l'ordre du texte, pas par importance : la
-            coupe emporte la fin. Le message ne prétend donc pas garder « les plus
-            importants » ; il dit où la lecture s'est arrêtée, ce que montre le
-            dernier concept de la liste. La borne est la nôtre : pas de reproche
-            sur la longueur.
+            Concepts dans l'ordre du texte : la coupe emporte la fin, pas « les
+            moins importants ». La borne est la nôtre : pas de reproche.
           */
           <p className="mt-pas-2 text-petit text-stone-500">
             {t("conceptsTronques", { plafond: PLAFOND_CONCEPTS_PAR_DEPOT })}

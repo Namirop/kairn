@@ -11,12 +11,8 @@ import { lireLEtatDuPaiement } from "@/lib/paiement/etat-pour-ladministration";
 export const metadata: Metadata = { title: "Pilotage · Administration" };
 
 /**
- * Le seul écran interne qui écrit : couper les appels, baisser un plafond,
- * changer de modèle. Ce sont les réglages du modèle ; ceux du compte vivent
- * dans le produit, sous « Mon compte » dans le rail.
- *
- * `ADMIN_EMAILS` n'y figure pas : la liste qui décide qui ouvre cet écran ne se
- * modifie pas depuis cet écran.
+ * Le seul écran interne qui écrit. `ADMIN_EMAILS` n'y figure pas : la liste qui
+ * décide qui ouvre cet écran ne se modifie pas depuis lui.
  */
 export const dynamic = "force-dynamic";
 
@@ -30,8 +26,7 @@ export default async function PagePilotage() {
     lireLEtatDuPaiement(),
   ]);
 
-  // Les valeurs d'environnement vont au formulaire pour qu'un champ vide dise
-  // ce qui s'appliquera. Cet objet part au client : aucun secret n'y entre.
+  // Pour qu'un champ vide dise ce qui s'appliquera. Part au client : aucun secret.
   const environnement = {
     AI_ENABLED: process.env.AI_ENABLED,
     MOCK_AI: process.env.MOCK_AI,

@@ -4,10 +4,8 @@ import { ROUTES } from "@/lib/auth/routes";
 import { lireLUtilisateur } from "@/lib/auth/session";
 
 /**
- * Renvoi vers `/admin`, pour les favoris de l'ancienne adresse.
- *
- * Gardé exactement comme la vraie page : un renvoi non gardé apprendrait à
- * n'importe qui que `/admin` existe, ce que son 404 s'applique à taire.
+ * Ancienne adresse, gardée comme la vraie : un renvoi non gardé révélerait
+ * `/admin`, que son 404 s'applique à taire.
  */
 export const dynamic = "force-dynamic";
 

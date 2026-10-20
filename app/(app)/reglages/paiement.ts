@@ -14,12 +14,9 @@ import { AbonnementDejaOuvertError, PaiementError } from "@/lib/paiement/erreurs
 import { arreterLAbonnement, reprendreLAbonnement } from "@/lib/paiement/resiliation";
 
 /**
- * Les gestes d'argent : payer, arrêter, reprendre, ouvrir le portail. À part
- * des autres gestes du compte, pour qu'un import distrait ne les mette pas à
- * portée d'un écran qui ne les demande pas.
- *
- * Chacun revérifie la session et passe par la limite de débit. Le compte visé
- * est toujours celui de la session : aucun de ces gestes ne prend d'identifiant.
+ * Les gestes d'argent, à part pour qu'un import distrait ne les mette pas à
+ * portée d'un autre écran. Session et limite de débit revérifiées ; le compte
+ * visé est celui de la session, aucun geste ne prend d'identifiant.
  */
 
 const CADENCES = ["month", "year"] as const;
@@ -28,24 +25,21 @@ const cadenceSchema = z.enum(CADENCES);
 export type EtatDuPaiement = { erreur?: string };
 
 /*
- * Les textes sont dans `compte.offre.erreurs`. Le détail d'un échec Stripe
- * (`echec`) part au journal et pas à l'écran : il nomme des clés et des prix,
- * rien d'actionnable. `dejaAbonne` ne survient qu'avec un onglet resté ouvert
- * sur l'état d'avant : la réponse est de rafraîchir, pas de réessayer.
+ * Le détail d'un échec Stripe part au journal, pas à l'écran : clés et prix,
+ * rien d'actionnable. `dejaAbonne` vient d'un onglet resté sur l'état d'avant :
+ * il faut rafraîchir, pas réessayer.
  */
 const erreurs = () => getTranslations("compte.offre.erreurs");
 
 type Erreurs = Awaited<ReturnType<typeof erreurs>>;
 
-/** Ce que porte la demande, déjà lu, ou ce qu'on répond quand elle ne se lit pas. */
 type Demande<D> = { lue: D } | { refus: string };
 
 type Acces<D> = { erreur: string } | { utilisateur: UtilisateurDeSession; demande: D };
 
 /**
- * L'entrée commune des gestes : la session, puis la demande, puis la limite de
- * débit. Dans cet ordre : une demande illisible est refusée sans consommer de
- * geste, et une session expirée se dit avant tout le reste.
+ * Session, demande, puis limite de débit, dans cet ordre : une session expirée
+ * se dit d'abord, une demande illisible ne consomme pas de geste.
  */
 async function ouvrirLeGeste<D>(t: Erreurs, demande: Demande<D>): Promise<Acces<D>> {
   const utilisateur = await lireLUtilisateur();
@@ -61,12 +55,7 @@ async function ouvrirLeGeste<D>(t: Erreurs, demande: Demande<D>): Promise<Acces<
   return { utilisateur, demande: demande.lue };
 }
 
-/**
- * Ouvre la page de paiement et y envoie.
- *
- * La redirection est hors du `try` : `redirect()` lève une exception que Next
- * intercepte, et l'attraper ici transformerait un succès en erreur.
- */
+/** `redirect()` hors du `try` : il lève, et l'attraper ferait d'un succès une erreur. */
 export async function payerAction(
   _precedent: EtatDuPaiement,
   donnees: FormData,
@@ -99,9 +88,8 @@ export async function payerAction(
 }
 
 /**
- * Envoie au portail Stripe, pour les factures et le moyen de paiement
- * seulement : sa configuration refuse la résiliation et le changement d'offre,
- * qui se font dans Kairn. Redirection hors du `try`, comme pour l'achat.
+ * Factures et moyen de paiement seulement : le portail est configuré pour refuser
+ * résiliation et changement d'offre, qui se font dans Kairn.
  */
 export async function portailAction(): Promise<EtatDuPaiement> {
   const t = await erreurs();
@@ -127,10 +115,7 @@ export async function portailAction(): Promise<EtatDuPaiement> {
   redirect(adresse);
 }
 
-/**
- * Arrête le renouvellement, ou revient dessus : un seul drapeau chez Stripe,
- * donc une seule action.
- */
+/** Arrêter et reprendre : un seul drapeau chez Stripe, donc une seule action. */
 const gesteSchema = z.enum(["arreter", "reprendre"]);
 
 export async function renouvellementAction(

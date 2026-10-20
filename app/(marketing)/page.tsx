@@ -14,36 +14,27 @@ import { inviteDeDepot } from "@/lib/domain/invites-de-depot";
 import { adressePublique } from "@/lib/i18n/adresses";
 import { langueDeLaRequete } from "@/lib/i18n/langue-de-la-requete";
 
-/**
- * La page publique : une pile de panneaux séparés par des coupes de roche.
- * Chaque coupe a sa propre graine, pour qu'aucune ne ressemble à un séparateur
- * de gabarit.
- */
-/** Rendue à la demande : l'invite du champ change à chaque chargement. */
+/** Chaque coupe a sa graine, pour qu'aucune ne ressemble à un séparateur de gabarit. */
+/** L'invite du champ change à chaque chargement. */
 export const dynamic = "force-dynamic";
 
 export default async function PageAccueil() {
   const langue = await langueDeLaRequete();
-  // Lu ici et non dans le composant : quelqu'un qui revient doit retrouver ses
-  // concepts au premier rendu, pas après un aller-retour.
+  // Ici : qui revient retrouve ses concepts au premier rendu, sans aller-retour.
   const essaiPrecedent = await lireLEssaiEnCours();
   const connecte = (await lireLUtilisateur()) !== null;
   const t = await getTranslations("site.accueil.pied");
-  // L'invite change à chaque visite, et c'est voulu. Un Server Component se rend
-  // une fois par requête : la règle de pureté, qui ne le distingue pas d'un
-  // composant client, ne s'applique pas ici.
+  // Voulu : un Server Component se rend une fois par requête, la règle de pureté
+  // vise les composants client.
   // eslint-disable-next-line react-hooks/purity
   const invite = inviteDeDepot(Math.random(), langue);
 
   return (
     <>
-      {/* Le hero porte le même titre et le même cairn pour tout le monde ; son
-          geste mène à l'essai ou à la journée selon l'état. */}
       <Ouverture connecte={connecte} />
 
-      {/* L'essai n'existe que pour un visiteur, et sa jointure avec lui. Sans
-          essai, la coupe d'ombre vers ombre qui suit reste quand même : sans
-          elle, le sentier aurait l'air de continuer l'ouverture. */}
+      {/* Sans essai, la coupe ombre vers ombre reste : sinon le sentier aurait
+          l'air de continuer l'ouverture. */}
       {connecte ? null : (
         <>
           <Strates de="ombre" vers="papier" graine="accueil-essai" />
@@ -61,8 +52,7 @@ export default async function PageAccueil() {
         <div className="gap-pas-4 flex flex-wrap items-baseline justify-between">
           <p className="text-mono text-stone-500">{t("devise")}</p>
 
-          {/* Atteignables sans compte : la confidentialité et les tarifs se
-              lisent avant de s'engager. */}
+          {/* Sans compte : tarifs et confidentialité se lisent avant de s'engager. */}
           <nav className="gap-pas-4 text-mono flex flex-wrap">
             <Link
               href={adressePublique(ROUTES.tarifs, langue)}

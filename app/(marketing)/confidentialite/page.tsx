@@ -14,19 +14,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Ce que Kairn collecte, et ce qu'on peut en faire.
- *
- * Les chiffres de la page suivent le code et la configuration : les sept jours
- * d'une visite sans compte sont `JOURS_AVANT_OUBLI`, les six heures de
- * restauration la fenêtre de la base de production. Ils se changent ensemble.
- *
- * La mesure d'audience a sa rubrique : « aucun cookie de mesure » seul se lirait
- * « aucune mesure ». L'empreinte d'IP y figure comme donnée personnelle :
- * hacher pseudonymise, n'anonymise pas.
- *
- * La base du rappel quotidien est le contrat, pas le consentement, parce que
- * `dailyReminderEnabled` vaut vrai à la création du compte : un consentement
- * pré-coché n'en est pas un. Passer ce défaut à faux changerait cette ligne.
+ * Les chiffres suivent le code et se changent avec lui : sept jours =
+ * `JOURS_AVANT_OUBLI`, six heures = fenêtre de restauration de la base de prod.
+ * L'audience a sa rubrique : « aucun cookie de mesure » se lirait « aucune
+ * mesure ». L'empreinte d'IP est une donnée personnelle : hacher pseudonymise.
+ * Le rappel repose sur le contrat : `dailyReminderEnabled` est vrai par défaut,
+ * et un consentement pré-coché n'en est pas un.
  */
 type Espace = Messages["legal"]["confidentialite"];
 type Cle = MessageKeys<Espace, NestedKeyOf<Espace>>;

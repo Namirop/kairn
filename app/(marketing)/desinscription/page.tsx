@@ -14,16 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("meta"), robots: { index: false } };
 }
 
-/**
- * Confirmation de désinscription.
- *
- * L'affichage ne modifie rien : les scanners de messagerie ouvrent les liens
- * des emails, et une désinscription déclenchée par un robot serait une
- * désinscription qu'on n'a pas demandée. Seul le bouton écrit.
- *
- * Un jeton invalide a son propre titre : l'écran dit d'abord ce qui s'est
- * passé, puis ouvre les réglages.
- */
+/** L'affichage n'écrit rien, le bouton seul : les scanners de messagerie ouvrent les liens. */
 export default async function PageDesinscription({
   searchParams,
 }: {

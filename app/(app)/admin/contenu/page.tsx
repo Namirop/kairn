@@ -10,9 +10,8 @@ import { JOURS_MONTRES, lireLesVolumes } from "@/lib/db/administration";
 export const metadata: Metadata = { title: "Contenu · Administration" };
 
 /**
- * Ce qui est entré dans le produit, et ce que le découpage en a tiré. La
- * moyenne de concepts par dépôt est la mesure clé : elle chute avec les rejets
- * et grimpe avec les articles entiers, ce que les compteurs bruts confondent.
+ * Mesure clé : la moyenne de concepts par dépôt, qui chute avec les rejets et
+ * grimpe avec les articles entiers, ce que les compteurs bruts confondent.
  */
 export const dynamic = "force-dynamic";
 

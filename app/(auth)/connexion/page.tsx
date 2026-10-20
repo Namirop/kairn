@@ -26,17 +26,14 @@ export default async function PageConnexion({
   const brut = parametres[PARAMETRE_DE_SUITE];
   const suite = cheminDeSuite(Array.isArray(brut) ? brut[0] : brut) ?? ROUTES.aujourdhui;
 
-  // Déjà connecté : on le mène là où il allait, sans lui redemander un code.
   if (await lireLUtilisateur()) redirect(suite);
 
   const t = await getTranslations("compte.connexion");
-  // La politique de confidentialité a sa version anglaise : on mène à celle qu'on lit.
   const confidentialite = adressePublique(ROUTES.confidentialite, await langueDeLaRequete());
 
   return (
     <div className="gap-pas-6 md:gap-pas-8 flex flex-col">
-      {/* Pas de chapeau : le mécanisme du code est expliqué une fois, sous le
-          champ, dans le formulaire. */}
+      {/* Pas de chapeau : le code s'explique une fois, sous le champ. */}
       <h1 className="text-h1-app leading-tight font-bold">{t("titre")}</h1>
 
       <FormulaireConnexion suite={suite} />
@@ -50,8 +47,8 @@ export default async function PageConnexion({
         </div>
       ) : null}
 
-      {/* Le rappel quotidien est actif dès la création du compte (base légale :
-          le contrat). Il s'annonce ici, au moment où l'on s'engage. */}
+      {/* Le rappel est actif dès la création (base légale : le contrat) : il
+          s'annonce au moment où l'on s'engage. */}
       <p className="text-petit text-stone-500">
         {t.rich("consentement", {
           lien: (morceau) => (

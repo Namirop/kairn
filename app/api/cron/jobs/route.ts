@@ -7,34 +7,25 @@ import { oublierLesEnvoisDeCodeClos } from "@/lib/db/envois-de-code";
 import { executerLeJob, type IssueDuJob } from "@/lib/jobs/runner";
 
 /**
- * Reprise des jobs : ferme ceux qui ont épuisé leurs tentatives (`TENTATIVES_MAX`),
- * puis rattrape ceux restés en attente et ceux bloqués « en cours » depuis
- * `BLOCAGE_APRES_MS`. Appelée par un déclencheur externe, authentifiée par
- * CRON_SECRET.
+ * Ferme les jobs épuisés, puis rattrape ceux en attente ou bloqués « en cours ».
+ * Déclencheur externe, authentifié par CRON_SECRET.
  */
 
 export const dynamic = "force-dynamic";
 
 /**
- * Soixante secondes, le plafond du palier d'hébergement gratuit : le passage
- * enchaîne des appels modèle. Sans cette déclaration, la fonction est coupée
- * bien plus tôt, au milieu d'un job, et la file ralentit sans aucune erreur.
+ * Plafond du palier gratuit. Sans cette déclaration, la fonction est coupée bien
+ * plus tôt, au milieu d'un job, et la file ralentit sans erreur.
  */
 export const maxDuration = 60;
 
-/**
- * Borne le travail d'un passage. À relever si la file prend du retard, en même
- * temps que `maxDuration` : l'une sans l'autre ne sert à rien.
- */
+/** À relever avec `maxDuration` si la file prend du retard : l'un sans l'autre ne sert à rien. */
 const JOBS_PAR_PASSAGE = 3;
 
 /**
- * Au-delà, on ne commence plus de job : il ne finirait pas dans la minute.
- *
- * Un job prend de 8 à 43 secondes (médiane 20) : trois d'affilée débordent, et
- * un passage coupé laisse un job « en cours » qui a peut-être payé son appel
- * sans rien écrire. Vingt secondes laissent les quarante restantes au job
- * qu'on démarre, ce qui couvre le neuvième décile. Le premier part toujours.
+ * Au-delà, on ne commence plus de job. Un job prend 8 à 43 s (médiane 20), et un
+ * passage coupé laisse un job « en cours » qui a peut-être payé son appel sans
+ * rien écrire : 40 s restantes couvrent le neuvième décile. Le premier part toujours.
  */
 const BUDGET_DE_DEPART_MS = 20_000;
 
@@ -45,8 +36,8 @@ export async function GET(request: Request) {
   }
 
   const abandonnes = await fermerLesJobsEpuises();
-  // Les essais que personne n'a réclamés : personne n'a accepté que leur texte
-  // reste. Les cascades emportent les concepts.
+  // Essais non réclamés : personne n'a accepté que leur texte reste. Les cascades
+  // emportent les concepts.
   const visitesOubliees = await oublierLesVisitesAbandonnees();
   await oublierLesEnvoisDeCodeClos();
   const jobs = await trouverLesJobsAReprendre(JOBS_PAR_PASSAGE);
@@ -77,7 +68,7 @@ export async function GET(request: Request) {
     termines: comptes.DONE,
     echoues: comptes.FAILED,
     ignores: comptes.SKIPPED,
-    // Plafond du jour plein : revenus intacts à la file, ce n'est pas un échec.
+    // Plafond du jour plein : rendus intacts à la file, pas un échec.
     reportes: comptes.REPORTE,
     abandonnes,
     visitesOubliees,

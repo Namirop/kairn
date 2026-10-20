@@ -9,11 +9,8 @@ import { lireLUtilisateur } from "@/lib/auth/session";
 import { basculerLeTraitement } from "@/lib/db/retour";
 
 /**
- * Marquer un retour lu, ou le remettre à lire : un retour classé par erreur ne
- * doit pas disparaître pour de bon.
- *
- * L'autorisation est revérifiée ici et pas seulement à l'affichage : une Server
- * Action est une route, atteignable sans passer par l'écran qui la propose.
+ * Une bascule : un retour classé par erreur ne disparaît pas pour de bon.
+ * Autorisation revérifiée : une Server Action est atteignable sans l'écran.
  */
 
 const CHAMPS = z.object({ id: z.string().min(1) });

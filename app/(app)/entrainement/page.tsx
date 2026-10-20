@@ -13,10 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("entrainement") };
 }
 
-/**
- * L'entraînement libre. Recalculé à chaque visite : deux ouvertures d'affilée
- * ne doivent pas resservir les mêmes questions.
- */
+/** Deux ouvertures d'affilée ne doivent pas resservir les mêmes questions. */
 export const dynamic = "force-dynamic";
 
 export default async function PageEntrainement() {

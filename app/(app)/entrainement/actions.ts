@@ -7,10 +7,7 @@ import { prendreUnGeste } from "@/lib/db/limite-de-gestes";
 import { lireFuseauUtilisateur, marquerPrincipeVu } from "@/lib/db/reglages-du-compte";
 import type { QuestionServie } from "@/lib/db/question-servie";
 
-/**
- * Les gestes de l'entraînement libre. Rien ici ne déplace une échéance : c'est
- * `lib/db/entrainement.ts` qui le garantit, pas cette couche.
- */
+/** Rien ne déplace une échéance : `lib/db/entrainement.ts` le garantit, pas cette couche. */
 
 /** Même plafond qu'en session : un onglet ouvert une nuit ne mesure plus rien. */
 const TEMPS_MAXIMUM_MS = 15 * 60 * 1000;
@@ -40,10 +37,7 @@ export async function sentrainerAction(donnees: PassageDonne): Promise<boolean> 
   return enregistrerEntrainement({ userId: utilisateur.id, ...valide.data });
 }
 
-/**
- * Un tour de plus, sans quitter l'écran. Le geste le plus cher en lecture : il
- * passe par la limite de débit, et sa lecture est bornée côté base.
- */
+/** Le geste le plus cher en lecture : limite de débit, et lecture bornée côté base. */
 export async function tourSuivantAction(): Promise<QuestionServie[]> {
   const utilisateur = await lireLUtilisateur();
 
@@ -56,7 +50,7 @@ export async function tourSuivantAction(): Promise<QuestionServie[]> {
   return lireTourDentrainement(utilisateur.id);
 }
 
-/** L'explication du principe a été vue : une fenêtre qui revient devient un péage. */
+/** Une explication qui revient devient un péage. */
 export async function principeVuAction(): Promise<void> {
   const utilisateur = await lireLUtilisateur();
 

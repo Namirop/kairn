@@ -6,11 +6,7 @@ import type { TexteATrou } from "@/components/revision/use-suite-de-questions";
 import { ZoneDeReponse } from "@/components/revision/zone-de-reponse";
 import type { QuestionServie } from "@/lib/db/question-servie";
 
-/**
- * Une question réelle montée dans un état de réponse figé. Même composition
- * que `DerouleQuestions` ; seul l'état « répondu » est posé en accessoire au
- * lieu de sortir de la machine à états.
- */
+/** Même composition que `DerouleQuestions`, l'état « répondu » posé en accessoire. */
 
 export type EtatDApercu = "juste" | "faux" | "revele";
 
@@ -53,7 +49,7 @@ export function ApercuQuestion({
   );
 }
 
-/** Le premier index qui n'est pas la bonne réponse — l'option cliquée à tort. */
+/** L'option cliquée à tort. */
 function mauvaisIndex(question: QuestionServie): number {
   const bon = question.correctIndex ?? 0;
   const total = question.options?.length ?? 0;
@@ -65,17 +61,12 @@ function mauvaisIndex(question: QuestionServie): number {
   return 0;
 }
 
-/**
- * L'état d'un texte à trou, figé. Requis même hors CLOZE, où `ZoneDeReponse`
- * ne le lit pas. Sur un CLOZE, `comble` fait apparaître le terme attendu comme
- * après une vérification.
- */
+/** Requis même hors CLOZE, où `ZoneDeReponse` ne le lit pas. */
 function trouFige(question: QuestionServie, etat: EtatDApercu): TexteATrou {
   const attendu = question.cloze?.accepted[0] ?? "";
   const verdict =
     question.cloze === null ? null : etat === "faux" ? "RATE" : etat === "juste" ? "JUSTE" : null;
-  // À côté, on montre ce qui a été écrit : un leurre généré fait une saisie
-  // plausible. Sinon rien n'est saisi.
+  // Un leurre généré fait une saisie ratée plausible.
   const saisie = verdict === "RATE" ? (question.cloze?.leurres[0] ?? "…") : "";
 
   return {

@@ -10,9 +10,8 @@ import { COOKIE_DE_LANGUE, LOCALE } from "@/lib/i18n/langues";
 const LANGUE = z.enum(["FR", "EN"]);
 
 /**
- * Change la langue du compte, pour l'interface, les emails et les dépôts à
- * venir : retraduire l'existant coûterait des appels et réécrirait des concepts
- * déjà planifiés. Aussi retenue en cookie, pour la landing et la connexion.
+ * Vaut pour les dépôts à venir : retraduire l'existant coûterait des appels et
+ * réécrirait des concepts planifiés. Le cookie sert la landing et la connexion.
  */
 export async function changerDeLangueAction(langue: unknown): Promise<{ ok: boolean }> {
   const utilisateur = await lireLUtilisateur();

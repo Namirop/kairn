@@ -3,11 +3,8 @@ import { couperLesEmails } from "@/lib/db/reglages-du-compte";
 import { lireLeJetonDeDesinscription } from "@/lib/email/desinscription";
 
 /**
- * Désinscription en un clic, sans session : le jeton signé du lien fait foi.
- *
- * Seul POST écrit, ce qui protège des scanners de messagerie qui suivent les
- * liens à l'ouverture. La page /desinscription poste ce formulaire, et les
- * clients qui gèrent RFC 8058 postent directement ici.
+ * Sans session : le jeton signé fait foi. POST seul, contre les scanners de
+ * messagerie ; la page /desinscription et les clients RFC 8058 postent ici.
  */
 export async function POST(request: Request) {
   const jeton =

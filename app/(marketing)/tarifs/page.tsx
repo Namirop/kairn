@@ -17,16 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("titre"), description: t("description") };
 }
 
-/**
- * Le prix, sur une page publique : elle se partage par lien et se relit sans
- * être connecté. Elle informe, elle n'encaisse pas : l'achat vit dans les
- * réglages, et la carte se saisit chez Stripe.
- */
+/** Informe sans encaisser : l'achat vit dans les réglages, la carte se saisit chez Stripe. */
 export default async function PageTarifs() {
   const connecte = (await lireLUtilisateur()) !== null;
   const t = await getTranslations("site.tarifs");
-  // Premium n'est pas vendu en anglais : ni geste vers l'achat, ni précisions
-  // sur un abonnement qu'on ne peut pas prendre.
+  // Premium n'est pas vendu en anglais : ni achat, ni précisions sur l'abonnement.
   const vendable = (await langueDeLaRequete()) === "FR";
 
   return (
@@ -53,8 +48,7 @@ export default async function PageTarifs() {
           {t("precisions.titre")}
         </h2>
 
-        {/* Ce qui suit doit rester vrai du code : chaque phrase se vérifie dans
-            le produit. */}
+        {/* Chaque phrase doit rester vraie du code. */}
         <div className="mt-pas-8 gap-pas-6 grid">
           <Precision titre={t("precisions.identique.titre")}>
             {t("precisions.identique.texte")}
@@ -76,8 +70,6 @@ export default async function PageTarifs() {
         </div>
 
         <div className="mt-pas-12 gap-pas-4 flex flex-wrap items-center">
-          {/* Sans compte, on commence par essayer ; connecté, on va là où l'on
-              paie. */}
           <Button asChild size="lg">
             <Link href={destination(connecte, vendable)}>
               {connecte
@@ -94,10 +86,7 @@ export default async function PageTarifs() {
   );
 }
 
-/**
- * Où mène le geste du bas. Qui est connecté et ne peut pas acheter dans sa
- * langue retourne à sa journée : les réglages ne lui vendraient rien.
- */
+/** Sans achat possible dans sa langue, retour à la journée : les réglages ne vendraient rien. */
 function destination(connecte: boolean, vendable: boolean): string {
   if (!connecte) return ROUTES.inscription;
 
