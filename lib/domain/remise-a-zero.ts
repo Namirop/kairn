@@ -18,11 +18,9 @@ export function joursAvantLaBascule(aujourdhui: string, finDePeriode: string): n
 }
 
 /**
- * Le moment de la remise à zéro, prêt à être dit.
- *
  * Une échéance proche se compte en jours, une lointaine se nomme : « le 12
- * septembre » situe mieux que « dans 26 jours ». Le domaine choisit la forme ;
- * les mots sont dans `temps.remiseAZero`, la date se formate à l'écran.
+ * septembre » situe mieux que « dans 26 jours ». Les mots sont dans
+ * `temps.remiseAZero`.
  */
 export type RemiseAZero =
   | { quand: "instant" }

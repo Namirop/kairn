@@ -2,14 +2,9 @@ import { TROU } from "./reponse-cloze";
 import { aplati } from "./texte-aplati";
 
 /**
- * Le terme masqué qui déborde sur la phrase qui l'entoure.
- *
- * « Une fenêtre de \_\_\_ semaines », terme « 52 semaines » : la réponse « 52 »
- * est refusée par la comparaison, et l'écran affiche « 52 semaines semaines ».
- * Le mot déjà écrit contre le trou est rendu à la phrase.
- *
- * Réparé à la lecture, comme `etalonLisible`, pour couvrir aussi les questions
- * déjà en base. La prévention vit dans le prompt, la mesure dans
+ * Le terme masqué qui redit un mot déjà écrit contre le trou : « fenêtre de
+ * \_\_\_ semaines », terme « 52 semaines ». Réparé à la lecture pour couvrir les
+ * questions déjà en base ; la prévention vit dans le prompt, la mesure dans
  * `controlerQuestion`.
  */
 
@@ -22,10 +17,7 @@ function mots(texte: string): string[] {
   return texte.split(/\s+/).filter((mot) => motNu(mot).length > 0);
 }
 
-/**
- * Ce qui borde le trou, lu depuis le trou : les mots d'avant à reculons, les
- * mots d'après dans l'ordre. Vide si la phrase n'en porte pas.
- */
+/** Lus depuis le trou : les mots d'avant à reculons, ceux d'après dans l'ordre. */
 function bords(phrase: string): { avant: string[]; apres: string[] } {
   const [avant = "", ...suite] = phrase.split(TROU);
 
@@ -34,7 +26,6 @@ function bords(phrase: string): { avant: string[]; apres: string[] } {
   return { avant: mots(avant).reverse(), apres: mots(suite.join(TROU)) };
 }
 
-/** Deux suites de mots disent-elles la même chose, aux accents et à la casse près ? */
 function memesMots(gauche: readonly string[], droite: readonly string[]): boolean {
   return (
     gauche.length === droite.length &&
@@ -43,11 +34,8 @@ function memesMots(gauche: readonly string[], droite: readonly string[]): boolea
 }
 
 /**
- * Combien de mots le terme partage avec un bord, en partant du trou.
- *
- * Le plus long recouvrement, pas le premier mot : « effet \_\_\_ de bord » avec
- * « effet indésirable de bord » recouvre deux mots sans que « bord » et « de »
- * correspondent. Jamais tous les mots, sinon la réponse serait vide.
+ * Le plus long recouvrement avec le bord, pas le premier mot seul. Jamais tous
+ * les mots, sinon la réponse serait vide.
  */
 function recouvrement(
   terme: readonly string[],
@@ -61,10 +49,7 @@ function recouvrement(
   return 0;
 }
 
-/**
- * Le terme, débarrassé des mots que la phrase répète déjà de part et d'autre du
- * trou : à droite d'abord, puis à gauche sur ce qui reste.
- */
+/** À droite d'abord, puis à gauche sur ce qui reste. */
 export function sansLesBordsDuTrou(phrase: string, terme: string): string {
   const { avant, apres } = bords(phrase);
   const retenus = mots(terme);
@@ -72,8 +57,7 @@ export function sansLesBordsDuTrou(phrase: string, terme: string): string {
   const aDroite = recouvrement(retenus, apres, (suite, k) => suite.slice(suite.length - k));
   const sansLaDroite = retenus.slice(0, retenus.length - aDroite);
 
-  // Le bord gauche se lit du trou vers le début de la phrase ; on retourne donc
-  // la tête du terme pour comparer les deux suites dans le même sens.
+  // Le bord gauche se lit à reculons : la tête du terme est retournée pour suivre.
   const aGauche = recouvrement(sansLaDroite, avant, (suite, k) => suite.slice(0, k).reverse());
 
   return sansLaDroite.slice(aGauche).join(" ");
@@ -91,11 +75,8 @@ export type TexteATrouEnBase = {
 };
 
 /**
- * Le texte à trou tel qu'on le sert.
- *
- * Seule la première forme acceptée, celle que l'écran affiche dans le trou, est
- * rognée ; la forme longue reste acceptée parce qu'elle est juste. Les leurres
- * sont rognés aussi, sans quoi le terme juste se repérerait à sa forme.
+ * La forme longue reste acceptée, elle est juste. Les leurres sont rognés aussi,
+ * sans quoi le terme juste se repérerait à sa forme.
  */
 export function trouSansRedite(cloze: TexteATrouEnBase): TexteATrouEnBase {
   const [attendu, ...autres] = cloze.accepted;

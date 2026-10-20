@@ -1,19 +1,12 @@
 import type { Corps } from "./cairn-physique";
 import type { Pierre } from "./cairn-empilement";
 
-/**
- * Détection du geste sur l'empilement : ce que le pointeur a touché. La chute
- * relève de la simulation (`cairn-physique.ts`).
- */
+/** Ce que le pointeur a touché sur l'empilement ; la chute est dans `cairn-physique.ts`. */
 
 /** Points testés le long du segment parcouru entre deux images. */
 const ECHANTILLONS = 6;
 
-/**
- * Marge ajoutée autour de chaque pierre, en unités de viewBox. Les pierres ont
- * un léger jeu vertical : sans marge, un balayage horizontal passerait dans un
- * interstice sans rien renverser.
- */
+/** En unités de viewBox : sans marge, un balayage passerait entre deux pierres. */
 const TOLERANCE = 1.5;
 
 export type Point = { x: number; y: number };
@@ -33,10 +26,8 @@ function contient(solide: Corps, pierre: Pierre, point: Point): boolean {
 }
 
 /**
- * Pierre traversée par le segment, la plus haute d'abord.
- *
- * On teste le segment, pas le point d'arrivée : un geste rapide saute d'une
- * image à l'autre et traverserait une pierre sans la toucher.
+ * La plus haute pierre traversée. Le segment et pas le point d'arrivée : un
+ * geste rapide traverserait une pierre entre deux images.
  */
 export function pierreTraversee(
   corps: Corps[],

@@ -1,36 +1,20 @@
 import { racineDeMot } from "./racine-de-mot";
 
 /**
- * L'étalon dit-il autre chose que la bonne option ?
- *
- * Sur un format à choix, la bonne option est déjà surlignée : un étalon qui la
- * redit occupe un bloc pour rien. Utilisé par la correction d'un choix et par
- * ce qui suit une pierre jetée.
- *
- * Trois épreuves, dans cet ordre :
- *
- * 1. L'option contient l'étalon : il n'ajoute rien (un vrai ou faux dont
- *    l'étalon est « Faux »).
- * 2. L'étalon ne contient pas l'option : on le montre. Deviner une
- *    reformulation coûterait des faux négatifs, et se taire à tort est pire.
- * 3. L'étalon contient l'option : la longueur du reste tranche.
+ * L'étalon dit-il autre chose que la bonne option, déjà surlignée sur un format
+ * à choix ? S'il est contenu dans l'option, non ; s'il ne la contient pas, on le
+ * montre, car se taire à tort est pire ; sinon, la longueur du reste tranche.
  */
 
 /**
- * Le nombre de mots qu'on peut ajouter à une option sans rien dire (« Elle
- * doit » en fait deux). Sur les questions de production, une seule tombe
- * entre quatre et six mots ajoutés : le seuil n'est pas sur une falaise.
+ * Les mots ajoutables sans rien dire (« Elle doit » en fait deux). En production,
+ * une seule question tombe entre quatre et six : le seuil n'est pas sur une falaise.
  */
 const MOTS_EN_PLUS = 3;
 
 /**
- * Casse, ponctuation, accords et espaces effacés : il ne reste que des racines,
- * pour qu'une recopie qui change un pluriel ou un temps reste une redite. Les
- * deux textes viennent de la même génération, deux racines confondues y sont
- * presque toujours le même mot.
- *
- * Une paraphrase franche n'est pas rattrapée : c'est le prompt qui demande
- * une recopie mot pour mot quand il n'y a aucune cause à énoncer.
+ * Réduit aux racines, pour qu'un pluriel ou un temps changé reste une redite.
+ * Une paraphrase franche n'est pas rattrapée : le prompt demande la recopie.
  */
 function normaliser(texte: string): string {
   return texte
@@ -43,10 +27,7 @@ function normaliser(texte: string): string {
     .join(" ");
 }
 
-/**
- * Le petit tient-il dans le grand, aux mots entiers ? Sans les espaces de
- * garde, « art » se trouverait dans « quatre parties ».
- */
+/** Aux mots entiers : sans les espaces, « art » serait dans « quatre parties ». */
 function contient(grand: string, petit: string): boolean {
   return ` ${grand} `.includes(` ${petit} `);
 }

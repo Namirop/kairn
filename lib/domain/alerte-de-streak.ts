@@ -1,22 +1,11 @@
 import { jourLocal, heureLocale } from "./jour-local";
 
-/**
- * Quand une série est en sursis, et quand le dire. Contrairement au rappel
- * quotidien, l'alerte ne part que si une série est en train d'être perdue : rare,
- * elle est lue le jour où elle part.
- */
+/** Quand une série est en sursis, et quand le dire. */
 
-/**
- * L'heure locale de l'alerte : la journée est jouée, et il reste le temps d'une
- * session avant minuit.
- */
+/** La journée est jouée, et il reste le temps d'une session avant minuit. */
 export const HEURE_DE_LALERTE = 21;
 
-/**
- * Est-ce l'heure d'alerter ce compte-là ? Pas si son rappel quotidien tombe à
- * cette heure ou plus tard : il joue déjà ce rôle, et deux messages partiraient
- * ensemble.
- */
+/** Pas si le rappel quotidien tombe à cette heure ou après : il joue déjà ce rôle. */
 export function estLHeureDeLAlerte(
   maintenant: Date,
   cible: { timezone: string; dailyReminderHour: number },
@@ -27,9 +16,8 @@ export function estLHeureDeLAlerte(
 }
 
 /**
- * La série est-elle en sursis : en cours, sans passage dans la journée civile
- * de la personne ? Les jours se comparent en étiquettes `AAAA-MM-JJ`, insensibles
- * aux changements d'heure.
+ * En cours, sans passage dans la journée locale. Les jours se comparent en
+ * étiquettes `AAAA-MM-JJ`, insensibles aux changements d'heure.
  */
 export function serieEnSursis(
   maintenant: Date,

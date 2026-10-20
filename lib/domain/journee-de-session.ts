@@ -29,17 +29,13 @@ export type JourneeComposee<T extends ConceptCandidat> = {
   dus: number;
 };
 
-/**
- * Les candidats qui ont au moins une formulation posable, avec celles que la
- * rotation juge également bonnes.
- */
+/** Les candidats qui ont une formulation posable, avec celles que la rotation juge égales. */
 export function conceptsProposables<T extends ConceptCandidat>(
   candidats: T[],
   derniereFacetteDe: (concept: T) => string | null,
 ): ConceptProposable<T>[] {
   return candidats.flatMap((atome) => {
-    // Une formulation vide se trie ici : un `not: ""` en SQL laisserait passer
-    // une espace.
+    // Ici et non en SQL : un `not: ""` laisserait passer une espace.
     const equivalentes = variantesEquivalentes(
       atome.variants.filter(questionServable),
       derniereFacetteDe(atome),
@@ -56,14 +52,9 @@ export function composerLaJournee<T extends ConceptCandidat>(
   fuseau: string,
   reste: number,
 ): JourneeComposee<T> {
-  /*
-    La journée est composée avant de choisir les formulations : la requête
-    ramène 36 h d'avance, et répartir les formats sur tous les candidats ferait
-    consommer des QCM par des concepts dus demain.
-
-    Le répartiteur reçoit l'ordre des identifiants, pas celui de l'urgence : le
-    glouton en dépend, et une session doit se recomposer à l'identique.
-  */
+  // La journée avant les formulations : la requête ramène 36 h d'avance, et des
+  // concepts dus demain consommeraient des QCM. Le répartiteur reçoit l'ordre des
+  // ids, pas de l'urgence, pour qu'une session se recompose à l'identique.
   const proposables = conceptsProposables(candidats, derniereFacetteDe);
 
   const dus = proposables.filter((concept) => estServableAujourdhui(concept, maintenant, fuseau));

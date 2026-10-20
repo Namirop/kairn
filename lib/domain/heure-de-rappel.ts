@@ -1,30 +1,18 @@
 import type { LangueDuProduit } from "./langue-du-produit";
 
 /**
- * L'heure du rappel quotidien, telle qu'on l'écrit : un champ libre à lecture
- * tolérante (« 8 », « 08:00 », « 20 h 00 », « 7 pm »).
- *
- * Les minutes ne sont acceptées qu'à zéro : l'envoi ne compare que l'heure
- * locale du compte à celle du réglage, donc « 20 h 30 » ne pourrait pas être
- * tenu, et l'arrondir en silence mentirait.
- *
- * La lecture accepte les deux conventions dans les deux langues ; seule
- * l'écriture suit la langue de l'écran.
+ * L'heure du rappel quotidien, en champ libre à lecture tolérante (« 8 »,
+ * « 20 h 00 », « 7 pm »), les deux conventions dans les deux langues. Les
+ * minutes ne sont acceptées qu'à zéro : l'envoi ne compare que l'heure, et
+ * arrondir « 20 h 30 » en silence mentirait.
  */
 
 export const HEURE_MIN = 0;
 export const HEURE_MAX = 23;
 
-/**
- * Chiffres, un séparateur facultatif — `h` ou `:` —, des minutes facultatives,
- * puis un `am` ou `pm` facultatif, points compris (« p.m. »).
- */
 const ECRITURE = /^(\d{1,2})\s*(?:h|:)?\s*(\d{2})?\s*(?:([ap])\.?\s*m\.?)?\s*$/i;
 
-/**
- * L'heure sur vingt-quatre heures, depuis une heure sur douze. Midi est
- * « 12 pm » et minuit « 12 am » : le piège classique d'une demi-journée.
- */
+/** Midi est « 12 pm » et minuit « 12 am ». */
 function depuisDouzeHeures(heure: number, apresMidi: boolean): number | null {
   if (heure < 1 || heure > 12) return null;
 
@@ -33,7 +21,6 @@ function depuisDouzeHeures(heure: number, apresMidi: boolean): number | null {
   return apresMidi ? base + 12 : base;
 }
 
-/** L'heure lue, ou `null` si ce qui est écrit n'en désigne pas une. */
 export function lireHeureDeRappel(saisie: string): number | null {
   const trouve = ECRITURE.exec(saisie.trim());
 

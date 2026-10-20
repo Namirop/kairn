@@ -3,35 +3,22 @@ import { bornerLeNeuf } from "./part-de-nouveaute";
 import { parUrgence } from "./urgence-de-revision";
 
 /**
- * Ce qui compose une session : ce qui est dû, dans quel ordre, et jusqu'où.
- *
- * Un concept est dû selon le jour civil de l'utilisateur, pas en UTC : à 00 h 30
- * à Paris, une échéance à 23 h 00 UTC la veille est déjà passée pour lui.
- *
- * La session ne se complète jamais avec des concepts non échus : être à jour est
- * un état normal.
+ * Ce qui compose une session. Un concept est dû selon le jour civil de
+ * l'utilisateur, pas en UTC. La session ne se complète jamais avec des concepts
+ * non échus : être à jour est un état normal.
  */
 
 /**
- * Au-delà, la session devient une corvée qu'on abandonne. Le reste est encore
- * dû demain, trié par `parUrgence`.
- *
- * Le plafond porte sur la journée, pas sur une ouverture d'écran : sinon
- * recharger en donnerait vingt de plus. Qui veut continuer a l'entraînement.
+ * Au-delà, la session devient une corvée qu'on abandonne. Par journée et non par
+ * ouverture d'écran, sinon recharger en donnerait vingt de plus.
  */
 export const PLAFOND_SESSION = 20;
 
-/**
- * Ce qu'un compte peut choisir comme plafond. Sous cinq, l'arriéré grossit
- * mécaniquement ; au-delà de cinquante, personne ne tient la session.
- */
+/** Sous cinq, l'arriéré grossit mécaniquement ; au-delà de cinquante, personne ne tient. */
 export const PLAFOND_MIN = 5;
 export const PLAFOND_MAX = 50;
 
-/**
- * Le plafond lu depuis ce qu'on a écrit, ou `null` si ce n'en est pas un.
- * `null` plutôt qu'une exception : l'appelant est un formulaire.
- */
+/** `null` plutôt qu'une exception : l'appelant est un formulaire. */
 export function lirePlafondDeSession(saisie: string): number | null {
   const trouve = /^\s*(\d{1,3})\s*$/.exec(saisie);
 
@@ -48,26 +35,22 @@ export type ConceptDu = {
   id: string;
   due: Date;
   tags: string[];
-  /** Le dépôt d'origine, qui sert de sujet quand le concept n'a pas de tag. */
+  /** Sert de sujet quand le concept n'a pas de tag. */
   inputId: string;
-  /** Dernier passage sur ce concept, quel qu'en ait été le résultat. */
+  /** Quel qu'en ait été le résultat. */
   lastReview: Date | null;
-  /** L'intervalle que ts-fsrs avait prévu, en jours. Zéro pour un concept neuf. */
+  /** En jours. Zéro pour un concept neuf. */
   scheduledDays: number;
 };
 
-/** Vrai si l'échéance tombe au plus tard dans la journée en cours chez l'utilisateur. */
 export function estDu(due: Date, maintenant: Date, fuseau: string): boolean {
   // Au format AAAA-MM-JJ, l'ordre lexicographique est l'ordre chronologique.
   return jourLocal(due, fuseau) <= jourLocal(maintenant, fuseau);
 }
 
 /**
- * Déjà passé aujourd'hui : il ne revient pas aujourd'hui.
- *
- * ts-fsrs replanifie un concept en apprentissage à quelques minutes, donc le
- * même jour civil. Sans cette règle la session le reposerait dans la foulée, et
- * « tu es à jour » ne serait jamais atteignable.
+ * ts-fsrs replanifie un concept en apprentissage à quelques minutes : sans cette
+ * règle, la session le reposerait dans la foulée et ne finirait jamais.
  */
 export function dejaRevuAujourdhui(
   lastReview: Date | null,
@@ -79,11 +62,7 @@ export function dejaRevuAujourdhui(
   return jourLocal(lastReview, fuseau) === jourLocal(maintenant, fuseau);
 }
 
-/**
- * Le prédicat unique « posable aujourd'hui ». Tout ce qui compte des concepts
- * (session, ce qui revient demain, prochaine échéance) passe par ici : deux
- * définitions divergeraient en silence.
- */
+/** Le prédicat unique : tout ce qui compte des concepts passe par ici, deux définitions divergeraient. */
 export function estServableAujourdhui(
   concept: Pick<ConceptDu, "due" | "lastReview">,
   maintenant: Date,
@@ -95,12 +74,7 @@ export function estServableAujourdhui(
   );
 }
 
-/**
- * Le jour civil où ce concept sera posé, que les écrans annoncent.
- *
- * Ce n'est pas son échéance : un concept qui vient d'être revu en porte une
- * dans la journée, mais ne reviendra que demain.
- */
+/** Pas son échéance : un concept revu aujourd'hui en porte une dans la journée, mais revient demain. */
 export function jourOuIlRevient(
   concept: Pick<ConceptDu, "due" | "lastReview">,
   maintenant: Date,
@@ -117,11 +91,8 @@ export function jourOuIlRevient(
 }
 
 /**
- * Ce que la journée servira, décidé avant de savoir sous quelle forme.
- *
- * La répartition des formats doit porter sur cette liste, pas sur les
- * candidats : la requête ramène trente-six heures d'avance, et des concepts dus
- * demain consommeraient des formats sans être servis.
+ * La répartition des formats porte sur cette liste, pas sur les candidats : la
+ * requête ramène trente-six heures d'avance, qui consommeraient des formats.
  */
 export function conceptsDeLaJournee<T extends ConceptDu>(
   concepts: T[],
@@ -129,10 +100,7 @@ export function conceptsDeLaJournee<T extends ConceptDu>(
   fuseau: string,
   plafond: number = PLAFOND_SESSION,
 ): T[] {
-  /*
-    `bornerLeNeuf` et non un `slice` : un concept jamais revu a une urgence
-    infinie, et un gros dépôt prendrait toute la session pendant des jours.
-  */
+  // `bornerLeNeuf` et non un `slice` : le neuf a une urgence infinie.
   return bornerLeNeuf(
     concepts
       .filter((concept) => estServableAujourdhui(concept, maintenant, fuseau))
@@ -141,20 +109,14 @@ export function conceptsDeLaJournee<T extends ConceptDu>(
   );
 }
 
-/**
- * Ce qu'il reste du plafond après ce qui a déjà été fait dans la journée. Zéro
- * veut dire que la journée est faite.
- */
+/** Zéro veut dire que la journée est faite. */
 export function plafondRestant(plafond: number, faitsAujourdhui: number): number {
   return Math.max(0, Math.max(0, plafond) - Math.max(0, faitsAujourdhui));
 }
 
 export type ChargeDuJour = { aujourdhui: number; enAttente: number };
 
-/**
- * Ce que la session sert aujourd'hui, et ce qu'elle reporte : le total échu
- * seul découragerait sans rien apprendre.
- */
+/** Servi et reporté plutôt que le total échu, qui découragerait sans rien apprendre. */
 export function chargeDuJour(dus: number, plafond: number = PLAFOND_SESSION): ChargeDuJour {
   const borne = Math.max(0, plafond);
 

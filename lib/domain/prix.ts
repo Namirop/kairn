@@ -1,12 +1,7 @@
 /**
- * Le prix des deux cadences, en euros : la page de tarifs, l'écran de l'offre et
- * le contrôle de ce que Stripe rapporte lisent le même chiffre.
- *
- * Ce ne sont pas eux qui font payer : est encaissé ce que Stripe a enregistré
- * pour l'identifiant de prix. En cas d'écart, le catalogue Stripe fait foi et
- * cette constante est fausse.
- *
- * Entiers : un prix rond se lit sans décimale.
+ * Le prix affiché des deux cadences, en euros entiers. Ce n'est pas lui qui fait
+ * payer : en cas d'écart, le catalogue Stripe fait foi et cette constante est
+ * fausse.
  */
 
 export const PRIX_MENSUEL = 7;

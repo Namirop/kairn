@@ -1,36 +1,22 @@
 /**
- * Un texte dont les retours à la ligne subis sont recollés.
- *
- * Un texte enroulé à soixante-cinq signes par son éditeur s'afficherait sur une
- * demi-carte. Mais un dépôt porte aussi des retours voulus (listes, puces), à
- * garder. Ce qui les sépare : une ligne coupée par la machine est pleine. On
- * recolle donc une ligne à la suivante seulement quand elle touche le bord du
- * paragraphe.
+ * Recolle les retours à la ligne subis (texte enroulé par un éditeur) et garde
+ * les voulus (listes, puces). Ce qui les sépare : une ligne coupée par la
+ * machine est pleine, elle touche le bord du paragraphe.
  */
 
-/**
- * En deçà, aucun paragraphe n'est recollé. Une liste d'entrées courtes a aussi
- * des lignes régulières ; une machine enroule autour de soixante-dix signes,
- * jamais autour de quarante.
- */
+/** Une machine enroule vers soixante-dix signes ; une liste courte est régulière aussi. */
 const SEUIL_ENROULEMENT = 55;
 
 /**
- * Part de la ligne la plus longue au-delà de laquelle une ligne est « pleine ».
- *
- * Le cas mesuré va de 59 à 67 signes (88 %) ; 0,9 coupait le paragraphe en
- * morceaux. La marge doit encaisser un mot long renvoyé à la ligne suivante.
+ * Le cas mesuré va de 59 à 67 signes (88 %) : la marge encaisse un mot long
+ * renvoyé à la ligne, 0,9 coupait le paragraphe.
  */
 const PART_PLEINE = 0.8;
 
 /**
- * Ce qui ouvre une ligne qu'on ne recolle jamais à la précédente : puce, numéro,
- * tiret, citation, titre (`#` à `######`).
- *
- * `//` protège un extrait de code arrivé sans barrières : un commentaire plein
- * se recollerait à la ligne de code suivante. `|` ouvre une rangée de tableau
- * markdown, pleine par nature ; elle ne demande pas d'espace derrière, une
- * rangée pouvant s'écrire `|fichier|rôle|`.
+ * Jamais recollée à la précédente. `//` protège un extrait de code sans
+ * barrières ; `|` ouvre une rangée de tableau, pleine par nature, sans espace
+ * exigé (`|fichier|rôle|`).
  */
 const OUVRE_UNE_ENTREE = /^\s*(?:\||#{1,6}\s|(?:\/\/|[-*•–—>]|\d{1,3}[.)])\s)/;
 
@@ -38,7 +24,6 @@ function normaliser(texte: string): string {
   return texte.replace(/\r\n?/g, "\n");
 }
 
-/** Recolle un paragraphe, c'est-à-dire une suite de lignes non vides. */
 function recollerUnParagraphe(lignes: string[]): string {
   const plein = Math.max(...lignes.map((ligne) => ligne.trimEnd().length));
 
@@ -58,10 +43,6 @@ function recollerUnParagraphe(lignes: string[]): string {
   return rendu;
 }
 
-/**
- * Le texte, ses coupures subies recollées et ses coupures voulues gardées. Les
- * lignes vides, qui séparent les paragraphes, sont conservées.
- */
 export function lignesRecollees(texte: string): string {
   const lignes = normaliser(texte).split("\n");
   const rendu: string[] = [];

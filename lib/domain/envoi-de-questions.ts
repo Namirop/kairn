@@ -1,22 +1,13 @@
 import { cibleDuVraiOuFaux } from "./vrai-ou-faux";
 
 /**
- * Le message qui part au modèle pour faire écrire les questions d'un groupe.
- *
- * Partagé par le produit (`lib/jobs/redaction-questions.ts`) et le banc
- * (`scripts/evaluation/`) : la sortie référence le rang des concepts, et le banc
- * doit mesurer exactement ce que le produit envoie.
- *
- * La cible du vrai ou faux est dans l'envoi et non dans le prompt système :
- * c'est une décision par question, et le prompt système est mis en cache.
+ * Le message qui fait écrire les questions d'un groupe. Partagé avec le banc
+ * (`scripts/evaluation/`), qui doit mesurer exactement ce que le produit envoie.
+ * La cible du vrai ou faux est ici et non dans le prompt système, mis en cache.
  */
 
 export type ConceptAEnvoyer = {
-  /**
-   * De quoi dériver les tirages de ce concept : l'id de l'Atom en production,
-   * le texte du concept au banc, qui n'écrit rien en base et doit pouvoir
-   * comparer deux passages.
-   */
+  /** L'id de l'Atom en production ; au banc, qui n'écrit rien, le texte du concept. */
   graine: string;
   concept: string;
 };

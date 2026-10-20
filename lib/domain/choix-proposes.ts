@@ -1,14 +1,9 @@
 import { aplati } from "./texte-aplati";
 
 /**
- * Les choix qu'une question ferme propose.
- *
- * Un QCM porte ses options en base ; un vrai ou faux non, ce sont toujours les
- * deux mêmes. Ce fichier les reconstruit et retrouve laquelle est la bonne.
- *
- * Le booléen du `payload` fait foi. Le premier mot de la réponse-étalon
- * (« Vrai », « Faux ») n'est qu'un repli pour d'anciennes lignes sans booléen :
- * le prompt interdit ce verdict en tête de la réponse.
+ * Les choix d'un vrai ou faux, qui n'a pas d'options en base. Le booléen du
+ * `payload` fait foi ; le premier mot de la réponse-étalon n'est qu'un repli
+ * pour d'anciennes lignes, le prompt interdisant ce verdict en tête.
  */
 
 export type ChoixProposes = {
@@ -22,7 +17,6 @@ export const CHOIX_VRAI_FAUX = ["Vrai", "Faux"] as const;
 const INDEX_VRAI = 0;
 const INDEX_FAUX = 1;
 
-/** Le premier mot de la réponse, sans ponctuation, sans accent, en minuscules. */
 function premierMot(answerKey: string): string {
   return (
     aplati(answerKey)
@@ -32,12 +26,7 @@ function premierMot(answerKey: string): string {
   );
 }
 
-/**
- * Les choix d'un vrai ou faux, ou `null` si rien ne dit lequel est le bon.
- *
- * Plutôt que désigner une bonne réponse au hasard, `null` renvoie la question en
- * format ouvert, où la personne juge.
- */
+/** `null` si rien ne dit le bon : la question passe en format ouvert, où la personne juge. */
 export function choixDUnVraiOuFaux(attendu: unknown, answerKey: string): ChoixProposes | null {
   const options = [...CHOIX_VRAI_FAUX];
 

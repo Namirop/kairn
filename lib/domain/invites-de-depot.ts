@@ -1,32 +1,22 @@
 import type { LangueDuProduit } from "./langue-du-produit";
 
 /**
- * Ce qu'on met dans le champ de dépôt quand il est vide.
- *
- * Des exemples volontairement disparates (cuisine, mot étranger, documentation)
- * disent par contraste qu'on peut déposer n'importe quoi, mieux qu'une
- * explication qu'on ne lit pas avant d'agir.
- *
- * Chaque langue a ses propres textes, pas une traduction : un exemple déposé
- * part vraiment au découpage, dans la langue de la personne. « Doch » reste dans
- * les deux, ni le français ni l'anglais n'ayant de mot pour ça.
+ * Ce qu'on met dans le champ de dépôt vide. Des exemples disparates disent qu'on
+ * peut déposer n'importe quoi, mieux qu'une explication qu'on ne lit pas. Chaque
+ * langue a ses textes, pas une traduction : un exemple déposé part vraiment au
+ * découpage.
  */
 
 export type ExempleDeDepot = {
-  /** Ce qui s'affiche sur le bouton : court, et de nature évidente. */
   etiquette: string;
-  /** Ce qui remplit le champ. Du vrai contenu, pas un texte de démonstration. */
+  /** Du vrai contenu, pas un texte de démonstration. */
   texte: string;
 };
 
 /**
- * Les trois exemples du premier dépôt, de trois natures qui ne se recouvrent
- * pas : deux exemples techniques diraient « outil pour développeurs », cinq
- * feraient une liste à lire.
- *
- * Les trois étiquettes doivent tenir sur une ligne de 576 px sous le champ de
- * l'essai : une puce orpheline casse le contraste. Avant d'en allonger une,
- * vérifier qu'elles tiennent encore.
+ * Trois natures qui ne se recouvrent pas : deux exemples techniques diraient
+ * « outil pour développeurs ». Les étiquettes doivent tenir sur une ligne de
+ * 576 px sous le champ de l'essai : vérifier avant d'en allonger une.
  */
 const EXEMPLES_FR: readonly ExempleDeDepot[] = [
   {
@@ -46,10 +36,7 @@ const EXEMPLES_FR: readonly ExempleDeDepot[] = [
   },
 ];
 
-/**
- * Les textes d'invite du champ, tirés à chaque chargement. Chacun nomme une
- * matière différente ; aucun ne donne de consigne de forme.
- */
+/** Chacune nomme une matière différente ; aucune ne donne de consigne de forme. */
 const INVITES_FR: readonly string[] = [
   "Colle ici ce que tu veux retenir. Une phrase, un article, une explication qu'on vient de te donner.",
   "Le passage d'une doc que tu viens de relire pour la troisième fois.",
@@ -61,7 +48,7 @@ const INVITES_FR: readonly string[] = [
   "Une commande que tu retapes toujours de travers.",
 ];
 
-/** Les mêmes en anglais, sous la même contrainte d'une ligne de 576 px. */
+/** Même contrainte d'une ligne de 576 px. */
 const EXEMPLES_EN: readonly ExempleDeDepot[] = [
   {
     etiquette: "A cooking tip",
@@ -101,10 +88,7 @@ export const INVITES_DE_DEPOT: Record<LangueDuProduit, readonly string[]> = {
   EN: INVITES_EN,
 };
 
-/**
- * Une invite, tirée d'un nombre entre 0 et 1. L'appelant tire côté serveur : un
- * tirage côté client casserait l'hydratation.
- */
+/** `tirage` dans [0, 1], tiré côté serveur : côté client, il casserait l'hydratation. */
 export function inviteDeDepot(tirage: number, langue: LangueDuProduit): string {
   const invites = INVITES_DE_DEPOT[langue];
   const bornes = Math.min(Math.max(tirage, 0), 0.999999);

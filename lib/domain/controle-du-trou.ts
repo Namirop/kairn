@@ -5,23 +5,17 @@ import { motsNormalises } from "./mots-normalises";
 import { TROU } from "./reponse-cloze";
 import { trouDevoileSaReponse } from "./trou-devoile";
 
-/**
- * Ce que son format impose à un texte à trou, contrôlé par étapes : le premier
- * manquement trouvé est le seul rendu.
- */
+/** Ce que son format impose à un texte à trou ; seul le premier manquement est rendu. */
 
-/** Le trou fait un à trois mots, jamais une proposition entière. */
+/**
+ * Un trou plus long se reformule au lieu de se retrouver, et la comparaison
+ * échoue sur une réponse juste.
+ */
 export const MOTS_MAX_DU_TROU = 3;
 
 type Cloze = NonNullable<VariantAControler["cloze"]>;
 
-/**
- * Le texte à trou : un seul trou, et ce qui manque tient en trois mots.
- *
- * La longueur se mesure sur la première forme acceptée, le terme masqué. Un
- * trou plus long se reformule au lieu de se retrouver, et la comparaison
- * échoue sur une réponse juste.
- */
+/** La longueur se mesure sur la première forme acceptée, le terme masqué. */
 export function controlerCloze(variant: VariantAControler): Manquement[] {
   const cloze = variant.cloze ?? null;
 
@@ -61,9 +55,8 @@ function termeCourt(_cloze: Cloze, terme: string): string | null {
 }
 
 /**
- * Un terme qui redit un mot posé contre le trou (« de ___ semaines », terme
- * « 52 semaines ») : « 52 », juste, serait compté faux. Réparé à la lecture par
- * `trouSansRedite` ; signalé pour que le banc dise si le prompt tient.
+ * « de ___ semaines », terme « 52 semaines » : « 52 », juste, serait compté
+ * faux. Réparé à la lecture par `trouSansRedite`, signalé pour le banc.
  */
 function termeSansRedite(cloze: Cloze, terme: string): string | null {
   return termeDebordeSurLaPhrase(cloze.sentence, terme)
@@ -72,9 +65,8 @@ function termeSansRedite(cloze: Cloze, terme: string): string | null {
 }
 
 /**
- * Un terme écrit en clair ailleurs dans sa propre phrase : le trou ne demande
- * plus que de recopier. La question marche mais ne teste plus rien, donc rien à
- * réparer à la lecture ; le signalement dit si la consigne du prompt tient.
+ * Le terme écrit ailleurs dans la phrase : il suffit de recopier. Rien à réparer
+ * à la lecture, le signalement sert au banc.
  */
 function termeCache(cloze: Cloze, terme: string): string | null {
   return trouDevoileSaReponse(cloze.sentence, terme)
@@ -83,9 +75,8 @@ function termeCache(cloze: Cloze, terme: string): string | null {
 }
 
 /**
- * Un leurre qui est une forme acceptée met deux bonnes réponses dans l'aide.
- * Signalé sans refus : `pistesDuTrou` retire le doublon à l'affichage, mais un
- * modèle qui le fait souvent doit se voir au banc.
+ * Un leurre accepté met deux bonnes réponses dans l'aide. `pistesDuTrou` le
+ * retire à l'affichage ; signalé pour que le banc voie un modèle qui récidive.
  */
 function leurresFaux(cloze: Cloze): string | null {
   const acceptees = new Set(cloze.accepted.map((forme) => motsNormalises(forme)));
@@ -94,7 +85,6 @@ function leurresFaux(cloze: Cloze): string | null {
   return doublon === undefined ? null : `leurre accepté comme réponse : « ${doublon} »`;
 }
 
-/** Les contrôles du trou, dans l'ordre : le premier qui trouve à redire l'emporte. */
 const ETAPES_DU_TROU: readonly ((cloze: Cloze, terme: string) => string | null)[] = [
   unSeulTrou,
   termeCourt,

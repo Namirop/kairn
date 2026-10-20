@@ -1,13 +1,9 @@
 /**
- * Passage d'un instant au calendrier de l'utilisateur.
- *
- * Toute échéance se calcule en UTC. Le fuseau ne sert qu'à savoir quel jour il
- * est pour lui, et s'il est l'heure de lui écrire.
- *
- * `en-CA` est choisi pour son format de date : il rend `AAAA-MM-JJ`.
+ * Passage d'un instant au calendrier de l'utilisateur. Les échéances restent en
+ * UTC ; le fuseau ne dit que quel jour il est et s'il est l'heure d'écrire.
  */
 
-/** Jour civil de l'utilisateur, au format `AAAA-MM-JJ`. */
+/** `AAAA-MM-JJ`, d'où `en-CA`. */
 export function jourLocal(instant: Date, fuseau: string): string {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: fuseau,
@@ -55,11 +51,8 @@ export function jourSuivant(jour: string): string {
 }
 
 /**
- * Combien de jours civils séparent deux jours locaux. Négatif si le second
- * précède le premier.
- *
- * Par les étiquettes et non par l'écart entre deux instants : hier 22 h et ce
- * matin 8 h font dix heures, mais bien un jour.
+ * Par les étiquettes et non par les instants : hier 22 h et ce matin 8 h font
+ * un jour. Négatif si le second précède le premier.
  */
 export function joursEntre(depuis: string, jusqua: string): number {
   const ecart = jourEnDateUtc(jusqua).getTime() - jourEnDateUtc(depuis).getTime();

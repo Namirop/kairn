@@ -2,17 +2,11 @@ import type { VariantAControler } from "./controle-question";
 import { controlerCloze } from "./controle-du-trou";
 import type { Manquement } from "./manquement";
 
-/**
- * Ce que son format impose à une question : les options d'un MCQ, le trou d'un
- * CLOZE (`controle-du-trou.ts`), la valeur d'un vrai ou faux, et aucune charge sur un format qui n'en
- * porte pas.
- */
+/** Ce que son format impose à une question ; le trou d'un CLOZE vit dans `controle-du-trou.ts`. */
 
 /**
- * L'écart toléré entre la plus longue et la plus courte option d'un MCQ.
  * Signalé seulement si les deux seuils sont dépassés : sur des options courtes
- * le rapport s'envole sans trahir la réponse, sur des longues c'est l'écart
- * absolu qui ne dit rien.
+ * le rapport s'envole sans trahir la réponse, sur des longues l'écart absolu.
  */
 export const ECART_MAX_OPTIONS = 2;
 export const ECART_MINIMUM_SIGNIFICATIF = 30;
@@ -52,11 +46,8 @@ function controlerMcq(variant: VariantAControler): Manquement[] {
 }
 
 /**
- * Le vrai ou faux, relu contre la valeur que l'envoi imposait à cette question :
- * le modèle ne tient pas une proportion demandée globalement.
- *
- * Un écart est un manquement, jamais un refus : la question reste servable,
- * elle est seulement comptée du mauvais côté de la répartition.
+ * Relu contre la valeur imposée à cette question : le modèle ne tient pas une
+ * proportion demandée globalement. Un écart est un manquement, pas un refus.
  */
 function controlerVraiOuFaux(variant: VariantAControler): Manquement[] {
   const rendue = variant.estVraie ?? null;
@@ -83,18 +74,13 @@ function controlerVraiOuFaux(variant: VariantAControler): Manquement[] {
   ];
 }
 
-/**
- * La charge écartée à la relecture. La sortie n'en garde pas trace, d'où le
- * drapeau posé par le schéma ; sans lui, un modèle fautif serait rattrapé en
- * silence indéfiniment.
- */
+/** La sortie ne garde pas trace de la charge écartée : sans ce drapeau, la faute passerait en silence. */
 function controlerCharge(variant: VariantAControler): Manquement[] {
   if (!variant.chargeIgnoree) return [];
 
   return [{ regle: "charge", detail: `une charge jointe à un format ${variant.format}, écartée` }];
 }
 
-/** Tout ce que le format de cette question lui reproche. */
 export function controlerLeFormat(variant: VariantAControler): Manquement[] {
   return [
     ...controlerMcq(variant),

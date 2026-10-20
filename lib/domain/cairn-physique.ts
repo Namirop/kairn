@@ -4,13 +4,9 @@ import { resoudre, type Appui } from "./cairn-resolution";
 import { LARGEUR_VUE, type Pierre } from "./cairn-empilement";
 
 /**
- * Chute des pierres du cairn.
- *
- * L'état d'un corps ne dépend que de son état précédent et du pas de temps,
- * fourni par le composant : le même geste donne la même chute. Ce fichier
- * intègre ; les contacts se résolvent dans `cairn-resolution`.
- *
- * Le repère est celui du viewBox : `y` croît vers le bas, le sol est à zéro.
+ * Chute des pierres du cairn : intégration seule, les contacts se résolvent
+ * dans `cairn-resolution`. Le pas de temps vient du composant, donc le même
+ * geste donne la même chute. Repère du viewBox : `y` vers le bas, sol à zéro.
  */
 
 export type { Cadre } from "./cairn-collision";
@@ -18,38 +14,29 @@ export type { Cadre } from "./cairn-collision";
 export const CADRE_SERRE: Cadre = { gauche: 0, droite: LARGEUR_VUE };
 
 /**
- * Le cairn de la page publique n'a pas de bords. Le dessin n'est pas centré
- * dans la fenêtre : tout bord fini, compté en unités de dessin, tombe soit hors
- * de l'écran soit en travers du texte, et les pierres s'y écrasent contre rien.
- * C'est le frottement au sol qui garantit la fin de la simulation.
+ * Pour la page publique : le dessin n'y est pas centré, et tout bord fini
+ * tomberait hors de l'écran ou en travers du texte. Le frottement au sol suffit
+ * à terminer la simulation.
  */
 export const SANS_BORDS: Cadre = { gauche: -Infinity, droite: Infinity };
 
 /** Unités de viewBox par seconde au carré. */
 const GRAVITE = 300;
 /**
- * Ce qu'il faut pour qu'une pierre soit déclarée posée.
- *
- * Seuils larges : un éboulis résolu par impulsions ne s'arrête jamais tout à
- * fait, et 5 unités/s sont invisibles sur un dessin de 100 de large. Une pierre
- * encore enfoncée dans sa voisine ne s'endort pas, sauf sous `SEUIL_FIGE` :
- * coincée entre un bord et le socle, elle ne peut pas se dégager.
+ * Seuils de pose, larges : un éboulis par impulsions ne s'arrête jamais tout à
+ * fait, et 5 unités/s sont invisibles sur 100 de large. Une pierre enfoncée ne
+ * s'endort que sous `SEUIL_FIGE`, cas d'une pierre coincée qui ne peut se dégager.
  */
 const SEUIL_REPOS = 5;
 const SEUIL_ROTATION = 30;
 const SEUIL_ENFONCEMENT = 0.6;
 const SEUIL_FIGE = 0.35;
 /**
- * Ce qu'une pierre garde de sa vitesse après une seconde de contact, et non
- * d'une image à l'autre : 0,9 par image ferait 0,9^60 par seconde, et la pierre
- * frappée s'arrêterait net en l'air. Élevé au pas de temps, l'amortissement ne
- * dépend pas non plus de la cadence d'affichage.
+ * La vitesse gardée après une seconde de contact, pas par image : élevée au pas
+ * de temps, elle ne dépend pas de la cadence d'affichage.
  */
 const AMORTI_AU_CONTACT = 0.35;
-/**
- * Le frein des pierres déjà lentes, bien plus mordant : il arrête celles qui
- * vibrent sous le seuil de repos sans jamais s'y poser, et garantit la fin.
- */
+/** Plus mordant, pour les pierres lentes qui vibreraient sans jamais se poser. */
 const AMORTI_LENT = 0.02;
 /** Pas de temps maximal : un onglet qui reprend la main ne téléporte rien. */
 const PAS_MAX = 1 / 30;
@@ -89,13 +76,12 @@ export function initialiser(pierres: Pierre[]): Corps[] {
 }
 
 /**
- * Déloge une pierre et tout ce qu'elle portait.
- *
- * Celles du dessus ne reçoivent qu'une part décroissante du coup : à vitesse
+ * Les pierres du dessus reçoivent une part décroissante du coup : à vitesse
  * égale, la pile glisserait d'un bloc au lieu de s'ébouler.
  */
 const SOUFFLE = 0.6;
 
+/** Déloge une pierre et tout ce qu'elle portait. */
 export function renverser(corps: Corps[], index: number, impulsion: Impulsion): Corps[] {
   const sens = impulsion.vx >= 0 ? 1 : -1;
 
@@ -116,10 +102,8 @@ export function renverser(corps: Corps[], index: number, impulsion: Impulsion): 
 }
 
 /**
- * Le corps tel que le solveur le voit. Ce qui n'est pas libre a une masse
- * infinie : le socle ne s'écroule pas sous une pierre qui retombe, la coupure a
- * déjà décidé de ce qui tombe. Les pierres libres (`enMobile`) ont la masse et
- * l'inertie d'un rectangle plein de densité un.
+ * Masse infinie pour ce qui n'est pas libre : le socle ne s'écroule pas sous une
+ * pierre qui retombe, la coupure a déjà décidé de ce qui tombe.
  */
 function enMur(solide: Corps, pierre: Pierre | undefined): Mobile {
   return {
@@ -138,6 +122,7 @@ function enMur(solide: Corps, pierre: Pierre | undefined): Mobile {
   };
 }
 
+/** Un rectangle plein de densité un. */
 function enMobile(solide: Corps, pierre: Pierre, pas: number): Mobile {
   const masse = pierre.largeur * pierre.hauteur;
   const inertie =
@@ -160,21 +145,14 @@ function enMobile(solide: Corps, pierre: Pierre, pas: number): Mobile {
   };
 }
 
-/**
- * Ce que devient une pierre libre une fois les contacts résolus : posée, freinée
- * ou laissée à sa course.
- */
+/** Posée, freinée ou laissée à sa course. */
 function apresLeContact(mobile: Mobile, appui: Appui, pas: number): Corps {
-  // Posée : le reste de vitesse est coupé net, sinon il vibre sous le seuil
-  // et la boucle ne s'arrête jamais.
+  // Posée, la vitesse est coupée net : un reste vibrerait sans fin sous le seuil.
   const vitesse = Math.hypot(mobile.vx, mobile.vy);
   const immobile = vitesse < SEUIL_REPOS && Math.abs(mobile.vr) < SEUIL_ROTATION;
   const posee =
     appui.touche && immobile && (appui.enfoncement < SEUIL_ENFONCEMENT || vitesse < SEUIL_FIGE);
 
-  // Appuyée et déjà lente, elle est freinée jusqu'à l'arrêt : sans ça, une
-  // pierre coincée vibre indéfiniment, trop lente pour se voir et trop vive
-  // pour être déclarée posée.
   const parSeconde = immobile ? AMORTI_LENT : AMORTI_AU_CONTACT;
   const freine = posee || !appui.touche ? 1 : parSeconde ** pas;
 
@@ -190,7 +168,7 @@ function apresLeContact(mobile: Mobile, appui: Appui, pas: number): Corps {
   };
 }
 
-/** Avance la simulation d'un pas. `dt` est en secondes. */
+/** `dt` est en secondes. */
 export function avancer(
   corps: Corps[],
   pierres: Pierre[],
@@ -219,12 +197,10 @@ export function avancer(
   });
 }
 
-/** Vrai quand plus rien ne bouge. */
 export function toutEstPose(corps: Corps[]): boolean {
   return corps.every((solide) => !solide.libre || solide.repos);
 }
 
-/** Vrai quand au moins une pierre est tombée. */
 export function cairnRenverse(corps: Corps[]): boolean {
   return corps.some((solide) => solide.libre);
 }

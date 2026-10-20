@@ -1,12 +1,8 @@
 import type { Boite, Vecteur } from "./cairn-collision";
 
 /**
- * La cinématique d'un solide en deux dimensions : ce qu'une impulsion change à
- * la vitesse et à la rotation d'une pierre. Le choix de l'impulsion vit dans
- * `cairn-resolution`.
- *
- * Le terme de rotation fait basculer une pierre heurtée par un coin au lieu de
- * la faire glisser à plat.
+ * Ce qu'une impulsion change à la vitesse et à la rotation d'une pierre ; son
+ * choix vit dans `cairn-resolution`.
  */
 
 export type Mobile = {
@@ -53,12 +49,7 @@ export function appliquer(mobile: Mobile, point: Vecteur, jx: number, jy: number
   mobile.vr += ((rx * jy - ry * jx) * mobile.inertieInverse * 180) / Math.PI;
 }
 
-/**
- * L'inverse de la masse effective d'un contact le long d'un axe, rotations
- * comprises : la vitesse relative gagnée par unité d'impulsion. Elle croît
- * quand on pousse loin du centre, parce que la pierre peut tourner au lieu de
- * résister.
- */
+/** La vitesse relative gagnée par unité d'impulsion le long d'un axe, rotations comprises. */
 export function masseEffectiveInverse(a: Mobile, b: Mobile, point: Vecteur, axe: Vecteur): number {
   const bras = (mobile: Mobile) =>
     (point.x - mobile.boite.x) * axe.y - (point.y - mobile.boite.y) * axe.x;

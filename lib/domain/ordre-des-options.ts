@@ -1,28 +1,19 @@
 import { tirageDe } from "./tirage-deterministe";
 
 /**
- * L'ordre dans lequel les options d'un QCM sont montrées.
- *
- * Le modèle place la bonne réponse en premier 92 % du temps (52 QCM mesurés),
- * et FSRS lirait comme mémorisées les réussites de qui répond « la première ».
- * Une position aléatoire est une propriété de distribution, qu'un modèle ne
- * tient pas par consigne : c'est le serveur qui décide de l'ordre.
- *
- * La permutation est déterministe, semée : une question garde son ordre entre
- * deux affichages, et le rejeu du banc reste comparable.
+ * L'ordre des options d'un QCM, décidé par le serveur : le modèle place la
+ * bonne réponse en premier 92 % du temps (52 QCM mesurés), et FSRS lirait ce
+ * réflexe de position comme un souvenir. La permutation est semée, pour qu'une
+ * question garde son ordre et que le rejeu du banc reste comparable.
  */
 
 export type OptionsServies = { options: string[]; correctIndex: number };
 
-/**
- * Ce qui peut rester à côté du nombre pour que l'option reste une quantité :
- * « 20 minutes » en est une, « Le scénario tient en 3 actes » non.
- */
+/** « 20 minutes » est une quantité, « Le scénario tient en 3 actes » non. */
 const RESTE_MAXIMUM = 12;
 
 const NOMBRE = /-?\d[\d\s]*(?:[.,]\d+)?/;
 
-/** La valeur d'une option quand l'option est une quantité, sinon rien. */
 function quantite(option: string): number | null {
   const trouve = NOMBRE.exec(option);
 
@@ -37,13 +28,11 @@ function quantite(option: string): number | null {
   return Number.isFinite(valeur) ? valeur : null;
 }
 
-/** Une option qui se souvient d'être la bonne, pour n'avoir plus à compter. */
 type Option = { texte: string; estLaBonne: boolean };
 
 /**
- * Les options triées, quand elles sont toutes des quantités distinctes. Un
- * lecteur attend des nombres dans l'ordre, et le tri ne doit rien non plus à la
- * position d'origine. Deux valeurs égales : on retombe sur le mélange.
+ * Quand toutes sont des quantités distinctes : un lecteur attend des nombres
+ * dans l'ordre, et le tri ne doit rien à la position d'origine.
  */
 function triees(options: Option[]): Option[] | null {
   const mesurees = options.map((option) => ({ option, valeur: quantite(option.texte) ?? NaN }));
@@ -54,10 +43,7 @@ function triees(options: Option[]): Option[] | null {
   return mesurees.sort((un, deux) => un.valeur - deux.valeur).map((mesure) => mesure.option);
 }
 
-/**
- * Tirage sans remise dans le paquet des options : chaque ordre est aussi
- * probable, et la suite est entièrement décidée par la graine.
- */
+/** Tirage sans remise : chaque ordre est équiprobable et décidé par la graine. */
 function melangees(options: Option[], graine: string): Option[] {
   const tirage = tirageDe(graine);
   const restantes = [...options];

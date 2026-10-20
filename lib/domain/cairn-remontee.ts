@@ -2,15 +2,11 @@ import { poser, type Corps } from "./cairn-physique";
 import type { Pierre } from "./cairn-empilement";
 
 /**
- * Le retour du cairn à sa forme : une interpolation, pas une simulation. La
- * chute est de la physique ; la reconstruction est une animation, sans
- * collisions entre pierres qui remontent.
- *
- * Chaque pierre revient à une vitesse proportionnelle à l'écart restant : elles
- * arrivent ensemble.
+ * Le retour du cairn à sa forme : une interpolation, sans collisions. Vitesse
+ * proportionnelle à l'écart restant, pour que les pierres arrivent ensemble.
  */
 
-/** Ce qu'il reste d'écart quand on considère qu'une pierre est rentrée. */
+/** L'écart sous lequel une pierre est rentrée. */
 const ARRIVEE = 0.3;
 const ARRIVEE_ANGLE = 0.5;
 /** Vitesse du rappel, en fraction de l'écart restant par seconde. */

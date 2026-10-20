@@ -1,13 +1,9 @@
 import type { LangueDuProduit } from "./langue-du-produit";
 
 /**
- * La langue dans laquelle parler à quelqu'un qu'on ne connaît pas encore.
- *
- * D'abord le choix explicite gardé en cookie, puis `Accept-Language`, qui dit
- * ce que le navigateur lit et non le pays d'où l'on se connecte.
- *
- * Le français par défaut quand rien ne tranche : c'est la langue d'origine, la
- * seule où chaque texte a été relu par quelqu'un qui la parle.
+ * La langue d'un visiteur inconnu : le cookie, puis `Accept-Language` (ce que le
+ * navigateur lit, pas le pays). Le français par défaut : seule langue où chaque
+ * texte a été relu par quelqu'un qui la parle.
  */
 
 const LANGUES: readonly LangueDuProduit[] = ["FR", "EN"];
@@ -34,13 +30,7 @@ function lirePreference(morceau: string, rang: number): Preference | null {
   return Number.isFinite(poids) && poids > 0 ? { langue, poids, rang } : null;
 }
 
-/**
- * La première langue du produit dans l'ordre de préférence du navigateur.
- *
- * Pas seulement la première de la liste : « pt-PT, en;q=0.8 » doit donner
- * l'anglais, pas le français par défaut. À poids égal, l'ordre d'écriture
- * départage.
- */
+/** Pas seulement la première de la liste : « pt-PT, en;q=0.8 » doit donner l'anglais. */
 export function langueDuNavigateur(
   acceptLanguage: string | null | undefined,
 ): LangueDuProduit | null {

@@ -3,24 +3,13 @@ import { type ElementDeProse, elementsDeProse } from "./structure-de-prose";
 import { segmentsEnGras } from "./texte-en-gras";
 
 /**
- * Les premiers mots d'un dépôt, ses marques de markdown retirées, pour l'aperçu
- * de deux lignes de la liste des dépôts.
- *
- * Deux lignes ne peuvent pas rendre une structure : on la met à plat, les
- * morceaux séparés par le point médian du produit.
- *
- * Les accents graves survivent exprès : c'est le rendu qui relève les termes de
- * code.
+ * L'aperçu de deux lignes d'un dépôt dans la liste : structure mise à plat,
+ * marques retirées. Les accents graves survivent exprès, le rendu relève le code.
  */
 
-/** Ce qui sépare deux morceaux mis à plat. Le point médian de la liste. */
 const SEPARATEUR = " · ";
 
-/**
- * Ce qu'on lit avant de couper : mettre à plat coûte au prorata du texte, pour
- * deux lignes affichées. De quoi remplir l'aperçu même si les marques en mangent
- * la moitié.
- */
+/** Assez pour remplir deux lignes même si les marques en mangent la moitié. */
 const PREFIXE = 1200;
 
 function sansGras(texte: string): string {

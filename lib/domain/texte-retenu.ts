@@ -1,28 +1,15 @@
 /**
- * Ce qui reste d'un dépôt quand sa consigne en écarte une partie.
- *
- * L'Input n'est jamais modifié : ceci est une vue rangée à côté, que l'écran
- * du dépôt montre à la place du texte entier pour ne pas faire relire ce que
- * la consigne a écarté. Une régénération repart du texte d'origine.
- *
- * Le modèle doit recopier, pas réécrire : chaque ligne rendue doit se
- * retrouver mot pour mot dans le dépôt, sinon on retombe sur le texte entier,
- * sans rattrapage. Les blancs sont normalisés, car un modèle qui recopie
- * replie ses lignes autrement.
+ * Ce qui reste d'un dépôt quand sa consigne en écarte une partie : une vue à
+ * côté de l'Input, qui n'est jamais modifié. Chaque ligne rendue doit se
+ * retrouver mot pour mot dans le dépôt, sinon on retombe sur le texte entier ;
+ * les blancs sont normalisés, un modèle qui recopie replie ses lignes autrement.
  */
 
-/** Les blancs, quels qu'ils soient, ramenés à un espace unique. */
 function normaliser(texte: string): string {
   return texte.replace(/\s+/g, " ").trim();
 }
 
-/**
- * La part du dépôt que la consigne a laissée, ou `null` s'il n'y a rien à
- * montrer de différent.
- *
- * `null` (pas de rendu, rendu vide, rendu égal au dépôt, rendu infidèle) :
- * l'écran affiche le texte d'origine.
- */
+/** `null` quand il n'y a rien de différent ou de fidèle à montrer : l'écran affiche l'original. */
 export function texteRetenu(source: string, rendu: string | null | undefined): string | null {
   if (!rendu) return null;
 

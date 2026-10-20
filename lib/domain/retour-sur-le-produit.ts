@@ -1,12 +1,7 @@
 /**
- * Ce qu'on accepte d'un retour sur le produit, et ce qu'on en garde.
- *
- * Seul le message est obligatoire : chaque champ imposé en plus fait renoncer
- * une partie des gens.
- *
- * Les bornes ne jugent pas la qualité du retour : elles empêchent que ce texte
- * libre, écrit par n'importe quel compte et lu dans un écran d'administration,
- * devienne une porte d'entrée.
+ * Ce qu'on accepte d'un retour sur le produit. Seul le message est obligatoire :
+ * chaque champ imposé fait renoncer des gens. Les bornes ne jugent pas la
+ * qualité : ce texte libre est lu dans un écran d'administration.
  */
 
 /** Laisse passer « ça bug », arrête une frappe accidentelle. */
@@ -18,18 +13,13 @@ export const MESSAGE_MAX = 2000;
 /** Le nom d'un écran, pas le récit de ce qu'on y faisait. */
 export const ECRAN_MAX = 120;
 
-/**
- * Retours acceptés d'un même compte sur vingt-quatre heures glissantes : assez
- * pour une session de test intensive, trop peu pour qu'un script remplisse la
- * table.
- */
+/** Sur vingt-quatre heures glissantes : assez pour tester, trop peu pour un script. */
 export const RETOURS_PAR_JOUR = 20;
 
 export function peutEncoreEnvoyer(dejaEnvoyes: number): boolean {
   return dejaEnvoyes < RETOURS_PAR_JOUR;
 }
 
-/** Le message sans ses espaces de bord, ou `null` s'il sort des bornes. */
 export function lireLeMessage(saisie: string): string | null {
   const propre = saisie.trim();
 
@@ -38,20 +28,13 @@ export function lireLeMessage(saisie: string): string | null {
   return propre;
 }
 
-/** L'écran nommé, coupé à sa borne, ou `null` s'il n'a pas été rempli. */
 export function lireLEcran(saisie: string): string | null {
   const propre = saisie.trim();
 
   return propre.length === 0 ? null : propre.slice(0, ECRAN_MAX);
 }
 
-/**
- * Ce qui rend un défaut d'affichage reproductible, en une ligne : la taille de
- * la fenêtre, puis le navigateur coupé court.
- *
- * Aucune donnée personnelle ne doit y entrer : ni adresse, ni contenu déposé,
- * ni identifiant.
- */
+/** De quoi reproduire un défaut d'affichage, et aucune donnée personnelle. */
 export function resumerLeContexte(largeur: number, hauteur: number, agent: string): string | null {
   const fenetre =
     Number.isFinite(largeur) && Number.isFinite(hauteur) && largeur > 0 && hauteur > 0

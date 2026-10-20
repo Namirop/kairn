@@ -13,10 +13,8 @@ const LARGEUR_BASE = 60;
 /** Un vrai cairn s'affine en montant. */
 const AFFINEMENT = 0.45;
 /**
- * De combien chaque pierre mord celle du dessous. Les arêtes penchées et la
- * rotation écartent le contact apparent : trop peu, un liseré de fond passe et
- * les pierres lévitent ; trop, la pile devient un bloc. Le remplissage opaque
- * cache le chevauchement.
+ * De combien chaque pierre mord celle du dessous : trop peu, les arêtes
+ * penchées laissent passer un liseré et les pierres lévitent ; trop, un bloc.
  */
 const CHEVAUCHEMENT = 0.9;
 const MARGE_HAUTE = 6;
@@ -47,12 +45,8 @@ function arrondi(valeur: number): number {
 }
 
 /**
- * Quadrilatère taillé : flancs pincés vers le haut, arêtes penchées, coins mordus
- * inégalement puis adoucis. C'est la somme des trois qui évite le rectangle
- * arrondi.
- *
- * Exporté pour la marque, dont la pierre du point du i a ses propres
- * proportions.
+ * Flancs pincés, arêtes penchées, coins mordus inégalement : c'est la somme des
+ * trois qui évite le rectangle arrondi. Exporté pour la pierre du point du i.
  */
 export function tailler(largeur: number, hauteur: number, tirage: () => number): string {
   const bas = largeur / 2;
@@ -100,8 +94,7 @@ export function empiler(nombre: number, graines?: string[]): Empilement {
     const progression = total === 1 ? 0 : index / (total - 1);
     const largeur = LARGEUR_BASE * (1 - progression * AFFINEMENT) * (0.86 + tirage() * 0.24);
     const hauteur = 10 + tirage() * 9;
-    // L'assise devient plus hasardeuse en montant : décalage et inclinaison
-    // suivent la hauteur.
+    // L'assise devient plus hasardeuse en montant.
     const instabilite = 0.35 + progression * 0.65;
 
     const chemin = tailler(largeur, hauteur, tirage);

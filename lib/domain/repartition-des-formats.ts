@@ -1,30 +1,15 @@
 /**
- * Comment une session choisit, parmi ce que la rotation lui laisse, de quoi
- * varier les gestes de sa journée.
- *
- * La rotation choisit concept par concept, et à égalité c'est l'identifiant qui
- * tranchait. Or les variantes d'un concept naissent d'un même `createMany` : le
- * plus petit identifiant désigne partout la même position, donc souvent le même
- * format pour toute une session.
- *
- * Ce module ne choisit qu'à l'intérieur de l'ensemble que la rotation déclare
- * également bon : il n'affaiblit aucune règle de mémoire. Le format départage
- * avant la facette parce que c'est lui qui se voit à l'écran ; l'ordre reçu en
- * dernier.
- *
- * Déterministe : une session rechargée se recompose à l'identique.
+ * Varie les formats d'une session parmi les variantes que la rotation juge
+ * également bonnes, sans affaiblir aucune règle de mémoire. Sans ça, l'identifiant
+ * départagerait, et un même `createMany` donnerait le même format partout. Le
+ * format passe avant la facette parce qu'il se voit. Déterministe.
  */
 
 import { gesteDeReponse, type GesteDeReponse } from "./geste-de-reponse";
 
 /**
- * Ce que coûte une question, compté en questions.
- *
- * Égaliser les formats à l'unité tire chacun vers le quart, et promeut donc
- * l'explication (environ 15 % de ce qui est écrit) au détriment du QCM. Or une
- * question qu'on formule et se note soi-même pèse bien plus qu'un choix. Elle
- * compte double : à l'équilibre elle retombe autour de sa part écrite, sans
- * disparaître.
+ * Égaliser à l'unité tirerait l'explication (15 % de l'écrit) vers le quart, or
+ * formuler pèse bien plus que choisir. Comptée double, elle retombe vers sa part.
  */
 const COUT: Record<GesteDeReponse, number> = { CHOISIR: 1, SAISIR: 1, FORMULER: 2 };
 
@@ -32,7 +17,6 @@ function coutDe(format: string): number {
   return COUT[gesteDeReponse(format)];
 }
 
-/** Le strict nécessaire pour répartir : ce qui se voit, et ce qui se compte. */
 export type VarianteRepartissable = {
   id: string;
   format: string;
@@ -40,10 +24,8 @@ export type VarianteRepartissable = {
 };
 
 /**
- * Ce qu'un concept propose, dans l'ordre où la rotation les a rendues.
- *
- * Un tableau vide (concept sans question servable) ressort tel quel, pour que
- * l'appelant garde l'alignement avec sa propre liste.
+ * Dans l'ordre de la rotation. Un concept sans candidate rend `undefined` à sa
+ * place, pour que l'appelant garde l'alignement avec sa propre liste.
  */
 export type ChoixDunConcept<T extends VarianteRepartissable> = T[];
 
@@ -67,12 +49,8 @@ function moinsServi<T extends VarianteRepartissable>(
 }
 
 /**
- * Une variante par concept, choisies pour que la session ne se répète pas.
- *
- * Glouton, assumé : chaque concept, dans l'ordre reçu, sert le format le moins
- * vu jusque-là. Un optimum global ne se verrait pas à l'écran.
- *
- * L'ordre reçu compte donc : c'est à l'appelant de le rendre stable.
+ * Glouton, assumé : un optimum global ne se verrait pas à l'écran. L'ordre reçu
+ * compte donc, à l'appelant de le rendre stable.
  */
 export function repartirLesFormats<T extends VarianteRepartissable>(
   choix: ChoixDunConcept<T>[],
@@ -85,8 +63,7 @@ export function repartirLesFormats<T extends VarianteRepartissable>(
 
     if (!retenue) return undefined;
 
-    // Le format se compte en effort, la facette à l'unité : une facette est un
-    // angle, pas un effort.
+    // Une facette est un angle, pas un effort : elle se compte à l'unité.
     formats.set(retenue.format, (formats.get(retenue.format) ?? 0) + coutDe(retenue.format));
     facettes.set(retenue.facet, (facettes.get(retenue.facet) ?? 0) + 1);
 

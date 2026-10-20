@@ -12,12 +12,8 @@ import { renvoiAuConcept } from "./renvoi-au-concept";
 const MOTS_MINIMUM_POUR_CITER = 3;
 
 /**
- * Un texte de question qui est une coquille : « placeholder » ou consigne
- * générique qui ne redit rien de la question réelle. Invisible à l'écran pour
- * un CLOZE, elle fausse pourtant la mesure du radotage (paires identiques).
- *
- * `lib/ai/schemas/generate-variants.ts` dérive déjà la question d'un CLOZE ; ce
- * contrôle attrape le reste. Signalé, pas refusé.
+ * Une coquille à la place de la question. Invisible à l'écran pour un CLOZE,
+ * elle fausse pourtant la mesure du radotage. Signalée, pas refusée.
  */
 const COQUILLES = [
   /^placeholder\d*$/i,
@@ -55,10 +51,7 @@ function controlerCoquille(variant: VariantAControler): Manquement[] {
 }
 
 /**
- * La question qui renvoie au concept (« mentionné dans le concept »), que
- * l'écran de révision ne montre jamais puisqu'il donnerait la réponse.
- *
- * On lit ce qui s'affiche, comme pour les coquilles. Signalé, jamais refusé :
+ * Un renvoi au concept, que la révision ne montre jamais. Signalé, pas refusé :
  * la tournure est maladroite, pas fausse, et jeter l'appel coûterait plus.
  */
 function controlerRenvoi(variant: VariantAControler): Manquement[] {

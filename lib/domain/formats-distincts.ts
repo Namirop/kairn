@@ -1,11 +1,7 @@
 /**
- * Ne montrer qu'une question par format, à l'affichage de l'essai de la
- * landing, où les questions côte à côte prouvent la rotation.
- *
- * La génération peut légitimement rendre deux Variants du même format (sans
- * code à citer, il ne reste que trois formats vérifiables), mais deux textes à
- * trou côte à côte ruinent la démonstration. Les Variants restent tous en
- * base.
+ * Une question par format dans l'essai de la landing, qui montre la rotation.
+ * Deux Variants du même format sont légitimes (sans code à citer, il reste trois
+ * formats vérifiables) et restent en base, mais ruinent la démonstration.
  */
 
 export function unParFormat<T extends { format: string }>(questions: T[]): T[] {

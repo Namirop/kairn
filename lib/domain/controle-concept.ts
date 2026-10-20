@@ -1,17 +1,9 @@
 import type { Manquement } from "./manquement";
 
-/**
- * Ce qui se vérifie sur le texte d'un concept : se comprend-il seul, et cite-t-il
- * du code.
- */
-
 /*
-  Les deux langues sont lues ensemble : les motifs ne se recouvrent pas, et
-  passer la langue ouvrirait la possibilité de la passer mal en silence.
-
-  L'anglais est lu plus étroitement : « above », « previously » y sont aussi des
-  mots de prose (« above 40 °C »). On ne retient que les tournures qui ne
-  désignent qu'un passage absent.
+  Les deux langues sont lues ensemble : passer la langue permettrait de la passer
+  mal en silence. L'anglais est lu plus étroitement, « above » y étant aussi un
+  mot de prose (« above 40 °C »).
 */
 const RENVOIS = [
   /ci-dessus|ci-dessous|ci-avant|plus haut dans|comme vu|comme expliqué|précédemment|le précédent|la précédente|susmentionné|évoqué plus haut/i,
@@ -24,22 +16,16 @@ const OUVERTURES_REPRISES = [
   /^(it|its|they|their|this|these|those|that|he|she)\b/i,
 ];
 
-/**
- * « Il faut », « it is possible » : le pronom est impersonnel. « It is » laisse
- * passer « It is a framework », qui reprend bien un absent : prix accepté pour
- * un contrôle qui mesure, payé aussi par « il est ».
- */
+/** « It is a framework » passe à tort, comme « il est » : prix accepté pour un contrôle qui mesure. */
 const OUVERTURES_IMPERSONNELLES = [
   /^il (faut|existe|est|y a|n'y a|s'agit|suffit|vaut|arrive|reste)\b/i,
   /^it(?:'s| is| was| takes| seems| appears| helps| pays| depends| matters| turns out)\b/i,
 ];
 
 /**
- * Ce qui déclenche la règle CODE du prompt : une citation, pas un jugement sur
- * le sujet. Sert à mesurer, pas à sanctionner.
- *
- * L'extraction écrit rarement des accents graves (« L'instruction COPY ») : les
- * marqueurs suivent le code tel qu'il est réellement écrit.
+ * Ce qui déclenche la règle CODE du prompt, pour mesurer et non sanctionner.
+ * L'extraction écrit rarement des accents graves : les marqueurs suivent le code
+ * tel qu'il est écrit (« L'instruction COPY »).
  */
 const CITATIONS_DE_CODE = [
   /`[^`]+`/, // un fragment entre accents graves
