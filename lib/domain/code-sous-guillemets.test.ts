@@ -22,6 +22,12 @@ describe("estUnTermeDeCode", () => {
     }
   });
 
+  it("relève une constante ou un paramètre en souligné", () => {
+    for (const terme of ["DATABASE_URL", "max_tokens", "__init__"]) {
+      expect(estUnTermeDeCode(terme)).toBe(true);
+    }
+  });
+
   /** Ce que la consigne d'origine visait : un mot cité dans sa langue. */
   it("laisse un mot étranger entre guillemets", () => {
     for (const terme of ["ser", "estar", "Doch", "aburrido", "Guinee"]) {

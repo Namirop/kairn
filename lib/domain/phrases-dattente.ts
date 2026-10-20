@@ -21,8 +21,9 @@ type Palier = {
  * « quelques secondes » ; 45 s, au-delà de tout ce qu'on a mesuré. Le dernier
  * palier tient jusqu'à l'abandon, à 90 s.
  *
- * Une borne est atteinte à la relève suivante, pas à la seconde près : une
- * phrase n'est pas remplacée une seconde après être apparue.
+ * Le composant n'avance le temps que par relèves : une borne est atteinte à la
+ * relève suivante, et une phrase n'est pas remplacée une seconde après être
+ * apparue.
  */
 const BORNES = [0, 8_000, 20_000, 45_000] as const;
 

@@ -9,7 +9,7 @@
  * Les signes qu'un mot de prose ne porte pas. Trait d'union et apostrophe
  * absents exprès (« porte-greffe », « aujourd'hui ») ; le souligné y est.
  */
-const SIGNES_DE_CODE = /[./\\:;=()[\]{}<>$#@*|~^%+,]/;
+const SIGNES_DE_CODE = /[./\\:;=()[\]{}<>$#@*|~^%+,_]/;
 
 /** Une minuscule suivie d'une capitale : `minSdk`, `MainActivity`. */
 const CASSE_MELEE = /\p{Ll}\p{Lu}/u;
