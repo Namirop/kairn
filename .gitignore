@@ -73,3 +73,5 @@ scripts/evaluation/vecteurs/
 
 # Outillage de design local (config et critiques de l'outil) : reste sur la machine.
 /.impeccable/
+# Fiche produit lue par l'outil de design : contient le modèle économique, reste locale.
+/PRODUCT.md
